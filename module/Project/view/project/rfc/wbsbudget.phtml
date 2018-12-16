@@ -1,0 +1,91 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form class="form-horizontal" method="post" role="form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-12 coll-top clear padlr0" id="divproject" >
+                        <div class="col-lg-4 col-sm-4">
+                            <h1>WBS Budget</h1>
+                        </div>
+                        <div class="col-lg-4 col-sm-4">
+                            <select name="projectId" id="projectId" class="form-control single_dropdown lbl_move" label="Project" style="width:100%;" onchange="return changeProject();">
+                                <option value="0">Select Project</option>
+                                <?php foreach($projectlists as $project) { ?>
+                                    <option value="<?php echo $project['ProjectId']; ?>" <?php echo ($project['ProjectId'] == $projectId) ? 'selected' : ''; ?>><?php echo $project['ProjectName']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-sm-2">
+                            <select name="projectType" id="projectType" class="form-control single_dropdown lbl_move" label="Type" style="width:100%;" onchange="return changeProject();">
+                                <option value="B" <?php if($type=='B') { ?>selected<?php } ?>>Budget</option>
+                                <option value="P" <?php if($type=='P') { ?>selected<?php } ?>>Plan</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-sm-2" id="divSave" style="display: none">
+                            <button type="button" class="save-bt edit_als" onclick="return submitForm();">Save <i class="fa fa-floppy-o"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>WBS</th>
+                                <th>Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i = 0;
+                            if (isset($wbsWise)) {
+                                foreach($wbsWise as $trans) {
+                                    $i = $i+1;
+                                    ?>
+                                    <tr>
+                                        <td width="5%"><input type="hidden" id="wbsId_<?php echo $i; ?>" name="wbsId_<?php echo $i; ?>" value="<?php echo $trans['WBSId'];?>" /><?php echo $i; ?></td>
+                                        <td width="50%"><?php echo $trans['WBSName']; ?></td>
+                                        <td width="25%"><input type="text" class="parent_text text-right" id="amount_<?php echo $i; ?>" name="amount_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['Amount'],2,true); ?>" onkeypress="return isDecimal(event,this);" /></td>
+                                    </tr>
+                                <?php }
+                            } ?>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="totRows" id="totRows" value="<?php echo $i;?>" />
+                        <input type="hidden" name="projId" id="projId" value="<?php echo $projectId; ?>" />
+                        <input type="hidden" name="projType" id="projType" value="<?php echo $type; ?>" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(function () {
+        var iRows = parseInt(isNullCheck($('#totRows').val(),'number'));
+        if (iRows >0) $('#divSave').show();
+    });
+
+
+    function changeProject()
+    {
+        var iProjectId = isNullCheck($('#projectId').val(),'number');
+        var iType = isNullCheck($('#projectType').val(),'string');
+        if (iProjectId == 0) {
+            alert('Select a Project');
+            return false;
+        }
+        if (iType == "") {
+            alert('Select a Type');
+            return false;
+        }
+        window.location.href = getBaseURL() + "project/rfc/wbsbudget/"+iProjectId+'/'+iType;
+    }
+
+    function submitForm()
+    {
+        $('form').submit();
+    }
+</script>

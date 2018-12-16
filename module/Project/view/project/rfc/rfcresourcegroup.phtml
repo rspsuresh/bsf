@@ -1,0 +1,1804 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/tableHeadFixer.js"></script>
+<style>
+    .subDiv					{margin-bottom:5px;}
+    .rfc_met 				{float:left;padding-bottom:10px;padding-left:10px;padding-top:10px;width:100%;}
+    .popuptable table tr th	{background:#E2EBEF!important;padding:5px;border-right:2px solid #5D9BB6;}
+    .popuptable table tr th input[type=text]{ font-size:14px; font-weight:600; color:#333}
+    .popuptable table tr tr	{border-bottom:1px solid #dcdbdb; width:100%;}
+    .popuptable table		{border:1px solid #c2c2c2;}
+    .select-style select	{padding-left:0px !important;}
+
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="form"  action="" onsubmit="return entryValidate()"  method="post" enctype="multipart/form-data">
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+                <input type="hidden" name="rfcmode" id="rfcmode" value="<?php echo $mode;?>">
+                <input type="hidden" name="editid" id="editid" value="<?php echo $editid;?>">
+                <input type="hidden" name="codegenType" id="codegenType" value="<?php echo $codegenType;?>">
+
+                <?php if (isset($rfctrans) && $editid != 0):?>
+                    <input type="hidden" name="rfcregisterid" id="rfcregisterid" value="<?php echo $rfctrans[0]['RFCRegisterId'];?>">
+                <?php endif; ?>
+                <!--Heading-->
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - Resource Group <?php echo ($mode!='edit') ? 'Add' : 'Edit' ?></h1>
+                </div>
+                <!--Heading end-->
+                <!--form start-->
+                <div class="col-lg-12 clear padlr0">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-6">
+                        <div class="col-lg-offset-1">
+                            <label for="refno" class="bk_lbl bk_lbl_inpt splcharc">Reference No <span class="colon_r">:</span></label>
+                            <input type="text" class="bk_lbl_inpt inputbg_ef bk_inpt1 splcharc" name="refno" data-bsfshare="refno" id="refno" onchange="" value="<?php  if ($rfcid!=0) { echo $rfcregister['RefNo'];}  else { echo $svNo; } ?>" <?php if ($genType==true) { ?> readonly <?php } ?> />
+                        </div>
+                    </div>
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-6 ">
+                        <div class="col-lg-offset-6">
+                            <div class="col-lg-12">
+                                <label for="refdate" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Reference Date <span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt no_bg bk_inpt inputbg_ef" name="refdate" data-bsfshare="refdate" readonly id="refdate" onchange="validateDate(this);" value="<?php if ($rfcid!=0)  { echo date("d-m-Y", strtotime($rfcregister['RefDate']));} else { echo date('d-m-Y');}?>" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--form end-->
+                <!--table start-->
+                <div class="col-lg-12 col-lg-offset-0 padtop20" style="<?php echo ($mode!='edit' || $editid !=0 || $rfcid !=0) ? 'display: none': '';?>" id="delete-list">
+                    <div class="col-lg-12 clear">
+                        <div class="table-responsive clear">
+                            <div id='jqxWidget'>
+                                <div id="grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0 padtop20" style="<?php echo ($mode!='edit' || $editid !=0 || $rfcid !=0) ? '': 'display: none';?>" id="edit-content">
+                    <div class="table-responsive topsp animated-panel zoomIn parent-scroll" style="animation-delay: 0.2s;">
+                        <table class="fixTable table" style=" margin-bottom:0px;" id="sample12">
+                            <thead>
+                            <tr>
+                                <th <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>>Code</th>
+                                <th>Resource Group</th>
+                                <th>Parent Group</th>
+                                <th>Type</th>
+                                <th class="text-center">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php $i=0;
+                            if (isset($rfctrans)):
+                                foreach ($rfctrans as $trans):
+                                    $i = $i + 1; ?>
+                                    <tr id="rowid_<?php echo $i; ?>">
+                                        <input type="hidden" name="groupid_<?php echo $i; ?>" value="<?php echo $trans['ResourceGroupId']; ?>" id="groupid_<?php echo $i; ?>" >
+                                        <td width="8%" <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>><input class="parent_text" type="text" name="code_<?php echo $i; ?>" value="<?php echo $trans['Code']; ?>"  id="code_<?php echo $i; ?>" maxlength="5" onblur="return CheckSerialNo(this.id)"></td>
+                                        <td width="18%"><input class="parent_text" type="text" name="groupname_<?php echo $i; ?>" maxlength="100" value="<?php echo $trans['ResourceGroupName']; ?>" id="groupname_<?php echo $i; ?>" onchange="return onChangeRGroupName()" onblur="return CheckResGroupName(this.id)" autocomplete="off"></td>
+                                        <td width="15%"><input class="parent_text nosuggestion" type="text" name="parentname_<?php echo $i; ?>" id ="parentname_<?php echo $i; ?>" value="<?php echo $trans['ParentName'];?>"  onfocus="return CheckParentFocus(this.id)" onblur="return CheckSuggestionId(this, 'parentid')" readonly/></td>
+                                        <td width="15%"><input class="parent_text nosuggestion" type="text" name="typename_<?php echo $i ?>" id ="typename_<?php echo $i ?>" value="<?php echo $trans['TypeName'];?>" onfocus="return onTypeEnterValid(this.id)" onblur="return CheckSuggestionId(this, 'typeid')" readonly/></td>
+                                        <td width="4%" align="center">
+                                            <?php if ($editid == 0) { ?>
+                                            <ul class="action_btns">
+                                                <li>
+                                                    <a href="#" class="mainTrDelete_<?php echo $i; ?>"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+                                                </li>
+                                            </ul>
+                                            <?php } ?>
+                                        </td>
+                                        <input type="hidden" name="typeid_<?php echo $i ?>" id ="typeid_<?php echo $i ?>" value="<?php echo $trans['TypeId']; ?>"/>
+                                        <input type="hidden" name="parentid_<?php echo $i; ?>" id ="parentid_<?php echo $i; ?>" value="<?php echo $trans['ParentId']; ?>"/>
+                                    </tr>
+                                <?php endforeach; endif; ?>
+                            <?php $i = ($i==0) ? 1 : $i+1; ?>
+                            <?php if ($editid==0) { ?>
+                                <tr id="rowid_<?php echo $i; ?>">
+                                    <input type="hidden" name="groupid_<?php echo $i; ?>" value="0" id="groupid_<?php echo $i; ?>">
+                                    <td width="8%" <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>><input class="parent_text" type="text" name="code_<?php echo $i; ?>" id="code_<?php echo $i; ?>" maxlength="5" onblur="return CheckSerialNo(this.id)"></td>
+                                    <td width="18%"><input class="parent_text" type="text" name="groupname_<?php echo $i; ?>" maxlength="100" id="groupname_<?php echo $i; ?>" onchange="return onChangeRGroupName()" onblur="return CheckResGroupName(this.id)" autocomplete="off"></td>
+                                    <td width="15%"><input class="parent_text" type="text" name="parentname_<?php echo $i; ?>" id ="parentname_<?php echo $i; ?>" onfocus="return CheckParentFocus(this.id)" onblur="return CheckSuggestionId(this, 'parentid')"/></td>
+                                    <td width="15%"><input class="parent_text" type="text" name="typename_<?php echo $i; ?>" id ="typename_<?php echo $i; ?>" onfocus="return onTypeEnterValid(this.id)" onblur="return CheckSuggestionId(this, 'typeid')"/></td>
+                                    <td width="4%" align="center">
+                                        <ul class="action_btns">
+                                            <li>
+                                                <a href="#" class="mainTrDelete_<?php echo $i; ?>" style="display: none;"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <input type="hidden" name="typeid_<?php echo $i ?>" id ="typeid_<?php echo $i; ?>" />
+                                    <input type="hidden" name="parentid_<?php echo $i; ?>" id ="parentid_<?php echo $i; ?>"/>
+                                </tr>
+                                <!--Remarks start-->
+                            <?php } ?>
+                            <tr class="remarks">
+                                <td colspan="7"><textarea placeholder="Remarks" maxlength="255" name="narration" id="narration" class="remrk element"
+                                                          onfocus="inputFocus(this)" onblur="inputBlur(this)"><?php echo (isset($rfcregister['Narration'])) ? $rfcregister['Narration'] : ''; ?></textarea></td>
+                            </tr>
+                            <!--Remarks end-->
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="<?php echo $i; ?>">
+                    </div>
+                </div>
+                <!--table end-->
+            </form>
+        </div>
+    </div>
+</div>
+<!--excel-->
+<?php if ($mode != 'edit'):?>
+    <div class="fixed-action-btn active" data-toggle="tooltip" data-placement="left" title="Import From Excel">
+         <span class="butclr-ns btn-file">
+              <p class="sam-up"><i class="fa fa-folder-open sap"></i></p>
+              <input type="file" name="myfile" id="myfile" class="input-large filestyle" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="getexcelfield(this)">
+              </span>
+
+    </div>
+<?php endif; ?>
+<!--excel end-->
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" style="<?php if ($rfcid !=0) { if ($rfcregister['Approve']=='Y') { echo 'display: none;'; } else { echo '';} }?>"><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+        <li class="dropdown save_btn float_r" id="next-btn" style="<?php echo ($mode!='edit' || $editid !=0 || $rfcid !=0) ? 'display: none;' : '';?>"><a href="javascript:nextresource();" data-toggle="tooltip" class="ripple" title="Go to next!">Next</a></li>
+        <li class="can_btn float_l" style="padding-bottom:10px;"><a href="<?php if ($rfcid !=0) { echo $this->basePath().'/project/rfc/rfcregister'; } else if ($editid !=0) {echo $this->basePath().'/project/main/resgroupmaster';}  else { echo $this->basePath().'/project/rfc/rfc-what';}?>">Cancel</a></li>
+        <!--    <li class="cancel_btn float_r" id="back-btn" style="--><?php //echo ($mode=='edit' && ( $editid !=0 || $rfcid !=0)) ? '' : 'display: none;';?><!--"><a href="javascript:backresource();" name="backbut" id="backbut" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>-->
+    </ul>
+</div>
+<table id="dummy" style="display: none">
+    <tbody >
+    <tr id="rowid__1">
+        <input type="hidden" name="groupid__1" id="groupid__1" value="0">
+        <td width="8%" <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>><input class="parent_text" type="text" name="code__1" id="code__1" maxlength="5" onblur="return CheckSerialNo(this.id)"></td>
+        <td width="18%"><input class="parent_text" type="text" name="groupname__1" maxlength="100" id="groupname__1" onchange="return onChangeRGroupName()" onblur="return CheckResGroupName(this.id)" autocomplete="off"></td>
+        <td width="15%"><input class="parent_text" type="text" name="parentname__1" id ="parentname__1" onfocus="return CheckParentFocus(this.id)" onblur="return CheckSuggestionId(this, 'parentid')"/></td>
+        <td width="15%"><input class="parent_text" type="text" name="typename__1" id ="typename__1" onfocus="return onTypeEnterValid(this.id)" onblur="return CheckSuggestionId(this, 'typeid')"/></td>
+        <td width="4%" align="center">
+            <ul class="action_btns">
+                <li>
+                    <a href="#" class="mainTrDelete__1" style="display: none;"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+                </li>
+            </ul>
+
+        </td>
+        <input type="hidden" name="typeid__1" id ="typeid__1" />
+        <input type="hidden" name="parentid__1" id ="parentid__1"/>
+    </tr>
+    </tbody>
+</table>
+<!--<div id="dummyMaterial" style="display: none;">-->
+<!--  <div class="subDiv" style="display: none;">-->
+<!--    <div class="rfc_met">-->
+<!--      <ul>-->
+<!--        <li>-->
+<!--          <label>Material Type</label>-->
+<!--          <div class="select-style rfc_meoption">-->
+<!--            <select name="materialtype__1" id ="materialtype__1">-->
+<!--              <option value="">Select Material Type</option>-->
+<!--              <option value="F">Fuel</option>-->
+<!--              <option value="S">Steel</option>-->
+<!--              <option value="P">Production</option>-->
+<!--            </select>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--        <li>-->
+<!--          <label>Lead Time (in Days)</label>-->
+<!--          <input class="parent_text text-right" type="text" name="leadtime__1" maxlength="3" id="leadtime__1" onkeypress="return isNumberKey(event,this)">-->
+<!--        </li>-->
+<!--        <li>-->
+<!--          <label>Credit Period (in Days)</label>-->
+<!--          <input class="parent_text text-right" type="text"  name="creditdays__1" maxlength="3" id="creditdays__1" onkeypress="return isNumberKey(event,this)">-->
+<!--        </li>-->
+<!--      </ul>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+<div id="excelfieldmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" style="width: 50%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Resource Group Import Sheet - Assign Fields</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive popuptable animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+                    <table class="table" width="100%" style=" margin-bottom:0px;">
+                        <tbody>
+                        <tr id="excelfieldTable"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer"> <a href="#" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return fileupload()" >Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="excelmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" style="width: 75%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Resource Group Import Sheet</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive parent-scroll">
+                    <table class="fixTable table" id="excelTable">
+                        <thead>
+                        <tr>
+                            <th>Parent</th>
+                            <th>Type</th>
+                            <th>Code</th>
+                            <th>Resource Group</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <tr id="excelrowid_1" >
+                            <td width="15%"><input class="parent_text" type="text" placeholder="Enter Parent Group Name" name="excelparent_1" value = "" id="excelparent_1" onfocus="excelParentFocus(this.id)"/></td>
+                            <td width="15%"><input class="parent_text" type="text" placeholder="Enter Type Name" name="exceltype_1" value = "" id="exceltype_1" onfocus="excelTypeFocus(this.id)" onchange="excelTypevalid(this.id)" /></td>
+                            <td width="8%"><input class="parent_text excel-code-txt" type="text" placeholder="Enter Code" name="excelcode_1" value = "" id="excelcode_1" maxlength="5" onfocus="excelCodeFocus(this.id)" onchange="excelCodeValid(this.id)" ></td>
+                            <td width="18%"><input class="parent_text" type="text" placeholder="Enter Resource Group Name" name="excelresgroupname_1" value = "" id="excelresgroupname_1" onfocus="excelGNameFocus(this.id)" onchange="excelGNameValid(this.id)"></td>
+                            <input type="hidden" id="excelparentid_1"></td>
+                            <input type="hidden" id="exceltypeid_1"></td>
+
+                            <td width="3%" align="center">
+
+                                <ul class="action_btns">
+                                    <li>
+                                        <a href="#" class="excelTrDelete"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+                                    </li>
+                                </ul>
+                            </td>
+                            <input type="hidden" name="excelparentid_1" value = "" id="excelparentid_1" >
+                            <input type="hidden" name="exceltypeid_1" value = "" id="exceltypeid_1" >
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <a href="#" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return ResourceGroupUpdate()" >Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+    if ($('#rfcmode').val() == 'edit') {
+        $("#typename_1").prop('readonly', true);
+        $("#parentname_1").prop('readonly', true);
+    }
+    checkgroupfreeze();
+});
+// autosuggestion
+var resgroup = <?php echo json_encode($resgroup); ?>;
+var resgrouplist = resgroup;
+var restypelist = <?php echo json_encode($restype); ?>;
+var NResUsedAsParent = [];
+var bExcelUpdate=false;
+
+var bExcelParent = false,
+    bExcelType = false,
+    bExcelCode = false,
+    bExcelResGroup = false;
+
+var formData = new FormData();
+var arrayField =[];
+arrayField = [{ data :1, value: 'Parent' },
+    { data :2, value: 'Type' },
+    { data :3, value: 'Code' },
+    { data :4, value: 'ResourceGroup' },
+];
+
+var arrayFieldR = arrayField;
+
+function bindAutosuggest() {
+    $('input[id^=parentname_]:not(.nosuggestion)').autocomplete({
+        lookup: resgrouplist,
+        showNoSuggestionNotice:true,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase =='*') {
+                return suggestion.value;
+            }
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function(suggestion) {
+            if(suggestion) {
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#parentid_" + iFocusRowId).val(suggestion.data);
+                // set typeid and typename
+                $("#typeid_" + iFocusRowId).val(suggestion.TypeId);
+                $("#typename_" + iFocusRowId).val(suggestion.TypeName);
+                $("#typename_" + iFocusRowId).prop('readonly', true);
+                // set prop set for labour type(1)
+//                if(suggestion.TypeId == 2) {
+//                   $('.mainTr_' + iFocusRowId).show();
+//                    $('.mainTr_' + iFocusRowId).trigger('click');
+//                    $("#materialtype_" + iFocusRowId).val(suggestion.MaterialType);
+//                    $("#leadtime_" + iFocusRowId).val(suggestion.CreditDays);
+//                    $("#creditdays_" + iFocusRowId).val(suggestion.LeadTime);
+//                }
+                if(typeof suggestion.referer != 'undefined' && NResUsedAsParent.indexOf(suggestion.referer)) {
+                    $('#groupname_' + suggestion.referer).prop('readonly', true);
+                    $('#parentname_' + suggestion.referer).prop('readonly', true);
+                    $('#code_' + suggestion.referer).prop('readonly', true);
+                    $('#typename_' + suggestion.referer).prop('readonly', true);
+                    NResUsedAsParent.push(suggestion.referer);
+                }
+                removeError($(this));
+                $('#parentname_'+iFocusRowId).triggerHandler('blur');
+            }
+        }, onSearchStart: function(suggestion) {
+            var name = $(this).attr('name'),
+                iFocusRowId = name.split('_')[1];
+            $("#parentid_" + iFocusRowId).val(0);
+            // set typeid and typename
+            $('.mainTr_' + iFocusRowId).hide();
+            $("#typeid_" + iFocusRowId).val(0);
+            $("#typename_" + iFocusRowId).val('');
+
+
+//            if ($('#rfcmode').val() != 'edit') $("#typename_" + iFocusRowId).prop('readonly', false);
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                $(this).addClass('error');
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#parentid_" + iFocusRowId).val(0);
+                // set typeid and typename
+                $('.mainTr_' + iFocusRowId).hide();
+                $("#typeid_" + iFocusRowId).val(0);
+                $("#typename_" + iFocusRowId).val('');
+                $("#typename_" + iFocusRowId).prop('readonly', false);
+//                if ($('#rfcmode').val() != 'edit') $("#typename_" + iFocusRowId).prop('readonly', false);
+            } else {
+                removeError($(this));
+            }
+        }
+    });
+    $('input[id^=typename_]:not(.nosuggestion)').autocomplete({
+        lookup: restypelist,
+        showNoSuggestionNotice:true,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase =='*') {
+                return suggestion.value;
+            }
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function(suggestion) {
+            if(suggestion) {
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#typeid_" + iFocusRowId).val(suggestion.data);
+                removeError($(this));
+                // set prop set for labour type(1)
+                if(suggestion.data == 2) {
+                    $('.mainTr_' + iFocusRowId).show();
+                    $('.mainTr_' + iFocusRowId).trigger('click');
+                }
+            }
+        }, onSearchStart: function(suggestion) {
+            var name = $(this).attr('name'),
+                iFocusRowId = name.split('_')[1];
+            $("#typeid_" + iFocusRowId).val(0);
+            $('.mainTr_' + iFocusRowId).hide();
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                $(this).addClass('error');
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#typeid_" + iFocusRowId).val(0);
+                $('.mainTr_' + iFocusRowId).hide();
+            } else
+                removeError($(this));
+        }
+    });
+}
+function bindExcelAutosuggest() {
+    var $parent = $('input[id^=excelparent_]');
+    $parent.autocomplete({
+        lookup: resgrouplist,
+        showNoSuggestionNotice:true,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase =='*') {
+                return suggestion.value;
+            }
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function(suggestion) {
+            if(suggestion) {
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#excelparentid_" + iFocusRowId).val(suggestion.data);
+                $("#exceltypeid_" + iFocusRowId).val(suggestion.TypeId);
+                $("#exceltype_" + iFocusRowId).val(suggestion.TypeName);
+                removeError($(this));
+            }
+        },
+        onSearchStart: function(suggestion) {
+            var name = $(this).attr('name'),
+                iFocusRowId = name.split('_')[1];
+            $("#excelparentid_" + iFocusRowId).val(0);
+            $("#exceltypeid_" + iFocusRowId).val(0);
+        },
+        onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                showError($(this), 'Invalid Parent');
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#excelparentid_" + iFocusRowId).val(0);
+                $("#exceltypeid_" + iFocusRowId).val(0);
+            } else
+                removeError($(this));
+        }
+    });
+    $('input[id^=exceltype_]').autocomplete({
+        lookup: restypelist,
+        showNoSuggestionNotice:true,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase =='*') {
+                return suggestion.value;
+            }
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function(suggestion) {
+            if(suggestion) {
+                var name = $(this).attr('name'),
+                    iFocusRowId = name.split('_')[1];
+                $("#exceltypeid_" + iFocusRowId).val(suggestion.data);
+                removeError($(this));
+            }
+        }, onSearchStart: function(suggestion) {
+            var name = $(this).attr('name');
+            $("#exceltypeid_" + name.split('_')[1]).val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                showError($(this), 'Invalid Parent');
+                var name = $(this).attr('name');
+                $("#exceltypeid_" + name.split('_')[1]).val(0);
+            } else
+                removeError($(this));
+        }
+    });
+}
+// Expand Script
+//function expandTrFn(reset) {
+//    var $mainTRs = $("a[class*=mainTr_]");
+//    if (typeof reset !== 'undefined' && reset === true)
+//        $mainTRs.unbind('click');
+//        $mainTRs.click(function(e){
+//        e.preventDefault();
+//        var name = $(this)[0].className,
+//            key = name.split('_')[1];
+//        if (validateAndAddTabs(name) == false) return false;
+//        var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+//            $i = $(this).find("i");
+//        if(!$subTr.is(":visible")){
+//            $subTr.show();
+//            $subTr.find(".subDiv").slideDown("slow");
+//            $i.addClass("tform");
+//            $('rateanal_'+ key +'restable').show();
+//            closedetails(key);
+//        } else {
+//            $subTr.find(".subDiv").slideUp("slow");
+//            $subTr.slideUp("slow");
+//            $i.removeClass("tform");
+//        }
+//        return false;
+//    });
+//}
+//function closedetails(key) {
+//    var $mainTRs = $("a[class*=mainTr_]");
+//    $.each($mainTRs, function (i, obj) {
+//        var $this = $(this),
+//            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1)
+//            return;
+//        if($mainTr.length != 0)
+//            $mainTr.trigger('click');
+//    });
+//}
+//function validateAndAddTabs(name) {
+//    var id = name.split('_')[1];
+//    if ($.trim($('tr.subTr_' + id).html()) != "") return true;
+//    var $parentname = $('#parentname_'+ id),
+//        $typename = $('#typename_1'+ id),
+//        $code = $('#code_'+ id),
+//        $name = $('#groupname_'+ id);
+//
+//    var icodegenType = parseInt(isNullCheck($('#codegenType').val(),'number'));
+//    if (icodegenType==0) {
+//        if ($.trim($code.val()).length == 0) {
+//            alert("Code is Empty");
+//            $code.focus();
+//            return false;
+//        }
+//    }
+//    if ($.trim($name.val()).length==0) {
+//        alert("Resource Group is Empty");
+//        $name.focus();
+//        return false;
+//    }
+//    $parentname.prop('readonly', true);
+//    $typename.prop('readonly', true);
+////    var html = $('#dummyMaterial').html().replace(/__1/g,'_'+ id).replace(/__9/g, '_1');
+////    $('tr.subTr_' + id).html('<td colspan="12">' + html + '</td>');
+//    return true;
+//}
+function bindTRDeleteFn(reset) {
+
+    var $trDelete = $('a[class*=mainTrDelete_]');
+    if (typeof reset !== 'undefined' && reset === true)
+        $trDelete.unbind('click');
+    $.each($trDelete, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].className;
+        if (name.indexOf('__') != -1)
+            return;
+        $this.on('click', function(e) {
+            e.preventDefault();
+            var ikey =$this.closest('tr').attr('id').split('_')[1];
+            if (isNullCheck($('#groupname_' + ikey).val(),'string')=='') return;
+            if (confirm('Do you want to Delete')) {
+//                $this.closest('tr').nextAll('.subTr_' + name.split('_')[1])[0].remove();
+                $this.closest('tr').remove();
+                // check and unfreeze cells
+                checkFreezedCells();
+            }
+            return false;
+        });
+    });
+
+}
+function bindExcelDeleteFn(reset) {
+    var $trDelete = $('a[class*=excelTrDelete]');
+    if (typeof reset !== 'undefined' && reset === true)
+        $trDelete.unbind('click');
+    $.each($trDelete, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].className;
+        $this.on('click', function(e) {
+            e.preventDefault();
+            if (confirm('Do you want to Delete')) {
+                var tr_length = $('#excelTable tr').length;
+                if (tr_length ==2) {
+                    var $excelpids = $('input[id*=excelparent_]');
+                    $.each($excelpids, function (i, obj) {
+                        var $this = $(this),
+                            name = $this[0].id;
+                        var key1 = name.split('_')[1];
+                        $('#excelparent_' + key1).val('');
+                        $('#exceltype_' + key1).val('');
+                        $('#excelcode_' + key1).val('');
+                        $('#excelresgroupname_' + key1).val('');
+                        $('#excelparentid_' + key1).val('');
+                        $('#exceltypeid_' + key1).val('');
+                    });
+                } else {
+                    $this.closest('tr').remove();
+                }
+            }
+            return false;
+        });
+    });
+}
+$(function () {
+    bindAutosuggest();
+    bindTRDeleteFn();
+    bindExcelDeleteFn();
+//    expandTrFn();
+    // default keyoveride
+    $(document).keydown(function(event) {
+        if(event.ctrlKey && event.keyCode == 78) {
+            $("#addbut").trigger("click");
+            event.preventDefault();
+        }
+        else if(event.ctrlKey && event.keyCode == 83) {
+            $("#donebut").trigger("click");
+            event.preventDefault();
+        }
+    });
+    var irfcid = $('#rfcUId').val();
+    var editid = $('#editid').val();
+    var url1 = getBaseURL() +"project/rfc/getrfcresourcegrouppicklist";
+    if (irfcid != 0) url1 += "/" + irfcid;
+    else if (editid != 0) url1 += "/0/edit/" + editid;
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        dataFields: [
+            { name: 'ResourceGroupId', type: 'number' },
+            { name: 'ResourceGroupName', type: 'string' },
+            { name: 'available', type: 'boolean' }
+        ],
+        id: 'ResourceGroupId',
+        url: url1
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    $("#grid").jqxGrid(
+        {
+            width: "100%",
+            height: 436,
+            rowsheight: 35,
+            pagerButtonsCount: 6,
+            pagesize: 10,
+            source: rfcdata,
+            pageable: true,
+            sortable: true,
+            altrows: true,
+            enabletooltips: true,
+            editable: true,
+            selectionmode: 'singlerow',
+            columns: [
+                { text: 'ResourceGroupId', datafield: 'ResourceGroupId', editable:false, hidden: true  },
+                { text: 'Resource Group Name', datafield: 'ResourceGroupName', editable:false, width: '80%'  },
+                { text: 'Action', align:'center', datafield: 'available', columntype: 'checkbox', width: '20%' }
+            ]
+        });
+    $("#grid").bind('cellendedit', function (event) {
+        if (event.args.value) {
+            $("#grid").jqxGrid('selectrow', event.args.rowindex);
+        } else {
+            $("#grid").jqxGrid('unselectrow', event.args.rowindex);
+        }
+    });
+});
+function submitForm() {
+    $('form').submit();
+}
+function backresource() {
+    $('#edit-content').hide();
+    $('#delete-list').show();
+    $('#next-btn').show();
+    $('#submit-btn').hide();
+    $('#back-btn').hide();
+}
+function CheckParentFocus(x) {
+    checkParent(x.split('_')[1]);
+}
+function CheckSuggestionId(x, inputId) {
+    var $this = $(x),
+        $input = $('#' + inputId + '_' + $this[0].id.split('_')[1]);
+    var iRowId = parseInt($('#rowid').val());
+    var iARowid = $this[0].id.split("_")[1];
+    if ($this.val().length != 0 && $input.val().length != 0 && $input.val() == 0) {
+        var bAns=false;
+        var sParentName = $this.val().trim();
+        var $codes = $('input[id^=groupname_]');
+        $.each($codes, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var ikey = isNullCheck(name.split('_')[1],'number');
+            if (ikey !=0) {
+                if (ikey != iARowid) {
+                    if (sParentName.toLowerCase() == $('#'+name).val().trim().toLowerCase()) {
+                        bAns =true;
+                        return;
+                    }
+                }
+            }
+        });
+        if (bAns==true) showError($this, 'Required');
+        else  removeError($this);
+    } else removeError($this);
+
+    checkFreezedCells();
+
+    if ($('#rfcmode').val() != 'edit')
+        AddNewRowRes($this[0].id);
+
+    $('.mainTrDelete_' + iRowId).show();
+}
+
+function checkgroupfreeze() {
+    var $codes = $('input[id^=groupname_]');
+    $.each($codes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ikey = isNullCheck(name.split('_')[1],'number');
+        var sGroup = $('#'+name).val().trim().toLowerCase();
+        if (sGroup !="") {
+            var $parent = $('input[id^=parentname_]');
+            var bAns = false;
+            $.each($parent, function (i, obj) {
+                var $pthis = $(this);
+                if ($pthis.val().trim().toLowerCase() == sGroup) {
+                    bAns = true;
+                    return;
+                }
+            });
+        }
+        if (bAns==true) {
+            $('#groupname_' + ikey).prop('readonly', true);
+        }
+    });
+}
+
+function checkFreezedCells() {
+    // check for resource freeze
+    $.each(NResUsedAsParent, function (i, key) {
+        var name= $('#groupname_'+key).val(),
+            isUsed = true;
+        $.each($('input[id^=parentname_]'), function () {
+            if ($(this).val() == name) {
+                isUsed = true;
+                return false;
+            }
+
+            isUsed = false;
+        });
+
+        if (!isUsed) {
+            NResUsedAsParent.splice(NResUsedAsParent.indexOf(key),1);
+            var $parentName = $('#parentname_' + key);
+            $('#groupname_' + key).prop('readonly', false);
+            $('#code_' + key).prop('readonly', false);
+            $parentName.prop('readonly', false);
+            if ($parentName.val().length == 0)
+                $('#typename_' + key).prop('readonly', false);
+        } else {
+            $('#groupname_' + key).prop('readonly', true);
+        }
+    });
+}
+
+//function onGroupEnterValid(x) {
+//    var key = x.split('_')[1];
+//    var isValid = true;
+//    if ($('#parentname_' + key).val().length > 0) {
+//        if (isNullCheck($('#parentid_' + key).val(),'string')=="" || isNullCheck($('#parentid_' + key).val(),'string')=="0") isValid=false;
+//    }
+//    if (isNullCheck($('#typeid_' + key).val(),'number')==0) isValid=false;
+//    else if ($('#code_' + key).hasClass('error'))  isValid=false;
+//    if (isValid==true) $('#groupname_' + key).prop('readonly', false);
+//    else $('#groupname_' + key).prop('readonly', true);
+//}
+//function onCodeEnterValid(x) {
+//    var key = x.split('_')[1];
+//    var isValid = true;
+//    if ($('#parentname_' + key).val().length > 0) {
+//        if (isNullCheck($('#parentid_' + key).val(),'string')=="" || isNullCheck($('#parentid_' + key).val(),'string')=="0") isValid=false;
+//    }
+//    if (isNullCheck($('#typeid_' + key).val(),'number')==0) isValid=false;
+//    else if ($('#typeid_' + key).hasClass('error'))  isValid=false;
+//    if (isValid==true) $('#code_' + key).prop('readonly', false);
+//    else $('#code_' + key).prop('readonly', true);
+//}
+function onTypeEnterValid(x) {
+    var $typename = $('#typename_' + key);
+    var key = x.split('_')[1];
+    if ($typename.hasClass('nosuggestion'))
+        return;
+
+    if (NResUsedAsParent.indexOf(key) != -1) {
+        $typename.prop('readonly', true);
+        return;
+    }
+
+    if ($('#parentname_' + key).val().length > 0)
+        $typename.prop('readonly', true);
+    else if ($('#rfcmode').val() != 'edit')
+        $typename.prop('readonly', false);
+}
+function CheckSerialNo(x) {
+    var icodegenType = parseInt(isNullCheck($('#codegenType').val(),'number'));
+    if (icodegenType==1) return;
+
+    var iARowid = x.split("_")[1],
+        $code = $('#code_' + iARowid),
+        sSlNo =  $code.val().trim(),
+        iGroupId =  parseInt(isNullCheck($('#groupid_' + iARowid).val(),'number'));
+    removeError($code);
+    if (sSlNo.length ==0)
+        return;
+
+    var rfcId = isNullCheck($('#rfcUId').val(), 'number');
+//        sMode ="add";
+//    if (isNullCheck($('#rfcmode').val(),'string') == 'edit') {
+//        sMode = 'edit';
+//        rfcId = isNullCheck($('#rfcregisterid').val(), 'number');
+//    }
+    $.ajax({
+        url: getBaseURL() + "project/rfc/checkresgroupserialfound",
+        async: false,
+        type: 'post',
+        data: {'slno': sSlNo, 'rfcid':rfcId,'groupid':iGroupId},
+        success: function(data,status) {
+            if (data == "Y") {
+                showError($code, 'Code already used');
+                return;
+            }
+        }
+    });
+    if ($code.hasClass('error')) return;
+    removeError($code);
+    var $codes = $('input[id^=code_]');
+    $.each($codes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ikey = isNullCheck(name.split('_')[1],'number');
+        if (ikey !=0) {
+            if (ikey != iARowid) {
+                if (sSlNo.toLowerCase() == $('#'+name).val().trim().toLowerCase()) {
+                    showError($code, 'Code already used');
+                    return;
+                }
+            }
+        }
+    });
+    if ($('#rfcmode').val() != 'edit')
+        AddNewRowRes(x);
+}
+
+function CheckResGroupName(x) {
+    var iARowid = x.split("_")[1],
+        $groupName = $('#groupname_' + iARowid),
+        sGroupName =  $groupName.val().trim(),
+        iGroupId =  parseInt(isNullCheck($('#groupid_' + iARowid).val(),'number'));
+
+    removeError($groupName);
+    if (sGroupName.length ==0)
+        return;
+
+    var rfcId = isNullCheck($('#rfcUId').val(), 'number');
+    $.ajax({
+        url: getBaseURL() + "project/rfc/checkresgroupnamefound",
+        async: false,
+        type: 'post',
+        data: {'groupname': sGroupName, 'rfcid':rfcId,'groupid':iGroupId},
+        success: function(data,status) {
+            if (data == "Y") {
+                showError($groupName, 'Already used');
+                return;
+            }
+        }
+    });
+
+    if ($groupName.hasClass('error')) return;
+    removeError($groupName);
+    var $codes = $('input[id^=groupname_]');
+    $.each($codes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ikey = isNullCheck(name.split('_')[1],'number');
+        if (ikey !=0) {
+            if (ikey != iARowid) {
+                if (sGroupName.toLowerCase() == $('#'+name).val().trim().toLowerCase()) {
+                    showError($groupName, 'Already used');
+                    return;
+                }
+            }
+        }
+    });
+    if ($('#rfcmode').val() != 'edit')
+        AddNewRowRes(x);
+}
+function checkParent(key1) {
+    resgrouplist = resgroup;
+    var $groupids = $('input[id^=groupname_]');
+    $.each($groupids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ikey = isNullCheck(name.split('_')[1],'number');
+        if (ikey !=0) {
+            if (ikey != key1) {
+                var sGroupname = isNullCheck($('#groupname_' + ikey).val().trim(), 'string');
+                var sTypeName = isNullCheck($('#typename_' + ikey).val().trim(), 'string');
+                var iTypeId = isNullCheck($('#typeid_' + ikey).val(), 'number');
+//                var smaterialtype  = isNullCheck($('#materialtype_' + ikey).val(), 'string');
+//                var ileadtime = isNullCheck($('#leadtime_' + ikey).val(), 'number');
+//                var icreditdays = isNullCheck($('#creditdays_' + ikey).val(), 'number');
+                if (iTypeId != 0 && sGroupname != "") {
+                    var objR = $.grep(resgrouplist, function (element, index) {
+                        return element.value == sGroupname;
+                    });
+
+                    if (objR.length !=0)
+                        return;
+
+                    resgrouplist.push({
+                        data: 'New',
+                        value: sGroupname,
+                        referer: ikey,
+                        TypeName: sTypeName,
+                        TypeId: iTypeId
+                    });
+                }
+            }
+        }
+    });
+}
+
+function onChangeRGroupName() {
+    $.each($('input[id^=parentname_]'), function() {
+        checkParent($(this)[0].id.split('_')[1]);
+    });
+}
+
+function nextresource() {
+    var rows = $("#grid").jqxGrid('getrows');
+    var id = "";
+    for (var m = 0; m < rows.length; m++) {
+        var row = $("#grid").jqxGrid('getrowdata', m);
+        if (row.available==true) {
+            id += row.ResourceGroupId + ',';
+        }
+    }
+    if (id.length !=0) {
+        id = id.slice(0,-1);
+        $.post(getBaseURL() +'project/rfc/getresourcegrouplist', {ids: id}, function (data) {
+            var obj = jQuery.parseJSON(data)
+            var iRowId = $('#rowid').val();
+            var stabelrow = '#sample12';
+            for (var i = 1; i <= iRowId; i++) {
+                if (i!=1) {
+                    $('#rowid_' + i).remove();
+                }
+            }
+            iRowId=0;
+            $('#rowid').val(iRowId);
+            for (var i = 0; i < obj.length; i++) {
+                var ioRowId = iRowId;
+                iRowId = iRowId+1;
+                if (iRowId != 1) {
+                    var sStr=  $("#dummy tbody").html();
+                    sStr = sStr.replace(/__1/g, '_'+ iRowId );
+                    sStr = sStr.replace(/__9/g, '_1');
+                    if (ioRowId != 1) {
+                        ioRowId = (ioRowId * 2) - 1;
+                    }
+                    $('#sample12 > tbody > tr.remarks').before(sStr);
+                }
+                var $parentName = $('#parentname_'+iRowId),
+                    $parentId = $('#parentid_'+iRowId),
+                    $typeId = $('#typeid_'+iRowId);
+                $('#groupid_'+iRowId).val(obj[i]['ResourceGroupId']);
+                $typeId.val(obj[i]['TypeId']);
+                $('#typename_'+iRowId).val(obj[i]['TypeName']);
+                $parentId.val(obj[i]['ParentId']);
+                $parentName.val(obj[i]['ParentName']);
+                $('#code_'+iRowId).val(obj[i]['Code']);
+                $('#groupname_'+iRowId).val(obj[i]['ResourceGroupName']);
+                if ($parentId.val() != "")
+                    $parentName.prop('readonly', true);
+                $('.mainTrDelete_' + iRowId).hide();
+                $('#typename_' + iRowId).prop('readonly', true);
+                $parentName.prop('readonly', true);
+                $('#rowid').val(iRowId);
+//                if($typeId.val() == 2) {
+//                    $('.mainTr_' + iRowId).show();
+//                    validateAndAddTabs('.mainTr_' + iRowId);
+//                    $('#materialtype_' + iRowId + ' option[value="'+obj[i]['MaterialType']+ '"]').prop('selected', true);
+//                    $('#leadtime_' + iRowId).val(obj[i]['LeadTime']);
+//                    $('#creditdays_' + iRowId).val(obj[i]['CreditDays']);
+//                }
+            }
+        });
+        $('#delete-list').hide();
+        $('#edit-content').show();
+        $('#next-btn').hide();
+        $('#submit-btn').show();
+        $('#back-btn').show();
+    } else {
+        alert("Select Work Type")
+    }
+}
+function inputFocus(i){
+    if(i.value==i.defaultValue){ i.value=""; i.style.color="#000"; }
+}
+function inputBlur(i){
+    if(i.value==""){ i.value=i.defaultValue; i.style.color="#888"; }
+}
+
+var $narration = $('#narration');
+function entryValidate() {
+    removeError($narration);
+
+    var isValid = true,
+        validRows = 0;
+    $.each($('input[id^=code_]'), function() {
+        var $this = $(this),
+            id = $this[0].id,
+            key = id.split('_')[1];
+        if (id.indexOf('__') != -1)
+            return;
+
+        // check for parentid and typeid
+        var parentId = $('#parentid_' + key).val(),
+            typeId = $('#typeid_' + key).val(),
+            code = $('#code_' + key).val().trim().length,
+            groupname = $('#groupname_' + key).val().trim().length,
+            icodegenType = parseInt(isNullCheck($('#codegenType').val(),'number'));
+
+//        if (icodegenType ==0) {
+//            if (code == 0)  {
+//                showError($('#code_' + key), 'Required');
+//            }
+//        }
+
+        if ((parentId == 0 || parentId.length == 0) && (typeId == 0 || typeId.length == 0) && groupname  == 0)
+            return;
+
+        validRows++;
+
+        var $groupname = $('#groupname_' + key);
+        var $typeame = $('#typename_' + key);
+        var $parentname = $('#parentname_' + key);
+
+        if ($this.val().length == 0) {
+            if (icodegenType ==0) showError($this, 'Required');
+        }
+        if ($groupname.val().length == 0) showError($groupname, 'Required');
+        if ($parentname.val().length != 0) {
+            if (parentId == 0) {
+                showError($parentname, 'Required');
+            }
+        }
+
+        if (typeId == 0) showError($typeame, 'Required');
+
+
+//        if ($credit_period.length != 0 && $lead_time.length != 0) {
+//
+//            if (leadTime.length != 0 && !validateNumberOnly(leadTime)) {
+//                showError($lead_time, 'Integer Only');
+//                if (!$('.subTr_' + key).is(':visible'))
+//                    $('.mainTr_' + key).trigger('click');
+//            } else
+//                removeError($lead_time);
+//
+//            if (leadTime.length != 0 && !validateNumberOnly(creditPeriod)) {
+//                showError($credit_period, 'Integer Only');
+//                if (!$('.subTr_' + key).is(':visible'))
+//                    $('.mainTr_' + key).trigger('click');
+//            } else
+//                removeError($credit_period);
+//        }
+    });
+
+    if (validRows == 0) {
+        alert('No Resource Group found!');
+        return false;
+    }
+
+    if(isValid && $('.error').length != 0) {
+        alert('Kindly notice the error notifications!');
+        return false;
+    }
+
+    if (parseInt(isNullCheck($('#editid').val(),'number')) !=0) {
+        if ($narration.val().length == 0 || $('#narration').val().trim() == "Remarks") {
+            isValid = false;
+            showError($narration, 'Required');
+            $narration.focus();
+        }
+    }
+
+    return isValid;
+}
+function validateRow(key) {
+    var isValid = true;
+    if ($('#parentname_' + key).val().length > 0) {
+        if (isNullCheck($('#parentid_' + key).val(),'string')=="" || isNullCheck($('#parentid_' + key).val(),'string')=="0") isValid=false;
+    }
+    if (isNullCheck($('#typeid_' + key).val(),'number')==0) isValid=false;
+    else if ($('#code_' + key).hasClass('error'))  isValid=false;
+    else if ($('#groupname_' + key).hasClass('error'))  isValid=false;
+    return isValid;
+}
+
+function AddNewRowRes(id) {
+    if (bExcelUpdate==true) return;
+
+
+    var iEditId = parseInt(isNullCheck($('#editid').val(),'number'));
+    if (iEditId ==0) {
+        var iRowId = parseInt($('#rowid').val()),
+            key = parseInt(id.split('_')[1]);
+        if ($('#rowid_' + key).nextAll('tr[id*=rowid_]').length == 1)
+            return;
+
+        if (validateRow(key) == false) return;
+
+        var icodegenType = parseInt(isNullCheck($('#codegenType').val(),'number'));
+        if (icodegenType==0) {
+            if ($('#code_' + key).val().length == 0) return; }
+
+        if ($('#groupname_' + key).val().length == 0)return;
+
+        // check row already exists
+        if ($('#rowid_' + (key + 1)).length != 0)
+            return;
+
+        $('.mainTrDelete_' + iRowId).show();
+        iRowId = +iRowId + 1;
+        var sStr = $('#dummy tbody').html();
+        sStr = sStr.replace(/__1/g, '_' + iRowId);
+        sStr = sStr.replace(/__9/g, '_1');
+
+        $('#sample12 > tbody tr:last').before(sStr);
+        $('#rowid').val(iRowId);
+        bindAutosuggest(true);
+        bindTRDeleteFn(true);
+//        expandTrFn(true);
+        $('#code_' + iRowId).focus();
+    }
+}
+function ResourceGroupUpdate() {
+    $('.loading_area').show();
+    if (excelSheetValid()==false) {
+        $('.loading_area').hide();
+        alert("Invalid Sheet");
+        return;
+    }
+
+    var iMRowId = $('#rowid').val();
+    var $excelpids = $('input[id*=excelparent_]');
+    bExcelUpdate=true;
+    $.each($excelpids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var key1 = name.split('_')[1],
+            $groupName = $('#groupname_' + iMRowId);
+
+
+        if ($('#groupname_' + iMRowId).val() != "")
+        {
+            iMRowId = + iMRowId+1;
+            var sStr = $('#dummy tbody').html();
+            sStr = sStr.replace(/__1/g, '_' + iMRowId);
+//            sStr = sStr.replace(/__9/g, '_1');
+            $('#sample12 > tbody tr:last').before(sStr)
+
+        }
+
+//        if ($groupName.length > 0) {
+//            if ($('#groupname_' + iMRowId).val() != "") { iMRowId = + iMRowId+1;}
+//        }
+
+
+
+//        if ($('#groupname_' + iMRowId).length == 0){
+//            var sStr = $('#dummy tbody').html();
+//            sStr = sStr.replace(/__1/g, '_' + iMRowId);
+//            sStr = sStr.replace(/__9/g, '_1');
+//            $('#sample12 > tbody tr:last').before(sStr)
+//        }
+
+        var $parentName = $('#parentname_' + iMRowId);
+        $('#parentid_' + iMRowId).val($("#excelparentid_"+key1).val());
+        $parentName.val($("#excelparent_"+key1).val());
+        $('#typeid_' + iMRowId).val($("#exceltypeid_"+key1).val());
+        $('#typename_' + iMRowId).val($("#exceltype_"+key1).val());
+        $('#code_' + iMRowId).val($("#excelcode_"+key1).val());
+        $('#groupname_' + iMRowId).val($("#excelresgroupname_"+key1).val());
+        if ($('#typeid_' + iMRowId).val().length > 0 ) $('#typename_' + iMRowId).prop('readonly', true);
+        else $('#typename_' + iMRowId).prop('readonly', false);
+        $('#rowid').val(iMRowId);
+        // iMRowId=+iMRowId+1;
+
+        //  $groupName.trigger('blur');
+        CheckSuggestionId($parentName, 'parentid')
+    });
+    bExcelUpdate=false;
+    AddNewRowRes('groupname_' + iMRowId);
+    checkResgroupFocus();
+    checkResgroupcodeFocus();
+    bindTRDeleteFn(true);
+    $('#excelmodal').modal('toggle');
+    bindAutosuggest();
+    $('.loading_area').hide();
+}
+function excelSheetValid() {
+    var isValid=true;
+    var $excelpids = $('input[id^=excelparent_]');
+    $.each($excelpids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var key1 = name.split('_')[1];
+        if ($('#excelparent_' + key1).hasClass('error')) {
+            isValid=false;
+            return;
+        } else if ($('#exceltype_' + key1).hasClass('error')) {
+            isValid=false;
+            return;
+        } else if ($('#excelcode_' + key1).hasClass('error')) {
+            isValid=false;
+            return;
+        } else if ($('#excelresgroupname_' + key1).hasClass('error')) {
+            isValid=false;
+            return;
+        }
+    });
+    return isValid;
+}
+
+function fileupload() {
+    var isValid=true;
+    var $excelpids = $('input[id^=field_]');
+    $.each($excelpids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var key1 = name.split('_')[1];
+        if ($('#field_' + key1).hasClass('error')) {
+            console.log($('#field_' + key1).val());
+            isValid=false;
+            return;
+        }
+    });
+    if (isValid==false) {alert ("Please Assign Fields Correctly"); return;}
+
+    $("#excelfieldmodal").modal('hide');
+    var bValid=true;
+    var arrHeader =[];
+    for (var i = 0; i < $("#excelfieldTable").find("th").length; i++) {
+        arrHeader.push({efield: $('#efield_'+i).val(), field: $('#field_'+i).val()});
+    }
+    arrHeader =  JSON.stringify(arrHeader);
+    formData.append('arrHeader', arrHeader);
+    formData.append('csrf', "<?php echo isset($csrf)?$csrf:''; ?>");
+    $.ajax({
+        url: getBaseURL() +"project/rfc/uploadrgdata",
+        async: false,
+        dataType: 'script',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data:  formData,
+        type: 'post',
+        success: function(data,status, xhr) {
+            var obj = jQuery.parseJSON(data);
+            var key1=1;
+            if (obj[0].Valid==true) {
+                $('#excelTable tr:gt(1)').remove();
+                var $excelagtnos = $('input[id^=excelagtno_]');
+                $.each($excelagtnos, function (i, obj) {
+                    var $this = $(this),
+                        name = $this[0].id;
+                    key1 = name.split('_')[1];
+                });
+                var irow = key1;
+
+                $("#excelparent_"+irow).val('');
+                $("#exceltype_"+irow).val('');
+                $("#exceltypeid_"+irow).val('0');
+                $("#excelparentid_"+irow).val('0');
+                $("#excelcode_"+irow).val('');
+                $("#excelresgroupname_"+irow).val('');
+
+                for (var i = 0; i < obj.length; i++) {
+                    if (irow != key1)  {
+                        $("#excelTable tbody tr:last").after('<tr>' + $("#excelTable tbody tr:first").html() + "</tr>");
+                        var $tr = $("#excelTable tbody tr:last");
+                        $tr.find("input").each(function () {
+                            $(this).attr("id", $(this).attr("id").replace( "_" + key1, "_" + irow));
+                        });
+                        $tr.find("select").each(function () {
+                            $(this).attr("id", $(this).attr("id").replace( "_" + key1, "_" + irow));
+                        });
+                        $tr.find("textarea").each(function () {
+                            $(this).attr("id", $(this).attr("id").replace( "_" + key1, "_" + irow));
+                        });
+                    }
+
+                    $("#excelparent_"+irow).val(isNullCheck(obj[i].Parent,'string'));
+                    $("#exceltype_"+irow).val(isNullCheck(obj[i].Type,'string'));
+                    $("#excelcode_"+irow).val(isNullCheck(obj[i].Code,'string'));
+                    $("#excelresgroupname_"+irow).val(isNullCheck(obj[i].ResourceGroupName,'string'));
+                    $("#exceltypeid_"+irow).val(isNullCheck(obj[i].TypeId,'number'));
+                    $("#excelparentid_"+irow).val(isNullCheck(obj[i].ParentId,'number'));
+
+
+                    //$(".th:contains('None')") .remove();
+                    irow = +irow + 1;
+                }
+            } else {
+                bValid=false;
+            }
+            bindExcelDeleteFn();
+            if (bValid==true)
+                $("#excelmodal").modal('show');
+            else
+                alert("Invalid File Format");
+        },
+        error: function(xhr, status, errorThrown) {
+            if (xhr.status == 400)
+                alert(xhr.responseText);
+            else
+                alert(errorThrown);
+        }
+    });
+
+    if (bExcelCode==false) $('.excel-code-txt').hide();
+    clearInputFile($('#myfile'));
+}
+
+
+
+
+//function fileupload(x) {
+//    var bValid=true;
+//    var formData = new FormData();
+//    formData.append('file', $('#myfile').prop("files")[0]);
+//    $.ajax({
+//        url: getBaseURL() +"project/rfc/uploadresgroupdata",
+//        async: false,
+//        dataType: 'script',
+//        cache: false,
+//        contentType: false,
+//        processData: false,
+//        data: formData,
+//        type: 'post',
+//        success: function(data,status, xhr) {
+//            var obj = jQuery.parseJSON(data);
+//            var key1=1;
+//            if (obj[0].Valid==true) {
+//                $('#excelTable tr:gt(1)').remove();
+//                var $excelpids = $('input[id^=excelparent_]');
+//                $.each($excelpids, function (i, obj) {
+//                    var $this = $(this),
+//                        name = $this[0].id;
+//                    key1 = name.split('_')[1];
+//                });
+//                var irow = key1;
+//                $("#excelparent_"+irow).val('');
+//                $("#exceltype_"+irow).val('');
+//                $("#excelcode_"+irow).val('');
+//                $("#excelresgroupname_"+irow).val('');
+//                $("#excelparentid_"+irow).val('');
+//                $("#exceltypeid_"+irow).val('');
+//                var sOldid = "_" + key1;
+//                for (var i = 0; i < obj.length; i++) {
+//                    if (irow != key1)  {
+//                        var sNewid = "_" + irow;
+//                        $("#excelTable tbody tr:last").after("<tr>" + $("#excelTable tbody tr:first").html() + "</tr>");
+//                        $("#excelTable tbody tr:last").find("input:text").each(function () {
+//                            $(this).attr("name", $(this).attr("name").replace(sOldid, sNewid));
+//                            $(this).attr("id", $(this).attr("id").replace(sOldid, sNewid));
+//                        });
+//                        $("#excelTable tbody tr:last").find("input:hidden").each(function () {
+//                            $(this).attr("name", $(this).attr("name").replace(sOldid, sNewid));
+//                            $(this).attr("id", $(this).attr("id").replace(sOldid, sNewid));
+//                        });
+//                        bindExcelDeleteFn(true);
+//                    }
+//                    $("#excelparent_"+irow).val(obj[i].ParentName);
+//                    $("#exceltype_"+irow).val(obj[i].TypeName);
+//                    $("#excelcode_"+irow).val(obj[i].Code);
+//                    $("#excelresgroupname_"+irow).val(obj[i].ResGroupName);
+//                    $("#excelparentid_"+irow).val(obj[i].ParentId);
+//                    $("#exceltypeid_"+irow).val(obj[i].TypeId);
+//                    irow = +irow + 1;
+//                }
+//            } else {
+//                bValid=false;
+//            }
+//            if (bValid==true) {
+//                bindExcelAutosuggest();
+//                excelvalid();
+//                $("#excelmodal").modal('show');
+//            }
+//            else { alert("Invalid File Format"); }
+//        },
+//        error: function(xhr, status, errorThrown) {
+//            if (xhr.status == 400)
+//                alert(xhr.responseText);
+//            else
+//                alert(errorThrown);
+//        }
+//    });
+//    clearInputFile($('#myfile'));
+//}
+
+
+function excelvalid() {
+    var $excelpids = $('input[id^=excelparent_]'),
+        tempResgroupName = [];
+    $.each($excelpids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id,
+            ikey = name.split('_')[1],
+            $resgroupname = $("#excelresgroupname_" + ikey),
+            $type = $('#exceltype_' + ikey),
+            $parent = $("#excelparent_" + ikey),
+            sgName = isNullCheck($resgroupname.val(),'string');
+        if (isNullCheck($type.val(),'string') != "") {
+            if (isNullCheck($("#exceltypeid_" + ikey).val(), 'number') == 0) $type.addClass('error');
+            else  $("#exceltype_" + ikey).prop('readonly', true);
+        } else
+            $type.addClass('error');
+
+        var $code = $("#excelcode_" + ikey),
+            sCode = isNullCheck($code.val(),'string');
+        if (sCode != "") {
+            if (CheckSerialNoUsed(sCode, ikey) == false) $code.addClass('error');
+            else  $code.prop('readonly', true);
+        } else
+            $code.addClass('error');
+
+        if (sgName != "") {
+            if (CheckgroupNameUsed(sgName, ikey) == false) $resgroupname.addClass('error');
+            else  {
+                $resgroupname.prop('readonly', true);
+                tempResgroupName.push(sgName);
+            }
+        } else
+            $resgroupname.addClass('error');
+
+        $parent.prop('readonly', false);
+        $parent.triggerHandler('focus');
+        if (isNullCheck($parent.val(),'string') != "") {
+            if (isNullCheck($("#excelparentid_" + ikey).val(), 'number') != 0 ||  tempResgroupName.indexOf($parent.val()) != -1)
+                $parent.prop('readonly', true);
+            else
+                $parent.addClass('error');
+        }
+    });
+}
+function excelRowvalid(irowId) {
+    var ikey = irowId;
+    if ($('#excelparent_' + ikey).hasClass('error')) $("#excelparent_" + ikey).prop('readonly', false);
+    else $("#excelparent_" + ikey).prop('readonly', true);
+    if ($('#exceltype_' + ikey).hasClass('error')) $("#exceltype_" + ikey).prop('readonly', false);
+    else $("#exceltype_" + ikey).prop('readonly', true);
+    if ($('#excelcode_' + ikey).hasClass('error')) $("#excelcode_" + ikey).prop('readonly', false);
+    else $("#excelcode_" + ikey).prop('readonly', true);
+    if ($('#excelresgroupname_' + ikey).hasClass('error')) $("#excelresgroupname_" + ikey).prop('readonly', false);
+    else $("#excelresgroupname_" + ikey).prop('readonly', true);
+}
+function CheckSerialNoUsed(sSlNo,irowid) {
+    var isValid = true;
+    var rfcId = isNullCheck($('#rfcUId').val(), 'number'),
+        sMode ="add";
+    if (isNullCheck($('#rfcmode').val(),'string') == 'edit') {
+        sMode = 'edit';
+        rfcId = isNullCheck($('#rfcregisterid').val(), 'number');
+    }
+    $.ajax({
+        url: getBaseURL() + "project/rfc/checkresgroupserialfound/" +sSlNo + "/" +  rfcId+ '/' + sMode,
+        async: false,
+        type: 'post',
+        success: function(data,status) {
+            if (data == "Y") {
+                isValid =false;
+            }
+        }
+    });
+    if (isValid==false) return isValid;
+    var $codes = $('input[id^=code_]');
+    $.each($codes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (sSlNo == $('#' + name).val().trim()) {
+            isValid=false;
+            return;
+        }
+    });
+    if (isValid==false) return isValid;
+    var $excelcodes = $('input[id^=excelcode_]');
+    $.each($excelcodes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ickey = isNullCheck(name.split('_')[1],'number');
+        if (ickey !=0) {
+            if (ickey != irowid) {
+                if (sSlNo == $('#excelcode_' + ickey).val().trim()) {
+                    isValid = false;
+                    return;
+                }
+            }
+        }
+    });
+}
+function CheckgroupNameUsed(sgName,irowid) {
+    var isValid = true;
+    $.ajax({
+        url: getBaseURL() + "project/rfc/checkresgroupnamefound/"+sgName,
+        async: false,
+        type: 'post',
+        success: function(data,status) {
+            if (data == "Y") {
+                isValid =false;
+            }
+        }
+    });
+    if (isValid==false) return isValid;
+    var $codes = $('input[id^=groupname_]');
+    $.each($codes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (sgName == $('#' + name).val().trim()) {
+            isValid=false;
+            return;
+        }
+    });
+    if (isValid==false) return isValid;
+    var $excelcodes = $('input[id^=excelresgroupname_]');
+    $.each($excelcodes, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var ickey = isNullCheck(name.split('_')[1],'number');
+        if (ickey !=0) {
+            if (ickey != irowid) {
+                if (sgName == $('#excelresgroupname_' + ickey).val().trim()) {
+                    isValid = false;
+                    return;
+                }
+            }
+        }
+    });
+}
+function excelParentFocus(x) {
+    var key = x.split('_')[1],
+        $parent = $('#excelparent_' + key);
+    excelRowvalid(key);
+    if ($parent.hasClass('error'))
+        showError($parent, 'Invalid parent');
+}
+//function excelParentvalid(x) {
+//    var key = x.split('_')[1];
+//    var sgName = isNullCheck($("#excelparent_" + key).val().trim(),'string');
+//    var iPId=0;
+//    if (sgName != "") {
+//        $.ajax({
+//            url: getBaseURL() + "project/rfc/checkresparentnamefound/" + sgName,
+//            async: false,
+//            type: 'post',
+//            success: function (data, status) {
+//                iPId = isNullCheck(data, 'number');
+//            }
+//        });
+//        if (iPId == 0) $('#excelparent_' + key).addClass('error');
+//        else {
+//            $('#excelparentid_' + key).val(iPId);
+//            var $parent = $('#excelparent_' + key);
+//            removeError($parent);
+//        }
+//    }
+//}
+function excelTypeFocus(x) {
+    var key = x.split('_')[1],
+        $type = $('#exceltype_' + key);
+    excelRowvalid(key);
+    if ($type.hasClass('error'))
+        showError($type, 'Invalid Type');
+}
+function excelTypevalid(x) {
+    var key = x.split('_')[1],
+        $excelType = $("#exceltype_" + key),
+        sgName = isNullCheck($excelType.val().trim(),'string'),
+        iPId=0;
+    if (sgName != "") {
+        $.ajax({
+            url: getBaseURL() + "project/rfc/checkrestypefound/" + sgName,
+            async: false,
+            type: 'post',
+            success: function (data, status) {
+                iPId = isNullCheck(data, 'number');
+            }
+        });
+        if (iPId == 0) $excelType.addClass('error');
+        else {
+            $('#exceltypeid_' + key).val(iPId);
+            removeError($excelType);
+        }
+    }
+}
+function excelCodeFocus(x) {
+    var key = x.split('_')[1],
+        $code = $('#excelcode_' + key);
+    excelRowvalid(key);
+    if ($code.hasClass('error')) {
+        if (isNullCheck($code.val().trim(),'string') =="")
+            showError($code, 'Required');
+        else
+            showError($code, 'Code already used');
+    }
+}
+function excelCodeValid(x) {
+    var key = x.split('_')[1],
+        $excelCode = $("#excelcode_" + key),
+        sCode = isNullCheck($excelCode.val().trim(),'string');
+    if (sCode != "") {
+        if (CheckSerialNoUsed(sCode, key) == false)
+            showError($excelCode, 'Code already used');
+        else
+            removeError($excelCode);
+    } else
+        showError($excelCode, 'Required');
+}
+function excelGNameFocus(x) {
+    var key = x.split('_')[1],
+        $resgroupName = $('#excelresgroupname_' + key);
+    excelRowvalid(key);
+    if ($resgroupName.hasClass('error')) {
+        if (isNullCheck($resgroupName.val().trim(),'string') =="")
+            showError($resgroupName, 'Required');
+        else
+            showError($resgroupName, 'Name already used');
+    }
+}
+function excelGNameValid(x) {
+    var key = x.split('_')[1],
+        $resgroupName = $("#excelresgroupname_" + key),
+        sgName = isNullCheck($resgroupName.val().trim(),'string');
+    if (sgName != "") {
+        if (CheckgroupNameUsed(sgName, key) == false) {
+            showError($resgroupName, 'Name already used');
+        } else
+            removeError($resgroupName);
+    } else
+        removeError($resgroupName);
+}
+
+function getexcelfield(x) {
+    var bValid=true;
+
+    bExcelParent = false;
+    bExcelType = false;
+    bExcelCode = false;
+    bExcelResGroup = false;
+
+    formData = new FormData();
+    formData.append('file', $('#myfile').prop("files")[0]);
+    $.ajax({
+        url: getBaseURL() +"project/rfc/getrgfielddata",
+        async: false,
+        dataType: 'script',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: formData,
+        type: 'post',
+        success: function(data,status, xhr) {
+            var obj = jQuery.parseJSON(data);
+
+            $("#excelfieldTable").find("th").remove();
+            $("#excelfieldTable").find("td").remove();
+            //$("#excelfield").find("td").remove();
+
+            var sStr="Select Field";
+            for (var i = 0; i < obj.length; i++) {
+                $("#excelfieldTable").append('<tr><th width="20%"><input id="efield_'+i+'" class="text-reon text-right" type="text" value="'+obj[i]['Field']+'" style="background: transparent;"/></th><td width="70"><input id="field_'+i+'" class="parent_text" type="text"'+sStr+' onfocus="checkexcelFieldFocus(this.id)"</td></tr>');
+//                $("#excelfield").append('<td><input id="field_'+i+'" class="parent_text" type="text"'+sStr+' onfocus="checkexcelFieldFocus(this.id)"</td>');
+                $('#efield_'+i).prop('readonly', true);
+
+                if (obj[i]['Field'].trim().toUpperCase() == 'PARENT') { $('#field_'+i).val('Parent'); bExcelParent=true; }
+                if (obj[i]['Field'].trim().toUpperCase() == 'TYPE') { $('#field_'+i).val('Type'); bExcelType=true;}
+                if (obj[i]['Field'].trim().toUpperCase() == 'CODE') { $('#field_'+i).val('Code'); bExcelCode=true; }
+                if (obj[i]['Field'].trim().toUpperCase() == 'RESOURCEGROUP') { $('#field_'+i).val('ResourceGroup'); bExcelResGroup=true;}
+            }
+
+            bindexcelFieldComplete();
+            $("#excelfieldmodal").modal('show');
+        },
+        error: function(xhr, status, errorThrown) {
+            if (xhr.status == 400)
+                alert(xhr.responseText);
+            else
+                alert(errorThrown);
+        }
+    });
+    clearInputFile($('#myfile'));
+}
+
+function bindexcelFieldComplete() {
+    var $excelfield = $('input[id^=field_]');
+    $excelfield.unbind('autocomplete');
+    $.each($excelfield, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+        checkexcelFieldUsed(key1);
+        $this.autocomplete({
+            lookup: arrayFieldR,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) removeError($(this));
+            }, onSearchStart: function(suggestion) {
+                //$("#materialAdvId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) showError($(this), 'Invalid');
+                else removeError($(this));
+            }
+        });
+    });
+}
+
+function clearInputFile(file){
+    var f = file[0];
+    if(f.value){
+        try{
+            f.value = '';
+        }catch(err){ }
+        if(f.value){
+            var form = document.createElement('form'),
+                parentNode = f.parentNode, ref = f.nextSibling;
+            form.appendChild(f);
+            form.reset();
+            parentNode.insertBefore(f,ref);
+        }
+    }
+}
+
+function checkResgroupFocus() {
+    var $resgroups = $('input[id*=groupname_]');
+    $.each($resgroups, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var key1 = name.split('_')[1];
+        $('#groupname_' + key1).trigger('focus');
+    });
+}
+
+function checkResgroupcodeFocus() {
+    var $resgroups = $('input[id*=code_]');
+    $.each($resgroups, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var key1 = name.split('_')[1];
+        $('#code_' + key1).trigger('focus');
+    });
+}
+
+
+function checkexcelFieldFocus(x) {
+    var arrname = x.split('_');
+    var key1 = arrname[1];
+    checkexcelFieldUsed(key1);
+}
+function checkexcelFieldUsed(id) {
+    var reskeyid = $('input[id*=field_]');
+    arrayFieldR = arrayField;
+    arrayFieldR= $.grep(arrayField, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.value == $this.val()) {
+                    is_selected = false;
+                }
+            }
+        });
+        return is_selected;
+    });
+}
+</script>
+<script>
+    $(document).ready(function() {
+        $(".fixTable").tableHeadFixer();
+    });
+</script>

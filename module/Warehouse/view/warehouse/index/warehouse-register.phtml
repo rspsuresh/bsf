@@ -1,0 +1,107 @@
+<style type="text/css">
+    .jqx-grid-header {height:75px !important;}
+    .reg-icon-file{color:hsl(208, 41%, 58%) !important;margin-top:10px; }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4 col-md-8 col-sm-6">
+                <h1><strong>WareHouse Register</strong>
+                    <div class="stgedit_btn req_addbtn brad_50">
+                        <a href="<?php echo $this->basePath();?>/warehouse/index/warehouse-create" class="ripple" data-toggle="tooltip" data-placement="right" title="Add New Warehouse"><i class="fa fa-plus"></i></a>
+                    </div>
+                </h1>
+            </div>
+            <div class="col-lg-12">
+                <div id="subGrid">
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:50px;">
+            <div class="col-lg-12">
+                <div id="jqxgrid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r">
+            <a href="<?php echo $this->basePath();?>/warehouse/index/warehouse-register" class="ripple">Close</a>
+        </li>
+        <li class="cancel_btn cancel_btn_bluecolor float_l" id="Home"><a href="<?php echo $this->basePath();?>/mms/master/resourceview" class="ripple">back</a></li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function (){
+        $.ajax({
+            url:getBaseURL()+"warehouse/index/warehouse-register",
+            type:"post",
+            data:"mode=first",
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(JSON.stringify(data))
+                var $treeGrid = $("#subGrid");
+                var source =
+                {
+                    dataFields: [
+                        { name: 'WareHouseId', type: 'string'},
+                        { name: 'WareHouseNo', type: 'string'},
+                        { name: 'WareHouseName', type: 'string' },
+                        { name: 'Address', type: 'string' }
+                    ],
+                    localdata:data,
+                    id: 'WareHouseId',
+                    datatype: "json",
+                    async: false
+
+                };
+
+                var employeesAdapter = new $.jqx.dataAdapter(source);
+
+                // creage jqxgrid
+                $("#subGrid").jqxGrid({
+                    width: '100%',
+                    pageable: true,
+                    autoheight:true,
+                    source: employeesAdapter,
+                    sortable: true,
+                    filterable: true,
+                    pageable: true,
+                    showfilterrow: true,
+                    ready: function () {
+                        //$("#subGrid").jqxGrid('showrowdetails', 1);
+                    },
+                    columns: [
+
+                        { text: 'WareHouseId', datafield: 'WareHouseId',  hidden: true, filterable: false},
+                        { text: 'WareHouseNo', dataField: 'WareHouseNo'},
+                        { text: 'WareHouseName', dataField: 'WareHouseName' },
+                        { text: 'Address', dataField: 'Address' },
+                        { text: 'Action', sortable: false, filterable: false, cellsalign: 'center',width:'12%',
+                            cellsrenderer: function (row) {
+                                var WareHouseId = $treeGrid.jqxGrid('getCellValue', row, 'WareHouseId');
+                                var  editLink = '<a title="Edit Plan" href="'+ getBaseURL() + 'warehouse/index/warehouse-planedit/'+WareHouseId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-cog"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a  title="Edit Basic Info" href="'+ getBaseURL() + 'warehouse/index/warehouse-create/'+WareHouseId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-address-book"></i></a>';
+                            }
+                        }
+                    ]
+                });
+                // $("#").on('rowselect', function(event){
+                //	event arguments.
+                // var args = event.args;
+                //	row's bound index.
+                // var rowBoundIndex = args.rowindex;
+                //row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+                // var rowData = args.row;
+                // location.replace("detailed/"+rowData.uid);
+                // });
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    });
+</script>

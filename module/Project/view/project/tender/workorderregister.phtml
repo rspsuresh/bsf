@@ -1,0 +1,459 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/highcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basepath(); ?>/library/Highcharts-4.2.3/js/modules/exporting.js"></script>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+    #treeGrid .jqx-grid-header {
+        height:75px !important;
+    }
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/pie.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Work Order Register</h1>
+                <div class="dropdown nav-list"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print print-icon-img" aria-hidden="true"></i></a>
+                    <ul class="dropdown-menu drp-list arrow-right">
+                        <li><a href="<?php echo $this->basePath(); ?>/project/report/workorderregister-report">Work Order Register</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 padtop10">
+                <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear">
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                            <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status3">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-list-alt fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge fntwt600 comnelips"><?php echo (isset($noofenquiry)) ? (int)$noofenquiry['count'].' Nos' : '';?></div>
+                                            <div class="cbhuge comnelips">Enquiries</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                            <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status1">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-hand-paper-o fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge fntwt600 comnelips"><?php echo (isset($noofquoted)) ? (int)$noofquoted['count'].' Nos' : '';?></div>
+                                            <div class="cbhuge comnelips">Bid Quoted</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                            <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status4">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-thumbs-up fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge fntwt600 comnelips"><?php echo (isset($ordercount)) ? (int)$ordercount['Orders'].' Nos' : '';?></div>
+                                            <div class="cbhuge comnelips">Orders</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                            <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status2">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-check-square-o fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge fntwt600 comnelips"><?php echo (isset($ordervalue)) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($ordervalue['OrderAmt'],2,true) : '';?></div>
+                                            <div class="cbhuge comnelips">Order Received</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="treeGrid"> </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <!--                <div class="col-lg-12 commargin_ttop_20">-->
+                <!--                    <section class="pnnal">-->
+                <!--                        <header class="pnnal-heading"><i class="fa fa-bar-chart"></i> Top 5 Clients </header>-->
+                <!--                        <div class="pnnal-body">-->
+                <!--                            <div id="cbfrstchartdiv"></div>-->
+                <!--                        </div>-->
+                <!--                    </section>-->
+                <!--                </div>-->
+                <!--                <div class="col-lg-12 commargin_ttop_20">-->
+                <!--                    <section class="pnnal">-->
+                <!--                        <header class="pnnal-heading"><i class="fa fa-pie-chart"></i> Project Type Wise Orders</header>-->
+                <!--                        <div class="pnnal-body">-->
+                <!--                            <div id="cbsecchartdiv"></div>-->
+                <!--                        </div>-->
+                <!--                    </section>-->
+                <!--                </div>-->
+                <!--                <div class="col-lg-12 commargin_ttop_20">-->
+                <!--                    <section class="pnnal">-->
+                <!--                        <header class="pnnal-heading"><i class="fa fa-line-chart"></i> Order Received </header>-->
+                <!--                        <div class="pnnal-body">-->
+                <!--                            <div id="cbthirdchartdiv"></div>-->
+                <!--                        </div>-->
+                <!--                    </section>-->
+                <!--                </div>-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete WorkOrder No : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="form-group col-lg-12 req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var data = <?php echo (isset($orders)) ? json_encode($orders) : ''?>,
+    $treeGrid = $("#treeGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+$(function () {
+    var source = {
+        localdata:data,
+        async: false,
+        dataType: "json",
+        dataFields: [
+            { name: 'WORegisterId', type: 'number' },
+            { name: 'EnquiryId', type: 'number' },
+            { name: 'WONo', type: 'string' },
+            { name: 'WODate', type: 'string' },
+            { name: 'ClientName', type: 'string' },
+            { name: 'ProjectName', type: 'string' },
+            { name: 'OrderAmount', type: 'string' },
+            { name: 'Approve', type: 'string' }
+        ],
+        id: 'WORegisterId'
+    };
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        autoheight: true,
+        filterable: true,
+        showfilterrow: true,
+        sortable: true,
+        pageable:true,
+        rowDetails: true,
+        columns: [
+            { text: 'WORegisterId', datafield: 'WORegisterId',  hidden: true, filterable: false},
+            { text: 'EnquiryId', datafield: 'EnquiryId',  hidden: true, filterable: false},
+            { text: 'WO No.', dataField: 'WONo', width:'10%'},
+            { text: 'WO Date', dataField: 'WODate', width:'10%'},
+            { text: 'Client Name', dataField: 'ClientName', width:'20%'},
+            { text: 'Project Name', dataField: 'ProjectName', width:'25%'},
+            { text: 'Amount', dataField: 'OrderAmount',width:'15%', cellsalign: 'right',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'OrderAmount'),2, true) + '</div>';
+                }
+            },
+            { text: 'Approve', dataField: 'Approve', width:'10%',cellsalign: 'center'},
+            { text: 'Action', sortable: false, filterable: false, align: 'left',width:'10%',
+                cellsrenderer: function (row) {
+                    var woId = $treeGrid.jqxGrid('getCellValue', row, 'WORegisterId'),
+                        enId = $treeGrid.jqxGrid('getCellValue', row, 'EnquiryId'),
+                        editLink = '<a title="Edit" href="'+ getBaseURL() + 'project/tender/workorder/'+enId+'/edit/'+woId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="deleteWorkorder(event,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                    return editLink;
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        $deleteModal.modal('hide');
+        var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'cb/workorder/deleteorder',
+            type: 'POST',
+            data: {"WORegisterId": rowData.WORegisterId, "Remarks": remarks, "Type": 'update'},
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $treeGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Failed to delete the work order!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert('Failed to delete the work order!');
+            }
+        });
+        $remarks.val('');
+    });
+});
+
+function deleteWorkorder(event, row) {
+    event.preventDefault();
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    if (confirm("Do you want to delete?")) {
+        $.ajax({
+            url: getBaseURL() + 'project/tender/delete-workorder',
+            type: 'POST',
+            data: "woId="+ rowData.WORegisterId,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $treeGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Failed to delete the request!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+}
+
+
+//var arrColors = [ "#62d5ce","#754DEB", "#0D8ECF"];
+//var clientOrder = <?php //echo $clientorder;?>//;
+//$.each(clientOrder, function(index, data) {
+//    var colorsCnt = arrColors.length,
+//        key = ( index % colorsCnt);
+//    data.color = arrColors[key];
+//});
+//var chart1 = AmCharts.makeChart("cbfrstchartdiv", {
+//    "theme": "light",
+//    "type": "serial",
+//    "startDuration": 2,
+//    "dataProvider":  clientOrder,
+//    "valueAxes": [{
+//        "position": "left",
+//        "axisAlpha":0,
+//        "gridAlpha":0
+//    }],
+//    "graphs": [{
+//        "balloonText": "[[category]]<br/><b>Rs.[[value]]</b>",
+//        "colorField": "color",
+//        "fillAlphas": 0.85,
+//        "lineAlpha": 0.1,
+//        "type": "column",
+//        "topRadius":1,
+//        "valueField": "Amount"
+//    }],
+//    "depth3D": 40,
+//    "angle": 30,
+//    "chartCursor": {
+//        "categoryBalloonEnabled": false,
+//        "cursorAlpha": 0,
+//        "zoomable": false
+//    },
+//    "categoryField": "ClientName",
+//    "categoryAxis": {
+//        "gridPosition": "start",
+//        "axisAlpha":0,
+//        "gridAlpha":0
+//
+//    },
+//    "chartScrollbar": {
+//        "oppositeAxis": false,
+//        "offset": 50,
+//        "scrollbarHeight": 30,
+//        "backgroundAlpha": 0,
+//        "selectedBackgroundAlpha": 0.1,
+//        "selectedBackgroundColor": "#67b7dc",
+//        "graphLineAlpha": 0.5,
+//        "selectedGraphFillAlpha": 0,
+//        "selectedGraphLineAlpha": 1,
+//        "color": "#AAAAAA"
+//    }
+//},0);
+//
+//
+//var projectTypeOrder = <?php //echo $projecttypeorder;?>//;
+//var chart2 = AmCharts.makeChart("cbsecchartdiv", {
+//    "type": "pie",
+//    "theme": "light",
+//    "innerRadius": "40%",
+//    "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+//    "dataProvider": projectTypeOrder,
+//    "balloonText": "[[value]]",
+//    "valueField": "Amount",
+//    "titleField": "ProjectTypeName",
+//    "balloon": {
+//        "drop": true,
+//        "adjustBorderColor": false,
+//        "color": "#FFFFFF",
+//        "fontSize": 16
+//    }
+//});
+//
+//
+//
+//var chart3 = AmCharts.makeChart("cbthirdchartdiv", {
+//    "theme": "light",
+//    "type": "serial",
+//    "marginRight": 80,
+//    "autoMarginOffset": 20,
+//    "marginTop":20,
+//    "dataProvider": <?php //echo $monorder;?>//,
+//    "valueAxes": [{
+//        "id": "v1",
+//        "axisAlpha": 0.1
+//    }],
+//    "graphs": [{
+//        "useNegativeColorIfDown": true,
+//        "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+//        "bullet": "round",
+//        "bulletBorderAlpha": 1,
+//        "bulletBorderColor": "#FFFFFF",
+//        "hideBulletsCount": 50,
+//        "lineThickness": 2,
+//        "lineColor": "#fdd400",
+//        "negativeLineColor": "#67b7dc",
+//        "valueField": "Amount"
+//    }],
+//    "chartCursor": {
+//        "valueLineEnabled": true,
+//        "valueLineBalloonEnabled": true
+//    },
+//    "categoryField": "Mondata",
+//    "categoryAxis": {
+//        "axisAlpha": 0,
+//        "minHorizontalGap": 60
+//    }
+//});
+
+//bindJqxGridAutoResize();
+//	$(function () {
+//		Highcharts.setOptions({
+//                colors: ['#62d5ce', '#D6D23A', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4']
+//            });
+//    $('#cbsecchartdiv').highcharts({
+//        chart: {
+//            type: 'areaspline'
+//        },
+//        title: {
+//            text: 'Average fruit consumption during one week'
+//        },
+//        legend: {
+//            layout: 'vertical',
+//            align: 'left',
+//            verticalAlign: 'top',
+//            x: 150,
+//            y: 100,
+//            floating: true,
+//            borderWidth: 1,
+//            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+//        },
+//        xAxis: {
+//			min: 0.5,
+//			gridLineWidth: 0,
+//            categories: [
+//                'Monday',
+//                'Tuesday',
+//                'Wednesday',
+//                'Thursday',
+//                'Friday',
+//                'Saturday',
+//                'Sunday'
+//            ]
+//
+//        },
+//        yAxis: {
+//			gridLineWidth: 0,
+//            title: {
+//                text: 'Fruit units'
+//            }
+//        },
+//        tooltip: {
+//            shared: true,
+//            valueSuffix: ' units'
+//        },
+//        credits: {
+//            enabled: false
+//        },
+//        plotOptions: {
+//            areaspline: {
+//                fillOpacity: 0.5
+//            }
+//        },
+//        series: [{
+//            name: 'John',
+//            data: [3, 4, 3, 5, 4, 10, 12]
+//        }, {
+//            name: 'Jane',
+//            data: [1, 3, 4, 3, 3, 5, 4]
+//        }]
+//    });
+//});
+
+</script>
+<script>$('.nav-list').hover(function() {
+        $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500);
+    }, function() {
+        $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500);
+    });
+</script>

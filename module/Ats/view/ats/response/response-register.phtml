@@ -1,0 +1,114 @@
+<style>
+#dataTable .jqx-grid-header 	{height:75px !important;}
+</style>
+<script type="text/javascript">
+$(document).ready(function () {
+	var $Grid = $("#dataTable");
+	var source =
+	{	
+		localdata: <?php echo json_encode($result); ?>,
+		dataType: "json",
+		dataFields: [
+
+			{ name: 'RFQRegId', type: 'string' },
+			{ name: 'RFQNo', type: 'string' },
+			{ name: 'RFQDate', type: 'date', format: 'DD-MM-yyyy' },
+			{ name: 'TypeName', type: 'string' },
+			{ name: 'verification', type: 'string' },
+			{ name: 'Approve', type: 'string' },
+			{ name: 'totalsent', type: 'totalsent' },
+			{ name: 'Received', type: 'Received' },
+			{ name: 'Pending', type: 'Pending' }
+		],
+		id: 'RFQRegId'
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source);
+
+	$("#dataTable").jqxGrid(
+	{
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready:function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No quotation to display";
+			$("#dataTable").jqxGrid('localizestrings', localizationobj);
+		},
+		source:dataAdapter,
+		columns: [
+		//0 totalsent,0 Received,0 Pending
+		{ text: 'RFQRegId', dataField: 'RFQRegId',hidden:true},
+		{ text: 'RFQ No', dataField: 'RFQNo', width:'9%' },
+		{ text: 'RFQ Date', dataField: 'RFQDate', width:'15%', cellsalign: 'center', align: 'center', filtertype: 'date', cellsformat: 'dd-MM-yyyy' },
+		{ text: 'RFQ Type', dataField: 'TypeName', width: '15%' },
+		{ text: 'verification', dataField: 'verification', width:'9%', cellsalign: 'center', align: 'center' },
+		{ text: 'Approve', dataField: 'Approve', width:'9%', cellsalign: 'center', align: 'center' },
+		{ text: 'Total sent', dataField: 'totalsent', width:'11%', cellsalign: 'center', align: 'center' },
+		{ text: 'Received', dataField: 'Received', width:'11%', cellsalign: 'center', align: 'center' },
+		{ text: 'Pending', dataField: 'Pending', width:'11%', cellsalign: 'center', align: 'center' },
+		{ text: 'Action', sortable: false, filterable: false, cellsalign: 'center',width:'10%',
+            cellsrenderer: function (row) {
+               // var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+                var RFQRegId = $Grid.jqxGrid('getCellValue', row, 'RFQRegId');
+                var Received = $Grid.jqxGrid('getCellValue', row, 'Received');
+                if(Received != 0)
+                {
+                    var editLink = '<a title="Detailed" href="' + getBaseURL() + 'ats/response/rfq-vendors/' + RFQRegId + '" style="margin-top:8px;margin-left:30px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                    return editLink ;
+                }
+                else {
+                    var editLink ='<a href="' + getBaseURL() + 'ats/response/rfq-vendors/' + RFQRegId + '"  style="margin-top:8px;margin-left:30px;" "javascript:void(0);" title="Detailed" onclick="reqdetail(' + RFQRegId + ');return false;""><i class="fa fa-paper-plane reg-icon"></i></a>';
+                    return editLink;
+                }
+            }
+		}
+	  ]
+	});
+	$("#dataTable").bind('rowselect', function (event) {
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		//location.replace('rfq-vendors/'+rowData.uid);
+	});
+});
+
+function reqdetail(RFQRegId) {
+	var rows = $("#dataTable").jqxGrid('getselectedrowindexes');
+
+	for(var i in rows){
+		var data =$("#dataTable").jqxGrid("getrowdata", rows[i]);
+		if(data.Received ==0 ){
+			alert("Vendor Still Not Response the RFQ");
+			return;
+		}
+	}
+}
+</script>
+<div class="content_wrapper  padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+            	<h1>Select the rfq to view the vendor responses</h1> 
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+                    <div id="jqxWidget">
+						<div id="dataTable"></div>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

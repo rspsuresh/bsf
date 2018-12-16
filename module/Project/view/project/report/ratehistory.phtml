@@ -1,0 +1,256 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!--<script type="text/javascript" src="--><?php //echo $this->basePath(); ?><!--/library/Highcharts-4.2.3/js/highcharts.js"></script>-->
+<!--<script type="text/javascript" src="--><?php //echo $this->basePath(); ?><!--/library/Highcharts-4.2.3/js/modules/exporting.js"></script>-->
+<?php
+echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+
+<style>
+    .top_ct 				{background:#fff;padding:5px 0;margin:0}
+    #scdule-db1 			{width:100%;height:435px !important;font-size:11px;overflow:hidden !important}
+    .panel-body 			{border:1px solid #e7e7e7;box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.23);}
+    .panel-heading 			{border-bottom: 1px solid #ddd;border-top-left-radius:3px;border-top-right-radius:3px;color:#06528c;font-size:20px;padding:10px 15px;transition: margin 0.5s ease-out 0s;}
+    .lbl_move 				{height:40px !important;}
+    .rate-history 			{background:#e9eae2;box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.23);	margin:15px 0;border:1px solid #dad7d7;	padding:20px 0;}
+    .rate-heading 			{font-size:14px;line-height:30px;color:#000;}
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Rate History</h1>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="margin-bottom:10px; padding-right:0px !important;">
+                <label class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 control-label text-right">Select Resource</label>
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="padding-right:0px !important;">
+                    <select class="form-control single_dropdown lbl_move sortoption"  onchange="changeChart();" name="resourceId" id="resourceId" style="width:100%;">
+                        <option value="0">None</option>
+                        <?php foreach($Resource as $Res) { ?>
+                            <option value="<?php echo $Res['ResourceId']; ?>"><?php echo $Res['ResourceName']; ?></option>
+                        <?php } ?>
+                    </select>
+                    </select>
+                </div>
+                <!--Short by end-->
+            </div>
+
+            <div class="col-md-12 col-sm-12 col-xs-12 clear">
+                <div class="row rate-history">
+                    <div class="col-lg-2 col-sm-2" style="padding-left:0 !important; padding-right:0 !important">
+                        <div class="col-md-12 rate-heading">From</div>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 select-lst ">
+                            <input type="text" name="fromDate" id="fromDate" readonly class="form-control lbl_move date_picker" value="<?php echo date("d-m-Y", strtotime($mindate));?>" onchange="changeChart();" style="width:100%;" />
+                        </div>
+                        <!--Short by end-->
+                    </div>
+                    <div class="col-lg-2 col-sm-2" style="padding-left:0 !important; padding-right:0 !important">
+                        <div class="col-md-12 rate-heading">To</div>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 select-lst ">
+                            <input type="text" name="toDate" id="toDate" readonly class="form-control lbl_move date_picker" value="<?php echo date("d-m-Y");?>" onchange="changeChart();" style="width:100%;" />
+                        </div>
+                        <!--Short by end-->
+                    </div>
+                    <div class="col-lg-4 col-sm-3" style="padding-left:0 !important; padding-right:0 !important">
+                        <div class="col-md-12 rate-heading">Project</div>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 select-lst ">
+                            <select class="form-control single_dropdown lbl_move sortoption" name="projectId" id="projectId" onchange="changeChart();" style="width:100%;">
+                                <option value="0">All</option>
+                                <?php foreach($Project as $Proj) { ?>
+                                    <option value="<?php echo $Proj['ProjectId']; ?>"><?php echo $Proj['ProjectName']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <!--Short by end-->
+                    </div>
+                    <div class="col-lg-4 col-sm-3" style="padding-left:0 !important; padding-right:0 !important">
+                        <div class="col-md-12 rate-heading">Vender</div>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 select-lst ">
+                            <select class="form-control single_dropdown lbl_move sortoption"  name="vendorId" id="vendorId" onchange="changeChart();" style="width:100%;">
+                                <option value="0">All</option>
+                                <?php foreach($Vendor as $Ven) { ?>
+                                    <option value="<?php echo $Ven['VendorId']; ?>"><?php echo $Ven['VendorName']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <!--Short by end-->
+                    </div>
+                </div>
+            </div>
+            <!--chart2 start-->
+
+            <div class="col-lg-12 clear" style="display: none" id="divchart">
+                <section class="panel">
+                    <header class="panel-heading col-lg-12 col-sm-12 col-xs-12">
+                        <div class="col-md-9 col-sm-9 col-xs-9"><i class="fa fa-area-chart"></i>Rate History</div>
+                        <!--            <div class="col-md-3 col-sm-3 col-xs-3">-->
+                        <!--              <select class="form-control single_dropdown lbl_move sortoption" style="width:100%;">-->
+                        <!--                <option></option>-->
+                        <!--                <option selected>Week</option>-->
+                        <!--                <option>Month</option>-->
+                        <!--                <option>Day</option>-->
+                        <!--              </select>-->
+                        <!--            </div>-->
+                    </header>
+                    <div class="panel-body">
+                        <div id="scdule-db1" class="top_ct"></div>
+                    </div>
+                </section>
+            </div>
+            <!--chart3complete-->
+            <div class="col-md-12" id="divdata">
+                <div class="table-responsive">
+                    <div id="dataTable"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--datepicker-->
+<script>
+    function changeChart() {
+        var iresId = $('#resourceId').val(),
+            ivendorId = $('#vendorId').val(),
+            iprojectId = $('#projectId').val(),
+            dfromdate = $('#fromDate').val(),
+            dtodate = $('#toDate').val();
+
+        $('#divchart').hide();
+        $('#divdata').hide();
+        if (iresId ==0) return;
+        $.ajax({
+            url: getBaseURL() + "project/report/getratehistory",
+            async: false,
+            type: 'post',
+            data: {'resourceId': iresId, 'vendorId': ivendorId,'projectId':iprojectId,'fromDate':dfromdate,'toDate':dtodate},
+            success: function (data, status) {
+                var obj = jQuery.parseJSON(data);
+                var chartData = obj['trans'];
+                var billTrans = obj['billtrans'];
+
+                if (chartData.length > 0) { $('#divchart').show(); $('#divdata').show();}
+                else return;
+
+                var Resource = $("#resourceId option:selected").text();
+                AmCharts.makeChart("scdule-db1", {
+                    "theme": "light",
+                    "type": "serial",
+                    "marginRight": 80,
+                    "autoMarginOffset": 20,
+                    "marginTop":20,
+                    "dataProvider": chartData,
+                    "valueAxes": [{
+                        "id": "v1",
+                        "axisAlpha": 0.1
+                    }],
+                    "graphs": [{
+                        "useNegativeColorIfDown": true,
+                        "balloonText": "[[category]]<br><b>Rate: [[value]]</b>",
+                        "bullet": "round",
+                        "bulletBorderAlpha": 1,
+                        "bulletBorderColor": "#FFFFFF",
+                        "hideBulletsCount": 50,
+                        "lineThickness": 2,
+                        "lineColor": "#fdd400",
+                        "negativeLineColor": "#67b7dc",
+                        "valueField": "Rate"
+                    }],
+                    "chartCursor": {
+                        "valueLineEnabled": true,
+                        "valueLineBalloonEnabled": true
+                    },
+                    "categoryField": "BillDate",
+                    "categoryAxis": {
+                        "axisAlpha": 0,
+                        "minHorizontalGap": 60,
+                        "labelRotation": 45
+                    },
+                    "titles": [{
+                        "text": Resource,
+                        "size": 15
+                    }]
+                });
+
+
+                var source = {
+                    localdata:billTrans,
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'BillDate', type: 'date' },
+                        { name: 'BillNo', type: 'string' },
+                        { name: 'VendorName', type: 'string' },
+                        { name: 'CostCentreName', type: 'string' },
+                        { name: 'Rate', type: 'number' }
+                    ],
+                    id: 'PVTransId'
+                };
+
+                var dataAdapter = new $.jqx.dataAdapter(source);
+                $("#dataTable").jqxGrid({
+                    width: '100%',
+                    pageable: true,
+                    rowsheight: 35,
+                    filterable: true,
+                    showfilterrow: true,
+                    selectionMode: 'singleRow',
+                    pagerButtonsCount: 6,
+                    autoheight:true,
+                    source: dataAdapter,
+                    altrows: true,
+                    editable:true,
+                    enabletooltips: true,
+                    selectionmode: 'singlerow',
+                    editmode: 'selectedcell',
+                    columns: [
+                        { text: 'PVTransId', datafield: 'PVTransId', hidden: true},
+                        { text: 'BillDate', dataField: 'BillDate',width:'10%',editable:false,cellsformat: 'dd-MM-yyyy'},
+                        { text: 'BillNo', dataField: 'BillNo',width:'10%',editable:false},
+                        { text: 'VendorName', dataField: 'VendorName',width:'35%',editable:false},
+                        { text: 'CostCentreName', dataField: 'CostCentreName',width:'35%',editable:false},
+                        { text: 'Rate', dataField: 'Rate',editable:false, width:'10%',
+                            cellsrenderer: function (row) {
+                                return '<div class="text-right">' + sanitizeNumber($("#dataTable").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                            }}
+                    ]
+                });
+
+//            $('#scdule-db1').highcharts({
+//
+//                chart: {
+//                    type: 'column'
+//                },
+//                title: {
+//                    text: Resource
+//                },
+//                xAxis: {
+//                    categories: obj['date']
+////                    type: 'datetime',
+////                    labels: {
+////                        format: '{value:%d-%m-%Y}',
+////                        rotation: 45,
+////                        align: 'left'
+////                    }
+//                },
+//
+//                yAxis: {
+//                    categories: obj['rate']
+////                    minorTickInterval: 0.1
+//                },
+//
+//                tooltip: {
+//                    headerFormat: '<b>{series.name}</b><br />',
+//                    pointFormat: 'x = {point.x}, y = {point.y}'
+//                },
+//
+//                series: [{
+//                    name: 'Rate',
+//                    data: obj['rate']
+//                }]
+//            });
+            }
+        });
+    }
+</script>

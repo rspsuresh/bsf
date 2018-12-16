@@ -1,0 +1,384 @@
+<style>
+    .alertmsg_txtarea {resize:none; height:90px; width:100%;}
+    .table-fixed tbody{max-height:420px;min-height:20px; overflow-y:auto;width:100%}
+    .table-fixed thead,.table-fixed tbody,.table-fixed tr,.table-fixed td,.table-fixed th{display:block}
+    .table-fixed tbody td,.table-fixed thead>tr>th{float:left; border-bottom:0;position:relative;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}
+	.select2-container .select2-selection--single{height:40px !important;border:1px solid #ccc !important}
+	.form-group1{margin-bottom:8px}
+	.parent_text{height:40px}
+    input[type="text"]:disabled {background: #f1f1f1;}
+</style>
+<div class="content_wrapper padlr0">
+<div class="container-fluid padlr0">
+<div class="col-lg-12">
+    <h1 class="col-md-7 text-left animated growIn" style="font-size: 24px;">Approval Setting
+        <div class="btn-group proname_btn"> <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><label style="font-size:18px" for ="ccname"><?php echo $typeName; ?></label><span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Change&nbsp;Type"><i class="fa fa-caret-down "></i></span></a>
+            <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                <ul>
+                    <li><a href="javascript:void(0);" id="a1" class="followupId" data-index="1">Approval</a></li>
+                    <li><a href="javascript:void(0);" id="a2" class="followupId" data-index="2">Critical Roles</a></li>
+                    <li><a href="javascript:void(0);" id="a3" class="followupId" data-index="3">Alert-Internal</a></li>
+                    <li><a href="javascript:void(0);" id="a5" class="followupId" data-index="4">Alert-External</a></li>
+                    <li><a href="javascript:void(0);" id="a4" class="followupId" data-index="5">Alert-Reminder</a></li>
+                    <li><a href="javascript:void(0);" id="a6" class="followupId" data-index="6">Alert-Reports</a></li>
+                    <li><a href="javascript:void(0);" id="a7" class="followupId" data-index="7">Alert-Custom-Reminder</a></li>
+                </ul>
+            </div>
+            <input type="hidden" name="typeId" id="typeId" value="<?php echo $type; ?>" />
+        </div>
+    </h1>
+    <div class="col-md-2 col-sm-3" id="divaddnew" style="display: none">
+        <a href="javascript:addNewAlert();" class="button-gif"><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;Add New Alert</a>
+    </div>
+    <div class="col-md-3 col-sm-4 padlr0" style=" float: right;">
+        <div class="input-group col-md-12">
+            <input name="search_all" id="search_all" type="text" onkeyup="voucherSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+        </div>
+    </div>
+</div>
+    <div class="col-lg-12 clear">
+        <?php $k=0; ?>
+        <div class="col-lg-12 padlr0">
+            <div class="table-responsive" style="min-height:200px;">
+                <table class="table table-hover table-fixed tbltop_bdr0" id="setingtable">
+                    <thead>
+                    <tr class="col-xs-12" style="padding:0 !important">
+                        <th class="col-xs-8" id="hname">Role Name</th>
+                        <th class="col-xs-3">Module Name</th>
+                        <th class="col-xs-1">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach($resultAppSelect as $resultLists){
+//										if($resultModules['ModuleName']== $resultLists['ModuleName']) {
+                        $k+=1;?>
+                        <tr id="index_<?php echo $k; ?>" class="col-xs-12" style="padding:0 !important">
+                            <td class="col-xs-8" data-expandid="<?php echo $resultLists['Id']; ?>" rel="rt_<?php echo $k; ?>"><?php echo $resultLists['Name'];?></td>
+                            <td class="col-xs-3" data-expandid="<?php echo $resultLists['Id']; ?>" rel="rt_<?php echo $k; ?>"><?php echo $resultLists['ModuleName'];?></td>
+                            <td class="col-xs-1">
+                                <ul class="action_btns">
+                                    <li>
+                                        <a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="<?php echo $resultLists['Id']; ?>" onclick="editDept('<?php echo $resultLists['Id']; ?>',$(this));getDeptId(this);" rel="rt" data-placement="left" data-original-title="Edit">
+                                            <span><i class="fa fa-edit"></i></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="addAlertModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Create New Custom Alert</h1>
+            </div>
+            <div class="modal-body col-md-12" style="background:#F0F0F5">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="form-group col-lg-12">
+                        <label style="margin-bottom: 10px;">Alert Name</label>
+                        <input type="text" class="parent_text" style="height:40px;" id="newalertname" onchange="checkAlertFound(this.value)">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer" style="background:#e6f2f9; border:1px solid #d8e8f1">
+                <a href="javascript:void(0);" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return createNewAlert()" data-toggle="tooltip" data-original-title="Create">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var globalTimeout=null;
+$('.followupId').on('click',function(){
+    var typeId = $(this).attr('data-index'),
+        typeName = $(this).text();
+    $('#typeId').val(typeId);
+
+    if (typeId==7) $('#divaddnew').show();
+    else  $('#divaddnew').hide();
+
+    $("label[for='ccname']").html(typeName);
+    var sStr =  isNullCheck($('#search_all').val(),'string');
+    voucherSearch(sStr);
+});
+
+//$(".mainTr").click(function(){
+//    var relDiv = $(this).attr('rel');
+//    var relVal = relDiv.split("_");
+//
+//    if(relVal[0]=='rt') {
+//        $("#rtDivDept_"+relVal[1]).slideToggle("slow");
+//        var key=$(this).data('expandid');
+//
+//        //console.log(cid);
+//        //console.log(cid1);
+//        //console.log(cid2);
+//    } /*else {
+//     $("#ocDivDept_"+relVal[1]).slideToggle("slow");
+//     }*/
+//
+//    var rtCount = $('#rtCount').val();
+//    //var ocCount = $('#ocCount').val();
+//    for(i=1;i<=rtCount;i++) {
+//        if(relVal[0] == 'rt') {
+//            if(relVal[1] != i) {
+//                $("#rtDivDept_"+i).slideUp("slow");
+//            }
+//        } else {
+//            $("#rtDivDept_"+i).slideUp("slow");
+//        }
+//    }
+//    /*for(i=1;i<=ocCount;i++) {
+//     if(relVal[0] == 'oc') {
+//     if(relVal[1] != i) {
+//     $("#ocDivDept_"+i).slideUp("slow");
+//     }
+//     } else {
+//     $("#ocDivDept_"+i).slideUp("slow");
+//     }
+//     }*/
+//})
+
+//$(".editSubmitBtn").click(function(){
+//    //$(".error_message").hide();
+//    var key=$(this).data('editid');
+//    $("#editform_" + key).submit();
+//});
+
+//function getdetailsShow(x){
+//    var $parents = $(x).parents('.notRequiredCheckbox');
+//    var $notRequiredDivs = $parents.nextAll('.notRequired');
+//    if($(x).is(":checked")){
+//        $notRequiredDivs.hide();
+//    } else{
+//        $notRequiredDivs.show();
+//    }
+//}
+
+//$('.frequencyPeriodType').on('change', function(){
+//    var periodtypeId = $(this).val();
+//    var $parent = $(this).parents('.not_frequencyPeriodType');
+//    var $count = $parent.nextAll('.not_frequencyPeriodCount');
+//    var $time = $parent.nextAll('.not_fTime');
+//    var $day = $parent.nextAll('.not_fDay');
+//    var $week = $parent.nextAll('.not_fWeek');
+//
+//    if(periodtypeId ==  'None') {
+//        $time.hide();
+//        $day.hide();
+//        $week.hide();
+//        $count.hide();
+//    } else if(periodtypeId ==  'Day') {
+//        $time.show();
+//        $day.hide();
+//        $week.hide();
+//        $count.show();
+//    } else if(periodtypeId ==  'Week') {
+//        $time.hide();
+//        $day.hide();
+//        $week.show();
+//        $count.show();
+//    } else if(periodtypeId ==  'Month') {
+//        $time.hide();
+//        $day.show();
+//        $week.hide();
+//        $count.show();
+//    }
+//});
+//
+//$('.processPeriodType').on('change', function(){
+//    var frequencyPeriodId = $(this).val();
+//    var $parent = $(this).parents('.not_processPeriodType');
+//    var $count = $parent.nextAll('.not_processPeriodCount');
+//    $count.show();
+//    if(frequencyPeriodId ==  'None') {
+//        $count.hide();
+//    }
+//});
+//
+//$('.gracePeriodType').on('change', function(){
+//    var gracePeriodId = $(this).val();
+//    var $parent = $(this).parents('.not_gracePeriodType');
+//    var $count = $parent.nextAll('.not_gracePeriodCount');
+//    $count.show();
+//    if(gracePeriodId ==  'None') {
+//        $count.hide();
+//    }
+//});
+//
+//$('.informType').on('change', function(){
+//    var informTypeId = $(this).val();
+//    var $parent = $(this).parents('.not_informType');
+//    var $informPeriodType = $parent.nextAll('.not_informPeriodType');
+//    var $count = $parent.nextAll('.not_informPeriodCount');
+//    $informPeriodType.show();
+//    $count.show();
+//    if(informTypeId ==  'I') {
+//        $informPeriodType.hide();
+//        $count.hide();
+//    }
+//});
+//
+//$('.informPeriodType').on('change', function(){
+//    var informPeriodTypeId = $(this).val();
+//    var $parent = $(this).parents('.not_informPeriodType');
+//    var $count = $parent.nextAll('.not_informPeriodCount');
+//    $count.show();
+//    if(informPeriodTypeId ==  'None') {
+//        $count.hide();
+//    }
+//});
+
+function voucherSearch(positionDetails) {
+    var iTypeId = $('#typeId').val();
+    //$("#hname").text("AlertName");
+    if (iTypeId ==1 || iTypeId ==2 ) $("#hname").text("RoleName");
+    else $("#hname").text("AlertName");
+
+    if (globalTimeout != null) {
+        clearTimeout(globalTimeout);
+    }
+    globalTimeout = setTimeout(function() {
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/approval-settings',
+            type: 'POST',
+            data: {'TypeId': iTypeId,'searchStr' : $.trim(positionDetails)},
+            async:false,
+            success: function (data, textStatus, jqXHR) {
+                var posDetail = JSON.parse(data);
+                $('#setingtable tbody').html('');
+                var sHtml="";
+                if(posDetail.length>0) {
+                    $.each(posDetail,function(j,o) {
+                        var i = +j+1;
+
+                        sHtml = sHtml + '<tr id="index_' + i + '" class="col-xs-12" style="padding:0 !important">'+
+                        '<td class="col-xs-8" data-expandid="' + o.Id + '" rel="rt_' + i + '">' + o.Name + '</td>'+
+                        '<td class="col-xs-3" data-expandid="' + o.Id + '" rel="rt_' + i + '">' + o.ModuleName + '</td>'+
+                        '<td class="col-xs-1">'+
+                        '<ul class="action_btns">'+
+                        '<li>'+
+                        '<a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="' + o.Id +'" onclick="editDept('+ o.Id + ',$(this));getDeptId(this);" rel="rt" data-placement="left" data-original-title="Edit">'+
+                        '<span><i class="fa fa-edit"></i></span>'+
+                        '</a></li></ul></td></tr>';
+                    });
+                }
+                $('#setingtable tbody').html(sHtml);
+                if (iTypeId==7) $('#divaddnew').show();
+                else  $('#divaddnew').hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 400)
+                    alert(jqXHR.responseText);
+                else
+                    alert("Request Failed");
+            }
+        });
+        globalTimeout=null;
+    }, 500);
+}
+
+function getDeptId(data) {
+    curDeptId = $(data).attr('data-expandid');
+}
+function editDept(Id,_this) {
+    $('.close_tr').remove();
+//    $('#add_data').html('');
+
+    var iTypeId = $('#typeId').val();
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/approvalsettingedit',
+        type: 'POST',
+        async: false,
+        data: {'TypeId': iTypeId,'Id':Id,'ActionType':'Edit'},
+        success:function(data, textStatus, jqXHR){
+            $(data).insertAfter(_this.closest('tr'));
+            $('.card-body').slimScroll({
+                height : '100%',
+                alwaysVisible: false,
+                railVisible: true,
+                railColor: '#cececd',
+                railOpacity: 1
+            });
+            $(".lbl_move").polymerForm();
+            $(".lbl_move").each(function() {
+                if($(this).val() != '' && $(this).val() != null) {
+                    $(this).closest('div').addClass('dirty');
+                }
+            });
+            _this.closest('tr').next('tr').show("slow");
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+        }
+    });
+}
+$(document).on('click','.close',function() {
+    $('.close_tr').remove();
+    //$('#add_data').html('');
+});
+function addNewAlert() {
+    $('#newalertname').val('');
+    $('#addAlertModal').modal('show');
+}
+function checkAlertFound(argAlert) {
+    removeError($('#newalertname'));
+    $.ajax({
+        url:getBaseURL()+ 'workflow/index/checkalertFound',
+        type:"post",
+        data: {'alertId':0,'alertName':argAlert},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if(data == 'Y'){
+                showError($('#newalertname'), 'Alert Name already found!');
+                return false;
+            } else{
+                removeError($('#newalertname'));
+            }
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            return false;
+        }
+    });
+}
+function createNewAlert() {
+    var sAlertName = isNullCheck($('#newalertname').val(),'string');
+    if (sAlertName=="") { showError($('#newalertname'), 'Enter Alert Name'); return; }
+    checkAlertFound(sAlertName);
+    if ($('#newalertname').hasClass('error')) return;
+    newAlertUpdate(sAlertName);
+    $('#addAlertModal').modal('hide');
+}
+function newAlertUpdate(argAlert) {
+    $.ajax({
+        url:getBaseURL()+ 'workflow/index/addnewalert',
+        type:"post",
+        data: {'alertId':0,'alertName':argAlert},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            var sStr =  isNullCheck($('#search_all').val(),'string');
+            voucherSearch(sStr);
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            return false;
+        }
+    });
+}
+
+</script>

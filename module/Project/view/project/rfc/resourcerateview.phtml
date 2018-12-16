@@ -1,0 +1,584 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/highcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/highcharts-3d.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/modules/exporting.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<style>
+    .jqx-grid-header {
+        height:75px !important;
+    }
+    #dataTable .jqx-grid-header {
+        height:75px !important;
+    }
+    .jqx-grid-columngroup-header > div > div {
+        border-bottom:1px solid red !important;
+        padding:11px 10px !important;
+    }
+    #chartdiv {
+        width :100%;
+        background:#fff;
+        height:250px;
+        font-size:11px;
+    }
+    #container {
+        width:100% !important;
+        overflow:hidden !important;
+    }
+    .chart-icon                                {width:30px; margin-right:5px;}
+    .chart-scale                               {stroke:#ECECEC;}
+    .chart-line                                {transform-origin:bottom;}
+    .chart-icon .chart-line:first-child, .chart-icon:focus .chart-line:first-child, .chart-icon:active .chart-line:first-child {animation: 0.4s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite chartlines;}
+    .chart-icon .chart-line:nth-child(2), .chart-icon:focus .chart-line:nth-child(2), .chart-icon:active .chart-line:nth-child(2) {animation: 1.22s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite reverse chartlines;}
+    .chart-icon .chart-line:nth-child(3), .chart-icon:focus .chart-line:nth-child(3), .chart-icon:active .chart-line:nth-child(3) {animation: 0.94s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite reverse chartlines;}
+    .chart-icon .chart-line:nth-child(4), .chart-icon:focus .chart-line:nth-child(4), .chart-icon:active .chart-line:nth-child(4) {animation: 1.70s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite chartlines;}
+    @keyframes chartlines {
+        0% {
+            transform: scaleY(1.10);
+        }
+        32% {
+            transform: scaleY(0.85);
+        }
+        79% {
+            transform: scaleY(0.12);
+        }
+        100% {
+            transform: scaleY(0.50);
+        }
+    }
+</style>
+<div class="content_wrapper padlr0">
+<div class="container-fluid">
+    <div class="row">
+        <div id="divnewpagetittle" >
+            <h1 class="text-center">Project Resource </h1>
+        </div>
+        <div class="col-lg-12 page_tittle" id="pagetittle" style="display: none;">
+            <h1 class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0" style="padding-left:0px !important;">Project Resource </h1>
+            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                <label class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 lab-ls">Select Project</label>
+                <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <select name="project_id" id="project_select" onchange="showGrid();" class="form-control single_dropdown lbl_move" style="width:100%;">
+                        <option value="">Select Project</option>
+                        <?php if(isset($projectlists)):?>
+                            <?php foreach ( $projectlists as $project ):?>
+                                <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $proj_id) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                            <?php endforeach; ?>
+                        <?php  endif; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                <label class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 lab-ls">Select Type</label>
+                <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <select name="type_name" id="type_select" onchange="showGrid();" class="form-control single_dropdown lbl_move" style="width:100%;">
+                        <option value="">Select Type</option>
+                        <option value="B" <?php if($proj_type=='B') { ?>selected<?php } ?>>Budget</option>
+                        <option value="P" <?php if($proj_type=='P') { ?>selected<?php } ?>>Plan</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="fixed-action-btn active rf-fixed" id="printdiv" style="display: none"> <a class="btn-floating btn-large"> <i class="fa fa-print"></i> </a>
+            <ul>
+                <li> <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Print Report"> <i class="fa fa-print"></i> </a> </li>
+                <li> <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Download Excel"> <i class="fa fa-download"></i> </a> </li>
+                <li> <a class="btn-floating" id="csvExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Export CSV"> <i class="fa fa-file-archive-o"></i> </a> </li>
+            </ul>
+        </div>
+        <div class="col-lg-12 clear" id="gridWrapper" style="display: none;" >
+            <div class="table-responsive clear animated fadeInUp">
+                <div id="dataTable"></div>
+            </div>
+        </div>
+        <form id="formSubmit" action="" method="post">
+            <div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+                <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                        <div class="col-lg-12 frmwrk_div" id="projects_list">
+                            <select name="project_idNew" id="project_selectNew" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%;">
+                                <option value="">Select Project</option>
+                                <?php if(isset($projectlists)):?>
+                                    <?php foreach ( $projectlists as $project ):?>
+                                        <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                                    <?php endforeach; ?>
+                                <?php  endif; ?>
+                            </select>
+                        </div>
+                        <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                            <select name="type_nameNew" id="type_selectNew" class="form-control single_dropdown lbl_move" data-size="6" title="Select Type..." style="width:100%;">
+                                <option value="">Select Type</option>
+                                <option value="B">Budget</option>
+                                <option value="P">Plan</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="submitType" id="submitType" value="new">
+                        <div class="savebtn_areas col-lg-7 col-sm-7 col-sm-offset-3 col-xs-offset-4 col-lg-offset-3">
+                            <ul>
+                                <li class="subs"><a href="javascript: submitform();"  id="continue">Submit</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="clearfix"></div>
+        <!--chart-->
+        <div class="col-lg-12 chats " id="divChart" style="display: none; margin-top:20px;">
+            <div class="row">
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0 zoomIn animated">
+                    <div class="panel panel-default">
+                        <div class="panel-heading panel-hd">    <svg
+                                class="chart-icon"
+                                version="1.1"
+                                baseProfile="full"
+                                viewBox="0 0 100 100"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#48ff00"  x1="5" y1="95" x2="5" y2="5" stroke-width="5" class="chart-scale" />
+                                <line stroke="#ff3000" x1="2.5" y1="95" x2="100" y2="95" stroke-width="5" class="chart-scale" />
+                            </svg>Resource Type</div>
+                        <div class="panel-body">
+                            <div id="container" style="min-width: 310px; height: 250px; max-width: 600px; margin: 0 auto"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 col-xs-offset-0 zoomIn animated">
+                    <div class="panel panel-default">
+                        <div class="panel-heading panel-hd">     <svg
+                                class="chart-icon"
+                                version="1.1"
+                                baseProfile="full"
+                                viewBox="0 0 100 100"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                                <line stroke="#48ff00"  x1="5" y1="95" x2="5" y2="5" stroke-width="5" class="chart-scale" />
+                                <line stroke="#ff3000" x1="2.5" y1="95" x2="100" y2="95" stroke-width="5" class="chart-scale" />
+                            </svg>Resource Group</div>
+                        <div class="panel-body">
+                            <div id="chartdiv"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="col-lg-6">
+                <h3>Resource Type</h3>
+                <div id="container" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
+              </div>
+              <div class="col-lg-6">
+                <h3>Resource Group</h3>
+                <div id="chartdiv"></div>
+              </div>
+            </div>-->
+            <!--chart-->
+        </div>
+    </div>
+    <?php if (isset($proj_id)) { if ($proj_id !=0) { ?>
+        <div class="col-lg-12 savebtn_area">
+            <ul>
+                <li class="cancel_btn float_l goback-foll"><a href="<?php echo $this->basePath() . '/project/rfc/projboq/' . $proj_id . '/' .$proj_type ;?>" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i>Goto BOQ</a></li>
+            </ul>
+        </div>
+    <?php }} ?>
+</div>
+<script>
+var $project = $('#project_select'),
+    $projectNew = $('#project_selectNew'),
+    $type_list = $('#types_list'),
+    $type = $('#type_select');
+
+var arrrestype = <?php if(isset($Restype)) echo json_encode($Restype); else echo '[]'; ?>;
+var arrresgroup = <?php if(isset($Resgrp)) echo json_encode($Resgrp); else echo '[]'; ?>;
+
+$dataGrid = $("#dataTable"),
+    $(function () {
+        var data = <?php echo (isset($projectdetails)) ? json_encode($projectdetails) : '[]'?>;
+        var proj_id = <?php if(isset($proj_id)) echo json_encode($proj_id); else echo '""';?>;
+        var proj_type = <?php if(isset($proj_type)) echo json_encode($proj_type); else echo '""'?>;
+        if(proj_id != '') {
+            $('#gridWrapper').show();
+            $('#formWrapper').hide();
+            $('#MainWrapper').hide();
+            $('#divnewpagetittle').hide();
+            $('#pagetittle').show();
+            $('#divChart').show();
+            $('#printdiv').show();
+            $('#project_select').val(proj_id);
+            $type.val(proj_type);
+        }
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ResourceId', type: 'number' },
+                { name: 'TypeName', type: 'string' },
+                { name: 'Code', type: 'string' },
+                { name: 'ResourceName', type: 'string' },
+                { name: 'UnitName', type: 'string' },
+                { name: 'Qty', type: 'string' },
+                { name: 'IncludeFlag', type: 'boolean' },
+                { name: 'Rate', type: 'string' },
+                { name: 'Amount', type: 'string' },
+            ],
+            id: 'RequestId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        var resdata = new $.jqx.dataAdapter(source);var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.ResourceId,datarecord.UnitName));
+        };
+
+        $("#dataTable").jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            filterable: true,
+            showfilterrow: true,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: dataAdapter,
+            altrows: true,
+            editable:true,
+            enabletooltips: true,
+            groupable:true,
+            selectionmode: 'singlerow',
+            editmode: 'selectedcell',
+            rowdetails: true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:2px solid #5bc0de;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'ResourceId', datafield: 'ResourceId', hidden: true},
+                /*{ text: 'Resource Type', dataField: 'TypeName',width:'18%',editable:false},*/
+                { text: 'Code', dataField: 'Code',editable:false, width:'18%'},
+                { text: 'Resource Name', dataField: 'ResourceName',width:'33%',editable:false},
+                { text: 'Unit', dataField: 'UnitName',editable:false, width:'11%'},
+                { text: 'Inc', dataField: 'IncludeFlag', columntype: 'checkbox',align:'center',editable:false, width:'5%'},
+                { text: 'Qty', dataField: 'Qty',editable:false, width:'11%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                    }},
+                { text: 'Rate', dataField: 'Rate', editable:false, align: 'right', cellsalign: 'right', width:'11%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                    }},
+                { text: 'Amount', dataField: 'Amount', editable:false, align: 'right', cellsalign: 'right',width:'11%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                    }},
+            ],
+            groups: ['TypeName'],
+            groupsrenderer: function (defaultText, group, state, params) {
+                return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+            },
+            ready: function () {
+                $("#dataTable").jqxGrid('expandallgroups');
+            }
+        });
+        $("#dataTable").bind('rowselect', function (event) {
+            rowindex = event.args.rowindex;
+            rowdata = $("#dataTable").jqxGrid('getrowdata', rowindex)
+//                populateChart(rowdata);
+        });
+        $("#dataTable").bind('cellendedit', function (event) {
+            var args = event.args;
+            if (args.value == args.oldvalue || args.datafield != 'CRate')
+                return;
+            $("#dataTable").jqxGrid('setcellvalue', args.rowindex, 'CAmount', sanitizeNumber(parseFloat(args.value) * parseFloat(args.row.Qty),2,true));
+        });
+
+
+        $('#dataTable').on('rowexpand', function (event) {
+            var prev_row = $('#dataTable').jqxGrid('selectedrowindexes');
+            if (prev_row != '') {
+                for (var i = 0; i < prev_row.length; i++) {
+                    $('#dataTable').jqxGrid('hiderowdetails', prev_row[i]);
+                }
+            };
+            var index = $('#dataTable').jqxGrid('getrowboundindex', event.args.rowindex);
+            $('#dataTable').jqxGrid({selectedrowindexes: [index]});
+        });
+
+        $('#dataTable').on('rowcollapse', function (event) {
+            $('#dataTable').jqxGrid('clearselection');
+        });
+
+//        $('#dataTable').on('rowexpand', function (event) {
+//            var prev_row = $('#dataTable').jqxGrid('selectedrowindexes');
+//            if (prev_row != '') {
+//                for (var i = 0; i < prev_row.length; i++) {
+//                    $('#dataTable').jqxGrid('hiderowdetails', prev_row[i]);
+//                }
+//            };
+//            $('#dataTable').jqxGrid({
+//                selectedrowindexes: [event.args.rowindex]
+//            });
+//        });
+//
+//        $('#dataTable').on('rowcollapse', function (event) {
+//            $('#dataTable').jqxGrid('clearselection');
+//        });
+    });
+
+
+function renderRowDetail(id,argUnit,index) {
+    var dataValue = '';
+    var sUrl= "project/template/getprojectiowresource";
+    var iProjectId = isNullCheck($('#project_select').val(),'number');
+    var sType =  isNullCheck($('#type_select').val(),'string');
+
+    if (sUrl =="")  return;
+    $.ajax({
+        url: getBaseURL() + sUrl,
+        type: 'POST',
+        data: {'resourceid': id,'unit':argUnit,'projectid':iProjectId,'type':sType},
+        async: false,
+        success: function(data,status, xhr) {
+            if(xhr.status == 200)
+                dataValue = data;
+        }, error: function(xhr, status, errorThrown) {
+        }
+    });
+    return dataValue;
+}
+
+function  printTable() {
+    $("#dataTable").jqxGrid('exportdata', 'pdf', 'ProjectResource');
+}
+//Print option
+$("#excelExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+});
+$("#csvExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+});
+$("#htmlExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'html', 'jqxGrid');
+});
+
+
+$("#print").click(function () {
+    var gridContent = $("#dataTable").jqxGrid('exportdata', 'html');
+    //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+    var newWindow = window.open('', '', 'width=800, height=500'),
+        document = newWindow.document.open(),
+        pageContent =
+            '<!DOCTYPE html>\n' +
+            '<html>\n' +
+            '<head>\n' +
+            '<meta charset="utf-8" />\n' +
+            '<title>Project Resource</title>\n' +
+            '<h1>Project Resource</h1>\n' +
+            '</head>\n' +
+            '<body>\n' + gridContent + '\n</body>\n</html>';
+    document.write(pageContent);
+    document.close();
+    newWindow.print();
+
+    /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+});
+
+$(function () {
+    $projectNew.on('change', function() {
+
+        if ($(this).val() == '') {
+            $type_list.hide();
+        } else {
+            $type_list.show();
+        }
+    });
+});
+
+function showGrid() {
+    var Projid = $project.val();
+    var Projtype = $type.val();
+
+    $('#project_selectNew').val(Projid);
+    $('#type_selectNew').val(Projtype);
+    $('#formSubmit').submit();
+
+    if ($project.val() == '') {
+//            alert('Select a project!');
+        $project.focus();
+        $project.addClass('error');
+        return;
+    }
+
+    if ($type.val() == '') {
+//            alert('Select a type!');
+        $type.focus();
+        $type.addClass('error');
+        return;
+    }
+    var sProjectName = $project.find('option:selected').html(),
+        sTypeName  = $type.find('option:selected').html();
+}
+function submitform() {
+    $('#formSubmit').submit();
+}
+//    function populateChart(rowdata) {
+//        var sResName = isNullCheck(rowdata['ResourceName'],'string');
+//        var chartData = [{
+//            "Revision": 'Revision 1',
+//            "Rate": 23.5
+//        },
+//            {
+//                "Revision": 'Revision 2',
+//                "Rate": 30
+//            },
+//            {
+//                "Revision": 'Revision 3',
+//                "Rate": 10.9
+//            }];
+//
+//        AmCharts.makeChart("chartdiv", {
+//            "theme": "light",
+//            "type": "serial",
+//            "marginRight": 80,
+//            "autoMarginOffset": 20,
+//            "marginTop":20,
+//            "dataProvider": chartData,
+//            "valueAxes": [{
+//                "id": "v1",
+//                "axisAlpha": 0.1
+//            }],
+//            "graphs": [{
+//                "useNegativeColorIfDown": true,
+//                "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+//                "bullet": "round",
+//                "bulletBorderAlpha": 1,
+//                "bulletBorderColor": "#FFFFFF",
+//                "hideBulletsCount": 50,
+//                "lineThickness": 2,
+//                "lineColor": "#fdd400",
+//                "negativeLineColor": "#67b7dc",
+//                "valueField": "Rate"
+//            }],
+//            "chartCursor": {
+//                "valueLineEnabled": true,
+//                "valueLineBalloonEnabled": true
+//            },
+//            "categoryField": "Revision",
+//            "categoryAxis": {
+//                "axisAlpha": 0,
+//                "minHorizontalGap": 60
+//            },
+//            "titles": [{
+//                "text": sResName,
+//                "size": 15
+//            }]
+//        });
+//    }
+
+function submitResource() {
+    var rows = JSON.stringify($("#dataTable").jqxGrid('getrows'));
+    var iProjectId = isNullCheck( $('#project_id').val(),'number');
+    var sRefNo= isNullCheck( $('#refno').val(),'string');
+    var dRefDate= isNullCheck( $('#refdate').val(),'string');
+    var iRFCId = isNullCheck($('#rfcUId').val(),'number');
+    if (rows != null) {
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/updateresourcerate',
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                //$('#target').html(data.msg);
+                window.location = getBaseURL() + 'project/rfc/rfc-what';
+            },
+            data: {'rowdata': rows,'RefNo' : sRefNo,'RefDate':dRefDate,'ProjectId':iProjectId,'RFCId' : iRFCId}
+        });
+    }
+}
+
+
+AmCharts.addInitHandler(function(chart) {
+    // check if there are graphs with autoColor: true set
+    for(var i = 0; i < chart.graphs.length; i++) {
+        var graph = chart.graphs[i];
+        if (graph.autoColor !== true)
+            continue;
+        var colorKey = "autoColor-"+i;
+        graph.lineColorField = colorKey;
+        graph.fillColorsField = colorKey;
+        for(var x = 0; x < chart.dataProvider.length; x++) {
+            var color = chart.colors[x]
+            chart.dataProvider[x][colorKey] = color;
+        }
+    }
+
+}, ["serial"]);
+
+
+$(function () {
+    populateChart();
+});
+
+
+function populateChart() {
+
+    if (arrrestype.length >0) {
+        var chart = AmCharts.makeChart("container", {
+            "type": "pie",
+            "theme": "light",
+            "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+            "dataProvider": arrrestype,
+            "valueField": "Amount",
+            "titleField": "TypeName",
+            "theme": "light",
+            "startEffect": "easeOutSine",
+            "balloonText": "[[title]]<br/><b>[[value]]</b>",
+            "radius": "30%",
+            "innerRadius": "60%",
+            "balloon": {
+                "fixedPosition": true
+            }
+        });
+    }
+
+    if (arrresgroup.length >0) {
+        var chart = AmCharts.makeChart("chartdiv", {
+            "type": "serial",
+            "theme": "light",
+            "dataProvider": arrresgroup,
+
+            "gridAboveGraphs": true,
+            "startDuration": 1,
+            "graphs": [{
+                "balloonText": "[[category]]: <b>[[value]]</b>",
+                "fillAlphas": 0.8,
+                "lineAlpha": 0.2,
+                "type": "column",
+                "valueField": "Amount",
+                "autoColor": true
+            }],
+            "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": true
+            },
+            "categoryField": "ResourceGroupName",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "gridAlpha": 0,
+                "tickPosition": "start",
+                "tickLength": 20
+            },
+            "export": {
+                "enabled": true
+            }
+        });
+    }
+}
+</script>

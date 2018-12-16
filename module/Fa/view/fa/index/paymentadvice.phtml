@@ -1,0 +1,1179 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/fa.css" />
+<style type="text/css">
+    .top-20{margin-top: 20px;}
+    .mar_btm{margin-bottom: 20px;}
+
+</style>
+<p id="strm_loader_cloud" style="display: none;" class="strm_loader txt_center clear"><span></span>Loading...</p>
+<div class="content_wrapper">
+    <form method="post" id="paymentForm" onsubmit="return entryValidate();">
+        <div class="container-fluid">
+            <div class="col-lg-12">
+                <h1>Payment Advice</h1>
+            </div>
+            <div class="col-lg-12 padlr0 mar_top">
+                <div class="col-lg-4">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="adviceNo" id="adviceNo" style="width:100%;" class="form-control lbl_move" label="Advice No" value="<?php echo (isset($payBillList)) ? $payBillList[0]['PayAdviceNo'] : $svNo;?>" <?php echo (isset($aVNo) && $aVNo['genType'] == 1) ? 'readonly' : '';?>  />
+                        <input type="hidden" name="payAdvId" id="payAdvId" value="<?php echo (isset($payAdvId)) ? $payAdvId :'0';?>" / >
+                        <div class="error_message"><p>please enter Advice No...</p></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group req_flds col-lg-12">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="adviceDate" id="adviceDate" class="form-control lbl_move datepickerinput" label="GDate" value="<?php echo (isset($payBillList)) ? $payBillList[0]['PayAdviceDate'] : '';?>" />
+                        <div class="error_message"><p>Please enter Advice date...</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 padlr0 firstBill" id="billRegisterFilter">
+                <div class="col-lg-4">
+                    <div class="form-group col-lg-12">
+                        <select class="single_dropdown lbl_move " name="subLedgerTypeId" id="subLedgerTypeId" label="Sub Ledger Type" onchange="filterBillRegister(this);" style="width:100%;">
+                            <?php if(isset($subLedgerTypeList)) {
+                                foreach($subLedgerTypeList as $slList):?>
+                                    <option value="<?php echo $slList['SLTypeId'];?>" <?php if(isset($payBillList) ){if($slList['SLTypeId'] == $payBillList[0]['SLTypeId']) { echo "selected"; } }?> ><?php echo $slList['SLTypeName'];?></option>
+                                <?php endforeach; } ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group col-lg-12">
+                        <select class="single_dropdown lbl_move " name="billType" id="billType" label="Advance Against" onchange="filterBillRegister(this);" style="width:100%;">
+                            <option value="O" <?php if(isset($payBillList) && $payBillList[0]['BillType'] == "O" ) { echo "selected"; }?> >Bill & Advance</option>
+                            <option value="B" <?php if(isset($payBillList) && $payBillList[0]['BillType'] == "B" ) { echo "selected"; }?> >Bill</option>
+                            <option value="A" <?php if(isset($payBillList) && $payBillList[0]['BillType'] == "A" ) { echo "selected"; }?> >Advance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group col-lg-12">
+                        <select class="single_dropdown lbl_move " name="subLedgerId" id="subLedgerId" label="Sub Ledger Name" onchange="filterBillRegister(this);" style="width:100%;">
+                            <option value="0">All</option>
+                            <?php if(isset($subLedgerNameList) && count($subLedgerNameList) !=0){
+                                foreach($subLedgerNameList as $slNames):?>
+                                    <option value="<?php echo $slNames['SubLedgerId'];?>" <?php if(isset($payBillList) ){if($slNames['SubLedgerId'] == $payBillList[0]['SubLedgerId']) { echo "selected"; } }?> > <?php echo $slNames['SubLedgerName'];?> </option>
+                            <?php endforeach; } ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 secondBill" id="currentBillText" style="display: none;">
+                <div class="col-lg-4">
+                    <label class="amt_lbl">Sub Ledge Type:<span id="slText"><?php echo $subLedgerTypeList[0]['SLTypeName'];?></span></label>
+                </div>
+                <div class="col-lg-4">
+                    <label class="amt_lbl">Advance Against:<span id="billTypeText">Bill & Advance</span></label>
+                </div>
+            </div>
+            <!--First Slide-->
+            <div id="billWrapper" class="firstBill" <?php echo (isset($payAdvId) && $payAdvId != 0 ) ? 'style="display: none;"':'';?> >
+            </div>
+            <p class="strm_loader txt_center clear" style="display:none;" id="FA_moreNewsFeed"><span></span>Loading...</p>
+            <div class="nomore_newsfeed clear m_btm20 firstBill" id="FA_noMoreNewsFeed"><p class="txt_center"><span><i class="fa fa-exclamation"></i></span> No more Feeds...</p></div>
+            <input type="hidden" id="FA_newsFeed_totalFound" value="<?php echo $totalFeeds['TotalFeeds']; ?>">
+            <input type="hidden" id="FA_newsFeed_perpage" value="10">
+            <input type="hidden" id="FA_newsFeed_pageNo" value="1">
+            <!--Second Slide-->
+            <div id="currentBillWrapper" class="secondBill" <?php echo (isset($payAdvId) && $payAdvId != 0 ) ? '':'style="display: none;"';?> >
+                <div class="row">
+                    <div class="col-lg-12 clear top-20">
+                        <div id="accordion" class="panel-group">
+                            <!--First Panel-->
+                            <div class="panel panel-info">
+                                <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1" aria-expanded="true">
+                                    <h4 class="panel-title accordion-toggle defa_panels">Amount</h4>
+                                    <div class="amo_lbl">
+                                        <label>Amount : <span id="panelCurrentAmt">0</span></label>
+                                    </div>
+                                </div>
+                                <div class="panel-collapse collapse in" id="collapseOne" style="overflow: hidden;">
+                                    <div class="panel-body bgcolr">
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive top-20 mar_btm">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Sno</th>
+                                                        <th>Bill Date</th>
+                                                        <th>Bill No</th>
+                                                        <th>Cost Centre</th>
+                                                        <th>Sub Ledger Name</th>
+                                                        <th>Bill Type</th>
+                                                        <th>Bill Amount</th>
+                                                        <th>Advance</th>
+                                                        <th>Advice Amount</th>
+                                                        <th>Current Amount</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="main" id="currentBill">
+                                                    </tbody>
+                                                    <tbody class="total">
+                                                    <tr>
+                                                        <td colspan="5">&nbsp;</td>
+                                                        <td align="right" class="t_amt">Total Amount</td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="balTot" id="balTot" value="0" readonly>
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="advTot" id="advTot" value="0" readonly>
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="adviceTot" id="adviceTot" value="0" readonly>
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="curTot" id="curTot" value="0" readonly>
+                                                            <input type="hidden" name="currentTot" id="currentTot" value="<?php echo (isset($payBillList)) ? $payBillList[0]['BillAmount'] : '0';?>">
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <input type="hidden" name="currentBillRowId" id="currentBillRowId" value="0"/>
+                                            </div>
+                                            <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5 top-5">
+                                                <ul>
+                                                    <li><a id="accordTwo" onclick="billAmountCheck();">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                                </ul>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Second Panel-->
+                            <div class="panel panel-info">
+                                <div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2" aria-expanded="false">
+                                    <h4 class="panel-title accordion-toggle defa_panels">Advance</h4>
+                                    <div class="amo_lbl">
+                                        <label>Amount : <span id="panelAdvanceAmt">0</span></label>
+                                    </div>
+                                </div>
+                                <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false">
+                                    <div class="panel-body bgcolr">
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive top-20 mar_btm">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Sno</th>
+                                                        <th>Bill Date</th>
+                                                        <th>Bill No</th>
+                                                        <th>Ref Type</th>
+                                                        <th>Bill Type</th>
+                                                        <th>Cost Centre</th>
+                                                        <th>Sub Ledger Name</th>
+                                                        <th>Bill Amount</th>
+                                                        <th>Adjusted Amount</th>
+                                                        <th>Balance Amount</th>
+                                                        <th>Current Amount</th>
+                                                        <th>Sel</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="main" id="advanceBill">
+
+                                                    </tbody>
+                                                    <tbody class="total">
+                                                    <tr>
+                                                        <td colspan="6">&nbsp;</td>
+                                                        <td align="right" class="t_amt">Advance Amount</td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="billTot" id="billTot" readonly="">
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="adjuseTot" id="adjuseTot" readonly="">
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="balanceTot" id="balanceTot" readonly="">
+                                                        </td>
+                                                        <td width="10%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="advanceTot" id="advanceTot" readonly="">
+                                                        </td>
+                                                        <td>&nbsp;</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <input type="hidden" name="advanceRowId" id="advanceRowId" value="0"/>
+                                            </div>
+                                            <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5 top-5">
+                                                <ul>
+                                                    <li><a href="javascript:nextAccordian(3)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Third Panel-->
+                            <div class="panel panel-info">
+                                <div data-target="#collapseThree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-3" aria-expanded="false">
+                                    <h4 class="panel-title accordion-toggle defa_panels">Deduction</h4>
+                                    <div class="amo_lbl">
+                                        <label>Amount : <span id="panelDeductionAmt">0</span></label>
+                                    </div>
+                                </div>
+                                <div class="panel-collapse collapse" id="collapseThree" aria-expanded="false">
+                                    <div class="panel-body bgcolr">
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive top-20 mar_btm">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Sno</th>
+                                                        <th>Return Date</th>
+                                                        <th>Return No</th>
+                                                        <th>Cost Centre</th>
+                                                        <th>Sub Ledger Name</th>
+                                                        <th>Return Amount</th>
+                                                        <th>Adjusted Amount</th>
+                                                        <th>Balance Amount</th>
+                                                        <th>Current Amount</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="main" id="deductionBill">
+
+                                                    </tbody>
+                                                    <tbody class="total">
+                                                    <tr>
+                                                        <td colspan="4">&nbsp;</td>
+                                                        <td align="right" class="t_amt">Deduction Amount</td>
+                                                        <td width="15%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="deductionReturnTot" id="deductionReturnTot" value="0" readonly="">
+                                                        </td>
+                                                        <td width="15%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="deductionAdjustTot" id="deductionAdjustTot" value="0" readonly="">
+                                                        </td>
+                                                        <td width="15%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="deductionBalTot" id="deductionBalTot" value="0" readonly="">
+                                                        </td>
+                                                        <td width="15%">
+                                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="deductionTot" id="deductionTot" value="0" readonly="">
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <input type="hidden" name="deductionRowId" id="deductionRowId" value="0"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-offset-7 col-lg-3">
+                                <label class="amt_lbl">Bill Amount : </label>
+                            </div>
+                            <div class="col-lg-2">
+                                <input type="text" class="parent_text border-none clearTotal" id="totBillAmount" value="0" style="margin-top: 4px;" readonly>
+                            </div>
+                            <div class="col-lg-offset-7 col-lg-3">
+                                <label class="amt_lbl">Net Amount : </label>
+                            </div>
+                            <div class="col-lg-2">
+                                <input type="text" class="parent_text border-none clearTotal" id="totNetAmount" value="0" style="margin-top: 4px;" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </form>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="add" class="save_btn float_r secondBill" style="display: none;">
+            <a class="ripple><button type="button" onclick="submitForm();" data-rid="1" id="continueRid" class="ripple">Submit</button></a>
+        </li>
+        <li id="next" class="save_btn float_r firstBill">
+            <a class="ripple><button type="button" onclick="nextRegisterView();" data-rid="1" id="continueRid" class="ripple">Next</button></a>
+        </li>
+        <li id="back" class="cancel_btn cancel_btn_bluecolor float_r" style="display: none;">
+            <a class="ripple has-ripple" style="cursor:pointer;" button type="button" onclick="backRegisterView()" id="backRid" class="ripple">back<span class="ripple-wrapper"></span></a></li>
+    </ul>
+</div>
+
+<script type="text/template" id="dummy-bill">
+    <div class="col-lg-12 feed-bg" id="feedDiv_{{sno}}" onclick="checkRow({{sno}})" >
+        <div class="ribbon"><span id="ribbonSpan_{{sno}}"></span></div>
+        <div class="col-lg-1">
+            <strong class="sno">{{sno}}</strong>
+        </div>
+        <div class="col-lg-1">
+            <div class="radio_check" style="display: none;" >
+                <p>
+                    <input type="checkbox" name="tick_{{sno}}" id="tick_{{sno}}" onchange="calcAmount();">
+                    <label for="tick_{{sno}}">Yezzz</label>
+                <p>
+            </div>
+        </div>
+        <input type="hidden" name="BillRegisterId_{{sno}}" id="BillRegisterId_{{sno}}" value="{{BillRegisterId}}" >
+        <input type="hidden" name="BillForexRate__" id="BillForexRate__" value="{{BillForexRate}}">
+        <div class="col-lg-2 brdr_lft prtg">
+            <div class="padtb">
+                <span class="lble">Bill Date</span>
+                <strong class="srg">{{BillDate}}</strong>
+                <input type="hidden" name="billDate_{{sno}}" id="billDate_{{sno}}" value="{{BillDate}}" />
+            </div>
+            <div class="padtb">
+                <span class="lble">Bill No</span>
+                <strong class="srg">{{BillNO}}</strong>
+                <input type="hidden" name="billNo_{{sno}}" id="billNo_{{sno}}" value="{{BillNO}}" />
+            </div>
+        </div>
+        <div class="col-lg-3 brdr_lft prtg">
+            <div class="padtb">
+                <span class="lble">Bill Type</span>
+                <strong class="srg">{{BillType}}</strong>
+                <input type="hidden" name="billType_{{sno}}" id="billType_{{sno}}" value="{{BillType}}" />
+            </div>
+            <div class="padtb">
+                <span class="lble">Cost Center</span>
+                <strong class="srg">{{CostCentre}}</strong>
+                <input type="hidden" name="CostCentre_{{sno}}" id="CostCentre_{{sno}}" value="{{CostCentre}}" />
+                <input type="hidden" name="CostCentreId_{{sno}}" id="CostCentreId_{{sno}}" value="{{CostCentreId}}" />
+            </div>
+        </div>
+        <div class="col-lg-3 brdr_lft prtg">
+            <div class="padtb">
+                <span class="lble">Due Date</span>
+                <strong class="srg">{{DueDate}}</strong>
+                <input type="hidden" name="DueDate_{{sno}}" id="DueDate_{{sno}}" value="{{DueDate}}" />
+            </div>
+            <div class="padtb">
+                <span class="lble">Bill Amount</span>
+                <strong class="srg">{{BillAmount}}</strong>
+                <input type="hidden" name="billAmt_{{sno}}" id="billAmt_{{sno}}" value="{{BillAmount}}">
+            </div>
+        </div>
+        <div class="col-lg-2 brdr_lft prtg">
+            <div class="padtb">
+                <span class="lble">Advance</span>
+                <strong class="srg">{{Advance}}</strong>
+                <input type="hidden" name="Advance_{{sno}}" id="Advance_{{sno}}" value="{{Advance}}" />
+            </div>
+            <div class="padtb">
+                <span class="lble">Advice Amount</span>
+                <strong class="srg">{{PayAdvAmount}}</strong>
+                <input type="hidden" name="PayAdvAmount_{{sno}}" id="PayAdvAmount_{{sno}}" value="{{PayAdvAmount}}" />
+                <input type="hidden" name="HCurrent_{{sno}}" id="HCurrent_{{sno}}" value="{{HCurrent}}" />
+                <input type="hidden" name="HAdvance_{{sno}}" id="HAdvance_{{sno}}" value="{{HAdvance}}" />
+            </div>
+            <div class="padtb">
+                <span class="lble">SubLedger Name</span>
+                <strong class="srg">{{SubLedgerName}}</strong>
+                <input type="hidden" name="SubLedgerName_{{sno}}" id="SubLedgerName_{{sno}}" value="{{SubLedgerName}}" />
+                <input type="hidden" name="SubLedgerId_{{sno}}" id="SubLedgerId_{{sno}}" value="{{SubLedgerId}}" />
+                <input type="hidden" name="RefTypeId_{{sno}}" id="RefTypeId_{{sno}}" value="{{RefTypeId}}" />
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="template-currentBill" type="text/template" class="hide">
+    <tr>
+        <td class="tbl_input_td" width="1%">
+            {{sno}}
+        </td>
+        <td class="tbl_input_td" width="10%">
+            {{BillDate}}
+        </td>
+        <td class="tbl_input_td" width="10%">
+            {{BillNo}}
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{CostCentre}}
+        </td>
+        <td class="tbl_input_td" width="14%">
+            {{SubLedgerName}}
+        </td>
+        <td class="tbl_input_td" width="10%">
+            {{EntryType}}
+        </td>
+        <td class="tbl_input_td" width="10%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="curBillAmt__" id="curBillAmt__" value="{{BillAmount}}" data-prevValue="{{BillAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="10%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="curAdvance__" id="curAdvance__" value="{{Advance}}" data-prevValue="{{Advance}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="10%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="curPayAdvAmount__" id="curPayAdvAmount__" value="{{PayAdvAmount}}" data-prevValue="{{PayAdvAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="10%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="curAmount__" name="curAmount__" value="{{maxCurAmount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="CurrentAmount(this);"/>
+            <input type="hidden" name="curBillRegisterId__" id="curBillRegisterId__" value="{{BillRegisterId}}">
+            <input type="hidden" name="curBillForexRate__" id="curBillForexRate__" value="{{BillForexRate}}">
+            <input type="hidden" name="curBillNo__" id="curBillNo__" value="{{BillNo}}">
+            <input type="hidden" name="curCostCentreId__" id="curCostCentreId__" value="{{CostCentreId}}">
+            <input type="hidden" name="curRefTypeId__" id="curRefTypeId__" value="{{RefTypeId}}">
+            <input type="hidden" name="advCurRefTypeId__" id="advCurRefTypeId__" value="{{advCurRefTypeId}}">
+            <input type="hidden" name="advCurBillRegisterId__" id="advCurBillRegisterId__" value="{{advCurBillRegisterId}}">
+            <input type="hidden" name="curSLId__" id="curSLId__" value="{{SubLedgerId}}">
+            <input type="hidden" name="curBillType__" id="curBillType__" value="{{BillType}}">
+            <input type="hidden" name="curHCurrent__" id="curHCurrent__" value="{{HCurrent}}">
+            <input type="hidden" name="curHAdvance__" id="curHAdvance__" value="{{HAdvance}}">
+        </td>
+    </tr>
+</script>
+
+<script id="template-advanceBill" type="text/template" class="hide">
+    <tr>
+        <td class="tbl_input_td" width="1%">
+            {{sno}}
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{BillDate}}
+            <input type="hidden" name="advanceBillRegisterId_{{sno}}" id="advanceBillRegisterId_{{sno}}" value="{{BillRegisterId}}">
+        </td>
+        <td class="tbl_input_td" width="9%">
+            {{BillNo}}
+        </td>
+        <td class="tbl_input_td" width="9%">
+            {{RefType}}
+            <input type="hidden" name="advanceRefTypeId_{{sno}}" id="advanceRefTypeId_{{sno}}" value="{{RefTypeId}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{EntryType}}
+            <input type="hidden" name="advanceBillType_{{sno}}" id="advanceBillType_{{sno}}" value="{{BillType}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{CostCentre}}
+            <input type="hidden" name="advanceCostCentreId_{{sno}}" id="advanceCostCentreId_{{sno}}" value="{{CostCentreId}}">
+            <input type="hidden" name="advanceSubLedgerId_{{sno}}" id="advanceSubLedgerId_{{sno}}" value="{{SubLedgerId}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{SubLedgerName}}
+        </td>
+        <td class="tbl_input_td" width="5%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="advanceBillAmount_{{sno}}" id="advanceBillAmount_{{sno}}" value="{{BillAmount}}" data-prevValue="{{BillAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="5%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="advanceAdjustedAmount_{{sno}}" id="advanceAdjustedAmount_{{sno}}" value="{{AdjustedAmount}}" data-prevValue="{{AdjustedAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="5%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="advanceBalanceAmount_{{sno}}" id="advanceBalanceAmount_{{sno}}" value="{{BalanceAmount}}" data-prevValue="{{BalanceAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="5%">
+            <input type="text" class="parent_text border-none" style="text-align:right;" name="advanceCurrentAmount_{{sno}}" id="advanceCurrentAmount_{{sno}}" value="{{CurrentAmount}}" data-prevValue="{{CurrentAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="1%">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" name="advanceBillSel_{{sno}}" id="advanceBillSel_{{sno}}" {{Sel}} onchange="checkAdvance(this);" onclick="billAmountErrCheck(event);">
+                    <label for="advanceBillSel_{{sno}}"></label>
+                <p>
+            </div>
+        </td>
+    </tr>
+</script>
+
+<script id="template-deductionBill" type="text/template" class="hide">
+    <tr>
+        <td class="tbl_input_td" width="1%">
+            {{sno}}
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{ReturnDate}}
+            <input type="hidden" name="deductionReturnRegId_{{sno}}" id="deductionReturnRegId_{{sno}}" value="{{ReturnRegId}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{ReturnNo}}
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{CostCentre}}
+            <input type="hidden" name="deductionCostCentreId_{{sno}}" id="deductionCostCentreId_{{sno}}" value="{{CostCentreId}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            {{SubLedgerName}}
+            <input type="hidden" name="deductionSubLedgerId_{{sno}}" id="deductionSubLedgerId_{{sno}}" value="{{SubLedgerId}}">
+        </td>
+        <td class="tbl_input_td" width="15%">
+            <input type="text" class="parent_text border-none" name="deductionReturnAmount_{{sno}}" id="deductionReturnAmount_{{sno}}" value="{{ReturnAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="15%">
+            <input type="text" class="parent_text border-none" name="deductionAdjustedAmount_{{sno}}" id="deductionAdjustedAmount_{{sno}}" value="{{AdjustedAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="15%">
+            <input type="text" class="parent_text border-none" name="deductionBalanceAmount_{{sno}}" id="deductionBalanceAmount_{{sno}}" value="{{BalanceAmount}}" readonly>
+        </td>
+        <td class="tbl_input_td" width="9%">
+            <input type="text" class="parent_text border-none" name="deductionCurrentAmount_{{sno}}" id="deductionCurrentAmount_{{sno}}" value="{{CurrentAmt}}" onchange="calcDeductionAmount();" onKeyPress="return isDecimal(event)">
+            <input type="hidden" name="deductionHCurrent_{{sno}}" id="deductionHCurrent_{{sno}}" value="{{HCurrent}}">
+            <input type="hidden" name="deductionHAdjust_{{sno}}" id="deductionHAdjust_{{sno}}" value="{{HAdjust}}">
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    var billRegList=<?php echo (isset($billRegister)) ? json_encode($billRegister) : '[]';?>;
+    var payAdvId=<?php echo (isset($payAdvId)) ? $payAdvId : '0';?>;
+    var advanceList=<?php echo (isset($advanceList)) ? json_encode($advanceList) : '[]';?>;
+    var advAdjList=<?php echo (isset($advAdjList)) ? json_encode($advAdjList) : '[]';?>;
+    var returnList=<?php echo (isset($returnList)) ? json_encode($returnList) : '[]';?>;
+
+    $(".datepickerinput").datepicker({
+        format: "dd-mm-yyyy",
+        autoclose: true
+    });
+
+    $('.date_icon').click(function() {
+        var input = $(this).parent().find('input').datepicker('show');
+    });
+
+    $(function () {
+        bindTickCss();
+        if(payAdvId != 0){
+            nextRegisterView();
+        }else{
+            renderRequests(billRegList);
+        }
+    });
+
+    function renderRequests(data) {
+        var $billWrapper = $('#billWrapper');
+        if(data.length == 0) {
+            $billWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            var sno = 0;
+            var template = $('#dummy-bill').html();
+            //$billWrapper.html('');
+            bindFeed(data,sno);
+        }
+    }
+    function bindFeed(data,sno){
+        var $billWrapper = $('#billWrapper');
+        var template = $('#dummy-bill').html();
+
+        $.each(data, function (i,o) {
+            sno++;
+            $billWrapper.append(template
+                    .replace(/\{\{sno\}\}/g, sno)
+                    .replace(/\{\{BillDate\}\}/g,o.BillDate)
+                    .replace(/\{\{BillRegisterId\}\}/g,o.BillRegisterId)
+                    .replace(/\{\{BillForexRate\}\}/g,o.BillForexRate)
+                    .replace(/\{\{BillNO\}\}/g,o.BillNo)
+                    .replace(/\{\{BillType\}\}/g,o.BillType)
+                    .replace(/\{\{CostCentre\}\}/g,o.CostCentreName)
+                    .replace(/\{\{CostCentreId\}\}/g,o.CostCentreId)
+                    .replace(/\{\{DueDate\}\}/g, o.DueDate)
+                    .replace(/\{\{BillAmount\}\}/g,sanitizeNumber(parseFloatVal(o.BillAmount,0),2,true))
+                    .replace(/\{\{Advance\}\}/g,sanitizeNumber(parseFloatVal(o.Advance,0),2,true))
+                    .replace(/\{\{SubLedgerName\}\}/g,o.SubLedgerName)
+                    .replace(/\{\{SubLedgerId\}\}/g,o.SubLedgerId)
+                    .replace(/\{\{HCurrent\}\}/g,o.HCurrent)
+                    .replace(/\{\{PayAdvAmount\}\}/g, sanitizeNumber(parseFloatVal(o.PayAdvAmount,0),2,true))
+                    .replace(/\{\{RefTypeId\}\}/g, o.RefTypeId)
+                    .replace(/\{\{HAdvance\}\}/g, o.HAdvance)
+            );
+        });
+    }
+
+    function calcAmount(){
+        var totBillAmount=0;
+        var totNetAmount=0;
+        $.each($('input[id^=tick_]'),function(){
+            if($('#'+$(this).attr('id')).is(':checked')){
+                totBillAmount=parseFloatVal(totBillAmount)+ parseFloatVal($('#billAmt_'+$(this).attr('id').split('_')[1]).val());
+                totNetAmount=parseFloatVal(totNetAmount)- parseFloatVal($('#billAmt_'+$(this).attr('id').split('_')[1]).val());
+            }
+        });
+        $('#totBillAmount').val(sanitizeNumber(parseFloatVal(totBillAmount,0),2,true));
+        $('#totNetAmount').val(sanitizeNumber(parseFloatVal(totNetAmount,0),2,true));
+    }
+
+    function CurrentAmount(x){
+        var $x=$(x),
+            id=$x.attr('id').split('_')[1],
+            curAmount=$('#curAmount_'+id).val(),
+            billAmount=$('#curBillAmt_'+id).val(),
+            payAdvAmount=$('#curPayAdvAmount_'+id).val(),
+            CurAdvanceAmount=$('#curAdvance_'+id).val(),
+            HCurrent=$('#curHCurrent_'+id).val(),
+            maxCurAmount=0;
+
+        maxCurAmount=parseFloatVal(billAmount)-(parseFloatVal(payAdvAmount)+parseFloatVal(CurAdvanceAmount))+parseFloatVal(HCurrent);
+
+        if(curAmount == 0){
+            showError($x,'Current amount cannot be 0');
+        } else if(parseFloatVal(curAmount) > maxCurAmount){
+            showError($x,'Current amount cannot be greater than '+maxCurAmount);
+        }
+        else{
+            removeError($x);
+        }
+        calcCurrentAmount();
+        calcNetAmount();
+    }
+
+    function calcCurrentAmount(){
+        var totBillAmount= 0, totNetAmount= 0,totAdvanceAmount= 0,totAdviceAmount= 0,
+            currentBillRowId=$('#currentBillRowId').val();
+        var totCurrentAmount=0;
+        for(var i=1;i<=currentBillRowId;i++){
+            totCurrentAmount=parseFloatVal(totCurrentAmount)+ parseFloatVal($('#curAmount_'+i).val());
+            totBillAmount=parseFloatVal(totBillAmount)+ parseFloatVal($('#curBillAmt_'+i).val());
+            totNetAmount=parseFloatVal(totNetAmount)+ parseFloatVal($('#curBillAmt_'+i).val());
+            totAdvanceAmount=parseFloatVal(totAdvanceAmount)+ parseFloatVal($('#curAdvance_'+i).val());
+            totAdviceAmount=parseFloatVal(totAdviceAmount)+ parseFloatVal($('#curPayAdvAmount_'+i).val());
+        }
+        $('#curTot').val(sanitizeNumber(parseFloatVal(totCurrentAmount,0),2,true));
+        $('#currentTot').val(totCurrentAmount);
+        $('#panelCurrentAmt').text(sanitizeNumber(parseFloatVal(totCurrentAmount,0),2,true));
+        $('#balTot').val(sanitizeNumber(parseFloatVal(totBillAmount,0),2,true));
+        $('#advTot').val(sanitizeNumber(parseFloatVal(totAdvanceAmount,0),2,true));
+        $('#adviceTot').val(sanitizeNumber(parseFloatVal(totAdviceAmount,0),2,true));
+        $('#totBillAmount').val(sanitizeNumber(parseFloatVal(totBillAmount,0),2,true));
+        $('#totNetAmount').val(sanitizeNumber(parseFloatVal(totNetAmount,0),2,true));
+    }
+
+    function billAmountCheck(){
+        var totBillAmnt=0;
+        var curBillAmnt=0;
+        var errCount=0;
+        var currentBillRowId=$('#currentBillRowId').val();
+        $("#accordTwo").removeAttr("href","javascript:nextAccordian(2)");
+        for(var i=1;i<=currentBillRowId;i++){
+            totBillAmnt=parseFloatVal($('#curAdvance_'+i).val())+ parseFloatVal($('#curPayAdvAmount_'+i).val())+ parseFloatVal($('#curAmount_'+i).val());
+            curBillAmnt = parseFloatVal($("#curBillAmt_"+i).val());
+            if(curBillAmnt < totBillAmnt){
+                errCount++;
+                $("#curAmount_"+i).focus();
+                return;
+            }
+        }
+        if(errCount == 0){
+            $("#accordTwo").attr("href","javascript:nextAccordian(2)");
+        }
+    }
+
+    function filterBillRegister(x){
+        var $x=$(x),
+            id=$x.attr('id');
+
+        var slTypeId=$('#subLedgerTypeId').val();
+        var billType=$('#billType').val();
+
+        if(id == 'subLedgerTypeId'){
+            $('#subLedgerId').html('');
+            $('#subLedgerId').val('').trigger('change');
+            $.ajax({
+                url:"<?php echo $this->basePath(); ?>/fa/index/paymentadvice",
+                type:"post",
+                data:{'slTypeId':slTypeId,'type':'getSubLedgerName'},
+                success:function(data, textStatus, jqXHR){
+                    var subLedgerNameList=JSON.parse(data);
+
+                    $('#subLedgerId').append('<option value="0">All</option>');
+                    if(subLedgerNameList.length != 0) {
+                        $.each(subLedgerNameList, function (i, o) {
+                            $('#subLedgerId').append('<option value=' + o.SubLedgerId + '>' + o.SubLedgerName + '<option>');
+                        });
+                    }
+                    $('#subLedgerId').val('0').trigger('change');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                }
+            });
+        }
+
+        var slId=$('#subLedgerId').val();
+        if(slId == null)
+            return false;
+
+        $('.clearTotal').text(0);
+        $('#FA_newsFeed_pageNo').val(1);
+
+        $('#slText').text($('#subLedgerTypeId option:selected').text());
+        $('#billTypeText').text($('#billType option:selected').text());
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/paymentadvice",
+            type:"post",
+            data:{'slTypeId':slTypeId,'billType':billType,'slId':slId,'type':'filterBill'},
+            success:function(data, textStatus, jqXHR){
+                var billRegister=JSON.parse(data);
+                $('#billWrapper').html('');
+                renderRequests(billRegister);
+                bindTickCss();
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function nextRegisterView(){
+        $('#currentBill').html('');
+        var billTableTemplate = $('#template-currentBill').html();
+        var sno = 0;
+
+        if(payAdvId != 0){
+            /*First Panel*/
+            $.each(billRegList, function (i,o) {
+                var billType = '';
+                if (o.BillType == 'Bill') {
+                    billType = 'B';
+                } else {
+                    billType = 'A';
+                }
+                /*var maxCurAmount = 0;
+
+                 maxCurAmount = parseFloatVal(o.BillAmount) - parseFloatVal(o.PayAdvAmount) + parseFloatVal(o.HCurrent);*/
+                var PayAdvAmount=parseFloatVal(o.PayAdvAmount);
+
+                var advCurRefTypeId;
+                var advCurBillRegisterId;
+                $.each(advanceList, function (j,k) {
+                    if (o.SubLedgerId == k.SubLedgerId
+                        && o.CostCentreId == k.CostCentreId
+                        && o.BillType != k.BillType) {
+                        advCurRefTypeId=k.RefTypeId;
+                        advCurBillRegisterId=k.BillRegisterId;
+                    }
+                });
+
+                sno += 1;
+                $('#currentBill').append(billTableTemplate.replace(/__/g, '_' + sno)
+                        .replace(/\{\{sno\}\}/g, sno)
+                        .replace(/\{\{BillRegisterId\}\}/g, o.BillRegisterId)
+                        .replace(/\{\{BillForexRate\}\}/g, o.BillForexRate)
+                        .replace(/\{\{BillDate\}\}/g, o.BillDate)
+                        .replace(/\{\{BillNo\}\}/g, o.BillNo)
+                        .replace(/\{\{BillAmount\}\}/g, sanitizeNumber(parseFloatVal(o.BillAmount,0),2,true))
+                        .replace(/\{\{maxCurAmount\}\}/g, o.CurrentAmount)
+                        .replace(/\{\{Advance\}\}/g, sanitizeNumber(parseFloatVal(o.Advance,0),2,true))
+                        .replace(/\{\{HCurrent\}\}/g, o.HCurrent)
+                        .replace(/\{\{PayAdvAmount\}\}/g,sanitizeNumber(parseFloatVal(PayAdvAmount,0),2,true))
+                        .replace(/\{\{CostCentre\}\}/g, o.CostCentreName)
+                        .replace(/\{\{CostCentreId\}\}/g, o.CostCentreId)
+                        .replace(/\{\{EntryType\}\}/g, o.BillType)
+                        .replace(/\{\{BillType\}\}/g, billType)
+                        .replace(/\{\{SubLedgerName\}\}/g, o.SubLedgerName)
+                        .replace(/\{\{SubLedgerId\}\}/g, o.SubLedgerId)
+                        .replace(/\{\{RefTypeId\}\}/g, o.RefTypeId)
+                        .replace(/\{\{HAdvance\}\}/g, o.HAdvance)
+                        .replace(/\{\{advCurRefTypeId\}\}/g, advCurRefTypeId)
+                        .replace(/\{\{advCurBillRegisterId\}\}/g, advCurBillRegisterId)
+                );
+            });
+            /*Second & Third Panel*/
+            bindAdvanceDet(advanceList);
+            bindDeductionDet(returnList);
+
+        }else {
+            /*First Panel*/
+            var SubLedgerIds=[];
+            $.each($('input[id^=tick_]'), function () {
+                if ($('#' + $(this).attr('id')).is(':checked')) {
+                    var tickId = $(this).attr('id').split('_')[1];
+                    var billType = '';
+                    if ($('#billType_' + tickId).val() == 'Bill') {
+                        billType = 'B';
+                    } else {
+                        billType = 'A';
+                    }
+                    var maxCurAmount = 0,
+                        billAmount = $('#billAmt_' + tickId).val(),
+                        payAdvAmount = $('#PayAdvAmount_' + tickId).val(),
+                        curAdvance = $('#Advance_' + tickId).val(),
+                        HCurrent = $('#HCurrent_' + tickId).val();
+
+                    maxCurAmount = parseFloatVal(billAmount) - parseFloatVal(payAdvAmount) + parseFloatVal(HCurrent)-parseFloatVal(curAdvance);
+
+                    SubLedgerIds.push($('#SubLedgerId_' + tickId).val());
+
+                    sno += 1;
+                    $('#currentBill').append(billTableTemplate.replace(/__/g, '_' + sno)
+                            .replace(/\{\{sno\}\}/g, sno)
+                            .replace(/\{\{BillRegisterId\}\}/g, $('#BillRegisterId_' + tickId).val())
+                            .replace(/\{\{BillForexRate\}\}/g, $('#BillForexRate_' + tickId).val())
+                            .replace(/\{\{BillDate\}\}/g, $('#billDate_' + tickId).val())
+                            .replace(/\{\{BillNo\}\}/g, $('#billNo_' + tickId).val())
+                            .replace(/\{\{BillAmount\}\}/g, billAmount)
+                            .replace(/\{\{maxCurAmount\}\}/g, maxCurAmount)
+                            .replace(/\{\{Advance\}\}/g, $('#Advance_' + tickId).val())
+                            .replace(/\{\{HCurrent\}\}/g, HCurrent)
+                            .replace(/\{\{PayAdvAmount\}\}/g, payAdvAmount)
+                            .replace(/\{\{CostCentre\}\}/g, $('#CostCentre_' + tickId).val())
+                            .replace(/\{\{CostCentreId\}\}/g, $('#CostCentreId_' + tickId).val())
+                            .replace(/\{\{EntryType\}\}/g, $('#billType_' + tickId).val())
+                            .replace(/\{\{BillType\}\}/g, billType)
+                            .replace(/\{\{SubLedgerName\}\}/g, $('#SubLedgerName_' + tickId).val())
+                            .replace(/\{\{SubLedgerId\}\}/g, $('#SubLedgerId_' + tickId).val())
+                            .replace(/\{\{RefTypeId\}\}/g, $('#RefTypeId_' + tickId).val())
+                    );
+                }
+            });
+
+            /*Second & Third Panel*/
+            $.ajax({
+                url:"<?php echo $this->basePath(); ?>/fa/index/paymentadvice",
+                type:"post",
+                data:{'subLedgerId':SubLedgerIds.toString(),'payAdvId':$('#payAdvId').val(),'type':'advanceReturnBill'},
+                success:function(data, textStatus, jqXHR){
+                    var advanceReturnBill=JSON.parse(data),
+                        advanceList=advanceReturnBill['advanceList'],
+                        returnList=advanceReturnBill['returnList'];
+                    bindAdvanceDet(advanceList);
+                    bindDeductionDet(returnList);
+
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                }
+            });
+
+        }
+        $('#currentBillRowId').val(sno);
+        if (sno == 0) {
+            alert('Please Select atleast one row and proceed !!');
+            $('#currentBill').html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            $('.firstBill').hide();
+            $('.secondBill').show();
+            if(payAdvId != 0){
+                $('#back').hide();
+            }else{
+                $('#back').show();
+            }
+            calcCurrentAmount();
+        }
+    }
+
+    function bindAdvanceDet(advanceList){
+        $('#advanceBill').html('');
+        var advanceTemplate = $('#template-advanceBill').html();
+        var advanceSno = 0;
+        $.each(advanceList, function (i,o) {
+            advanceSno+=1;
+            var Sel='';
+            var EntryType='';
+            if(o.Sel == 1)
+                Sel='checked';
+
+            if(o.EntryType == 'B')
+                EntryType='Bill';
+            else
+                EntryType='Advance';
+
+            var advanceCurrentAmount=0;
+            if(payAdvId != 0){
+                $.each(advAdjList, function (j,k) {
+                    if(o.BillRegisterId== k.AdvRegId && o.CostCentreId == k.CostCentreId){
+                        advanceCurrentAmount= k.Amount;
+                    }
+                });
+            }
+
+            $('#advanceBill').append(advanceTemplate
+                    .replace(/\{\{sno\}\}/g, advanceSno)
+                    .replace(/\{\{BillRegisterId\}\}/g, o.BillRegisterId)
+                    .replace(/\{\{BillDate\}\}/g, o.BillDate)
+                    .replace(/\{\{BillNo\}\}/g, o.BillNo)
+                    .replace(/\{\{RefType\}\}/g, o.RefType)
+                    .replace(/\{\{CostCentre\}\}/g, o.CostCentreName)
+                    .replace(/\{\{CostCentreId\}\}/g, o.CostCentreId)
+                    .replace(/\{\{BillAmount\}\}/g, sanitizeNumber(parseFloatVal(o.BillAmount,0),2,true))
+                    .replace(/\{\{AdjustedAmount\}\}/g, sanitizeNumber(parseFloatVal(o.Adjusted,0),2,true))
+                    .replace(/\{\{BalanceAmount\}\}/g, sanitizeNumber(parseFloatVal(o.Balance,0),2,true))
+                    .replace(/\{\{CurrentAmount\}\}/g, sanitizeNumber(parseFloatVal(advanceCurrentAmount,0),2,true))
+                    .replace(/\{\{BillType\}\}/g, o.BillType)
+                    .replace(/\{\{EntryType\}\}/g, EntryType)
+                    .replace(/\{\{SubLedgerId\}\}/g, o.SubLedgerId)
+                    .replace(/\{\{SubLedgerName\}\}/g, o.SubLedgerName)
+                    .replace(/\{\{RefTypeId\}\}/g, o.RefTypeId)
+                    .replace(/\{\{Sel\}\}/g, Sel)
+            );
+        });
+        $('#advanceRowId').val(advanceSno);
+        calcAdvanceCurrentAmount();
+    }
+
+    function bindDeductionDet(returnList){
+        $('#deductionBill').html('');
+        var deductionTemplate = $('#template-deductionBill').html();
+        var deductionSno = 0;
+        $.each(returnList, function (i,o) {
+            deductionSno+=1;
+
+            $('#deductionBill').append(deductionTemplate
+                    .replace(/\{\{sno\}\}/g, deductionSno)
+                    .replace(/\{\{ReturnRegId\}\}/g, o.ReturnRegId)
+                    .replace(/\{\{ReturnDate\}\}/g, o.ReturnDate)
+                    .replace(/\{\{ReturnNo\}\}/g, o.ReturnNo)
+                    .replace(/\{\{CostCentre\}\}/g, o.CostCentreName)
+                    .replace(/\{\{CostCentreId\}\}/g, o.CostCentreId)
+                    .replace(/\{\{SubLedgerName\}\}/g, o.SubLedgerName)
+                    .replace(/\{\{SubLedgerId\}\}/g, o.SubLedgerId)
+                    .replace(/\{\{ReturnAmount\}\}/g, sanitizeNumber(parseFloatVal(o.ReturnAmount,0),2,true))
+                    .replace(/\{\{AdjustedAmount\}\}/g, sanitizeNumber(parseFloatVal(o.Adjusted,0),2,true))
+                    .replace(/\{\{BalanceAmount\}\}/g, sanitizeNumber(parseFloatVal(o.Balance,0),2,true))
+                    .replace(/\{\{CurrentAmt\}\}/g, sanitizeNumber(parseFloatVal(o.Current,0),2,true))
+                    .replace(/\{\{HCurrent\}\}/g, o.HCurrent)
+                    .replace(/\{\{HAdjust\}\}/g, o.HAdjust)
+            );
+        });
+        $('#deductionRowId').val(deductionSno);
+        calcDeductionAmount();
+    }
+
+    function billAmountErrCheck(e){
+        if($('.error').length != 0){
+            event.preventDefault();
+            $('.error').focus();
+            return;
+        }
+    }
+
+    function checkAdvance(x){
+        var $x=$(x),
+            key=$x.attr('id').split('_')[1];
+
+        var currentBillRowId=$('#currentBillRowId').val(),
+            advanceRowId=$('#advanceRowId').val();
+
+        if ($('#advanceBillSel_' + key).is(':checked')) {
+            for(var iCurrent=1;iCurrent<=currentBillRowId;iCurrent++) {
+                var advanceBalanceAmount=$('#advanceBalanceAmount_'+key).val();
+                var curBillAmount = $('#curBillAmt_' + iCurrent).val(),
+                    curAdvance = $('#curAdvance_' + iCurrent).val(),
+                    curHAdvance = $('#curHAdvance_' + iCurrent).val(),
+                    curAdviceAmount = $('#curPayAdvAmount_' + iCurrent).val(),
+                    curHCurrent = $('#curHCurrent_' + iCurrent).val(),
+                    curCurrent = $('#curAmount_' + iCurrent).val();
+
+                if ($('#curSLId_' + iCurrent).val() == $('#advanceSubLedgerId_'+key).val()
+                    && $('#curCostCentreId_' + iCurrent).val() == $('#advanceCostCentreId_'+key).val()
+                    && $('#curBillType_' + iCurrent).val() != $('#advanceBillType_'+key).val()) {
+
+                    var currentBalAdvanceFill = parseFloatVal(curBillAmount) - (parseFloatVal(curAdviceAmount) + parseFloatVal(curCurrent)+ parseFloatVal(curAdvance))+ parseFloatVal(curHCurrent);
+
+                    if(currentBalAdvanceFill !=0 ) {
+                        if(currentBalAdvanceFill >= advanceBalanceAmount){
+                            //
+                            var alreadycurAdvance = parseFloatVal($('#curAdvance_' + iCurrent).val());
+                            var alreadycurAdvanceTotal = parseFloatVal(alreadycurAdvance)+parseFloatVal(advanceBalanceAmount);
+
+                            $('#curAdvance_' + iCurrent).val(alreadycurAdvanceTotal);
+
+
+                            var totalAdvanceCurrentAmount=parseFloatVal($('#advanceCurrentAmount_' + key).val())+parseFloatVal(advanceBalanceAmount);
+                            $('#advanceCurrentAmount_' + key).val(totalAdvanceCurrentAmount);
+                            $('#advanceBalanceAmount_' + key).val(0);
+                        }else{
+                            var alreadycurAdvance = parseFloatVal($('#curAdvance_' + iCurrent).val());
+                            var alreadycurAdvanceTotal = parseFloatVal(alreadycurAdvance)+parseFloatVal(currentBalAdvanceFill);
+                            var remainAdvanceBalance=parseFloatVal(advanceBalanceAmount)-parseFloatVal(currentBalAdvanceFill);
+
+                            $('#curAdvance_' + iCurrent).val(alreadycurAdvanceTotal);
+
+                            var totalAdvanceCurrentAmount=parseFloatVal($('#advanceCurrentAmount_' + key).val())+parseFloatVal(currentBalAdvanceFill);
+                            $('#advanceCurrentAmount_' + key).val(totalAdvanceCurrentAmount);
+                            $('#advanceBalanceAmount_' + key).val(remainAdvanceBalance);
+                        }
+                        $('#advCurRefTypeId_' + iCurrent).val($('#advanceRefTypeId_'+key).val());
+                        $('#advCurBillRegisterId_' + iCurrent).val($('#advanceBillRegisterId_'+key).val());
+                    }
+                }
+            }
+        }else{
+            for(var iCurrent=1;iCurrent<=currentBillRowId;iCurrent++) {
+                var curBillAmount = $('#curBillAmt_' + iCurrent).val(),
+                    curAdvance = $('#curAdvance_' + iCurrent).val(),
+                    curAdviceAmount = $('#curPayAdvAmount_' + iCurrent).val(),
+                    curCurrent = $('#curAmount_' + iCurrent).val();
+
+                if ($('#curSLId_' + iCurrent).val() == $('#advanceSubLedgerId_'+key).val()
+                    && $('#curCostCentreId_' + iCurrent).val() == $('#advanceCostCentreId_'+key).val()
+                    && $('#curBillType_' + iCurrent).val() != $('#advanceBillType_'+key).val()) {
+
+                    var advanceCurrentAmount= $('#advanceCurrentAmount_' + key).val();
+                    curAdvance = $('#curAdvance_' + iCurrent).val();
+                    var bal= parseFloatVal(curAdvance)-parseFloatVal(advanceCurrentAmount);
+                    if(bal>=0){
+                        $('#curAdvance_' + iCurrent).val(bal);
+
+                        var dTotal=parseFloatVal(advanceCurrentAmount)+parseFloatVal($('#advanceBalanceAmount_' + key).val());
+                        $('#advanceBalanceAmount_' + key).val(dTotal);
+                        $('#advanceCurrentAmount_' + key).val(0);
+
+                    }else{
+                        var currentAdvance=$('#curAdvance_' + iCurrent).val();
+                        $('#curAdvance_' + iCurrent).val(0);
+
+                        var remainCurrentAmount=parseFloatVal($('#advanceCurrentAmount_' + key).val())-parseFloatVal(currentAdvance);
+                        $('#advanceCurrentAmount_' + key).val(remainCurrentAmount);
+
+                        var remainBalAmount=parseFloatVal($('#advanceBalanceAmount_' + key).val())+parseFloatVal(currentAdvance);
+
+                        $('#advanceBalanceAmount_' + key).val(remainBalAmount);
+                    }
+                    $('#advCurRefTypeId_' + iCurrent).val(0);
+                    $('#advCurBillRegisterId_' + iCurrent).val(0);
+                }
+            }
+        }
+        if (($("#advanceCurrentAmount_" + key).val() == 0) && ($("#advanceBillSel_" + key).is(':checked') == true)) {
+            $("#advanceBillSel_" + key).prop('checked', false);
+            alert("Advance amount already filled can't add more...");
+        }
+        calcAdvanceCurrentAmount();
+        calcCurrentAmount();
+    }
+
+    function calcAdvanceCurrentAmount(){
+        var totCurrentAmount= 0,advBillTot= 0,advAdjustAmntTot=0,advBalAmntTot=0;
+        var advanceRowId=$('#advanceRowId').val();
+
+        for(var i=1;i<=advanceRowId;i++){
+            totCurrentAmount=parseFloatVal(totCurrentAmount)+ parseFloatVal($('#advanceCurrentAmount_'+i).val());
+            advBillTot=parseFloatVal(advBillTot)+ parseFloatVal($('#advanceBillAmount_'+i).val());
+            advAdjustAmntTot=parseFloatVal(advAdjustAmntTot)+ parseFloatVal($('#advanceAdjustedAmount_'+i).val());
+            advBalAmntTot=parseFloatVal(advBalAmntTot)+ parseFloatVal($('#advanceBalanceAmount_'+i).val());
+        }
+        $('#advanceTot').val(sanitizeNumber(parseFloatVal(totCurrentAmount,0),2,true));
+        $('#billTot').val(sanitizeNumber(parseFloatVal(advBillTot,0),2,true));
+        $('#adjuseTot').val(sanitizeNumber(parseFloatVal(advAdjustAmntTot,0),2,true));
+        $('#balanceTot').val(sanitizeNumber(parseFloatVal(advBalAmntTot,0),2,true));
+        $('#panelAdvanceAmt').text(sanitizeNumber(parseFloatVal(totCurrentAmount,0),2,true));
+    }
+
+    function calcDeductionAmount(){
+        var curAmount= 0,retAmountTot= 0,adjuseAmountTot= 0,balAmountTot=0;
+        var deductionRowId=$('#deductionRowId').val();
+
+        for(var i=1;i<=deductionRowId;i++){
+            var maxDeductionAmount=parseFloatVal($('#deductionBalanceAmount_'+i).val())+parseFloatVal($('#deductionHCurrent_'+i).val());
+
+            if( parseFloatVal($('#deductionCurrentAmount_'+i).val()) > maxDeductionAmount){
+                showError($('#deductionCurrentAmount_'+i),'Current amount cannot be greater than '+maxDeductionAmount);
+            } else{
+                removeError($('#deductionCurrentAmount_'+i));
+            }
+            retAmountTot=parseFloatVal(retAmountTot)+ parseFloatVal($('#deductionReturnAmount_'+i).val());
+            adjuseAmountTot=parseFloatVal(adjuseAmountTot)+ parseFloatVal($('#deductionAdjustedAmount_'+i).val());
+            balAmountTot=parseFloatVal(balAmountTot)+ parseFloatVal($('#deductionBalanceAmount_'+i).val());
+            curAmount=parseFloatVal(curAmount)+ parseFloatVal($('#deductionCurrentAmount_'+i).val());
+        }
+        $('#deductionReturnTot').val(sanitizeNumber(parseFloatVal(retAmountTot,0),2,true));
+        $('#deductionAdjustTot').val(sanitizeNumber(parseFloatVal(adjuseAmountTot,0),2,true));
+        $('#deductionBalTot').val(sanitizeNumber(parseFloatVal(balAmountTot,0),2,true));
+        $('#deductionTot').val(sanitizeNumber(parseFloatVal(curAmount,0),2,true));
+        $('#panelDeductionAmt').text(sanitizeNumber(parseFloatVal(curAmount,0),2,true));
+        calcNetAmount();
+    }
+
+    function calcNetAmount() {
+        var totalNetAmount=parseFloatVal($('#currentTot').val())- parseFloatVal($('#deductionTot').val());
+        $("#totNetAmount").val(sanitizeNumber(parseFloatVal(totalNetAmount,0),2,true));
+    }
+
+    function backRegisterView(){
+        $('.secondBill').hide();
+        $('#back').hide();
+        $('.firstBill').show();
+    }
+
+    function checkRow(rowId){
+        $('#tick_'+rowId).trigger('click');
+    }
+
+    function bindTickCss() {
+        $(document).ready(function () {
+            $("input[id^=tick_]").click(function () {
+                var id = $(this).attr('id').split('_')[1];
+                if ($('#tick_' + id).is(':checked')) {
+                    $('#feedDiv_' + id).css('background', '#bdddfb');
+                    $('#ribbonSpan_' + id).text('SELECT');
+                } else {
+                    $('#feedDiv_' + id).css('background', '#fff');
+                    $('#ribbonSpan_' + id).text('');
+                }
+            });
+        });
+    }
+
+    function entryValidate(){
+        if($('.error').length != 0) {
+            alert('Kindly notice the error notifications!');
+            return false;
+        }
+    }
+
+    function submitForm(){
+        $('#paymentForm').submit();
+    }
+
+    function nextAccordian(id) {
+        if(id == 2) {
+            $('#panelheading-' +id).trigger('click');
+        }
+        $('#panelheading-' + id).trigger('click');
+    }
+
+    var FA_oldPageNo = 0;
+    $(document).ready(function() {
+        if ($('#billWrapper').length > 0) {
+            $(window).scroll(function(){
+                if ($('#FA_newsFeed_totalFound').val() > 10) {
+                    if($(window).scrollTop() + $(window).height() >= $(document).height() -100) {
+                        //$('#FA_noMoreNewsFeed').hide();
+                        loadMoreFeed($('#FA_newsFeed_pageNo').val());
+                    }
+                }
+            });
+        }
+    });
+
+    function loadMoreFeed(PageNo){
+        if ($('#billWrapper').length > 0) {
+            if (PageNo == 0) {
+                PageNo = 1;
+                FA_oldPageNo = 0;
+            } else {
+                PageNo = parseInt($('#FA_newsFeed_pageNo').val())+1;
+            }
+            console.log(FA_oldPageNo+':::::::'+PageNo);
+            if (FA_oldPageNo == PageNo) {
+                return false;
+            }
+            FA_oldPageNo = PageNo;
+
+            var MaxPageNo = parseInt(parseInt($('#FA_newsFeed_totalFound').val())/parseInt($('#FA_newsFeed_perpage').val()));
+
+            if (parseInt(parseInt($('#FA_newsFeed_totalFound').val())%parseInt($('#FA_newsFeed_perpage').val())) != 0)
+                MaxPageNo = parseInt(MaxPageNo) + 1;
+
+            var slTypeId=$('#subLedgerTypeId').val();
+            var billType=$('#billType').val();
+            var slId=$('#subLedgerId').val();
+
+            if (MaxPageNo >= PageNo) {
+                $('#FA_moreNewsFeed').show();
+                $.ajax({
+                    url: "<?php echo $this->basePath(); ?>/fa/index/paymentadvice",
+                    type: "post",
+                    data: {'PageNo':PageNo,'slTypeId':slTypeId,'billType':billType,'slId':slId,'type': 'loadMoreFeed'},
+                    success: function (data, textStatus, jqXHR) {
+                        var billRegister = JSON.parse(data);
+                        var sno=(parseInt(PageNo)-1)*10;
+                        if (PageNo == 1) {
+                            $('#billWrapper').html('');
+                            bindFeed(billRegister,sno);
+
+                            $("#FA_newsFeed_pageNo").val(1);
+                            //$("#FA_newsFeed_totalFound").val($(".IndexPageNews-TotalFound-Hiddden:last").text());
+                            $('#FA_moreNewsFeed').hide();
+                        } else {
+                            bindFeed(billRegister,sno);
+
+                            $("#FA_newsFeed_pageNo").val(PageNo);
+                            $('#FA_moreNewsFeed').hide();
+                        }
+                        bindTickCss();
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    }
+                });
+            } else {
+                $('#FA_noMoreNewsFeed').show();
+            }
+        }
+    }
+</script>

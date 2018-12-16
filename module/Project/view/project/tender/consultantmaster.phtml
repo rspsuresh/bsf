@@ -1,0 +1,521 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    .feedback-panel				   {padding:20px;width:250px;background:#e3edf1;border:#0aa699 1px solid;position:absolute;top:200px;left:-250px;}
+    .feedback-panel a.feedback-tab {background: url('<?php echo $this->basePath(); ?>/images/feedback.png') no-repeat;border-width: 1px 1px 1px 0;display:block;
+        height:99px;left:248px;outline:medium none;position:absolute;text-indent: -9999px;width:39px;top:-1px;}
+    textarea 					   {width:90%;padding:5px;}
+    #response-message 			   {background:#fff;border:1px solid #ccc;padding:50px;margin-top:30px;}
+    .cbfedbckbutn 				   {padding:7px;text-align:center;background-color:#0aa699 !important;color:#fff;font-weight:600;}
+    #treeGrid .jqx-grid-header     {height:75px !important;}
+
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Consultant Master</h1>
+            <div id="addBtnWrapper" class="edit_del commargin_top float_r">
+                <ul>
+                    <a title="Add New Consultant" href="#" onclick="consultantAdd(); return false;" class="edit-btn edit_al" style=" display:block;"><i class="fa fa-plus"></i> Add New Consultant</a>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive clear">
+                <div id="treeGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delconsultantName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/>
+                                </textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Edit Consultant</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" id="editForm">
+                        <div class="row">
+                            <div class="form-group padtop20 col-lg-12">
+                                <input type="hidden" name="consultantId" id="consultantId" class="form-control"/>
+                                <input type="text" id="consultantName" name="consultantName" class="form-control lbl_move" label="Name"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select class="form-control single_dropdown lbl_move" name="cType" id="cType" label="Consultant Type" style="width:100%;">
+                                    <option></option>
+                                    <?php foreach($consultantType as $key => $value) { ?>
+                                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" id="address"  name="address" class="form-control lbl_move" label="Address" placeholder=""/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" id="city" name="city" class="form-control lbl_move" label="City" data-name="locality"/>
+                                <input type="hidden" id="state" name="state" class="form-control" data-name="administrative_area_level_1"/>
+                                <input type="hidden" id="country" name="country" class="form-control" data-name="country"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnEditYes" class="ripple">Update</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Create Consultant</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" id="addForm" autocomplete="off">
+                        <div class="row">
+                            <div class="form-group padtop20 col-lg-12">
+                                <input type="text" id="consultantNamenew" name="consultantNamenew" autocomplete="off" class="form-control lbl_move" label="Name"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select class="form-control single_dropdown lbl_move" name="newCType" id="newCType" label="Consultant Type" style="width:100%;">
+                                    <option></option>
+                                    <?php foreach($consultantType as $key => $value) { ?>
+                                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" id="addressnew" name="addressnew" autocomplete="off" class="form-control lbl_move" label="Address" placeholder=""/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" id="citynew" name="citynew" autocomplete="off" class="form-control lbl_move" label="City" data-name="locality"/>
+                                <input type="hidden" id="statenew" name="statenew" class="form-control" data-name="administrative_area_level_1"/>
+                                <input type="hidden" id="countrynew" name="countrynew" class="form-control" data-name="country"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnAddYes" class="ripple">Create</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+var NoOfconsultantCount = <?php echo (isset($NoOfconsultantCount)) ? $NoOfconsultantCount : '0'?>;
+var arr_consultants = <?php echo (isset($consultantReg)) ? json_encode($consultantReg) : ''?>,
+    $treeGrid = $("#treeGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $editModal = $('#EditModal'),
+    $addModal = $('#AddModal'),
+    $editForm = $('#editForm'),
+    $remarks = $('#remarks'),
+    $consultantName = $('#consultantName'),
+    $address = $('#address'),
+    $city = $('#city'),
+    $cType = $('#cType'),
+    $consultantNamenew = $('#consultantNamenew'),
+    $addressnew = $('#addressnew'),
+    $citynew = $('#citynew'),
+    $newCType = $('#newCType');
+$(function () {
+//    console.log(arr_consultants);
+    var source = {
+        localdata:arr_consultants,
+        dataType: "json",
+        dataFields: [
+            { name: 'ConsultantId', type: 'number' },
+            { name: 'ConsultantName', type: 'string' },
+            { name: 'ConsultantTypeName', type: 'string' },
+            { name: 'Address', type: 'string' },
+            { name: 'CityName', type: 'string' },
+        ],
+        id: 'ConsultantId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'consultantId', datafield: 'ConsultantId', hidden: true, filterable: false},
+            { text: 'Name', dataField: 'ConsultantName', width:'18%'},
+            { text: 'ConsultantTypeName', dataField: 'ConsultantTypeName', width:'20%'},
+            { text: 'Address', dataField: 'Address', width:'30%'},
+            { text: 'City', dataField: 'CityName', width:'18%'},
+            { text: 'Action', sortable: false, filterable: false, align: 'center', width:'14%',
+                cellsrenderer: function (row) {
+                    var editLink = '<button class="marg-70s" style="background: transparent; text-align-center;" title="Edit" onclick="consultantEdit('+row+')"><i class="fa fa-pencil-square-o reg-icon"></i></button>';
+                    return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="consultantDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else {
+            removeError($remarks);
+        }
+
+        $deleteModal.modal('hide');
+        var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'project/tender/deleteconsultant',
+            type: 'POST',
+            data: {"consultantId": rowData.consultantId, "Remarks": remarks, "Type": 'update'},
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200) {
+                    $treeGrid.jqxGrid("deleterow", rowData.uid);
+
+                    if ($treeGrid.jqxGrid('getdatainformation').rowscount < NoOfconsultantCount)  {
+                        $('#addBtnWrapper').show();
+                    } else {
+                        $('#addBtnWrapper').hide();
+                    }
+                } else
+                    alert('Cannot delete this consultant, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the consultant!');
+            }
+        });
+        $remarks.val('');
+    });
+
+    $('#btnEditYes').on('click', function () {
+        var consultantName = $consultantName.val();
+        var address = $address.val();
+        var city = $city.val();
+        var cType = $cType.val();
+
+        validate(function(isSuccess) {
+            if (isSuccess === false) {
+                // validation failed
+                return false;
+            } else {
+
+                $editModal.modal('hide');
+                var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'project/tender/editconsultant',
+                    type: 'POST',
+                    data: $editForm.serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'ConsultantName', consultantName);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'Address', address);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'CityName', city);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'ConsultantTypeName', cType);
+                        } else {
+                            alert('Failed to Edit the consultant!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the consultant!');
+                    }
+                });
+                $consultantName.val('');
+                $address.val('');
+                $cType.val('');
+            }
+        });
+
+
+        function validate(callback) {
+
+            if(consultantName.length == 0) {
+                showError($consultantName, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($consultantName);
+            }
+
+            if(address.length == 0) {
+                showError($address, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($address);
+            }
+
+            if(city.length == 0) {
+                showError($city, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($city);
+            }
+
+            if(cType.length == 0) {
+                showError($cType, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($cType);
+            }
+
+            //validate consultantname already found for addMode
+            $.ajax({
+                url:getBaseURL()+ 'project/tender/checkconsultantFound',
+                type:"post",
+                data: $('#editForm').serialize(),
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    //alert(data)
+                    if(data.results != false){
+                        showError($consultantName, 'consultant Name already found!');
+                        callback(false);
+                        return false;
+                    }
+                    else{
+                        removeError($consultantName);
+                        callback(true);
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    callback(false);
+                    return false;
+                }
+            });
+        }
+    });
+    //bindJqxGridAutoResize();
+});
+
+$('#btnAddYes').on('click', function () {
+    var consultantNamenew = $consultantNamenew.val();
+    var addressnew = $addressnew.val();
+    var citynew = $citynew.val();
+    var newCType = $newCType.val();
+
+    validate(function(isSuccess) {
+        if (isSuccess === false) {
+            // validation failed
+            return false;
+        } else {
+            $addModal.modal('hide');
+            $.ajax({
+                url: getBaseURL() + "project/tender/addconsultant",
+                type: 'POST',
+                data: $('#addForm').serialize(),
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200){
+                        $treeGrid.jqxGrid('addrow',null,JSON.parse(data));
+                        if(NoOfconsultantCount >= $treeGrid.jqxGrid('getdatainformation').rowscount) {
+                            $('#addBtnWrapper').hide();
+                        } else {
+                            $('#addBtnWrapper').show();
+                        }
+                    } else {
+                        alert('Failed to Add consultant!');
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to Add consultant!');
+                }
+            });
+            $consultantNamenew.val('');
+            $addressnew.val('');
+            $newCType.val('');
+        }
+    });
+
+    function validate(callback) {
+        if(consultantNamenew.length == 0) {
+            showError($consultantNamenew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($consultantNamenew);
+        }
+
+        if(addressnew.length == 0) {
+            showError($addressnew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($addressnew);
+        }
+
+        if(citynew.length == 0) {
+            showError($citynew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($citynew);
+        }
+
+        if(newCType.length == 0) {
+            showError($newCType, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($newCType);
+        }
+        //validate consultantname already found for addMode
+        $.ajax({
+            url:getBaseURL()+ 'project/tender/checkconsultantFound',
+            type:"post",
+            data: $('#addForm').serialize(),
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(data)
+                if(data.results != false){
+                    showError($consultantNamenew, 'consultant Name already found!');
+                    callback(false);
+                    return false;
+                } else{
+                    removeError($consultantNamenew);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+});
+
+function consultantDelete(x,row) {
+    $(x).prop('disabled', true);
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    $.ajax({
+        url: getBaseURL() + 'project/tender/deleteconsultant',
+        type: 'POST',
+        data: {"consultantId": rowData.consultantId, "Type": 'check'},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            $(x).prop('disabled', false);
+            if (jqXHR.status == 200) {
+                $deleteModal.data('row', row).modal('show');
+                $('#delconsultantName').html(rowData.consultantName);
+                $("#remarks").val('');
+            }else
+                alert('Cannot delete this consultant, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            $(x).prop('disabled', false);
+            alert('Cannot delete the consultant!');
+        }
+    });
+}
+
+function consultantEdit(row) {
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    $editModal.data('row', row).modal('show');
+    $consultantName.val(rowData.ConsultantName);
+    $consultantName.trigger('change');
+    $address.val(rowData.Address);
+    $address.trigger('change');
+    $city.val(rowData.CityName);
+    $city.trigger('change');
+    $cType.val(rowData.ConsultantTypeName);
+    $cType.trigger('change');
+    $('#consultantId').val(rowData.ConsultantId);
+}
+
+function consultantAdd() {
+    $addModal.modal('show');
+    $('#addForm').trigger('reset');
+}
+</script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&amp;key=AIzaSyDaNPyxJ7NKmZ4rC8awB-BlBh6ieH1Q9os"></script>
+<script>
+    /*Mapping Address*/
+    navigator.geolocation.getCurrentPosition(showPosition);
+    $addressnew.geocomplete({
+        details: "#addForm",
+        types: ["geocode", "establishment"]
+    });
+
+    $address.geocomplete({
+        details: "#EditModal",
+        types: ["geocode", "establishment"]
+    });
+
+    function showPosition(position) {
+        var coordinates = position.coords.latitude + "," + position.coords.longitude;
+        $addressnew.val(coordinates);
+        $addressnew.trigger("geocode");
+    }
+</script>

@@ -1,0 +1,559 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {
+	font-size:15px !important;
+	padding:5px 15px !important;
+}
+#jqxGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Non-Agreement Item Master</h1>
+            <div class="edit_del commargin_top float_r">
+                <ul>
+                    <li>
+                        <a title="Add Non-Agreement Item" onclick="nonAgtItemAdd('add'); return false;" class="edit_al"><i class="fa fa-plus"></i> Add Non-Agreement Item</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 commargin_top clear">
+            <div class="table-responsive clear">
+                <div id="jqxGrid"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="slNoDel" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                    <div class="row m_tb40">
+                        <div class="col-lg-12 form-group req_flds">
+                        	<textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                        </div>
+                    </div>
+                    </form>
+                </div> 
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+
+<!--Add Confirmation Modal-->
+<div id="AddEditModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="MHeader">Create Non-Agreement Item</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="post" id="addEditForm" autocomplete="off">
+                    <div class="row padtop20">
+                        <div class="col-lg-12 form-group req_flds">
+                            <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                            <input type="hidden" id="NonBOQId" name="NonBOQId">
+                            <input type="text" id="projectName" name="projectName" autocomplete="off" class="form-control lbl_move" maxlength="100" label="Project Name"/>
+                            <input type="hidden" name="projectId" id="projectId"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">
+                            <select name="woNo" id="woNo" class="form-control single_dropdown lbl_move" style="width:100%;" label="Work Order No"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">
+                            <input type="text" id="slNo" name="slNo" autocomplete="off" class="form-control lbl_move" maxlength="100" label="Serial No"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">
+                            <input type="text" name="unitName" id="unitName" autocomplete="off" class="form-control lbl_move" label="Unit"/>
+                            <input type="hidden" name="unitId" id="unitId"  class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">
+                            <input type="text" name="rate" id="rate" autocomplete="off" class="form-control lbl_move" label="Rate" onblur="return FormatNum(this,2,true)" onkeypress="return isDecimal(event,this)"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">
+                            <textarea id="specification" name="specification" autocomplete="off" class="form-control lbl_move" label="Specification"></textarea>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnAddEditYes" class="ripple">Create</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data = <?php echo (isset($nonAgtItemReg)) ? json_encode($nonAgtItemReg) : ''?>,
+        $jqxGrid = $("#jqxGrid"),
+        $deleteModal = $('#DeleteModal'),
+		$addEditModal = $('#AddEditModal'),
+        $addEditForm = $('#addEditForm'),
+        $remarks = $('#remarks'),
+        $nonBOQId = $('#NonBOQId'),
+        $projectName = $('#projectName'),
+        $projectId = $('#projectId'),
+        $woNo = $('#woNo'),
+        $slNo = $('#slNo'),
+        $specification = $('#specification'),
+        $btnAddEditYes = $('#btnAddEditYes'),
+        $MHeader = $('#MHeader'),
+        $unitName = $('#unitName'),
+        $unitId = $('#unitId'),
+        $rate = $('#rate'),
+        $wrkGrpName = $('#workGroupName'),
+        $wrkGrpId = $('#workGroupId');
+
+    var tempProjectId = 0;
+    $(function () {
+        $(".single_dropdown").select2({
+            placeholder: ""
+        });
+
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'NonBOQId', type: 'int' },
+                { name: 'WONo', type: 'string' },
+                { name: 'SlNo', type: 'string' },
+                { name: 'Specification', type: 'string' },
+                { name: 'ProjectId', type: 'string' },
+                { name: 'ProjectName', type: 'string' },
+                { name: 'UnitId', type: 'int' },
+                { name: 'UnitName', type: 'string' },
+                { name: 'Rate', type: 'string' },
+                { name: 'WORegisterId', type: 'string' },
+                { name: 'WorkGroupId', type: 'int' }
+            ],
+            id: 'NonBOQId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $jqxGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            filterable:true,
+            pageable:true,
+            rowDetails: true,
+            autoheight: true,
+            showfilterrow: true,
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            columns: [
+                { text: 'NonBOQId', datafield: 'NonBOQId', hidden: true, filterable: false},
+                { text: 'ProjectId', datafield: 'ProjectId', hidden: true, filterable: false},
+                { text: 'ProjectName', datafield: 'ProjectName', hidden: true, filterable: false},
+                { text: 'WORegisterId', datafield: 'WORegisterId', hidden: true, filterable: false},
+                { text: 'UnitId', datafield: 'UnitId', hidden: true, filterable: false},
+                { text: 'WorkGroupId', datafield: 'WorkGroupId', hidden: true, filterable: false},
+                { text: 'WorkOrder No.', dataField: 'WONo', width:'15%'},
+                { text: 'Sl. No.', dataField: 'SlNo', width:'15%'},
+                { text: 'Unit Name', datafield: 'UnitName', width:'15%'},
+                { text: 'Rate', datafield: 'Rate', width:'19%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;"}>' +  sanitizeNumber($jqxGrid.jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                    }
+                },
+                { text: 'Specification', dataField: 'Specification', width:'28%'},
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width:'8%',
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Edit" onclick="nonAgtItemEdit('+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" onclick="nonAgtItemDelete('+row+');return false;"><i class="fa fa-trash-o reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+        
+        bindProjectAutoComplete();
+        bindUnitNameAutoComplete();
+        
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $jqxGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'cb/master/deletenonagtitem',
+                type: 'POST',
+                async: false,
+                data: {"NonBOQId": rowData.NonBOQId, "Remarks": remarks},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $jqxGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Cannot delete this item, it is already in use!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete this item!');
+                }
+            });
+            $remarks.val('');	
+        });
+        
+        $btnAddEditYes.on('click', function (e) {
+            e.preventDefault();
+            var projectName = $projectName.val();
+            var woNo = $woNo.val();
+            var slNo = $slNo.val();
+            var specification = $specification.val();
+            var unitName = $unitName.val();
+            var rate = parseFloatVal($rate.val());
+
+            var isAddFun = false;
+            var url = getBaseURL() + 'cb/master/editnonagtitem';
+            if($btnAddEditYes.hasClass('add')) {
+                isAddFun = true;
+                url = getBaseURL() + 'cb/master/addnonagtitem';
+            }
+
+            validate(function(isSuccess) {
+                if(!isSuccess)
+                    return false;
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    async: false,
+                    data: $addEditForm.serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            if (isAddFun) {
+                                $jqxGrid.jqxGrid('addrow',null,JSON.parse(data));
+                            } else {
+                                var rowId = $addEditModal.data('row');
+
+                                var result = JSON.parse(data);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'ProjectId', result.ProjectId);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'ProjectName', result.ProjectName);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'WORegisterId', result.WORegisterId);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'WORegisterId', result.WORegisterId);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'WONo', result.WONo);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'SlNo', result.SlNo);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'Specification', result.Specification);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'UnitId', result.UnitId);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'UnitName', result.UnitName);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'WorkGroupId', result.WorkGroupId);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'WorkGroupName', result.WorkGroupName);
+                                $jqxGrid.jqxGrid("setcellvalue", rowId, 'Rate', result.Rate);
+                            }
+                            $addEditModal.modal('hide');
+                        } else {
+                            alert('Failed!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed!');
+                    }
+                });
+            });
+
+
+            function validate(callback) {
+                // remove errors only for non auto-complete fields
+                removeError($woNo);
+                removeError($slNo);
+                removeError($specification);
+                removeError($rate);
+                
+                if(projectName.length == 0) {
+                    showError($projectName, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($projectName.hasClass('error')) {
+                    showError($projectName, 'Invalid Project Name!');
+                    callback(false);
+                    return false;
+                }
+                if(woNo == null) {
+                    showError($woNo, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($woNo.hasClass('error')) {
+                    showError($woNo, 'Invalid Work Order!');
+                    callback(false);
+                    return false;
+                }
+                if(slNo.length == 0) {
+                    showError($slNo, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($slNo.hasClass('error')) {
+                    showError($slNo, 'Invalid Serial No!');
+                    callback(false);
+                    return false;
+                }
+                if(unitName.length == 0) {
+                    showError($unitName, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($unitName.hasClass('error')) {
+                    showError($unitName, 'Invalid Unit!');
+                    callback(false);
+                    return false;
+                }
+                if(rate.length == 0) {
+                    showError($rate, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($rate.hasClass('error')) {
+                    showError($rate, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if(/^[0-9\.\,]+$/.test(rate) == false) {
+                    showError($rate, 'Not a valid rate!');
+                    callback(false);
+                    return false;
+                }
+                if(specification.length == 0) {
+                    showError($specification, 'Required!');
+                    callback(false);
+                    return false;
+                }
+                if($specification.hasClass('error')) {
+                    showError($specification, 'Invalid Specification!');
+                    callback(false);
+                    return false;
+                }
+                
+                //validate vendor name already found for addMode
+                $.ajax({
+                    url:getBaseURL()+ 'cb/master/checknonagtitemfound',
+                    type:"post",
+                    data: $addEditForm.serialize(),
+                    dataType:"json",
+                    async: false,
+                    success:function(data, textStatus, jqXHR){
+                        if(data.results != false){
+                            showError($slNo, 'Sl No. already found!');
+                            callback(false);
+                            return false;
+                        }
+                        else{
+                            removeError($slNo);
+                            callback(true);
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        showError($slNo, 'Sl No. already found!');
+                        callback(false);
+                        return false;
+                    }
+                });
+            }
+        });
+
+        function bindProjectAutoComplete() {
+            var projectsJson = '<?php echo (isset($projectReg))?$projectReg:''; ?>';
+            var arr_projects = JSON.parse(projectsJson);
+
+            $projectName.autocomplete({
+                lookup: arr_projects,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $projectId.val(suggestion.data);
+                        removeError($projectName);
+                        if(tempProjectId != suggestion.data) {
+                            tempProjectId = suggestion.data;
+                            loadWorkOrder(function () {
+                                $woNo.select2({
+                                    placeholder: ""
+                                });
+                            });
+                        }
+                    } else {
+                        showError($projectName, 'Invalid Project Name!');
+                    }
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        showError($projectName, 'Invalid Project Name!');
+                    } else {
+                        removeError($projectName);
+                    }
+                }
+            });
+        }
+
+       // bindJqxGridAutoResize();
+    });
+    
+    function nonAgtItemDelete(row) {
+        var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+        $('#slNoDel').text(rowData.SlNo + ' ' + rowData.Specification).attr('data-NonBOQId', rowData.NonBOQId);
+        $("#remarks").val('');
+    }
+
+    function nonAgtItemEdit(row) {
+        var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+        
+        $projectName.val(rowData.ProjectName);
+        $projectId.val(rowData.ProjectId);
+        if(tempProjectId != rowData.ProjectId) {
+            tempProjectId = rowData.ProjectId;
+            loadWorkOrder(function () {
+                $woNo.val(rowData.WORegisterId);
+                $woNo.select2({
+                    placeholder: ""
+                });
+            });
+        }
+        $slNo.val(rowData.SlNo);
+        $specification.val(rowData.Specification);
+        $nonBOQId.val(rowData.NonBOQId);
+        $rate.val(sanitizeNumber(rowData.Rate,2,true));
+        $unitId.val(rowData.UnitId);
+		$unitName.val(rowData.UnitName);
+        $wrkGrpId.val(rowData.WorkGroupId);
+        $MHeader.html('Update Non-Agreement Item');
+        $btnAddEditYes.text('Update').removeClass('add').addClass('edit');
+        
+        removeError($projectName);
+        removeError($woNo);
+        removeError($slNo);
+        removeError($specification);
+        removeError($unitName);
+        removeError($rate);
+        $addEditForm.find('input,select,textarea').trigger('change');
+
+        $addEditModal.data('row', row).modal('show');
+    }
+
+    function nonAgtItemAdd() {
+        $MHeader.html('Create Non-Agreement Item');
+        $btnAddEditYes.text('Create').removeClass('edit').addClass('add');
+        $projectName.val('');
+        $projectId.val('');
+        $nonBOQId.val('');
+        tempProjectId = 0;
+        $woNo.html('');
+        $woNo.select2({
+            placeholder: ""
+        });
+        $slNo.val('');
+        $specification.val('');
+        $rate.val('');
+        $unitId.val('');
+        $unitName.val('');
+        $wrkGrpId.val('');
+
+        removeError($projectName);
+        removeError($woNo);
+        removeError($slNo);
+        removeError($specification);
+        removeError($unitName);
+        removeError($rate);
+        $addEditForm.find('input,textarea').trigger('change');
+
+        $addEditModal.modal('show');
+
+    }
+    
+     function loadWorkOrder(callback) {
+        // fetch data
+        $.ajax({
+            url: getBaseURL() + "cb/workorder/index/"+$projectId.val(),
+            data: {rtype:'projectworkorders', csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var detail = JSON.parse(data);
+                $woNo.children().remove();
+                for (j = 0; j < detail.length; j++) {
+                    $woNo.append('<option value="'+detail[j]['WorkOrderId']+'">'+detail[j]['WONo']+'</option>');
+                }
+
+                if(typeof callback != 'undefined') {
+                    callback();
+                }
+            }
+        });
+        return;
+    }
+
+    function bindUnitNameAutoComplete() {
+        $unitName.autocomplete({
+            lookup: <?php echo json_encode($units); ?>,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $unitId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                    $unitId.val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $unitId.val('');
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+</script>

@@ -1,0 +1,370 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 padlr0">Highlights
+                <div class="stgedit_btn req_addbtn brad_50"> <a href="javascript:void(0);" class="ripple addnew_reminder" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;News"><i class="fa fa-plus"></i></a> </div>
+            </h1>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                <label class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12  control-label">Select Project</label>
+                <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <form id="formProject" action="" method="post">
+                        <select class="form-control single_dropdown lbl_move" id="ProjectSelect" name="ProjectSelect" onchange="loadProject();" style="width:100%;">
+                            <option value="">Select Project</option>
+                            <?php foreach($ProjectName as $Project) {
+                                if((isset($proj_id) && $Project['ProjectId'] == $proj_id) || (isset($pro_id) && $Project['ProjectId'] == $pro_id)) {
+                                    if(isset($proj_id)){?>
+                                        <option value="<?php echo $Project['ProjectId'];?>" selected><?php echo $Project['ProjectName'];?></option>
+                                    <?php } else if(isset($pro_id)){ ?>
+                                        <option value="<?php echo $Project['ProjectId'];?>" selected><?php echo $Project['ProjectName'];?></option>
+                                    <?php }?>
+                                <?php } else { ?>
+                                    <option value="<?php echo $Project['ProjectId'];?>"> <?php echo $Project['ProjectName'];?> </option>
+                                <?php } } ?>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form method="post" id="addForm">
+            <div class="col-lg-12 clear">
+                <div class="col-lg-12 padlr0 adddprtmnt_box animated fadeInUp" id="adddprtmnt_boxAdd" style="display:none;">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <div class="col-lg-2 col-md-3 col-sm-3 padlr0">
+                        <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input readonly type="text" name="date" id="date" class="form-control date_picker lbl_move" label="Date" value=""/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                        <div class="form-group col-lg-12">
+                            <input type="text" id="Type" name="Type" class="form-control lbl_move" label="Type"/>
+                            <input type="hidden" name="tag" value="Add">
+                            <input type="hidden" id="TypeId" name="TypeId"/>
+                            <input type="hidden" name="ProjectId" id="ProjectId"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                        <div class="form-group col-lg-12">
+                            <textarea id="Note" name="Note" class="form-control lbl_move" label="Note"/>
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-1 col-sm-1">
+                        <div class="col-lg-12">
+                            <button type="button" class="save adddprtmnt_box_ok float_r brad_200 ripple" onclick="return submitAddForm();" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive animated fadeInUp" style="min-height:200px;">
+                <table class="table table-hover tbltop_bdr0" id="tableProj">
+                    <?php
+                    //                    if(!empty($note)) {
+                    if(isset($note)) {
+                    $i=1;	?>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Note</th>
+                        <th width="5%">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach($note as $noteValue){ ?>
+                        <tr id="noteTr_<?php echo $i; ?>">
+                            <input type="hidden" name="noteId_<?php echo $i;?>" id="noteId_<?php echo $i;?>" value="<?php echo $noteValue['NoteTransId'];?>" />
+                            <input type="hidden" name="date_<?php echo $i;?>" id="date_<?php echo $i;?>" value="<?php echo $noteValue['DateFormat'];?>" />
+                            <input type="hidden" name="Type_<?php echo $i;?>" id="Type_<?php echo $i;?>" value="<?php echo $noteValue['Type'];?>" />
+                            <input type="hidden" name="descNote_<?php echo $i;?>" id="descNote_<?php echo $i;?>" value="<?php echo $noteValue['Note'];?>" />
+                            <td><?php echo $noteValue['DateFormat'];?></td>
+                            <td><?php echo $noteValue['Type'];?></td>
+                            <td><?php echo $noteValue['Note'];?></td>
+                            <td class="action_btns_td"><ul class="action_btns">
+                                    <a href="javascript:void(0);" class="mainTr" onclick="noteEdit(this, '<?php echo $noteValue['NoteTransId']; ?>','<?php echo $i; ?>')" data-expandid="<?php echo $noteValue['NoteTransId']; ?>" rel="rt_<?php echo $i; ?>" data-toggle="tooltip" data-placement="left" data-original-title="Edit" ><i class="fa fa-pencil-square-o reg-icon"></i></a> <a href="javascript:void(0);"  data-toggle="tooltip" data-placement="left" data-original-title="Delete" onclick="noteDelete(this, '<?php echo $noteValue['NoteTransId']; ?>','<?php echo $i; ?>')"> <span><i class="fa fa-trash-o"></i></span> </a>
+                                    </li>
+                                </ul></td>
+                        </tr>
+                        <tr id="divNoteEdit_<?php echo $i; ?>"  style="display:none;">
+                            <td colspan="3"><form method="post" id="editForm_<?php echo $i; ?>">
+                                    <div class="col-lg-12 clear">
+                                        <div class="col-lg-12 padlr0 adddprtmnt_box" id="adddprtmnt_boxEdit">
+                                            <button type="button" class="close mainTr" data-dismiss="modal"  data-expandid="<?php echo $noteValue['ReminderId']; ?>"  rel="rt_<?php echo $i; ?>"  aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <div class="col-lg-2 col-md-3 col-sm-3 padlr0">
+                                                <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" readonly name="dateEdit_<?php echo $i;?>" id="dateEdit_<?php echo $i;?>" class="form-control date_picker lbl_move" label="Date" value=""/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-3 col-sm-3 padlr0">
+                                                <div class="form-group col-lg-12">
+                                                    <input type="text" name="TypeEdit_<?php echo $i;?>" id="TypeEdit_<?php echo $i;?>" class="form-control lbl_move" label="Type" value=""/>
+                                                    <input type="hidden" name="TypeEditId_<?php echo $i;?>" id="TypeEditId_<?php echo $i;?>" value=""/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                                                <div class="form-group col-lg-12">
+                                                    <!--Post Values to on submit-->
+                                                    <input type="hidden" name="tag" value="Edit">
+                                                    <input type="hidden" name="NoteTransId_<?php echo $i;?>" id="NoteTransId_<?php echo $i;?>" value="<?php echo $noteValue['NoteTransId']; ?>" />
+                                                    <input type="hidden" name="rowid" id="rowid" value="<?php echo $i; ?>" />
+                                                    <textarea id="descNoteEdit_<?php echo $i;?>" name="descNoteEdit_<?php echo $i;?>" class="form-control lbl_move" label="Note"/>
+                                                    </textarea>
+                                                    <input type="hidden" name="ProjectIdEdit_<?php echo $i;?>" id="ProjectIdEdit_<?php echo $i;?>" />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-1 col-sm-1">
+                                                <div class="col-lg-12">
+                                                    <!--<button type="button" class="saveEdit_<?php /*echo $i;*/?> adddprtmnt_box_ok float_r brad_200 ripple" onclick="noteTrEdit(this, '<?php /*echo $noteValue['ReminderId']; */?>','<?php /*echo $i; */?>')" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>-->
+                                                    <button type="button" class="saveEdit_<?php echo $i;?> adddprtmnt_box_ok float_r brad_200 ripple" onclick="noteTrEdit(this, '<?php echo $noteValue['NoteTransId']; ?>','<?php echo $i; ?>')" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form></td>
+                        </tr>
+                        <?php $i++;}
+                    }?>
+                    <input type="hidden" id="rtCount" name="rtCount" value="<?php echo count($note); ?>" />
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<!--<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">-->
+<!--    <div class="modal-dialog" role="document">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+<!--                <h1>Why do you want to delete <span id="delDeptName" class="bld-txt"></span>?</h1>-->
+<!--                <input type="hidden" name="deleteremindId" id="deleteremindId" value="" />-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">-->
+<!--                    <form class="form-horizontal" onsubmit="return false;">-->
+<!--                        <div class="row m_tb40">-->
+<!--                            <div class="col-lg-12 form-group req_flds">-->
+<!--                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/>-->
+<!--                                </textarea>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="modal-footer clear">-->
+<!--                <div class="col-lg-12 savebtn_area no_border">-->
+<!--                    <ul>-->
+<!--                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>-->
+<!--                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>-->
+<!--                    </ul>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+</form>
+<script>
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({
+        });
+
+    });
+
+    $('.addnew_reminder').click(function (){
+//        $('.adddprtmnt_box').show("slow");
+        $('#adddprtmnt_boxAdd').fadeIn();
+        $('#adddprtmnt_boxEdit').fadeOut();
+    });
+    $('.close').click(function(){
+        $('#adddprtmnt_boxAdd').fadeOut();
+        $('#adddprtmnt_boxEdit').fadeOut();
+    });
+</script>
+<script>
+    var arrType =<?php if(isset($Type)) echo json_encode($Type); else echo "[]";?>;
+    var Type = $('#Type');
+    var TypeId =$('#TypeId');
+
+    $(function() {
+        var ProjectSelect = $('#ProjectSelect').val();
+        if(ProjectSelect != ''){
+//        loadProject();
+            var Project = $('#ProjectSelect').val();
+            $('#ProjectId').val(Project);
+
+            $('#tableProj').find('tr[id^=noteTr_]').show();
+        }
+
+        Type.autocomplete({
+            lookup: arrType,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    TypeId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                TypeId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    TypeId.val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+
+        var $TypeEdit = $('input[id^=TypeEdit_]');
+        $TypeEdit.unbind('autocomplete');
+        $.each($TypeEdit, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var key1 = name.split('_')[1];
+            $this.autocomplete({
+                lookup: arrType,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                },
+                onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $("#TypeEdit_" + key1).val(suggestion.data);
+                        $(this).removeClass('error');
+                    }
+                },
+                onSearchStart: function (suggestion) {
+                    $("#TypeEditId_" + key1).val(0);
+                },
+                onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $(this).addClass('error');
+                        $("#TypeEditId_" + key1).val(0);
+                    } else $(this).removeClass('error');
+                }
+            });
+        });
+    });
+    function submitAddForm() {
+        if ($("#date").val() <= 0) {
+            showError($("#date"), 'Date is required!');
+            return false;}
+        else { removeError($("#date")); }
+
+        if ($("#Type").val() <= 0) {
+            showError($("#Type"), 'Type is required!');
+            return false;}
+        else {removeError($("#Type")); }
+
+        if ($("#Note").val() <= 0) {
+            showError($("#Note"), 'Note is required!');
+            return false;}
+        else {removeError($("#Note")); }
+
+        $("#addForm").submit();
+        $('.adddprtmnt_box').hide();
+
+    }
+
+    function loadProject() {
+        var Project = $('#ProjectSelect').val();
+        $('#ProjectId').val(Project);
+
+        $('#tableProj').find('tr[id^=noteTr_]').show();
+        $('#formProject').submit();
+//        $.ajax({
+//            url: getBaseURL() + "project/rfc/reminder",
+//            async: false,
+//            data: {'Projectid': Project,'type':'Project'},
+//            type: 'post',
+//            success: function (data, status) {
+//                if(!data)
+//                    return;
+//                var arrreminders =JSON.parse(data);
+//            },
+//            error: function (xhr,data, status) {
+//                console.log(xhr,data,status);
+//            }
+//        });
+    }
+
+    function noteEdit(x,id,indexrowId) {
+        //noteId_ date_ Type_ descNote_
+        $('#adddprtmnt_boxEdit').fadeIn();
+        $('#adddprtmnt_boxAdd').fadeOut();
+        $('#divNoteEdit_'+indexrowId).fadeIn();
+//    $('#divNoteEdit_'+indexrowId).slideToggle('slow');
+        var rtCount = $('#rtCount').val();
+        for(i=1;i<=rtCount;i++) {
+            $('#dateEdit_'+indexrowId).val($('#date_'+indexrowId).val());
+            $('#TypeEdit_'+indexrowId).val($('#Type_'+indexrowId).val());
+            $('#descNoteEdit_'+indexrowId).val($('#descNote_'+indexrowId).val());
+            if(indexrowId != i) {
+                $("#divNoteEdit_"+i).slideUp('slow');
+            }
+        }
+
+    }
+    function noteTrEdit(x,id,indexrowId) {
+        if ($("#dateEdit_"+indexrowId).val() <= 0) {
+            showError($("#dateEdit_"+indexrowId), 'Date is required!');
+            return false;}
+        else { removeError($("#date")); }
+
+        if ($("#TypeEdit_"+indexrowId).val() <= 0) {
+            showError($("#TypeEdit_"+indexrowId), 'Type is required!');
+            return false;}
+        else {removeError($("#Type")); }
+
+        if ($("#NoteEdit_"+indexrowId).val() <= 0) {
+            showError($("#NoteEdit_"+indexrowId), 'Note is required!');
+            return false;}
+        else {removeError($("#Note")); }
+
+        $("#editForm_"+indexrowId).submit();
+        $('.adddprtmnt_box').hide();
+    }
+    function noteDelete(x,id,indexrowId) {
+        console.log(id);
+        if(confirm("Are you sure to delete Note ?")) {
+            $.ajax({
+                url: getBaseURL() + 'project/rfc/highlights',
+                type: 'POST',
+                data: {"id":id, "type": "Delete"},
+                async: false,
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200) {
+                        $('#noteTr_'+indexrowId).remove();
+                    } else
+                        alert('Cannot delete this reminder!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete the Department!');
+                }
+            });
+        }
+
+    }
+
+</script>

@@ -1,0 +1,673 @@
+<?php
+$bsf = new \BuildsuperfastClass();
+	$url = $this->serverUrl(true);
+	$url = array_pop(explode("/", $url));
+?>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+
+<style type="text/css">
+    #covered-services-wrapper > tr.empty-row  .remove,
+    #uncovered-services-wrapper > tr.empty-row  .remove{
+        display: none;
+    }
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <?php if(isset($projectDetail)): ?>
+        <form method="post" role="form" id="property-mgmt-form">
+            <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+            <input type="hidden" name="ProjectId" value="<?php echo $projectDetail['ProjectId']; ?>">
+            <input type="hidden" name="PMId" value="<?php echo (isset($projPropertyMgmt))?$projPropertyMgmt['PMId']:''; ?>">
+            <div class="col-lg-12">
+                <h1 class="float_l">Project Info of
+                    <div class="btn-group proname_btn">
+                        <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php echo ucfirst($projectDetail['ProjectName']);?> <span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;project"><i class="fa fa-caret-down "></i></span></a>
+                        <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                            <ul>
+                                <?php foreach($arrProjects as $project): ?>
+                                    <li>
+                                        <a href="<?php echo $this->basePath(); ?>/crm/project/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo $bsf->encode($project['ProjectId']); ?>"
+                                            ><?php echo ucfirst($project['ProjectName']);?></a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </h1>
+                <div class="promote_social float_r">
+                    <ul>
+                        <span>Promote Project</span>
+                        <li><a href="#" class="fb_c ripple"><i class="fa fa-facebook-square"></i></a></li>
+                        <li><a href="#" class="twt_c ripple"><i class="fa fa-twitter-square"></i></a></li>
+                        <li><a href="#" class="g_c ripple"><i class="fa fa-google-plus-square"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="step_by_liner animated slideInDown"></div>
+                            <ul class="step_by stepby_mb60">
+                                <li>
+                                    <div class="step_by_sep animated_0_4s slideInRight"><p>10</p></div>
+                                    <p class="stepli_p1">Incentive Management</p>
+                                </li>
+                                <li>
+                                    <div class="step_by_sep stepsep_active animated slideInRight"><p>11</p></div>
+                                    <p class="stepli_p2">Property Management</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-lg-offset-3 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <div class="row">
+                        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 padtop10">
+                            <p>Maintenance Period</p>
+                            <div class="col-lg-12 req_flds">
+                                <label class="txt_left radio_label" for="term_monthly">Term</label>
+                                <div class="radio_check">
+                                    <p class="col-lg-6">
+                                        <input type="radio" name="Term" id="term_monthly"
+                                               value="M" <?php echo ((!isset($projPropertyMgmt)) || (isset($projPropertyMgmt) && $projPropertyMgmt['Term'] == 'M'))?'checked':''; ?>>
+                                        <label for="term_monthly" class="ripple">Monthly</label>
+                                    </p>
+                                    <p class="col-lg-6">
+                                        <input type="radio" name="Term" id="term_yearly"
+                                               value="Y" <?php echo (isset($projPropertyMgmt) && $projPropertyMgmt['Term'] == 'Y')?'checked':''; ?>>
+                                        <label for="term_yearly" class="ripple">Yearly</label>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 padtop10">
+                            <div class="col-lg-12 padtop20 req_flds">
+                                <input type="text" class="form-control lbl_move" label="No of Terms"
+                                       name="NoOfTerms" id="NoOfTerms"  value="<?php echo (isset($projPropertyMgmt))?$projPropertyMgmt['NoOfTerms']:''; ?>"
+                                       onkeypress="return isDecimal(event, this)"/>
+                                <div class="error_message"><p></p></div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div class="col-lg-12 req_flds">
+                                <input type="text" class="form-control lbl_move" label="AMC Charge"
+                                       name="AMCAmt" id="AMCAmt"  value="<?php echo (isset($projPropertyMgmt))?$this->commonHelper()->sanitizeNumber($projPropertyMgmt['AMCAmt'], 2):''; ?>"
+                                       onkeypress="return isDecimal(event, this)"/>
+                                <div class="error_message"><p></p></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="penality_int_area col-lg-12 req_flds">
+                                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-6 padlr0"><p style="padding-top:3px;">Monthly Maintenance Fees</p></div>
+                                <div class="col-lg-7 col-md-7 col-sm-7 col-xs-6 padlr0">
+                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padlr0">
+                                        <div class="radio_check penality_radio_check">
+                                            <p data-placement="top" data-toggle="tooltip" data-original-title="Fixed">
+                                                <input type="radio" class="f_rdoinput" name="MaintenanceType" value="F"
+                                                       id="MaintenanceTypeFixed" <?php echo ( (!isset($projPropertyMgmt)) || (isset($projPropertyMgmt) && $projPropertyMgmt['MaintenanceType'] == 'F'))?'checked':''; ?>>
+                                                <label class="ripple" for="MaintenanceTypeFixed"></label>
+                                            </p>
+                                            <p data-placement="top" data-toggle="tooltip" data-original-title="Per Square Feet">
+                                                <input type="radio" class="sq_rdoinput" name="MaintenanceType" value="S"
+                                                       id="MaintenanceTypeSq" <?php echo (isset($projPropertyMgmt) && $projPropertyMgmt['MaintenanceType'] == 'S')?'checked':''; ?>>
+                                                <label class="ripple" for="MaintenanceTypeSq"></label>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-lg-8 col-md-8 col-sm-8 col-xs-12 padlr0">
+                                        <input type="text" class="lbl_move"  name="MaintenanceAmt" id="MaintenanceAmt" value="<?php echo (isset($projPropertyMgmt))?$this->commonHelper()->sanitizeNumber($projPropertyMgmt['MaintenanceAmt'], 2):''; ?>"
+                                               onkeypress="return isDecimal(event, this)"/>
+                                        <div class="error_message"><p></p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 padtop10">
+                            <div class="col-lg-12 padtop20 req_flds">
+                                <select name="DueDayOfMonth" id="DueDayOfMonth" class="single_dropdown lbl_move" style="width:100%;" label="Due Date on month">
+                                    <option value=""></option>
+                                    <?php for($i=1;$i<=31;$i++): ?>
+                                        <option value="<?php echo $i; ?>" <?php echo (isset($projPropertyMgmt) && $projPropertyMgmt['DueDayOfMonth'] == $i)?'selected':''; ?>><?php echo $i; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                                <div class="error_message"><p></p></div>
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div class="col-lg-12 req_flds">
+                                <input type="text" class="form-control lbl_move" label="Maintenance Deposit" name="MaintenanceDepositAmt" id="MaintenanceDeposit"
+                                       value="<?php echo (isset($projPropertyMgmt))?$this->commonHelper()->sanitizeNumber($projPropertyMgmt['MaintenanceDepositAmt'], 2):''; ?>"
+                                       onkeypress="return isDecimal(event, this)"/>
+                                <div class="error_message"><p></p></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 clear">
+                            <div class="table-responsive clear padtop10">
+                                <table class="table table-hover clear" id="contactTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Covered Services</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="covered-services-wrapper" data-row-count="0"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 clear">
+                            <div class="table-responsive clear padtop10">
+                                <table class="table table-hover clear" id="contactTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Un Covered Services</th>
+                                        <th width="150px;"></th>
+                                        <th width="150px">Amount</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="uncovered-services-wrapper" data-row-count="0"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <?php endif; ?>
+    </div>
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+            <li class="save_btn m_right10 float_r "><input type="button" name="saveExit" class="ripple continue" value="Save &amp; Exit"/></li>
+          <!--  <li class="save_btn m_right10 float_r "><input type="button" name="saveNext" class="ripple continue save-next" value="Save &amp; Next"/></li>-->
+            <li class="goto">
+                <label for="go_to" class="float_l">Go to</label>
+                <select id="projectSteps" name="go_to" class="float_l goto_select">
+                    <option value="general" <?php if($this->currentRequest()->get('action') == 'general') { echo 'selected'; } ?>>General</option>
+                    <option value="land-area" <?php if($this->currentRequest()->get('action') == 'land-area') { echo 'selected'; } ?>>Area Details</option>
+                    <option value="land-cost" <?php if($this->currentRequest()->get('action') == 'land-cost') { echo 'selected'; } ?>>Land Cost Calculation</option>
+                    <option value="other-cost" <?php if($this->currentRequest()->get('action') == 'other-cost') { echo 'selected'; } ?>>Other Cost Details</option>
+                    <option value="payment" <?php if($this->currentRequest()->get('action') == 'payment-schedule' || $this->currentRequest()->get('action') == 'payment-schedule-edit' || $this->currentRequest()->get('action') == 'payment-schedule-register' || $this->currentRequest()->get('action') == 'payment') { echo 'selected'; } ?>>Payment Schedule</option>
+                    <option value="unit-type-register" <?php if($this->currentRequest()->get('action') == 'unit-type-register' || $this->currentRequest()->get('action') == 'unit-type' || $this->currentRequest()->get('action') == 'unit-type-edit') { echo 'selected'; } ?>>Unit Type</option>
+                    <option value="facility" <?php if($this->currentRequest()->get('action') == 'facility' || $this->currentRequest()->get('action') == 'car-park' || $this->currentRequest()->get('action') == 'other-facility') { echo 'selected'; } ?>>Facility Management</option>
+                    <option value="checklist" <?php if($this->currentRequest()->get('action') == 'checklist') { echo 'selected'; } ?>>Check List Management</option>
+                    <option value="penality-interestrate" <?php if($this->currentRequest()->get('action') == 'penality-interestrate') { echo 'selected'; } ?>>Penality & Interest Rate</option>
+                    <option value="incentive-register" <?php if($this->currentRequest()->get('action') == 'incentive-register') { echo 'selected'; } ?>>Incentive Management</option>
+                    <option value="property-management" <?php if($this->currentRequest()->get('action') == 'property-management') { echo 'selected'; } ?>>Property Management</option>
+                </select>
+                <p class="donecngs_p hide">Done With Your Changes ?</p>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script id="cov-serv-template" type="text/template">
+    <tr id="covService__">
+        <td class="tbl_input_td form-group">
+            <input type="text" class="tbl_input service-name" name="covService___name" value="" />
+            <input type="hidden" class="service-id" name="covService___id" value=""/>
+            <div class="error_message"><p></p></div>
+        </td>
+        <td class="action_btns_td">
+            <ul class="action_btns">
+                <li>
+                    <a href="javascript:void(0);" class="remove">
+                        <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                    </a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<script id="uncov-serv-template" type="text/template">
+    <tr id="uncovServ__">
+        <td class="tbl_input_td form-group">
+            <input type="text" class="tbl_input service-name" name="uncovServ___name" value="" />
+            <input type="hidden" class="service-id" name="uncovServ___id" value="" />
+            <div class="error_message"><p></p></div>
+        </td>
+        <td class="form-group">
+            <select style="width:100%;" name="uncovServ___type" id="uncovServ___type" class="single_dropdown service-type" >
+                <option value="" ></option>
+                <option value="D" >Per day</option>
+                <option value="W" >Per week</option>
+                <option value="M">Per month</option>
+                <option value="R" >As Per Reading</option>
+                <option value="Q" >As Required</option>
+            </select>
+            <div class="error_message"><p></p></div>
+        </td>
+        <td class="tbl_input_td form-group">
+            <input type="text" class="tbl_input service-amt" name="uncovServ___amount" onkeypress="return isDecimal(event, this)" readonly/>
+            <div class="error_message"><p></p></div>
+        </td>
+        <td class="action_btns_td">
+            <ul class="action_btns">
+                <li>
+                    <a href="javascript:void(0);" class="remove">
+                        <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                    </a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    $("#projectSteps").change(function(){
+        if(this.value=="unit-type-generation"){
+            window.location.href= getBaseURL() + "crm/index/"+this.value+"/<?php echo $bsf->encode($projectId); ?>";
+        } else {
+            window.location.href= getBaseURL() + "crm/project/"+this.value+"/<?php echo $bsf->encode($projectId); ?>";
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $(function() {
+        var arrServices = <?php echo (isset($jsonServices))?$jsonServices:'[]'; ?>;
+        var arrCoveredServices = <?php echo (isset($jsonCoveredServices))?$jsonCoveredServices:'[]'; ?>;
+        var arrUncoveredServices = <?php echo (isset($jsonUncoveredServices))?$jsonUncoveredServices:'[]'; ?>;
+
+        var $propertyMgmtForm = $('#property-mgmt-form'),
+            $uncoveredServWrapper = $('#uncovered-services-wrapper'),
+            $coveredServWrapper = $('#covered-services-wrapper'),
+            $NoOfTerms = $('#NoOfTerms'),
+            $AMCAmt = $('#AMCAmt'),
+            $MaintenanceAmt = $('#MaintenanceAmt'),
+            $DueDayOfMonth = $('#DueDayOfMonth'),
+            $MaintenanceDeposit = $('#MaintenanceDeposit');
+
+        init();
+        bindSaveBtn_onClick();
+        bindServices_autoComplete();
+        bindServiceRemove_onClick();
+        bindUncoveredServType_onChange();
+
+        function init() {
+            $(".single_dropdown").select2({
+                placeholder: "",
+                allowClear: true
+            });
+
+            // covered services
+            if(arrCoveredServices.length > 0) {
+                $.each(arrCoveredServices, function(index, covService) {
+                    addCoveredServiceRow(covService);
+                });
+                addCoveredServiceRow();
+            } else {
+                addCoveredServiceRow();
+            }
+
+            // uncovered services
+            if(arrUncoveredServices.length > 0) {
+                $.each(arrUncoveredServices, function(index, uncovService) {
+                    addUnCoveredServiceRow(uncovService);
+                });
+                addUnCoveredServiceRow();
+            } else {
+                addUnCoveredServiceRow();
+            }
+
+//            $NoOfTerms.focus();
+        }
+
+        function bindUncoveredServType_onChange() {
+            $uncoveredServWrapper.on('change', '.service-type', function() {
+                var $tarServAmt = $(this).closest('tr').find('.service-amt');
+
+                if($(this).val() === 'R' || $(this).val() === 'Q') {
+                    $tarServAmt.val('');
+                    $tarServAmt.attr('readonly', true);
+                } else {
+                    $tarServAmt.removeAttr('readonly');
+                }
+            });
+        }
+
+        function bindSaveBtn_onClick() {
+            $('.save_btn input[type="button"]').on('click', function() {
+                var $this = $(this);
+
+                validate(function(isSuccess) {
+                    if(isSuccess) {
+                        $coveredServWrapper.find('tr.empty-row').remove();
+                        $uncoveredServWrapper.find('tr.empty-row').remove();
+
+                        if($this.hasClass('save-next')) {
+                            $propertyMgmtForm.append('<input type="hidden" name="saveNext" value="1">');
+                        }
+                        $propertyMgmtForm.submit();
+                    }
+                });
+
+            });
+
+            function validate(callback) {
+                var NoOfTerms = parseInt($NoOfTerms.val()),
+                    AMCAmt = parseFloat($AMCAmt.val()),
+                    MaintenanceAmt = parseFloat($MaintenanceAmt.val()),
+                    DueDayOfMonth = parseInt($DueDayOfMonth.val()),
+                    MaintenanceDeposit = parseFloat($MaintenanceDeposit.val());
+
+                var isSuccess = true;
+                if(isNaN(NoOfTerms)) {
+                    showErrorMsg($NoOfTerms, 'No.of Terms is required!');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($NoOfTerms);
+                }
+
+                if(isNaN(AMCAmt)) {
+                    showErrorMsg($AMCAmt, 'Amount is required!');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($AMCAmt);
+                }
+
+                if(isNaN(MaintenanceAmt)) {
+                    showErrorMsg($MaintenanceAmt, 'Amount is required!');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($MaintenanceAmt);
+                }
+
+                if(isNaN(DueDayOfMonth)) {
+                    showErrorMsg($DueDayOfMonth, 'Due Day of Month is required!');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($DueDayOfMonth);
+                }
+
+                if(isNaN(MaintenanceDeposit)) {
+                    showErrorMsg($MaintenanceDeposit, 'Amount is required!');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($MaintenanceDeposit);
+                }
+
+                // covered services
+                if($coveredServWrapper.find('input.error').length > 0) {
+                    $coveredServWrapper.find('input.error').focus();
+                    isSuccess = false;
+                }
+
+                $uncoveredServWrapper.find('> tr:not(.empty-row)').each(function() {
+
+                    var $serviceName = $(this).find('input.service-name.error');
+                    var $serviceAmt = $(this).find('input.service-amt'),
+                        servAmt = parseFloat($serviceAmt.val()),
+                        $servType = $(this).find('.service-type'),
+                        servType = $servType.val();
+
+                    if($serviceName.length > 0) {
+                        isSuccess = false;
+                        showErrorMsg($serviceName, 'Name is required!');
+                        return false;
+                    } else {
+                        removeErrorMsg($serviceName);
+                    }
+
+                    if(servType == '') {
+                        isSuccess = false;
+                        showErrorMsg($servType, 'Type is required!');
+                        return false;
+                    } else {
+                        removeErrorMsg($servType);
+                    }
+
+                    if(servType != 'R' && servType != 'Q' && isNaN(servAmt)) {
+                        showErrorMsg($serviceAmt, 'Amount is required!');
+                        isSuccess = false;
+                        return false;
+                    } else {
+                        removeErrorMsg($serviceAmt);
+                    }
+                });
+
+                // uncovered services
+                if($uncoveredServWrapper.find('input.error').length > 0) {
+                    $uncoveredServWrapper.find('input.error').focus();
+                    isSuccess = false;
+                }
+
+                callback(isSuccess);
+                return isSuccess;
+            }
+        }
+
+        function addCoveredServiceRow(covService) {
+
+            if($coveredServWrapper.find('tr.empty-row').length > 0) {
+                return;
+            }
+
+            var rowCount = (parseInt($coveredServWrapper.attr('data-row-count'))) + 1;
+
+            var covServHtml = $('#cov-serv-template').html();
+            covServHtml = covServHtml.replace(/covService__/g, 'covService_' + rowCount);
+            $coveredServWrapper.append(covServHtml);
+
+            var $tarTr = $coveredServWrapper.find('#covService_' + rowCount);
+            if(typeof covService != 'undefined') {
+                $tarTr.find('input.service-name').val(covService.ServiceName);
+                $tarTr.find('input.service-id').val(covService.ServiceId);
+            } else {
+                $tarTr.addClass('empty-row');
+            }
+
+            $coveredServWrapper.attr('data-row-count', rowCount);
+        }
+
+        function addUnCoveredServiceRow(uncovService) {
+
+            if($uncoveredServWrapper.find('tr.empty-row').length > 0) {
+                return;
+            }
+
+            var rowCount = (parseInt($uncoveredServWrapper.attr('data-row-count'))) + 1;
+
+            var unCovServHtml = $('#uncov-serv-template').html();
+            unCovServHtml = unCovServHtml.replace(/uncovServ__/g, 'uncovServ_' + rowCount);
+            $uncoveredServWrapper.append(unCovServHtml);
+
+            var $tarTr = $uncoveredServWrapper.find('#uncovServ_' + rowCount);
+            if(typeof uncovService != 'undefined') {
+                var amt = parseFloat(uncovService.Amount);
+                $tarTr.find('input.service-name').val(uncovService.ServiceName);
+                $tarTr.find('input.service-id').val(uncovService.ServiceId);
+                $tarTr.find('.service-type option[value="'+uncovService.Type+'"]').attr('selected', 'selected');
+                var $tarServAmt = $tarTr.find('input.service-amt');
+                if(uncovService.Type != 'R' && uncovService.Type != 'Q') {
+                    $tarServAmt.val(amt.toFixed(2));
+                    $tarServAmt.removeAttr('readonly');
+                } else {
+                    $tarServAmt.val('');
+                }
+            } else {
+                $tarTr.addClass('empty-row');
+            }
+
+            $tarTr.find(".single_dropdown").select2({
+                placeholder: "",
+                allowClear: true
+            });
+
+            $uncoveredServWrapper.attr('data-row-count', rowCount);
+        }
+
+        // remove services
+        function bindServiceRemove_onClick() {
+            $coveredServWrapper.on('click', '> tr .remove', function(ev) {
+                ev.preventDefault();
+
+                var isConfirm = confirm('Are you sure wants to remove?');
+                if(isConfirm) {
+                    $(this).closest('tr').remove();
+                }
+            });
+
+            $uncoveredServWrapper.on('click', '> tr .remove', function(ev) {
+                ev.preventDefault();
+
+                var isConfirm = confirm('Are you sure wants to remove?');
+                if(isConfirm) {
+                    $(this).closest('tr').remove();
+                }
+            });
+        }
+
+        // auto complete
+        function bindServices_autoComplete() {
+
+            $coveredServWrapper.on('focus', '> tr input.service-name', function() {
+                var $tarIp = $(this);
+                // remove used services
+                removeUsedService($tarIp, function(arrServicesCopy) {
+                    autoComplete($tarIp, arrServicesCopy);
+                });
+
+            });
+
+            $uncoveredServWrapper.on('focus', '> tr input.service-name', function() {
+                var $tarIp = $(this);
+                // remove used services
+                removeUsedService($tarIp, function(arrServicesCopy) {
+                    autoComplete($tarIp, arrServicesCopy);
+                });
+
+            });
+
+            function removeUsedService($tarIp, callback) {
+
+                var arrServicesCopy = [];
+                $.each(arrServices, function (index, service) {
+                    var isExists = false;
+                    $coveredServWrapper.find('> tr input.service-name').each(function () {
+                        if ($tarIp[0] != $(this)[0]
+                            && $(this).val().trim().toLowerCase() == service.value.toLowerCase()) {
+                            isExists = true;
+                            return false;
+                        }
+                    });
+
+                    if(isExists === false) {
+                        $uncoveredServWrapper.find('> tr input.service-name').each(function () {
+                            if ($tarIp[0] != $(this)[0]
+                                && $(this).val().trim().toLowerCase() == service.value.toLowerCase()) {
+                                isExists = true;
+                                return false;
+                            }
+                        });
+                    }
+
+                    if (isExists === false) {
+                        arrServicesCopy.push(service);
+                    }
+                });
+
+                callback(arrServicesCopy);
+                return;
+            }
+
+            function autoComplete($tarIp, arrServicesCopy) {
+
+                if($tarIp.hasClass('autocomplete-binded')) {
+                    $tarIp.autocomplete( "destroy" );
+                }
+
+                var $serviceId = $tarIp.next('.service-id');
+                var isCoveredIp = true;
+                if($tarIp.closest('#covered-services-wrapper').length <= 0) {
+                    isCoveredIp = false;
+                }
+
+                $tarIp.autocomplete({
+                    lookup: arrServicesCopy,
+                    lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                        if (queryLowerCase == '*') {
+                            return suggestion.value;
+                        } else {
+                            var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                            return re.test(suggestion.value);
+                        }
+                    }, onSelect: function (suggestion) {
+                        if (suggestion) {
+                            $serviceId.val(suggestion.data);
+                            removeErrorMsg($(this));
+                        }
+                    }, onSearchStart: function (suggestion) {
+                        $serviceId.val('');
+                    }, onSearchComplete: function (query, suggestions) {
+
+                    }
+                }).blur(function () {
+                    var ServiceName = $tarIp.val().trim();
+                    var $tarTr = $tarIp.closest('tr');
+
+                    removeErrorMsg($tarIp);
+
+                    if (ServiceName.length <= 0) {
+                        if($tarTr.hasClass('empty-row') == false) {
+                            $tarTr.addClass('empty-row');
+                            $serviceId.val('');
+                        }
+                    } else {
+                        $tarTr.removeClass('empty-row');
+
+                        var isExists = false;
+                        $coveredServWrapper.find('> tr input.service-name').each(function () {
+                            if ($tarIp[0] != $(this)[0]
+                                && $(this).val().trim().toLowerCase() == ServiceName.toLowerCase()) {
+                                isExists = true;
+                                return false;
+                            }
+                        });
+
+                        if(isExists === false) {
+                            $uncoveredServWrapper.find('> tr input.service-name').each(function () {
+                                if ($tarIp[0] != $(this)[0]
+                                    && $(this).val().trim().toLowerCase() == ServiceName.toLowerCase()) {
+                                    isExists = true;
+                                    return false;
+                                }
+                            });
+                        }
+
+                        if(isExists) {
+                            showErrorMsg($tarIp, 'Service already exists!');
+                            $tarIp.focus();
+                        } else {
+                            if(isCoveredIp) {
+                                addCoveredServiceRow();
+                            } else {
+                                addUnCoveredServiceRow();
+                            }
+                        }
+                    }
+                });
+
+                $tarIp.addClass('autocomplete-binded');
+            }
+        }
+
+        function showErrorMsg($tarIp, msg) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text(msg);
+            $tarIp.addClass('error');
+            $tarErrorMsg.show();
+        }
+
+        function removeErrorMsg($tarIp) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text('Please Enter ' + $tarIp.attr('label') + '...');
+            $tarIp.removeClass('error');
+            $tarErrorMsg.hide();
+        }
+    });
+</script>

@@ -1,0 +1,587 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<style>
+    #limain_bill,#lieb_charge,#litele_charge {
+        display: none;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 data-bsfhead="Lease/RentalBill">Lease / Rental Bill</h1>
+        </div>
+        <form  id="theform" method="post"  autocomplete="off">
+            <div class="col-lg-12">
+                <ul class="edit-lbl">
+                    <li class="col-lg-4">
+                        <label>Date : </label>
+                        <span class="date_icon reen-date"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="entry_date" id="entry_date" data-bsfshare="entryDate"  class="date_picker" value="<?php echo date('d-m-Y'); ?>" readonly>
+                    </li>
+                    <li class="col-lg-5">
+                        <label>Voucher No : </label>
+                        <input type="text" value="<?php echo $svNo; ?>" <?php if ($genType==true) { ?> readonly <?php } ?> name="voucher_no" data-bsfshare="VoucherNo" id="voucher_no">
+                    </li>
+                </ul>
+            </div>
+            <!---------------------------Form Area--------------------------->
+            <div class="col-lg-12 flwup_topcnt fmg_topcnt clear" style="margin-bottom:10px;">
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <input type="text" id="proper_name"  class="form-control lbl_move" value="" data-bsfshare="PropertyName" label="Property Name"/>
+                    <input type="hidden" name="unitId" id="unitId" value=""/>
+                    <input type="hidden" name="DueDate" id="DueDate" value="0"/>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <input type="text"  id="tenant_name"  name="tenant_name" class="form-control lbl_move" value="" data-bsfshare="TenantName" label="Name of the Tenant" />
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="target_from" id="target_from" data-bsfshare="From Date" readonly class="form-control lbl_move date_picker" onchange="changeCallDate($(this).val());" label="Rent Period From"/>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar" ></i></span>
+                    <input type="text" name="target_to" id="target_to" data-bsfshare="To Date" readonly class="form-control lbl_move date_picker_call" onchange="dueDate();" label="Rent Period To" disabled/>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                <!---------------------------Particulars Detalis left--------------------------->
+
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="par-lessbill">
+                        <h1>Particulars</h1>
+                        <ul>
+                            <h2>Current Due</h2>
+                            <li>
+                                <label>Rental Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" name="rent_charge" data-bsfshare="RentCharge" id="rent_charge">
+                                <input type="hidden" name="RentalRegId" id="RentalRegId">
+                            </li>
+                            <li id="limain_bill">
+                                <label>Maintenance Bill</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="main_bill" onkeypress="return isDecimal(event,this;)" onchange="onChangeAmount();FormatNum(this, 2);" data-bsfshare="MainBill" id="main_bill">
+                                <input type="hidden" name="main_id" id="main_id">
+                            </li>
+                            <li id="lieb_charge">
+                                <label>EB Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="eb_charge" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" data-bsfshare="EbCharge" id="eb_charge">
+                                <input type="hidden" name="eb_id" id="eb_id">
+                            </li>
+                            <li id="litele_charge">
+                                <label>Telephone Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="tele_charge" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" data-bsfshare="TeleCharge" id="tele_charge">
+                                <input type="hidden" name="tele_id" id="tele_id">
+                            </li>
+                        </ul>
+                        <ul class="bgs-grs">
+                            <li>
+                                <label>Gross Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="gross_amount" name="gross_amount" data-bsfshare="CrossAmount" readonly="readonly">
+                            </li>
+                            <li>
+                                <label>Service Tax <?php echo (isset($stlist) && $stlist['NetTax']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['NetTax'],2,false).' %' : '0 %';?></label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="service_tax" name= "service_tax" onkeypress="return isDecimal(event,this);"  data-bsfshare="ServiceTax" readonly />
+                                <input type="hidden" id="service_taxable" value="<?php echo (isset($stlist) && $stlist['TaxablePer']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['TaxablePer'],3,false) : 0;?>" />
+                                <input type="hidden" id="service_net" value="<?php echo (isset($stlist) && $stlist['NetTax']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['NetTax'],3,false) : 0;?>" />
+                            </li>
+                            <li>
+                                <label>Total Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="total_amount" name="total_amount" data-bsfshare="TotalAmount" readonly="readonly">
+                            </li>
+                        </ul>
+                        <ul>
+                            <h2>Previous Bill Due</h2>
+                            <li>
+                                <label>Balance Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="preBillTot();FormatNum(this, 2);" data-bsfshare="LastBill" id="last_bill" name="last_bill">
+                            </li>
+                            <li>
+                                <label>Late Fees</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="preBillTot();FormatNum(this, 2);" data-bsfshare="LateFee" id="late_fee" name="late_fee">
+                            </li>
+                            <li>
+                                <label>Total Payable</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="total_payable" name="total_payable" data-bsfshare="Total Payable" readonly>
+                            </li>
+                            <li>
+                                <label>Advance Paid</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="preBillTot();FormatNum(this, 2);" data-bsfshare="Excess Amount" id="excess_amt" name="excess_amt" readonly>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="pei-rem">
+                        <label>Remarks</label>
+                        <textarea name="remarks" data-bsfshare="Remarks" maxlength="250"></textarea>
+                    </div>
+                </div>
+                <!---------------------------Particulars Detalis left end--------------------------->
+                <!---------------------------Previous Detalis right --------------------------->
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="par-lessbill par-prew">
+                        <h1>Previous Details</h1>
+                        <ul>
+                            <li>
+                                <label>Rental Charges</label>
+                                <span id="pRentalCharges"></span> </li>
+                            <li>
+                                <label>Other Charges</label>
+                                <span id="pOtherCharges"></span> </li>
+                            <li>
+                                <label>Gross Amount</label>
+                                <span id="pGrossAmt"></span> </li>
+                            <li>
+                                <label>Service Tax</label>
+                                <span id="pServiceTax"></span> </li>
+                            <li>
+                                <label>Total Amount</label>
+                                <span id="pTotAmt"></span> </li>
+                            <li>
+                                <label>Previous Bill Due</label>
+                                <span id="previousBillDue"></span> </li>
+                            <li>
+                                <label>Late Fees</label>
+                                <span id="pLateFees"></span> </li>
+                            <li>
+                            <li>
+                                <label>Total Amount Payable</label>
+                                <span id="pTotAmtPayable"></span> </li>
+                            <li>
+                                <label>Previous Paid</label>
+                                <span id="previousPaid"></span> </li>
+                            <li>
+                                <label>Previous Due</label>
+                                <span id="previousDue"></span> </li>
+                        </ul>
+                    </div>
+                    <div class="totalpay">
+                        <label>Total Amount Payable</label> <i class="fa fa-inr cur-css-tol"></i>
+                        <p id="dueDay"></p>
+                        <input type="hidden" id="dueDateVal" name="dueDateVal" />
+                        <span><input type="text" id="totalpayamount" name="totalpayamount" data-bsfshare="TotalPay Amount" readonly /></span>
+                    </div>
+                </div>
+                <!---------------------------Previous Detalis right end--------------------------->
+            </div>
+        </form>
+        <div class="col-lg-12 m_tb40 padlr0 clear"></div>
+    </div>
+</div>
+<!---------------------------button--------------------------->
+<div class="col-lg-12 savebtn_area clear">
+    <ul>
+        <li class="dropdown save_btn float_r"><button class="ripple" onclick="submitFormData();" type="button">Submit</button></li>
+    </ul>
+</div>
+<!---------------------------button--------------------------->
+<script>
+    function previousDetails() {
+        var UnitVal = parseInt($.trim($('#unitId').val()));
+        if(UnitVal!=0) {
+            $.ajax({
+                url:getBaseURL()+'crm/property/rental-entry',
+                type:'POST',
+                data:{"UnitId":UnitVal,"mode" : "pre"},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status != 200) {
+                        alert('Failed to get previous Bill Details !');
+                        return false;
+                    }
+                    else
+                    {
+                        var details = JSON.parse(data);
+
+                        if(details.previous!=false) {
+                            if(details.previous['RentalCharge']>0) {
+                                $('#pRentalCharges').html('Rs.'+sanitizeNumber(details.previous['RentalCharge'],2,true));
+                            }
+                            if(details.previous['GrossAmount']>0) {
+                                $('#pGrossAmt').html('Rs.'+sanitizeNumber(details.previous['GrossAmount'],2,true));
+                            }
+                            if(details.previous['ServiceTax']>0) {
+                                $('#pServiceTax').html('Rs.'+sanitizeNumber(details.previous['ServiceTax'],2,true));
+                            }
+                            if(details.previous['TotalAmount']>0) {
+                                $('#pTotAmt').html('Rs.'+sanitizeNumber(details.previous['TotalAmount'],2,true));
+                            }
+                            if(details.previous['PreviousBillDue']>0) {
+                                $('#previousBillDue').html('Rs.'+sanitizeNumber(details.previous['PreviousBillDue'],2,true));
+                            }
+                            if(details.previous['LateFees']>0) {
+                                $('#pLateFees').html('Rs.'+sanitizeNumber(details.previous['LateFees'],2,true));
+                            }
+                            if(details.previous['TotalAmountPayable']>0) {
+                                $('#pTotAmtPayable').html('Rs.'+sanitizeNumber(details.previous['TotalAmountPayable'],2,true));
+                            }
+
+                            var tot =0;
+
+                            if(details.reAmt != false && details.reAmt['tAmount']!=null) {
+                                tot = parseFloat(details.previous['TotalAmountPayable']) - parseFloat(details.reAmt['tAmount']);
+                                $('#previousPaid').html('Bill No.'+details.previous['PVNo']+' on ' + details.date + ' for Rs.'+ sanitizeNumber(details.reAmt['tAmount'],2,true));
+                            }
+                            if(tot>0) {
+                                $('#previousDue').html('Rs.'+sanitizeNumber(tot,2));
+                                $('#last_bill').val(sanitizeNumber(tot,2)).trigger('change');
+                            }
+
+                            if(details.oAmt != false && details.oAmt['tAmount']!=null) {
+                                $('#pOtherCharges').html('Rs.'+sanitizeNumber(details.oAmt['tAmount'],2,true));
+                            }
+                            var oBillAmt=0;
+                            if(details.overAllBill != false && details.overAllBill['tAmount']!=null) {
+                                oBillAmt=sanitizeNumber(details.overAllBill['tAmount'],2);
+                            }
+
+                            var oBillPaid=0;
+                            if(details.overAllPaid != false && details.overAllPaid['tAmount']!=null) {
+                                oBillPaid=sanitizeNumber(details.overAllPaid['tAmount'],2);
+                            }
+                            var Excess = parseFloat(oBillPaid)-parseFloat(oBillAmt);
+
+                            if(Excess>0) {
+                                $('#excess_amt').val(sanitizeNumber(Excess,2)).trigger('change');
+                            }
+
+                        }
+
+
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to get previous Bill Details !');
+                }
+            });
+        }
+
+    }
+    Date.isLeapYear = function (year) {
+        return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+    };
+
+    Date.getDaysInMonth = function (year, month) {
+        return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+    };
+
+    Date.prototype.isLeapYear = function () {
+        return Date.isLeapYear(this.getFullYear());
+    };
+
+    Date.prototype.getDaysInMonth = function () {
+        return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+    };
+
+    Date.prototype.addMonths = function (value) {
+        var n = this.getDate();
+        this.setDate(1);
+        this.setMonth(this.getMonth() + value);
+        this.setDate(Math.min(n, this.getDaysInMonth()));
+        return this;
+    };
+    $(document).ready(function() {
+        $('.date_picker_call').datepicker({
+            format: "dd-mm-yyyy",
+            startDate: new Date(),
+            todayBtn: true,
+            orientation: "top auto",
+            autoclose: true
+        });
+    });
+    function changeCallDate(myDat) {
+        if(myDat!="" && myDat!=null) {
+            var sDate = myDat.split('-');
+            var myDate = new Date(sDate[1]+'/'+sDate[0] +'/'+sDate[2]);
+            myDate.setMonth(myDate.getMonth() + 1);
+            $('.date_picker_call').val('').attr('disabled',false);
+            $('.date_picker_call').datepicker('setStartDate', myDate);
+        }
+    }
+
+    function dueDate() {
+        var dVal = $('#target_to').val();
+        if(dVal!="") {
+            var sDate = dVal.split('-');
+            var dueDay=1;
+            var oDate =parseInt($('#DueDate').val());
+            if(oDate!=0) {
+                dueDay=oDate;
+            }
+
+            var actualDate = new Date((sDate[1])+'/'+ sDate[0] +'/'+sDate[2]);
+
+            if(parseInt(actualDate.getDate()) > dueDay) {
+                actualDate = new Date((sDate[1])+'/'+ dueDay +'/'+sDate[2]);
+                actualDate = actualDate.addMonths(1);
+            } else {
+                actualDate = new Date((sDate[1])+'/'+ dueDay +'/'+sDate[2]);
+            }
+
+            var fDate = $.datepicker.formatDate('dd-mm-yy', actualDate);
+
+            $('#dueDay').html('on before '+fDate);
+
+            $('#dueDateVal').val(fDate);
+        } else {
+            $('#dueDay').html('');
+            $('#dueDateVal').val('');
+
+        }
+    }
+    var $unitName = $('#proper_name'),
+        $pvDate = $('#entry_date'),
+        $pvNo = $('#voucher_no'),
+        $UnitId = $('#unitId'),
+        $tenantName = $('#tenant_name'),
+        $rentCharge = $('#rent_charge'),
+        $rentPeriod = $('#rent_period'),
+        $maintenance = $('#main_bill'),
+        $mainId = $('#main_id'),
+        $ebId = $('#eb_id'),
+        $teleId = $('#tele_id'),
+        $ebCharge = $('#eb_charge'),
+        $teleCharge = $('#tele_charge'),
+        $limaintenance = $('#limain_bill'),
+        $liebCharge = $('#lieb_charge'),
+        $liteleCharge = $('#litele_charge'),
+        $grossAmount = $('#gross_amount'),
+        $serviceTax = $('#service_tax'),
+        $totalAmount = $('#total_amount'),
+        $lastBill = $('#last_bill'),
+        $lateFees = $('#late_fee'),
+        $excessAmt = $('#excess_amt'),
+        $totalPayable = $('#total_payable'),
+        $totalPayableAmount = $('#totalpayamount'),
+        $RentalRegisterId = $('#RentalRegId');
+    $unitName.on('change',function() {
+
+    });
+    $(document).ready(function() {
+        var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+        $unitName.autocomplete({
+            lookup: arr_Units,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $UnitId.val(suggestion.data);
+                    $tenantName.val(suggestion.LeaserName).trigger('change');
+                    $rentCharge.val(sanitizeNumber(suggestion.RentAmount,2));
+                    $RentalRegisterId.val(suggestion.RentalRegisterId);
+
+                    $('#DueDate').val(isNullCheck(suggestion.DueDayOfMonth,'number'));
+                    dueDate();
+                    if(typeof suggestion.services!= "undefined")
+                    {
+                        $.each(suggestion.services, function(index, data) {
+                            var arr = data.ServiceName.split(' ');
+                            if(arr[0]=="Maintenance"){
+                                $maintenance.val(sanitizeNumber(data.Amount,2));
+                                $mainId.val(data.ServiceId);
+                                $limaintenance.show();
+                            }else if(arr[0]=="EB"){
+                                $ebCharge.val(sanitizeNumber(data.Amount,2));
+                                $ebId.val(data.ServiceId);
+                                $liebCharge.show();
+                            } else if(arr[0]=="Telephone"){
+                                $teleCharge.val(sanitizeNumber(data.Amount,2));
+                                $teleId.val(data.ServiceId);
+                                $liteleCharge.show();
+                            }
+                        });
+                        onChangeAmount();
+                    } else
+                    {
+                        liHide();
+                    }
+                    previousDetails();
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $UnitId.val(0);
+                $tenantName.val("").trigger('change');
+                $RentalRegisterId.val(0);
+                $rentCharge.val('');
+                $('#DueDate').val(0);
+                dueDate();
+                liHide();
+
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $UnitId.val(0);
+                    $tenantName.val("").trigger('change');
+                    $RentalRegisterId.val(0);
+                    $rentCharge.val('');
+                    $('#DueDate').val(0);
+                    dueDate();
+                    liHide();
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+        function liHide() {
+            $limaintenance.hide();
+            $liebCharge.hide();
+            $liteleCharge.hide();
+            $maintenance.val(0);
+            $ebCharge.val(0);
+            $teleCharge.val(0);
+            $mainId.val(0);
+            $ebId.val(0);
+            $teleId.val(0);
+            onChangeAmount();
+        }
+    });
+    function onChangeAmount() {
+        var mAmt = parseFloatVal($maintenance.val()),
+            eAmt = parseFloatVal($ebCharge.val()),
+            tAmt = parseFloatVal($teleCharge.val()),
+            rAmt = parseFloatVal($rentCharge.val());
+        var gAmt = mAmt+eAmt+tAmt+rAmt;
+        $grossAmount.val(sanitizeNumber(gAmt,2));
+        onCalTotal();
+    }
+    function onCalTotal() {
+        var gAmt = parseFloatVal($grossAmount.val());
+        var taxable = parseFloatVal($('#service_taxable').val());
+        var nTax = parseFloatVal($('#service_net').val());
+        var tAmt=(taxable*gAmt);
+        if(tAmt!=0) {
+            tAmt = tAmt/100;
+        }
+        var sTax = tAmt*nTax;
+
+        if(sTax!=0) {
+            sTax = sTax/100;
+        }
+        var sAmt = parseFloatVal(sTax);
+        $('#service_tax').val(sanitizeNumber(sAmt,2));
+        var totAmt = gAmt+sAmt;
+        $totalAmount.val(sanitizeNumber(totAmt,2));
+        totalAmountPayable();
+    }
+    function preBillTot() {
+        var lAmt = parseFloatVal($lastBill.val()),
+            lFeeAmt = parseFloatVal($lateFees.val());
+        var totPay = lAmt+lFeeAmt;
+        $totalPayable.val(sanitizeNumber(totPay,2));
+
+        totalAmountPayable();
+    }
+
+    function totalAmountPayable() {
+        var totAmt = parseFloatVal($totalAmount.val()),
+            totPay = parseFloatVal($totalPayable.val()),
+            exAmt = parseFloatVal($excessAmt.val());
+        var totalPayAmount = totAmt+ totPay;
+        totalPayAmount-=exAmt;
+        if(totalPayAmount>0) {
+            $totalPayableAmount.val(sanitizeNumber(totalPayAmount,2));
+        } else {
+            $totalPayableAmount.val(0);
+        }
+    }
+
+    function submitFormData() {
+        var unitId =  $UnitId.val(),
+            rentalCharge = $rentCharge.val(),
+            grossAmount = $grossAmount.val(),
+            pvDate = $pvDate.val(),
+            pvNo = $pvNo.val(),
+            totalPayableAmount = $totalPayableAmount.val(),
+            maintenance = $maintenance.val(),
+            ebCharge = $ebCharge.val(),
+            teleCharge = $teleCharge.val();
+        if(unitId.length == 0 || unitId == 0) {
+            showError($unitName, "Required");
+            return;
+        } else {
+            removeError($unitName);
+        }
+        if($.trim($('#tenant_name').val()).length == 0) {
+            showError($('#tenant_name'), "Required");
+            return;
+        } else {
+            removeError($('#tenant_name'));
+        }
+        if($.trim($('#target_from').val()).length == 0) {
+            showError($('#target_from'), "Required");
+            return;
+        } else {
+            removeError($('#target_from'));
+        }
+        if($.trim($('#target_to').val()).length == 0) {
+            showError($('#target_to'), "Required");
+            return;
+        } else {
+            removeError($('#target_to'));
+        }
+
+        if(rentalCharge.length == 0) {
+            showError($rentCharge, "Required");
+            return;
+        } else {
+            removeError($rentCharge);
+        }
+        if(grossAmount.length == 0) {
+            showError($grossAmount, "Required");
+            return;
+        }else{
+            removeError($grossAmount);
+        }
+        if(pvNo.length == 0) {
+            showError($pvNo, "Required");
+            return;
+        } else{
+            removeError($pvNo);
+        }
+        if(pvDate.length == 0 || !/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/.test(pvDate)) {
+            showError($pvDate, "Invalid Date");
+            return;
+        }else {
+            removeError($pvDate);
+        }
+        if(totalPayableAmount.length == 0) {
+            showError($totalPayableAmount, "required");
+            return;
+        } else {
+            removeError($totalPayableAmount);
+        }
+        if(maintenance.length == 0) {
+            showError($maintenance, "required");
+            return;
+        } else{
+            removeError($maintenance);
+        }
+        if(ebCharge.length == 0) {
+            showError($ebCharge, "required");
+            return;
+        } else {
+            removeError($ebCharge);
+        }
+        if(teleCharge.length == 0) {
+            showError($teleCharge, "required");
+            return;
+        } else{
+            removeError($teleCharge);
+        }
+        $('#theform').submit();
+    }
+</script>

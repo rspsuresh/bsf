@@ -1,0 +1,165 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/pie.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Expense Register</h1>
+            </div>
+            <div class="col-lg-12 top_ct">
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="treeGrid"> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete expense no. : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="form-group col-lg-12 req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data = <?php echo (isset($expenses)) ? json_encode($expenses) : ''?>,
+        $treeGrid = $("#treeGrid"),
+        $deleteModal = $('#DeleteModal'),
+        $remarks = $('#remarks');
+    $(function () {
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ExpenseId', type: 'number' },
+                { name: 'WorkOrderId', type: 'number' },
+                { name: 'WONo', type: 'string' },
+                { name: 'ExpenseNo', type: 'string' },
+                { name: 'ExpenseDate', type: 'string' },
+                { name: 'Amount', type: 'string' }
+            ],
+            id: 'ExpenseId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            showfilterrow: true,
+            filterable: true,
+            pageable:true,
+            rowDetails: true,
+            autoheight: true,
+            selectionmode: 'singlerow',
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            columns: [
+                { text: 'ExpenseId', datafield: 'ReceiptId', hidden: true, filterable: false},
+                { text: 'WorkOrderId', datafield: 'WORegisterId', hidden: true, filterable: false},
+                { text: 'Expense No.', dataField: 'ExpenseNo',width:'20%'},
+                { text: 'Expense Date', dataField: 'ExpenseDate',width:'20%'},
+                { text: 'Workorder No.', dataField: 'WONo', width:'20%'},
+                { text: 'Amount', dataField: 'Amount',width:'20%', cellsalign: 'right',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                    }},
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width:'20%',
+                    cellsrenderer: function (row) {
+                        var ExpenseId = $treeGrid.jqxGrid('getCellValue', row, 'ExpenseId'),
+                            WorkOrderId = $treeGrid.jqxGrid('getCellValue', row, 'WorkOrderId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'cb/expense/index/'+ExpenseId+'/edit" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="expenseDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                        return editLink;
+                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'cb/expense/deleteexpense',
+                type: 'POST',
+                data: {"ExpenseId": rowData.ExpenseId, "Remarks": remarks},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the expense!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert('Failed to delete the expense!');
+                }
+            });
+            $remarks.val('');
+        });
+    });
+
+    function expenseDelete(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+        $('#delEntryName').html(rowData.ReceiptNo);
+        $("#remarks").val('');
+    }
+
+    //bindJqxGridAutoResize();
+</script>

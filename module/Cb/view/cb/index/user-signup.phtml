@@ -1,0 +1,148 @@
+<div class="signup_wrapper">
+	<div class="signup_header">
+		<img src="<?php echo $this->basePath(); ?>/images/rabills_logo.png" class="login_logo" alt="" title="BuildSuperFast" />
+	</div>
+	<div class="signup_content">
+		<div class="signupcnt_left float_l">
+			<h1>Sign Up</h1>
+			<p>Welcome to RA-Bills, your comprehensive billing solution.</p>
+			<form id="userSignupForm" method="post" autocomplete="off">
+				<input type="hidden" id="subscriberId" name="subscriberId" value="<?php echo $subscriberId; ?>" />
+				<ul class="login_form cb_login_form">
+					<li class="login_input">
+						<p class="label_p"><label for="firstName">First Name</label></p>
+						<input type="text" id="firstName" name="firstName" autocomplete="off"  />
+                        <div class="error_message"><p>Required</p></div>
+					</li>
+					<li class="login_input">
+						<p class="label_p"><label for="lastName">Last Name</label></p>
+						<input type="text" id="lastName" name="lastName" autocomplete="off" />
+						<div class="error_message"><p>Required</p></div>
+					</li>
+					<li class="login_input">
+						<p class="label_p"><label for="email">Email</label></p>
+						<input type="text" id="email" name="email" autocomplete="off"  />
+						<div class="error_message"></div>
+					</li>
+					<li class="login_input">
+						<p class="label_p"><label for="username">Username</label></p>
+						<input type="text" id="username" name="username" autocomplete="off" />
+                        <div class="error_message"><p>Required</p></div>
+					</li>
+					<li class="login_input">
+						<p class="label_p"><label for="password">Password</label></p>
+						<input type="password" id="password" name="password" autocomplete="off" />
+						<div class="error_message"><p>Required</p></div>
+					</li>
+					<li class="login_input animated fadeInUp">
+						<p class="label_p"><label for="confirmPassword">Confirm Password</label></p>
+						<input type="password" id="confirmPassword" name="confirmPassword" autocomplete="off" />
+						<div class="error_message"></div>
+					</li>
+					<li class="login_input">
+						<p class="label_p"><label for="mobile">Mobile Number (10 digits)</label></p>
+						<input type="text" id="mobile" name="mobile"  maxlength="10" autocomplete="off" onKeyPress="return isNumberKey(event);" />
+						<div class="error_message"><p>Required</p></div>
+					</li>
+					<li>
+						<div class="login_load brad_2"><p><img src="<?php echo $this->basePath(); ?>/images/loading.gif" alt="" />Loading &nbsp;&nbsp;&nbsp;Please Wait!</p></div>
+						<button type="submit" name="userSignup" class="signup_btn brad_2 ripple" onclick="return userSignupValidate();">Get Started</button>
+					</li>
+				</ul>
+			</form>
+		</div>
+		<div class="signup_footer clear">
+			<p class="txt_center">Copyright © <?php echo date('Y'); ?> RA-Bills.com. All Rights Reserved <img class="float_r" src="<?php echo $this->basePath(); ?>/images/bsf_flogo.jpg" alt="" /></p>
+		</div>
+	</div>
+</div>
+<script>
+function userSignupValidate()
+{
+	$('.error_message').hide();
+	var sFlag = 0;
+	if($('#firstName').val() == '') {
+		$('#firstName').closest('.login_input').find(".error_message").show();
+		$('#firstName').focus();
+		sFlag = 1;
+		return false;
+	}
+	if($('#lastName').val() == '') {
+		$('#lastName').closest('.login_input').find(".error_message").show();
+		$('#lastName').focus();
+		sFlag = 1;
+		return false;
+	}
+	if($('#email').val() == '') {
+		$('#email').closest('.login_input').find(".error_message").show();
+		$('#email').closest('.login_input').find(".error_message").html('<p>Required</p>');
+		$('#email').focus();
+		sFlag = 1;
+		return false;
+	} else if($('#email').val() != '' && validateEmail($('#email').val())==false) {
+		$('#email').closest('.login_input').find(".error_message").show();
+		$('#email').closest('.login_input').find(".error_message").html('<p>Please enter valid email id</p>');
+		$('#email').focus();
+		sFlag = 1;
+		return false;
+	}
+	if($('#username').val() == '') {
+		$('#username').closest('.login_input').find(".error_message").show();
+		$('#username').focus();
+		sFlag = 1;
+		return false;
+	}
+	if($('#password').val() == '') {
+		$('#password').closest('.login_input').find(".error_message").show();
+		$('#password').focus();
+		sFlag = 1;
+		return false;
+	}
+	if($('#confirmPassword').val() == '') {
+		$('#confirmPassword').closest('.login_input').find(".error_message").show();
+		$('#confirmPassword').closest('.login_input').find(".error_message").html('<p>Required</p>');
+		$('#confirmPassword').focus();
+		sFlag = 1;
+		return false;
+	} else if($('#password').val() != $('#confirmPassword').val()) {
+		$('#confirmPassword').closest('.login_input').find(".error_message").show();
+		$('#confirmPassword').closest('.login_input').find(".error_message").html('<p>Password mismatch!</p>');
+		$('#confirmPassword').focus();
+		sFlag = 1;
+		return false;
+	}
+
+    var mobileNo = $.trim($('#mobile').val());
+    if(mobileNo == '') {
+        $('#mobile').closest('.login_input').find(".error_message").show();
+        $('#mobile').focus();
+        sFlag = 1;
+        return false;
+    }
+    if(!/^\+?[0-9\-]{10,20}$/.test(mobileNo)) {
+        $('#mobile').closest('.login_input').find(".error_message").html('<p>Please enter a valid mobile number!</p>').show();
+        $('#mobile').focus();
+        sFlag = 1;
+        return false;
+    }
+
+	if(sFlag == 0) {
+		$.post(getBaseURL()+'cb/index/check-username-email', { userName: $('#username').val(), eMail: $('#email').val() },
+		function(data) {
+			var chkusr = JSON.parse(data);
+			if(chkusr.uCount != 0) {
+				$('#username').closest('.login_input').find(".error_message").show();
+				$('#username').closest('.login_input').find(".error_message").html('<p>Username already exists!</p>');
+				$('#username').focus();
+			} else if(chkusr.eCount != 0) {
+				$('#email').closest('.login_input').find(".error_message").show();
+				$('#email').closest('.login_input').find(".error_message").html('<p>Email already exists!</p>');
+				$('#email').focus();
+			} else {
+				$("#userSignupForm").submit();
+			}
+		});
+	}
+	return false;
+}
+</script>

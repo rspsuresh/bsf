@@ -1,0 +1,461 @@
+<!--Handson Table plugin-->
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/handsontable/css/handsontable.full.min.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/lodash.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/underscore.string.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeral.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeric.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/formula.js"></script>
+<script type="text/javascript"src="<?php echo $this->basePath(); ?>/library/handsontable/js/parser.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.formula.js"></script>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    .form-control {
+        box-shadow:none !important
+    }
+    #HandsonTableWrapper 								{height: 100%; width: 100%; overflow: auto; }
+    #HandsonWrapper 									{display: none;}
+    #HandsonTableModal 									{float: left; width:100%;}
+    .HandsonModalBtns 									{float:right;margin:20px 0;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form class="form-horizontal" method="post" id="formBid">
+                <div id="MainWrapper">
+                    <div class="col-lg-12">
+                        <h1>Commercial - Bid status <?php echo isset($EnquiryName) ? '- ' .$EnquiryName:'';?></h1>
+                    </div>
+                    <div class="col-lg-12 zoomIn animated">
+                        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                            <div class="col-sm-6 col-sm-offset-3 top-next">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" name="ref_date" id="ref_date" class="form-control date_picker lbl_move" value="<?php if($EnquiryFollowupId==0) echo date("d-m-Y",strtotime($Date)); else echo "";?>"  label="Date"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <select class="form-control single_dropdown lbl_move" name="Status" id="Status" label="Current status" style="width:100%;">
+                                                <option></option>
+                                                <option value="Win">Win</option>
+                                                <option value="Loss">Loss</option>
+                                                <option value="NoResult">No Result</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="Participants" id="Participants" maxlength="3" onblur="AddParticipants();" class="form-control lbl_move" value="" onKeyPress="return isNumberKey(event);" label="Number Of Participants"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="Position" id="Position" maxlength="4" class="form-control lbl_move" value="L"  label="Our position"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <textarea class="form-control lbl_move" name="Remarks" id="Remarks" label="Remarks"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divcomp" class="col-lg-12 clear" style="display: none">
+                            <h1>Competitor Analysis<button type="button" class="pull-right btn" onclick="showExcelWithDetails();">With Details</button><div class="clearfix"></div></h1>
+                            <div class="table-responsive">
+                                <table class="table tbltop_bdr0"  id="CompetitiveTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Contractor name</th>
+                                        <th class="text-right">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 cht" style="margin-top:10px; height:350px;display: none" id="FlowChart"></div>
+                </div>
+                <!--Handson Table-->
+                <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0" id="HandsonWrapper">
+                    <div class="md-popup">
+                        <div id="HandsonTableModal">
+                            <h1 id="modalHeader">Competitive Details</h1>
+                            <div class="col-lg-12 clear">
+                                <div class="tabs-content" style="margin-top:0px; display:block;">
+                                    <div id="HandsonTableWrapper" class="hot handsontable"></div>
+                                    <input type="hidden" name="Measurement" id="Measurement"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="HandsonModalBtns">
+                                    <button type="button" class="md_cance" onClick="return hideHandsonWrapper()">Cancel</button>
+                                    <button type="button" class="md_ok" onClick="return updateMSheet()" id="modalAddUpdateBtn">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="formSubmit();" class="ripple">Save</a></li>
+        <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/followup/followup';?>" method="post" id="frmfollowup">
+            <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+            <input type="hidden" id="formfrom" name="formfrom"/>
+            <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $EnquiryName; ?>"/>
+            <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Go Back</a></li>
+        </form>
+    </ul>
+</div>
+<!--Table Template-->
+<script id="dummy-Competitive"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="TransId__" id="TransId__"/>
+        <td width="3%"><input readonly class="parent_text" value="L_" name="Position__" id="Position__" type="text" /></td>
+        <td width="20%"><input class="parent_text" name="ContractorName__" id="ContractorName__" type="text" onchange="updateFlowChart();refreshMSheet();"/></td>
+        <td width="10%"><input class="parent_text text-right" maxlength="15" name="Amount__" id="Amount__" type="text" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="updateFlowChart();"/></td>
+    </tr>
+</script>
+<!--Handson Script-->
+<script type="text/javascript">
+    var arr_quotaions = <?php echo (isset($quotations)) ? json_encode($quotations) : '[]';?>;
+    var $MainWrapper = $('#MainWrapper'),
+        $savebtn = $('.savebtn_area'),
+        $HandsonWrapper = $('#HandsonWrapper'),
+        $HandsonTableModal = $('#HandsonTableModal'),
+        $modalAddUpdateBtn = $('#modalAddUpdateBtn'),
+        $modalHeader = $('#modalHeader'),
+        $TemplateName = $('#TemplateName'),
+        $TemplateId = $('#TemplateId');
+
+    var handsonTableData =  [[]],
+        handsonTable = null,
+        $HandsonTableWrapper = document.getElementById('HandsonTableWrapper'),
+        HandsonTableSettings = {
+            colHeaders:true,
+            rowHeaders: true,
+            contextMenu: true,
+            minRows: 25,
+            minCols: 10,
+            minSpareRows: 1,
+            stretchH: 'all',
+            formulas: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            fillHandle: true,
+            data: handsonTableData,
+            beforeChange: function(changes, source) {
+                if(source == 'paste') {
+                    var changesJSON = JSON.parse(JSON.stringify(changes));
+                    for(var i=0; i<changesJSON.length; i++) {
+                        var row = changesJSON[i][0],
+                            value = changesJSON[i][3];
+
+                        if(value.indexOf('=') == -1)
+                            return;
+
+                        changes[i][3] = value.replace(/\d+/g, function(n){return  parseInt(row + 1, 10); });
+                    }
+                }
+            },
+            cells: function (row, col, prop) {
+                var cellProperties = {};
+
+                if (row === 0) {
+                    cellProperties.renderer = firstRowRenderer;
+                }
+
+                return cellProperties;
+            }
+        };
+
+    function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
+        td.style.fontWeight = 'bold';
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        handsonTable = new Handsontable($HandsonTableWrapper, HandsonTableSettings);
+    });
+    var summationColumn = '',
+        selColumns = [],
+        tempSelectedCol = [];
+    function AddTemplate() {
+        handsonTableData = [[]];
+        summationColumn = '';
+        selColumns = [];
+        tempSelectedCol = [];
+        $TemplateName.val('');
+        $TemplateId.val('');
+        renderHandsonTable();
+
+        $modalAddUpdateBtn.html('Add');
+        $modalHeader.html('Add Template');
+
+        $MainWrapper.hide();
+        $HandsonWrapper.data('type','add').fadeIn();
+    }
+
+    function hideHandsonWrapper(){
+        $HandsonWrapper.hide();
+        $savebtn.show();
+        $MainWrapper.fadeIn();
+    }
+
+    function renderHandsonTable() {
+        if(typeof handsonTableData != 'object')
+            handsonTableData  = [[]];
+
+        handsonTable.loadData(handsonTableData);
+        handsonTable.render();
+    }
+
+    function updateMSheet() {
+        var data = filterArray(handsonTable.getData()),
+            jsonData = JSON.stringify(data);
+        if(jsonData == '[]')
+            jsonData = '[[]]';
+
+        $('#Measurement').val(jsonData);
+        $HandsonWrapper.hide();
+        $MainWrapper.fadeIn();
+        $savebtn.show();
+    }
+
+    function refreshMSheet() {
+        var arr_contractName = ["Serial No.", "Specification"];
+        $.each($('input[id^=ContractorName_]'), function () {
+            var value = $.trim($(this).val());
+            if (value.length == 0)
+                return false;
+
+            arr_contractName.push(value);
+        });
+
+        handsonTableData[0] = arr_contractName;
+        handsonTable.loadData(handsonTableData);
+        handsonTable.render();
+
+        var data = filterArray(handsonTable.getData()),
+            jsonData = JSON.stringify(data);
+        if(jsonData == '[]')
+            jsonData = '[[]]';
+
+        $('#Measurement').val(jsonData);
+    }
+
+    // Filter all empty rows
+    function filterArray(arr) {
+        var checkNull = true;
+        arr =  $.grep($(arr).toArray().reverse(), function (n,i) {
+            var isValid = false;
+
+            if(!checkNull)
+                return true;
+
+            $.each(n, function(j,obj) {
+                if(obj != null) {
+                    isValid = true;
+                    checkNull = false;
+                    return false;
+                }
+            });
+
+            return isValid;
+        });
+        return arr.reverse();
+    }
+
+    function showExcelWithDetails() {
+        if($('#Participants').val() == '' || $('#Participants').val() == 0) {
+            alert('Please fill Number of Participants!');
+            return false;
+        }
+
+        var isFieldsFilled = true;
+        var arr_contractName = [["Serial No.", "Specification"]];
+        $.each($('input[id^=ContractorName_]'), function () {
+            var value = $.trim($(this).val());
+
+            if(value.length == 0) {
+                isFieldsFilled = false;
+                return false;
+            }
+
+            arr_contractName[0].push(value);
+        });
+        if(!isFieldsFilled) {
+            alert('Please fill all Contractor names!');
+            return false;
+        }
+
+        if($('#Measurement').val().length == 0) {
+            $.each(arr_quotaions, function (i,o) {
+                var tmp_arr = [];
+                tmp_arr.push(o.SerialNo);
+                tmp_arr.push(o.Specification);
+                arr_contractName.push(tmp_arr);
+            });
+            handsonTableData = arr_contractName;
+        } else {
+            handsonTableData[0] = arr_contractName[0];
+        }
+        renderHandsonTable();
+
+        $savebtn.hide();
+        $MainWrapper.hide();
+        $HandsonWrapper.fadeIn();
+    }
+</script>
+<script type="text/javascript">
+    var FlowChart = null;
+    function updateFlowChart() {
+        var $amount = $('input[id^=Amount_]');
+        var chartData = [];
+        $.each($amount, function() {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+
+            var key = name.split('_')[1],
+                name = $('#ContractorName_'+key).val(),
+                amount =  parseFloat(isNullCheck($this.val(),'number'));
+
+            if (isNaN(parseFloat(amount)) || name == '')
+                return;
+
+            chartData.push({
+                'Name': name,
+                'Amount': amount
+            });
+        });
+
+        $('#FlowChart').hide();
+
+        if (FlowChart != null) {
+            FlowChart.dataProvider = chartData;
+            FlowChart.validateData();
+            return;
+        }
+
+        $('#FlowChart').show();
+
+        FlowChart = AmCharts.makeChart("FlowChart", {
+            "theme": "light",
+            "type": "serial",
+            "marginRight": 80,
+            "dataProvider": chartData,
+            "valueAxes": [{
+                "axisAlpha": 0,
+                "position": "left",
+                "title": "Contractors"
+            }],
+            "startDuration": 1,
+            "graphs": [{
+                "balloonText": "<b>[[category]]: [[value]]</b>",
+                "fillColorsField": "color",
+                "fillAlphas": 0.9,
+                "lineAlpha": 0.2,
+                "type": "column",
+                "valueField": "Amount"
+            }],
+            "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": false
+            },
+            "categoryField": "Name",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "labelRotation": 45
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    $(function(){
+        var arrContractBidStatus = <?php if(isset($ContractBidStatus)) echo json_encode($ContractBidStatus); else echo "[]";?>;
+        var arrBidCompetitorTrans = <?php if(isset($BidCompetitorTrans)) echo json_encode($BidCompetitorTrans); else echo "[]";?>;
+//        console.log(arrBidCompetitorTrans);
+        if(arrContractBidStatus.length != 0) {
+//            console.log(arrContractBidStatus)
+            $("#Status option[value= '"+arrContractBidStatus.BStatus+"']").prop('selected', true);
+            $("#Status").trigger('change');
+            $("#ref_date").val(arrContractBidStatus.RefDate).trigger('change');
+            $('#Participants').val(arrContractBidStatus.NoOfParticipants).trigger('change');
+            $('#Position').val(arrContractBidStatus.Position).trigger('change');
+            $('#Remarks').val(arrContractBidStatus.Remarks).trigger('change');
+//            var handsonTableData = JSON.parse(arrContractBidStatus.Measurement);
+            $('#Measurement').val(arrContractBidStatus.Measurement).trigger('change');
+        }
+        if(arrBidCompetitorTrans.length != 0) {
+//            console.log(arrBidCompetitorTrans)
+            var Participants = arrContractBidStatus.NoOfParticipants;
+            var template = $('#dummy-Competitive').html();
+            var $tbody = $('#CompetitiveTable').find('tbody');
+            var rowid = 0;
+            $.each(arrBidCompetitorTrans, function(i, o) {
+                rowid += 1;
+                $tbody.append(template.replace(/__/g, '_' + rowid));
+                $('#Position_' + rowid).val(o.Position);
+                $('#ContractorName_' + rowid).val(o.CompetitorName);
+                $('#Amount_' + rowid).val(sanitizeNumber(o.Amount,3,true,true));
+
+                if(typeof o.TransId != 'undefined') {
+                    $('#TransId_'+rowid).val(o.TransId);
+                }
+            });
+            if (rowid >0)  $('#divcomp').show();
+            updateFlowChart();
+        }
+
+        $('.ripple').materialripple();
+        var dp1 = $('.date_picker').datepicker().on('changeDate', function() {
+            $('.datepicker').hide();
+        }).data('datepicker');
+        $('.toolbar_ddown ul').slimScroll({
+            height : '100%',
+            alwaysVisible: false,
+            railVisible: true,
+            railColor: '#cececd',
+            railOpacity: 1
+        });
+    });
+    function AddParticipants() {
+        var $tbody = $('#CompetitiveTable').find('tbody');
+        $tbody.html("");
+        var Participants = parseInt(isNullCheck($('#Participants').val(),'number'));
+        var template = $('#dummy-Competitive').html();
+        for(var i=1;i<=Participants;i++) {
+            $tbody.append(template.replace(/L_/g, 'L'+ i).replace(/__/g, '_' + i));
+        }
+        if (Participants >0)  $('#divcomp').show();
+    }
+    function formSubmit() {
+        $('#formBid').submit();
+    }
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+</script>
+

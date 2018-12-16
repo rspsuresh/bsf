@@ -1,0 +1,90 @@
+<div class="container">
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="login-panel panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Please Sign In</h3>
+				</div>
+				<div class="panel-body">
+					<form role="form" method="post" onsubmit="return false;">
+						<fieldset>
+							<div class="form-group">
+								<input class="form-control checkEmp" placeholder="E-mail" error="Please fill the valid user name" name="email" type="text" autofocus/>
+							</div>
+							<div class="form-group">
+								<input class="form-control checkEmp" placeholder="Password" error="Please fill the valid password" name="password" type="password" value="">
+							</div>
+							<div class="checkbox">
+								<label>
+									<input name="remember" type="checkbox" value="Remember Me">Remember Me
+								</label>
+							</div>
+							<!-- Change this to a button or input when using this as a form -->
+							<a class="btn btn-lg btn-success btn-block submitButton">Login</a>
+							<input type="submit" style="visibility: hidden;" />
+						</fieldset>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+function checkSubmit(){
+	var bool = true;
+/* 	var pattern = /^[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*@[a-z0-9]+(\-[a-z0-9]+)*(\.[a-z0-9]+(\-[a-z0-9]+)*)*\.[a-z]{2,4}$/;		
+	$(".checkEmp").each(function(){
+		if($(this).val().trim().length == 0){
+			bool=false;
+			alert("Please fill the value");
+			$(this).focus();
+			return false;
+		}
+	});
+	if(bool){
+		if (!pattern.test($("#email").val())) {
+			$("#email").focus();
+			bool = false;
+			alert('Please enter vaild email address');
+		}			
+	} */
+	$(".checkEmp").each(function(){
+		if($(this).val().trim().length == 0){
+			bool=false;
+			alert($(this).attr("error"));
+			$(this).focus();
+			return false;			
+		}
+	});
+	if(bool){
+		var formData = $("form").serializeArray();
+		$.ajax({
+			url:getBaseURL()+"vendor/index/vendor-login",
+			type:"post",
+			data:formData,
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				//alert(JSON.stringify(data));
+				if(data['data'] == 1){
+					alert("Please check the user name and password");
+				}
+				else if(data['data'] == 2){
+					location.replace("vendor-dashboard");
+				}
+				else if(data['data'] == 3){
+					alert("You haven't right to access this account. Please check with admin");
+				}
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"------------"+errorThrown);
+			}
+		});
+	}		
+}
+$('form').on('submit', function(){
+	checkSubmit();	
+});
+$(".submitButton").click(function(){
+	checkSubmit();
+});
+</script>

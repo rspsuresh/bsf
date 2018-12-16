@@ -1,0 +1,2922 @@
+<?php
+function nonZeroNumber($number) {
+    if(!isset($number) || !is_numeric($number) || $number <= 0) {
+        return '';
+    } else {
+        return round($number, 2);
+    }
+}
+?>
+
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<script id="coApp-row"  type="text/template" class="hide">
+    <div class="form-group padtop10 empty-coApp coApp__">
+        <input type="text" name="coApp_name__" id="coApp_name__" onkeypress="addNewRow(this);" class="form-control lbl_move"
+               label="Co-Applicant--" value=""/>
+    </div>
+</script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 data-bsfhead="Finalisation">Finalisation</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="col-lg-12 clear">
+                <div class="kickoff_area col-lg-12 clear">
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-12 col-md-12 col-sm-12 cnt_sliders padlr0">
+                            <?php if(isset($unitBooking)): ?>
+                            <form id="finalisation-form" method="post">
+                                <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+                                <input type="hidden" name="booking_id" value="<?php echo $unitBooking['BookingId']; ?>">
+                                <div id="carousel" class="carousel slide" data-ride="carousel">
+                                    <!-- Wrapper for slides -->
+                                    <div class="carousel-inner" role="listbox">
+                                        <!--step 1-->
+                                        <div class="item active">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <div class="float_l">
+                                                    <label for="booking_no" data-bsfshare="booking_no" class="bk_lbl bk_lbl_inpt">Booking no <span class="colon_r">:</span></label>
+                                                    <input type="text" data-bsfshare="BookingNo" class="bk_lbl_inpt inputbg_ef bk_inpt1" name="booking_no" id="booking_no" value="<?php echo $unitBooking['BookingNo']; ?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+                                                <div class="col-lg-offset-1">
+                                                    <label for="booking_date" data-bsfshare="Booking Date" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Booking Date <span class="colon_r">:</span></label>
+                                                    <input type="text" data-bsfshare="BookingDate" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="booking_date" id="booking_date" value="<?php echo date('d-m-Y', strtotime($unitBooking['BookingDate'])); ?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 m_tb10">
+                                                <div class="col-lg-8 col-lg-offset-2">
+                                                    <div class="row">
+                                                        <div class="form-group m_top20 col-lg-12 padtop20">
+                                                            <input type="text" name="project_name" class="form-control lbl_move"  data-bsfshare="ProjectName" label="Project Name"
+                                                                   value="<?php echo $unitBooking['ProjectName']; ?>" disabled>
+                                                            <input type="hidden" name="project_id" id="project_id" value="<?php echo $unitBooking['ProjectId']; ?>">
+                                                        </div>
+                                                        <div class="form-group col-lg-12 padtop20">
+                                                            <input type="text" name="unit_no" class="form-control lbl_move" data-bsfshare="UnitNo" label="Unit No"
+                                                                   value="<?php echo $unitBooking['UnitNo']; ?>" disabled>
+                                                            <input type="hidden" name="unit_id" id="unit_id" value="<?php echo $unitBooking['UnitId']; ?>">
+                                                        </div>
+                                                        <div class="form-group col-lg-12 padtop20">
+                                                            <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2">
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" name="buyer_investor" id="buyer" value="B"
+                                                                        <?php echo ($unitBooking['CustomerType'] == 'B')?'checked':''; ?>>
+                                                                    <label for="buyer">Buyer</label>
+                                                                </p>
+
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" name="buyer_investor" id="investor" value="I"
+                                                                        <?php echo ($unitBooking['CustomerType'] == 'I')?'checked':''; ?>>
+                                                                    <label for="investor">Investor</label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div id="unitprice-wrapper" class="form-group col-lg-12 padtop10">
+                                                            <input type="text" name="unit_rate" id="unit_rate" data-bsfshare="UnitRate" class="form-control lbl_move"
+                                                                   label="Unit Rate (Per Sq.ft)" readonly value="<?php echo $unitBooking['Rate']; ?>"/>
+                                                        </div>
+                                                        <div class="form-group col-lg-12 padtop20">
+                                                            <label class="txt_left control-label">Discount based on</label>
+                                                            <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2">
+                                                                <p class="col-lg-4">
+                                                                    <input type="radio" name="discount_based" id="normal" value="N"
+                                                                        <?php echo ($unitBooking['DiscountBased'] == 'N')?'checked':'checked'; ?>>
+                                                                    <label for="normal">Normal</label>
+                                                                </p>
+
+                                                                <p class="col-lg-4">
+                                                                    <input type="radio" name="discount_based" id="plan" value="P"
+                                                                        <?php echo ($unitBooking['DiscountBased'] == 'P')?'checked':''; ?>>
+                                                                    <label for="plan">Plan</label>
+                                                                </p>
+                                                                <p class="col-lg-4">
+                                                                    <input type="radio" name="discount_based" id="referal" value="R"
+                                                                        <?php echo ($unitBooking['DiscountBased'] == 'N' && $unitBooking['ReferalType'] !='')?'checked':''; ?>>
+                                                                    <label for="referal">Referal</label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div id="plan-list-wrapper" <?php if(isset($unitBooking)) { if($unitBooking['DiscountBased']=='P') { echo "style='display:block;'"; } else { echo "style='display:none;'"; } } ?> class="form-group col-lg-12 padtop10">
+                                                            <select id="plan_list" name="plan_list" class="form-control single_dropdown lbl_move"
+                                                                    data-bsfshare="PlanName" label="Select Plan" style="width:100%;" onchange="planDetails($(this).val());">
+                                                                <option value=""></option>
+                                                                <?php if(isset($planList)) {
+                                                                    foreach ($planList as $planDetails) { ?>
+                                                                        <option value="<?php echo $planDetails['PlanId']; ?>" <?php echo ($unitBooking['PlanId'] == $planDetails['PlanId']) ? 'selected' : ''; ?>><?php echo $planDetails['PlanName']; ?></option>
+                                                                    <?php }
+                                                                }?>
+                                                            </select>
+                                                        </div>
+                                                        <div id="divreferalType" class="form-group col-lg-12 padtop10" <?php if(isset($unitBooking)) { if($unitBooking['ReferalType']!='') { echo "style='display:block;'"; } else { echo "style='display:none;'"; } } ?> >
+                                                            <label class="txt_left control-label">Referal Type</label>
+                                                            <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2">
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" name="referalType" class="referalhide" id="Buyer" value="B"
+                                                                        <?php echo ($unitBooking['ReferalType'] == 'B')?'checked':''; ?>>
+                                                                    <label for="Buyer">Buyer</label>
+                                                                </p>
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" name="referalType" class="referalhide" id="Employee" value="E"
+                                                                        <?php echo ($unitBooking['ReferalType'] == 'E')?'checked':''; ?>>
+                                                                    <label for="Employee">Employee</label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div id="divBuyer" class="form-group col-lg-12 padtop10" <?php if(isset($unitBooking)) { if($unitBooking['ReferalType']=='B') { echo "style='display:block;'"; } else { echo "style='display:none;'"; } } ?> >
+                                                            <select id="buyerName" name="buyerName" onchange="showNormal()" class="form-control single_dropdown lbl_move"
+                                                                    label="Select Buyer" style="width:100%;" >
+                                                                <option value=""></option>
+                                                                <?php if(isset($buyerList)) {
+                                                                    foreach ($buyerList as $buyerDetails) { ?>
+                                                                        <option value="<?php echo $buyerDetails['BuyerId']; ?>" <?php if(isset($unitBooking)) { if($unitBooking['ReferalTypeId']==$buyerDetails['BuyerId']) { echo "selected"; } else { echo ""; } } ?> ><?php echo $buyerDetails['UserName']; ?></option>
+                                                                    <?php }
+                                                                }?>
+                                                            </select>
+                                                        </div>
+                                                        <div id="divEmployee" class="form-group col-lg-12 padtop10" <?php if(isset($unitBooking)) { if($unitBooking['ReferalType']=='E') { echo "style='display:block;'"; } else { echo "style='display:none;'"; } } ?> >
+                                                            <select id="employeeName" name="employeeName" onchange="showNormal()" class="form-control single_dropdown lbl_move"
+                                                                    label="Select Employee" style="width:100%;" >
+                                                                <option value=""></option>
+                                                                <?php if(isset($employeeList)) {
+                                                                    foreach ($employeeList as $employeeDetails) { ?>
+                                                                        <option value="<?php echo $employeeDetails['UserId']; ?>" <?php if(isset($unitBooking)) { if($unitBooking['ReferalTypeId']==$employeeDetails['UserId']) { echo "selected"; } else { echo ""; } } ?> ><?php echo $employeeDetails['UserName']; ?></option>
+                                                                    <?php }
+                                                                }?>
+                                                            </select>
+                                                        </div>
+                                                        <div id="discount-type-wrapper" class="form-group col-lg-12 padtop10">
+                                                            <select id="discount_type" name="discount_type" class="form-control single_dropdown lbl_move plan_disabled"
+                                                                    label="Select Discount Type" data-bsfshare="DiscountType" style="width:100%;">
+                                                                <option value=""></option>
+                                                                <option value="R" <?php echo (trim($unitBooking['DiscountType']) == 'R')?'selected':''; ?>>Rate/Sq.ft</option>
+                                                                <option value="L" <?php echo (trim($unitBooking['DiscountType']) == 'L')?'selected':''; ?>>Lumpsum</option>
+                                                                <option value="P" <?php echo (trim($unitBooking['DiscountType']) == 'P')?'selected':''; ?>>Percentage</option>
+                                                            </select>
+                                                        </div>
+                                                        <div id="lumpsum-type-wrapper" class="form-group col-lg-12 padtop10 animated fadeInUp <?php echo ($unitBooking['DiscountType'] != 'L' && $unitBooking['DiscountType'] != 'P')?'hide':''; ?>">
+                                                            <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2">
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" class="plan_disabled" name="lumpsum_type" id="lumpsum_type_overall" value="O" <?php echo ($unitBooking['LumpsumReceiptId'] == 0)?'checked':''; ?>>
+                                                                    <label for="lumpsum_type_overall">OverAll</label>
+                                                                </p>
+
+                                                                <p class="col-lg-6">
+                                                                    <input type="radio" class="plan_disabled" name="lumpsum_type" id="lumpsum_type_receiptwise" value="R" <?php echo ($unitBooking['LumpsumReceiptId'] != 0)?'checked':''; ?>>
+                                                                    <label for="lumpsum_type_receiptwise">Receipt wise</label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div id="lumpsum-receipt-wise-wrapper" class="form-group col-lg-12 padtop10 animated fadeInUp <?php echo ($unitBooking['LumpsumReceiptId'] == 0)?'hide':''; ?>">
+                                                            <select id="lumpsum_receipt_wise" name="lumpsum_receipt_wise" class="plan_disabled form-control single_dropdown lbl_move"
+                                                                    label="Select Receipt Type" data-bsfshare="ReceiptType" style="width:100%;">
+                                                                <option value=""></option>
+                                                                <?php foreach($arrReceiptTypes as $receipt): ?>
+                                                                    <option value="<?php echo $receipt['ReceiptTypeId']; ?>" data-type="<?php echo $receipt['Type']; ?>" <?php echo ($unitBooking['LumpsumReceiptId'] == $receipt['ReceiptTypeId'])?'selected':''; ?>><?php echo $receipt['ReceiptTypeName']; ?></option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
+                                                        <div id="discount-wrapper" class="form-group col-lg-12 padtop10 animated fadeInUp <?php echo (trim($unitBooking['DiscountType']) == '')?'hide':''; ?>">
+                                                            <input type="text" name="discount" id="discount" class="plan_disabled form-control lbl_move"
+                                                                   label="Discount" data-bsfshare="Discount" onkeypress="return isDecimal(event, this)"
+                                                                   value="<?php echo ($unitBooking['Discount'] > 0)?$unitBooking['Discount']:'0'; ?>"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="unit-detail-wrapper" class="col-lg-6 m_tb10 hide">
+                                                <div class="form-group stginner_cnt">
+                                                    <div class="col-lg-12">
+                                                        <div class="row">
+                                                            <div class="stginner_h5">
+                                                                <h5>Unit Detail</h5>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Unit Type</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_UnitTypeName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Block Name</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_BlockName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label
+                                                                    class="col-lg-5 padlr0 col-md-5 col-sm-5 col-md-4 txt_left control-label">Level</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_FloorName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Area</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><span id="unitdetail_UnitArea"></span> Sq.ft</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">UDS Land Area</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_UDSLandArea"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Rate</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_Rate"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="liner"></div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Base Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_BaseAmt"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Advance
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_AdvAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Land Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_LandAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Construction Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_ConstructionAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Other Cost
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_OtherAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!--   <div class="row">
+                                                               <div class="col-lg-12">
+                                                                   <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Gross Amont</label>
+
+                                                                   <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                       <p id="unitdetail_GrossAmount"></p>
+                                                                   </div>
+                                                               </div>
+                                                           </div>-->
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Qualifier
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_QualifierAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="net_amnt">
+                                                            <h2>Gross Amount</h2>
+
+                                                            <h1>Rs. <span id="unitdetail_NetAmt"></span></h1>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                <ul>
+                                                    <li class="save_btn float_r">
+                                                        <a href="#" data-slide="next" data-stepno="2" class="ripple carousel-next-btn">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <!--step 2-->
+                                        <div class="item">
+                                            <div class="col-lg-12 padlr0">
+                                                <div class="col-lg-6 col-md-6 col-sm-8 padlr0">
+                                                    <div class="form-group m_top20 col-lg-12">
+                                                        <select id="payment_schedule" name="payment_schedule" class="form-control single_dropdown lbl_move"
+                                                                label="Select Payment Schedule..." style="width:100%;">
+                                                            <option value="-1"></option>
+                                                            <?php if(isset($arrPaymentSchedules)): ?>
+                                                                <?php foreach($arrPaymentSchedules as $paymentSchedule): ?>
+                                                                    <option value="<?php echo $paymentSchedule['PaymentScheduleId']; ?>" data-typeid="<?php echo $paymentSchedule['ScheduleTypeId']; ?>"
+                                                                        <?php echo ($paymentSchedule['PaymentScheduleId'] == $unitBooking['PaymentScheduleId'])?'selected':''; ?>
+                                                                        ><?php echo $paymentSchedule['PaymentSchedule']; ?></option>
+                                                                <?php endforeach; ?>
+                                                            <?php endif; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <!--        <div id="other-cost-wrapper" class="hide animated fadeInUp">-->
+                                                <!--            <div class="col-lg-6 col-md-8 clear">-->
+                                                <!--                <p class="heading_checkbox">Select Other Cost</p>-->
+                                                <!---->
+                                                <!--                <div class="card">-->
+                                                <!--                    <div class="card-body" style="min-height:50px; max-height:310px;">-->
+                                                <!--                        <ul id="unCheckedUl" class="list ui-sortable other-cost" data-sortable="true">-->
+                                                <!--                            --><?php //if(isset($arrNonSelectedOtherCosts)): ?>
+                                                <!--                                --><?php //foreach($arrNonSelectedOtherCosts as $otherCost): ?>
+                                                <!--                                    <li class="tile ui-sortable-handle">-->
+                                                <!--                                        <div class="checkbox checkbox-styled tile-text vendor_checkboxborder_gray">-->
+                                                <!--                                            <label>-->
+                                                <!--                                                <input type="checkbox" name="other_cost[]" value="--><?php //echo $otherCost['OtherCostId']; ?><!--">-->
+                                                <!--                                                <span>--><?php //echo $otherCost['OtherCostName']; ?><!--</span>-->
+                                                <!--                                                </label>-->
+                                                <!--                                            </div>-->
+                                                <!--                                    </li>-->
+                                                <!--                                --><?php //endforeach; ?>
+                                                <!--                            --><?php //endif; ?>
+                                                <!--                        </ul>-->
+                                                <!--                    </div>-->
+                                                <!--                </div>-->
+                                                <!--            </div>-->
+                                                <!--            <div class="col-lg-6 col-md-8">-->
+                                                <!--                <p class="heading_checkbox">Selected Other Cost</p>-->
+                                                <!---->
+                                                <!--                <div class="card">-->
+                                                <!--                    <div class="card-body" style="min-height:50px; max-height:310px;">-->
+                                                <!--                        <ul class="list ui-sortable other-cost" data-sortable="true" id="checkedUl">-->
+                                                <!--                            --><?php //if(isset($arrSelectedOtherCosts)): ?>
+                                                <!--                                --><?php //foreach($arrSelectedOtherCosts as $otherCost): ?>
+                                                <!--                                    <li class="tile ui-sortable-handle">-->
+                                                <!--                                        <div class="checkbox checkbox-styled tile-text vendor_checkboxborder_gray">-->
+                                                <!--                                            <label>-->
+                                                <!--                                                <input type="checkbox" name="other_cost[]" value="--><?php //echo $otherCost['OtherCostId']; ?><!--" checked>-->
+                                                <!--                                                <span>--><?php //echo $otherCost['OtherCostName']; ?><!--</span>-->
+                                                <!--                                            </label>-->
+                                                <!--                                        </div>-->
+                                                <!--                                    </li>-->
+                                                <!--                                --><?php //endforeach; ?>
+                                                <!--                            --><?php //endif; ?>
+                                                <!--                        </ul>-->
+                                                <!--                    </div>-->
+                                                <!--                </div>-->
+                                                <!--            </div>-->
+                                                <!--        </div>-->
+                                                <div id="payment-schedule-container" class="col-lg-12 animated fadeInUp">
+                                                    <h1>Payment Schedule</h1>
+                                                    <div id="payment-schedule-wrapper" class="table-responsive m_btm20" style="min-height:200px;">
+                                                        <?php if(isset($arrPaymentScheduleDetails)): ?>
+                                                            <table class="table payment-schedule" data-id="<?php echo $unitBooking['PaymentScheduleId']; ?>">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Description</th>
+                                                                    <th>Date</th>
+                                                                    <th>Round Off</th>
+                                                                    <th>Schedule %</th>
+                                                                    <th>Schedule Amount</th>
+                                                                    <th>Tax</th>
+                                                                    <th>Net Amount</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                <?php $i = 0;
+                                                                foreach($arrPaymentScheduleDetails as $paymentSchedule):
+                                                                    $isReceiptsFound = isset($paymentSchedule['arrReceiptTypes'])?TRUE:FALSE;
+                                                                    ?>
+                                                                    <tr class="mainTr">
+                                                                        <td><?php echo $paymentSchedule['StageName']; ?></td>
+                                                                        <td><?php echo date('d-m-Y', strtotime($paymentSchedule['SchDate'])); ?></td>
+                                                                        <td><?php echo nonZeroNumber($paymentSchedule['RoundOff']); ?></td>
+                                                                        <td><?php echo nonZeroNumber($paymentSchedule['Percentage']); ?>%</td>
+                                                                        <td><input type="text" class="tbl_input txt_right" value="<?php echo nonZeroNumber($paymentSchedule['Amount']); ?>" disabled="disabled"></td>
+                                                                        <td><input type="text" class="tbl_input sch-tax txt_right" value="<?php echo nonZeroNumber($paymentSchedule['QualAmount']); ?>" disabled="disabled"></td>
+                                                                        <td><input type="text" class="tbl_input sch-net-amt txt_right" value="<?php echo nonZeroNumber($paymentSchedule['NetAmount']); ?>" disabled="disabled"></td>
+                                                                        <td>
+                                                                            <?php if($isReceiptsFound): ?>
+                                                                                <ul class="action_btns">
+                                                                                    <li><a href="#" class="subTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>
+                                                                                </ul>
+                                                                            <?php endif; ?>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <?php if($isReceiptsFound): ?>
+
+                                                                    <tr style="display: none;" class="subTr">
+                                                                        <td colspan="11" style="padding:0px !important; ">
+                                                                            <div class="subDiv" style="display: none;">
+                                                                                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                                                <div class="col-lg-12">
+                                                                                    <div class="table-responsive topsp">
+                                                                                        <table class="table receipt-type-table" style="margin-bottom:0px;">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Receipt Type</th>
+                                                                                                <th>Amount</th>
+                                                                                                <th>Tax</th>
+                                                                                                <th>Net Amount</th>
+                                                                                                <th></th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            <?php $j = 0; $recAmtTot = 0; $recTaxTot = 0;
+                                                                                            foreach($paymentSchedule['arrReceiptTypes'] as $receipt):
+                                                                                                $recAmtTot += $receipt['Amount'];
+                                                                                                $recTaxTot += $receipt['QualAmount'];
+                                                                                                $isHavingQualifier = isset($receipt['qualHtmlTag'])?TRUE:FALSE;
+                                                                                                ?>
+                                                                                                <tr>
+                                                                                                    <td><?php echo $receipt['ReceiptName']; ?></td>
+                                                                                                    <td>
+                                                                                                        <input type="text" id="BillAbs_<?php echo $i; ?>_CurAmt_<?php echo $j; ?>" class="sch-amt tbl_input txt_right" value="<?php echo nonZeroNumber($receipt['Amount']); ?>" disabled="disabled">
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <input type="text" class="sch-tax tbl_input txt_right" value="<?php echo nonZeroNumber($receipt['QualAmount']); ?>" disabled="disabled">
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <input type="text" class="sch-net-amt tbl_input txt_right" value="<?php echo nonZeroNumber($receipt['NetAmount']); ?>" disabled="disabled">
+                                                                                                    </td>
+                                                                                                    <td width="3%" align="center" class="action_btns_td">
+                                                                                                        <?php if($isHavingQualifier): ?>
+                                                                                                            <ul class="action_btns">
+                                                                                                                <li><a href="#" class="rqualmainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>
+                                                                                                            </ul>
+                                                                                                        <?php endif; ?>
+                                                                                                        <input type="hidden" class="qualRefId" id="BillAbs_<?php echo $i; ?>_QualRefId_<?php echo $j; ?>" disabled="disabled">
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                                <?php if($isHavingQualifier): ?>
+                                                                                                <tr class="subTr qualmainTr" style="display:none;">
+                                                                                                    <td colspan="5"><div class="subDiv"><?php echo $receipt['qualHtmlTag']; ?></div></td>
+                                                                                                </tr>
+                                                                                            <?php endif; ?>
+                                                                                                <?php $j++;
+                                                                                            endforeach; ?>
+                                                                                            <tr>
+                                                                                                <td class="text-right rate_pri">Total</td>
+                                                                                                <td><input type="text" class="rec-tot-amt tbl_input txt_right" value="<?php echo $recAmtTot; ?>"></td>
+                                                                                                <td><input type="text" class="rec-tot-amt tbl_input txt_right" value="<?php echo $recTaxTot; ?>"></td>
+                                                                                                <td><input type="text" class="rec-tot-amt tbl_input txt_right" value="<?php echo ($recAmtTot + $recTaxTot); ?>"></td>
+                                                                                                <td></td>
+                                                                                            </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                <?php endif; ?>
+                                                                    <?php $i++;
+                                                                endforeach; ?>
+                                                                </tbody>
+                                                            </table>
+                                                        <?php endif; ?>
+                                                        <?php if (isset($arrCustomPaymentScheduleDetails)): ?>
+                                                            <table class="table custom-schedule">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Description</th>
+                                                                    <th>Amount</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody class="main">
+                                                                    <?php $i=0;
+                                                                    $total =0;
+                                                                        foreach($arrCustomPaymentScheduleDetails as $detail):
+                                                                            $total+=$detail['Amount'];?>
+                                                                        <tr class="mainTr">
+                                                                            <td><input type="text" class="tbl_input" name="sch_cust_date_<?php echo $i; ?>" id="sch_cust_date_<?php echo $i; ?>" value="<?php echo $detail['SchDate'];?>" readonly></td>
+                                                                            <td><input type="text" class="tbl_input txt_right" name="sh_cust_desc_<?php echo $i; ?>" id="sh_cust_desc_<?php echo $i; ?>" value="<?php echo $detail['TermDescription'];?>" maxlength="250"></td>
+                                                                            <td><input type="text" class="tbl_input txt_right" name="sh_cust_amount_<?php echo $i; ?>" id="sh_cust_amount_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($detail['Amount'],2,true);?>" readonly></td>
+                                                                            <td>
+                                                                                <ul class="action_btns">
+                                                                                    <li><a href="#" class="subTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>
+                                                                                </ul>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr class="subTr" style="display: none;">
+                                                                            <td colspan="11" style="padding:0px !important; ">
+                                                                                <div class="subDiv" style="display: none;">
+                                                                                    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                                                    <div class="col-lg-12">
+                                                                                        <div class="table-responsive topsp">
+                                                                                            <table class="table receipt-type-table" style="margin-bottom:0px;" id="sch_cust_receipttable_<?php echo $i; ?>">
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th>Receipt Type</th>
+                                                                                                        <th>Amount</th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody class="main">
+                                                                                                    <?php foreach($detail['Receipts'] as $receipts):?>
+                                                                                                        <tr>
+                                                                                                            <td><?php echo $receipts['TypeName']?></td>
+                                                                                                            <td>
+                                                                                                                <input type="text" name="sch_cust__0_receiptamount__" id="sch_cust__0_receiptamount__" class="sch-amt tbl_input txt_right" value="{{Amount}}" readonly>
+                                                                                                                <input type="hidden" name="sch_cust__0_receipttypeid__" id="sch_cust__0_receipttypeid__" value="{{TypeId}}">
+                                                                                                                <input type="hidden" name="sch_cust__0_receipttype__" id="sch_cust__0_receipttype__" value="{{Type}}">
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    <?php endforeach;?>
+                                                                                                </tbody>
+                                                                                                <tbody class="total">
+                                                                                                <tr>
+                                                                                                    <td class="text-right rate_pri">Total</td>
+                                                                                                    <td>
+                                                                                                        <input type="text" class="rec-tot-amt tbl_input txt_right" name="sh_cust_receiptAmtTotal_<?php echo $i; ?>" id="sh_cust_receiptAmtTotal_<?php echo $i; ?>" readonly>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php $i++;endforeach; ?>
+                                                                </tbody>
+                                                                <tbody class="total">
+                                                                    <tr class="mainTr">
+                                                                        <td></td>
+                                                                        <td class="text-right rate_pri">Total</td>
+                                                                        <td><input type="text" class="rec-tot-tax tbl_input txt_right totalright" id="sch_cust_total" name="sch_cust_total" value="<?php echo $this->commonHelper()->sanitizeNumber($total,2,true)?>"readonly></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                            <input type="hidden" name="sch_cust_terms" id="sch_cust_terms" value="<?php echo count($arrCustomPaymentScheduleDetails);?>"/>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div id="payment-schedule-form-wrapper" class="m_btm20 padtop20 col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-6 col-sm-offset-3 animated fadeInUp" style="display: none;">
+                                                        <div class="row">
+                                                            <div class="form-group col-lg-12">
+                                                                <select id="sch-period" class="form-control single_dropdown lbl_move" label="Period" style="width:100%;">
+                                                                    <option value=""></option>
+                                                                    <option value="M">Monthly</option>
+                                                                    <option value="B">Bimonthly</option>
+                                                                    <option value="Q">Quaterly</option>
+                                                                    <option value="H">Half Yearly</option>
+                                                                    <option value="Y">Yearly</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-lg-12">
+                                                                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="text" id="sch-from-month" class="form-control lbl_move" label="From Month" readonly/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-lg-12">
+                                                                <input type="text" id="sch-no-terms" class="form-control lbl_move" label="No.of Terms" onkeypress="return isNumberKey(event);"/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-lg-12">
+                                                                <input type="text" id="sch-day" class="form-control lbl_move" label="Day" onkeypress="return isNumberKey(event);"/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="form-group col-lg-12">
+                                                                <a onclick="paymentScheduleCustom();return false;" class="ripple apply_btn float_r"><span><i class="fa fa-check-square"></i></span> Apply</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                <ul>
+                                                    <li class="save_btn float_l">
+                                                        <a href="#carousel" data-slide="prev" data-stepno="1" class="ripple steps_btn">Back</a>
+                                                    </li>
+                                                    <li class="save_btn float_r">
+                                                        <a href="#" data-slide="next" data-stepno="3" class="ripple carousel-next-btn">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <!--step 3-->
+                                        <div class="item">
+                                            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20 unit_kickoff">
+                                                <div class="unitkkoff_topimg"></div>
+                                                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20">
+                                                    <div class="form-group padtop20">
+                                                        <h1 class="txt_center">Finalising through Broker?</h1>
+
+                                                        <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2 m_btm20">
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="buyer_yes_no" id="buyer_yes" value="buyer_yes" <?php echo ($unitBooking['BrokerId'] > 0)?'checked':''; ?>>
+                                                                <label for="buyer_yes">Yes</label>
+                                                            </p>
+
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="buyer_yes_no" id="buyer_no" value="buyer_no" <?php echo ($unitBooking['BrokerId'] <= 0)?'checked':''; ?>>
+                                                                <label for="buyer_no">No</label>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div id="broker-info-wrapper" class="<?php echo ($unitBooking['BrokerId'] <= 0)?'hide':''; ?> animated fadeInUp">
+                                                        <div class="form-group padtop20 clear">
+                                                            <input type="text" name="broker_name" id="broker_name" class="form-control lbl_move"
+                                                                   label="Broker Name" value="<?php echo $unitBooking['BrokerName']; ?>"/>
+                                                            <input type="hidden" name="broker_id" id="broker_id" value="<?php echo $unitBooking['BrokerId']; ?>">
+                                                        </div>
+                                                        <div class="form-group padtop10">
+                                                            <input type="text" name="commission" id="commission" class="form-control lbl_move"
+                                                                   label="Commission %" onkeypress="return isDecimal(event, this)"
+                                                                   value="<?php echo $unitBooking['CommissionPercent']; ?>"/>
+                                                        </div>
+                                                        <div class="form-group padtop10">
+                                                            <input type="text" name="amount" id="amount" class="form-control lbl_move" label="Amount"
+                                                                   value="<?php echo $unitBooking['Commission']; ?>" readonly/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                    <ul>
+                                                        <li class="save_btn float_l">
+                                                            <a href="#carousel" data-slide="prev" data-stepno="2" class="ripple steps_btn">Back</a>
+                                                        </li>
+                                                        <li class="save_btn float_r">
+                                                            <a href="#" data-slide="next" data-stepno="4" class="ripple carousel-next-btn">Continue</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--step 4-->
+                                        <div class="item">
+                                            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20 unit_kickoff">
+                                                <div class="unitkkoff_topimg"></div>
+                                                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20">
+                                                    <div class="form-group padtop20">
+                                                        <h1 class="txt_center">Applying for Loan?</h1>
+
+                                                        <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2 m_btm20">
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="loan_yes_no" id="loan_yes" value="loan_yes" <?php echo ($unitBooking['PaymentOption'] == 'L')?'checked':''; ?>>
+                                                                <label for="loan_yes">Yes</label>
+                                                            </p>
+
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="loan_yes_no" id="loan_no" value="loan_no" <?php echo ($unitBooking['PaymentOption'] != 'L')?'checked':''; ?>>
+                                                                <label for="loan_no">No</label>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div id="loan-approved-wrapper" class="form-group padtop20 <?php echo ($unitBooking['PaymentOption'] != 'L')?'hide':''; ?> animated fadeInUp">
+                                                        <h1 class="txt_center">Did Loan got Approved / Sanctioned ?</h1>
+
+                                                        <div class="radio_check col-lg-11 col-lg-offset-1 col-md-8 col-md-offset-2 m_btm20">
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="loan_approved_yes_no" id="loan_approved_yes" value="loan_approved_yes"
+                                                                    <?php echo ($unitBooking['LoanApproval'] == 1)?'checked':''; ?>>
+                                                                <label for="loan_approved_yes">Yes</label>
+                                                            </p>
+
+                                                            <p class="col-lg-6">
+                                                                <input type="radio" name="loan_approved_yes_no" id="loan_approved_no" value="loan_approved_no"
+                                                                    <?php echo ($unitBooking['LoanApproval'] == 0)?'checked':''; ?>>
+                                                                <label for="loan_approved_no">No</label>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div id="loan-approved-info-wrapper" class="<?php echo ($unitBooking['PaymentOption'] != 'L' || $unitBooking['LoanApproval'] == 0)?'hide':''; ?> animated fadeInUp">
+                                                        <div class="form-group padtop20 clear">
+                                                            <input type="text" name="proposal_no" id="proposal_no" class="form-control lbl_move"
+                                                                   label="Proposal No" value="<?php echo $unitBooking['LoanProposalNo']; ?>"/>
+                                                        </div>
+                                                        <div class="form-group padtop10">
+                                                            <input type="text" name="bank_name" id="bank_name" class="form-control lbl_move" label="Bank Name"
+                                                                   value="<?php echo $unitBooking['BankName']; ?>"/>
+                                                        </div>
+                                                        <div class="form-group padtop10">
+                                                            <input type="text" name="loan_amount" id="loan_amount" class="form-control lbl_move" label="Amount"
+                                                                   onkeypress="return isDecimal(event, this)" value="<?php echo $unitBooking['LoanAmt']; ?>"/>
+                                                        </div>
+                                                        <div class="form-group padtop10">
+                                                            <div class="col-lg-12 padlr0">
+                                                                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                                <input type="text" name="sanction_date" id="sanction_date"
+                                                                       class="form-control date_picker lbl_move" label="Sanction Date"
+                                                                       value="<?php echo (strtotime($unitBooking['SanctionDate']))?date('d-m-Y', strtotime($unitBooking['SanctionDate'])):date('d-m-Y'); ?>"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                    <ul>
+                                                        <li class="save_btn float_l">
+                                                            <a href="#carousel" data-slide="prev" data-stepno="3" class="ripple steps_btn">Back</a>
+                                                        </li>
+                                                        <li class="save_btn float_r">
+                                                            <a href="#" data-slide="next" data-stepno="5" class="ripple carousel-next-btn">Continue</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--step 5-->
+                                        <div class="item">
+                                            <div class="col-lg-12">
+                                                <h1>Check List</h1>
+
+                                                <div class="table-responsive m_btm20" style="min-height:200px;">
+                                                    <table id="check-list-table" class="table table-hover">
+                                                        <thead>
+                                                        <tr>
+                                                            <th width="4%">Select</th>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Executive Name</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php if(isset($arrCheckList)): ?>
+                                                            <?php foreach($arrCheckList as $checkList):
+                                                                $isChecked = ($checkList['Checked'] == 'Checked')?TRUE:FALSE; ?>
+                                                                <tr>
+                                                                    <td class="tbl_input_td">
+                                                                        <div class="radio_check">
+                                                                            <p>
+                                                                                <input type="checkbox" value="<?php echo $checkList['CheckListId']; ?>" id="check_list_<?php echo $checkList['CheckListId']; ?>" name="check_list[]" <?php echo $checkList['Checked']; ?>/>
+                                                                                <label for="check_list_<?php echo $checkList['CheckListId']; ?>" class="ripple"></label>
+                                                                            </p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td><?php echo $checkList['CheckListName']; ?></td>
+                                                                    <td>
+                                                                        <div style="width: 200px; height: 40px; position:relative;">
+                                                                            <span class="date_icon <?php echo ($isChecked)?'':'hide'; ?>"><i class="fa fa-calendar"></i></span>
+                                                                            <input type="text" class="form-control date_picker <?php echo ($isChecked)?'':'hide'; ?>" onchange="validateDate(this)"
+                                                                                   name="check_list_date_<?php echo $checkList['CheckListId']?>"
+                                                                                   value="<?php echo ($isChecked)?$checkList['SubmittedDate']:''; ?>"
+                                                                                <?php echo ($isChecked)?'':'disabled'; ?>>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style="width: 400px;">
+                                                                            <input type="text" class="form-control executive-name <?php echo ($isChecked)?'':'hide'; ?>"
+                                                                                   name="check_list_executive_name_<?php echo $checkList['CheckListId']?>" <?php echo ($isChecked)?'':'disabled'; ?>
+                                                                                   value="<?php echo ($isChecked)?$checkList['ExecutiveName']:''; ?>">
+                                                                            <input type="hidden" class="executive-id" value="<?php echo ($isChecked)?$checkList['ExecutiveId']:''; ?>"
+                                                                                   name="check_list_executive_id_<?php echo $checkList['CheckListId']?>" <?php echo ($isChecked)?'':'disabled'; ?>>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                <ul>
+                                                    <li class="save_btn float_l">
+                                                        <a href="#carousel" data-slide="prev" data-stepno="4" class="ripple steps_btn">Back</a>
+                                                    </li>
+                                                    <li class="save_btn float_r">
+                                                        <a href="#" data-slide="next" data-stepno="6" class="ripple carousel-next-btn">Continue</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <!--step 6-->
+                                        <div class="item">
+                                            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20 unit_kickoff">
+                                                <div class="unitkkoff_topimg"></div>
+                                                <div id="content_all" class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 padlr0 m_btm20">
+                                                    <div class="form-group m_top20 padtop20 clear coApp_0">
+                                                        <input type="text" name="registration_name" id="registration_name" class="form-control lbl_move"
+                                                               label="Registration Name" value="<?php echo $unitBooking['BookingName']; ?>"/>
+                                                    </div>
+                                                    <?php
+                                                    $count=0;
+                                                    if(isset($coAppDetails)) {
+                                                        foreach ($coAppDetails as $data):
+                                                            $count++;?>
+                                                            <div class="form-group padtop10 coApp_<?php echo $count; ?>">
+                                                                <input type="text" name="coApp_name_<?php echo $count; ?>" id="coApp_name_<?php echo $count; ?>" onkeypress="addNewRow(this);" class="form-control lbl_move"
+                                                                       label="Co-Applicant <?php echo $count; ?>" value="<?php echo (isset($data['CoApplicantName'])) ? $data['CoApplicantName'] : ''; ?>" />
+                                                            </div>
+                                                        <?php
+                                                        endforeach;
+                                                    }
+                                                    ?>
+                                                    <input type="hidden" id="coApp_count" name="coApp_count" value="<?php echo $count; ?>" />
+
+                                                    <div class="form-group padtop10">
+                                                        <input type="text" name="executive_name" id="executive_name" class="form-control lbl_move"
+                                                               label="Post Sale Executive" value="<?php echo $unitBooking['ExecutiveName']; ?>"/>
+                                                        <input type="hidden" name="executive_id" id="executive_id" value="<?php echo $unitBooking['PostExecutiveId']; ?>"/>
+                                                    </div>
+                                                    <div class="form-group padtop10">
+                                                        <input type="text" name="adv_amount" id="adv_amount" class="form-control lbl_move"
+                                                               label="Advance Amount" onkeypress="return isDecimal(event, this)" value="<?php echo $unitBooking['AdvAmount']; ?>"/>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                    <ul>
+                                                        <li class="save_btn float_l">
+                                                            <a href="#carousel" data-slide="prev" data-stepno="5" class="ripple steps_btn">Back</a>
+                                                        </li>
+                                                        <li class="save_btn float_r">
+                                                            <a id="update-btn" href="#" class="ripple">Update</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                    </form>
+                    <?php elseif(isset($err)): ?>
+                        <h1 class="text-center" style="margin: 150px auto;">Error: <?php echo $err; ?></h1>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="payment-schedule-template" type="text/template">
+    <table class="table payment-schedule" data-id="payment_schedule_id__">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Round Off</th>
+            <th>Schedule %</th>
+            <th>Schedule Amount</th>
+            <th>Tax</th>
+            <th>Net Amount</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</script>
+<script type="text/javascript">
+    var custom_payment_schedule_details = null;
+    $(document).ready(function() {
+        var dType = "<?php echo $unitBooking['DiscountBased']; ?>";
+        if(dType=="P") {
+            $('.plan_disabled').prop("disabled",true);
+        }
+        addNewRow($('<div id="coApp_name__"></div>'));
+        $('input[type=radio][name=discount_based]').on('change',function() {
+            if($(this).val()=="N") {
+                $('#divreferalType').hide();
+                $('#divBuyer').hide();
+                $('#buyerName').val('').trigger('change');
+                $('#divEmployee').hide();
+                $('#employeeName').val('').trigger('change');
+
+                $("#plan-list-wrapper").hide();
+                $("#plan_list").val('').trigger('change');
+                $("#discount_type").val('').trigger('change');
+                $('.plan_disabled').prop("disabled",false);
+                $("#discount-type-wrapper").show();
+                $("#discount").val('').trigger('change');
+
+            } else if($(this).val()=="P") {
+                $('#divreferalType').hide();
+                $('#divBuyer').hide();
+                $('#buyerName').val('').trigger('change');
+                $('#divEmployee').hide();
+                $('#employeeName').val('').trigger('change');
+
+                $("#discount-type-wrapper").hide();
+                $("#discount_type").val('').trigger('change');
+                $("#plan-list-wrapper").show();
+                $("#discount").val('').trigger('change');
+
+            } else if($(this).val()=="R") {
+                $("#plan-list-wrapper").hide();
+                $("#plan_list").val('').trigger('change');
+                $("#discount-type-wrapper").hide();
+                $("#discount_type").val('').trigger('change');
+                $('.plan_disabled').prop("disabled",false);
+                $('input[type=radio][name=referalType][value=E]').prop('checked',false);
+                $('input[type=radio][name=referalType][value=B]').prop('checked',true);
+                $('#divreferalType').show();
+                $('#divBuyer').show();
+            }
+        });
+        $('input[type=radio][name=referalType]').on('change',function() {
+            if($(this).val()=="B") {
+                $('#divEmployee').hide();
+                $('#employeeName').val('').trigger('change');
+                $("#discount-type-wrapper").hide();
+                $("#discount_type").val('').trigger('change');
+                $('#divBuyer').show();
+            } else if($(this).val()=="E") {
+                $('#divBuyer').hide();
+                $('#buyerName').val('').trigger('change');
+                $("#discount-type-wrapper").hide();
+                $("#discount_type").val('').trigger('change');
+                $('#divEmployee').show();
+            }
+        });
+    });
+    function showNormal() {
+        $("#discount-type-wrapper").show();
+    }
+    function planDetails(pId) {
+        if(pId!="" && pId !=null) {
+            $.ajax({
+                url: getBaseURL() + 'crm/lead/finalisation-edit',
+                data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", PlanId: pId},
+                type: 'POST',
+                success: function (data, status, xhr) {
+                    if (xhr.status == 200) {
+                        var planDetails = JSON.parse(data);
+                        if(planDetails!=false) {
+                            $('.plan_disabled').prop("disabled",true);
+                            removeError($('#lumpsum_receipt_wise'));
+                            $('#discount_type').val(planDetails.DiscountType).trigger('change');
+                            $('#discount-type-wrapper').show();
+                            if(planDetails.DiscountType=="L" || planDetails.DiscountType=="P") {
+                                $("input[name=lumpsum_type][value=" + planDetails.LumpsumType + "]").prop('checked', true).trigger('change');
+                            }
+                            if(planDetails.ReceiptType==0) {
+                                $('#lumpsum_receipt_wise').val('').trigger('change');
+                            } else {
+                                $('#lumpsum_receipt_wise').val(planDetails.ReceiptType).trigger('change');
+                            }
+                            $('#discount').val(planDetails.Discount).trigger('change');
+                            $('#discount-wrapper').removeClass('hide');
+                        }                }
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                }
+            });
+        } else {
+            $('#discount-type-wrapper').hide();
+            $('#discount_type').val('').trigger('change');
+
+        }
+
+    }
+    $(function () {
+        var $project_id = $('#project_id'),
+            $unitpriceWrapper = $('#unitprice-wrapper'),
+            $discountWrapper = $('#discount-wrapper'),
+            $unit_rate = $('#unit_rate'),
+            $discount = $('#discount'),
+            $unitDetailWrapper = $('#unit-detail-wrapper'),
+            $carousel = $('#carousel'),
+            $payment_schedule = $('#payment_schedule'),
+            $otherCostWrapper = $('#other-cost-wrapper'),
+            $unCheckedUI = $('#unCheckedUl'),
+            $checkedUI = $('#checkedUl'),
+            $paymentScheduleContainer = $('#payment-schedule-container'),
+            $paymentScheduleWrapper = $('#payment-schedule-wrapper'),
+            $paymentScheduleForm = $('#payment-schedule-form-wrapper'),
+            $buyer_no = $('#buyer_no'),
+            $buyer_yes_no = $('input[name="buyer_yes_no"]'),
+            $brokerInfoWrapper = $('#broker-info-wrapper'),
+            $broker_name = $('#broker_name'),
+            $broker_id = $('#broker_id'),
+            $commission = $('#commission'),
+            $amount = $('#amount'),
+            $unitdetail_NetAmt = $('#unitdetail_NetAmt'),
+            $loan_no = $('#loan_no'),
+            $loanApprovedWrapper = $('#loan-approved-wrapper'),
+            $loanApprInfoWrapper = $('#loan-approved-info-wrapper'),
+            $loanApprNo = $('#loan_approved_no'),
+            $proposal_no = $('#proposal_no'),
+            $bank_name = $('#bank_name'),
+            $loan_amt = $('#loan_amount'),
+            $sanction_date = $('#sanction_date'),
+            $checkListTable = $('#check-list-table'),
+            $executive_name = $('#executive_name'),
+            $executive_id = $('#executive_id'),
+            $registration_name = $('#registration_name'),
+            $adv_amount = $('#adv_amount'),
+            $updateBtn = $('#update-btn'),
+            $booking_date = $('#booking_date'),
+            $booking_no = $('#booking_no'),
+            $paymentScheduleTemplate = $('#payment-schedule-template'),
+            $discountTypeWrapper = $('#discount-type-wrapper'),
+            $discount_type = $('#discount_type'),
+            $unit_id = $('#unit_id'),
+            $lumpsum_receipt_wise = $('#lumpsum_receipt_wise'),
+            $lumpsumTypeWrapper = $('#lumpsum-type-wrapper'),
+            $lumpsumReceiptWiseWrapper = $('#lumpsum-receipt-wise-wrapper'),
+            $lumpsumType = $lumpsumTypeWrapper.find('input[name="lumpsum_type"]'),
+            $constructionAmt = $('#unitdetail_ConstructionAmount'),
+            $landAmt = $('#unitdetail_LandAmount'),
+            $unitdetail_UnitArea = $('#unitdetail_UnitArea'),
+            $unitdetail_Rate = $('#unitdetail_Rate'),
+            $unitdetail_BaseAmt = $('#unitdetail_BaseAmt'),
+            $unitdetail_GrossAmt = $('#unitdetail_GrossAmount'),
+            $unitdetail_OtherCostAmt = $('#unitdetail_OtherAmount');
+
+        bindBookingNo_onChange();
+
+        bindDiscount_onChange();
+        bindBookingDate_onChange();
+
+        bindNextBtn_onClick();
+
+        bindPaymentSchedule_onChange();
+
+        bindBroker_onChange();
+        bindBrokerCommission_onChange();
+
+        bindApplyLoan_onChange();
+        bindLoanApproved_onChange();
+
+        bindBrokerName_autoComplete();
+        bindExecutiveName_autoComplete();
+        bindUpdateBtn_onClick();
+
+        bindDiscountType_onChange();
+        bindOtherCost_checkList();
+        bindLumpsumType_onChange();
+        bindLumpsumReceiptWise_onChange();
+
+        bindCheckListExecutiveName_autoComplete();
+        bindCheckList_onSelect();
+
+        bindExpandMainTr();
+        bindExpandMainTrInput();
+
+        // Qaulifier TR
+        bindRQualExpandTr();
+        bindRQualExpandTrInput();
+        bindQualExpandTr();
+        bindQualExpandTrInput();
+
+        bindTaxCalculation();
+
+        init();
+
+        function init() {
+
+            var $tarPSTable = $paymentScheduleWrapper.find('.payment-schedule[data-id="'+$payment_schedule.val()+'"]');
+            fillRowRefEditMode();
+            calcTaxForPaymentSchedule($tarPSTable);
+
+            $carousel.carousel({
+                interval: false
+            });
+
+            load_unitDetails(function(){
+                var discount = parseFloat($discount.val()),
+                    $unitdetail_UnitArea = $('#unitdetail_UnitArea'),
+                    area = parseFloat($unitdetail_UnitArea.attr('data-original-value')),
+                    rate = parseFloat($unitdetail_Rate.attr('data-original-value')),
+                    baseAmt = parseFloat($unitdetail_BaseAmt.attr('data-original-value')),
+                    grossAmt = 0,
+                    netAmt = parseFloat($unitdetail_NetAmt.attr('data-original-value')),
+                    otherCostAmt = parseFloat($unitdetail_OtherCostAmt.text());
+
+                if (!isNaN(otherCostAmt)) {
+                    grossAmt = baseAmt + otherCostAmt;
+                    netAmt = grossAmt;
+                }
+
+                $unitdetail_NetAmt.text(sanitizeNumber(netAmt,2,true));
+
+                $discount.trigger('change');
+                $unitDetailWrapper.removeClass('hide');
+            });
+
+            $payment_schedule.select2();
+            $discount_type.select2();
+            $lumpsum_receipt_wise.select2();
+
+            $("#sch-from-month").datepicker({
+                changeYear: false,
+                format: "M",
+                viewMode: "months",
+                minViewMode: "months",
+                maxViewMode: "months"
+            }).on('changeDate', function() {
+                $('.datepicker').hide();
+                $('.datepicker .datepicker-months .table-condensed > thead').show();
+            }).on('click', function () {
+                $('.datepicker .datepicker-months .table-condensed > thead').hide();
+            });
+        }
+
+        function bindCheckList_onSelect() {
+            $checkListTable.on('change', 'tr td input[type="checkbox"]', function() {
+                var $this = $(this),
+                    $tarTr = $this.closest('tr');
+
+                if($this.is(':checked')) {
+                    $tarTr.find('input[type="text"]').removeAttr('disabled').removeClass('hide');
+                    $tarTr.find('input[type="hidden"]').removeAttr('disabled');
+                    $tarTr.find('.date_icon').removeClass('hide');
+                } else {
+                    $tarTr.find('input[type="text"]').attr('disabled', true).val('').addClass('hide');
+                    $tarTr.find('input[type="hidden"]').attr('disabled', true).val('');
+                    $tarTr.find('.date_icon').addClass('hide');
+                }
+            });
+        }
+
+        function bindCheckListExecutiveName_autoComplete() {
+
+            $checkListTable.find('tr td .executive-name').autocomplete({
+                lookup: <?php echo (isset($arrExecutives))?json_encode($arrExecutives):'[]'; ?>,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $(this).closest('td').find('.executive-id').val(suggestion.data);
+
+                        removeError($(this));
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $(this).closest('td').find('.executive-id').val('');
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $(this).closest('td').find('.executive-id').val('');
+                        showError($(this), 'Executive Name not found!');
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        }
+
+        function bindBookingNo_onChange() {
+            $booking_no.on('change', function() {
+
+                checkBookingNo(function(isSuccess, msg) {
+                    if(isSuccess == false) {
+                        alert(msg);
+                        $booking_no.focus();
+                    }
+                });
+            });
+
+        }
+
+        function checkBookingNo(callback) {
+            var booking_no = $booking_no.val().trim();
+            if(booking_no.length <= 0) {
+                callback(false, 'Booking No is required!');
+                return false;
+            } else {
+                $.ajax({
+                    url: getBaseURL() + 'crm/lead/check-booking-no',
+                    data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", BookingNo: booking_no},
+                    type: 'POST',
+                    success: function (data, status, xhr) {
+
+                        if (data.unit_booking == false) {
+                            $booking_no.addClass('already-exists');
+                            callback(data.unit_booking, 'Booking No Already exists!');
+                            return data.unit_booking;
+                        } else {
+                            $booking_no.removeClass('already-exists');
+                            callback(true);
+                            return true;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr.responseText);
+                    }
+                });
+            }
+        }
+
+        function bindApplyLoan_onChange() {
+            $('input[name="loan_yes_no"]').on('change', function () {
+                if ($loan_no.is(':checked')) {
+                    $loanApprInfoWrapper.addClass('hide');
+                    $loanApprovedWrapper.addClass('hide');
+                    resetLoanData();
+                } else {
+                    $loanApprInfoWrapper.removeClass('hide');
+                    $loanApprovedWrapper.removeClass('hide');
+
+                    $('input[name="loan_approved_yes_no"]').trigger('change');
+                }
+
+            });
+        }
+
+        function bindLoanApproved_onChange() {
+            $('input[name="loan_approved_yes_no"]').on('change', function () {
+                if ($loanApprNo.is(':checked')) {
+                    $loanApprInfoWrapper.addClass('hide');
+                    resetLoanData();
+                } else {
+                    $loanApprInfoWrapper.removeClass('hide');
+                }
+            });
+        }
+
+        function resetLoanData() {
+            $proposal_no.val('');
+            $bank_name.val('');
+            $loan_amt.val('');
+            $sanction_date.val('');
+        }
+
+        function bindBroker_onChange() {
+            $buyer_yes_no.on('change', function () {
+
+                if ($buyer_no.is(':checked')) {
+                    $brokerInfoWrapper.addClass('hide');
+                    $broker_name.val('');
+                    $broker_id.val('');
+                    $commission.val('');
+                    $amount.val('');
+                } else {
+                    $brokerInfoWrapper.removeClass('hide');
+                }
+            });
+        }
+
+        function bindBrokerCommission_onChange() {
+            $commission.on('change', function () {
+                var commission = parseFloat($commission.val());
+                if (isNaN(commission)) {
+                    return;
+                }
+                var amount = (parseFloatVal($unitdetail_NetAmt.text()) * commission) / 100;
+                $amount.val(amount.toFixed(2));
+            });
+        }
+
+        function bindPaymentSchedule_onChange() {
+            $payment_schedule.on('change', function () {
+                var payment_schedule = $payment_schedule.val();
+
+                removeError($payment_schedule);
+
+                showPaymentScheduleDetails(function() {
+                    $otherCostWrapper.removeClass('hide');
+                    $paymentScheduleContainer.removeClass('hide');
+                });
+
+            });
+        }
+
+        function bindOtherCost_checkList() {
+            $('.other-cost input:checkbox').bind('change', function () {
+                var current = $(this).closest('li');
+                if (current.find("input:checkbox").is(':checked')) {
+                    var prependToDiv = $('#checkedUl');
+                    current.animate({
+                        top: -30,
+                        left: prependToDiv.offset().left
+                    }, 200, function () {
+                        current.prependTo(prependToDiv).css({
+                            top: 'auto',
+                            left: 'auto'
+                        });
+                    });
+                } else {
+                    current.animate({
+                        top: -30,
+                        left: -$unCheckedUI.offset().left
+                    }, 200, function () {
+                        current.prependTo($unCheckedUI).css({
+                            top: 'auto',
+                            left: 'auto'
+                        });
+                    });
+                }
+            });
+        }
+
+        function bindExecutiveName_autoComplete() {
+            $executive_name.autocomplete({
+                lookup: <?php echo (isset($arrExecutives))?json_encode($arrExecutives):'[]'; ?>,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $executive_id.val(suggestion.data);
+
+                        removeError($(this));
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $executive_id.val('');
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $executive_id.val('');
+                        showError($(this), 'Executive Name not found!');
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        }
+
+        function bindBrokerName_autoComplete() {
+            $broker_name.autocomplete({
+                lookup: <?php echo (isset($arrBrokers))?json_encode($arrBrokers):'[]'; ?>,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $broker_id.val(suggestion.data);
+
+                        removeError($(this));
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $broker_id.val('');
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $broker_id.val('');
+                        showError($(this), 'Broker Name not found!');
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        }
+
+        function bindUpdateBtn_onClick() {
+
+            $updateBtn.on('click', function (ev) {
+                ev.preventDefault();
+
+                validate(function (isSuccess) {
+                    if (isSuccess) {
+                        $('.plan_disabled').prop("disabled",false);
+                        $('#finalisation-form').submit();
+                    }
+                });
+            });
+
+            function validate(callback) {
+                var reg_name = $registration_name.val().trim(),
+                    exe_name = $executive_name.val().trim(),
+                    exe_id = parseInt($executive_id.val()),
+                    adv_amt = parseFloat($adv_amount.val()),
+                    othercost= parseFloatVal($('#unitdetail_OtherAmount').text());
+                net_amount = parseFloatVal($('#unitdetail_NetAmt').text());
+                net_amt= othercost + net_amount;
+
+
+                removeError($registration_name);
+                removeError($executive_name);
+                removeError($adv_amount);
+
+                if (reg_name.length <= 0) {
+                    showError($registration_name, 'Registration Name is required!');
+                    callback(false);
+                    return false;
+                } else if (exe_name.length <= 0) {
+                    showError($executive_name, 'Executive Name is required!');
+                    callback(false);
+                    return false;
+                } else if (isNaN(exe_id)) {
+                    showError($executive_name, 'Invalid Executive Name!');
+                    callback(false);
+                    return false;
+                } else if (isNaN(adv_amt)) {
+                    showError($adv_amount, 'Advance amount is required!');
+                    callback(false);
+                    return false;
+                } else if(adv_amt > net_amt) {
+                    showError($adv_amount, 'Advance amount should not exceed net amount!');
+                    callback(false);
+                    return false;
+                } else {
+                    callback(true);
+                    return true;
+                }
+            }
+        }
+
+        function bindNextBtn_onClick() {
+            $('.carousel-next-btn').on('click', function (ev) {
+                ev.preventDefault();
+
+                var stepno = parseInt($(this).attr('data-stepno'));
+                switch (stepno) {
+                    case 2:
+                        validate_step1(function (isSuccess) {
+                            if (isSuccess) {
+                                var  netAmt = parseFloatVal($unitdetail_NetAmt.text()),
+                                    baseAmt = parseFloatVal($unitdetail_BaseAmt.text()),
+                                    otherCostAmt = parseFloat($unitdetail_OtherCostAmt.text());
+
+                                if (!isNaN(otherCostAmt)) {
+                                    grossAmt = baseAmt + otherCostAmt;
+                                    netAmt = grossAmt;
+                                }
+                                $unitdetail_NetAmt.text(sanitizeNumber(netAmt,2,true));
+                                $payment_schedule.trigger('change');
+                                $carousel.carousel('next');
+                            }
+                        });
+                        break;
+                    case 3:
+                        validate_step2(function (isSuccess) {
+                            if (isSuccess) {
+                                $carousel.carousel('next');
+                            }
+                        });
+                        break;
+                    case 4:
+                        validate_step3(function (isSuccess) {
+                            if (isSuccess) {
+                                $carousel.carousel('next');
+                            }
+                        });
+                        break;
+                    case 5:
+                        validate_step4(function (isSuccess) {
+                            if (isSuccess) {
+                                $carousel.carousel('next');
+                            }
+                        });
+                        break;
+                    case 6:
+                        validate_step5(function (isSuccess) {
+                            if (isSuccess) {
+                                $carousel.carousel('next');
+                            }
+                        });
+                        break;
+                }
+            });
+        }
+
+        function validate_step1(callback) {
+            var booking_no = $booking_no.val().trim(),
+                booking_date = $booking_date.val().trim(),
+                unitRate = parseFloat($unit_rate.val()),
+                discount = parseFloat($discount.val());
+
+//        $discount.trigger('change');
+
+            if(booking_no.length <= 0) {
+                alert('Booking No is required!');
+                $booking_no.focus();
+
+                callback(false);
+                return false;
+            } else if($booking_no.hasClass('already-exists')) {
+                alert('Booking No already exists!');
+                $booking_no.focus();
+
+                callback(false);
+                return false;
+            } else if(booking_date.length <= 0) {
+                alert('Booking Date is required!');
+                $booking_date.focus();
+                callback(false);
+                return false;
+            } else if($('input[type=radio][name=discount_based]:checked').val()=="P" && $('#plan_list').val()=="") {
+                showError($('#plan_list'), 'Plan is required!');
+                $('#plan_list').focus();
+                callback(false);
+                return false;
+            } else if ($discount_type.val() != '' && isNaN(discount)) {
+                showError($discount, 'Discount is required!');
+                $discount.focus();
+
+                callback(false);
+                return false;
+            }else if($discount_type.val() == 'P' && discount > 100) {
+                showError($discount, 'Percentage Discount should not be > 100');
+                $discount.focus();
+                callback(false);
+                return false;
+            }
+            else if($discount.hasClass('error')) {
+                callback(false);
+                return false;
+            } else {
+                callback(true);
+                return true;
+            }
+        }
+
+        function validate_step2(callback) {
+            var payment_schedule = parseInt($payment_schedule.val());
+
+            removeError($payment_schedule);
+            if (isNaN(payment_schedule)) {
+                showError($payment_schedule, 'Project schedule is required!');
+
+                callback(false);
+                return false;
+            } else {
+                callback(true);
+                return true;
+            }
+        }
+
+        function validate_step3(callback) {
+
+            if ($buyer_no.is(':checked')) {
+                callback(true);
+                return true;
+            } else {
+                var broker_name = $broker_name.val().trim(),
+                    broker_id = parseInt($broker_id.val()),
+                    commission = parseFloat($commission.val()),
+                    amount = parseFloat($amount.val());
+
+                removeError($broker_name);
+                removeError($commission);
+                removeError($amount);
+                if (broker_name.length <= 0) {
+                    showError($broker_name, 'Broker Name is required!');
+
+                    callback(false);
+                    return false;
+                } else if (isNaN(broker_id)) {
+                    showError($broker_name, 'Invalid Broker Name!');
+
+                    callback(false);
+                    return false;
+                } else if (isNaN(commission)) {
+                    showError($commission, 'Commission is required!');
+
+                    callback(false);
+                    return false;
+                } else if (isNaN(amount)) {
+                    showError($amount, 'Amount is required!');
+
+                    callback(false);
+                    return false;
+                } else {
+                    callback(true);
+                    return true;
+                }
+            }
+        }
+
+        function validate_step4(callback) {
+            if ($loan_no.is(':checked') || $loanApprNo.is(':checked')) {
+                callback(true);
+                return true;
+            } else {
+                var proposal_no = $proposal_no.val().trim(),
+                    bank_name = $bank_name.val().trim(),
+                    loan_amt = parseFloat($loan_amt.val()),
+                    sanction_date = $sanction_date.val();
+
+                removeError($proposal_no);
+                removeError($bank_name);
+                removeError($loan_amt);
+                removeError($sanction_date);
+                if (proposal_no.length <= 0) {
+                    showError($proposal_no, 'Proposal No is required!');
+                    callback(false);
+                    return false;
+                } else if (bank_name.length <= 0) {
+                    showError($bank_name, 'Bank Name is required!');
+                    callback(false);
+                    return false;
+                } else if (isNaN(loan_amt)) {
+                    showError($loan_amt, 'Amount is required!');
+                    callback(false);
+                    return false;
+                } else if (sanction_date.length <= 0) {
+                    showError($sanction_date, 'Sanction date is required!');
+                    callback(false);
+                    return false;
+                } else {
+                    callback(true);
+                    return true;
+                }
+            }
+        }
+
+        function validate_step5(callback) {
+            callback(true);
+            return;
+//        var arrCheckbox = $checkListTable.find('tr td input[type="checkbox"]').toArray();
+//
+//        validate(arrCheckbox, function(isSuccess) {
+//            callback(isSuccess);
+//            return;
+//        });
+//
+//        function validate(arrCheckbox, validate_callback) {
+//            if(arrCheckbox.length <= 0) {
+//                validate_callback(true);
+//                return true;
+//            }
+//
+//            var $tarCheckbox = $(arrCheckbox.shift());
+//            if($tarCheckbox.is(':checked')) {
+//                var $tarTr = $tarCheckbox.closest('tr'),
+//                    $tarDateIp = $tarTr.find('.date_picker'),
+//                    date = $tarDateIp.val().trim(),
+//                    $executiveName = $tarTr.find('.executive-name'),
+//                    exeName = $executiveName.val().trim(),
+//                    exeId = $tarTr.find('.executive-id').val();
+//
+//                if(date === '') {
+//                    showError($tarDateIp, 'Date is required!');
+//                    validate_callback(false);
+//                    return false;
+//                } else if(exeName === '') {
+//                    showError($executiveName, 'Executive Name is required!');
+//                    validate_callback(false);
+//                    return false;
+//                } else if(exeId === '') {
+//                    showError($executiveName, 'Executive Name not found!');
+//                    validate_callback(false);
+//                    return false;
+//                } else {
+//                    validate(arrCheckbox, validate_callback);
+//                }
+//            } else {
+//                validate(arrCheckbox, validate_callback);
+//            }
+//        }
+        }
+
+        function bindDiscount_onChange() {
+            $discount.on('change', function () {
+                removeError($discount);
+                var discount = parseFloatVal($discount.val()),
+                    area = parseFloat($unitdetail_UnitArea.attr('data-original-value')),
+                    rate = parseFloat($unitdetail_Rate.attr('data-original-value')),
+                    baseAmt = parseFloat($unitdetail_BaseAmt.attr('data-original-value')),
+                    grossAmt = 0,
+                    netAmt = parseFloatVal($unitdetail_NetAmt.attr('data-original-value')),
+                    otherCostAmt = parseFloat($unitdetail_OtherCostAmt.text());
+
+                $constructionAmt.text(parseFloat($constructionAmt.attr('data-original-value')).toFixed(2));
+                $landAmt.text(parseFloat($landAmt.attr('data-original-value')).toFixed(2));
+                $unitdetail_Rate.text(rate.toFixed(2));
+                $unitdetail_BaseAmt.text(baseAmt.toFixed(2));
+                //$unitdetail_GrossAmt.text(grossAmt.toFixed(2));
+                $unitdetail_NetAmt.text(sanitizeNumber(netAmt,2,true));
+//                $paymentScheduleWrapper.html('');
+                if ($discount_type.val() == 'L') {
+                    // lumpsum
+                    var lumpsumType = $lumpsumType.filter(':checked').val();
+                    if (lumpsumType == 'O') {
+                        // overall
+                        if(discount > baseAmt) {
+                            showError($discount, 'Discount should be lesser than Base Amount!');
+                            return;
+                        }
+
+                        baseAmt = baseAmt - discount;
+                        grossAmt = baseAmt;
+                        netAmt = grossAmt;
+                        var landAmt = parseFloat($landAmt.attr('data-original-value'));
+                        var constAmt = baseAmt-landAmt;
+                        $constructionAmt.text(constAmt.toFixed(2));
+                    } else {
+                        // receipt wise
+                        var receiptType = $lumpsum_receipt_wise.val();
+                        if(receiptType.length <= 0) {
+                            showError($lumpsum_receipt_wise, 'Select Receipt Type!');
+                            return;
+                        }
+                        removeError($lumpsum_receipt_wise);
+                        var $selReceiptType = $lumpsum_receipt_wise.find('option:selected'),
+                            selReceipt = $selReceiptType.attr('data-type');
+
+                        if(selReceipt == 'C') {
+                            var constAmt = parseFloat($constructionAmt.attr('data-original-value'));
+                            if(discount > constAmt) {
+                                showError($discount, 'Discount should be lesser than Construction Amount!');
+                                return;
+                            }
+                            constAmt -= discount;
+                            $constructionAmt.text(constAmt.toFixed(2));
+                        } else if(selReceipt == 'L') {
+                            var landAmt = parseFloat($landAmt.attr('data-original-value'));
+                            if(discount > landAmt) {
+                                showError($discount, 'Discount should be lesser than Land Amount!');
+                                return;
+                            }
+                            landAmt -= discount;
+                            $landAmt.text(landAmt.toFixed(2));
+                        }
+
+                        baseAmt -= discount;
+                    }
+                } else if ($discount_type.val() == 'R') {
+                    // unit rate
+                    if (discount > rate) {
+                        showError($discount, 'Discount should be lesser than Unit rate!');
+                        return;
+                    } else {
+                        rate = rate - discount;
+                        baseAmt = rate * area;
+                        var landAmt = parseFloat($landAmt.attr('data-original-value'));
+                        var constAmt = baseAmt-landAmt;
+                        $constructionAmt.text(constAmt.toFixed(2));
+                    }
+                }else if($discount_type.val() =='P') {
+
+                    var lumpsumType = $lumpsumType.filter(':checked').val();
+                    if (lumpsumType == 'O') {
+                        // overall
+                        discount=baseAmt * (discount/100);
+                        baseAmt = parseFloat(baseAmt) - discount;
+                        grossAmt = baseAmt;
+                        netAmt = grossAmt;
+                        var landAmt = parseFloat($landAmt.attr('data-original-value'));
+                        var constAmt = baseAmt-landAmt;
+                        $constructionAmt.text(constAmt.toFixed(2));
+
+                    } else {
+                        // receipt wise
+                        var receiptType = $lumpsum_receipt_wise.val();
+                        if(receiptType.length <= 0) {
+                            showError($lumpsum_receipt_wise, 'Select Receipt Type!');
+                            return;
+                        }
+
+                        var $selReceiptType = $lumpsum_receipt_wise.find('option:selected'),
+                            selReceipt = $selReceiptType.attr('data-type');
+
+                        if(selReceipt == 'C') {
+                            var constAmt = parseFloat($constructionAmt.attr('data-original-value'));
+                            discount=constAmt * (discount/100);
+
+                            constAmt -= discount;
+                            $constructionAmt.text(constAmt.toFixed(2));
+                        } else if(selReceipt == 'L') {
+                            var landAmt = parseFloat($landAmt.attr('data-original-value'));
+                            discount=landAmt * (discount/100);
+
+                            landAmt -= discount;
+                            $landAmt.text(landAmt.toFixed(2));
+                        }
+
+                        baseAmt -= discount;
+                    }
+                }
+                grossAmt = baseAmt;
+                netAmt = grossAmt;
+                if (!isNaN(parseFloat(otherCostAmt))) {
+                    grossAmt = baseAmt + otherCostAmt;
+                    netAmt = grossAmt;
+                }
+                $unitdetail_Rate.text(rate.toFixed(2));
+                $unitdetail_BaseAmt.text(baseAmt.toFixed(2));
+                //$unitdetail_GrossAmt.text(0000);
+
+                $('#unitdetail_NetAmt').text(sanitizeNumber(netAmt,2,true));
+            });
+        }
+
+        function bindBookingDate_onChange() {
+            $booking_date.on('change', function() {
+                $paymentScheduleWrapper.html('');
+            });
+        }
+
+        function bindDiscountType_onChange() {
+            $discount_type.on('change', function() {
+
+                var discountType = $discount_type.val().trim();
+
+                $discountWrapper.addClass('hide');
+                $lumpsumTypeWrapper.addClass('hide');
+                $lumpsumReceiptWiseWrapper.addClass('hide');
+
+                $discount.val('').trigger('change');
+                $lumpsumType.removeAttr('checked');
+                if(discountType.length > 0 ) {
+                    if(discountType == 'L' || discountType=='P') {
+                        $lumpsumTypeWrapper.removeClass('hide');
+                    } else {
+                        $discountWrapper.removeClass('hide');
+                    }
+                }
+            });
+        }
+
+        function bindLumpsumType_onChange() {
+            $lumpsumType.on('change', function() {
+
+                var lumpsumType = $(this).val();
+                if(lumpsumType == 'O') {
+                    $discountWrapper.removeClass('hide');
+                    $lumpsumReceiptWiseWrapper.addClass('hide');
+                } else {
+                    $discountWrapper.addClass('hide');
+                    $lumpsumReceiptWiseWrapper.removeClass('hide');
+                }
+                $lumpsum_receipt_wise.find('option').removeAttr('selected');
+                $discount.val('').trigger('change');
+            });
+        }
+
+        function bindLumpsumReceiptWise_onChange() {
+            $lumpsum_receipt_wise.on('change', function() {
+
+                var receiptWise = $(this).val();
+                if(receiptWise.length > 0) {
+                    $discountWrapper.removeClass('hide');
+                } else {
+                    $discountWrapper.addClass('hide');
+                }
+                $discount.val('').trigger('change');
+            });
+        }
+
+        function showPaymentScheduleDetails(callback) {
+            var payment_schedule_id = $payment_schedule.val();
+            if (/^\d+$/.test(payment_schedule_id) === false) {
+                return;
+            }
+
+            var $tarPSTable = $paymentScheduleWrapper.find('.payment-schedule[data-id="'+payment_schedule_id+'"]');
+            if ($tarPSTable.length > 0) {
+                $tarPSTable.removeClass('hide').siblings('.payment-schedule').addClass('hide');
+                callback();
+            } else {
+                $paymentScheduleWrapper.find('.payment-schedule:not(.hide)').addClass('hide');
+                load_paymentScheduleDetail(function() {
+                    callback();
+                });
+            }
+
+        }
+
+        function load_paymentScheduleDetail(callback) {
+            var payment_schedule_id = $payment_schedule.val();
+            var $sel_payment_schedule = $payment_schedule.find('option:selected');
+
+            var project_id = $project_id.val();
+            if (/^\d+$/.test(project_id) === false) {
+                return;
+            }
+
+            var unit_id = $unit_id.val();
+            if (/^\d+$/.test(unit_id) === false) {
+                return;
+            }
+
+            var landAmt = parseFloatVal($landAmt.text()),
+                constructionAmt = parseFloatVal($constructionAmt.text());
+
+            if($sel_payment_schedule.attr('data-typeid') == '2') {
+                var totalAmount = parseFloatVal($('#unitdetail_LandAmount').text()) + parseFloatVal($('#unitdetail_ConstructionAmount').text()) + parseFloatVal($('#unitdet_OtherAmount').text());
+                var custTotal = parseFloatVal($('#sch_cust_total').val());
+                console.log(totalAmount, custTotal);
+//                if(totalAmount == custTotal) {
+                    return;
+//                }
+
+                $('.savebtn_area').hide();
+                $paymentScheduleContainer.removeClass('hide');
+                $paymentScheduleWrapper.html('').hide();
+                $paymentScheduleForm.show();
+                $('.loading_area').show();
+                $.ajax({
+                    url: getBaseURL() + 'crm/lead/paymentscheduledetail',
+                    data: {
+                        csrf: "<?php echo isset($csrf)?$csrf:''; ?>",
+                        ProjectId: project_id,
+                        PaymentScheduleId: payment_schedule_id,
+                        BookingDate: $booking_date.val(),
+                        UnitId: unit_id,
+                        Type: 'custom'
+                    },
+                    type: 'POST',
+                    success: function (data, status, xhr) {
+                        if(data.payment_schedule_detail.length != 0) {
+                            custom_payment_schedule_details=data.payment_schedule_detail;
+                        } else {
+                            custom_payment_schedule_details=null;
+                        }
+                        $('.loading_area').hide();
+                    }, error: function (xhr, status, error) {
+                        custom_payment_schedule_details=null;
+                        $('.loading_area').hide();
+                    }
+                });
+
+                if (callback) {
+                    callback();
+                }
+            } else {
+                $('.savebtn_area').show();
+                $paymentScheduleWrapper.html('').show();
+                $paymentScheduleForm.hide();
+
+                $.ajax({
+                    url: getBaseURL() + 'crm/lead/paymentscheduledetail',
+                    data: {
+                        csrf: "<?php echo isset($csrf)?$csrf:''; ?>",
+                        ProjectId: project_id,
+                        PaymentScheduleId: payment_schedule_id,
+                        BookingDate: $booking_date.val(),
+                        UnitId: unit_id
+                    },
+                    type: 'POST',
+                    success: function (data, status, xhr) {
+
+                        if (data.payment_schedule_detail.length > 0) {
+                            processPaymentScheduleDetail(payment_schedule_id, data);
+                        }
+
+                        if (callback) {
+                            callback();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr.responseText);
+                    }
+                });
+            }
+        }
+
+        function processPaymentScheduleDetail(payment_schedule_id, data, callback) {
+
+            var landAmt = parseFloatVal($landAmt.text()),
+                constructionAmt = parseFloatVal($constructionAmt.text());
+
+            if(isNaN(constructionAmt)) {
+                constructionAmt = 0;
+            }
+
+            if(isNaN(landAmt)) {
+                landAmt = 0;
+            }
+
+            var baseAmt = parseFloatVal($unitdetail_BaseAmt.text());
+            var opHtml = $paymentScheduleTemplate.html();
+            opHtml = opHtml.replace(/payment_schedule_id__/g, payment_schedule_id)
+            $paymentScheduleWrapper.append(opHtml);
+            var $tarPSTable = $paymentScheduleWrapper.find('.payment-schedule[data-id="'+payment_schedule_id+'"]');
+
+            var rowHtml ='', i = 0;
+            $.each(data.payment_schedule_detail, function(index, ps_detail) {
+
+                var scheduleAmt = 0;
+                var schPercent = parseFloat(ps_detail.Percentage);
+                if(ps_detail.StageType == 'A') {
+                    if(!isNaN(schPercent) && schPercent != 0) {
+                        scheduleAmt = (baseAmt * schPercent) / 100;
+                    } else {
+                        scheduleAmt = parseFloat(ps_detail.Amount);
+                    }
+                    baseAmt -= scheduleAmt;
+                } else if(ps_detail.StageType == 'O') {
+                    scheduleAmt = parseFloat(ps_detail.schedule_amt);
+                } else {
+                    scheduleAmt = (baseAmt * parseFloat(ps_detail.Percentage)) / 100;
+                }
+
+                var roundOff = parseFloat(ps_detail.RoundOff);
+
+                if(isNaN(roundOff) || roundOff == 0) {
+                    roundOff ='';
+                }
+                else{
+
+                    scheduleAmt =Math.round(scheduleAmt / roundOff) * roundOff
+
+                }
+                var schDate = '';
+                if(ps_detail.PaymentScheduleDate != null) {
+                    schDate = ps_detail.PaymentScheduleDate;
+                }
+                rowHtml += '<tr class="mainTr">'
+                + '<td>' + ps_detail.StageName + '</td>'
+                + '<td>' + schDate + '</td>'
+                +  '<td id="round_'+j+'" >'+ roundOff + '</td>';
+
+                if(isNaN(schPercent) || schPercent == 0) {
+                    schPercent = '';
+                } else {
+                    schPercent += '%';
+                }
+                var isReceiptFound = true;
+                if(ps_detail.hasOwnProperty('arrReceiptTypes') == false
+                    || ps_detail.arrReceiptTypes.length <= 0) {
+                    isReceiptFound = false;
+                }
+                rowHtml += '<td>' + schPercent + '</td>'
+                + '<td><input type="text" class="tbl_input txt_right" value="' + scheduleAmt.toFixed(2) + '"></td>'
+                + '<td><input type="text" class="tbl_input sch-tax txt_right"></td>'
+                + '<td><input type="text" class="tbl_input sch-net-amt schnet txt_right" value="' + scheduleAmt.toFixed(2) + '"></td>'
+                + '<td>';
+                if(isReceiptFound) {
+                    rowHtml += '<ul class="action_btns">'
+                    + '<li><a href="#" class="subTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>'
+                    + '</ul>';
+                }
+                rowHtml += '</td>'
+                + '</tr>';
+
+                if(isReceiptFound) {
+                    rowHtml += '<tr style="display: none;" class="subTr">'
+                    + '<td colspan="11" style="padding:0px !important; ">'
+                    + '<div class="subDiv">'
+                    + '<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>'
+                    + '<div class="col-lg-12">'
+                    + '<div class="table-responsive topsp">'
+                    + '<table class="table receipt-type-table" style="margin-bottom:0px;">'
+                    + '<thead>'
+                    + '<tr>'
+                    + '<th>Receipt Type</th>'
+                    + '<th>Amount</th>'
+                    + '<th>Tax</th>'
+                    + '<th>Net Amount</th>'
+                    + '<th></th>'
+                    + '</tr>'
+                    + '</thead>'
+                    + '<tbody>';
+                    var curReceiptType = '',
+                        otherCostAmt = 0, j = 0;
+
+                    $.each(ps_detail.arrReceiptTypes, function (index, receipt) {
+                        var curAmt = 0;
+
+                        if(curReceiptType == '') {
+                            curReceiptType = receipt.Type;
+
+                            if(curReceiptType == 'O') {
+                                otherCostAmt = parseFloat(receipt.Amount);
+                            }
+                        }
+
+                        switch(curReceiptType) {
+                            case 'L' :
+                                if (landAmt <= 0) {
+                                    curAmt = 0;
+                                    curReceiptType = '';
+                                } else if (scheduleAmt <= landAmt) {
+                                    curAmt = scheduleAmt;
+                                    landAmt -= scheduleAmt;
+                                    scheduleAmt = 0;
+                                } else if (scheduleAmt > landAmt) {
+                                    curAmt = landAmt;
+                                    scheduleAmt -= landAmt;
+                                    landAmt = 0;
+                                    curReceiptType = '';
+                                }
+                                break;
+                            case 'C':
+                                if(landAmt <= 0) {
+                                    if (constructionAmt <= 0) {
+                                        curAmt = 0;
+                                        curReceiptType = '';
+                                    } else if (scheduleAmt <= constructionAmt) {
+                                        curAmt = scheduleAmt;
+                                        constructionAmt -= scheduleAmt;
+                                        scheduleAmt = 0;
+                                    } else if (scheduleAmt > constructionAmt) {
+                                        curAmt = constructionAmt;
+                                        scheduleAmt -= constructionAmt;
+                                        constructionAmt = 0;
+                                        curReceiptType = '';
+                                    }
+                                }
+                                break;
+                            default:
+                                if(curReceiptType == receipt.Type) {
+                                    if(otherCostAmt <= 0) {
+                                        curAmt = 0;
+                                        curReceiptType = '';
+                                    } else if(scheduleAmt <= otherCostAmt) {
+                                        curAmt = scheduleAmt;
+                                        otherCostAmt -= scheduleAmt;
+                                        scheduleAmt = 0;
+                                    } else if(scheduleAmt > otherCostAmt) {
+                                        curAmt = otherCostAmt;
+                                        scheduleAmt -= otherCostAmt;
+                                        otherCostAmt = 0;
+                                        curReceiptType = '';
+                                    }
+                                }
+                                break;
+                        }
+
+                        if(ps_detail.StageType == 'O') {
+                            curAmt = parseFloat(ps_detail.schedule_amt);
+                        }
+
+                        if(isNaN(curAmt) || curAmt == 0) {
+                            curAmt = '';
+                        } else {
+                            curAmt = curAmt.toFixed(2)
+                        }
+
+                        rowHtml += '<tr><td>' + receipt.ReceiptName + '</td>'
+                        + '<td><input type="text" id="BillAbs_'+ i +'_CurAmt_'+ j + '" class="sch-amt tbl_input txt_right" value="' + curAmt + '"></td>'
+                        + '<td><input type="text" class="sch-tax tbl_input txt_right"></td>'
+                        + '<td><input type="text" class="sch-net-amt tbl_input txt_right" value="' + curAmt + '"></td>'
+                        + '<td width="3%" align="center" class="action_btns_td">';
+
+                        if(receipt.hasOwnProperty('HtmlTag') && receipt.HtmlTag.length > 0 && curAmt != '') {
+                            rowHtml += '<ul class="action_btns">'
+                            + '<li><a href="#" class="rqualmainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>'
+                            + '</ul>';
+                        }
+
+                        rowHtml += '<input type="hidden" class="qualRefId" id="BillAbs_'+ i +'_QualRefId_'+ j + '" />'
+                        + '</td>'
+                        + '</tr>';
+
+                        if(receipt.hasOwnProperty('HtmlTag') && receipt.HtmlTag.length > 0) {
+                            rowHtml += '<tr class="subTr qualmainTr" style="display:none;">'
+                            + '<td colspan="5">'
+                            + '<div class="subDiv">'
+                            + receipt.HtmlTag
+                            + '</div></td>'
+                            +'</tr>';
+                        }
+                        j += 1;
+                    });
+                    rowHtml += '<tr>'
+                    + '<td class="text-right rate_pri">Total</td>'
+                    + '<td><input type="text" class="rec-tot-amt tbl_input txt_right"></td>'
+                    + '<td><input type="text" class="rec-tot-tax tbl_input txt_right"></td>'
+                    + '<td><input type="text" class="rec-tot-net tbl_input txt_right"></td>'
+                    + '<td></td></tr>'
+                    +'</tbody>'
+                    + '</table>'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '</td>'
+                    + '</tr>';
+                }
+                i += 1;
+            });
+
+            $tarPSTable.find('tbody').html(rowHtml);
+            fillRowRefEditMode();
+            calcTaxForPaymentSchedule($tarPSTable);
+            $paymentScheduleWrapper.find('input').attr('disabled', true);
+            $('.schnet').each(function(i,o) {
+                var net=$(this).val();
+                var round=$('#round_'+i).text();
+                if(!isNaN(round)) {
+                    net = Math.round(net / round) * round
+
+                }
+
+            });
+
+            if(typeof callback != 'undefined') {
+                callback();
+            }
+        }
+
+        function load_unitDetails(callback) {
+
+            var unit_id = $unit_id.val();
+            if (/^\d+$/.test(unit_id) === false) {
+                return;
+            }
+
+            $.ajax({
+                url: getBaseURL() + 'crm/lead/unitdetail',
+                data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", UnitId: unit_id},
+                type: 'POST',
+                success: function (data, status, xhr) {
+                    var othercost=0;
+
+                    $.each(data.unitamt, function (index, other) {
+                        if (other.Amount==null) {
+                            othercost=0;
+                        }
+                        else {
+                            othercost += parseFloat(other.Amount);
+                        }
+
+
+                    });
+
+                    $unitdetail_OtherCostAmt.text(othercost);
+                    $.each(data.unit_detail, function (index, detail) {
+
+                        var $tarDetail = $unitDetailWrapper.find('#unitdetail_' + index);
+
+                        if (detail == 0 || detail == null || detail.trim() == '') {
+                            $tarDetail.closest('.row').addClass('hide');
+                        } else {
+                            $tarDetail.closest('.row').removeClass('hide');
+                            if(index!="NetAmt") {
+                                $tarDetail.text(detail).attr('data-original-value', detail);
+                            } else {
+                                $tarDetail.text(sanitizeNumber(detail,2,true)).attr('data-original-value', detail);
+                            }
+                            if(index=="AdvAmount" || index=="UDSLandArea" || index=="BaseAmt" || index=="GrossAmount" || index=="LandAmount" || index=="Rate" || index=="ConstructionAmount" || index=="GuideLinevalue" || index=="MarketLandValue" || index=="OtherCostAmt" || index=="QualifierAmount") {
+                                $tarDetail.text(sanitizeNumber(detail,2,true)).attr('data-original-value', detail);
+                            }
+                        }
+                    });
+
+                    if (callback) {
+                        callback();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+
+        function bindExpandMainTr() {
+            $paymentScheduleWrapper.on('click', '.mainTr', function(e){
+                e.preventDefault();
+                if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                    closeMainTr();
+                    $(this).closest("tr").next(".subTr").show();
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                    $(this).find("i").addClass("tform");
+                }
+                else {
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".subTr").slideUp("slow");
+                    $(this).find("i").removeClass("tform");
+                }
+            });
+        }
+
+        function bindExpandMainTrInput() {
+            $paymentScheduleWrapper.on('focus', '.mainTrInput', function() {
+                if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                    closeMainTr();
+                    $(this).closest("tr").next(".subTr").show();
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                }
+            });
+        }
+
+        function closeMainTr() {
+            var $mainTr = $(".mainTr");
+            $.each($mainTr, function () {
+                $(this).find('.tform').removeClass('tform');
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+            });
+        }
+
+
+
+        function bindRQualExpandTr() {
+            $paymentScheduleWrapper.on('click', '.rqualmainTr', function (e) {
+                e.preventDefault();
+                if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                    closeRQualTr();
+                    $(this).closest("tr").next(".qualmainTr").show();
+                    $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+                    $(this).find("i").addClass("tform");
+                }
+                else {
+                    $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+                    $(this).find("i").removeClass("tform");
+                }
+            });
+        }
+
+        function bindRQualExpandTrInput() {
+            $paymentScheduleWrapper.on('focus', '.rqualmainTrInput', function (e) {
+                if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                    closeRQualTr();
+                    $(this).closest("tr").next(".qualmainTr").show();
+                    $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+                }
+            });
+        }
+
+        function closeRQualTr() {
+            var $mainTr = $(".rqualmainTr");
+            $.each($mainTr, function () {
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+            });
+        }
+
+
+        function bindQualExpandTr() {
+            $paymentScheduleWrapper.on('click', '.qualmainExp', function (e) {
+                e.preventDefault();
+                if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                    closeQualTr();
+                    $(this).closest("tr").next(".qualsubTr").show();
+                    $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+                    $(this).find("i").addClass("tform");
+                }
+                else {
+                    $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+                    $(this).find("i").removeClass("tform");
+                }
+            });
+        }
+
+        function bindQualExpandTrInput() {
+            $paymentScheduleWrapper.on('focus', '.qualmainTrInput', function (e) {
+                if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                    closeQualTr()
+                    $(this).closest("tr").next(".qualsubTr").show();
+                    $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+                }
+            });
+        }
+
+        function closeQualTr() {
+            var $mainTr = $(".qualmainExp");
+            $.each($mainTr, function () {
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+            });
+        }
+
+
+        function calcTaxForPaymentSchedule($tarPaySchTable) {
+
+            $tarPaySchTable.find('> tbody > tr.mainTr').each(function() {
+                var $tarReceiptTr = $(this),
+                    $recSubTr = $tarReceiptTr.next('.subTr');
+                if($recSubTr.length <= 0) {
+                    return true;
+                }
+
+                var $tarReceiptTab = $recSubTr.find('.receipt-type-table');
+                $tarReceiptTab.find('.qualmainTr').each(function() {
+                    var sch_amt = parseFloat($(this).prev('tr').find('.sch-amt').val());
+                    if(isNaN(sch_amt)) {
+                        sch_amt = 0;
+                    }
+
+                    var $tarQualTab = $(this).find(' > td > .subDiv > table');
+                    $tarQualTab.find('> tbody > tr').each(function() {
+                        var $tarBaseIp = $(this).find('>td:eq(4) input.qualmainTrInput');
+                        $tarBaseIp.val(sch_amt);
+                        $(this).find('>td:eq(3) input.qualChange').trigger('change');
+                    });
+
+                });
+            });
+        }
+
+        function bindTaxCalculation() {
+            $paymentScheduleWrapper.on('change', '.qualChange', function() {
+                CalculateTax($(this)[0].id);
+            });
+        }
+
+        function CalculateTax(id) {
+
+            //if (bReady==false) return;
+            var key1 = id.split('_')[1],
+                key2 = id.split('_')[3];
+
+            var sname = $('#QualRowRef_' + key1).val();
+            var dbaseAmt= parseFloatVal($('#' + sname).val());
+
+            CalculateQualifier(dbaseAmt,key1);
+            var dTaxAmt = parseFloatVal(isNullCheck($('#QualTotalAmt_' + key1).val(),'number'));
+
+            var k1 = sname.split('_')[1],
+                k2 = sname.split('_')[3];
+
+            $('#BillAbs_' + k1 + '_TaxAmt_' + k2).val(dTaxAmt);
+            $('#BillAbs_' + k1 + '_NetAmt_' + k2).val(dTaxAmt+dbaseAmt);
+
+//    calcTotal();
+        }
+
+        function fillRowRefEditMode() {
+            var $mainTr = $paymentScheduleWrapper.find(".qualmainTr"),
+                iTotalCount= 0,
+                ikey =0;
+            $.each($mainTr, function () {
+                var $x =$(this),
+                    $y = $x.prev(),
+                    akey1 = 0,
+                    akey2 = 0;
+                $y.find(".qualRefId").each(function () {
+                    var $z =$(this);
+                    akey1 = parseFloatVal($z[0].id.split('_')[1]);
+                    akey2 = parseFloatVal($z[0].id.split('_')[3]);
+                });
+                $x.find(".qualTypeId").each(function () {
+                    var $n =$(this),
+                        key1 = parseFloatVal($n[0].id.split('_')[1]);
+                    if (iTotalCount < key1) {
+                        iTotalCount = key1;
+                    }
+                    if (ikey != key1) {
+                        ikey = key1;
+                        var sname = 'BillAbs_' + akey1 + '_CurAmt_' + akey2;
+                        $('#QualRowRef_' + key1).val(sname);
+                        $('#BillAbs_' + akey1 + '_QualRefId_' + akey2).val(key1);
+                    }
+                });
+            });
+            $('#QualTotalRowId').val(iTotalCount);
+        }
+
+
+        function CalculateQualifier(baseValue, key1) {
+
+            var rows = $('#QualRowId_' + key1).val();
+            var sformula="";
+            var sname = $('#QualRowRef_' + key1).val();
+            var dbaseAmt= $('#' + sname).val();
+            var dTotalQualAmt=0;
+
+            for (i = 1; i <= rows; i++) {
+                var sRef = $('#Qual_' + key1 + '_Ref_' + i).val().trim();
+                var sFormula = $('#Qual_' + key1 + '_Exp_'+ i).val();
+
+                var dPer = isNullCheck($('#Qual_' + key1 + '_ExpPer_'+ i).val(),'number');
+                var sbaseRef = 'R0';
+                if (parseFloatVal(dPer) ==0) dPer=100;
+                sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+
+                var fvaule = computeEval(sFormula);
+                $('#Qual_' + key1 + '_ExpValue_' + i).val(numberFormat(fvaule,'C'));
+
+                var iQualTypeid = $('#Qual_' + key1 + '_TypeId_' + i).val();
+                if (iQualTypeid==1 || iQualTypeid==2) {
+                    var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(),'number'));
+                    var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(),'number'));
+                    var dCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_CessPer_' + i).val(),'number'));
+                    var dEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_EduCessPer_' + i).val(),'number'));
+                    var dHEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_HEduCessPer_' + i).val(),'number'));
+                    var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+                    $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+
+                    $('#Qual_' + key1 + '_NetPer_' + i).val(numberFormat(dNetPer,'C'));
+                    $('#Qual_' + key1 + '_ExpPer_'+ i).val(numberFormat(dNetPer,'C'));
+
+                    var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                    var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                    var dCessAmt =  dTaxAmt* (dCess/100);
+                    var dEDAmt =  dTaxAmt* (dEDCess/100);
+                    var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+                    var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+                    $('#Qual_' + key1 + '_TaxableAmt_'+ i).val(numberFormat(dTaxableAmt,'C'));
+                    $('#Qual_' + key1 + '_TaxPerAmt_'+ i).val(numberFormat(dTaxAmt,'C'));
+                    $('#Qual_' + key1 + '_CessAmt_'+ i).val(numberFormat(dCessAmt,'C'));
+                    $('#Qual_' + key1 + '_EduCessAmt_'+ i).val(numberFormat(dEDAmt,'C'));
+                    $('#Qual_' + key1 + '_HEduCessAmt_'+ i).val(numberFormat(dHEDAmt,'C'));
+                    $('#Qual_' + key1 + '_NetAmt_'+ i).val(numberFormat(dNetAmt,'C'));
+
+                    dAmt = dNetAmt;
+                } else {
+                    var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+                }
+                $('#Qual_' + key1 + '_Amount_' + i).val(numberFormat(dAmt,'C'));
+                if ($('#Qual_' + key1 + '_YesNo_' + i).is(':checked') == true) dTotalQualAmt = dTotalQualAmt+ parseFloatVal(dAmt);
+                for (j = i; j <= rows; j++) {
+                    var sFormula = $('#Qual_' + key1 + '_Exp_'+ i).val();
+                    sFormula = sFormula.replace(new RegExp(sRef, 'g'), dAmt);
+                }
+            }
+            $('#QualTotalAmt_' + key1).val(numberFormat(dTotalQualAmt,'C')).trigger('change');
+        }
+
+        bindQualTot_onChange();
+        function bindQualTot_onChange() {
+            $paymentScheduleWrapper.on('change', '[id^="QualTotalAmt_"]', function() {
+                var $tarReceiptTr = $(this).closest('.qualmainTr').prev('tr');
+
+                $tarReceiptTr.find('.sch-tax').val($(this).val());
+
+                calcReceiptTotal($tarReceiptTr.closest('tbody'));
+            });
+        }
+
+        function calcReceiptTotal($tarTbody) {
+            var totAmt = 0,
+                totTax = 0;
+            $tarTbody.find('tr').each(function() {
+                var $tarSchAmt = $(this).find('.sch-amt');
+                if($tarSchAmt.length > 0) {
+                    var amt = parseFloat($tarSchAmt.val());
+                    if(!isNaN(amt)) {
+                        totAmt += amt;
+                    }
+                    var tax = parseFloat($(this).find('.sch-tax').val());
+                    if(!isNaN(tax)) {
+                        totTax += tax;
+                    }
+
+                    netAmt = amt + tax;
+                    if(!isNaN(netAmt)) {
+                        $(this).find('.sch-net-amt').val(netAmt.toFixed(2));
+                    }
+                }
+            });
+
+            var $totTr = $tarTbody.find('tr:last-of-type');
+            $totTr.find('.rec-tot-amt').val(totAmt.toFixed(2));
+            $totTr.find('.rec-tot-tax').val(totTax.toFixed(2));
+            var netAmt = totAmt + totTax;
+            $totTr.find('.rec-tot-net').val(netAmt.toFixed(2));
+
+            var $tarReceiptTr = $tarTbody.closest('.subTr').prev('.mainTr');
+            $tarReceiptTr.find('.sch-tax').val(totTax.toFixed(2));
+            $tarReceiptTr.find('.sch-net-amt').val(netAmt.toFixed(2));
+        }
+
+        function computeEval(formula) {
+            with (document.forms){
+                with (Math) {
+                    A = eval((formula));
+                }
+            } return A;
+        }
+
+        function signChange(x) {
+            var $this = $(x);
+            if ($this.hasClass( "fa-plus" )) {
+                $this.removeClass('fa-plus clr-gre');
+                $this.addClass('fa-minus clr-red');
+                var key1 = $this[0].id.split('_')[1],
+                    key2 = $this[0].id.split('_')[3];
+                $('#Qual_' + key1 + '_Sign_' + key2).val('-');
+            } else {
+                $this.removeClass('fa-minus clr-red');
+                $this.addClass('fa-plus clr-gre');
+                var key1 = $this[0].id.split('_')[1],
+                    key2 = $this[0].id.split('_')[3];
+                $('#Qual_' + key1 + '_Sign_' + key2).val('+');
+            }
+        }
+
+//    function qualTotal() {
+//        var iRows = $('#QualTotalRowId').val();
+//        var arrQual =[];
+//        for (i = 1; i <= iRows; i++) {
+//            $qualrows = $('input[id*=Qual_'+i+'_Ref_]'),
+//                $.each($qualrows, function () {
+//                    var $this = $(this),
+//                        name = $this[0].id,
+//                        keys = name.split('_'),
+//                        key1 = keys[1],
+//                        key2 = keys[3];
+//
+//                    var sQualName = $('#Qual_' + key1 + '_Desc_' + key2).val();
+//                    var iQualifierId = $('#Qual_' + key1 + '_Id_' + key2).val();
+//                    var dAmt =  parseFloatVal(isNullCheck($('#Qual_' + key1 + '_Amount_' + key2).val(),'number'));
+//                    var sSign = $('#Qual_' + key1 + '_Sign_' + key2).val();
+//                    if (sSign =="") sSign ="+";
+//
+//                    if (sSign =="-") { dAmt = dAmt*(-1); }
+//
+//                    if (dAmt !=0) {
+//                        arrQual.push({QualifierId:iQualifierId, QualName: sQualName, Amount: dAmt});
+//                    }
+//                });
+//        }
+//
+//        var result = [];
+//        arrQual.reduce(function (res, value) {
+//            if (!res[value.QualifierId]) {
+//                res[value.QualifierId] = {
+//                    Amount: 0,
+//                    QualName: value.QualName,
+//                    QualifierId: value.QualifierId
+//                };
+//                result.push(res[value.QualifierId])
+//            }
+//            res[value.QualifierId].Amount += value.Amount
+//            return res;
+//        }, {});
+//
+//        var iCount=0;
+//
+//        $("#totaltaxTable tbody").empty();
+//        $('#billqualrowid').val(iCount);
+//        $.each(result,function(index,element){
+//            iCount = +iCount+1;
+//            var $tbody = $('#totaltaxTable tbody');
+//            var template = $('#dummy-totaltaxTable tbody').html();
+//            $tbody.append(template.replace(/__1/g, '_' + iCount));
+//
+//            $('#QualName_' + iCount).val(element.QualName);
+//            $('#QualAmt_' + iCount).val(numberFormat(element.Amount,'C'));
+//            $('#QualifierId_' + iCount).val(element.QualifierId);
+//
+//            $('#billqualrowid').val(iCount);
+//        });
+//    }
+    });
+    function addNewRow(x) {
+        var strClass = $(x).attr('id');
+        var arr = strClass.split('_');
+        if($(x).val() != ""){
+            $(x).closest('.empty-'+arr[0]).removeClass('empty-'+arr[0]);
+        }
+
+        if($('#content_all').find('.empty-'+arr[0]).length > 0) {
+            return;
+        }
+
+        var newCount = parseInt($('#'+arr[0]+'_count').val());
+        var oldCount =newCount;
+        var template = $('#'+arr[0]+'-row').html();
+        newCount++;
+        template = template.replace(/__/g, '_' + newCount);
+        template = template.replace(/--/g, ' ' + newCount);
+
+        $(template).insertAfter(".coApp_"+oldCount);
+        $('#'+arr[0]+'_count').val(newCount);
+        $(".empty-coApp .lbl_move").polymerForm();
+        $(".empty-coApp .lbl_move").each(function() {
+            if($(this).val() != '' && $(this).val() != null) {
+                $(this).closest('div').addClass('dirty');
+            }
+        });
+    }
+
+    function paymentScheduleCustom() {
+        var $terms = $('#sch-no-terms'),
+            $from_month = $('#sch-from-month'),
+            $day = $('#sch-day'),
+            $period = $('#sch-period');
+
+        var terms = parseInt($terms.val()),
+            from_month = $from_month.val(),
+            day = parseInt($day.val()),
+            period = $period.val();
+
+
+        if(period.length == 0) {
+            showError($period,'Required');
+            return false;
+        } else
+            removeError($period);
+
+        if(from_month.length == 0) {
+            showError($from_month,'Required');
+            return false;
+        } else
+            removeError($from_month);
+
+        if(isNaN(terms) ||terms.length == 0) {
+            showError($terms,'Required');
+            return false;
+        } else
+            removeError($terms);
+
+        if(isNaN(day) || day.length == 0) {
+            showError($day,'Required');
+            return false;
+        } else if(day > 31) {
+            showError($day,'Day should be less than or equal 31!');
+            return false;
+        } else
+            removeError($day);
+
+        $('.loading_area').show();
+
+        var $payment_schedule_wrapper = $('#payment-schedule-wrapper');
+        var $payment_schedule_form_wrapper = $('#payment-schedule-form-wrapper');
+
+        var month = $from_month.datepicker('getDate').getMonth() + 1;
+        var year = $from_month.datepicker('getDate').getFullYear();
+        var template = $('#schedule-custom-template-tr').html();
+        var receipttemplate = $('#schedule-custom-receipt-type-tr').html();
+        $payment_schedule_wrapper.html($('#schedule-custom-template').html());
+        var sumMonths = 0;
+        switch(period) {
+            case 'M'://monthly
+                sumMonths=1;
+                break;
+            case 'B'://bimonthly
+                sumMonths=2;
+                break;
+            case 'Q'://quaterly
+                sumMonths=3;
+                break;
+            case 'H'://half yearly
+                sumMonths=6;
+                break;
+            case 'Y'://yearly
+                sumMonths=12;
+                break;
+        }
+
+        var totalLandAmount = parseFloatVal($('#unitdetail_LandAmount').text());
+        var totalConstructionAmount = parseFloatVal($('#unitdetail_ConstructionAmount').text());
+        var totalOtherAmount = parseFloatVal($('#unitdet_OtherAmount').text());
+        var totalAmount = totalLandAmount + totalConstructionAmount + totalOtherAmount;
+
+        var amount = totalAmount / terms;
+        var landAmount = totalLandAmount / terms;
+        var constructionAmount = totalConstructionAmount / terms;
+        var otherAmount = totalOtherAmount / terms;
+
+        var totCalcAmount = 0;
+        var totReceiptAmount = 0;
+        // set dates and amount
+        for(var i=0;i<terms;i++) {
+            if(i != 0)
+                month+=sumMonths;
+
+            if(month > 12) {
+                month = month - 12;
+                year+=1;
+            }
+
+            totCalcAmount += parseFloatVal(sanitizeNumber(amount,2));
+            if(i == (terms-1)) {
+                var diff = totCalcAmount - totalAmount;
+                amount = amount - diff;
+            }
+
+            $('#payment-schedule-wrapper > .custom-schedule > tbody.main').append(template.replace(/__/g,'_'+i)
+                .replace(/\{\{date\}\}/g,$.datepicker.formatDate('dd-mm-yy', getValidDateOfMonth(year,month,day)))
+                .replace(/\{\{terms\}\}/g, 'Term-' + (i+1))
+                .replace(/\{\{amount\}\}/g,sanitizeNumber(amount,2,true)));
+
+
+            if(custom_payment_schedule_details != null) {
+                var receiptAmount = 0;
+                $.each(custom_payment_schedule_details, function (j, o) {
+                    var receiptAmt= 0;
+                    switch(o.Type) {
+                        case 'L':
+                            receiptAmt = sanitizeNumber(landAmount,2,true);
+                            break;
+                        case 'C':
+                            receiptAmt = sanitizeNumber(constructionAmount,2,true);
+                            break;
+                        case 'O':
+                            receiptAmt = sanitizeNumber(otherAmount,2,true);
+                            break;
+                    }
+
+                    if(i == (terms-1) && j == (custom_payment_schedule_details.length - 1) && receiptAmt != 0) {
+                        var diff = amount - parseFloatVal(receiptAmt);
+                        receiptAmt = sanitizeNumber((receiptAmt + diff),2,true);
+                    }
+
+                    $('#sch_cust_receipttable_' + i + ' > tbody.main').append(receipttemplate.replace(/__0/g,'_'+i)
+                            .replace(/__/g,'_'+j)
+                            .replace(/\{\{TypeName\}\}/g, o.TypeName)
+                            .replace(/\{\{Amount\}\}/g, receiptAmt )
+                            .replace(/\{\{TypeId\}\}/g, o.TypeId )
+                            .replace(/\{\{Type\}\}/g, o.Type )
+                    );
+                    receiptAmount += parseFloatVal(receiptAmt);
+                    totReceiptAmount += parseFloatVal(receiptAmt);
+                });
+                $('#sh_cust_receiptAmtTotal_'+i).val(sanitizeNumber(receiptAmount,2,true));
+            }
+        }
+        $('#sch_cust_terms').val(terms);
+        $('#sch_cust_receipts').val(custom_payment_schedule_details.length);
+        $('#sch_cust_total').val(sanitizeNumber(totalAmount,2,true));
+
+        $('.savebtn_area').show();
+        $payment_schedule_wrapper.show();
+        $payment_schedule_form_wrapper.hide();
+        $('.loading_area').hide();
+    }
+    function getValidDateOfMonth(year,month,day) {
+        var date = new Date(year+'-'+month+'-'+day);
+        var firstDateOfMonth = new Date(year+'-'+month+'-1');
+        var lastDateOfMonth = new Date(firstDateOfMonth.getFullYear(), firstDateOfMonth.getMonth()+1, 0);
+        var lastDay = lastDateOfMonth.getDate();
+        if(day > lastDay) {
+            date = new Date(year+'-'+month+'-'+lastDay);
+        }
+        return date;
+    }
+</script>
+<script type="text/template" id="schedule-custom-template">
+    <table class="table custom-schedule">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody class="main"></tbody>
+        <tbody class="total">
+        <tr class="mainTr">
+            <td></td>
+            <td class="text-right rate_pri">Total</td>
+            <td><input type="text" class="rec-tot-tax tbl_input txt_right totalright" id="sch_cust_total" name="sch_cust_total" readonly></td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="hidden" name="sch_cust_terms" id="sch_cust_terms"/>
+    <input type="hidden" name="sch_cust_receipts" id="sch_cust_receipts"/>
+</script>
+<script type="text/template" id="schedule-custom-template-tr">
+    <tr class="mainTr">
+        <td><input type="text" class="tbl_input" name="sch_cust_date__" id="sch_cust_date__" value="{{date}}" readonly></td>
+        <td><input type="text" class="tbl_input txt_right" name="sh_cust_desc__" id="sh_cust_desc__" value="{{terms}}" maxlength="250"></td>
+        <td><input type="text" class="tbl_input txt_right" name="sh_cust_amount__" id="sh_cust_amount__" value="{{amount}}" readonly></td>
+        <td>
+            <ul class="action_btns">
+                <li><a href="#" class="subTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>
+            </ul>
+        </td>
+    </tr>
+    <tr class="subTr" style="display: none;">
+        <td colspan="11" style="padding:0px !important; ">
+            <div class="subDiv" style="display: none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table receipt-type-table" style="margin-bottom:0px;" id="sch_cust_receipttable__">
+                            <thead>
+                            <tr>
+                                <th>Receipt Type</th>
+                                <th>Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody class="total">
+                            <tr>
+                                <td class="text-right rate_pri">Total</td>
+                                <td>
+                                    <input type="text" class="rec-tot-amt tbl_input txt_right" name="sh_cust_receiptAmtTotal__" id="sh_cust_receiptAmtTotal__" readonly>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script type="text/template" id="schedule-custom-receipt-type-tr">
+    <tr>
+        <td>{{TypeName}}</td>
+        <td>
+            <input type="text" name="sch_cust__0_receiptamount__" id="sch_cust__0_receiptamount__" class="sch-amt tbl_input txt_right" value="{{Amount}}" readonly>
+            <input type="hidden" name="sch_cust__0_receipttypeid__" id="sch_cust__0_receipttypeid__" value="{{TypeId}}">
+            <input type="hidden" name="sch_cust__0_receipttype__" id="sch_cust__0_receipttype__" value="{{Type}}">
+        </td>
+    </tr>
+</script>

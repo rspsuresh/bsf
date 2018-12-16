@@ -1,0 +1,151 @@
+<?php
+		$url = $this->serverUrl(true);
+		$url = array_pop(explode("/", $url));
+		$url1 = array_pop(explode("/", $url));
+?>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<form class="form-horizontal" method="post" id="executivewise">
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+    	<div class="row">
+            <div class="col-lg-12">
+                <h1>Lead Allocation Transfer</h1> 
+            </div> 
+            <div class="col-lg-12 clear">
+            	<h1 class="txt_center form_main_h1">Executive Wise</h1>
+                <div class="form-group">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                        
+						<div id="Executivewise" class="showDiv">
+                        <div class="row">   
+                            <div class="col-lg-12">
+                                <!---------------multiple text tag---------------->
+                                <div class="form-group m_top20 col-lg-12">
+                                    <select name="executiveId[]" id="executiveId" onchange="enableToExe(this);" class="form-control multiple_dropdown lbl_move"  multiple="multiple" label="From Executive..." style="width:100%;">
+                                        <?php if(isset($resultsExecutive)) {
+                                            foreach ($resultsExecutive as $type) {
+                                                echo "<option value='" . $type['UserId'] . "' >" . $type['UserName'] . "</option>";
+                                            }
+                                        }?>
+                                    </select>
+									<div class="error_message"><p>Please select executive...</p> </div> 
+                                </div>
+                                <div class="form-group col-lg-12">
+                                    <select name="executivesId[]" id="executivesId" class="form-control multiple_dropdown lbl_move"   multiple="multiple" label="To Executive..." style="width:100%;" disabled>
+
+                                    </select>
+									<div class="error_message"><p>Please select executive...</p> </div> 
+                                </div>
+                            </div>
+                         </div>
+                        </div>
+                      
+                        <div class="col-lg-12 savebtn_area m_auto no_border">
+                            <ul>
+                                <li class="save_btn m_auto">
+                                    <a href="javascript:void(0);" class="ripple continue">Transfer</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+    	</div>
+    </div>
+</div>
+ </form>
+<script>
+	$(document).ready(function() {
+		$(".multiple_dropdown").select2({
+		});
+	});
+    toExe = <?php echo (isset($resultsExecutive)) ? json_encode($resultsExecutive) : '[]';?>;
+function enableToExe(_this) {
+    var exeArr = $(_this).val();
+    var dataList="";
+    var exeIdSelect = $('#executivesId');
+    if(exeArr!=null){
+        if(toExe.length>0) {
+            $.each(toExe, function (i, o) {
+                if($.inArray(o.UserId, exeArr) == -1) {
+                    dataList += "<option value='" + o.UserId + "'>" + o.UserName + "</option>";
+                }
+            });
+        }
+        exeIdSelect.attr("disabled",false);
+        exeIdSelect.html(dataList);
+    } else {
+        exeIdSelect.val(null).trigger('change');
+        exeIdSelect.attr("disabled",true);
+    }
+
+}
+//form validation//
+$(".error_message").hide();
+ $(".continue").click(function(){
+	$('.error_message').hide();
+		var ele = $(".showDiv");
+		 $(".error").text("");
+		 var bool = true;
+		ele.find("input,checkbox, select, textarea").each(function(){
+			
+			 var tagname = $(this).prop("tagName").toLowerCase();
+			 if(tagname == 'select'){
+				if($(this).val() == "" || $(this).val() == null){
+					bool = false;
+					$(this).closest('.form-group').find(".error_message").show();
+					$(this).focus();
+					return false;					
+				}
+			} 
+			else {
+				$(".error_message").remove();
+			}		
+		 });
+		if(bool){
+			$('form').submit();
+			}
+		
+	});
+
+
+//    $("#executiveId").on('change', function() {
+//
+//        var fromexeId=$("#executiveId").val();
+//
+//        $.ajax({
+//            type: 'POST',
+//            url: getBaseURL() + 'crm/lead/allocation-executivewise',
+//            data: {'fromexeId':fromexeId},
+//            success: function(data, status, xhr) {
+//                var valu = JSON.parse(data);
+//
+//                if(valu.length > 0) {
+//                    $('#executivesId').html(' ');
+//                    var opHtml = '<option value=""></option>';
+//
+//                    $.each(valu, function (i, o) {
+//                        opHtml += '<option value="' + o.UserId + '">' + o.UserName + '</option>';
+//                    });
+//
+//                    $('#executivesId').html(opHtml);
+//
+//                }
+//
+//
+//            },
+//            error: function(xhr, status, errorThrown) {
+//                $('.loading_area').hide();
+//                if (xhr.status == 400)
+//                    alert(xhr.responseText);
+//                else
+//                    alert(errorThrown);
+//            }
+//        });
+//
+//    });
+
+
+</script>

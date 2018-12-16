@@ -1,0 +1,187 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-12 page_tittle">
+                    <?php if(isset($projectlists)){ ?>
+        <div class="col-lg-12">
+          <h1 class="text-center">Register - Project Bill Of Quantity</h1>
+        </div>
+        <?php } else {  ?>
+        <h1>Register - Project Bill Of Quantity</h1>
+        <?php }  ?>
+
+			</div>
+			<!--div class="col-lg-12 top_ct" id="project-title" style="display: none;">
+				<div class="col-lg-3 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+					<div class="form-group">
+						<input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name" readonly />
+					</div>
+				</div>
+				<div class="col-lg-3 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+					<div class="form-group">
+						<input type="text" name="type_name" id="type_name" class="form-control lbl_move" label="Type" readonly />
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-12 clear" id="gridWrapper" style="display: none;">
+				<div class="table-responsive clear">
+					<div id="grid"></div>
+				</div>
+			</div-->
+			<div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next">
+              <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+				<div class="col-lg-12 frmwrk_div" id="projects_list">
+					<select name="project_id" id="project_select" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%">
+						<option value="">Select Project</option>
+						<?php if(isset($projectlists)): ?>
+						<?php foreach ( $projectlists as $project ): ?>
+						<option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+						<?php endforeach; ?>
+						<?php endif; ?>
+					</select>
+				</div>
+				<div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+					<select name="type_name" id="type_select" class="form-control single_dropdown lbl_move" data-size="6" title="Select Type..." style="width:100%">
+						<option value="">Select Type</option>
+						<option value="B">Budget</option>
+						<option value="P">Plan</option>
+					</select>
+				</div>
+				<div class="savebtn_areas col-lg-7 col-sm-7 col-sm-offset-3 col-xs-offset-4 col-lg-offset-3">
+					<ul>
+						<li class="subs"><a onclick="showGrid();" id="continue">Submit</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+	</div>
+	</div>
+</div>
+<!--div class="col-lg-12 savebtn_area">
+	<ul>
+		<li id="back-btn" style="display: none;"><a href="javascript:showOptions();" style="float:left; padding-top:13px; padding-bottom:10px;" data-toggle="tooltip" data-placement="right" title="Go Back"><i class="fa fa-arrow-circle-o-left" style="font-size: 25px; color:#3580C4;"></i></a></li>
+	</ul>
+</div-->
+
+<script type="text/javascript">
+var $project = $('#project_select'),
+	$type_list = $('#types_list'),
+	$type = $('#type_select'),
+	baseURL = getBaseURL();
+	/*$grid = $("#grid"),
+	jqxGridElem = null;*/
+
+function showGrid()
+{
+	if ($project.val() == '') {
+		alert('Select a project!');
+		$project.addClass('error');
+		return;
+	}
+
+    var type = $type.val();
+	if (type == '') {
+		alert('Select a type!');
+		$type.addClass('error');
+		return;
+	}
+
+    var url = "project/rfc/";
+    if(type == 'P')
+        url += "projboqplan/" + $project.val();
+    else
+        url += "projboq/" + $project.val()+"/"+ $type.val();
+
+	window.location.href = baseURL + url;
+}
+
+$(function () {
+	$project.on('change', function() {
+		if ($(this).val() == '') {
+			$type_list.hide();
+		} else {
+			$type_list.show();
+		}
+	});
+});
+
+// jqxgrid
+/*var source = {
+	dataType: "json",
+	dataFields: [
+		{ name: 'IOWTransId', type: 'number' },
+		{ name: 'SerialNo', type: 'string' },
+		{ name: 'Specification', type: 'string' },
+		{ name: 'Rate', type: 'Number' },
+		{ name: 'Qty', type: 'Number' },
+		{ name: 'Amount', type: 'Number' }
+	],
+	id: 'ResourceId'
+};
+
+function renderGridData()
+{
+	source.url = baseURL + "project/rfc/getprojectboqmaster/" + $project.val();
+	if (jqxGridElem != null) {
+		// bind project datas
+		var dataAdapter = new $.jqx.dataAdapter(source);
+		$grid.jqxGrid({ source: dataAdapter });
+		return;
+	}
+	
+	// jqxgrid
+	var dataAdapter = new $.jqx.dataAdapter(source);
+	var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+		var $tabsdiv = $($(parentElement).children()[0]);
+		$tabsdiv.append(renderRowDetail(datarecord.IOWTransId));
+	};
+	$grid.jqxGrid({
+		width: "100%",
+		source: dataAdapter,
+		pageable: true,
+		autoheight: true,
+		sortable: true,
+		enabletooltips: true,
+		rowdetails: true,
+		initrowdetails: initrowdetails,
+		rowdetailstemplate: { rowdetails: "<div style='height:300px;overflow:auto;'></div>", rowdetailsheight:400},
+		columns: [
+			{ text: 'IOWTransId', datafield: 'IOWTransId', hidden: true  },
+			{ text: 'Serial No.', datafield: 'SerialNo', width: '15%'},
+			{ text: 'Specification', datafield: 'Specification', width: '55%'},
+			{ text: 'Quantity', datafield: 'Qty', align: 'center', cellsalign: 'right', width: '10%'},
+			{ text: 'Rate', datafield: 'Rate', align: 'center', cellsalign: 'right', width: '10%'},
+			{ text: 'Amount', datafield: 'Amount', align: 'center', cellsalign: 'right', width: '10%'}
+		]
+	});
+}
+
+function renderRowDetail(id)
+{
+	var dataValue = '';
+	$.ajax({
+		url: getBaseURL() + 'project/rfc/getprojectboqdetails',
+		type: 'POST',
+		data: {TransId: id},
+		async: false,
+		success: function(data,status, xhr) {
+		if(xhr.status == 200)
+			dataValue = data;
+		}, error: function(xhr, status, errorThrown) {
+		}
+	});
+	return dataValue;
+}
+
+function showOptions()
+{
+	$('#formWrapper').show();
+	$('#gridWrapper').hide();
+	$('#project-title').hide();
+	$('#back-btn').hide();
+}*/
+</script>

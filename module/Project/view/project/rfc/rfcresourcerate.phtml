@@ -1,0 +1,1176 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/bootstrap-treefy.min.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/bootstrap-treefy.min.js"></script>
+<?php
+echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<style>
+    .jqx-grid-header {
+        height: 80px !important;
+    }
+    .jqx-grid-columngroup-header > div > div {border-bottom:1px solid red !important;padding:11px 10px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Request for creation - Resource Rate</h1>
+            </div>
+            <div class="col-lg-12 top_ct">
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                    <div class="form-group">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" label="Reference Date" value="<?php if ($rfcid != 0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])); } else { echo date("d-m-Y"); } ?>" />
+                    </div>
+                </div>
+                <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                    <div class="form-group">
+                        <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcid !=0 ) ? $rfcregister['RefNo'] : $svNo; ?>" <?php echo ($genType==true) ? 'readonly' : ''; ?> />
+                    </div>
+                </div>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                    <div class="form-group">
+                        <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name" value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName']; ?>" readonly/>
+                        <input type="hidden" name="project_id" id="project_id" value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId']; ?>" />
+                        <input type="hidden" name="rfcUId" id="rfcUId" value="<?php if(isset($rfcid)) echo $rfcid; else echo 0; ?>" />
+                    </div>
+                </div>
+                <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                    <div class="form-group">
+                        <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName']; ?>" readonly/>
+                        <input type="hidden" name="project_type" id="project_type" value="<?php if(isset($projecttype)) echo $projecttype; else if(isset($rfcregister['ProjectType'])) echo $rfcregister['ProjectType']; ?>" />
+                    </div>
+                </div>
+                <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                    <div class="form-group">
+                        <select name="revrequired" id="revselection" class="form-control single_dropdown lbl_move" data-size="6" label="Revision" style="width:100%">
+                            <option value="Y" <?php echo ($revrequired == 'Y') ? 'selected' : '';?>>Yes</option>
+                            <option value="N" <?php echo ($revrequired == 'N') ? 'selected' : '';?>>No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 col-lg-offset-0">
+                <div id="dataTable"></div>
+                <input type="hidden" name="totRows" id="totRows" value="<?php echo count($projectdetails); ?>" />
+                <input type="hidden" name="totWbsRows" id="totWbsRows" value="<?php echo count($projWBS); ?>" />
+                <div class="clearfix"></div>
+            </div>
+            <div class="col-lg-12" style="margin-bottom:10px; margin-top:10px;">
+                <div class="col-lg-12" style="margin-bottom:10px; margin-top:10px; background:#fff; border:1px solid #E4F1FE;">
+                    <!--chat 1-->
+                    <div class="col-lg-12">
+                        <div id="chartdiv" style="height:200px;"></div>
+                    </div>
+                    <!--chat 1-->
+                    <div class="col-lg-6"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+            <li class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="submitResource();" data-toggle="tooltip" class="ripple" title="submit!">Submit</a></li>
+            <li class="can_btn float_l" style="padding-bottom:10px;"><a href="<?php if ($rfcid !=0) { echo $this->basePath().'/project/rfc/rfcregister'; } else { echo $this->basePath().'/project/rfc/rfc-what';}?>">Cancel</a></li>
+        </ul>
+    </div>
+</div>
+
+<!--Modal-->
+<div id="wbsForm" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form id="wbsWiseForm">
+                    <div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+                        <?php
+                        $i = 1;
+                        foreach($projectdetails as $proTrans):
+                            $trandId = $proTrans['ResourceId'];
+                            ?>
+                            <input type="hidden" name="resourceId_<?php echo $i; ?>" id="resourceId_<?php echo $i; ?>" value="<?php echo $trandId; ?>" />
+                            <table class="table" style="margin-bottom:0;display:none;" id="wbsModalRow_<?php echo $trandId; ?>">
+                                <thead>
+                                <tr>
+                                    <th width="1%"></th>
+                                    <th class="th-modal">WBS Name</th>
+                                    <th class="th-modal">Lifting Charges</th>
+                                    <th class="th-modal">Floor-Wise Rate</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php $j = 1;
+                                foreach($projWBS as $wbsTrans): ?>
+                                    <tr data-node="treetable-<?php echo $wbsTrans['WBSId']; ?>" <?php if($wbsTrans['ParentId'] != 0) { ?>data-pnode="treetable-parent-<?php echo $wbsTrans['ParentId']; ?>"<?php } ?>>
+                                        <td></td>
+                                        <td width="40%"> <div style="min-height:30px; max-height:35px;overflow:auto; width:100%">
+                                            <input type="hidden" name="wbsId_<?php echo $j; ?>_<?php echo $trandId; ?>" id="wbsId_<?php echo $j; ?>_<?php echo $trandId; ?>" value="<?php echo $wbsTrans['WBSId']; ?>" />
+                                            <input type="hidden" name="parentId_<?php echo $j; ?>_<?php echo $trandId; ?>" id="parentId_<?php echo $j; ?>_<?php echo $trandId; ?>" value="<?php echo $wbsTrans['ParentId']; ?>" />
+                                            <?php echo $wbsTrans['WBSName']; ?></div>
+                                        </td>
+                                        <td width="30%" class="tbl_input_td"><input type="text" name="liftCharge_<?php echo $j; ?>_<?php echo $trandId; ?>" id="liftCharge_<?php echo $j; ?>_<?php echo $trandId; ?>" value="" onkeypress="return isDecimal(event,this);" class="tbl_input text-right"/></td>
+                                        <td width="30%" class="tbl_input_td"><input type="text" name="floorRate_<?php echo $j; ?>_<?php echo $trandId; ?>" id="floorRate_<?php echo $j; ?>_<?php echo $trandId; ?>" value="" onkeypress="return isDecimal(event,this);" class="tbl_input text-right"/></td>
+                                    </tr>
+                                    <?php $j++;
+                                endforeach; ?>
+                                </tbody>
+                            </table>
+                            <?php $i++;
+                        endforeach; ?>
+                    </div>
+                </form>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel_bt" data-dismiss="modal">Cancel</button>
+                <button type="button" class="saves_ok" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal end-->
+<!--Analysis Modal-->
+<div id="activityForm" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Rate Analysis</h3>
+            </div>
+            <div class="modal-body">
+                <form id="activityWiseForm">
+                    <div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;" id="activity-table-wrapper"></div>
+                    <input type="hidden" name="activityrowid" id="activityrowid" value="0"/>
+                </form>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="saves_ok
+                " data-dismiss="modal">Modify</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="formula" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Formula</h1>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Formula Expression</label>
+                    <input type="text" class="parent_text" name="formulaexp" value = "" id="formulaexp" onchange="return formulacalculation()" onkeypress="return isFormula(event);" >
+                </div>
+                <div class="form-group">
+                    <input type="text" class="parent_text text-right" name="formulavalue" value = "" id="formulavalue"  onfocus="return formulafocus()" readonly >
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return formulaok()" data-toggle="tooltip" class="ripple has-ripple" data-original-title="Apply">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Analysis Modal End-->
+<script type="text/template" id="dummy-activity-rate-analysis">
+<input type="hidden" name="resourceId__" id="resourceId__" value="" />
+
+<!-- Resource Details -->
+<input type="hidden" name="resgroupid__" id ="resgroupid__" value="0">
+<input type="hidden" name="resname__" id ="resname__" value="">
+<input type="hidden" name="code__" id="code__">
+<input type="hidden" name="rate__" id="rate__">
+<input type="hidden" name="typeid__" id="typeid__">
+<input type="hidden" name="unitid__" id ="unitid__">
+
+<div class="activityDivs" id="activityModalRow__rowresourceid">
+<div class="darkmenu">
+    <ul>
+        <li class="active" id="manual_tab__"><a href="javascript:showmix('manual', '#manual_tab__')"><i class="fa fa-magic"></i> Manual</a></li>
+        <li id="machinery_tab__"><a href="javascript:showmix('machinery', '#machinery_tab__')"><i class="fa fa-cogs"></i> Machinery</a></li>
+    </ul>
+    <div class="lstate manual_mac">
+        <ul>
+            <li>
+                <label>LS Rate</label>
+                <input type="text" class="text-right" name="analrateLS__" id="analrateLS__" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onkeyup="bindRate('analrateLS__')"/>
+            </li>
+            <li>
+                <label>Manual Rate</label>
+                <input type="text" class="text-right" name="analrateM__" id="analrateM__" onkeypress="return isDecimal(event,this)" readonly/>
+            </li>
+            <li>
+                <label>Machinery Rate</label>
+                <input type="text" class="text-right" name="analrateA__" id="analrateA__" onkeypress="return isDecimal(event,this)" readonly/>
+            </li>
+            <li>
+                <label>Rate Type</label>
+                <div class="select-style select-inline">
+                    <select name="analrate__" id ="analrate__" onchange="return MainRateUpdate(this.id)">
+                        <option value="L">LS </option>
+                        <option value="M">Manual </option>
+                        <option value="A">Machinery </option>
+                    </select>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="col-lg-12 clear">
+    <div id="activityWQty__">
+        <label class="lbl_style">Working Qty</label>
+        <input type="text" class="parent_texters work_qt text-right"name="activity___AnalQty" id="activity___AnalQty" onkeypress="return isDecimal(event,this)" onchange="ChangeWorkQty(this.id)">
+    </div>
+    <div id="activityWQtyR__" style="display: none;">
+        <label class="lbl_style">Working Qty</label>
+        <input type="text" class="parent_texters work_qt text-right" name="activityR___AnalQty" id="activityR___AnalQty" onkeypress="return isDecimal(event,this)" onchange="ChangeWorkQty(this.id)">
+    </div>
+    <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+        <!-- Manual tabs -->
+        <table class="table" style="margin-bottom:0px; margin-top:8px;" id="activity___restable">
+            <thead>
+            <tr>
+                <th class="bg_clo_subTr">Resource name</th>
+                <th class="bg_clo_subTr">Unit</th>
+                <th class="bg_clo_subTr">Qty</th>
+                <th class="bg_clo_subTr">Rate</th>
+                <th class="bg_clo_subTr">Amount</th>
+                <th class="bg_clo_subTr text-center">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=0; $total=0;
+            if(isset($trans['activitytrans'])):
+                foreach($rfcactivity as $curanal):
+                    if($curanal['ActivityType'] != 'A' || $trans['RFCTransId'] != $curanal['RFCTransId'])
+                        continue;
+                    $j = $j+1; ?>
+                    <tr id="activity___RowId_1">
+                        <td width="25%"><input class="parent_text" type="text" name="activity___resname_1" id ="activity___resname_1" value="<?php echo $curanal['Code'].' '.$curanal['ResourceName'];?>" onfocus="return CheckResourceFocus(this.id,'')" readonly autocomplete="off"></td>
+                        <td width="5%"><label for="activity___resunit_1"><?php echo $curanal['UnitName'];?></label></td>
+                        <td width="5%"><input type="text" class="parent_text text-right" name="activity___resqty_1" id="activity___resqty_1" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Qty'],3);?>" onfocus="return showformula(this.id)" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" onchange="return ValueChange(this.id)"></td>
+                        <td width="5%"><input type="text" class="parent_text text-right" name="activity___resrate_1" id="activity___resrate_1" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Rate'],2,true);?>" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2,true)" onchange="return ValueChange(this.id)" readonly></td>
+                        <td width="8%"><input type="text" class="parent_text text-right" name="activity___resamt_1" id="activity___resamt_1" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Amount'],2,true);?>" readonly="" onkeypress="return isDecimal(event,this)"></td>
+                        <td width="2%">
+                            <ul class="action_btns">
+                                <li>
+                                    <a id="activity___resdel_1" href="javascript:DeleteResource('activity___RowId_1')" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                </li>
+                            </ul>
+                        </td>
+                        <input type="hidden" name="activity___formula_1" id="activity___formula_1">
+                        <input type="hidden" name="activity___resid_1" id ="activity___resid_1" value="<?php echo $curanal['ResourceId'];?>">
+                        <input type="hidden" name="activity___resunit_1" id ="activity___resunit_1" value="<?php echo $curanal['UnitId'];?>">
+                        <input type="hidden" name="activity___rowrefid_1" value = "1" id="activity___rowrefid_1">
+                    </tr>
+                    <?php $total += $curanal['Amount'];
+                endforeach; endif;  $j = $j+1; ?>
+            <tr id="activity___RowId_1">
+                <td width="25%"><input class="parent_text" type="text" name="activity___resname_1" id ="activity___resname_1" value="" onfocus="return CheckResourceFocus(this.id,'')" autocomplete="off"></td>
+                <td width="5%"><label for="activity___resunit_1"></label></td>
+                <td width="5%"><input type="text" class="parent_text text-right" name="activity___resqty_1" id="activity___resqty_1" value="" align="right" onfocus="return showformula(this.id)" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" onchange="return ValueChange(this.id)"></td>
+                <td width="5%"><input type="text" class="parent_text text-right" name="activity___resrate_1" id="activity___resrate_1" value="" align="right" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2,true)" onchange="return ValueChange(this.id)" readonly></td>
+                <td width="8%"><input type="text" class="parent_text text-right" name="activity___resamt_1" id="activity___resamt_1" value="" align="right" readonly="" onkeypress="return isDecimal(event,this)"></td>
+                <td width="2%">
+                    <ul class="action_btns">
+                        <li>
+                            <a id="activity___resdel_1" href="javascript:DeleteResource('activity___RowId_1')" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                        </li>
+                    </ul>
+                </td>
+                <input type="hidden" name="activity___formula_1" id="activity___formula_1">
+                <input type="hidden" name="activity___resid_1" id ="activity___resid_1" value="">
+                <input type="hidden" name="activity___resunit_1" id ="activity___resunit_1" value="">
+                <input type="hidden" name="activity___rowrefid_1" value = "1" id="activity___rowrefid_1">
+            </tr>
+            </tbody>
+            <tbody class="total">
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;"></td>
+                <td style="border-right:none;"></td>
+                <td style="border-right:none;"></td>
+                <td style="border-right:none;vertical-align: middle;" class="rate_pri" align="right">Total</td>
+                <td style="border-right:none;"><input class="parent_text text-right" type="text" placeholder="00.0" name="activity___totrate" id="activity___totrate" value="<?php echo $this->commonHelper()->sanitizeNumber($total,2,true);?>"  readonly></td>
+                <td style="border-right:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none; vertical-align: middle;" class="rate_pri" align="right">Rate Per Unit</td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" name="activity___perrate" id="activity___perrate" value="<?php echo $this->commonHelper()->sanitizeNumber($total,2,true);?>"  readonly></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="rowinfoid__" id="rowinfoid__" value="1">
+        <table class="table" style="display: none;margin-bottom:0px; margin-top:8px;" id="activityR___restable">
+            <thead>
+            <tr>
+                <th class="bg_clo_subTr">Resource name</th>
+                <th class="bg_clo_subTr">Unit</th>
+                <th class="bg_clo_subTr">Qty</th>
+                <th class="bg_clo_subTr">Rate</th>
+                <th class="bg_clo_subTr">Amount</th>
+                <th class="bg_clo_subTr text-center">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=0; $total=0;
+            if(isset($rfcactivity)):
+                foreach($rfcactivity as $curanal):
+                    if($curanal['ActivityType'] == 'A' || $trans['RFCTransId'] != $curanal['RFCTransId'])
+                        continue;
+                    $j = $j+1; ?>
+                    <tr id="activityR___RowId_1">
+                        <td width="25%"><input class="parent_text" type="text" name="activityR___resname_1" id="activityR___resname_1" value="<?php echo $curanal['Code'].' '.$curanal['ResourceName'];?>" onfocus="return CheckResourceFocus(this.id,'R')" readonly autocomplete="off"></td>
+                        <td width="5%"><label for="activityR___resunit_1"><?php echo $curanal['UnitName'];?></label></td>
+                        <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resqty_1" id="activityR___resqty_1" value="<?php echo $curanal['Qty'];?>" align="right" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onfocus="return showformulaR(this.id)" onkeydown="return showF(this.id,event)" onchange="return ValueChangeR(this.id)"></td>
+                        <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resrate_1" id="activityR___resrate_1" value="<?php echo $curanal['Rate'];?>" align="right" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onchange="return ValueChangeR(this.id)" readonly></td>
+                        <td width="8%"><input type="text" class="parent_text text-right" name="activityR___resamt_1" id="activityR___resamt_1" value="<?php echo $curanal['Amount'];?>" align="right" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                        <td width="2%">
+                            <ul class="action_btns">
+                                <li>
+                                    <a id="activityR___resdel_1" href="javascript:DeleteResourceR('activityR___RowId_1')" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                </li>
+                            </ul>
+                        </td>
+                        <input type="hidden" name="activityR___formula_1" id="activityR___formula_1">
+                        <input type="hidden" name="activityR___resid_1" id="activityR___resid_1" value="<?php echo $curanal['ResourceId'];?>">
+                        <input type="hidden" name="activityR___resunit_1" id="activityR___resunit_1" value="<?php echo $curanal['UnitId'];?>">
+                        <input type="hidden" name="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                    </tr>
+                    <?php $total += $curanal['Amount'];
+                endforeach; endif; $j = $j+1;?>
+            <tr id="activityR___RowId_1">
+                <td width="25%"><input class="parent_text" type="text" name="activityR___resname_1" id="activityR___resname_1" value="" onfocus="return CheckResourceFocus(this.id,'R')" autocomplete="off"></td>
+                <td width="5%"><label for="activityR___resunit_1"></label></td>
+                <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resqty_1" id="activityR___resqty_1" value="" align="right" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onfocus="return showformulaR(this.id)" onkeydown="return showF(this.id,event)" onchange="return ValueChangeR(this.id)"></td>
+                <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resrate_1" id="activityR___resrate_1" value="" align="right" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onchange="return ValueChangeR(this.id)" readonly></td>
+                <td width="8%"><input type="text" class="parent_text text-right" name="activityR___resamt_1" id="activityR___resamt_1" value="" align="right" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                <td width="2%">
+                    <ul class="action_btns">
+                        <li>
+                            <a id="activityR___resdel_1" href="javascript:DeleteResourceR('activityR___RowId_1')" style="display: none;"><i class="fa fa-trash-o ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                        </li>
+                    </ul>
+
+                </td>
+                <input type="hidden" name="activityR___formula_1" id="activityR___formula_1">
+                <input type="hidden" name="activityR___resid_1" id="activityR___resid_1" value="">
+                <input type="hidden" name="activityR___resunit_1" id="activityR___resunit_1" value="">
+                <input type="hidden" name="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+            </tr>
+            </tbody>
+            <tbody class="total">
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;"></td>
+                <td style="border-right:none;"></td>
+                <td style="border-right:none;"></td>
+                <td style="border-right:none; vertical-align: middle;" align="right" class="rate_pri">Total</td>
+                <td style="border-right:none;"><input class="parent_text text-right" type="text" placeholder="00.0" name="activityR___totrate" id="activityR___totrate"  value="<?php echo $total;?>" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                <td style="border-right:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none; vertical-align: middle;"  class="rate_pri" align="right">Rate Per Unit</td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" name="activityR___perrate" id="activityR___perrate" value="<?php echo $total;?>" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="rowinfoidR__" id="rowinfoidR__" value="1">
+    </div>
+</div>
+</div>
+</script>
+<script type="text/template" id="dummy-activity-tr">
+    <tr id="activity___RowId_0">
+        <td width="25%"><input class="parent_text" type="text" name="activity___resname_0" id ="activity___resname_0" value="" onfocus="return CheckResourceFocus(this.id,'')" autocomplete="off"></td>
+        <td width="5%"><label for="activity___resunit_0"></label></td>
+        <td width="5%"><input type="text" class="parent_text text-right" name="activity___resqty_0" id="activity___resqty_0" value="" align="right" onfocus="return showformula(this.id)" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" onchange="return ValueChange(this.id)"></td>
+        <td width="5%"><input type="text" class="parent_text text-right" name="activity___resrate_0" id="activity___resrate_0" value="" align="right" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2,true)" onchange="return ValueChange(this.id)" readonly></td>
+        <td width="8%"><input type="text" class="parent_text text-right" name="activity___resamt_0" id="activity___resamt_0" value="" align="right" readonly="" onkeypress="return isDecimal(event,this)"></td>
+        <td width="2%">
+            <ul class="action_btns">
+                <li>
+                    <a id="activity___resdel_0" href="javascript:DeleteResource('activity___RowId_0')" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                </li>
+            </ul>
+        </td>
+        <input type="hidden" name="activity___formula_0" id="activity___formula_0">
+        <input type="hidden" name="activity___resid_0" id ="activity___resid_0" value="">
+        <input type="hidden" name="activity___resunit_0" id ="activity___resunit_0" value="">
+        <input type="hidden" name="activity___rowrefid_0" value = "1" id="activity___rowrefid_0">
+    </tr>
+</script>
+<script type="text/template" id="dummy-activityr-tr">
+    <tr id="activityR___RowId_0">
+        <td width="25%"><input class="parent_text" type="text" name="activityR___resname_0" id="activityR___resname_0" value="" onfocus="return CheckResourceFocus(this.id,'R')" autocomplete="off"></td>
+        <td width="5%"><label for="activityR___resunit_0"></label></td>
+        <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resqty_0" id="activityR___resqty_0" value="" align="right" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onfocus="return showformulaR(this.id)" onkeydown="return showF(this.id,event)" onchange="return ValueChangeR(this.id)"></td>
+        <td width="5%"><input type="text" class="parent_text text-right" name="activityR___resrate_0" id="activityR___resrate_0" value="" align="right" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onchange="return ValueChangeR(this.id)" readonly></td>
+        <td width="8%"><input type="text" class="parent_text text-right" name="activityR___resamt_0" id="activityR___resamt_0" value="" align="right" onkeypress="return isDecimal(event,this)" readonly=""></td>
+        <td width="4%">
+            <ul class="action_btns">
+                <li>
+                    <a id="activityR___resdel_0" href="javascript:DeleteResourceR('activityR___RowId_0')" style="display: none;"><i class="fa fa-trash-o ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                </li>
+            </ul>
+
+        </td>
+        <input type="hidden" name="activityR___formula_0" id="activityR___formula_0">
+        <input type="hidden" name="activityR___resid_0" id="activityR___resid_0" value="">
+        <input type="hidden" name="activityR___resunit_0" id="activityR___resunit_0" value="">
+        <input type="hidden" name="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+    </tr>
+</script>
+<script>
+$dataGrid = $("#dataTable");
+var data = <?php echo (isset($projectdetails)) ? json_encode($projectdetails) : '[]'?>;
+var projectdetailsactivity = <?php echo (isset($projectdetailsactivity)) ? json_encode($projectdetailsactivity) : '[]'?>;
+var arrayreslist =  <?php echo (isset($reslist)) ? json_encode($reslist) : '[]'?>;
+var arrayres = arrayreslist;
+var arrayresR = arrayreslist;
+$(function () {
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'ResourceId', type: 'number' },
+            { name: 'TypeId', type: 'number' },
+            { name: 'TypeName', type: 'string' },
+            { name: 'Code', type: 'string' },
+            { name: 'ResourceName', type: 'string' },
+            { name: 'RateType', type: 'string' },
+            { name: 'UnitName', type: 'string' },
+            { name: 'Qty', type: 'number' },
+            { name: 'IncludeFlag', type: 'boolean' },
+            { name: 'Rate', type: 'number' },
+            { name: 'Amount', type: 'number' },
+            { name: 'CInc', type: 'boolean' },
+            { name: 'CRate', type: 'number' },
+            { name: 'CAmount', type: 'number' }
+        ],
+//        id: 'ResourceId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $("#dataTable").jqxGrid({
+        width: '100%',
+        pageable: true,
+        rowsheight: 35,
+        selectionMode: 'singleRow',
+        pagerButtonsCount: 6,
+        autoheight:true,
+        source: dataAdapter,
+        altrows: true,
+        editable:true,
+        enabletooltips: true,
+        groupable:true,
+        selectionmode: 'singlerow',
+        editmode: 'selectedcell',
+        columns: [
+            { text: 'ResourceId', datafield: 'ResourceId', hidden: true},
+            { text: 'RateType', datafield: 'RateType', hidden: true},
+            { text: 'Code', dataField: 'Code',editable:false, width:'10%'},
+            { text: 'Resource Name', dataField: 'ResourceName',width:'22%',editable:false},
+            { text: 'Unit', dataField: 'UnitName',editable:false, width:'8%'},
+            { text: 'Qty', dataField: 'Qty',editable:false, width:'8%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                }},
+            { text: 'Inc', dataField: 'IncludeFlag', columngroup: 'Current',columntype: 'checkbox',align:'center',editable:false, width:'5%'},
+            { text: 'Rate', dataField: 'Rate', columngroup: 'Current',editable:false, align: 'right', cellsalign: 'right', width:'8%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }},
+            { text: 'Amount', dataField: 'Amount', columngroup: 'Current',editable:false, align: 'right', cellsalign: 'right',width:'8%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                }},
+            { text: 'Inc', dataField: 'CInc', columngroup: 'Revised',columntype: 'checkbox',align:'center', editable: true, width:'5%'},
+            { text: 'Rate', dataField: 'CRate', columngroup: 'Revised',align: 'right', cellsalign: 'right', cellsformat: 'D2', columntype: 'numberinput', width:'8%',
+                createeditor: function (row, cellvalue, editor) {
+                    editor.jqxNumberInput({ digits: 20,spinButtons: false});
+                }},
+            { text: 'Amount', dataField: 'CAmount', columngroup: 'Revised',align: 'right', cellsalign: 'right', width:'8%', editable:false},
+            { text: 'Action', sortable: false, filterable: false, align: 'left',width:'10%',
+                cellsrenderer: function (row) {
+                    var resourceId = $dataGrid.jqxGrid('getCellValue', row, 'ResourceId');
+                    var TypeId = $dataGrid.jqxGrid('getCellValue', row, 'TypeId');
+                    var link = '<a title="Edit WBS" href="javascript:void(0);" style="padding-left: 15px;" onclick="return showModal('+resourceId+');"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    if(TypeId == '4') {
+                        link += '<a title="Analysis" href="javascript:void(0);" style="padding-left: 15px;" onclick="return showAnalysisModal('+resourceId+');"><i class="fa fa-pencil-square-o reg-icon"></i></a>'
+                    }
+
+                    return link;
+                }
+            }
+        ],
+        groups: ['TypeName'],
+        groupsrenderer: function (defaultText, group, state, params) {
+            return "<div style='margin: 5px;font-weight: bold;'>" + group + "</div>";
+        },
+        ready: function () {
+            $("#dataTable").jqxGrid('expandallgroups');
+        },
+        columngroups: [
+            { text: 'Revised', align: 'center', name: 'Revised' },
+            { text: 'Current', align: 'center', name: 'Current' }
+        ]
+    });
+    $("#dataTable").bind('rowselect', function (event) {
+        rowindex = event.args.rowindex;
+        rowdata = $("#dataTable").jqxGrid('getrowdata', rowindex);
+        populateChart(rowdata);
+    });
+    $("#dataTable").bind('cellendedit', function (event) {
+        var args = event.args;
+        if (args.value == args.oldvalue || args.datafield != 'CRate')
+            return;
+        $("#dataTable").jqxGrid('setcellvalue', args.rowindex, 'CAmount', sanitizeNumber(parseFloat(args.value) * parseFloat(args.row.Qty),2,true));
+    });
+
+    $(".table").treeFy({
+        treeColumn: 1,
+        collapseAnimateCallback: function(row) {
+            row.fadeOut();
+        },
+        expandAnimateCallback: function(row) {
+            row.fadeIn();
+        }
+    });
+
+    // activity tables
+    var $rowid = $('#activityrowid'),
+        activityrowid = parseInt($rowid.val());
+    $.each(projectdetailsactivity, function (i,o) {
+        activityrowid += 1;
+        var $wrapper = $('#activity-table-wrapper'),
+            template = $('#dummy-activity-rate-analysis').html();
+
+        template =template.replace(/__rowresourceid/g,'_' +o.ResourceId);
+        $wrapper.append(template.replace(/__/g, '_' + activityrowid));
+
+        bindResourceAutoComplete(activityrowid);
+        bindResRowAutoComplete($('#activityR_' + activityrowid + '_resname_1'));
+        // resource details
+        $('#resourceId_' + activityrowid).val(o.ResourceId);
+        $('#resname_' + activityrowid).val(o.ResourceName);
+        $('#resgroupid_' + activityrowid).val(o.ResourceGroupId);
+        $('#code_' + activityrowid).val(o.Code);
+        $('#rate_' + activityrowid).val(o.Rate);
+        $('#typeid_' + activityrowid).val(o.TypeId);
+        $('#unitid_' + activityrowid).val(o.UnitId);
+
+        $('#analrateLS_' + activityrowid).val(o.LRate);
+        $('#analrateM_' + activityrowid).val(o.MRate);
+        $('#analrateA_' + activityrowid).val(o.ARate);
+        $('#analrate_' + activityrowid).find('option[value='+ o.RateType+']').attr('selected','selected');
+        $('#activity_' + activityrowid + '__AnalQty').val(o.AnalysisAQty);
+        $('#activityR_' + activityrowid + '__AnalQty').val(o.AnalysisMQty);
+
+        var analysisrowid = 1;
+        $.each(o.rateAnalysis, function (j,a) {
+            var $resname = $('#activity_'+activityrowid+'_resname_' + analysisrowid);
+            var $qty = $('#activity_'+activityrowid+'_resqty_' + analysisrowid);
+            $resname.val(a.Code + ' ' + a.ResourceName);
+            $('#activity_'+activityrowid+'_resid_' + analysisrowid).val(a.ResourceId);
+            $('label[for=activity_'+activityrowid+'_resunit_' + analysisrowid+']').html(a.UnitName);
+            $('#activity_'+activityrowid+'_resunit_' + analysisrowid).val(a.UnitId);
+            $qty.val(a.Qty);
+            $('#activity_'+activityrowid+'_resrate_' + analysisrowid).val(a.Rate);
+            $('#activity_'+activityrowid+'_resamt_' + analysisrowid).val(a.Amount);
+            $('#activity_'+activityrowid+'_formula_' + analysisrowid).val(a.Formula);
+            $resname.trigger('change');
+            $qty.trigger('change');
+            analysisrowid++;
+        });
+        $('#rowinfoid_' + activityrowid).val(analysisrowid);
+
+        analysisrowid = 1;
+        $.each(o.rateAnalysisR, function (j,a) {
+            var $resname = $('#activityR_'+activityrowid+'_resname_' + analysisrowid);
+            var $qty = $('#activityR_'+activityrowid+'_resqty_' + analysisrowid);
+            $resname.val(a.Code + ' ' + a.ResourceName);
+            $('#activityR_'+activityrowid+'_resid_' + analysisrowid).val(a.ResourceId);
+            $('label[for=activityR_'+activityrowid+'_resunit_' + analysisrowid+']').html(a.UnitName);
+            $('#activityR_'+activityrowid+'_resunit_' + analysisrowid).val(a.UnitId);
+            $qty.val(a.Qty);
+            $('#activityR_'+activityrowid+'_resrate_' + analysisrowid).val(a.Rate);
+            $('#activityR_'+activityrowid+'_resamt_' + analysisrowid).val(a.Amount);
+            $('#activityR_'+activityrowid+'_formula_' + analysisrowid).val(a.Formula);
+            $resname.trigger('change');
+            $qty.trigger('change');
+            analysisrowid++;
+        });
+        $('#rowinfoidR_' + activityrowid).val(analysisrowid);
+    });
+    $rowid.val(activityrowid);
+
+});
+// rate analysis
+function showmix(x, tab) {
+    $(tab).addClass('active').siblings('li').removeClass('active');
+    var rowid = tab.split('_')[2];
+    if (x=="machinery") {
+        $('#activity_'+rowid+'_restable').hide();
+        $('#activityWQty_' + rowid).hide();
+        $('#activityR_'+rowid+'_restable').show();
+        $('#activityWQtyR_' + rowid).show();
+        return;
+    } else {
+        $('#activity_' + rowid + '_restable').show();
+        $('#activityWQty_' + rowid).show();
+        $('#activityR_' + rowid + '_restable').hide();
+        $('#activityWQtyR_' + rowid).hide();
+    }
+}
+function MainRateUpdate(id) {
+    var rowid = id.split('_')[1];
+    var sVal = $('#analrate_' + rowid).val(),
+        dRate='';
+    if (sVal=='M') dRate = parseFloat(isNullCheck($('#analrateM_' + rowid).val(),'number'));
+    else if (sVal=='A') dRate =  parseFloat(isNullCheck($('#analrateA_' + rowid).val(),'number'));
+    else if (sVal=='L') dRate =  parseFloat(isNullCheck($('#analrateLS_' + rowid).val(),'number'));
+    $('#rate_' + rowid).val(sanitizeNumber(dRate,2,true));
+}
+function bindRate(x) {
+    var i = x.split('_')[1];
+    if ($('#analrate_' +i).val() == 'L')
+        $('#rate_'+i).val($('#analrateLS_' + i).val());
+}
+function CheckResourceFocus(x,type) {
+    checkResource(x.split('_')[1],type);
+}
+
+function checkResource(iFRowId,type) {
+    iFocusRowId = iFRowId;
+    var $reskeyid ="";
+    if (type=="R") {
+        arrayresR = arrayreslist;
+        $reskeyid = $('input[id*=activityR_' + iFocusRowId + '_resid_]');
+        arrayresR = $.grep(arrayreslist, function(element, index) {
+            var is_selected = true;
+            $.each($reskeyid, function (i, obj) {
+                var $this = $(this);
+                if (element.data == $this.val()) is_selected = false;
+            });
+            return is_selected;
+        });
+    } else {
+        arrayres = arrayreslist;
+        $reskeyid = $('input[id*=activity_' + iFocusRowId + '_resid_]');
+        arrayres = $.grep(arrayreslist, function(element, index) {
+            var is_selected = true;
+            $.each($reskeyid, function (i, obj) {
+                var $this = $(this);
+                if (element.data == $this.val()) is_selected = false;
+            });
+            return is_selected;
+        });
+    }
+}
+function SortOrder(iRowid) {
+    var rows = $('tr[id^=activity_'+iRowid+'_RowId_]');
+    var irefid=1;
+    $.each(rows, function() {
+        var id = $(this)[0].id;
+        var irow = id.split("_")[3];
+
+        $('#activity_' + iRowid + '_rowrefid_' + irow).val(irefid);
+        irefid = + irefid+1;
+    });
+}
+function SortOrderR(iRowid) {
+    var rows = $('tr[id^=activityR_'+iRowid+'_RowId_]');
+    var irefid=1;
+    $.each(rows, function() {
+        var id = $(this)[0].id;
+        var irow = id.split("_")[3];
+
+        $('#activityR_' + iRowid + '_rowrefid_' + irow).val(irefid);
+        irefid = + irefid+1;
+    });
+}
+function DeleteResourceR(x) {
+    var sStr = x.split("_"),
+        iARowid = sStr[3];
+    var iFocusRowId= sStr[1];
+    if (isNullCheck($('#activityR_' + iFocusRowId + '_resid_' + iARowid).val(),'number')==0) return;
+    if (confirm('Do you want to Delete')) {
+        var $row = $('#activityR_' + iFocusRowId + '_RowId_' + iARowid),
+            irid =   $('#rowinfoidR_' + iFocusRowId).val(),
+            $resname =  $('#activityR_' + iFocusRowId + '_resname_' + irid);
+        $row.remove();
+        bindResRowAutoComplete($resname);
+        ValueChangeR($($resname)[0].id);
+        SortOrderR(iFocusRowId);
+    }
+}
+function DeleteResource(x) {
+    var sStr = x.split("_"),
+        iARowid = sStr[3];
+    var iFocusRowId= sStr[1];
+    if (isNullCheck($('#activity_' + iFocusRowId + '_resid_' + iARowid).val(),'number')==0) return;
+    if (confirm('Do you want to Delete')) {
+        var $row = $('#activity_' + iFocusRowId + '_RowId_' + iARowid),
+            irid =   $('#rowinfoid_' + iFocusRowId).val(),
+            $resname =  $('#activity_' + iFocusRowId + '_resname_' + irid);
+        $row.remove();
+        bindResRowAutoComplete($resname);
+        ValueChange($($resname)[0].id);
+        SortOrder(iFocusRowId);
+    }
+}
+function bindResourceAutoComplete(rowId) {
+    var $resids = null;
+    if(typeof rowId != 'undefined') $resids = $('input[id*='+rowId+'_resname_]');
+    else $resids = $('input[id*=_resname_]');
+    // unbind previous autocomplete fn
+    $resids.unbind('autocomplete');
+    // bind autocomplete fn
+    $.each($resids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id,
+            arr_names = name.split('_');
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var key1 = arr_names[1],
+            key2 = arr_names[3];
+        if (name.substr(name.indexOf('_') - 1, 1) === 'R') {
+            var $resunit = $("label[for='activityR_" + key1 + "_resunit_"+key2+"']"),
+                $resid = $('#activityR_' + key1 + '_resid_' + key2),
+                $resunitid = $('#activityR_' + key1 + '_resunit_' + key2),
+                $resname = $('#activityR_' + key1 + '_resname_' + key2),
+                $resrate = $('#activityR_' + key1 + '_resrate_' + key2);
+            $this.autocomplete({
+                lookup: arrayresR,
+                multiselect:true,
+                showNoSuggestionNotice:false,
+                lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase =='*') return suggestion.value;
+                    else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $resid.val(suggestion.data);
+                        $resunit.html(suggestion.UnitName);
+                        $resunitid.val(suggestion.UnitId);
+                        $resname.prop('readonly', true);
+                        $resrate.val(sanitizeNumber(suggestion.Rate,2,true));
+                        if ($('#activityR_'+key1+'_RowId_' + (parseInt(key2) + 1)).length == 0) AddNewRowResR(key1);
+                        removeError($(this));
+                    }
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length){
+                        showError($(this), 'Required');
+                        $resunit.html('');
+                        $resid.val(0);
+                        $resrate.val(sanitizeNumber(0,2,true));
+                        $resunitid.val(0);
+                    } else removeError($(this));
+                }
+            });
+        } else {
+            var $resunit = $("label[for='activity_" + key1 + "_resunit_"+key2+"']"),
+                $resid = $('#activity_' + key1 + '_resid_' + key2),
+                $resunitid = $('#activity_' + key1 + '_resunit_' + key2),
+                $resname = $('#activity_' + key1 + '_resname_' + key2),
+                $resrate = $('#activity_' + key1 + '_resrate_' + key2);
+            $this.autocomplete({
+                lookup: arrayres,
+                multiselect:true,
+                showNoSuggestionNotice:false,
+                lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase =='*') return suggestion.value;
+                    else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $resunit.html(suggestion.UnitName);
+                        $resunitid.val(suggestion.UnitId);
+                        $resname.prop('readonly', true);
+                        $resid.val(suggestion.data);
+                        $resrate.val(sanitizeNumber(suggestion.Rate,2,true));
+                        if ($('#activity_'+key1+'_RowId_' + (parseInt(key2) + 1)).length == 0) AddNewRowRes(key1);
+                        removeError($(this));
+                    }
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length){
+                        showError($(this), 'Required');
+                        $resunit.html('');
+                        $resid.val(0);
+                        $resrate.val(sanitizeNumber(0,2,true));
+                        $resunitid.val(0);
+                    } else removeError($(this));
+                }
+            });
+        }
+    });
+}
+function bindResRowAutoComplete(x) {
+    var $this = $(x),
+        name = $this[0].id,
+        arr_names = name.split('_');
+    if (name.indexOf('__') != -1) return;
+    var key1 = arr_names[1],
+        key2 = arr_names[3];
+    $this.unbind('autocomplete');
+    if (name.substr(name.indexOf('_') - 1, 1) === 'R') {
+        checkResource(key1,"R");
+        var $resunit = $("label[for='activityR_" + key1 + "_resunit_"+key2+"']"),
+            $resid = $('#activityR_' + key1 + '_resid_' + key2),
+            $resunitid = $('#activityR_' + key1 + '_resunit_' + key2),
+            $resname = $('#activityR_' + key1 + '_resname_' + key2),
+            $resrate = $('#activityR_' + key1 + '_resrate_' + key2);
+        $this.autocomplete({
+            lookup: arrayresR,
+            multiselect:true,
+            showNoSuggestionNotice:false,
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase =='*') return suggestion.value;
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $resid.val(suggestion.data);
+                    $resunit.html(suggestion.UnitName);
+                    $resunitid.val(suggestion.UnitId);
+                    $resname.prop('readonly', true);
+                    $resrate.val(sanitizeNumber(suggestion.Rate,2,true));
+                    if ($('#activityR_'+key1+'_RowId_' + (parseInt(key2) + 1)).length == 0) AddNewRowResR(key1);
+                    removeError($(this));
+                }
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    showError($(this), 'Required');
+                    $resunit.html('');
+                    $resid.val(0);
+                    $resrate.val(sanitizeNumber(0,2,true));
+                    $resunitid.val(0);
+                } else removeError($(this));
+            }
+        });
+    } else {
+        checkResource(key1,"");
+        var $resunit = $("label[for='activity_" + key1 + "_resunit_"+key2+"']"),
+            $resid = $('#activity_' + key1 + '_resid_' + key2),
+            $resunitid = $('#activity_' + key1 + '_resunit_' + key2),
+            $resname = $('#activity_' + key1 + '_resname_' + key2),
+            $resrate = $('#activity_' + key1 + '_resrate_' + key2);
+        $this.autocomplete({
+            lookup: arrayres,
+            multiselect:true,
+            showNoSuggestionNotice:false,
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase =='*') return suggestion.value;
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $resunit.html(suggestion.UnitName);
+                    $resunitid.val(suggestion.UnitId);
+                    $resname.prop('readonly', true);
+                    $resid.val(suggestion.data);
+                    $resrate.val(sanitizeNumber(suggestion.Rate,2,true));
+                    if ($('#activity_'+key1+'_RowId_' + (parseInt(key2) + 1)).length == 0) AddNewRowRes(key1);
+                    removeError($(this));
+                }
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    showError($(this), 'Required');
+                    $resunit.html('');
+                    $resid.val(0);
+                    $resrate.val(sanitizeNumber(0,2,true));
+                    $resunitid.val(0);
+                } else removeError($(this));
+            }
+        });
+    }
+}
+
+function AddNewRowRes(key) {
+    var sRow = '#rowinfoid_' + key,
+        irowinfoId = $(sRow).val();
+    $('#activity_' + key + '_resdel_' + irowinfoId).show(); // show delete icon
+    irowinfoId = +irowinfoId + 1;
+    var template = $('#dummy-activity-tr').html();
+    template = template.replace(/__/g, '_' + key)
+        .replace(/_0/g, '_' + irowinfoId);
+    $( '#activity_' + key + '_restable tbody.sorting tr:last-child').after(template);
+    checkResource(key, "");
+    $(sRow).val(irowinfoId);
+    bindResourceAutoComplete(key);
+}
+function AddNewRowResR(key) {
+    var sRow = '#rowinfoidR_' + key,
+        irowinfoId  = $(sRow).val();
+    $('#activityR_'+key+'_resdel_' + irowinfoId).show(); // show delete icon
+    irowinfoId = +irowinfoId + 1;
+
+    var template = $('#dummy-activityr-tr').html();
+    template = template.replace(/__/g, '_' + key)
+        .replace(/_0/g, '_' + irowinfoId);
+    $('#activityR_' + key + '_restable tbody.sorting tr:last-child').after(template);
+    checkResource(key,"R");
+    $(sRow).val(irowinfoId);
+    bindResourceAutoComplete(key);
+}
+function ValueChange(x) {
+    var sStr = x.split("_"),
+        iFocusRowId = sStr[1],
+        iARowid = sStr[3],
+        dQty = parseFloat(isNullCheck($("#activity_" + iFocusRowId + "_resqty_" + iARowid).val(),'number')),
+        dRate =  parseFloat(isNullCheck($("#activity_" + iFocusRowId + "_resrate_" + iARowid).val(),'number')),
+        dAmt = dQty*dRate;
+    $("#activity_" + iFocusRowId + "_resamt_" + iARowid).val(sanitizeNumber(dAmt,2,true));
+    var iRows = $('#rowinfoid_' + iFocusRowId).val(),
+        dTAmt = 0;
+    for (i = 1; i <= iRows; i++) {
+        var amt = parseFloat(isNullCheck($("#activity_" + iFocusRowId + "_resamt_" + i).val(),'number'));
+        dTAmt += amt;
+    }
+    $('#activity_' + iFocusRowId + '_totrate').val(sanitizeNumber(dTAmt,2,true));
+    var dAnalQty = parseFloat(isNullCheck($('#activity_' + iFocusRowId + '_AnalQty').val(),'number'));
+    if (dAnalQty.length==0 || dAnalQty==0 || dAnalQty == "Working Qty") { dAnalQty = 1; $('#activity_' + iFocusRowId + '_AnalQty').val(dAnalQty);}
+    var sUnit = $('select[name= unitid_' + iFocusRowId + '_] option:selected').text();
+    $('#activity_' + iFocusRowId + '_ltotrate').val('Rate for ' + dAnalQty + ' ' + sUnit);
+    $('#activity_' + iFocusRowId + '_lperrate').val('Rate per ' + sUnit);
+    var dNetRate = dTAmt/dAnalQty;
+    $('#analrateM_' + iFocusRowId).val(sanitizeNumber(dNetRate,2,true));
+    $('#activity_' + iFocusRowId + '_perrate').val(sanitizeNumber(dNetRate,2,true));
+    MainRateUpdate();
+}
+function MainRateUpdate() {
+    var sVal = $('#analrate_' + iFocusRowId).val(),
+        dRate='';
+    if (sVal=='M') dRate = parseFloat(isNullCheck($('#analrateM_' + iFocusRowId).val(),'number'));
+    else if (sVal=='A') dRate =  parseFloat(isNullCheck($('#analrateA_' + iFocusRowId).val(),'number'));
+    else if (sVal=='L') dRate =  parseFloat(isNullCheck($('#analrateLS_' + iFocusRowId).val(),'number'));
+    $('#rate_' + iFocusRowId).val(sanitizeNumber(dRate,2,true));
+}
+function ValueChangeR(x) {
+    var sStr = x.split("_"),
+        iFocusRowId = sStr[1],
+        iARowid = sStr[3],
+        dQty =  parseFloat(isNullCheck($("#activityR_" + iFocusRowId + "_resqty_" + iARowid).val(),'number')),
+        dRate = parseFloat(isNullCheck($("#activityR_" + iFocusRowId + "_resrate_" + iARowid).val(),'number')),
+        dAmt = dQty*dRate;
+    $("#activityR_" + iFocusRowId + "_resamt_" + iARowid).val(sanitizeNumber(dAmt,2,true));
+    var iRows = $('#rowinfoidR_' + iFocusRowId).val();
+    var dTAmt = 0;
+    for (i = 1; i <= iRows; i++) {
+        var amt = parseFloat(isNullCheck($("#activityR_" + iFocusRowId + "_resamt_" + i).val(),'number'));
+        dTAmt += amt;
+    }
+    $('#activityR_' + iFocusRowId + '_totrate').val(sanitizeNumber(dTAmt,2,true));
+    var dAnalQty = parseFloat(isNullCheck($('#activityR_' + iFocusRowId + '_AnalQty').val(),'number'));
+    if (dAnalQty.length==0 || dAnalQty==0 || dAnalQty == "Working Qty") { dAnalQty = 1; $('#activityR_' + iFocusRowId + '_AnalQty').val(dAnalQty);}
+    var sUnit = $('select[name=unitid_' + iFocusRowId + '] option:selected').text();
+    $('#activityR_' + iFocusRowId + '_ltotrate').val('Rate for ' + dAnalQty + ' ' + sUnit);
+    $('#activityR_' + iFocusRowId + '_lperrate').val('Rate per ' + sUnit);
+    var dNetRate = dTAmt/dAnalQty;
+    $('#analrateA_' + iFocusRowId).val(sanitizeNumber(dNetRate,2,true));
+    $('#activityR_' + iFocusRowId + '_perrate').val(sanitizeNumber(dNetRate,2,true));
+    MainRateUpdate();
+}
+function showformulaR(x,bshow) {
+    bSiteMix=false;
+    var sStr = x.split("_");
+    iFocusRowId = sStr[1];
+    iTransRowId = sStr[3];
+    var sExp = "#activityR_" + iFocusRowId + "formula_" + iTransRowId,
+        sExpression = $(sExp).val();
+    $("#formulaexp").val(sExpression);
+    var sformula = $("#formulaexp").val();
+    var fvaule=0;
+    if (sformula.length >0) {
+        try {
+            fvaule = computeEval(sformula);
+            $('#btnformula').prop('readonly', false);
+        } catch (e) {
+            $('#btnformula').prop('readonly', true);
+            alert('Expression in invalid.');
+        }
+        $("#activitR_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', true);
+        $("#formulavalue").val(parseFloat(fvaule).toFixed(3));
+        $("#formula").modal('show');
+    } else if (bshow==true) {
+        $("#activityR_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', true);
+        fvaule = $("#activityR_" + iFocusRowId + "_resqty_" + iTransRowId).val();
+
+        $("#formulaexp").val(fvaule);
+        $("#formulavalue").val(parseFloat(fvaule).toFixed(3));
+        $("#formula").modal('show');
+    } else {
+        $("#activityR_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', false);
+    }
+}
+function showformula(x,bshow) {
+    bSiteMix=true;
+    var sStr = x.split("_");
+    iFocusRowId = sStr[1];
+    iTransRowId = sStr[3];
+    var sExp = "#activity_" + iFocusRowId + "_formula_" + iTransRowId,
+        sExpression = $(sExp).val();
+    $("#formulaexp").val(sExpression);
+    var sformula = $("#formulaexp").val(),
+        fvaule=0;
+    if (sformula.length >0) {
+        try {
+            fvaule = computeEval(sformula);
+            $('#btnformula').prop('readonly', false);
+        } catch (e) {
+            $('#btnformula').prop('readonly', true);
+            alert('Expression in invalid.');
+        }
+        $("#activity_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', true);
+        $("#formulavalue").val(parseFloat(fvaule).toFixed(3));
+        $("#formula").modal('show');
+    } else if (bshow==true) {
+        $("#activity_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', true);
+        fvaule = $("#activity_" + iFocusRowId + "_resqty_" + iTransRowId).val();
+
+        $("#formulaexp").val(fvaule);
+        $("#formulavalue").val(parseFloat(fvaule).toFixed(3));
+        $("#formula").modal('show');
+    } else $("#activityR_" + iFocusRowId + "_resqty_" + iTransRowId).prop('readonly', false);
+
+    if (isNullCheck(fvaule,'number') < 0) {
+        $('#formulavalue').addClass('error');
+        return;
+    } else $('#formulavalue').removeClass('error');
+}
+function showF(x,event) {
+    if(event.keyCode ==113) {
+        showformula(x,true);
+        event.preventDefault();
+    }
+}
+function showFR(x,event) {
+    if(event.keyCode ==113) {
+        showformulaR(x,true);
+        event.preventDefault();
+    }
+}
+// rate analysis end
+
+function populateChart(rowdata)
+{
+    var sResName = isNullCheck(rowdata['ResourceName'],'string');
+    var chartData = [{
+        "Revision": 'Revision 1',
+        "Rate": 23.5
+    },
+        {
+            "Revision": 'Revision 2',
+            "Rate": 30
+        },
+        {
+            "Revision": 'Revision 3',
+            "Rate": 10.9
+        }];
+
+    AmCharts.makeChart("chartdiv", {
+        "theme": "light",
+        "type": "serial",
+        "marginRight": 80,
+        "autoMarginOffset": 20,
+        "marginTop":20,
+        "dataProvider": chartData,
+        "valueAxes": [{
+            "id": "v1",
+            "axisAlpha": 0.1
+        }],
+        "graphs": [{
+            "useNegativeColorIfDown": true,
+            "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+            "bullet": "round",
+            "bulletBorderAlpha": 1,
+            "bulletBorderColor": "#FFFFFF",
+            "hideBulletsCount": 50,
+            "lineThickness": 2,
+            "lineColor": "#fdd400",
+            "negativeLineColor": "#67b7dc",
+            "valueField": "Rate"
+        }],
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true
+        },
+        "categoryField": "Revision",
+        "categoryAxis": {
+            "axisAlpha": 0,
+            "minHorizontalGap": 60
+        },
+        "titles": [{
+            "text": sResName,
+            "size": 15
+        }]
+    });
+}
+
+function submitResource() {
+    var wbsData = [];
+    for(i=1;i<=$('#totRows').val();i++) {
+        var transId = $('#resourceId_'+i).val();
+        for(j=1;j<=$('#totWbsRows').val();j++) {
+            var data = {};
+            data.resourceId = transId;
+            data.wbsId = $('#wbsId_'+j+'_'+transId).val();
+            data.parentId = $('#parentId_'+j+'_'+transId).val();
+            data.liftCharge = $('#liftCharge_'+j+'_'+transId).val();
+            data.floorRate = $('#floorRate_'+j+'_'+transId).val();
+            wbsData.push(data);
+        }
+    }
+    var rows = JSON.stringify($("#dataTable").jqxGrid('getrows'));
+    var iProjectId = isNullCheck( $('#project_id').val(),'number');
+    var sRefNo= isNullCheck( $('#refno').val(),'string');
+    var dRefDate= isNullCheck( $('#refdate').val(),'string');
+    var iRFCId = isNullCheck($('#rfcUId').val(),'number');
+    if (rows != null) {
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/updateresourcerate',
+            type: 'post',
+            dataType: 'json',
+            data: {'rowdata': rows, 'RefNo': sRefNo, 'RefDate': dRefDate, 'ProjectId': iProjectId, 'RFCId': iRFCId, 'wbsWise': wbsData, 'activities': $('#activityWiseForm').serialize()},
+            success: function (data) {
+                window.location = getBaseURL() + 'project/rfc/rfc-what';
+            }, error: function (xhr,status,error) {
+                window.location = getBaseURL() + 'project/rfc/rfc-what';
+            }
+        });
+    }
+}
+
+function showModal(trId) {
+    $('.table').hide();
+    $('#wbsModalRow_'+trId).show();
+    $("#wbsForm").modal('show');
+}
+
+function showAnalysisModal(id) {
+    $('.activityDivs').hide();
+    $('#activityModalRow_'+id).show();
+    $("#activityForm").modal('show');
+}
+</script>

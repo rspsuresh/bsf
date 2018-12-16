@@ -1,0 +1,640 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/gridstack/jquery.minicolors.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/gridstack/dragresize.js"></script>
+<!-- MiniColors -->
+<script src="<?php echo $this->basePath(); ?>/library/gridstack/jquery.minicolors.js"></script>
+<style type="text/css">
+/* Required CSS classes: must be included in all pages using this script */
+
+/* Apply the element you want to drag/resize */
+.drsElement {
+	position: absolute;
+	border: 1px solid #333;
+}
+/*
+ The main mouse handle that moves the whole element.
+ You can apply to the same tag as drsElement if you want.
+*/
+.drsMoveHandle {
+	height: 20px;
+	background-color: #CCC;
+	border-bottom: 1px solid #666;
+	cursor: move;
+}
+/*
+ The DragResize object name is automatically applied to all generated
+ corner resize handles, as well as one of the individual classes below.
+*/
+.dragresize {
+	position: absolute;
+	width: 5px;
+	height: 5px;
+	font-size: 1px;
+	background: #EEE;
+	border: 1px solid #333;
+}
+/*
+ Individual corner classes - required for resize support.
+ These are based on the object name plus the handle ID.
+*/
+.dragresize-tl {
+	top: -8px;
+	left: -8px;
+	cursor: nw-resize;
+}
+.dragresize-tm {
+	top: -8px;
+	left: 50%;
+	margin-left: -4px;
+	cursor: n-resize;
+}
+.dragresize-tr {
+	top: -8px;
+	right: -8px;
+	cursor: ne-resize;
+}
+.dragresize-ml {
+	top: 50%;
+	margin-top: -4px;
+	left: -8px;
+	cursor: w-resize;
+}
+.dragresize-mr {
+	top: 50%;
+	margin-top: -4px;
+	right: -8px;
+	cursor: e-resize;
+}
+.dragresize-bl {
+	bottom: -8px;
+	left: -8px;
+	cursor: sw-resize;
+}
+.dragresize-bm {
+	bottom: -8px;
+	left: 50%;
+	margin-left: -4px;
+	cursor: s-resize;
+}
+.dragresize-br {
+	bottom: -8px;
+	right: -8px;
+	cursor: se-resize;
+}
+.text-bold, .text-bold * {
+	font-weight: bold !important;
+}
+.text-italic, .text-italic * {
+	font-style: italic !important;
+}
+.text-underline, .text-underline * {
+	text-decoration: underline !important;
+}
+.style-left, .style-left * {
+	text-align: left;
+}
+.style-center, .style-center * {
+	text-align: center;
+}
+.style-right, .style-right * {
+	text-align: right;
+}
+.style-justify, .style-justify * {
+	text-align: justify;
+}
+#styleOptions {
+	display:  none;
+}
+#ElementTemplate, .remScnt {
+	display:none;
+}
+.remScnt > .fa.fa-trash-o {
+	text-decoration: none !important;
+	font-style: normal !important;
+	font-size: 14px !important;
+	font-weight: normal !important;
+	color: #000 !important;
+	background: transparent !important;
+}
+.minicolors-theme-bootstrap .minicolors-swatch {
+	width:25px !important;
+	height:25px !important;
+	left:6px !important;
+	top:40px !important;
+}
+.remScnt {
+	position:absolute;
+	right:5px;
+	top:3px;
+	background:none;
+	color:#990;
+	font-size:14px;
+}
+</style>
+<script type="text/javascript">
+//<![CDATA[
+
+// Using DragResize is simple!
+// You first declare a new DragResize() object, passing its own name and an object
+// whose keys constitute optional parameters/settings:
+
+var dragresize = new DragResize('dragresize',
+ { minWidth:50, minHeight:30, minLeft:8, minTop:8, maxLeft:692, maxTop:600 });
+
+// Optional settings/properties of the DragResize object are:
+//  enabled: Toggle whether the object is active.
+//  handles[]: An array of drag handles to use (see the .JS file).
+//  minWidth, minHeight: Minimum size to which elements are resized (in pixels).
+//  minLeft, maxLeft, minTop, maxTop: Bounding box (in pixels).
+
+// Next, you must define two functions, isElement and isHandle. These are passed
+// a given DOM element, and must "return true" if the element in question is a
+// draggable element or draggable handle. Here, I'm checking for the CSS classname
+// of the elements, but you have have any combination of conditions you like:
+
+dragresize.isElement = function(elm)
+{
+ if (elm.className && elm.className.indexOf('drsElement') > -1) return true;
+};
+dragresize.isHandle = function(elm)
+{
+ if (elm.className && elm.className.indexOf('drsMoveHandle') > -1) return true;
+};
+
+// You can define optional functions that are called as elements are dragged/resized.
+// Some are passed true if the source event was a resize, or false if it's a drag.
+// The focus/blur events are called as handles are added/removed from an object,
+// and the others are called as users drag, move and release the object's handles.
+// You might use these to examine the properties of the DragResize object to sync
+// other page elements, etc.
+
+dragresize.ondragfocus = function() { };
+dragresize.ondragstart = function(isResize) { };
+dragresize.ondragmove = function(isResize) { };
+dragresize.ondragend = function(isResize) { };
+dragresize.ondragblur = function() { };
+
+// Finally, you must apply() your DragResize object to a DOM node; all children of this
+// node will then be made draggable. Here, I'm applying to the entire document.
+dragresize.apply(document);
+
+//]]>
+</script>
+<script>
+	$(document).ready( function() {
+
+		$('.demo').each( function() {
+			//
+			// Dear reader, it's actually very easy to initialize MiniColors. For example:
+			//
+			//  $(selector).minicolors();
+			//
+			// The way I've done it below is just for the demo, so don't get confused
+			// by it. Also, data- attributes aren't supported at this time...they're
+			// only used for this demo.
+			//
+			$(this).minicolors({
+				control: $(this).attr('data-control') || 'hue',
+				defaultValue: $(this).attr('data-defaultValue') || '',
+				format: $(this).attr('data-format') || 'hex',
+				keywords: $(this).attr('data-keywords') || '',
+				inline: $(this).attr('data-inline') === 'true',
+				letterCase: $(this).attr('data-letterCase') || 'lowercase',
+				opacity: $(this).attr('data-opacity'),
+				position: $(this).attr('data-position') || 'bottom left',
+				change: function(value, opacity) {
+					if( !value ) return;
+					if( opacity ) value += ', ' + opacity;
+					if( typeof console === 'object' ) {
+						//console.log(value);
+					}
+				},
+				theme: 'bootstrap'
+			});
+
+		});
+
+	});
+</script>
+
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1>Bill Abstract Details</h1>
+      </div>
+      <!--form start-->
+      <div class="col-lg-12"> 
+        <!--bill details-->
+        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0">
+          <div class="bill-deta">
+            <form method="post">
+              <input type="hidden" name="htmlcontent" id="htmlcontent" />
+              <input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($billinfo)) ? $billinfo['ClientId'] : 0;?>"  />
+            </form>
+            <div id="htmlwrapper">
+              <div class="col-lg-12">
+                <style>
+.thscss{font-size:15px;font-family:'Open Sans', sans-serif !important;font-weight:600 !important;background-color:#E2EBEF !important; border-bottom:2px solid #5D9BB6; padding:8px !important;}
+.tdpds{font-size:14px;border-top: 1px solid #EFEFEF!important;line-height:1.42857!important;padding:8px!important;vertical-align:top!important;font-size:15px!important;font-family:'Open Sans', sans-serif !important;}
+.bill-det{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:20px !important; display:block !important; padding-left:5px !important;}
+.date-bills{font-size:14px; font-weight:nornal; font-family:'Open Sans', sans-serif !important; display:block; padding-left:5px !important; clear:both; }
+.str-bill{ display:block !important; width:10px; padding-left:10px;}
+.date-shw{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:25px !important; display:block !important; padding-left:12px !important; }
+
+            </style>
+                <div id="p_scents" style="height:630px; position:relative;">
+                  <div class="drsElement drsMoveHandle" data-name="Header Info" style="left:10px;top:8px;width:200px; height:30px; min-width:120px; min-height:30px;background-color:#fff;color:#333;border:1px dashed #c2c2c2;">
+                    <p class="bill-det">Bill Details</p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <div class="drsElement drsMoveHandle" data-name="Date Info" style="left:570px;top:37px;width:120px;height:30px;min-width:120px;min-height:30px;background-color:rgb(255, 255, 255);color:rgb(0, 0, 0);border:1px dashed #E5E4DF;">
+                    <p class="bill-det">Date :<?php echo Date('d-m-Y'); ?></p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <?php
+					$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/images/nolgo.jpg';
+					if(isset($billinfo) && $billinfo['Logo']!="") {
+						$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/uploads/cb/company/'.$billinfo['SubscriberId'].'.'.$billinfo['Logo'];
+					}				
+					//echo $imgUrl;?>
+                  <div class="drsElement drsMoveHandle" data-name="Logo" style="left:10px;top:38px;width:200px;height:130px;min-width:100px;min-height:100px;background-color:#fff;border:1px dashed #c2c2c2;">
+                    <p style="text-align:center !important; vertical-align:middle !important;"><img src="<?php echo $imgUrl; ?>" /></p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <div class="drsElement drsMoveHandle" data-name="Order Info" style="left:10px;top:168px;width:300px;height:100px;min-width:200px;min-height:80px;background-color:rgb(255, 255, 255);color:rgb(0, 0, 0);border:1px dashed #c2c2c2;">
+                    <p class="date-bills">WONo : <?php echo (isset($billinfo)) ? $billinfo['WONo'] : '';?></p>
+                    <p class="date-bills">WODate : <?php echo (isset($billinfo)) ? $billinfo['WODate'] : '';?></p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <div class="drsElement drsMoveHandle" data-name="Client Info" style="left:10px;top:268px;width:300px;height:300px;min-width:200px;min-height:200px;background-color:#fff;border:1px dashed #c2c2c2;">
+                    <p class="date-bills">ClientName : <span style=" font-size:14px !important; "> <?php echo (isset($billinfo)) ? $billinfo['ClientName'] : '';?></span>
+                    <p style="font-size:14px; display:block; padding:0px 5px 5px 5px;font-family:'Open Sans', sans-serif !important; "><?php echo (isset($billinfo)) ? $billinfo['ClientAddress'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['ClientCity'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['ClientState'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['ClientCountry'] : '';?></p>
+                    </p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <div class="drsElement drsMoveHandle" data-name="Bill Info" style="left:310px;top:268px;width:375px;height:300px;min-width:300px;min-height:200px;background-color:#fff;border:1px dashed #c2c2c2;">
+                    <p style="font-size:14px; font-weight:normal; padding-left:10px; padding-top:10px; 
+                  font-family:'Open Sans', sans-serif !important; ">Bill No : <span style="font-size:14px; font-weight:normal; padding-left:10px;"><?php echo (isset($billinfo)) ? $billinfo['BillNo'] : '';?></span></p>
+                    <p style="font-size:14px; font-weight:normal; padding-left:10px;">Bill Date : <span style="font-size:14px; font-weight:normal; padding-left:10px; font-family:'Open Sans', sans-serif !important; "><?php echo (isset($billinfo)) ? $billinfo['BillDate'] : '';?></span></p>
+                    <p style="font-size:14px; font-weight:normal; padding-left:10px;">BillType : <span style="font-size:14px; font-weight:normal; padding-left:10px; font-family:'Open Sans', sans-serif !important; "><?php echo (isset($billinfo)) ? $billinfo['BillType'] : '';?></span></p>
+                    <p style="font-size:14px; font-weight:normal; padding-left:10px;">Entry Type : <span style="font-size:14px; font-weight:normal; padding-left:10px; font-family:'Open Sans', sans-serif !important; "><?php echo (isset($typeEntry)) ? $typeEntry : '';?></span></p>
+                    <p style="font-size:14px;font-weight:normal; padding-left:10px;  font-family:'Open Sans', sans-serif !important;"> Company Address :<span style="font-size:14px; font-weight:normal; padding-left:10px;width:225px;"> <?php echo (isset($billinfo)) ? $billinfo['BusinessName'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['Address'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['CityName'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['StateName'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['CountryName'] : '';?> <?php echo (isset($billinfo)) ? $billinfo['PinCode'] : '';?></span></p>
+                    <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                </div>
+                <!--table-->
+                <div style="margin-bottom:30px;">
+                  <table class="table table-hover" cellpadding="0" cellspacing="0">
+                    <thead>
+                      <tr> 
+                        <!--<th align="right" class="thscss">S.No</th>-->
+                        <th class="thscss">Ref</th>
+                        <th class="thscss">Description</th>
+                        <th class="thscss" style="text-align:right">Cum Amount</th>
+                        <th class="thscss" style="text-align:right">Pre Amount</th>
+                        <th class="thscss" style="text-align:right">Cur Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php foreach($billsAbsts as $billsAbst) { ?>
+                      <tr style="<?php echo ($billsAbst['Bold']) ? 'font-weight: bold;': '';echo ($billsAbst['Italic']) ? ' font-style: italic;' : '';echo ($billsAbst['Underline']) ? ' text-decoration: underline;' : '';?>" >
+                        <td width="5%" class="tdpds"><?php echo $billsAbst['RowName'];?></td>
+                        <td width="20%" class="tdpds"><?php echo $billsAbst['TypeName'];?></td>
+                        <td width="8%" class="tdpds" align="right"><?php echo $billsAbst['CumAmount'];?></td>
+                        <td width="8%" class="tdpds" align="right"><?php echo $billsAbst['PrevAmount'];?></td>
+                        <td width="8%" class="tdpds" align="right"><?php echo $billsAbst['CurAmount'];?></td>
+                      </tr>
+                      <?php } ?>
+                    </tbody>
+                  </table>
+                </div>
+                <!--table--> 
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--bill details--> 
+        <!--font-style-->
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+          <div class="col-lg-12">
+            <div class="sidebar-inn"> 
+              <!--<div class="sidebar-inn" id="theFixed" style="position:fixed;top:123px;">-->
+              <div class="rig-sty">
+                <div class="right-settings">
+                  <h1>SETTINGS <i class="fa fa-cog set-i"></i> </h1>
+                  <ul>
+                    <li> <span>Font Size</span>
+                      <div class="select-style selectsize">
+                        <select name="fontsize" id="fontsize" class="single_dropdown2" style="width:100%;" label="select fontsize">
+                          <option value="6" >6</option>
+                          <option value="7" >7</option>
+                          <option value="8" >8</option>
+                          <option value="9" >9</option>
+                          <option value="10" >10</option>
+                          <option value="11" >11</option>
+                          <option value="12" >12</option>
+                          <option value="13" >13</option>
+                          <option value="14" >14</option>
+                          <option value="15" >15</option>
+                          <option value="16" >16</option>
+                          <option value="17" >17</option>
+                          <option value="18" >18</option>
+                          <option value="19" >19</option>
+                          <option value="20" >20</option>
+                          <option value="22" >22</option>
+                          <option value="24" >24</option>
+                        </select>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="fnt-sty">
+                  <ul>
+                    <span>Font Style</span>
+                    <li>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check selector">
+                          <input class='selector' type="checkbox" name="bold" tagname='cid1' cid="1" id="bold" value="text-bold">
+                          <label class="ripple" for="bold">Bold</label>
+                        </p>
+                      </div>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check selector">
+                          <input  class='selector' type="checkbox" name="italic" tagname='cid2' cid="2" id="italic" value="text-italic">
+                          <label class="ripple" for="italic">Italic</label>
+                        </p>
+                      </div>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check selector">
+                          <input class='selector' type="checkbox" name="underline" tagname='cid21' cid="21" id="underline" value="text-underline">
+                          <label class="ripple" for="underline">Underline</label>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="fnt-sty-wrg">
+                  <ul>
+                    <span>Alignment</span>
+                    <li>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check">
+                          <input type="radio" class="selector radio" name="alignment" tagname='cid3' cid="3" id="left" value="style-left" >
+                          <label for="left" class="ripple" >Left</label>
+                        </p>
+                      </div>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check">
+                          <input type="radio" class="selector radio" name="alignment" tagname='cid4' cid="4" id="centre" value="style-center">
+                          <label for="centre" class="ripple" >Center</label>
+                        </p>
+                      </div>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check selector">
+                          <input type="radio" class="selector radio" name="alignment" tagname='cid5' cid="5" id="right" value="style-right">
+                          <label for="right" class="ripple" >Right</label>
+                        </p>
+                      </div>
+                      <div class="radio_check">
+                        <p class="rdochck_subscrb radio_check selector">
+                          <input type="radio" class="selector radio" name="alignment" tagname='cid5' cid="5" id="justify" value="style-justify">
+                          <label for="justify" class="ripple" >Justify</label>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="dis-pas">
+                  <ul>
+                    <span>Background Color</span>
+                    <li>
+                      <input type="text" id="b_color" class="form-control demo" data-format="rgb" value="#fff">
+                    </li>
+                  </ul>
+                </div>
+                <div class="dis-pas">
+                  <ul>
+                    <span>Text Color</span>
+                    <li>
+                      <input type="text" id="t_color" class="form-control demo" data-format="rgb" value="#fff">
+                    </li>
+                  </ul>
+                </div>
+                <div class="dis-pas">
+                  <ul>
+                    <span>Border Color</span>
+                    <li>
+                      <input type="text" id="b_color" class="form-control demo" data-format="rgb" value="#fff">
+                    </li>
+                  </ul>
+                </div>
+                <div class="dis-pas">
+                  <ul>
+                    <span>Border Size</span>
+                    <li>
+                      <div class="select-style sel-wets">
+                        <select>
+                          <option class="thin">Thin</option>
+                          <option class="thick">Thick</option>
+                          <option class="thicker">Thicker</option>
+                        </select>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="dis-pas">
+                  <ul>
+                    <span>Border Style</span>
+                    <li>
+                      <div class="select-style sel-wets">
+                        <select>
+                          <option class="dotteds">Dotted</option>
+                          <option class="dasheds">Dashed</option>
+                          <option class="solids">Solid</option>
+                          <option class="doubles">Double</option>
+                          <option class="hiddens">Hidden</option>
+                        </select>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="add-weg">
+                <h1>Controls <i class="fa fa-wrench set-i"></i> </h1>
+                <ul>
+                  <li>
+                    <label>Select Widget</label>
+                    <div class="select-style sel-wet">
+                      <select id="selectGridItems">
+                      </select>
+                    </div>
+                    
+                    <!--<a href="#" id="addScnt">Add Another Input Box</a>--> 
+                  </li>
+                  <li>
+                    <button type="button" onclick="addWidget();"><i class="fa fa-plus"></i> Add Widget</button>
+                    <a exportName="pdf" style="cursor:pointer" class="exportAction" ><i class="fa fa-print"></i> Print </a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!--font-style--> 
+        
+      </div>
+    </div>
+  </div>
+</div>
+<div id="ElementTemplate"></div>
+<script type="text/javascript">
+	var $options = $('#styleOptions'),
+        $sel_el = null,
+		scntDiv = $('#p_scents'),
+		$elementTemplate = $('#ElementTemplate'),
+		$selectGridItems = $('#selectGridItems');
+    $(function () {
+        // on click show options
+        $('#p_scents').on('click','.drsElement',function (e) {
+			e.stopPropagation();
+			$sel_el = $(this);
+			
+			 var styleProps = $( this ).find('*').css([
+				"width", "height", "color","font-size", "background-color", "font-weight", "font-style", "text-align", "text-decoration", "style-left", "style-center", "style-right", "style-justify" 
+			  ]);
+			$.each( styleProps, function( prop1, value ) {
+				//var fsize = parseInt($sel_el.find('*').css('font-size'));
+				if(prop1=="font-size"){			
+					var fsize = value;
+					fsize = fsize.replace('px', '');
+
+					$('#fontsize').val(fsize);
+				} else if(prop1=="background-color"){			
+					var bcolors = value;
+
+					$('#b_color').val(bcolors).next('.minicolors-swatch').find('> .minicolors-swatch-color').css("background-color", bcolors);
+					
+				} else if(prop1=="color"){			
+					var bcolors = value;
+
+					$('#t_color').val(bcolors).next('.minicolors-swatch').find('> .minicolors-swatch-color').css("background-color", bcolors);
+					
+				} else if(prop1=="font-weight"){
+					if(value=="bold"){
+						$('#bold').prop( "checked", true );
+					}else{
+						$('#bold').prop( "checked", false );
+					}
+					$('#bold').trigger('change');
+				} else if(prop1=="font-style"){
+					if(value=="italic"){
+						$('#italic').prop( "checked", true );
+					}else{
+						$('#italic').prop( "checked", false );
+					}				
+				} else if(prop1=="text-decoration"){
+					if(value=="underline"){
+						$('#underline').prop( "checked", true );
+					}else{
+						$('#underline').prop( "checked", false );
+					}					
+				} else if(prop1=="text-align"){
+					if(value=="justify"){
+						$('input:radio[name=alignment]').filter('[value=style-justify]').prop('checked', true);
+					} else if(value=="right"){
+						$('input:radio[name=alignment]').filter('[value=style-right]').prop('checked', true);
+					} else if(value=="center"){
+						$('input:radio[name=alignment]').filter('[value=style-center]').prop('checked', true);
+					} else{
+						$('input:radio[name=alignment]').filter('[value=style-left]').prop('checked', true);
+					}								
+				}
+			
+			});
+		  
+			 // show delete icon
+			$('.remScnt').hide();
+			$(this).find('.remScnt').show();
+			
+            $options.fadeIn();
+        });
+		
+		$('body').on('click',function () {
+			$('.remScnt').hide();
+		});
+		
+        $('#addScnt').click( function() {
+				$('<div class="drsElement drsMoveHandle" data-name="test"   style="left: 30px; top: 360px; width: 100px; height: 100px; background: #FDC; text-align: center"> Content test <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button></div>').appendTo(scntDiv);
+                return false;
+        });
+        
+        scntDiv.on('click', '.remScnt', function() {
+			var $el = $(this).parent('.drsElement'),
+				name = $el.data('name');
+			$elementTemplate.append($el[0].outerHTML);
+			$selectGridItems.append('<option>'+name+'</option>');
+			$el.remove();
+        });
+		
+		$("#fontsize").change(function() {
+			$sel_el.css("font-size", $(this).val() + "px").find('*').css("font-size", $(this).val() + "px");
+		});
+		
+		$("#b_color").change(function() {
+			$sel_el.css("background-color", $(this).val()).find('*').css("background-color", $(this).val());
+		});
+		
+		$("#t_color").change(function() {
+			$sel_el.css("color", $(this).val()).find('*').css("color", $(this).val());
+		});
+		
+		$('.selector').click(function () {
+			var $this = $(this),
+				value = $this.attr('value');
+			if($this.is(':checked')) {
+				$sel_el.addClass(value);
+			} else {
+				$sel_el.removeClass(value);
+			}
+		});
+		
+		$('.radio').click(function () {
+			var $this = $(this);
+				//value = $this.attr('value');
+			var value = $("input[name='alignment']:checked").val();
+			$sel_el.removeClass('style-left style-right style-center style-justify');
+			$sel_el.addClass(value);
+		});
+		
+		 $(".exportAction").click(function(){
+			$('#htmlcontent').val($('#htmlwrapper').html());
+			$('form').submit();
+		});	  
+	});
+	
+	function addWidget() {
+		if($elementTemplate.find('.drsElement').length == 0)
+			return false;
+			
+		var $option = $selectGridItems.find('option:selected'),
+			name = $option.val();
+			
+		if(name.length == 0)
+			return false;
+			
+		var $el = $elementTemplate.find('.drsElement[data-name="'+name+'"]');
+		
+		if($el.length == 0)
+			return false;
+			
+		$($el[0].outerHTML).appendTo(scntDiv);
+		$el.remove();
+		$option.remove();
+		
+    }
+	$(window).scroll(function(){
+    $("#theFixed").css("top",Math.max(70,123-$(this).scrollTop()));
+});
+	
+</script> 

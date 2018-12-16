@@ -1,0 +1,109 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<style type="text/css">
+   .content_wrapper{min-height:555px !important;}
+    .frmwrk_div {float: inherit !important;}
+</style>
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div id="divnewpagetittle" >
+                <h1 class="text-center">PO Amendment</h1>
+            </div>
+            <form id="formSubmit" action="" method="post">
+                <div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+                    <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next">
+                        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                            <div class="col-lg-12 frmwrk_div req_flds form-group" id="supplierList">
+
+                                <select name="supplier" id="supplier" label="Supplier" class="form-control single_dropdown lbl_move" data-size="6" title="Select Supplier..." style="width:100%;">
+                                    <option value="">Select Supplier</option>
+                                    <?php if(isset($arr_supplier)):?>
+                                        <?php foreach ($arr_supplier as $project ):?>
+                                            <option value="<?php echo $project[ 'VendorId' ];?>"><?php echo $project[ 'VendorName' ];?></option>
+                                        <?php endforeach; ?>
+                                    <?php  endif; ?>
+                                </select>
+
+                                <div class="error_message"><p>Please Select the Supplier..</p></div>
+                            </div>
+
+                            <div class="col-lg-12 frmwrk_div req_flds" id="vendorList" style="display:none;">
+
+                                <select name="poreg" id="poreg" label="PO No" class="form-control single_dropdown lbl_move" data-size="6" title="Select PO No..." style="width:100%;">
+
+                                </select>
+
+                                <div class="error_message"><p>Please Select the PO No..</p></div>
+                            </div>
+
+                            <div class="savebtn_areas col-lg-8 col-sm-7 col-sm-offset-3 col-xs-offset-4 col-lg-offset-3 sCheck" style="display:none;">
+                                <ul>
+                                    <li class="subs"><a onclick="submitForm()" href="javascript:void(0);" id="continue">Next</a></li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#supplier').on('change',function(){
+            $("#poreg").val('');
+            bindRequests();
+        });
+        $('#poreg').on('change',function(){
+            $('.sCheck').show();
+        });
+    });
+
+    function bindRequests() {
+        var sup =  $('#supplier').val();
+        var type = 'getVendor';
+
+        if(sup > 0 || sup != ''){
+            $.ajax({
+                url:getBaseURL()+'mms/purchase/po-amendment',
+                type:"post",
+                data:{'Supplier':sup,'Type': type},
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    if(jqXHR.status == 200) {
+                        $('#vendorList').show();
+                        $("#poreg").append("<option value=''>Select PO No</option>");
+                        $.each(data.request, function(i,v){
+                            $("#poreg").append("<option value='"+v.PoRegisterId+"'>"+v.PoNo+"</option>");
+                        });
+                        $("#poreg").selectpicker('refresh');
+                    }
+                }
+            });
+        }  else {
+            $("#poreg").html("<option value='0'>Select PO No</option>");
+            $("#poreg").val('').trigger('change');
+        }
+    }
+
+    function submitForm(){
+
+        var pono = $('#poreg').val();
+        var supplier = $('#supplier').val();
+        var flag = 1;
+        if(pono != ''  && supplier != ''){
+            $('#continue').attr('href',"<?php echo $this->basePath(); ?>/mms/purchase/order-entry/"+ flag + "/" + pono);
+        } else if( pono == '') {
+            $('#poreg').closest('.req_flds').find('.error_message').show();
+            return false;
+        } else if( supplier == '') {
+            $('#supplier').closest('.req_flds').find('.error_message').show();
+            return false;
+        }
+    }
+
+    </script>

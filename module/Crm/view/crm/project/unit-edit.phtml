@@ -1,0 +1,823 @@
+<?php
+$bsf = new \BuildsuperfastClass();
+	$url = $this->serverUrl(true);
+	$url = array_pop(explode("/", $url));
+?>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<?php if(isset($unitInfo)): ?>
+
+<form method="post" role="form" id="unit-type-generation-form" enctype="multipart/form-data">
+<input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+<input type="hidden" name="UnitId" value="<?php echo isset($unitInfo['UnitId']) ? $unitInfo['UnitId'] : ''; ?>">
+<input type="hidden" name="lcAreaBase" value="<?php echo isset($resultDetail['LCAreaBasedon']) ? $resultDetail['LCAreaBasedon'] : ''; ?>">
+<input type="hidden" name="lcRateBase" value="<?php echo isset($resultDetail['LCRateBasedon']) ? $resultDetail['LCRateBasedon'] : ''; ?>">
+<input type="hidden" name="redirectUrl" id="redirectUrl" value="">
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+
+        <div class="col-lg-12 clear">
+            <div>
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider">
+                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                        <!-- Wrapper for slides -->
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active" data-id="1">
+                                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                    <h1 class="txt_center form_main_h1">Unit Area Details</h1>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" id="UnitName" name="UnitName"
+                                                   class="form-control lbl_move" label="Unit Name" value="<?php echo $unitInfo['UnitNo']; ?>">
+                                            <div class="error_message"><p>Please Enter Unit Name...</p></div>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" class="form-control lbl_move" name="Area" id="Area"
+                                                   label="Saleable  Area" onblur="return FormatNum(this, 3)" onKeyPress="return isDecimal(event,this)"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['UnitArea'], 3); ?>">
+											<div class="error_message"><p>Please type the Area...</p></div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" class="form-control lbl_move"  name="UDSLandArea" id="UDSLandArea" onblur="return FormatNum(this, 3)"
+                                                   onKeyPress="return isDecimal(event,this)" label="UDS Land Area"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['UDSLandArea'], 3); ?>">
+											<div class="error_message"><p>Please type the UDS Land Area...</p></div>
+										</div>
+									</div>
+
+                                        <div class="row">
+                                            <?php  if ($resultDetail['LCAreaBasedon'] == 'C') { ?>
+                                            <div class="form-group col-lg-12 req_flds">
+                                                <?php }  else  { ?>
+                                                <div class="form-group col-lg-12">
+                                                    <?php } ?>
+                                                    <input type="text" class="form-control lbl_move"  name="CarpetArea" id="CarpetArea"
+                                                           onblur="return FormatNum(this, 3)" onKeyPress="return isDecimal(event,this)" label="Carpet Area"
+                                                           value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['CarpetArea'], 3); ?>">
+                                                    <div class="error_message"><p>Please type the Carpet Area...</p></div>
+                                                </div>
+                                            </div>
+
+									<div class="row">
+										<div class="form-group col-lg-12">
+											<select name="Facing" id="Facing" class="form-control single_dropdown lbl_move" data-size="5" style="width:100%;" label="Select the Facing...">
+											  <option value="">Select Facing</option>
+											  <?php if(isset($resultsFacing)):
+												    foreach($resultsFacing as $facing): ?>
+													    <option value="<?php echo $facing['FacingId']; ?>"
+                                                            <?php echo ($facing['FacingId'] == $unitInfo['FacingId'])?'selected':''; ?>>
+                                                                <?php echo $facing['Description']; ?>
+                                                        </option>
+												    <?php endforeach;
+                                                endif;?>
+											</select>
+											<div class="error_message"><p>Please Select the Facing...</p></div>
+										</div>
+									</div>
+                                </div>
+                            </div>
+                            <div class="item" data-id="2">
+                                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                    <h1 class="txt_center form_main_h1"><span class="unit-name"></span> - Unit Type Cost Details</h1>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="Rate" id ="Rate" class="form-control lbl_move"
+                                                   label="Rate" onKeyPress="return isDecimal(event)"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['Rate'], 2); ?>">
+											<div class="error_message"><p>Please Enter the Rate...</p></div>
+										</div>
+									</div>
+<!--									<div class="row">   -->
+<!--										<div class="form-group col-lg-12">-->
+<!--											<select name="LevelwiseRate" id="LevelwiseRate" class="single_dropdown lbl_move" data-size="5" style="width:100%;" label="Select Level...">-->
+<!--											   <option value="">Select Level</option>-->
+<!--											   --><?php
+//											   foreach($resultsLevel as $level){
+//											   echo "<option value='".$level['LevelId']."'>".$level['LevelName']."</option>";
+//										}?>
+<!--											</select>-->
+<!--											<div class="error_message"><p>Please Select the LevelwiseRate...</p></div>-->
+<!--										</div>-->
+<!--									</div> -->
+									<div class="row">   
+										<div class="form-group col-lg-12">
+											<input type="text" name="BaseAmount" id="BaseAmount"
+                                                   class="form-control lbl_move" value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['BaseAmt'], 2); ?>"
+                                                   label="Calculated Base Amount" readonly>
+										</div>
+									</div>
+<!--									<div class="row">   -->
+<!--										<div class="form-group col-lg-12">-->
+<!--                                            <select name="OtherCost[]" id="OtherCost" class="form-control multiple_dropdown lbl_move" multiple="multiple" style="width:100%;" label="Select OtherCost">-->
+<!--                                                --><?php //if(isset($arrOtherCosts)):
+//                                                   foreach($arrOtherCosts as $otherCost): ?>
+<!--                                                   <option value="--><?php //echo $otherCost['OtherCostId']; ?><!--"-->
+<!--                                                       --><?php //echo (in_array($otherCost['OtherCostId'], $arrExistOtherCostIds))?'selected':''; ?>
+<!--                                                           data-amt="--><?php //echo $otherCost['Amount']; ?><!--"> --><?php //echo $otherCost['OtherCostName']; ?><!--</option>-->
+<!--                                                --><?php //endforeach;
+//                                                    endif; ?>
+<!--                                            </select>-->
+<!--											<div class="error_message"><p>Please Select the OtherCost...</p></div>-->
+<!--										</div>-->
+<!--									</div>-->
+<!--                                    <div class="row">-->
+<!--                                        <div id="other-cost-details-wrapper" class="form-group col-lg-12 --><?php //echo (empty($arrExistingOtherCosts))?'hide':''; ?><!--">-->
+<!--                                            <div class="stginner_h5 m_btm20">-->
+<!--                                                <h5>Other Cost Items</h5>-->
+<!--                                            </div>-->
+<!--                                            --><?php //if(isset($arrExistingOtherCosts)):
+//                                                foreach($arrExistingOtherCosts as $otherCost): ?>
+<!--                                                    <div class="form-group penality_int_area col-lg-12 req_flds" data-id="--><?php //echo $otherCost['OtherCostId']; ?><!--">-->
+<!--                                                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-4 padlr0">-->
+<!--                                                            <p style="padding-top:3px;">--><?php //echo $otherCost['OtherCostName']; ?><!--</p>-->
+<!--                                                        </div>-->
+<!--                                                        <div class="col-lg-7 col-md-7 col-sm-7 col-xs-8 padlr0">-->
+<!--                                                            <input type="text" class="lbl_move other-cost-amt"  name="selectedOtherCostValue_--><?php //echo $otherCost['OtherCostId']; ?><!--"  value="--><?php //echo $otherCost['Amount']; ?><!--" placeholder="Amount">-->
+<!--                                                            <div class="error_message"><p></p></div>-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                            --><?php //endforeach;
+//                                                endif;
+//                                            ?>
+<!--                                        </div>-->
+<!--                                    </div>-->
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="GuideLineValue" id="GuideLineValue"
+                                                   class="gross form-control lbl_move" onKeyPress="return isDecimal(event)"
+                                                   label="GuideLineValue" value="<?php echo $unitInfo['GuideLineValue']; ?>">
+											<div class="error_message"><p>Please Enter the GuideLineValue...</p></div>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="MarketLandValue" id="MarketLandValue"
+                                                   class="gross form-control lbl_move" onKeyPress="return isDecimal(event)"
+                                                   label="MarketLandValue" value="<?php echo $unitInfo['MarketLandValue']; ?>">
+											<div class="error_message"><p>Please Enter the MarketLandValue...</p></div>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12">
+											<input type="text" name="LandAmount" id="LandAmount" class="form-control lbl_move"
+                                                   onKeyPress="return isDecimal(event)" value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['LandAmount'], 2); ?>"
+                                                   label="Calculated LandAmount" readonly>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12">
+											<input type="text" name="ConstructionAmount" id="ConstructionAmount"
+                                                   class="form-control lbl_move" onKeyPress="return isDecimal(event)"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['ConstructionAmount'], 2); ?>"
+                                                   label="Calculated Construction Amount" readonly>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12">
+											<input type="text" name="GrossAmount" id="GrossAmount" class="form-control lbl_move"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['GrossAmount'], 2); ?>"
+                                                   onKeyPress="return isDecimal(event)" label="Calculated Gross Amount" readonly>
+											<div class="error_message"><p>Please Enter the GrossAmount...</p></div>
+										</div>
+									</div>
+                                    <div class="row">
+										<div class="form-group col-lg-12">
+											<input type="text" name="NetAmt" id="NetAmt" class="form-control lbl_move"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['NetAmt'], 2); ?>"
+                                                   onKeyPress="return isDecimal(event)" label="Calculated Net Amount" readonly>
+											<div class="error_message"><p>Please Enter the NetAmount...</p></div>
+										</div>
+									</div>
+                                </div>
+                            </div>
+                            <div class="item" data-id="3">
+                                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                    <h1 class="txt_center form_main_h1"><span class="unit-name"></span> - Payable Amount Details</h1>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="AdvanceAmount" id="AdvanceAmount" class="Percent form-control lbl_move"
+                                                   onKeyPress="return isDecimal(event)" label="Advance Amount"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['AdvAmount'], 2); ?>">
+											<div class="error_message"><p>Please Enter the AdvanceAmount...</p></div>
+										</div>
+									</div>
+									 <div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="AdvancePercent" id="AdvancePercent" class="Percent form-control lbl_move"
+                                                   onKeyPress="return isDecimal(event)" label="Advance Percent"
+                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($unitInfo['AdvPercent'], 2); ?>">
+											<div class="error_message"><p>Please Enter the AdvancePercent...</p></div>
+										</div>
+									</div>
+									<div class="row">   
+										<div class="form-group col-lg-12 req_flds">
+											<input type="text" name="LateInterest" id="LateInterest" class="form-control lbl_move"
+                                                   onKeyPress="return isDecimal(event)" label="Late Interest % (Per Annum)"
+                                                   value="<?php echo $unitInfo['IntPercent']; ?>">
+											<div class="error_message"><p>Please Enter Late Interest...</p></div>
+										</div>
+									</div>
+                                    <div class="row">
+										<div class="form-group col-lg-12 req_flds">
+											<input name="CreditDays" id="CreditDays" type="text" class="form-control lbl_move"
+                                                   label="Credit Days" onKeyPress="return isDecimal(event)"
+                                                   value="<?php echo $unitInfo['CreditDays']; ?>">
+											<div class="error_message"><p>Please Enter Credit Days...</p></div>
+										</div>
+									</div>
+
+                                   <?php if(isset($unitIdImg)){ ?>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+
+                                                <a href="#upload_photo" class="file_link ripple upld_photo_a"><span><i class="fa fa-camera"></i></span>
+                                                    Upload Photo
+                                                </a><input type="file" class="file_input" id="files" name="files[]" multiple />
+                                            <?php  $imgCount =count($unitIdImg); ?>
+                                            <div id="upload_photo" class="upld_photo" <?php if($imgCount>0) { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; }?>>
+                                                <div id="upload_photos" class="upload_photos">
+                                                    <?php if(isset($unitIdImg)) { foreach($unitIdImg as $utdImg) {?>
+                                                        <span>
+                                                        <img class="thumb_photos" title="images.jpeg" src="<?php echo $this->basePath(); ?>/<?php echo $utdImg['ImageUrl']; ?>">
+                                                    </span>
+                                                    <?php } }?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?Php } else { ?>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <a href="#upload_photo" class="file_link ripple upld_photo_a"><span><i class="fa fa-camera"></i></span>
+                                                Upload Photo
+                                            </a><input type="file" class="file_input" id="files" name="files[]" multiple />
+                                            <div id="upload_photo" class="upld_photo">
+                                                <div id="upload_photos" class="upload_photos">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <!-- Indicators -->
+                           <!---- <ol class="carousel-indicators">
+                                <li data-target="#carousel-example-generic" data-index="0" class="active"></li>
+                                <li data-target="#carousel-example-generic" data-index="1"></li>
+                                <li data-target="#carousel-example-generic" data-index="2"></li>
+                                <!----<li data-target="#carousel-example-generic" data-slide-to="3"></li>---->
+                           <!---- </ol>---->
+                            <!-- Controls -->
+                            <ul class="prev_next next-bt">
+                                <li style="position: relative; right: 44%;top: 3px">
+                                    <a href="javascript:void(0)" class="prevSlide hide" id="back-btn">
+                                        <i class="fa fa-chevron-circle-left"></i> Back
+                                    </a>
+                                </li>
+                              	<li style="position: relative;left: 42%;bottom: 8px;">
+                                    <a href="javascript:void(0)" class="nextSlide" role="button" id="back-btn">Continue <i class="fa fa-chevron-circle-right"></i>
+                                    </a>
+                                </li>
+                                <div style="clear:both;"></div>
+                            </ul>
+                        </div>
+                    </div>	
+                </div>
+            </div>
+        </div>
+		
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="save_btn m_right10 float_r hide"><input type="button" name="saveExit" class="ripple continue" value="Save"/></li>
+    </ul>
+</div>
+</form>
+<?php endif; ?>
+<script type="text/javascript">
+$('.cnt_slider .carousel').carousel({
+ interval: false
+});
+
+//$('.carousel-indicators li').click(function(){
+//
+//
+//});
+
+</script>
+
+<script type="text/javascript">
+    $(function() {
+
+        var $unitName = $('#UnitName'),
+            arrExistingUnitNames = <?php echo (isset($jsonExistingUnitNames))?$jsonExistingUnitNames:'[]' ?>,
+            $carousel = $('#carousel-example-generic'),
+            $Area = $('#Area'),
+            $CarpetArea = $('#CarpetArea'),
+            $UDSLandArea = $('#UDSLandArea'),
+            $Facing = $('#Facing'),
+            $BaseAmt = $("#BaseAmount"),
+            $GrossAmt = $("#GrossAmount"),
+            $NetAmt = $("#NetAmt"),
+            $MarketLandValue = $("#MarketLandValue"),
+            $GuideLineValue = $("#GuideLineValue"),
+            $OtherCost = $("#OtherCost"),
+            $ConstAmt = $("#ConstructionAmount"),
+            $LandAmt = $("#LandAmount"),
+            $Rate = $('#Rate'),
+            $nextSlide = $('.nextSlide'),
+            $prevSlide = $('.prevSlide'),
+            $advanceAmt = $('#AdvanceAmount'),
+            $advancePercent = $('#AdvancePercent'),
+            $LateInt = $('#LateInterest'),
+            $CreditDays = $('#CreditDays'),
+            $otherCostDetailsWrapper = $('#other-cost-details-wrapper'),
+            $saveBtnArea = $('.savebtn_area');
+
+        init();
+        bindUnitName_onChange();
+        bindContinue_onClick();
+        bindPrev_onClick();
+        bindCalculation_onChange();
+        bindSaveBtn_onClick();
+        bindOtherCost_onChange();
+
+        function init() {
+            $(".single_dropdown").select2({
+                placeholder: "",
+                allowClear: true
+            });
+
+            $OtherCost.select2({
+                tags: true
+            });
+        }
+
+        function bindOtherCost_onChange() {
+            // select
+            $OtherCost.on("select2:select", function (e) {
+                //Gets the last selected item
+                var $tarOpt = $(e.params.data.element),
+                    selOtherCostId = e.params.data.id,
+                    selOtherCostName = e.params.data.text.trim(),
+                    amt = parseFloat($tarOpt.attr('data-amt'));
+
+                var otherCostAmtHtml = '<div class="form-group penality_int_area col-lg-12 req_flds" data-id="'+ selOtherCostId+'">'
+                    + '<div class="col-lg-5 col-md-5 col-sm-5 col-xs-4 padlr0">'
+                    + '<p style="padding-top:3px;">'+ selOtherCostName+'</p>'
+                    + '</div>'
+                    + '<div class="col-lg-7 col-md-7 col-sm-7 col-xs-8 padlr0">'
+                    + '<input type="text" class="lbl_move other-cost-amt"  name="selectedOtherCostValue_'+selOtherCostId+'" placeholder="Amount" value="'+amt.toFixed(2)+'">'
+                    + '<div class="error_message"><p></p></div>'
+                    + '</div>'
+                    + '</div>';
+
+                $otherCostDetailsWrapper.append(otherCostAmtHtml);
+                $otherCostDetailsWrapper.removeClass('hide');
+                var $tarOtherCostDetail = $otherCostDetailsWrapper.find('> div[data-id="'+selOtherCostId+'"]');
+                var $tarIp = $tarOtherCostDetail.find('input.lbl_move');
+
+                $tarIp.polymerForm();
+                $tarIp.each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+                $GrossAmt.trigger('change');
+            });
+
+            // unselect
+            $OtherCost.on("select2:unselect", function (e) {
+
+                //Gets the last selected item
+                var selOtherCostId = e.params.data.id;
+                var $tarOtherCostDetail = $otherCostDetailsWrapper.find('> div[data-id="'+selOtherCostId+'"]');
+                $tarOtherCostDetail.remove();
+
+                if($otherCostDetailsWrapper.find('>div').length <= 1) {
+                    $otherCostDetailsWrapper.addClass('hide');
+                }
+
+                $GrossAmt.trigger('change');
+            });
+        }
+
+        function bindUnitName_onChange() {
+            $unitName.on('change', function() {
+                validateUnitName(function(){});
+            });
+        }
+
+        function validateUnitName(callback) {
+            var unitName = $unitName.val().trim();
+
+            removeErrorMsg($unitName);
+            if(unitName === '') {
+                showErrorMsg($unitName, 'Please Enter Unit Type Name...');
+                callback(false);
+                return false;
+            }  else {
+                callback(true);
+                return true;
+            }
+        }
+
+        function showErrorMsg($tarIp, msg) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text(msg);
+            $tarErrorMsg.show();
+        }
+
+        function removeErrorMsg($tarIp) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text('Please Enter ' + $tarIp.attr('label') + '...');
+            $tarErrorMsg.hide();
+        }
+
+        function bindContinue_onClick() {
+            $nextSlide.click(function() {
+
+                var $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                switch (curItemId) {
+                    case '1':
+                        validate_step1(function(isSuccess) {
+                            if(isSuccess) {
+                                $carousel.carousel('next');
+
+                                var unitName = $unitName.val().trim();
+                                $('.unit-name').text(unitName);
+
+                                $prevSlide.removeClass('hide');
+                            }
+                        });
+                        break;
+                    case '2':
+                        validate_step2(function(isSuccess) {
+                            if(isSuccess) {
+                                $carousel.carousel('next');
+
+                                $nextSlide.addClass('hide');
+
+                                $saveBtnArea.find('.save_btn').removeClass('hide');
+                                $saveBtnArea.find('.donecngs_p').removeClass('hide');
+                            }
+                        });
+                        break;
+                    default :
+                        $carousel.carousel('next');
+                }
+            });
+        }
+
+        function bindPrev_onClick() {
+            $prevSlide.click(function() {
+                var $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                if(curItemId == '2') {
+                    $prevSlide.addClass('hide');
+                } else if(curItemId == '3') {
+                    $saveBtnArea.find('.save_btn').addClass('hide');
+                    $saveBtnArea.find('.donecngs_p').addClass('hide');
+                }
+
+
+                $nextSlide.removeClass('hide');
+                $carousel.carousel('prev');
+            });
+        }
+
+        function validate_step1(callback) {
+
+            validateUnitName(function(isSuccess) {
+                var Area = $Area.val().trim(),
+                    CarpetArea = $CarpetArea.val().trim(),
+                    UDSLandArea = $UDSLandArea.val().trim();
+
+                if(Area.length <= 0) {
+                    showErrorMsg($Area, 'Please Enter Area...');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($Area);
+                }
+
+                if ($('#lcAreaBase').val() == "C") {
+                    if (CarpetArea.length <= 0) {
+                        showErrorMsg($CarpetArea, 'Please Enter Carpet Area...');
+                        isSuccess = false;
+                    } else {
+                        removeErrorMsg($CarpetArea);
+                    }
+                }
+
+                if(UDSLandArea.length <= 0) {
+                    showErrorMsg($UDSLandArea, 'Please Enter UDS Land Area...');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($UDSLandArea);
+                }
+
+                callback(isSuccess);
+                return isSuccess;
+
+            });
+        }
+
+        function validate_step2(callback) {
+            var rate = parseFloat($Rate.val()),
+                guideLineVal = parseFloat($GuideLineValue.val()),
+                marketLandVal = parseFloat($MarketLandValue.val()),
+                isSuccess = true;
+
+            if(isNaN(rate)) {
+                showErrorMsg($Rate, 'Please Enter Rate...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($Rate);
+            }
+            if(isNaN(guideLineVal)) {
+                showErrorMsg($GuideLineValue, 'Please Enter Guide Line Value...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($GuideLineValue);
+            }
+            if(isNaN(marketLandVal)) {
+                showErrorMsg($MarketLandValue, 'Please Enter Market Land Value...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($MarketLandValue);
+            }
+
+            // check other cost details
+            if($OtherCost.val() != '') {
+                $otherCostDetailsWrapper.find('input').each(function() {
+                    var otherCostAmt = parseFloat($(this).val());
+                    if(isNaN(otherCostAmt) || otherCostAmt == 0) {
+                        showErrorMsg($(this), 'Invalid Amount...');
+                        isSuccess = false;
+                    } else {
+                        removeErrorMsg($(this));
+                    }
+                });
+            }
+
+            callback(isSuccess);
+            return isSuccess;
+        }
+
+        function bindCalculation_onChange() {
+
+            $Area.on('change', function() {
+                $Rate.trigger('change');
+            });
+
+           // Rate
+            $Rate.on('change', function() {
+                var BaseAmt = 0,
+                    Rate = parseFloat($Rate.val()),
+                    Area = parseFloat($Area.val());
+
+                if(!isNaN(Rate) && !isNaN(Area)) {
+                    BaseAmt = Area * Rate;
+                }
+
+                $BaseAmt.val(BaseAmt.toFixed(2));
+
+                calcConsAmt();
+                calcGrossAmt();
+            });
+
+            // UDS Land
+            $CarpetArea.on('change', function() {
+                calcConsAmt();
+                calcGrossAmt();
+            });
+
+            // Carpet Area
+            $UDSLandArea.on('change', function() {
+                calcConsAmt();
+                calcGrossAmt();
+            });
+
+            // Market value
+            $MarketLandValue.on('change', function () {
+                calcConsAmt();
+                calcGrossAmt();
+            });
+
+            // Guide line
+            $GuideLineValue.on('change', function() {
+                calcConsAmt();
+                calcGrossAmt();
+            });
+
+            $OtherCost.on('change', function() {
+                calcGrossAmt();
+            });
+
+            function calcConsAmt() {
+                var GuideLineVal = parseFloat( isNullCheck($GuideLineValue.val(),'number')),
+                    MarketVal = parseFloat(isNullCheck($MarketLandValue.val(),'number')),
+                    UDSLandArea = parseFloat(isNullCheck($UDSLandArea.val(),'number')),
+                    dCarpetLandArea = parseFloat(isNullCheck($CarpetArea.val(),'number')),
+                    LandAmt= 0,
+                    dArea= 0,
+                    dRate=0;
+
+                if ($('#lcAreaBase').val() == "C") dArea =dCarpetLandArea;
+                else dArea = UDSLandArea;
+
+                if ($('#lcRateBase').val() == "M") dRate = MarketVal;
+                else dRate = GuideLineVal;
+
+                LandAmt = dArea * dRate;
+                $LandAmt.val(LandAmt.toFixed(2));
+
+                var dBaseAmt = parseFloat(isNullCheck($BaseAmt.val(),'number'));
+                var dContAmt = dBaseAmt - LandAmt;
+                if (dContAmt <0)  dContAmt=0;
+                $ConstAmt.val(dContAmt.toFixed(2));
+            }
+
+
+            function calcGrossAmt() {
+                var LandAmt = parseFloat(isNullCheck($LandAmt.val(),'number')),
+                    ConstAmt = parseFloat(isNullCheck($ConstAmt.val(),'number'));
+
+                var $arrSelOptions = $OtherCost.find('option:selected');
+				
+                if(isNaN(LandAmt)) {
+                    LandAmt = 0;
+                }
+
+                if(isNaN(ConstAmt)) {
+                    ConstAmt = 0;
+                }
+
+                var GrossAmt = LandAmt + ConstAmt;
+                $GrossAmt.val(GrossAmt.toFixed(2)).trigger('change');
+            }
+
+            $advanceAmt.on('change', function() {
+                var BaseAmt = parseFloat(isNullCheck($BaseAmt.val(),'number')),
+                    advAmt = parseFloat(isNullCheck($advanceAmt.val(),'number')),
+                    advPercentage = 0;
+
+                if(BaseAmt < advAmt) {
+                    showErrorMsg($advanceAmt, 'Advance Amount cannot exceed Base Amount...');
+                } else {
+                    removeErrorMsg($advanceAmt);
+                    if(!isNaN(BaseAmt) && !isNaN(advAmt) && BaseAmt != 0) {
+                        advPercentage = (advAmt / BaseAmt) * 100;
+                    }
+                }
+
+                $advancePercent.val(advPercentage.toFixed(2));
+            });
+
+            $advancePercent.on('change', function() {
+                var BaseAmt = parseFloat($BaseAmt.val()),
+                    advAmt = 0,
+                    advPercentage = parseFloat(isNullCheck($advancePercent.val(),'number'));
+
+                if (advPercentage > 100) {
+                    showErrorMsg($advancePercent, 'Advance Percent cannot exceed 100...');
+                } else {
+                    removeErrorMsg($advancePercent);
+                    if (!isNaN(BaseAmt) && !isNaN(advPercentage)) {
+                        advAmt = (BaseAmt * advPercentage) / 100;
+                    }
+                }
+
+                $advanceAmt.val(advAmt.toFixed(2));
+            });
+
+            // calculate net amount
+            $GrossAmt.on('change', function() {
+
+                var totOtherCostAmt = parseFloat($GrossAmt.val());
+                $otherCostDetailsWrapper.find('input.other-cost-amt').each(function() {
+                    var amt = parseFloat($(this).val());
+                    if(!isNaN(amt)) {
+                        totOtherCostAmt += amt;
+                    }
+                });
+                $NetAmt.val(totOtherCostAmt.toFixed(2));
+            });
+        }
+
+
+        function bindSaveBtn_onClick() {
+            $('.continue').on('click', function(ev) {
+                ev.preventDefault();
+
+                var $this = $(this),
+                    $unitGenForm = $('#unit-type-generation-form'),
+                    $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                validate_step1(function(isStep1Success) {
+                    if(isStep1Success) {
+                        validate_step2(function(isStep2Success) {
+                            if(isStep2Success) {
+                                validate_step3(function(isSuccess) {
+                                    if(isSuccess) {
+                                        var $redirectUrl = $('#redirectUrl');
+                                        if($this.hasClass('save-next')) {
+                                            $redirectUrl.val('car-park');
+                                        } else {
+                                            $redirectUrl.val('');
+                                        }
+                                        $unitGenForm.submit();
+                                    } else {
+                                        //$nextSlide.trigger('click');
+                                    }
+                                });
+                            } else {
+                                //$nextSlide.trigger('click');
+                            }
+                        })
+                    }
+                });
+
+
+            });
+        }
+
+        function validate_step3(callback) {
+            var advAmt = parseFloat($advanceAmt.val()),
+                advPer = parseFloat($advancePercent.val()),
+                LateInt = parseFloat($LateInt.val()),
+                CreditDays = parseInt($CreditDays.val()),
+                isSuccess = true;
+
+            if (isNaN(advAmt)) {
+                isSuccess = false;
+                showErrorMsg($advanceAmt, 'Please Enter Advance Amount...');
+            } else {
+                removeErrorMsg($advanceAmt);
+            }
+
+            if (isNaN(advPer)) {
+                isSuccess = false;
+                showErrorMsg($advancePercent, 'Please Enter Advance Percentage...');
+            } else {
+                removeErrorMsg($advancePercent);
+            }
+
+            if (isNaN(LateInt)) {
+                isSuccess = false;
+                showErrorMsg($LateInt, 'Please Enter Late Interest...');
+            } else {
+                removeErrorMsg($LateInt);
+            }
+
+            if (isNaN(CreditDays)) {
+                isSuccess = false;
+                showErrorMsg($CreditDays, 'Please Enter Credit Days...');
+            } else {
+                removeErrorMsg($CreditDays);
+            }
+
+            callback(isSuccess);
+            return isSuccess;
+
+        }
+
+    });
+    function handleFileSelect(evt) {
+        $('.upld_photo').hide();
+        $('#upload_photos').html('');
+        var files = evt.target.files; // FileList object
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
+            // Only process image files.
+            if (!f.type.match('image.*')) {
+                continue;
+            }
+            var reader = new FileReader();
+            // Closure to capture the file information.
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    // Render thumbnail.
+                    var span = document.createElement('span');
+                    span.innerHTML = ['<img class="thumb_photos" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
+                    document.getElementById('upload_photos').insertBefore(span, null);
+                };
+            })(f);
+            // Read in the image file as a data URL.
+            reader.readAsDataURL(f);
+        }
+        $('.upld_photo').show();
+    }
+    document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+</script>

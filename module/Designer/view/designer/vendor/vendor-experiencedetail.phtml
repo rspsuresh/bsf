@@ -1,0 +1,98 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/handsontable.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/handsonTable.all.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/handsonTable.all.formula.js"></script>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                 <div id="example1" class="handsontable"></div>
+				 <p>
+		<input type="button" value="GetCellValue" id="selectFirst"/>
+		<input type="button" value="export" id="export"/>
+		</p>
+		<p>
+		 <button id="exportToCsv">Export</button>
+</p>
+<pre id="csv"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  var
+    data = [
+      ["SNo","No1","N02","Length","Breadth","Depth","Quantity","","",""],
+      [1,21, 10, 11, 12, 13,'','','',''],
+      [2,11, 10, 11, 12, 13,'','','',''],
+      [3,33, 10, 11, 12, 13,'','','',''],
+      [4,44, 10, 11, 12, 13,'','','',''],
+      [5,22, 10, 11, 12, 13,'=+G2','','','']
+  ],
+    container = document.getElementById('example1'),
+    selectFirst = document.getElementById('selectFirst'),
+   hot,
+   firstRowRenderer,
+   secondRowRenderer;
+
+function firstRowRenderer(instance, td, row, col, prop, value,cellProperties) {
+    Handsontable.cellTypes['formula'].renderer.apply(this, arguments);
+    td.style.fontWeight = 'bold';
+    td.style.color = 'green';
+	td.style.background = '#CEC';
+  }
+  
+function secondRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.fontWeight = 'bold';
+    td.style.textAlign = 'center';
+	td.style.background ='#D3D3D3';
+ }
+ 
+  hot = new Handsontable(container, {
+	 
+	colHeaders:true,
+	data:data,
+	
+
+	 // rowHeaders: ['SNo'],
+	rowHeaders: true,
+	minSpareRows: 100,
+
+    contextMenu:false,
+    manualColumnResize: true,
+    stretchH: 'all',
+	 
+    formulas: true,
+	cells: function (row, col, prop) {
+		var cellProperties = {
+				};
+      if (row === 1 && col === 6) {
+        this.renderer = firstRowRenderer;
+      }
+	  if (row === 0) {
+		cellProperties.renderer=secondRowRenderer;
+	}
+	if (row === 5 && col === 6) {
+		cellProperties.renderer=firstRowRenderer;
+	}
+	return cellProperties;
+	},
+	});
+ hot.loadData(data);
+
+ });
+
+  
+ $("#exportToCsv").click(function(e) {
+window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('div[id$=example1]').html()));
+e.preventDefault();
+});
+	
+
+
+</script>

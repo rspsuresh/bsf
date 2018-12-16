@@ -1,0 +1,1204 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<style>
+    .back-img .item h2{color:#333;font-size:16px !important;}
+    .top-conts span{color:#ff0000;font-size:14px !important;padding-left:6px;font-weight:600}
+    .top-conts{margin:0}
+    .ad-btn{background:#3399ff; text-shadow: 0 0 1px #546082;right:4px;text-align: center;padding-top: 2px; box-shadow: 0 0 0 2px #fff, 0 0 0 3px #3399ff; width:25px; height:25px; border-radius:50%; color:#fff; position:absolute}
+    #resourceGrid .jqx-grid-header{ height:75px !important;font-size:12px;}
+    #ltypepickgrid .jqx-grid-header{ height:75px !important;font-size:12px;}
+    #ltypepickgrid .jqx-checkbox {border:1px solid;}
+    #ltypepickgrid .jqx-grid-header{ height:75px !important;font-size:12px;}
+    #ltypepickgrid .jqx-checkbox {border:1px solid;}
+    .lab-natt textarea {height: 100px};
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="col-lg-12">
+            <h1 id="titleTag" class="text-center">Labour Rate Approval</h1><span style="line-height: 1.5"></span>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="row">
+                <form method="post" id="formWrapper">
+                    <div id="stageOne" class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                        <div class="col-lg-4 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8">
+                            <div class="col-lg-8 col-lg-offset-4">
+                                <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                                <input type="text" name="lraeDate" id="lraeDate" class="date_picker parnt-text" value="<?php echo date("d-m-Y"); ?>" readonly />
+                                <input type="hidden" id="lraId" name="lraId" value="<?php echo $lraId; ?>" />
+                                <input type="hidden" id="mode" name="mode" value="<?php echo $mode; ?>" />
+                                <input type="hidden" id="lraTypeId" name="lraTypeId" value="<?php echo $lraTypeId; ?>" />
+                                <div id="resourceInputsWrapper" class="hide"></div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" role="listbox">
+                                <div class="item active">
+                                    <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input class="parent_text form-control lbl_move" type="text" name="costCentreName" id="costCentreName" label="Select Cost Centre" />
+                                            <input type="hidden" id="costCentreId" name="costCentreId" value="<?php echo $costCentreId; ?>"/>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <select class="form-control single_dropdown lbl_move" label="Select Contractor Type" style="width:100%;" name="vendorType" id="vendorType"  onchange="bindGroupAutocomplete()">
+                                                <option value=""></option>
+                                                <option value="V">Vendor</option>
+                                                <option value="I">Internal</option>
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <!--<h5 class="select-title">Select the required Contractor to make LRA?</h5>-->
+                                            <!--<select class="form-control single_dropdown lbl_move" label="Select Contractor" style="width:100%;" name="vendorId" id="vendorId">
+                                                <option value=""></option>
+                                                </?php foreach($vendorMaster as $vm) { ?>
+                                                    <option value="</?php echo $vm['VendorId']; ?>" </?php if(isset($lraRegister) && $lraRegister['VendorId']==$vm['VendorId']) { ?>selected</?php } ?>></?php echo $vm['VendorName']; ?></option>
+                                                </?php } ?>
+                                            </select>-->
+                                            <input class="parent_text form-control lbl_move" type="text" name="vendorname" id="vendorname" label="Select Contractor" />
+                                            <input type="hidden" id="vendorId" name="vendorId" >
+                                            <input type="hidden" id="type" name="Type" >
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <select class="form-control single_dropdown lbl_move" label="Select Order Type" style="width:100%;" name="orderType" id="orderType">
+                                                <option value=""></option>
+                                                <option value="N">New Order</option>
+                                                <option value="E">Existing Order</option>
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div id="exOrderSel" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group" style="display:none;">
+                                            <select class="form-control single_dropdown lbl_move" label="Select Existing Order" style="width:100%;" name="nlraRegId" id="nlraRegId">
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--<div class="item min_h550">
+                                    <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input type="text" class="form-control lbl_move projName" label="Cost Centre" value=" " readonly />
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <h5 class="select-title">Select the required Contractor to make LRA?</h5>
+                                            <select class="form-control single_dropdown lbl_move" label="" style="width:100%;" name="vendorId" id="vendorId">
+                                                <option value=""></option>
+                                                </?php foreach($vendorMaster as $vm) { ?>
+                                                <option value="</?php echo $vm['VendorId']; ?>" </?php if(isset($lraRegister) && $lraRegister['VendorId']==$vm['VendorId']) { ?>selected</?php } ?>></?php echo $vm['VendorName']; ?></option>
+                                                </?php } ?>
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <select class="form-control single_dropdown lbl_move" label="Select Order Type" style="width:100%;" name="orderType" id="orderType">
+                                                <option value=""></option>
+                                                <option value="N">New Order</option>
+                                                <option value="E">Existing Order</option>
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div id="exOrderSel" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group" style="display:none;">
+                                            <select class="form-control single_dropdown lbl_move" label="Select Existing Order" style="width:100%;" name="nlraRegId" id="nlraRegId">
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="item">
+                                    <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input type="text" class="form-control lbl_move projName" label="Cost Centre" value=" " readonly />
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input type="text" class="form-control lbl_move conName" label="Contractor" value=" " readonly />
+                                        </div>
+                                        <div id="extOrdDiv" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input type="text" class="form-control lbl_move ordType" label="Existing Order" value=" " readonly />
+                                        </div>
+                                    </div>
+                                </div>-->
+                                <div class="item min_h550" style="margin-top:0">
+                                    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-12 top-sl-10" style="margin-top:0">
+                                        <div class="col-lg-12" style="padding:0 !important">
+                                            <div class="top-conts animated fadeInRight col-sm-12" style="text-align:right !important">
+                                                <h2>Cost Centre</h2>
+                                                <span id="nameofproject"></span>
+                                            </div>                                      
+                                            <div class="top-conts animated fadeInRight pull-right col-sm-12">
+                                                <h2>Contractor</h2>
+                                                <span id="nameofconstructor"></span>
+                                            </div>
+                                        </div>
+                                        <div id="resourceGrid"></div>
+                                    </div>
+                                </div>
+                                <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5 col-md-7 col-md-offset-5 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-3">
+                                    <li id="backPrev"><a href="javascript:void(0);" onclick="return goBack();"><span><i class="fa fa-arrow-left"></i></span> Back</a></li>
+                                    <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next <span><i class="fa fa-arrow-right"></i></span></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="stageTwo" style="display:none;">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                                    <div class="panel-box zoomIn animated">
+                                        <ul>
+                                            <li>
+                                                <label>Cost Centre</label>
+                                                <span class="sprojName"><?php if(isset($lraRegister) && $lraRegister['CostCentreName'] != '') { echo $lraRegister['CostCentreName']; } else { echo ''; } ?></span>
+                                            </li>
+                                            <li>
+                                                <label>Contractor</label>
+                                                <input type="hidden" name="vendorid" value="<?php echo $lraRegister['VendorId'];?>">
+                                                <span id="ltype" class="stype"><?php if(isset($lraRegister) && $lraRegister['VendorName'] != '') { echo $lraRegister['VendorName']; } else { echo ''; } ?></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                                    <div class="panel-box box2th zoomIn animated">
+                                        <ul>
+                                            <li>
+                                                <label>LRA Date</label>
+                                                <span><input type="text" id="lraDate" name="lraDate" class="date_picker" value="<?php if(isset($lraRegister) && ($lraRegister['LRADate'] != NULL)) { echo date("d-m-Y", strtotime($lraRegister['LRADate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                            </li>
+                                            <li>
+                                                <label>Ref Date</label>
+                                                <span><input type="text" id="refDate" name="refDate" class="date_picker" value="<?php if(isset($lraRegister) && ($lraRegister['RefDate'] != NULL)) { echo date("d-m-Y", strtotime($lraRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                            </li>
+                                            <li>
+                                                <label>From Date</label>
+                                                <span><input type="text" id="fromDate" name="fromDate" class="date_picker" value="<?php if(isset($lraRegister) && ($lraRegister['FromDate'] != NULL)) { echo date("d-m-Y", strtotime($lraRegister['FromDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                            </li>
+                                            <li>
+                                                <label>To Date</label>
+                                                <span><input type="text" id="toDate" name="toDate" class="date_picker" value="<?php if(isset($lraRegister) && ($lraRegister['ToDate'] != NULL)) { echo date("d-m-Y", strtotime($lraRegister['ToDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                                    <div class="panel-box box3th zoomIn animated">
+                                        <ul>
+                                            <li>
+                                                <label>LRA No</label>
+                                                <span><input type="text" id="lraNo" name="lraNo" value="<?php if(isset($lraRegister) && trim($lraRegister['LRANo']) != '') { echo trim($lraRegister['LRANo']); } else { echo ($genType) ? trim($lraNo) : ''; } ?>" readonly /></span>
+                                            </li>
+                                            <li>
+                                                <label>CC LRA No</label>
+                                                <span><input type="text" id="cclraNo" name="cclraNo" value="<?php if(isset($lraRegister) && trim($lraRegister['LRACCNo']) != '') { echo $lraRegister['LRACCNo']; } else { echo ''; } ?>" /></span>
+                                            </li>
+                                            <li>
+                                                <label>Comp LRA No</label>
+                                                <span><input type="text" id="complraNo" name="complraNo" value="<?php if(isset($lraRegister) && trim($lraRegister['LRACompNo']) != '') { echo $lraRegister['LRACompNo']; } else { echo ''; } ?>" /></span>
+                                            </li>
+                                            <li>
+                                                <label>Ref No</label>
+                                                <span><input type="text" id="refNo" name="refNo" value="<?php if(isset($lraRegister) && trim($lraRegister['RefNo']) != '') { echo $lraRegister['RefNo']; } else { echo ''; } ?>" /></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="error_message selOne"><p>Please enter atleast one entry...</p></div>
+                        <div class="col-lg-12 clear animated fadeInUp">
+                            <a id="labourtypePickList" href="javascript:void(0);" onclick="showPickList()" class="ad-btn" data-original-title="Labour Type PickList" data-placement="left" data-toggle="tooltip"><i class="fa fa-plus"></i></a>
+                            <div class="table-responsive top-30">
+                                <table class="table" style="margin-bottom:0px;" id="typeTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Labour Type </th>
+                                        <th>Unit</th>
+                                        <th class="text-right">Rate / Day</th>
+                                        <th class="text-right">OT Rate / Hr</th>
+                                        <th>&nbsp; </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="typebody">
+                                    <?php
+                                    if(isset($lraTypeTrans) && count($lraTypeTrans) != 0) {
+                                        $i = 1;
+                                        foreach($lraTypeTrans as $lratTrans) {
+                                            ?>
+                                            <tr>
+                                                <td width="45%">
+                                                    <input class="parent_text typeSuggest" type="text" name="typeName_<?php echo $i; ?>" id="typeName_<?php echo $i; ?>" onfocus="return CheckLRAFocus(this.id);" value="<?php echo $lratTrans['ResourceName']; ?>" readonly />
+                                                    <input type="hidden" name="typeId_<?php echo $i; ?>" id="typeId_<?php echo $i; ?>" value="<?php echo $lratTrans['ResourceId']; ?>" />
+                                                </td>
+                                                <td width="10%"><input type="hidden" name="unitId_<?php echo $i; ?>" id="unitId_<?php echo $i; ?>" value="<?php echo $lratTrans['UnitId']; ?>" /><span id="unitName_<?php echo $i; ?>"><?php echo $lratTrans['UnitName']; ?></span></td>
+                                                <td width="20%">
+                                                    <input class="parent_text text-right" type="text" name="rate_<?php echo $i; ?>" id="rate_<?php echo $i; ?>" value="<?php echo number_format($lratTrans['Rate'], 2); ?>" onfocus="return hideShow(this,'s','r');" onblur="return hideShow(this,'h','r');" onkeypress="return isDecimal(event,this);" />
+                                                    <div id="estRateDiv_<?php echo $i; ?>" style="position:relative;display:none;">
+                                                        <div class="top-tip">
+                                                            <span style="padding-top: 15px;">Estimate Rate : <i id="estRate_<?php echo $i; ?>"><?php if($lratTrans['EstRate'] != 0) { echo $lratTrans['EstRate']; } else if($lratTrans['AEstRate'] != 0) { echo $lratTrans['AEstRate']; } ?></i></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td width="20%">
+                                                    <input class="parent_text text-right" type="text" name="otRate_<?php echo $i; ?>" id="otRate_<?php echo $i; ?>" value="<?php echo number_format($lratTrans['OTRate'], 2); ?>" onfocus="return hideShow(this,'s','ot');" onblur="return hideShow(this,'h','ot');" onkeypress="return isDecimal(event,this);" />
+                                                    <div id="estOtRateDiv_<?php echo $i; ?>" style="position:relative;display:none;">
+                                                        <div class="top-tip">
+                                                            <span style="padding-top: 15px;">Estimate OT Rate : <i id="estOtRate_<?php echo $i; ?>"><?php if($lratTrans['EstRate'] != 0) { echo ($lratTrans['EstRate']/8); } else if($lratTrans['AEstRate'] != 0) { echo ($lratTrans['AEstRate']/8); } ?></i></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td width="5%" align="center" class="action_btns_td">
+                                                    <ul class="action_btns">
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="typeDelete_<?php echo $i; ?>" onclick="deleteTypeRow(this, event);"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <?php $i++;
+                                        }
+                                    } else { ?>
+                                        <tr>
+                                            <td width="45%">
+                                                <input class="parent_text typeSuggest" type="text" name="typeName_1" id="typeName_1" onfocus="return CheckLRAFocus(this.id);" />
+                                                <input type="hidden" name="typeId_1" id="typeId_1" />
+                                            </td>
+                                            <td width="10%"><input type="hidden" name="unitId_1" id="unitId_1" /><span id="unitName_1"></span></td>
+                                            <td width="20%">
+                                                <input class="parent_text text-right" type="text" name="rate_1" id="rate_1" onfocus="return hideShow(this,'s','r');" onblur="return hideShow(this,'h','r');" onkeypress="return isDecimal(event,this);" />
+                                                <div id="estRateDiv_1" style="position:relative;display:none;">
+                                                    <div class="top-tip">
+                                                        <span style="padding-top: 15px;">Estimate Rate : <i id="estRate_1"></i></span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td width="20%">
+                                                <input class="parent_text text-right" type="text" name="otRate_1" id="otRate_1" onfocus="return hideShow(this,'s','ot');" onblur="return hideShow(this,'h','ot');" onkeypress="return isDecimal(event,this);" />
+                                                <div id="estOtRateDiv_1" style="position:relative;display:none;">
+                                                    <div class="top-tip">
+                                                        <span style="padding-top: 15px;">Estimate OT Rate : <i id="estOtRate_1"></i></span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td width="5%" align="center" class="action_btns_td">
+                                                <ul class="action_btns">
+                                                    <li>
+                                                        <a href="javascript:void(0);" class="typeDelete_1" onclick="deleteTypeRow(this, event);" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                    </tbody>
+                                    <tbody class="narrationbody">
+                                    <tr  style="margin-top: 20px">
+                                        <td> <label>Narration</label> <textarea id="narration"style="height:60px" name="narration" class="parent_texts" maxlength="255"><?php if(isset($lraRegister['Narration'])) echo $lraRegister['Narration'];?></textarea> </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="typeRows" id="typeRows" value="<?php echo (isset($lraTypeTrans) && count($lraTypeTrans) != 0) ? count($lraTypeTrans) : 1; ?>" />
+                            </div>
+                            <div class="clearfix"></div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="submitDiv" class="col-lg-12 savebtn_area" style="display:none;">
+    <ul>
+        <li class="dropdown save_btn float_r" style="display:block !important;"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Submit" onclick="return submitForm();">Submit</a>
+        <li class="cancel_btn float_r"><a href="<?php echo $this->basePath().'/wpm/labourstrength/rate-approval-register'; ?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+        <!--<li class="cancel_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Go back!" onclick="return showBack('a');">Back</a></li>-->
+    </ul>
+</div>
+<div class="modal fade bs-example-modal-lgs" id="picklistmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1><i class="fa fa-list"></i> Labour Type Picklist</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12 tab-pane" style="padding:0 !important" role="tabpanel" id="iow-view">
+                    <div class="table-responsive clear">
+                        <div id="ltypepickgrid"> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <input type="hidden" id="picklistrestype" value="">
+                <input type="hidden" id="picklistrow" value="">
+                <a href="javascript:void(0);" class="md_cance" data-dismiss="modal">Cancel</a>
+                <button type="button" class="md_ok" onclick="updatefromPickList()" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<table id="dummy-type-row" style="display:none;">
+    <tbody>
+    <tr>
+        <td width="45%">
+            <input class="parent_text typeSuggest" type="text" name="typeName__1" id="typeName__1" onfocus="return CheckLRAFocus(this.id);" />
+            <input type="hidden" name="typeId__1" id="typeId__1" />
+        </td>
+        <td width="10%"><input type="hidden" name="unitId__1" id="unitId__1" /><span id="unitName__1"></span></td>
+        <td width="20%">
+            <input class="parent_text text-right" type="text" name="rate__1" id="rate__1" onfocus="return hideShow(this,'s','r');"  onblur="return hideShow(this,'h','r');" onkeypress="return isDecimal(event,this);" />
+            <div id="estRateDiv__1" style="position:relative;display:none;">
+                <div class="top-tip">
+                    <span style="padding-top: 15px;">Estimate Rate : <i id="estRate__1"></i></span>
+                </div>
+            </div>
+        </td>
+        <td width="20%">
+            <input class="parent_text text-right" type="text" name="otRate__1" id="otRate__1" onfocus="return hideShow(this,'s','ot');"  onblur="return hideShow(this,'h','ot');" onkeypress="return isDecimal(event,this);" />
+            <div id="estOtRateDiv__1" style="position:relative;display:none;">
+                <div class="top-tip">
+                    <span style="padding-top: 15px;">Estimate OT Rate : <i id="estOtRate__1"></i></span>
+                </div>
+            </div>
+        </td>
+        <td width="5%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li>
+                    <a href="javascript:void(0);" class="typeDelete__1" onclick="deleteTypeRow(this, event);" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    var groupMaster = <?php echo (isset($groupMaster)) ? json_encode($groupMaster) : '[]'; ?>;
+    var vendorMaster = <?php echo (isset($vendorMaster)) ? json_encode($vendorMaster) : '[]'; ?>;
+    //    var arrayList1 = $.map(groupMaster, function (obj) { return {value: obj.value,id:obj.id,type:obj.type, data: { category: 'Labour Group' }}; });
+    //    var arrayList2 = $.map(vendorMaster, function (obj) { return {value: obj.value,id:obj.id,type:obj.type, data: { category: 'Vendor' }}; });
+    //    var arrayList = arrayList1.concat(arrayList2);
+    var arrCostCentre = <?php echo (isset($opCostCentre)) ? json_encode($opCostCentre) : '[]'; ?>;
+    //bindGroupAutocomplete();
+    bindCostCentreAutoComplete();
+    $("#backPrev").hide();
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    var sel_resource_count = 0;
+    var $resourceGrid = $("#resourceGrid");
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            { name: 'Include', type: 'boolean' },
+            { name: 'value', type: 'string' },
+            { name: 'data', type: 'int' }
+        ],
+        id: 'data'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+    $(function () {
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            filterable: true,
+            showfilterrow: true,
+            editable: true,
+            columns: [
+                { dataField: 'data', hidden: true},
+                { text: '', dataField: 'Include', columntype: 'checkbox',filterable: false, align:'center',width:'10%'},
+                { text: 'Labour Type', dataField: 'value',width:'90%', editable:false},
+            ]
+        });
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            if(args.newvalue === true)
+                sel_resource_count++;
+            else
+                sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+        bindTypeList();
+    });
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for(var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Include === true) {
+                $inputs += '<input type="hidden" name="resourceIds[]" class="resourceIds" value="' + row.uid + '"/>';
+            }
+        }
+        $('#resourceInputsWrapper').html($inputs);
+    }
+
+    var typeList = '[]';
+    var tmp_typeList = typeList;
+
+    $(function(){
+        $('.ripple').materialripple();
+    });
+
+    var $costCentreId = $('#costCentreId'),
+        $vendorId = $('#vendorId'),
+        $orderType = $('#orderType');
+
+    $('#costCentreId').on('change', function() {
+        changeOrderType();
+    });
+
+    $('#vendorId').on('change', function() {
+        changeOrderType();
+    });
+
+    function changeOrderType()
+    {
+        $("#orderType").val('').trigger('change');
+        $('#exOrderSel').hide();
+        $("#nlraRegId").val('').trigger('change');
+        $('#nlraRegId').empty();
+    }
+
+    function bindTypeList()
+    {
+        $.post(getBaseURL()+'wpm/labourstrength/rate-approval-entry', { async: false, ccId: $('#costCentreId').val() },
+            function(data) {
+                typeList = JSON.parse(data);
+                tmp_typeList = typeList;
+                bindTypeAutoComplete();
+            });
+    }
+
+    $('#orderType').on('change', function() {
+        var otVal = $(this).val();
+        if(otVal == 'E') {
+            $('#exOrderSel').show();
+            $.post(getBaseURL()+'wpm/labourstrength/get-orders', { ccId: $costCentreId.val(), vId: $vendorId.val() },
+                function(data) {
+                    $('#nlraRegId').empty();
+                    $('#nlraRegId').append('<option value="">Select Order</option>');
+                    var returnData = JSON.parse(data);
+                    $.each(returnData, function(key, value){
+                        $('#nlraRegId')
+                            .append($("<option></option>")
+                                .attr("value",value.data)
+                                .text(value.value));
+                    });
+                });
+        } else {
+            $('#exOrderSel').hide();
+        }
+    });
+
+    function validateLabStg()
+    {
+        $('.error_message').hide();
+        var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+        var lVendorId = isNullCheck($vendorId.val(),'number');
+        var lOrderType = isNullCheck($orderType.val(),'string');
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+
+        //var projName = $('#costCentreId option:selected').text();
+        var projName = isNullCheck($('#costCentreName').val(),'string');
+        $("#nameofproject").text(projName);
+        if(currentIndex == 0) {
+            if (lCostCentreId == 0) {
+                $costCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var projName = $('#costCentreName').val();
+                $('.sprojName').html(projName);
+                $('#lraDate').val($('#lraeDate').val());
+                var contracttype =$('#type').val();
+                if(contracttype =='g')
+                {
+                    var showtext=$("#nameofconstructor").text()+"(Internal)";
+                }
+                else
+                {
+                    var showtext=$("#nameofconstructor").text();
+                }
+                $('.stype').html(showtext);
+            }
+
+            if (lVendorId == 0) {
+                $vendorId.closest('.form-group').find(".error_message").show();
+                return;
+            } else if (lOrderType == '') {
+                $orderType.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                if (lOrderType == 'E' && $('#nlraRegId').val() == 0) {
+                    $('#nlraRegId').closest('.form-group').find(".error_message").show();
+                    return;
+                }
+                var conName = $('#vendorId option:selected').text();
+                $('.sconName').html(conName);
+                var selOrd = $('#nlraRegId option:selected').text();
+                if (lOrderType == 'N') {
+                    $('#extOrdDiv').hide();
+                    $('.ordType').val('');
+                } else if (lOrderType == 'E') {
+                    $('#extOrdDiv').show();
+                    $('.ordType').val(selOrd);
+                }
+            }
+
+            if (lOrderType == 'N') {
+                bindResources();
+
+                getValueOfSlider('next');
+                $('#carousel-example-generic').carousel({
+                    slide: "next"
+                });
+            } else {
+                location.href = getBaseURL() + 'wpm/labourstrength/rate-approval-entry/' + $('#nlraRegId').val() + '/ex'
+            }
+        } else {
+            if (lOrderType == 'N') {
+                $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+                        typeId: $('#lraTypeId').val(),
+                        ccId: $('#costCentreId').val()
+                    },
+                    function (data) {
+                        var vNo = data.split('###');
+                        $('#cclraNo').val($.trim(vNo[0]));
+                        $('#complraNo').val($.trim(vNo[1]));
+                        if($.trim(vNo[0]) != '')
+                            $('#cclraNo').prop('readonly', true);
+                        if($.trim(vNo[1]) != '')
+                            $('#complraNo').prop('readonly', true);
+                    });
+
+                var resourceIds = '';
+                $('.resourceIds').each(function(){
+                    resourceIds += $(this).val()+',';
+                });
+
+                $.post(getBaseURL() + 'wpm/labourstrength/rate-approval-entry', {
+                        ccId: $('#costCentreId').val(),
+                        resourceIds: resourceIds
+                    },
+                    function (data) {
+                        $('#typeTable tbody.typebody').html('');
+                        $('#typeRows').val(0);
+                        insertTypeRow();
+                        if(resourceIds != '') {
+                            var returnData = JSON.parse(data);
+                            var ik = 1;
+                            $.each(returnData, function (key, value) {
+                                $('#typeName_' + ik).prop('readonly', true).addClass('border-none');
+                                $('#typeName_' + ik).val(value.value);
+                                $('#typeId_' + ik).val(value.data);
+                                $('#unitId_' + ik).val(value.UnitId);
+                                $('#unitName_' + ik).html(value.UnitName);
+                                if (value.Rate != 0) {
+                                    $('#rate_' + ik).val(value.Rate);
+                                    $('#otRate_' + ik).val(parseFloat(value.Rate / 8));
+                                    $('#estRate_' + ik).html(value.Rate);
+                                    $('#estOtRate_' + ik).html(parseFloat(value.Rate / 8));
+                                    FormatNum($('#rate_' + ik), 2);
+                                    FormatNum($('#otRate_' + ik), 2);
+                                } else {
+                                    $('#rate_' + ik).val(value.ARate);
+                                    $('#otRate_' + ik).val(parseFloat(value.ARate / 8));
+                                    $('#estRate_' + ik).html(value.ARate);
+                                    $('#estOtRate_' + ik).html(parseFloat(value.ARate / 8));
+                                    FormatNum($('#rate_' + ik), 2);
+                                    FormatNum($('#otRate_' + ik), 2);
+                                }
+                                $('.typeDelete_' + ik).show();
+                                insertTypeRow();
+                                ik++;
+                            });
+                        }
+                    });
+                showBack('e');
+            } else {
+                location.href = getBaseURL() + 'wpm/labourstrength/rate-approval-entry/' + $('#nlraRegId').val() + '/ex'
+            }
+        }
+    }
+
+    function bindResources() {
+        $('.loading_area').show();
+        $.ajax({
+            url:getBaseURL()+'wpm/labourstrength/rate-approval-entry',
+            type:"post",
+            data:{ccId: $('#costCentreId').val()},
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200) {
+                    resourceSource.localdata = data;
+                    resourceAdapter.dataBind();
+                    $('#NoOfSelResource').html(0);
+                    $('#carousel-example-generic').carousel({
+                        slide: "next"
+                    });
+                    $('.loading_area').hide();
+                }
+            }, error: function () {
+                $('.loading_area').hide();
+            }
+        });
+    }
+
+    function goBack()
+    {
+        $('#carousel-example-generic').carousel({
+            slide: "prev"
+        });
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function showBack(sbType)
+    {
+        if(sbType == 'a') {
+            $('#submitDiv').hide();
+            $('#stageTwo').hide();
+            $('#stageOne').show();
+            $('#titleTag').addClass('text-center');
+        } else {
+            $('#stageOne').hide();
+            $('#stageTwo').show();
+            $('#submitDiv').show();
+            //$('#titleTag').removeClass('text-center');
+        }
+    }
+
+    function submitForm()
+    {
+        var errFlag = 0;
+        var tRows = $('#typeRows').val();
+        var tCnt = 0;
+
+        $('.error_message').hide();
+        $('.red_bdr').removeClass('red_bdr');
+
+        if($.trim($('#fromDate').val()) != '' && $.trim($('#toDate').val()) != '') {
+            if (!compareDate($('#fromDate').val(), $('#toDate').val())) {
+                $('#toDate').addClass('red_bdr');
+                $('#toDate').focus();
+                errFlag = 1;
+                return false;
+            }
+        }
+        if($.trim($('#lraNo').val()) == '') {
+            $('#lraNo').addClass('red_bdr');
+            $('#lraNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#cclraNo').val()) == '') {
+            $('#cclraNo').addClass('red_bdr');
+            $('#cclraNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#complraNo').val()) == '') {
+            $('#complraNo').addClass('red_bdr');
+            $('#complraNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        /*if($.trim($('#refNo').val()) == '') {
+         $('#refNo').addClass('red_bdr');
+         $('#refNo').focus();
+         errFlag = 1;
+         return false;
+         }*/
+        for (var i = 1; i <= tRows; i++) {
+            if($('#typeId_'+i).val() == '') {
+                tCnt = tCnt + 1;
+            }
+            var estRate = parseInt($('#estRate_' + i).html());
+            var curRate = parseInt($('#rate_' + i).val());
+            var estOtRate = parseInt($('#estOtRate_' + i).html());
+            var curOtRate = parseInt($('#otRate_' + i).val());
+
+            if(curRate > estRate) {
+                $('#rate_' + i).addClass('red_bdr');
+                errFlag = 1;
+            } else {
+                $('#rate_' + i).removeClass('red_bdr');
+            }
+
+            if(curOtRate > estOtRate) {
+                $('#otRate_' + i).addClass('red_bdr');
+                errFlag = 1;
+            } else {
+                $('#otRate_' + i).removeClass('red_bdr');
+            }
+        }
+        if(tRows == tCnt) {
+            $(".selOne").show();
+            errFlag = 1;
+            return false;
+        }
+
+        if(errFlag == 0) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    /* For Type */
+    bindTypeAutoComplete();
+    function addTypeRow(x)
+    {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#typeName_' + key).val().length == 0 && $('#typeId_' + key).val().length == 0)
+            return;
+
+        var $rowid = $('#typeRows'),
+            count = parseInt($rowid.val()) + 1,
+            template = $('#dummy-type-row tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.parent('tbody').append(template);
+        $rowid.val(count);
+        $('.typeDelete_' + key).show();
+        bindTypeAutoComplete();
+    }
+
+    function insertTypeRow()
+    {
+        var $rowid = $('#typeRows'),
+            count = parseInt($rowid.val()) + 1,
+            template = $('#dummy-type-row tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $('#typeTable tbody.typebody').append(template);
+        $rowid.val(count);
+        bindTypeAutoComplete();
+    }
+
+    function bindCostCentreAutoComplete() {
+        $('#costCentreName').autocomplete({
+            lookup: arrCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $this = $(this);
+                    $('#costCentreId').val(suggestion.data);
+                    bindTypeList();
+                    $(this).removeClass('error');
+                }
+
+            }, onSearchStart: function (suggestion) {
+                $('#costCentreId').val(0);
+                $(this).removeClass('error');
+
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) {
+                    $(this).addClass('error');
+                    $('#costCentreId').val(0);
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+
+    function bindGroupAutocomplete() {
+        var arrData =[];
+        if ($('#vendorType').val() == "V")
+        {arrData = vendorMaster;
+            $("#vendorname").val("");
+            $('#vendorname').unbind('autocomplete')}
+        else if  ($('#vendorType').val() == "I") {
+            arrData = groupMaster;
+            $("#vendorname").val("");
+            $('#vendorname').unbind('autocomplete');
+        }
+        $('#vendorname').autocomplete({
+            lookup: arrData,
+//            groupBy: 'category',
+//            showNoSuggestionNotice:true,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $this = $(this);
+                    $('#vendorId').val(suggestion.id);
+                    $('#nameofconstructor').text(suggestion.value);
+                    $('#lcontract').text(suggestion.value);
+                    if(suggestion.type == 'G') {
+                        $('#type').val('g');
+                        $('#ltype').text('G');
+
+                    } else if(suggestion.type == 'V') {
+                        $('#type').val('v');
+                        $('#ltype').text('V');
+                    }
+                    $(this).removeClass('error');
+                }
+
+            }, onSearchStart: function (suggestion) {
+                $('#type').val(0);
+                $('#vendorId').val(0);
+                $('#nameofconstructor').text("");
+
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) {
+                    $('#type').val(0);
+                    $('#vendorId').val(0);
+                    $('#nameofconstructor').text("");
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+    function deleteTypeRow(x,e)
+    {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr').length == 1) {
+            var template = $('#dummy-type-row tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#typeRows').val(1);
+        }
+
+        $tr.remove();
+        return false;
+    }
+
+    function bindTypeRowAutoComplete(x) {
+        $('#'+ x).unbind('autocomplete');
+        $('#'+ x).autocomplete({
+            lookup: tmp_typeList,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $this = $(this);
+                    var key1 = $this[0].id.split('_')[1];
+                    $this.prop('readonly', true).addClass('border-none');
+
+                    $('#typeId_'+ key1).val(suggestion.data);
+                    $('#unitId_'+ key1).val(suggestion.UnitId);
+                    $('#unitName_'+ key1).html(suggestion.UnitName);
+                    if(suggestion.Rate != 0) {
+                        $('#rate_' + key1).val(suggestion.Rate);
+                        $('#otRate_' + key1).val(parseFloat(suggestion.Rate/8));
+                        $('#estRate_' + key1).html(suggestion.Rate);
+                        $('#estOtRate_' + key1).html(parseFloat(suggestion.Rate/8));
+                        FormatNum($('#rate_' + key1), 2);
+                        FormatNum($('#otRate_' + key1), 2);
+                    } else {
+                        $('#rate_' + key1).val(suggestion.ARate);
+                        $('#otRate_' + key1).val(parseFloat(suggestion.ARate/8));
+                        $('#estRate_' + key1).html(suggestion.ARate);
+                        $('#estOtRate_' + key1).html(parseFloat(suggestion.ARate/8));
+                        FormatNum($('#rate_' + key1), 2);
+                        FormatNum($('#otRate_' + key1), 2);
+                    }
+                    addTypeRow($this);
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                var $this = $(this);
+                var key1 = $this[0].id.split('_')[1];
+
+                $('#typeId_'+key1).val('');
+                $('#unitId_'+ key1).val('');
+                $('#unitName_'+ key1).html('');
+                $('#rate_' + key1).val('');
+                $('#otRate_' + key1).val('');
+                $('#estRate_' + key1).html('');
+                $('#estOtRate_' + key1).html('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    //$(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    }
+
+
+    function bindTypeAutoComplete() {
+        $('#typeTable .typeSuggest').autocomplete({
+            lookup: tmp_typeList,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $this = $(this);
+                    var key1 = $this[0].id.split('_')[1];
+                    $this.prop('readonly', true).addClass('border-none');
+
+                    $('#typeId_'+ key1).val(suggestion.data);
+                    $('#unitId_'+ key1).val(suggestion.UnitId);
+                    $('#unitName_'+ key1).html(suggestion.UnitName);
+                    if(suggestion.Rate != 0) {
+                        $('#rate_' + key1).val(suggestion.Rate);
+                        $('#otRate_' + key1).val(parseFloat(suggestion.Rate/8));
+                        $('#estRate_' + key1).html(suggestion.Rate);
+                        $('#estOtRate_' + key1).html(parseFloat(suggestion.Rate/8));
+                        FormatNum($('#rate_' + key1), 2);
+                        FormatNum($('#otRate_' + key1), 2);
+                    } else {
+                        $('#rate_' + key1).val(suggestion.ARate);
+                        $('#otRate_' + key1).val(parseFloat(suggestion.ARate/8));
+                        $('#estRate_' + key1).html(suggestion.ARate);
+                        $('#estOtRate_' + key1).html(parseFloat(suggestion.ARate/8));
+                        FormatNum($('#rate_' + key1), 2);
+                        FormatNum($('#otRate_' + key1), 2);
+                    }
+                    addTypeRow($this);
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                var $this = $(this);
+                var key1 = $this[0].id.split('_')[1];
+
+                $('#typeId_'+key1).val('');
+                $('#unitId_'+ key1).val('');
+                $('#unitName_'+ key1).html('');
+                $('#rate_' + key1).val('');
+                $('#otRate_' + key1).val('');
+                $('#estRate_' + key1).html('');
+                $('#estOtRate_' + key1).html('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    }
+
+    function CheckLRAFocus(x) {
+        var key = x.split('_')[1];
+        checkLRAUsed(key);
+        bindTypeRowAutoComplete(x);
+    }
+
+    function checkLRAUsed(key) {
+        var reskeyid = $('input[id*=typeId_]');
+        tmp_typeList = typeList;
+
+        tmp_typeList = $.grep(typeList, function (element, index) {
+            var is_selected = true;
+            $.each(reskeyid, function (i, obj) {
+                var $this = $(this),
+                    name = $this[0].id;
+                var arrname = name.split('_');
+                var key1 = arrname[1];
+                if (key1 != key) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                        return false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+    }
+    function showPickList() {
+        var key1 = $('#typeRows').val();
+        checkLRAUsed(key1);
+        bindLtypePickListGrid();
+        $("#picklistmodal").modal('show');
+    }
+
+    function bindLtypePickListGrid() {
+        var parent = $("#ltypepickgrid").parent();
+        $("#ltypepickgrid").remove();
+        $("<div id='ltypepickgrid'></div>").appendTo(parent);
+        var source = {
+            localdata:tmp_typeList,
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'data', type: 'number'},
+                { name: 'value', type: 'string'},
+                { name: 'ARate', type: 'number'},
+                { name: 'Rate', type: 'number'},
+                { name: 'UnitId', type: 'number'},
+                { name: 'UnitName', type: 'string'},
+                { name: 'Include', type: 'boolean'}
+            ],
+            id: 'IOWId'
+        };
+
+        var rfcdata = new $.jqx.dataAdapter(source);
+//    var columnsrenderer = function (value) {
+//        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+//    }
+
+        $("#ltypepickgrid").jqxGrid({
+            width: "100%",
+            pagerButtonsCount: 6,
+            pagesize: 10,
+            source: rfcdata,
+            pageable: true,
+            sortable: true,
+            filterable: true,
+            showfilterrow: true,
+            altrows: true,
+            enabletooltips: true,
+            editable: true,
+            selectionmode: 'singlerow',
+            columns: [
+                {text: 'data', datafield: 'data', hidden: true},
+                {text: 'LabourTypeName', datafield: 'value', 'editable': false, width: '75%'},
+                {text: 'UnitName', datafield: 'UnitName', 'editable': false, width: '15%'},
+                {text: 'UnitId', datafield: 'UnitId', hidden: true},
+                {text: 'ARate', datafield: 'ARate', hidden: true},
+                {text: 'Rate', datafield: 'Rate', hidden: true},
+                {text: 'Select', datafield: 'Include', columntype: 'checkbox', 'editable': true, width: '10%'}
+            ]
+        });
+    }
+    function updatefromPickList() {
+        $('.loading_area').show();
+        var rows = $('#ltypepickgrid').jqxGrid('getrows'),iResourceId= 0,sCode="",sResName="",sSpec="";
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i]['Include'] == true) {
+                var key1 = $('#typeRows').val();
+                $('#typeName_' + key1).val(rows[i]['value']);
+                $('#typeId_'+ key1).val(rows[i]['data']);
+                $('#unitId_'+ key1).val(rows[i]['UnitId']);
+                $('#unitName_'+ key1).html(rows[i]['UnitName']);
+                if(rows[i]['Rate'] != 0) {
+                    $('#rate_' + key1).val(rows[i]['Rate']);
+                    $('#otRate_' + key1).val(parseFloat(rows[i]['Rate']/8));
+                    $('#estRate_' + key1).html(rows[i]['Rate']);
+                    $('#estOtRate_' + key1).html(parseFloat(rows[i]['Rate']/8));
+                    FormatNum($('#rate_' + key1), 2);
+                    FormatNum($('#otRate_' + key1), 2);
+                } else {
+                    $('#rate_' + key1).val(rows[i]['ARate']);
+                    $('#otRate_' + key1).val(parseFloat(rows[i]['ARate']/8));
+                    $('#estRate_' + key1).html(rows[i]['ARate']);
+                    $('#estOtRate_' + key1).html(parseFloat(rows[i]['ARate']/8));
+                    FormatNum($('#rate_' + key1), 2);
+                    FormatNum($('#otRate_' + key1), 2);
+                }
+                addTypeRow($('#typeName_'+ key1));
+            }
+        }
+        $('#picklistmodal').modal('toggle');
+        $('.loading_area').hide();
+    }
+    function hideShow(x,hsType,raType) {
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[1];
+
+        if (hsType == 's') {
+            if(raType == 'r') {
+                $('#estRateDiv_' + rowid).show();
+            } else if(raType == 'ot') {
+                $('#estOtRateDiv_' + rowid).show();
+            }
+        } else if(hsType == 'h') {
+            if(raType == 'r') {
+                $('#estRateDiv_' + rowid).hide();
+                FormatNum(x, 2);
+                var estRate = parseInt($('#estRate_' + rowid).html());
+                var curRate = parseInt($('#rate_' + rowid).val());
+                if(curRate > estRate) {
+                    alert('Rate should not exceed estimated rate');
+                    $('#rate_' + rowid).addClass('red_bdr');
+                } else {
+                    $('#otRate_' + rowid).val(parseFloat($('#rate_' + rowid).val() / 8));
+                    $('#rate_' + rowid).removeClass('red_bdr');
+                    FormatNum($('#otRate_' + rowid), 2);
+                }
+            } else if(raType == 'ot') {
+                $('#estOtRateDiv_' + rowid).hide();
+                FormatNum(x, 2);
+                var estRate = parseInt($('#estOtRate_' + rowid).html());
+                var curRate = parseInt($('#otRate_' + rowid).val());
+                if(curRate > estRate) {
+                    alert('OT Rate should not exceed estimated ot rate');
+                    $('#otRate_' + rowid).addClass('red_bdr');
+                } else {
+                    $('#otRate_' + rowid).removeClass('red_bdr');
+                }
+            }
+        }
+    }
+    /* For Type */
+    <!---->
+    <?php if(isset($lraRegister)) { ?>
+    $('#stageOne').hide();
+    $('#stageTwo').show();
+    $('#submitDiv').show();
+    <?php }?>
+    <?php if(isset($lraRegister)){?>
+    <?php if($lraRegister['Approve']=="Y") { ?>
+    $('.save_btn').show();
+    <?php }}?>
+    <?php if(isset($lraTypeTrans) && count($lraTypeTrans) != 0) { ?>
+    insertTypeRow();
+    //bindTypeList();
+    showBack("e");
+    <?php } ?>
+
+</script>

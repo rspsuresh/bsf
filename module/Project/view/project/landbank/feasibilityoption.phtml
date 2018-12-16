@@ -1,0 +1,122 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+.panel                {border-radius:0px !important;}
+.panel-info           {border:none; border-top:none;}
+.chat_content         {float:left; width:100%;}
+.toolbar_ddown ul     {height:314px !important; border:none !important;}
+.toolbar_ddown        {border:none !important;}
+#ContentWrapper       {display: none;}
+.form-control         {box-shadow:none !important}
+.carousel-inner       {height:250px !important}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form method=""></form>
+            <div class="col-lg-12">
+                <h1 class="col-lg-6"><?php echo $landname; ?></h1>
+                    <input type="hidden" id="PropertyName" name="PropertyName" value="<?php echo $landname; ?>"/>
+                    <input type="hidden" id="EnquiryId" name="EnquiryId" value="<?php echo $enquiryId; ?>"/>
+                    <input type="hidden" id="OptionType" name="OptionType" value="<?php echo $optiontype; ?>"/>
+                <input type="hidden" id="pageUrl" name="pageUrl" value="<?php if ($page != '') { echo $page; } else { echo ''; } ?>" />
+              <div class="col-lg-6 edit_del" style="margin-bottom:10px;">
+                <ul>
+                    <li>
+                        <a href="javascript:CreateNewPlan();" class="edit-btn edit_al">Create New Business Plan<i class="fa fa-plus-circle"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            </div>
+           
+            <div class="clearfix"></div>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear" id="ContentWrapper">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12 savebtn_area" style="display: none;" id="button-area">
+    <ul>
+        <?php if($page=='R'){?>
+        <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/landbank/register';?>" method="post" id="frmfollowup">
+            <?php }else{ ?>
+            <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/landbank/followup';?>" method="post" id="frmfollowup">
+            <?php }?>
+            <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+            <input type="hidden" id="formfrom" name="formfrom"/>
+            <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $landname; ?>"/>
+            <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Cancel</a></li>
+        </form>
+    </ul>
+</div>
+<script type="text/javascript">
+    var $propertyName = $('#PropertyName'),
+        $enquiryId = $('#EnquiryId'),
+        $optiontype= $('#OptionType'),
+        $mainWrapper = $('#MainWrapper'),
+        $buttonArea = $('#button-area'),
+        $lblProjectName = $('#lblPropertyName'),
+        $lblEnquiryId = $('#lblEnquiryId'),
+        $contentWrapper = $('#ContentWrapper'),
+        $pageUrl = $('#pageUrl'),
+        iEnquiryId = isNullCheck($enquiryId.val(),'number');
+
+    $(function () {
+        // bind property name autocomplete
+        if (iEnquiryId !=0) submitProperty();
+    });
+
+    function submitProperty () {
+        var id = $enquiryId.val(),
+            optionType =$optiontype.val(),
+             pageUrl =$pageUrl.val();
+
+        if(id == 0) {
+//            alert('Select a property!');
+            return;
+        }
+        $.ajax({
+            url: getBaseURL() + "project/landbank/feasibilityoption",
+            async: false,
+            data: {'EnquiryId': id,'OptionType':optionType,'pageUrl':pageUrl},
+            type: 'post',
+            success: function (data, status) {
+//                console.log(data);
+                $contentWrapper.html(data);
+                $mainWrapper.hide();
+
+                // bind options
+                $contentWrapper.fadeIn("slow");
+                $buttonArea.fadeIn("slow");
+
+                $lblProjectName.val($propertyName.val());
+                $lblEnquiryId.val($enquiryId.val());
+//                $enquiryId.val(0);
+//                $propertyName.val('');
+            }
+        });
+    }
+
+    function showPropertyOptions() {
+        $mainWrapper.fadeIn("slow");
+
+        $contentWrapper.hide();
+        $buttonArea.hide();
+        $propertyName.focus();
+    }
+
+    function CreateNewPlan() {
+        var iEnquiryId = isNullCheck($('#EnquiryId').val(),'number');
+        <?php if($page == 'F'){?>
+        window.location.href = getBaseURL() + "project/landbank/businessfeasibility/" + iEnquiryId + "/0"+ "/F";
+        <?php } else{?>
+        window.location.href = getBaseURL() + "project/landbank/businessfeasibility/" + iEnquiryId + "/0"+ "/R";
+        <?php } ?>
+    }
+
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+</script>

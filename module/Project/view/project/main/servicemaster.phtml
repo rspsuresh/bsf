@@ -1,0 +1,338 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    .jqx-grid-header {
+        height:75px !important;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid ">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="float_l">Service Library</h1>
+                <div class="edit_del float_r">
+                    <ul>
+                        <li>
+                            <a title="Add New Service" href="#" onclick="serviceAddEdit('add'); return false;" class="edit-btn edit_al" style=" display:block;"><i class="fa fa-plus"></i> Add New Service</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0 tmss">
+                <div class="table-responsive clear">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delserviceName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Add Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="headerText">Edit Service</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+                        <div class="row commargin_top_20">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" name="serviceName" id="serviceName" autocomplete="off" class="form-control lbl_move" label="Name"/>
+                                <input type="hidden" name="serviceId" id="serviceId"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select name="serviceType" id="serviceType" style="width:100%;" class="form-control single_dropdown lbl_move hei-43" data-size="5" label="Type">
+                                    <option></option>
+                                    <?php if(isset($servicetypes)):
+                                        foreach($servicetypes as $type):?>
+                                            <option value="<?php echo $type['data']; ?>"><?php echo $type['value']; ?></option>
+                                        <?php endforeach; endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select name="unit" id="unit" style="width:100%;" class="form-control single_dropdown lbl_move hei-43" data-size="5" label="Unit">
+                                    <option></option>
+                                    <?php if(isset($unit)):
+                                        foreach($unit as $utype):?>
+                                            <option value="<?php echo $utype['data']; ?>"><?php echo $utype['value']; ?></option>
+                                        <?php endforeach; endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var $grid = $("#grid"),
+    $deleteModal = $('#DeleteModal'),
+    $editModal = $('#EditModal'),
+    $remarks = $('#remarks'),
+    $serviceName = $('#serviceName'),
+    $serviceTypeId = $('#serviceType'),
+    $unit = $('#unit'),
+    $serviceId = $('#serviceId');
+
+$(function () {
+    var datasource =
+    {
+        dataType: "json",
+        dataFields: [
+            { name: 'ServiceId', type: 'number' },
+            { name: 'ServiceTypeId', type: 'number' },
+            { name: 'UnitId', type: 'number' },
+            { name: 'ServiceName', type: 'string' },
+            { name: 'ServiceTypeName', type: 'string' },
+            { name: 'UnitName', type: 'string' }
+        ],
+        id: 'ServiceId',
+        localdata: <?php echo (isset($serviceReg)) ? json_encode($serviceReg): '[]';?>
+    };
+
+    var data = new $.jqx.dataAdapter(datasource);
+    $grid.jqxGrid( {
+        width: "100%",
+        source: data,
+        pageable: true,
+        autoheight: true,
+        sortable: true,
+        filterable:true,
+        showfilterrow: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'ServiceId', datafield: 'ServiceId', hidden: true},
+            { text: 'ServiceName', datafield: 'ServiceName'},
+            { text: 'ServiceType', datafield: 'ServiceTypeName'},
+            { text: 'Unit', datafield: 'UnitName'},
+//            { text: 'Action',sortable: false, filterable: false, align: 'left',
+//                cellsrenderer: function (row) {
+//                    var editLink = '<a title="Edit" href="#" onclick="serviceAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+//                    return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="serviceDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+//                }
+//            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        $deleteModal.modal('hide');
+        var rowData = $grid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'project/main/deleteservice',
+            type: 'POST',
+            async: false,
+            data: {"serviceId": rowData.ServiceId, "Remarks": remarks, "Type": 'update'},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $grid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Cannot delete this Service, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the Service!');
+            }
+        });
+        $remarks.val('');
+    });
+});
+
+function serviceDelete(x, row) {
+    $(x).prop('disabled', true);
+    var rowData = $grid.jqxGrid('getrowdata', row);
+    $.ajax({
+        url: getBaseURL() + 'project/main/deleteservice',
+        type: 'POST',
+        async: false,
+        data: {"serviceId": rowData.serviceId, "Type": 'check'},
+        success:function(data, textStatus, jqXHR){
+            $(x).prop('disabled', false);
+            if (jqXHR.status == 200){
+                $deleteModal.data('row', row).modal('show');
+                $('#delserviceName').html(rowData.serviceName);
+                $("#remarks").val('');
+            } else
+                alert('Cannot delete this Service, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            $(x).prop('disabled', false);
+            alert('Cannot delete this Service!');
+        }
+    });
+}
+
+function addUpdateFn() {
+    var serviceName = $serviceName.val();
+    var serviceId = $serviceId.val();
+    var serviceTypeId = $serviceTypeId.val();
+    var unitid = $unit.val();
+
+    validate(function(isSuccess) {
+
+        if(isSuccess === false) {
+            return false;
+        } else {
+            $editModal.modal('hide');
+            var mode = $editModal.data('mode');
+            if(mode == 'edit') {
+                var rowData = $grid.jqxGrid('getrowdata', $editModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'project/main/editservice',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $grid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                        } else {
+                            alert('Failed to Edit the Project!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the Project!')
+                    }
+                });
+            } else if(mode == 'add') {
+                $.ajax({
+                    url: getBaseURL() + 'project/main/addservice',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $grid.jqxGrid('addrow',null,JSON.parse(data));
+                        } else {
+                            alert('Failed to Add Project!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Add Project!');
+                    }
+                });
+            }
+            $serviceId.val(0);
+            $serviceName.val('');
+            $serviceTypeId.select2("val", "");
+            $unit.select2("val", "");
+        }
+    });
+
+
+    function validate(callback) {
+        if(serviceName.length == 0) {
+            showError($serviceName, 'Required!');
+            return;
+        } else {
+            removeError($serviceName);
+        }
+
+        if(serviceTypeId.length == 0) {
+            showError($serviceTypeId, 'Required!');
+            return;
+        } else {
+            removeError($serviceTypeId);
+        }
+
+        //validate service name already found
+        $.ajax({
+            url:getBaseURL()+ 'project/main/checkservicefound',
+            type:"post",
+            data: $('#addEditForm').serialize(),
+            async: false,
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(data)
+                if(data.results != false){
+                    showError($serviceName, 'Name already found!');
+                    callback(false);
+                    return false;
+                }
+                else{
+                    removeError($serviceName);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+
+function serviceAddEdit(mode,row) {
+    removeError($("#projectName"));
+    if(mode== 'edit') {
+        var rowData = $grid.jqxGrid('getrowdata', row);
+        $editModal.data('row', row).data('mode', 'edit').modal('show');
+        $serviceId.val(rowData.ServiceId);
+        $serviceName.val(rowData.ServiceName);
+        $serviceTypeId.val(rowData.ServiceTypeId).trigger('change');
+        $unit.val(rowData.UnitId).trigger('change');
+        $("#headerText").html("Edit Service");
+        $("#btnEditYes").html("Update");
+    } else if(mode== 'add'){
+        $editModal.data('mode', 'add').modal('show');
+        $serviceId.val(0);
+        $serviceName.val('');
+        $serviceTypeId.select2("val", "");
+        $unit.select2("val", "");
+        $("#headerText").html("New Service");
+        $("#btnEditYes").html("Create");
+    }
+}
+</script>

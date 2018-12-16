@@ -1,0 +1,419 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/pie.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1 class="col-lg-6 padlr0">Receipt Register</h1>
+                <!--<div class="col-lg-2 col-lg-offset-4 ">
+                    <div class="vendor_button">
+                         <select>
+                             <option value="0">All Projects</option>
+                         </select>
+                     </div>
+                </div>-->
+            </div>
+            <div class="col-lg-12 padlr0">
+                <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear">
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                            <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status3">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-line-chart fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge comnelips fntwt600"><?php echo (isset($salevalue)) ? 'Rs.'. $this->commonHelper()->sanitizeNumber((double)$salevalue['Amount'],2,true) : '';?></div>
+                                            <div class="cbhuge comnelips">Total Sale Value</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                            <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status4">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-thumbs-up fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge comnelips fntwt600"><?php echo (isset($billvalue)) ? 'Rs.'.$this->commonHelper()->sanitizeNumber((double)$billvalue['Amount'],2,true) : '';?></div>
+                                            <div class="cbhuge comnelips">Billed Value</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                            <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status1">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-check-square-o fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <div class="cbhuge comnelips fntwt600"><?php echo (isset($receiptvalue)) ? 'Rs.'.$this->commonHelper()->sanitizeNumber((double)$receiptvalue['Amount'],2,true) : '';?></div>
+                                            <div class="cbhuge comnelips">Received</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                            <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status2">
+                                <div class="padding-none">
+                                    <div class="row">
+                                        <div class="col-xs-3">
+                                            <i class="fa fa-retweet fa-5x cbpln-status-icon"></i>
+                                        </div>
+                                        <div class="col-xs-9 text-right">
+                                            <?php
+                                            $receivable = 0;
+                                            if (isset($billvalue)) $receivable = (double)$billvalue['Amount'];
+                                            if (isset($receiptvalue)) $receivable = $receivable -  (double)$receiptvalue['Amount'];
+                                            if ($receivable <0) $receivable=0;
+                                            ?>
+                                            <div class="cbhuge comnelips fntwt600"><?php echo (isset($receivable)) ? 'Rs.'.$this->commonHelper()->sanitizeNumber((double)$receivable,2,true) : '';?></div>
+                                            <div class="cbhuge comnelips">Receivable</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="treeGrid"> </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="reg-chats">
+                        <h2>Project wise Receipts</h2>
+                        <div id="chart-1" style="height:300px;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="reg-chats">
+                        <h2>Payment Received</h2>
+                        <div id="chart-2" style="height:300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--<div class="content_wrapper padlr0">-->
+<!--    <div class="container-fluid padlr0">-->
+<!--        <div class="col-lg-12">-->
+<!--            <h1>Receipt Register</h1>-->
+<!--        </div>-->
+<!--        <div class="col-lg-12">-->
+<!--            <div class="table-responsive clear">-->
+<!--                <div id="treeGrid"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--Delete Confirmation Modal-->
+<!--<div id="DeleteModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-header">
+        <a href="#" data-dismiss="modal" aria-hidden="true" class="close">×</a>
+        <h3>Delete</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label>Remarks</label>
+            <textarea id="remarks" maxlength="250"></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#" id="btnDeleteYes" class="btn danger">Yes</a>
+        <a href="#" data-dismiss="modal" aria-hidden="true" class="btn secondary">No</a>
+    </div>
+</div>-->
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times"></i></button>
+                <h1>Why do you want to delete Receipt No : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                                <form class="form-horizontal">
+                                    <div class="row">
+                                        <div class="form-group req_flds">
+                                            <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Remarks"/>
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                    <a href="#" id="btnDeleteYes" class="md_ok">Delete</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var data = <?php echo (isset($receipts)) ? json_encode($receipts) : ''?>,
+    $treeGrid = $("#treeGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+$(function () {
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'ReceiptId', type: 'number' },
+            { name: 'ReceiptNo', type: 'string' },
+            { name: 'ReceiptDate', type: 'string' },
+            { name: 'ReceiptAgainst', type: 'string' },
+            { name: 'ProjectName', type: 'string' },
+            { name: 'LeadName', type: 'string' },
+            { name: 'UnitNo', type: 'string' },
+            { name: 'Amount', type: 'number' }
+        ],
+        id: 'ReceiptId'
+    };
+
+    var columnrenderer = function (value) {
+        return '<div style="text-align: center; margin-top: 5px;">' + value + '</div>';
+    }
+
+    var cellsrenderer1 = function (row, columnfield, value, defaulthtml, columnproperties) {
+        return '<div style="white-space: normal; margin-bottom: 5px;">' + value + '</div>';
+    }
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        autorowheight: true,
+        autoheight: true,
+        pageable:true,
+        sortable: true,
+        pagerButtonsCount: 6,
+        showfilterrow: true,
+        filterable: true,
+        rowDetails: true,
+        selectionmode: 'singlerow',
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        source: dataAdapter,
+        columns: [
+            { text: 'ReceiptId', datafield: 'ReceiptId',hidden: true, filterable: false},
+            { text: 'Receipt No.', dataField: 'ReceiptNo', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'10%'},
+            { text: 'Date', dataField: 'ReceiptDate', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'10%'},
+            { text: 'ProjectName', dataField: 'ProjectName', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'20%'},
+            { text: 'BuyerName', dataField: 'LeadName', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'20%'},
+            { text: 'UnitName', dataField: 'UnitNo', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'10%'},
+            { text: 'Against', dataField: 'ReceiptAgainst', renderer: columnrenderer, cellsrenderer: cellsrenderer1,width:'10%'
+                /*,
+                 >>>>>>> .r578
+                 cellsrenderer: function (row) {
+                 switch ($treeGrid.jqxGrid('getCellValue', row, 'ReceiptAgainst')) {
+                 case 'B':
+                 return 'Bill/Schedule';
+                 case 'A':
+                 return 'Advance';
+                 case 'O':
+                 return 'Others';
+                 case 'P':
+                 return 'Pre-Booking';
+                 default:
+                 return 'N/A';
+                 }
+                 }*/
+            },
+            { text: 'Amount', dataField: 'Amount',width:'10%', cellsalign: 'right',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                }},
+            { text: 'Action', sortable: false, filterable: false,width:'10%',align: 'left',
+                cellsrenderer: function (row) {
+                    var ReceiptId = $treeGrid.jqxGrid('getCellValue', row, 'ReceiptId'),
+                        editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/bill/receipt/edit/'+ReceiptId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: receiptDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>'
+                    +'<a title="print" href="'+ getBaseURL() + 'crm/bill/receipt-print/'+ReceiptId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-print reg-icon"></i></a>';
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        $deleteModal.modal('hide');
+        var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'crm/bill/deletereceipt',
+            type: 'POST',
+            data: {"ReceiptId": rowData.ReceiptId, "Remarks": remarks},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $treeGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Failed to delete the receipt!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+        $remarks.val('');
+    });
+});
+
+function receiptDelete(row) {
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    $deleteModal.data('row', row).modal('show');
+    $('#delEntryName').html(rowData.ReceiptNo);
+    $("#remarks").val('');
+}
+
+var chart = AmCharts.makeChart("chart-1", {
+    "type": "pie",
+    "theme": "light",
+    "innerRadius": "40%",
+    "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+    "dataProvider": <?php echo $projectreceipts;?>,
+    "valueField": "Amount",
+    "titleField": "ProjectName",
+    "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+    "export": {
+        "enabled": true
+    }
+});
+
+
+//    var chart = AmCharts.makeChart("chart-2", {
+//        "theme": "light",
+//        "type": "serial",
+//        "startDuration": 2,
+//        "dataProvider": <?php //echo $monreceipt;?>//,
+//        "valueAxes": [{
+//            "position": "left",
+//            "axisAlpha":0,
+//            "gridAlpha":0
+//        }],
+//        "graphs": [{
+//            "balloonText": "[[category]]: <b>[[value]]</b>",
+//            "colorField": "color",
+//            "fillAlphas": 0.85,
+//            "lineAlpha": 0.1,
+//            "type": "column",
+//            "topRadius":1,
+//            "valueField": "Amount"
+//        }],
+//        "depth3D": 40,
+//        "angle": 30,
+//        "chartCursor": {
+//            "categoryBalloonEnabled": false,
+//            "cursorAlpha": 0,
+//            "zoomable": false
+//        },
+//        "categoryField": "Mondata",
+//        "categoryAxis": {
+//            "gridPosition": "start",
+//            "axisAlpha":0,
+//            "gridAlpha":0
+//
+//        },
+//        "export": {
+//            "enabled": true
+//        }
+//
+//    },0);
+//
+//    jQuery('.chart-input').off().on('input change',function() {
+//        var property	= jQuery(this).data('property');
+//        var target		= chart;
+//        chart.startDuration = 0;
+//
+//        if ( property == 'topRadius') {
+//            target = chart.graphs[0];
+//        }
+//
+//        target[property] = this.value;
+//        chart.validateNow();
+//    });
+
+
+AmCharts.makeChart("chart-2", {
+    "theme": "light",
+    "type": "serial",
+    "marginRight": 80,
+    "autoMarginOffset": 20,
+    "marginTop":20,
+    "dataProvider": <?php echo $monreceipt;?>,
+    "valueAxes": [{
+        "id": "v1",
+        "axisAlpha": 0.1
+    }],
+    "graphs": [{
+        "useNegativeColorIfDown": true,
+        "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+        "bullet": "round",
+        "bulletBorderAlpha": 1,
+        "bulletBorderColor": "#FFFFFF",
+        "hideBulletsCount": 50,
+        "lineThickness": 2,
+        "lineColor": "#fdd400",
+        "negativeLineColor": "#67b7dc",
+        "valueField": "Amount"
+    }],
+    "chartCursor": {
+        "valueLineEnabled": true,
+        "valueLineBalloonEnabled": true
+    },
+    "categoryField": "Mondata",
+    "categoryAxis": {
+        "axisAlpha": 0,
+        "minHorizontalGap": 60
+    }
+});
+</script>

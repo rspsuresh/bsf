@@ -1,0 +1,666 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/cb.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script>
+	$(document).ready(function() {
+		$(".single_dropdown").select2({
+			placeholder: "",
+			allowClear: true
+		});
+	});
+</script>
+<script id="covdummy-row"  type="text/template" class="hide">
+	<div class="onebyone_content empty-covrow">
+		<div class="input">
+			<div class="col-lg-12 m_btm10 padlr0">
+				<div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+				<input type="text" class="inputSetup auto-covered-complete" id="covServiceName__" value=""/>
+				<input type="hidden" name="covServiceName__"  id="covServiceIdName__" value="" />
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+					<select style="width:100%;" name="covServiceType__" id="covServiceType__" class="single_dropdown" onchange="cduration(this);" >
+						<option value="D" >per day</option>
+						<option value="W" >per week</option>
+						<option value="M">per month</option>
+						<option value="Q" >As Required</option>
+					</select>
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3 padlr0 cServiceValueDiv"><input type="text" class="inputSetup" name="covserviceValue__" id="covserviceValue__" placeholder="Times" onKeyPress="return isNumberKey(event);" value="" /></div>
+			</div>
+		</div>
+    </div>
+</script>
+<script id="uncovdummy-row"  type="text/template" class="hide">
+	<div class="onebyone_content empty-uncovrow">
+		<div class="input">
+			<div class="col-lg-12 m_btm10 padlr0">
+				<div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+					<input type="text" class="inputSetup auto-uncovered-complete" id="uncServiceName__" onchange="" value="" />
+					<input type="hidden" name="uncServiceName__"  id="uncServiceIdName__" value="" />
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+					<select style="width:100%;" name="uncServiceType__" id="uncServiceType__" class="single_dropdown" onchange="uncduration(this);">
+						<option value="D" >per day</option>
+						<option value="W" >per week</option>
+						<option value="M">per month</option>
+						<option value="R" >As per Reading</option>
+						<option value="Q" >As Required</option>
+					</select>
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3 padlr0 uncServiceValueDiv"><input type="text" class="inputSetup" name="uncServiceValue__" id="uncServiceValue__" Placeholder="Amount" onKeyPress="return isDecimal(event,this);" value="" /></div>
+			</div>
+		</div>
+    </div>
+</script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="txt_center">Property Management</h1>
+        </div>
+		<form method="post" action="" onsubmit = "return validation();">
+        <div class="col-lg-12 clear">
+        	<div class="liner"></div>
+        </div>
+        <div class="col-lg-12 clear" style="background-color:#fff;">
+        	<div class="col-lg-6 padlr0 m_top10">
+                <div class="signup_onebyone_content">
+                    <div class="setup_form prop_mnmt_form">
+                        <div class="flwup_rightcnt"><h2>Services</h2></div>
+                        <form method="post" action="" onsubmit = "return validation();">
+                            <ul class="onebyone_form">										
+                                <li id="q1" class="active focus">
+                                    <div class="onebyone_wrapper">
+                                        <div class="li_number">
+                                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                                            <div class="arrow">
+                                                <span><i class="fa fa-arrow-right"></i></span>
+                                            </div>
+                                        </div>
+										<input type="hidden" name="covCount" id="covCount" value="<?php if(isset($regInfoCovered) && count($regInfoCovered)>0) { echo count($regInfoCovered); } else { ?> 0 <?php } ?>" />
+                                        <div class="onebyone_question">
+                                            <span class="span_b">What are the Services Covered Under Maintenance?</span>
+                                        </div>
+										<div id="cov-service">
+											<?php if(isset($regInfoCovered) && count($regInfoCovered)>0) { 
+												$i=0;
+												foreach($regInfoCovered as $covered):?>
+<div class="onebyone_content">
+	<div class="input">
+		<div class="col-lg-12 m_btm10 padlr0">
+			<input type="hidden" value="<?php echo $covered['TransId']; ?>" name="covServiceTrans_<?php echo $i;?>">
+			<div class="col-lg-6 col-md-6 col-sm-6 padlr0"><input type="text" class="inputSetup auto-covered-complete" id="covServiceName_<?php echo $i;?>" value="<?php if($covered['ServiceName']!="") { echo $covered['ServiceName']; } ?>" />
+			<input type="hidden" name="covServiceName_<?php echo $i;?>"  id="covServiceIdName_<?php echo $i;?>" value="<?php if($covered['ServiceId']!="") { echo $covered['ServiceId']; } ?>" />
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+				<select style="width:100%;" name="covServiceType_<?php echo $i;?>" id="covServiceType_<?php echo $i;?>" class="single_dropdown" onchange="cduration(this);" >
+					<option <?php if($covered['TransType']== "D"){ echo "selected"; } ?> value="D" >per day</option>
+					<option <?php if($covered['TransType']== "W"){ echo "selected"; } ?> value="W" >per week</option>
+					<option <?php if($covered['TransType']== "M"){ echo "selected"; } ?> value="M">per month</option>
+					<option <?php if($covered['TransType']== "Q"){ echo "selected"; } ?> value="Q" >As Required</option>
+				</select>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-3 padlr0 cServiceValueDiv"><input type="text" class="inputSetup" name="covserviceValue_<?php echo $i;?>" id="covserviceValue_<?php echo $i;?>" placeholder="Times" onKeyPress="return isNumberKey(event);" value="<?php if($covered['TimesCount']!="") { echo $covered['TimesCount']; } else { echo "0"; } ?>" /></div>
+		</div>
+	</div>
+</div>
+												
+											<?php 
+												$i++;
+												endforeach;
+											} ?>
+											
+										</div>
+                                    </div>
+                                </li>
+								<li id="q2" class="">
+                                    <div class="onebyone_wrapper">
+                                        <div class="li_number">
+                                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                                            <div class="arrow">
+                                                <span><i class="fa fa-arrow-right"></i></span>
+                                            </div>
+                                        </div>
+										<input type="hidden" name="uncovCount" id="uncovCount" value="<?php if(isset($regInfoUnCovered) && count($regInfoUnCovered)>0) { echo count($regInfoUnCovered); } else { ?> 0 <?php } ?>" />
+                                        <div class="onebyone_question">
+                                            <span class="span_b">What are the Services Not Covered Under Maintenance?</span>
+                                        </div>
+										<div id="uncov-service">
+											<?php if(isset($regInfoUnCovered) && count($regInfoUnCovered)>0) { 
+												$j=0;
+												foreach($regInfoUnCovered as $unCovered):?>
+<div class="onebyone_content ">
+	<div class="input">
+		<div class="col-lg-12 m_btm10 padlr0">
+			<input type="hidden" value="<?php echo $unCovered['TransId']; ?>" name="uncServiceTrans_<?php echo $j;?>">
+			<div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+				<input type="text" class="inputSetup auto-uncovered-complete" id="uncServiceName_<?php echo $j;?>" value="<?php if($unCovered['ServiceName']!="") { echo $unCovered['ServiceName']; } ?>" />
+				<input type="hidden" name="uncServiceName_<?php echo $j;?>"  id="uncServiceIdName_<?php echo $j;?>" value="<?php if($unCovered['ServiceId']!="") { echo $unCovered['ServiceId']; } ?>" />
+			</div>
+			
+			<div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+				<select style="width:100%;" name="uncServiceType_<?php echo $j;?>" id="uncServiceType_<?php echo $j;?>" class="single_dropdown" onchange="uncduration(this);">
+					<option <?php if($unCovered['TransType']== "D"){ echo "selected"; } ?> value="D" >per day</option>
+					<option <?php if($unCovered['TransType']== "W"){ echo "selected"; } ?> value="W" >per week</option>
+					<option <?php if($unCovered['TransType']== "M"){ echo "selected"; } ?> value="M">per month</option>
+					<option <?php if($unCovered['TransType']== "R"){ echo "selected"; } ?> value="R" >As per Reading</option>
+					<option <?php if($unCovered['TransType']== "Q"){ echo "selected"; } ?> value="Q" >As Required</option>
+				</select>
+			</div>
+			<div class="col-lg-3 col-md-3 col-sm-3 padlr0 uncServiceValueDiv"><input type="text" class="inputSetup" name="uncServiceValue_<?php echo $j;?>" id="uncServiceValue_<?php echo $j;?>" Placeholder="Amount" onKeyPress="return isDecimal(event,this);" value="<?php if($unCovered['Amount']!="") { echo $unCovered['Amount']; } else { echo "0"; } ?>" /></div>
+		</div>
+	</div>
+</div>												
+												
+											<?php 
+												$j++;
+												endforeach; } ?>
+										</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="col-lg-12 savebtn_area m_btm20 no_border clear">
+                                <ul>
+                                	<li class="save_btn float_l">
+                                        <a class="ripple" href="<?php echo $this->basePath();?>/crm/property/deposit/<?php echo $unitId; ?>/<?php echo $regId; ?>"  data-toggle="tooltip" data-placement="right" title="back">Back</a>
+                                    </li>
+                                    <li class="save_btn float_r">
+                                        <input type="submit" class="ripple" href="javascript:void(0);" value="Continue"  data-toggle="tooltip" data-placement="left" title="Continue to fill Service" />
+                                    </li>
+                                </ul>
+                            </div>
+                        
+                    </div>
+                </div>
+                <div class="clear"></div>
+        	</div>
+			</form>
+            <div class="col-lg-6 m_top20" id="ProjectDetail">
+            	<div class="form-group clear">
+                    <div class="col-lg-12">
+						<div class="row">   
+							<div class="col-lg-12 clear">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label ">Project Name</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="dProjectName"><?php if(isset($unitInfo) && $unitInfo['ProjectName'] !=""){ echo $unitInfo['ProjectName']; } ?></p>   
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Block No</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="BlockName"><?php if(isset($unitInfo) && $unitInfo['BlockName'] !=""){ echo $unitInfo['BlockName']; } ?></p>
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Floor No</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="FloorName" ><?php if(isset($unitInfo) && $unitInfo['FloorName'] !=""){ echo $unitInfo['FloorName']; } ?></p> 
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Unit Type</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="UnitType" ><?php if(isset($unitInfo) && $unitInfo['UnitTypeName'] !=""){ echo $unitInfo['UnitTypeName']; } ?></p> 
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Unit No</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="UnitNo"><?php if(isset($unitInfo) && $unitInfo['UnitNo'] !=""){ echo $unitInfo['UnitNo']; } ?></p>
+								</div>
+							</div>
+						</div>
+						<!--div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Area</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="Area" >1267</p> 
+								</div>
+							</div>
+						</div-->
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Unit Area</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="UnitArea" ><?php if(isset($unitInfo) && $unitInfo['UnitArea'] !=""){ echo $unitInfo['UnitArea']; } ?></p> 
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Face</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="Facing"><?php if(isset($unitInfo) && $unitInfo['Description'] !=""){ echo $unitInfo['Description']; } ?></p> 
+								</div>
+							</div>
+						</div>
+						<div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Owner Name</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="BuyerName" ><?php if(isset($unitInfo) && $unitInfo['BuyerName'] !=""){ echo $unitInfo['BuyerName']; } ?></p> 
+								</div>
+							</div>
+						</div>
+						<!--div class="row">   
+							<div class="col-lg-12">
+								<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Address</label>
+								<div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+									<p id="BuyerAddress" >1355 Market Street, Suite 900 San Francisco, CA 94103</p> 
+								</div>
+							</div>
+						</div-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<script>
+$("li").hover(
+	function () {
+		$(this).addClass("active focus").parent().next().addClass("active focus");
+	},
+	function () {
+		$(this).removeClass("active focus").parent().next().removeClass("active focus");
+	}
+);
+
+
+
+$(".inputSetup").focus(function(){
+	$('.focus').removeClass('active focus');
+	$(this).closest('li').addClass('active focus');
+	$('body,html').animate({
+		scrollTop: scrollPoint
+	}, 600);
+});
+
+//newly addedd
+/*
+function validation(){
+	var errorFlag = 0;
+	var errorFlagCount = 0;
+
+	if($('input[name="availDeposite"]:checked').val() == 1){ 
+		if($('#depAmount').val() == ""){
+			showErrorMsg($('#depAmount'), "Required");
+			errorFlagCount = errorFlagCount + 1;
+			errorFlag = 1;
+			$('#depAmount').focus();
+		} else {
+			removeErrorMsg($('#depAmount'));
+		}
+	}
+	if($('input[name="availMainPeriod"]:checked').val() == 1){ 
+		if($('#mainPeriod').val() == ""){
+			showErrorMsg($('#mainPeriod'), "Required");
+			errorFlagCount = errorFlagCount + 1;
+			errorFlag = 1;
+			$('#mainPeriod').focus();
+		} else {
+			removeErrorMsg($('#mainPeriod'));
+		}
+	}
+	if($('input[name="availSerPeriod"]:checked').val() == 1){ 
+		if($('#mainCharge').val() == ""){
+			showErrorMsg($('#mainCharge'), "Required");
+			errorFlagCount = errorFlagCount + 1;
+			errorFlag = 1;
+			$('#mainCharge').focus();
+		} else {
+			removeErrorMsg($('#mainCharge'));
+		}
+	}
+	if($('input[name="availMainFee"]:checked').val() == 1){ 
+		if($('#dueDay').val() == ""){
+			showErrorMsg($('#dueDay'), "Required");
+			errorFlagCount = errorFlagCount + 1;
+			errorFlag = 1;
+			$('#dueDay').focus();
+		} else {
+			removeErrorMsg($('#dueDay'));
+		}
+		if($('#MainFee').val() == ""){
+			showErrorMsg($('#MainFee'), "Required");
+			errorFlagCount = errorFlagCount + 1;
+			errorFlag = 1;
+			$('#MainFee').focus();
+		} else {
+			removeErrorMsg($('#MainFee'));
+		}
+	}
+
+	if(errorFlag == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}*/
+function showErrorMsg($tarIp, msg) {
+	var $tarErrorMsg = $tarIp.closest('div').find('.error_message');
+	$tarErrorMsg.find('p').text(msg);
+	$tarErrorMsg.show();
+}
+
+function removeErrorMsg($tarIp) {
+	var $tarErrorMsg = $tarIp.closest('div').find('.error_message');
+	$tarErrorMsg.find('p').text('Please Enter ' + $tarIp.attr('label') + '...');
+	$tarErrorMsg.hide();
+}
+
+
+function addNewCovRow(x) {
+	if($(x).val() != ""){
+		$(x).closest('.onebyone_content.empty-covrow').removeClass('empty-covrow');
+	}
+	if( $('#cov-service').find('.onebyone_content.empty-covrow').length > 0) {
+		return;
+	}
+    covcount = parseInt($('#covCount').val());
+    //$('.deleteTr_' + count).show();
+    template = $('#covdummy-row').html();
+    covcount++;
+    template = template.replace(/__/g, '_' + covcount);
+    $('#cov-service').append(template);
+    $('#covCount').val(covcount);
+	$(".single_dropdown").select2({
+			placeholder: "",
+			allowClear: true
+		});
+	$('.auto-covered-complete').autocomplete({
+	lookup: <?php echo json_encode($services); ?>,
+	lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+		if(queryLowerCase == '*'){
+			return suggestion.value;
+		} else {
+            var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		}
+	},
+	onSelect: function(suggestion){
+		if(suggestion) {
+
+			$('#covServiceIdName_'+$(this)[0].id.split('_')[1]).val(suggestion.data);
+            addNewCovRow(this);
+			$(this).removeClass('error');
+		}
+	},
+	onSearchStart: function(suggestion) {
+
+	},
+	onSearchComplete: function (query, suggestion){
+		if(!suggestion.length) {
+			//$(this).addClass('error');
+		} else {
+			$(this).removeClass('error');
+		}
+	}
+});
+
+}
+function addNewUncovRow(x) {
+	if($(x).val() != ""){
+		$(x).closest('.onebyone_content.empty-uncovrow').removeClass('empty-uncovrow');
+	}
+	if( $('#uncov-service').find('.onebyone_content.empty-uncovrow').length > 0) {
+		return;
+	}
+    uncovcount = parseInt($('#uncovCount').val());
+    //$('.deleteTr_' + count).show();
+    template = $('#uncovdummy-row').html();
+    uncovcount++;
+    template = template.replace(/__/g, '_' + uncovcount);
+    $('#uncov-service').append(template);
+    $('#uncovCount').val(uncovcount);
+	$(".single_dropdown").select2({
+			placeholder: "",
+			allowClear: true
+		});
+	$('.auto-uncovered-complete').autocomplete({
+	lookup: <?php echo json_encode($services); ?>,
+	lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+		if(queryLowerCase == '*'){
+			return suggestion.value;
+		} else {
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		}
+	},
+	onSelect: function(suggestion){
+		if(suggestion) {
+			$('#uncServiceIdName_'+$(this)[0].id.split('_')[1]).val(suggestion.data);
+            addNewUncovRow(this);
+			$(this).removeClass('error');
+		}
+	},
+	onSearchStart: function(suggestion) {
+
+	},
+	onSearchComplete: function (query, suggestion){
+		if(!suggestion.length) {
+			//$(this).addClass('error');
+		} else {
+			$(this).removeClass('error');
+		}
+	}
+});
+}
+
+$(function() {
+	addNewCovRow();
+	addNewUncovRow();
+		$('.auto-covered-complete').autocomplete({
+		lookup: <?php echo json_encode($services); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+			if(queryLowerCase == '*'){
+				return suggestion.value;
+			} else {
+				var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		},
+		onSelect: function(suggestion){
+			if(suggestion) {
+				$('#covServiceIdName_'+$(this)[0].id.split('_')[1]).val(suggestion.data);
+                addNewCovRow(this);
+				$(this).removeClass('error');
+			}
+		},
+		onSearchStart: function(suggestion) {
+		
+		},
+		onSearchComplete: function (query, suggestion){
+			if(!suggestion.length) {
+				//$(this).addClass('error');
+			} else {
+				$(this).removeClass('error');
+			}
+		}
+	});
+		$('.auto-uncovered-complete').autocomplete({
+		lookup: <?php echo json_encode($services); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+			if(queryLowerCase == '*'){
+				return suggestion.value;
+			} else {
+				var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		},
+		onSelect: function(suggestion){
+			if(suggestion) {
+				$('#uncServiceIdName_'+$(this)[0].id.split('_')[1]).val(suggestion.data);
+                addNewUncovRow(this);
+				$(this).removeClass('error');
+			}
+		},
+		onSearchStart: function(suggestion) {
+		
+		},
+		onSearchComplete: function (query, suggestion){
+			if(!suggestion.length) {
+				//$(this).addClass('error');
+			} else {
+				$(this).removeClass('error');
+			}
+		}
+	});
+});
+
+function cduration(x){
+	if($(x).val() == "Q"){
+		$(x).closest('div').next('.cServiceValueDiv').hide();
+	} else {
+		$(x).closest('div').next('.cServiceValueDiv').show();
+	}
+}
+
+function uncduration(x){
+	if($(x).val() == "R" || $(x).val() == "Q"){
+		$(x).closest('div').next('.uncServiceValueDiv').hide();
+	} else {
+		$(x).closest('div').next('.uncServiceValueDiv').show();
+	}
+}
+/*consultant autocomplete start*/ /*
+var conArr= <?php echo json_encode($services); ?>;
+var conArrCopy = [];
+var conId = [];
+
+bindAotoComplete();
+removeContr();
+function sliceJson(curVal)
+{
+	var services = [];
+	$("#consultantTable tbody tr").each(function(){
+		var val = $(this).find(".auto-complete").val().trim();
+		if(val != "")
+			services.push($(this).find(".auto-complete").val());
+	});
+	
+	conArrCopy = $.grep(conArr, function(element, index) {
+		if($.inArray(element.value, services) != -1 && element.value != curVal)
+			return false;
+		return true;
+	});
+}
+function removeContr()
+{
+	$(".removeCon").unbind();
+	$(".removeCon").bind("click", function(){
+		var table = $(this).closest("table");
+		if(table.find("tbody tr").length > 1) {
+			var rid = $(this).closest("tr").find("input:hidden").val();
+			$(this).closest("tr").remove();
+			if(rid != '')
+				conId.splice($.inArray(rid, conId),1);
+		}
+	});
+}
+function addConTr(invoker)
+{
+	var table = $("#consultantTable tbody");
+	if($(invoker).closest("tr").index() == table.find("tr:last").index()) {
+		table.append(table.find("tr:first").clone());
+		table.find("tr:last").each(function(){
+			//$(this).find("td:nth-child(2)").text('');
+			//$(this).find("td:nth-child(3)").text('');
+			$(this).find("select, textarea, input:text, input:hidden").each(function(){
+				if($(this).prop("tagName").toLowerCase() == 'input')
+					$(this).val("");
+				
+				$(this).attr("name", $(this).attr("tagname"));
+				$(this).attr("id", $(this).attr("tagname"));
+			});
+		});
+		removeContr();
+		bindAotoComplete();
+	}
+}
+function fillCon(json, invoker, mode)
+{
+	var tr = $(invoker).closest("tr");
+	if(mode == 1) {
+		if($.inArray(json.data, conId) == -1) {
+			conId.push(json.data);
+			tr.find("input:text, textarea, select, input:hidden").each(function(){
+				$(this).attr("name", $(this).attr("tagname")+'_'+json.data);
+				$(this).attr("id", $(this).attr("tagname")+'_'+json.data);
+			});
+		}
+		//tr.find("td:nth-child(2)").text(json.Code);
+		tr.find("input:hidden").val(json.data);
+		//tr.find("td:nth-child(3)").text(json.UnitName);
+	} else {
+		var hidVal = tr.find("input:hidden").val();
+		if(hidVal != '')
+			conId.splice($.inArray(hidVal, conId),1);
+		
+		tr.find("input:text, input:hidden").each(function(){
+			$(this).attr("name", $(this).attr("tagname"));
+			$(this).attr("id", $(this).attr("tagname"));
+		});
+		//tr.find("td:nth-child(2)").text('');
+		//tr.find("td:nth-child(3)").text('');
+		//tr.find("td:nth-child(4) input:text").val('');
+		tr.find("input:hidden").val('');
+	}
+}
+function bindAotoComplete()
+{
+	$('.auto-complete').unbind();
+	$('.auto-complete').autocomplete({
+		lookup: <?php echo json_encode($conResult); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		},
+		onSelect: function(suggestion){
+			if(suggestion) {
+				addConTr(this);
+				fillCon(suggestion, this, 1);
+				$(this).removeClass('error');
+				var todc = $('#ConsultantCount').val();
+				var ntodc = (parseInt(todc) + parseInt(1)); 
+				$('#ConsultantCount').val(ntodc);
+			}
+		},
+		onSearchStart: function(suggestion) {
+		
+		},
+		onSearchComplete: function (query, suggestion){
+			if(!suggestion.length) {
+				fillCon('', this, 2);
+				$(this).addClass('error');
+			} else {
+				//fillCon('', this, 2);
+				$(this).removeClass('error');
+			}
+		},
+	});
+	
+	$('.auto-complete').bind("focus", function(){
+		sliceJson($(this).val().trim());
+		$(this).autocomplete().setOptions({
+			lookup: conArrCopy
+		});
+	});
+	
+	$('.auto-complete').bind("blur", function(){
+		if($.inArray($(this).val(), conArr) == -1){
+			fillCon('', this, 2);
+			$(this).addClass("error");
+		}
+	});
+}
+/*consultant autocomplete end*/
+</script>

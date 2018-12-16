@@ -1,0 +1,184 @@
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+/*--------------Jqx Grid jqx All-------------------*/
+#jqxgrid									{min-height:200px !important;}
+#jqxgrid .jqx-grid-header 					{height:90px !important;}
+.jqx-grid-groups-row						{padding-left:5px !important;}
+.jqx-grid-pager-input						{padding: 2px; text-align: center !important; width: 35px;}
+.jqx-widget .jqx-grid-column-header			{border:1px solid #c7c7c7 !important;}
+.jqx-widget .jqx-grid-columngroup-header	{border-top:0px !important;}
+.jqx-dropdownlist-state-normal  			{margin:2px 4px !important;}
+.jqx-grid-pager .jqx-dropdownlist-state-normal  			{margin-top: 0 !important;}
+.jqx-widget-header							{border-bottom: 1px solid #5d9bb6 !important;border-top: 1px solid #ddd !important;}
+.jqx-input									{height: 25px !important; margin:2px 4px !important;}
+.jqx-grid-pager .jqx-grid-pager-input		{height:20px !important; margin:0px 4px !important;}
+#jqxgrid .jqx-grid-cell-right-align 		{text-align:right !important; padding-right:8px;}
+#jqxgrid .jqx-grid-cell-left-align 			{padding-left:8px;}
+.jqx-grid-column-menubutton::after			{left:4px;top:10px;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<div class="content_wrapper  padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+            	<div class="col-lg-12 padlr0">
+                    <h1 class="col-lg-6">Loan Due Report (Not Done Under Progress)</h1> 
+                    <div class="col-lg-6">
+                        <ul>
+                          <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple"  id="print" data-original-title="ExportPrint" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-394.png" /></a></li>
+                          <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="excelExport" data-original-title="ExportExcel" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-393.png" /></a></li>
+                          <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="csvExport" data-original-title="ExportCSV" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-392.png" /></a></li>
+                          <!--<li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn4  ripple" id="htmlExport">Export to HTML</a></li>-->
+                        </ul>
+                     </div>
+                 </div>
+                <div class="col-lg-3 col-lg-offset-9 clear">
+					<select name="projectId" id="projectId" class="single_dropdown lbl_move" style="width:100%;" label="Select Project..." >
+						<option value="">Select Project</option>
+						<?php foreach($projectList as $project){ ?>
+								<option value="<?php echo $project['ProjectId'] ?>" <?php if($project['ProjectId']==$projectId ) { echo 'selected';} ?> ><?php echo $project['ProjectName'] ?></option>
+						<?php } ?>
+					</select>
+				</div>  
+			</div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+					<div style='margin-top: 10px;' id="jqxgrid">
+				</div>
+				</div>
+             </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+var arr_Lists = <?php echo (isset($arrUnitLists)) ? json_encode($arrUnitLists) : '[]';?>;
+$('#projectId').on('change', function(){
+	var projectId = $(this).val();
+	if(projectId !=  '') {
+		window.location.replace(getBaseURL() + "crm/report/loanduerpt/" + projectId);
+	} else{
+		window.location.replace(getBaseURL() + "crm/report/loanduerpt/0");
+	}
+});
+
+$(document).ready(function () {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+
+	// Load Grid
+	var source = {
+		localdata: arr_Lists,
+		datatype: "json",
+		pagesize: 15,
+		datafields:
+		[
+			{ name: "LeadId", type: "number" },
+			{ name: "BuyerName", type: "string" },
+			{ name: "UnitNo", type: "string" },
+			{ name: "ProjectName", type: "string" },
+			<?php foreach($datedet as $datedets) { ?>
+			{ name: "RecvAmount_<?php echo $datedets['Month'].$datedets['Year']; ?>", type: "number" },
+			{ name: "RecdAmount_<?php echo $datedets['Month'].$datedets['Year']; ?>", type: "number" },
+			<?php } ?>
+			{ name: "RecvAmount", type: "number" },
+			{ name: "RecdAmount", type: "number" },
+		]
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source);
+	$("#jqxgrid").jqxGrid(
+	{
+		width: "100%",
+		source: dataAdapter,
+		pageable: true,
+		columnsresize: true,
+		autoheight: true,
+		rowsheight:40,
+		sortable: true,
+		altrows: true,
+		enabletooltips: true,
+		showfilterrow: true,
+		filterable: true,
+		groupable: true,
+		showstatusbar: true,
+		statusbarheight: 35,
+		showaggregates: true,
+		columns: [
+		 { text: 'LeadId', dataField: 'LeadId', align: 'center' , pinned: true, hidden:true },
+		  { text: 'BuyerName', dataField: 'BuyerName', align: 'center', pinned: true ,width:"10%" },
+		  { text: 'UnitNo', dataField: 'UnitNo', align: 'center', pinned: true ,width:"10%" },
+		  { text: 'ProjectName', dataField: 'ProjectName', align: 'center', pinned: true ,width:"25%" },
+		<?php foreach($datedet as $datedets) { ?>
+			{ text: 'Billed', columnGroup: '<?php echo $datedets['MonthDesc']."-".$datedets['Year']; ?>', dataField: "RecvAmount_<?php echo $datedets['Month'].$datedets['Year']; ?>", align: 'right', cellsAlign: 'right' , cellsFormat: 'd2', width: '15%', aggregates: [{ '<b>Total</b>':
+				function (aggregatedValue, currentValue, column, record) {
+					var total = currentValue;
+					return aggregatedValue + total;
+				}
+			}]  },
+			{ text: 'Receivable', columnGroup: '<?php echo $datedets['MonthDesc']."-".$datedets['Year']; ?>', dataField: "RecdAmount_<?php echo $datedets['Month'].$datedets['Year']; ?>", align: 'right', cellsAlign: 'right' , cellsFormat: 'd2', width: '15%', aggregates: [{ '<b>Total</b>':
+				function (aggregatedValue, currentValue, column, record) {
+					var total = currentValue;
+					return aggregatedValue + total;
+				}
+			}]  },
+		<?php } ?>
+			{ text: 'Billed', columngroup: 'OB', dataField: 'RecvAmount', align: 'right', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+				function (aggregatedValue, currentValue, column, record) {
+					var total = currentValue;
+					return aggregatedValue + total;
+				}
+			}]   },
+			{ text: 'Receivable', columngroup: 'OB', dataField: 'RecdAmount', align: 'right', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+				function (aggregatedValue, currentValue, column, record) {
+					var total = currentValue;
+					return aggregatedValue + total;
+				}
+			}] },
+		],
+		columngroups: [
+			<?php foreach($datedet as $datedets) { ?>
+			{ text: '<?php echo $datedets['MonthDesc']."-".$datedets['Year']; ?>', align: 'center', name: '<?php echo $datedets['MonthDesc']."-".$datedets['Year']; ?>' },
+			<?php } ?>
+			{ text: 'Total', align: 'center', name: 'OB' }
+		]
+	});
+			
+	//Print option
+	$("#excelExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+	});
+	$("#csvExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+	});
+	$("#htmlExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid');
+	});
+
+	$("#print").click(function () {
+		var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html');
+		//console.log(gridContent);
+		var newWindow = window.open('', '', 'width=800, height=500'),
+		document = newWindow.document.open(),
+		pageContent =
+			'<!DOCTYPE html>\n' +
+			'<html>\n' +
+			'<head>\n' +
+			'<meta charset="utf-8" />\n' +
+			'<title>Buyer wise Receivable</title>\n' +				
+			'<h1>Buyer wise Receivable</h1>\n' +
+			'</head>\n' +
+			'<body>\n' + gridContent + '\n</body>\n</html>';
+		document.write(pageContent);
+		document.close();
+		newWindow.print();
+	});
+	//bindJqxGridAutoResize();	
+});
+</script>

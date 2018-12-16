@@ -1,0 +1,502 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<!--Handson Table plugin-->
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/handsontable/css/handsontable.full.min.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/lodash.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/underscore.string.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeral.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeric.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/formula.js"></script>
+<script type="text/javascript"src="<?php echo $this->basePath(); ?>/library/handsontable/js/parser.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.formula.js"></script>
+<!--Handson Table Plugin-->
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {
+	font-size:15px !important;
+	padding:5px 15px !important;
+}
+#HandsonTableWrapper {height: 100%; width: 100%; overflow: auto; }
+#HandsonWrapper {display: none;}
+#HandsonTableModal {float: left;}
+.tabs-content{ width:100%; float:left; position:relative !important; height:100%; min-height: 300px;}
+.md-popup{ height:100%; width:100%; float:left;}
+.HandsonModalBtns { float: right; margin: 20px 0;}
+#treeGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+    	<div class="col-lg-12" id="MainWrapper">
+        	<div class="col-lg-12 padlr0">
+                <h1 class="float_l">Measurement Template Master</h1>
+                <div class="edit_del commargin_top float_r">
+                    <ul>
+                        <li>
+                            <a title="Add Template" href="#" onclick="AddTemplate(); return false;" class="edit_al"><i class="fa fa-plus"></i> Add Template</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>    
+            <div class="col-lg-12 padlr0 commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+        <!--Handson Table-->
+        <div class="col-lg-12" id="HandsonWrapper">
+            <div class="md-popup">
+                <div id="HandsonTableModal">
+                    <h1 id="modalHeader">Add Template</h1>
+                    <div class="col-lg-12 excel-tbs" style="padding-left:0px !important;">
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <div class="form-group">
+                                <input type="hidden" id="TemplateId"/>
+                            
+                                <input class="lbl_move form-control" type="text" id="TemplateName" maxlength="100" style="height:43px !important;" label="Name"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                            <div class="form-group">
+                                <select name="columns[]" id="totalcolumns"  style="width:100%;" class="form-control single_dropdown lbl_move sel-mul" data-size="5" label="Choose Column(s)" multiple onchange="summationColumns(true);">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="tabs-content" style="margin-top:20px;">
+                            <div id="HandsonTableWrapper" class="hot handsontable"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="btn-group toal-disgr" data-toggle="buttons" id="summationColumnsWrapper"></div>
+                    </div>
+                    <div class="notefic">
+<!--                        <h1><i class="fa fa-sticky-note-o"></i> Notes</h1>-->
+                        <ul>
+                            <li><p>Choose column(s) to display summation value</p></li>
+                            <li><p>Select a submission column for quantity field to be updated</p></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="HandsonModalBtns">
+                            <button type="button" class="md_cance" onClick="return hideHandsonWrapper()">Cancel</button>
+                            <button type="button" class="md_ok" onClick="return AddUpdateSheet()" id="modalAddUpdateBtn">Add</button>
+                        </div>
+                    </div>
+            	</div>
+            </div>
+        </div>
+	</div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delTemplateName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var data = <?php echo (isset($templateReg)) ? json_encode($templateReg) : ''?>,
+    $jqxGrid = $("#treeGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+$(function () {
+    // select2
+    $('#totalcolumns').select2({
+        maximumSelectionLength: 4,
+        placeholder: ""
+    });
+
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'TemplateId', type: 'number' },
+            { name: 'TemplateName', type: 'string' }
+        ],
+        id: 'TemplateId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $jqxGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount:5,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'TemplateId', datafield: 'TemplateId', hidden: true, filterable: false},
+            { text: 'Name', dataField: 'TemplateName', width:'90%'},
+            { text: 'Action', sortable: false, filterable: false, align: 'left', width:'10%',
+                cellsrenderer: function (row) {
+                    var editLink = '<a title="Edit" href="#" onclick="EditTemplate('+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="#" onclick="DeleteTemplate('+row+'); return false;"><i class="fa fa-trash-o reg-icon"></i></a>';
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        var rowData = $jqxGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'cb/master/deletetemplate',
+            type: 'POST',
+            async: false,
+            data: {"TemplateId": rowData.TemplateId, "Remarks": remarks},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $jqxGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Failed to delete the Template!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the Template!');
+            }
+        });
+        $deleteModal.modal('hide');
+        $remarks.val('');
+    });
+    //bindJqxGridAutoResize();
+});
+
+function DeleteTemplate(row) {
+    var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+    $('#delTemplateName').html(rowData.TemplateName);
+    $("#remarks").val('');
+    $deleteModal.data('row', row).modal('show');
+}
+
+<!--Handson Script-->
+var $MainWrapper = $('#MainWrapper'),
+    $HandsonWrapper = $('#HandsonWrapper'),
+    $HandsonTableModal = $('#HandsonTableModal'),
+    $modalAddUpdateBtn = $('#modalAddUpdateBtn'),
+    $modalHeader = $('#modalHeader'),
+    $TemplateName = $('#TemplateName'),
+    $TemplateId = $('#TemplateId');
+
+var handsonTableData =  [[]],
+    handsonTable = null,
+    $HandsonTableWrapper = document.getElementById('HandsonTableWrapper'),
+    HandsonTableSettings = {
+        colHeaders:true,
+        rowHeaders: true,
+        contextMenu: true,
+        minRows: 25,
+        minCols: 10,
+        minSpareRows: 1,
+        stretchH: 'all',
+        formulas: true,
+        manualColumnResize: true,
+        manualRowResize: true,
+        fillHandle: true,
+        data: handsonTableData,
+        beforeChange: function(changes, source) {
+            if(source == 'paste') {
+                var changesJSON = JSON.parse(JSON.stringify(changes));
+                for(var i=0; i<changesJSON.length; i++) {
+                    var row = changesJSON[i][0],
+                        value = changesJSON[i][3];
+
+                    if(value.indexOf('=') == -1)
+                        return;
+
+                    changes[i][3] = value.replace(/\d+/g, function(n){return  parseInt(row + 1, 10); });
+                }
+            }
+        },
+        afterRender: function() {
+            summationColumns();
+        },
+        cells: function (row, col, prop) {
+            var cellProperties = {};
+
+            if (row === 0) {
+                cellProperties.renderer = firstRowRenderer;
+            }
+
+            return cellProperties;
+        }
+    };
+function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.fontWeight = 'bold';
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    handsonTable = new Handsontable($HandsonTableWrapper, HandsonTableSettings);
+});
+var summationColumn = '',
+    selColumns = [],
+    tempSelectedCol = [];
+function AddTemplate() {
+    handsonTableData = [[]];
+    summationColumn = '';
+    selColumns = [];
+    tempSelectedCol = [];
+    $TemplateName.val('');
+    $TemplateId.val('');
+    renderHandsonTable();
+
+    $modalAddUpdateBtn.html('Add');
+    $modalHeader.html('Add Template');
+
+    $MainWrapper.hide();
+    $HandsonWrapper.data('type','add').fadeIn();
+}
+
+function hideHandsonWrapper(){
+    $HandsonWrapper.hide();
+    $MainWrapper.fadeIn();
+}
+
+function renderHandsonTable() {
+    if(typeof handsonTableData != 'object')
+        handsonTableData  = [[]];
+
+    handsonTable.loadData(handsonTableData);
+    handsonTable.render();
+    summationColumns();
+}
+
+function summationColumns(calcOnly) {
+    if(handsonTable == null)
+        return;
+
+    var $totalColumns = $('#totalcolumns'),
+        rowCount = handsonTable.countRows();
+
+    if(typeof calcOnly == 'undefined') {
+        //set columns header
+        var options = '';
+        $.each(handsonTable.getDataAtRow (0), function (i, obj) {
+            var value = $.trim(obj),
+                sel = '';
+            if (value.length == 0 || value == "" || value.indexOf('=') != -1)
+                return;
+            var colName = handsonTable.getColHeader(i);
+            if($.inArray(colName, tempSelectedCol) != -1 || $.inArray(colName, selColumns) != -1)
+                sel = 'selected';
+            options += '<option value="' + colName + '" '+sel +'>' + value + '</option>';
+        });
+        $totalColumns.html(options).triggerHandler('change');
+    }
+    // calculate columns
+    var arr_columns = $totalColumns.find(':selected');
+    if(arr_columns.length == 0) {
+        $('#summationColumnsWrapper').html('');
+        return;
+    }
+    // selected summation columns
+    tempSelectedCol = [];
+    var totalLabels = '';
+    $.each(arr_columns, function(i, obj) {
+        var $this = $(this),
+            col = $this.val(),
+            columnData = handsonTable.plugin.helper.cellRangeValue(col+'1',col+ rowCount),
+            total = 0;
+        // push to temp sel col
+        tempSelectedCol.push(col);
+        // selected columns datas
+        $.each(columnData[0], function(j, val) {
+            if(/^[0-9\.]+$/.test(val) == false)
+                return;
+            total += parseFloatVal(val);
+        });
+        if(total == '')
+            total = 0;
+        if(col == summationColumn) {
+            totalLabels += '<label class="btn btn-primary tot-dis active">'
+            + '<input type="radio" name="summationColumns" autocomplete="off" value="'+col+'" data-total="'+total+'" checked><label>'+ $this.html() +' </label><p>'+total+'</p>'
+            + '</label>';
+        } else {
+            totalLabels += '<label class="btn btn-primary tot-dis">'
+            + '<input type="radio" name="summationColumns" autocomplete="off" value="'+col+'" data-total="'+total+'"> <label>'+ $this.html() +' </label><p>'+total+'</p>'
+            + '</label>';
+        }
+    });
+    $('#summationColumnsWrapper').html(totalLabels);
+}
+function EditTemplate(row) {
+    var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+    $.ajax({
+        url:getBaseURL()+ 'cb/master/getexceltemplate',
+        type:"POST",
+        data: {'TemplateId': rowData.TemplateId, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if(data != '') {
+                var json_data = $.parseJSON(data);
+                handsonTableData = $.parseJSON(json_data.Description);
+                summationColumn = $.trim(json_data.CellName);
+                selColumns = ($.trim(json_data.SelectedColumns)).split(',');
+            } else {
+                handsonTableData = [[]];
+                summationColumn = '';
+                selColumns = [];
+            }
+            renderHandsonTable();
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            return false;
+        }
+    });
+    $TemplateName.val(rowData.TemplateName).trigger('change');
+    $TemplateId.val(rowData.TemplateId);
+
+    $modalAddUpdateBtn.html('Save');
+    $modalHeader.html('Edit Template');
+
+    $MainWrapper.hide();
+    $HandsonWrapper.data('type','edit').data('rowid',row).fadeIn();
+}
+function AddUpdateSheet() {
+    var type = $HandsonWrapper.data('type'),
+        isSuccess = true,
+        templateName = $TemplateName.val();
+    if(templateName.length == 0) {
+        alert('Template Name is required!');
+        return false;
+    }
+    var $totalcolumns = $('#totalcolumns'),
+        columns = $totalcolumns.val();
+    if(columns == null) {
+        alert('Choose aleast one Column!');
+        return false;
+    }
+    var $checkedColumn = $('input[type=radio][name=summationColumns]:checked');
+    if($checkedColumn.length == 0) {
+        alert('Summation Column is Required!');
+        return false;
+    }
+    var selColumn = $checkedColumn.val(),
+        total = $checkedColumn.data('total'),
+        jsonData = JSON.stringify(filterArray(handsonTable.getData()));
+    if(jsonData == '[]')
+        jsonData = '[[]]';
+    if(type == 'add') {
+        $.ajax({
+            url: getBaseURL() + 'cb/master/addtemplate',
+            type: 'POST',
+            async: false,
+            data: {
+                'TemplateName': templateName,
+                'Description': jsonData,
+                'CellName': selColumn,
+                'SelectedColumns': columns.join(),
+                'csrf': "<?php echo isset($csrf)?$csrf:''; ?>"
+            },
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200){
+                    $jqxGrid.jqxGrid('addrow',null,JSON.parse(data));
+                } else {
+                    isSuccess=false;
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                isSuccess=false;
+            }
+        });
+    } else if(type == 'edit') {
+        var rowid = $HandsonWrapper.data('rowid');
+        $.ajax({
+            url: getBaseURL() + 'cb/master/updatetemplate',
+            type: 'POST',
+            async: false,
+            data: {
+                'TemplateId': $TemplateId.val(),
+                'TemplateName': templateName,
+                'Description': jsonData,
+                'CellName': selColumn,
+                'SelectedColumns': columns.join(),
+                'csrf': "<?php echo isset($csrf)?$csrf:''; ?>"
+            },
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200){
+                    data = JSON.parse(data);
+                    $jqxGrid.jqxGrid("setcellvalue", rowid, 'TemplateId', data.TemplateId);
+                    $jqxGrid.jqxGrid("setcellvalue", rowid, 'TemplateName', data.TemplateName);
+                } else {
+                    isSuccess=false;
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                isSuccess=false;
+            }
+        });
+    }
+    if(!isSuccess) {
+        alert('Failed to Add the Template!');
+        return false;
+    }
+    $HandsonWrapper.hide();
+    $MainWrapper.fadeIn();
+}
+// Filter all empty rows
+function filterArray(arr) {
+    var checkNull = true;
+    arr =  $.grep($(arr).toArray().reverse(), function (n,i) {
+        var isValid = false;
+
+        if(!checkNull)
+            return true;
+
+        $.each(n, function(j,obj) {
+            if(obj != null) {
+                isValid = true;
+                checkNull = false;
+                return false;
+            }
+        });
+        return isValid;
+    });
+    return arr.reverse();
+}
+</script>
+

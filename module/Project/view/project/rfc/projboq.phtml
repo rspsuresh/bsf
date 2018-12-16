@@ -1,0 +1,473 @@
+<!--Handson Table plugin-->
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/handsontable/css/handsontable.full.min.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/lodash.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/underscore.string.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeral.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeric.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/formula.js"></script>
+<script type="text/javascript"src="<?php echo $this->basePath(); ?>/library/handsontable/js/parser.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.formula.js"></script>
+<!--Handson Table Plugin-->
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<style>
+.select2-container .select2-selection--single{min-height:37px}
+.lbl_move{height:34px !important}
+.appfilter,.lbl_move,.text-lab{ font-size:12px !important;}
+.bgs{background:#eaf4fd }
+.coll-top{margin-bottom:10px;}
+.appfilter{padding:8px 20px; width:auto}
+.show_hide5{ height: 38px;width: 120px !important;line-height: 39px;}
+
+    .action-btns										{position:absolute !important; top:-13px;  right:7px;  }
+    .action-btns > .btn-floating						{border-radius:2px !important;background:#673AB7!important; }
+    .action-btns > ul > li > a.btn-floating				{border-radius:2px !important; background:#673AB7!important; font-size:20px !important; line-height:38px !important;}
+    .action-btns > ul > li > a i						{line-height:28px !important;}
+    .action-btns > .btn-large							{height:37px !important; height:37px !important;}
+    .action-btns > ul									{top:15px !important;font-size:23px;left:-167px;}
+    .action-btns > .btn-floating i						{font-size:18px !important;line-height: 39px !important;}
+    .segment 								{position:relative;display:inline-block;margin-right:-10px;}
+    .quick_link_btn										{display:inline-block;padding:6px 10px; float:right;color: #fff; border: 1px solid #4285f4; font-weight: bold; background: #4285f4;
+        background: -webkit-linear-gradient(top,#4387fd,#4683ea); background: linear-gradient(top,#4387fd,#4683ea);}
+    .quick_link_btn span								{ display:inline-block;padding-right:5px;}
+    .quick_link_btn:hover,.quick_link_btn:visited,
+    .quick_link_btn:active								{color: #fff;background: #2964c6; background: -webkit-linear-gradient(top,#2964c6,#2358af); background: linear-gradient(top,#2964c6,#2358af);}
+    .quick_link .toolbar_ddown							{width:260px !important;right:10px;}
+    .quick_link .toolbar_ddown::before,
+    .quick_link .toolbar_ddown::after					{right:5px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12 clear padlr0">
+            <h1 class="col-lg-8 col-sm-7">Register - Project Bill Of Quantity</h1>
+            <div class="col-lg-4 quick_link">
+			
+                <a href="javascript:void(0);"style="float:right" class="dropdown-toggle quick_link_btn" data-toggle="dropdown" style="" >
+                    <label><span><i class="fa fa-link" aria-hidden="true"></i></span> Quick Links</label>
+                </a>
+				
+                <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                    <ul>
+                        <li>
+                            <a href="<?php echo $this->basePath() . '/project/main/projectworkgroup/' . $projectId;?>">Project WorkGroup</a>
+                        </li>
+                        <li>
+                            <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/rfc/resourcerateview';?>" method="post" id="frmresource">
+                                <input type="hidden" name="submitType" value="new"/>
+                                <input type="hidden" name="project_idNew" value="<?php echo $projectId; ?>"/>
+                                <input type="hidden" name="type_nameNew" value="B"/>
+                                <a href="#" onclick="showResourceRate()" >Project Resource</a>
+                            </form>
+                        </li>
+                        <li>
+                            <a href="<?php echo $this->basePath() . '/project/main/projectiowsortorder/' .$projectId;?>">BOQ Sort Order</a>
+                        </li>
+                    </ul>
+                </div>
+                <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/rfc/rfcprojectiow'; ?>" method="post" id="frm-project">
+                    <a  href="javascript:submitNewIOW();" style="float:right; margin:0 10px 0 0"class="fancy-button"><i class="fa fa-plus" style="margin-right:5px"></i>Add New IOW</a>
+                    <input type="hidden" name="project_id" id="ocproject_id" value="">
+                    <input type="hidden" name="type_name" id="octype_name" value="">
+                    <input type="hidden" name="revrequired" id="ocrevrequired" value="Y">
+                    <input type="hidden" name="frm_what" value="true"/>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-6 padlr0">
+            <div class="fixed-action-btn active rf-fixed"> <a class="btn-floating btn-large"> <i class="fa fa-print"></i> </a>
+                <ul>
+                    <li> <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Print Report"> <i class="fa fa-print"></i> </a> </li>
+                    <li> <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Download Excel"> <i class="fa fa-download"></i> </a> </li>
+                    <li> <a class="btn-floating" id="csvExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Export CSV"> <i class="fa fa-file-archive-o"></i> </a> </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 coll-top clear padlr0">
+            <div class="col-lg-4 col-sm-4">
+                <select name="projectid" id="projid" class="form-control single_dropdown lbl_move" label="Project" style="width:100%;" onchange="return changeProject(this.value);">
+                    <option value="0">Select Project</option>
+                    <?php foreach($projectlists as $project) { ?>
+                        <option value="<?php echo $project['ProjectId']; ?>" <?php if($project['ProjectId']==$projectId) { ?>selected<?php } ?>><?php echo $project[ 'ProjectName' ]; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+            <div class="col-lg-2 col-sm-2">
+                <select name="typename" id="typename" class="form-control single_dropdown lbl_move" label="Type" style="width:100%;" onchange="return changePlan();">
+                    <option value="B" <?php if($type == "B") { ?>selected<?php } ?>>Budget</option>
+                    <option value="P" <?php if($type == "P") { ?>selected<?php } ?>>Plan</option>
+                </select>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0"><a href="#" class="show_hide5"><i class="fa fa-filter" aria-hidden="true"></i> Show Filter</a> </div>
+			 
+        </div>
+		<div class="clearfix"></div>
+        <div class="col-lg-12">
+            <div class="bgs show-hi animated fadeInUp">
+                <form id="formWrapper" method="post" action="<?php echo $this->basePath(); ?>/project/rfc/projboq/<?php echo $projectId; ?>/<?php echo $type; ?>">
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Serial No</label>
+                        <input type="text" id="serialNo" name="serialNo" class="form-control lbl_move"  value="<?php if(count($search) > 0) { echo $search['serialNo']; } ?>" />
+                        <input type="hidden"  id="projectId" name="projectId" value="<?php echo $projectId; ?>" />
+                        <input type="hidden"  id="typeName" name="typeName" value="<?php echo $type; ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Description</label>
+                        <input type="text" id="specification" class="form-control lbl_move" name="specification" value="<?php if(count($search) > 0) { echo $search['specification']; } ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Amount</label>
+                        <input type="text" id="amount" name="amount" class="text-right form-control lbl_move" onKeyPress="return isDecimal(event,this)" value="<?php if(count($search) > 0) { echo $search['amount']; } ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">&nbsp;</label>
+                        <button type="button" class="ripple has-ripple appfilter" onClick="return submitForm()"><i class="fa fa-filter" aria-hidden="true"></i> Filter</button>
+                    </div>
+                    <!--<ul class="filter-op">
+							<li>
+								<label>Serial No</label>
+								<input type="text" id="serialNo" name="serialNo" value="<?php if(count($search) > 0) { echo $search['serialNo']; } ?>" />
+								<input type="hidden" id="projectId" name="projectId" value="<?php echo $projectId; ?>" />
+								<input type="hidden" id="typeName" name="typeName" value="<?php echo $type; ?>" />
+							</li>
+							<li>
+								<label>Description</label>
+								<input type="text" id="specification" name="specification" value="<?php if(count($search) > 0) { echo $search['specification']; } ?>" />
+							</li>
+							<li>
+								<label>Amount</label>
+								<input type="text" id="amount" name="amount" class="text-center" onkeypress="return isDecimal(event,this)" value="<?php if(count($search) > 0) { echo $search['amount']; } ?>" />
+							</li>
+							<li>
+								<label>&nbsp;</label>
+								<button type="button" class="ripple has-ripple" onclick="return submitForm()" style="position: relative; overflow: hidden;">Filter<span class="ripple-wrapper"></span></button>
+							</li>
+						</ul>-->
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 clear">
+            <div class="table-responsive animated fadeInUp">
+                <table border="1" class="table-transform table table-striped table-bordered table-hover" width="100%" data-toolbar="#transform-buttons">
+                    <thead>
+                    <tr>
+                        <th width="5%" data-field="serialno">Serial No</th>
+                        <th width="15%" data-field="name">Description</th>
+                        <th width="6%" data-field="unit">Unit</th>
+                        <th width="7%" data-field="qty">Quantity</th>
+                        <th width="8%" data-field="rate">Base Rate</th>
+                        <th width="8%" data-field="amount">Base Amount</th>
+                        <th width="8%" data-field="qrate">Qual Rate</th>
+                        <th width="8%" data-field="qamount">Qual Amount</th>
+                        <th width="5%">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    if(!empty($projboq)) {
+                        $rows = count($projboq['Type']);
+                        $perPage = 10;
+                        $pages = ceil( $rows / $perPage );
+
+                        $page = isset( $gpage ) ? $gpage : 0;
+                        $page == 0 ? $start = 0 : $start = ( $page - 1 ) * $perPage;
+                        $curpag = ( $start == 0 ) ? 1 : ( $start / $perPage ) + 1 ;
+
+                        $stopVal = $start + $perPage;
+                        for($i=$start;$i<$rows;$i++) {
+                            $class = '';
+                            if($i == $stopVal) {
+                                break;
+                            }
+                            if($projboq['Type'][$i] == 2 ) {
+                                if ($projboq['Header'][$i] == 1) $class = 'float:left; text-align:left; font-size:14px; color:#000; font-weight:bold';
+                                else $class = 'float:left; text-align:left; font-size:13px;width:100%;min-height:40px;max-height:60px;overflow:auto; color:#000;';
+                            }
+                            ?>
+                            <tr>
+                                <?php if($projboq['Type'][$i] == 1) { ?>
+                                    <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                    <td colspan="7"><span style="text-decoration:underline; float:left; text-align:left; font-size:16px; color:#000; font-weight:bold"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                <?php } else { ?>
+                                    <?php if($projboq['Unit'][$i] != '') { ?>
+                                        <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                        <td><span style="<?php echo $class; ?>"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                        <td><?php echo $projboq['Unit'][$i]; ?></td>
+                                        <td><?php echo $this->commonHelper()->sanitizeNumber($projboq['Quanity'][$i],3); ?></td>
+                                        <td><i id="<?php echo $projboq['IOWTransId'][$i]; ?>" class="fa fa-chevron-circle-down show_hide chevron" data-original-title="Expand" data-toggle="tooltip"></i>&nbsp;&nbsp;<?php echo $this->commonHelper()->sanitizeNumber($projboq['Rate'][$i],2,true); ?></td>
+                                        <td><?php echo $this->commonHelper()->sanitizeNumber($projboq['Amount'][$i],2,true); ?></td>
+                                        <td><?php echo $this->commonHelper()->sanitizeNumber($projboq['QualRate'][$i],2,true); ?></td>
+                                        <td><?php echo $this->commonHelper()->sanitizeNumber($projboq['QualAmount'][$i],2,true); ?></td>
+                                        <td><div class="ed-dl">
+                                                <a href="<?php echo $this->basePath(); ?>/project/rfc/rfcprojectiow/0/edit/<?php echo $projboq['ProjectIOWId'][$i];?>" class="pull-left"><i class="fa fa-pencil-square-o reg-icon"></i></a>
+                                                <!--                      <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfcprojectiowdelete/0/--><?php //echo $projboq['ProjectIOWId'][$i];?><!--/--><?php //echo $type; ?><!--" class="pull-left"><i class="fa fa-trash-o reg-icon"></i></a>-->
+                                                <a href="#" onclick="checkRFCDelete(<?php echo $projboq['ProjectIOWId'][$i];?>)" class="pull-left"><i class="fa fa-trash-o reg-icon"></i></a>
+
+                                                <div class="clearfix"></div>
+                                            </div></td>
+                                    <?php } else { ?>
+                                        <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                        <td colspan="8"><span style="<?php echo $class; ?>"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                    <?php } ?>
+                                <?php } ?>
+                            </tr>
+                            <?php if($projboq['IOWTransId'][$i] != '') { ?>
+                                <tr>
+                                    <td colspan="9"><div id="iowId_<?php echo $projboq['IOWTransId'][$i]; ?>" class="subDiv slidingDiv animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                            <div class="col-lg-12 clear" id="iowCon_<?php echo $projboq['IOWTransId'][$i]; ?>"></div>
+                                        </div></td>
+                                </tr>
+                            <?php } ?>
+                        <?php } ?>
+                    <?php } else { $pages =0; ?>
+                        <tr>
+                            <td colspan="9" style="text-align:center;">No data to display!</td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-offset-md-6">
+                <ul id="pagination-demo" class="pagination-sm">
+                </ul>
+            </div>
+            <!--table border="1" class="table-transform" width="100%" data-toolbar="#transform-buttons">
+                      <tr>
+                          <th width="73%"align="right" bordercolor="none" id="total" colspan="5"><span style=" float:right">Total :&nbsp;&nbsp;&nbsp;</span></th>
+                          <td width="9%"></td>
+                          <th width="9%" align="right" bordercolor="none" id="total"><span style=" float:right">Total :&nbsp;&nbsp;&nbsp;</span></th>
+                          <td width="9%"></td>
+                      </tr>
+                  </table-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.twbsPagination.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.twbsPagination.min.js"></script>
+<script type="text/javascript">
+    var $serialSearch = $('#serialNo'),
+        $specSearch = $('#specification'),
+        $amount = $('#amount');
+
+    $(function(){
+        $(".slidingDiv").hide();
+        $('.show_hide').click(function(){
+            //$(".slidingDiv").hide();
+            var iowId = $(this).attr("id");
+            var stype =  $('#typeName').val();
+            $("#iowId_"+iowId).slideToggle();
+            var sUrl = 'project/rfc/getprojectboqdetails';
+            if ($('#typeName').val() == 'P') sUrl = 'project/rfc/getprojectboqwbsdetails';
+            $.ajax({
+                url: getBaseURL() + sUrl,
+                type: 'POST',
+                data: {TransId: iowId},
+                async: false,
+                success: function(data,status, xhr) {
+                    console.log(data);
+                    if(xhr.status == 200) {
+                        $("#iowId_"+iowId).html(data);
+                    }
+                }, error: function(xhr, status, errorThrown) {
+                }
+            });
+        });
+    });
+
+    var pages = '<?php echo $pages; ?>';
+    var projectId = $('#projectId').val();
+    var typeName = $('#typeName').val();
+    $('#pagination-demo').twbsPagination({
+        totalPages: pages,
+        visiblePages: 3,
+        href: getBaseURL() + 'project/rfc/projboq/'+projectId+'/'+typeName+'/{{number}}'
+        /*onPageClick: function (event, page) {
+         $('#page-content').text('Page ' + page);
+         }*/
+    });
+
+    var arr_specifications = <?php echo json_encode($specifications); ?>;
+    var $specification = $('#specification');
+
+    $(function () {
+        // bind property name autocomplete
+        $specification.autocomplete({
+            lookup: arr_specifications,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    //$enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                //$enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    //$enquiryId.val(0);
+                } else {
+                    $(this).removeClass('error');
+                }
+            }
+        });
+    });
+
+
+    var arr_serialnos = <?php echo json_encode($serialNos); ?>;
+    var $serialNo = $('#serialNo');
+
+    $(function () {
+        // bind property name autocomplete
+        $serialNo.autocomplete({
+            lookup: arr_serialnos,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    //$enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                //$enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    //$enquiryId.val(0);
+                } else {
+                    $(this).removeClass('error');
+                }
+            }
+        });
+    });
+
+
+    function checkRFCDelete(id) {
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/checkProjectIOWUsed',
+            type: 'POST',
+            async: false,
+            data: {'id': id},
+            success: function (data) {
+                if (data=='Y') {
+                    alert('This IOW is already Used, Do Not Delete');
+                    return;
+                } else if (data=='U') {
+                    alert('Request to delete this IOW is already pending');
+                    return;
+                }
+                window.location = getBaseURL() + 'project/rfc/rfcprojectiowdelete/0/' + id;
+            },
+            error: function(xhr,status, error) {
+            }
+        });
+    }
+
+
+    function submitForm()
+    {
+        var formFlag = 0;
+        if($serialSearch.val() != '') {
+            formFlag = 1;
+        } else if($specSearch.val() != '') {
+            formFlag = 1;
+        } else if($amount.val() != '') {
+            formFlag = 1;
+        }
+
+        if(formFlag == 1) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    function showResourceRate() {
+        $('#frmresource').submit();
+    }
+
+    function changeProject(projId)
+    {
+        var projectId = isNullCheck(projId, 'number');
+        if (projectId != 0)
+        {
+            //$('#pagination-demo').twbsPagination('destroy');
+            var sType = isNullCheck($('#typename').val(), 'string');
+            if (sType == 'P') window.location.href = getBaseURL() + 'project/rfc/projboqplan/' + projectId;
+            else window.location.href = getBaseURL() + 'project/rfc/projboq/'+projectId+'/B';
+        }
+    }
+
+    function changePlan()
+    {
+        var projectId = isNullCheck($('#projid').val(), 'number');
+        window.location.href = getBaseURL() + 'project/rfc/projboqplan/'+projectId;
+    }
+
+    function submitNewIOW() {
+        var iProjectId = $('#projid').val(),
+            sType = $('#typename').val();
+        $('#ocproject_id').val(iProjectId);
+        $('#octype_name').val(sType);
+        $('#frm-project').submit();
+    }
+
+
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+
+        $(".show-hi").hide();
+        $(".show_hide5").show();
+
+        $('.show_hide5').click(function(){
+            $(".show-hi").slideToggle();
+
+        });
+    });
+</script>
+<script type="text/javascript">
+    $("#print").click(function () {
+        var ProjectId = <?php if(isset($projectId)) echo $projectId; else echo '""'; ?>;
+        var TypeId = <?php if(isset($type)) echo json_encode($type); else echo ''; ?>;
+
+        window.location.href = getBaseURL() + "project/rfc/projboq-print/" + ProjectId +"/"+TypeId;
+
+        /*
+         var tableContent = $('.table')[0].outerHTML;
+         var newWindow = window.open('', '', 'width=800, height=500'),
+         document = newWindow.document.open(),
+         pageContent =
+         '<!DOCTYPE html>\n' +
+         '<html>\n' +
+         '<head>\n' +
+         '<meta charset="utf-8" />\n' +
+         '<title>Register - Project Bill Of Quantity</title>\n' +
+         '<h1>Register - Project Bill Of Quantity</h1>\n' +
+         '</head>\n' +
+         '<body>\n' + tableContent + '\n</body>\n</html>';
+         document.write(pageContent);
+         document.close();
+         newWindow.print();
+         */
+    });
+</script>

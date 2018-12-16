@@ -1,0 +1,914 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&amp;key=AIzaSyDaNPyxJ7NKmZ4rC8awB-BlBh6ieH1Q9os"></script>
+<style>
+    .btn.selectpicker {
+        padding: 13px 12px 32px !important;
+    }
+    .cont_bt a.back-btn{background: #f1f1f1; border: 1px solid #d7d7d7; box-shadow: 2px 0 16px #d7d7d7 inset;color: #333333; margin:8px 0;   padding: 8px 16px;font-weight:bold;float:left}
+    .cont_bt a.back-btn:hover{border:1px solid #3399ff; color:#3399ff;box-shadow:none;background:#fff;font-weight:bold}
+    .remrk{height:60px; width:100%}
+</style>
+<!--content-->
+<div class="col-lg-12" style="display: none" id ="divselect">
+    <div class="col-lg-12">
+        <h1 class="text-center">Tender Enquiry </h1>
+    </div>
+    <div class="col-lg-12 clear">
+        <div class="row">
+            <div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts">
+                        <div class="form-group">
+                            <select name="enquirytypeselect" id="enquirytypeselect" class="single_dropdown lbl_move" data-size="5" style=" width:100%;">
+                                <option value="1">New Enquiry</option>
+                                <option value="2">Existing Project</option>
+                            </select>
+                        </div>
+                        <div class="next-bt"><a href="javascript:goNext();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content_wrapper padlr0" style="display: none" id="divmain">
+<div class="container-fluid">
+<div class="row">
+<div class="col-lg-12">
+    <h1 class="text-center">Tender Enquiry</h1>
+</div>
+<!--form start-->
+<form id="formWrapper" method="post" role="form" enctype="multipart/form-data" onsubmit="return tenderValidate();">
+<input type="hidden" name="TenderEnquiryId" id="TenderEnquiryId" value="<?php if ($tenderEnquiryId != 0) { echo $tenderEnquiryId; } else { echo '0'; } ?>" />
+<input type="hidden" name="enquiryType" id="enquiryType" value="<?php echo $tenderEnquiry['EnquiryType']; ?>" />
+<div class="col-lg-12 top_ct" style="margin-bottom:10px">
+    <div class="col-lg-3 col-lg-offset-2">
+        <div class="countdown-box">
+            <div class="countdown" id="lRefNo" style="color:#45a2c9;" onclick="showReceiptNoText()">
+                <label id="lcno"><b style="color:#333">Ref No : </b><span style="font-size:15px;text-decoration: underline;"><?php  if ($tenderEnquiryId!=0) { echo (isset($tenderEnquiry)) ? $tenderEnquiry['RefNo'] : ''; } else {echo $svNo;}?></span></label>
+            </div>
+            <div id="tRefNo" style="display: none" >
+                <input type="text" name="RefNo" data-bsfshare="RefNo" id="RefNo" class="form-control lbl_move" label="Ref No." value="<?php if ($tenderEnquiryId!=0) { echo (isset($tenderEnquiry)) ? $tenderEnquiry['RefNo'] : '';} else {echo $svNo; }?>" <?php if ($genType==true) { ?> readonly <?php } ?> maxlength="50" onblur="showReceiptNoLabel()"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-lg-offset-1">
+        <div class="countdown-box">
+            <div class="countdown" id="lRefDate" style="color:#45a2c9 ;" onclick="showReceiptDateText()">
+                <label id="lcdate" style="float: right"><b style="color:#333">Ref Date : </b><span style="font-size:15px;text-decoration: underline;"><?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['RefDate'] : date('d-m-Y');?></span> </label>
+            </div>
+            <div id="tRefDate" style="display: none" >
+                <input type="text" name="RefDate" data-bsfshare="RefDate" id="RefDate" class="form-control date_picker lbl_move" readonly="readonly" label="Ref Date" onchange="validateDate(this)"  value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['RefDate'] : date('d-m-Y');?>"  onblur="showReceiptDateLabel()"/>
+                <input type="hidden" readonly name="Today" id="Today" value="<?php echo date("d-m-Y"); ?>" />
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12">
+<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2" id="divexist" style="display: none;background:#e7e9ec;padding-top:20px; padding-bottom:20px; border:1px solid #CFD8E6">
+    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0">
+        <input type="text" name="projectName" id="projectName" class="form-control lbl_move" label="Name of Project" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['CostCentreName'] : ''; ?>" />
+        <div class="error_message"><p>please enter name of work...</p></div>
+        <input type="hidden" name="costcentreId" id="costcentreId" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['CostCentreId'] : '0';?>" />
+        <input type="hidden" name="pclientId" id="pclientId" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ClientId'] : '0';?>" />
+        <input type="hidden" name="workorderId" id="workorderId" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['WORegisterId'] : '0';?>" />
+        <input type="hidden" name="refenquiryId" id="refenquiryId" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['RefEnquiryId'] : '0';?>" />
+    </div>
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <select name="quotetype" id="quotetype" class="single_dropdown lbl_move" data-size="5" style=" width:100%;">
+            <option value="0">Select Quote Type</option>
+            <option value="N"<?php echo (isset($tenderEnquiry) && $tenderEnquiry['QuoteType'] == 'N') ? 'selected' : '';?>>New Items</option>
+            <option value="Q"<?php echo (isset($tenderEnquiry) && $tenderEnquiry['QuoteType'] == 'Q') ? 'selected' : '';?>>Quantity Amend</option>
+        </select>
+        <div class="error_message"><p>please select quote type...</p></div>
+    </div>
+</div>
+<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2" id="divnew" style="display: none;background:#e7e9ec;padding-top:20px; padding-bottom:20px; border:1px solid #CFD8E6">
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" maxlength="255" name="NameOfWork" id="NameOfWork" class="form-control lbl_move" onchange="return nameWork(this.value);" label="Name Of Work" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['NameOfWork'] : ''; ?>" />
+            <div class="error_message"><p>please enter name of work...</p></div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <select name="SourceType" id="SourceType" class="single_dropdown lbl_move" data-size="5" onChange="return changeSourceType(this.value);"  style=" width:100%;">
+                <option value="0">Select Source Type</option>
+                <?php foreach($sourceType as $key => $value) { ?>
+                    <option value="<?php echo $key; ?>" <?php echo (isset($tenderEnquiry) && $tenderEnquiry['SourceType'] == $key) ? 'selected' : ''; ?>><?php echo $value; ?></option>
+                <?php } ?>
+            </select>
+            <div class="error_message"><p>please select source type...</p></div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" maxlength="120" name="SourceName" id="SourceName" class="form-control lbl_move" label="Source Name" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['SourceName'] : ''; ?>" />
+            <div class="error_message"><p>please enter source name...</p></div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" name="ClientName" id="ClientName" class="form-control lbl_move" label="Client Name" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ClientName'] : ''; ?>" />
+            <input type="hidden" name="ClientId" id="ClientId" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ClientId'] : ''; ?>" />
+            <div class="error_message"><p>please enter client name...</p></div>
+        </div>
+    </div>
+    <div id="divContactNo" class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" maxlength="20" name="ContactNo" id="ContactNo" class="form-control lbl_move" label="Contact No" maxlength="14" onKeyPress="return isNumberKey(event);" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ContactNo'] : ''; ?>" />
+            <div class="error_message"><p>please enter contact no...</p></div>
+        </div>
+    </div>
+    <div id="divNewsDate" class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            <input type="text" readonly name="NewsDate" id="NewsDate" class="form-control date_picker lbl_move" label="News Paper Date" value="<?php echo (isset($tenderEnquiry) &&  !is_null($tenderEnquiry['NewsDate'])) ? date("d-m-Y", strtotime($tenderEnquiry['NewsDate'])) : date("d-m-Y"); ?>" />
+            <div class="error_message"><p>please enter news paper date...</p></div>
+        </div>
+    </div>
+    <div id="divNewsPageNo" class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" maxlength="5" name="NewsPageNo" id="NewsPageNo" class="form-control lbl_move" label="News Paper Page No" maxlength="3" onKeyPress="return isNumberKey(event);" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['NewsPageNo'] : ''; ?>" />
+            <div class="error_message"><p>please enter news paper page no...</p></div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" class="form-control lbl_move" maxlength="255" name="plocation" id="plocation" label="Project Location" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['CityName'] : ''; ?>"/>
+            <div class="error_message"><p>please select project location...</p></div>
+            <input type="hidden" id="pcityid" name="pcityid" class="form-control" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['CityId'] : ''; ?>"/>
+<!--            <input type="hidden" id="pcity" name="pcity" class="form-control" data-name="locality" />-->
+<!--            <input type="hidden" id="pstate" name="pstate" class="form-control" data-name="administrative_area_level_1" />-->
+<!--            <input type="hidden" id="pcountry" name="pcountry" class="form-control" data-name="country" />-->
+        </div>
+    </div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <div class="form-group">
+            <input type="text" class="form-control lbl_move" maxlength="255" name="projectTypeName" id="projectTypeName" label="Project Type" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProjectTypeName'] : ''; ?>" />
+            <input type="hidden" id="ProjectTypeId" name="ProjectTypeId" class="form-control" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProjectTypeId'] : ''; ?>"/>
+        </div>
+    </div>
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+        <input type="text" maxlength="15" name="ProposalCost" id="ProposalCost" class="form-control lbl_move" label="Proposal Cost" onblur="return FormatNum(this, 2,true)" onKeyPress="return isDecimal(event,this);" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProposalCost'] : ''; ?>" />
+        <div class="error_message"><p>please enter proposal cost...</p></div>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-6">
+        <div class="col-lg-9 col-md-9 col-sm-9 padlr0">
+            <input type="text" maxlength="5" name="ProjectDuration" id="ProjectDuration" class="form-control lbl_move" label="Project Duration" onKeyPress="return isNumberKey(event);" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProjectDuration'] : ''; ?>" />
+            <div class="error_message"><p>please enter project duration...</p></div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+            <select name="Duration" id="Duration" class="form-control selectpicker show-tick">
+                <option value="1" <?php echo (isset($tenderEnquiry) && $tenderEnquiry['Duration'] == '1') ? 'selected' : ''; ?>>Days</option>
+                <option value="2" <?php echo (isset($tenderEnquiry) && $tenderEnquiry['Duration'] == '2') ? 'selected' : ''; ?>>Weeks</option>
+                <option value="3" <?php echo (isset($tenderEnquiry) && $tenderEnquiry['Duration'] == '3') ? 'selected' : ''; ?>>Months</option>
+                <option value="4" <?php echo (isset($tenderEnquiry) && $tenderEnquiry['Duration'] == '4') ? 'selected' : ''; ?>>Years</option>
+            </select>
+        </div>
+    </div>
+</div>
+<!--					<div class="clearfix"></div>-->
+<!--Document update-->
+<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2" style="padding:0 !important">
+    <div class="table-responsive topsp" style="margin-top:10px;">
+        <table class="table tableWithFloatingHeader" style=" margin-bottom:0px;">
+            <thead>
+            <tr>
+                <th>Document Type</th>
+                <th>Document Description</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php if(isset($tenderDocumentTrans) && count($tenderDocumentTrans) != 0): $i=1;
+                foreach($tenderDocumentTrans as $tenderDoc): ?>
+                    <tr>
+                        <td width="15%"><input  class="parent_text" maxlength="155" type="text" name="DocType_<?php echo $i; ?>" id="DocType_<?php echo $i; ?>" maxlength="155" onblur="addNewTenderDocRow(this)" value="<?php echo $tenderDoc['Type']; ?>" /></td>
+                        <td width="15%"><textarea class="parent_texts" name="DocDesc_<?php echo $i; ?>" id="DocDesc_<?php echo $i; ?>" onblur="addNewTenderDocRow(this)" ><?php echo $tenderDoc['Description']; ?></textarea></td>
+                        <td width="4%" class="action_btns_td"><ul class="action_btns">
+                                <li style="float:left;"> <a class="pull-left" id="docAttachment_<?php echo $i; ?>" href="<?php echo (trim($tenderDoc['URL']) == '')?'#': $this->basePath(). $tenderDoc['URL'];?>" <?php if(trim($tenderDoc['URL']) != ''): ?> target="_blank" download="" <?php endif; ?>>
+                                        <?php if(trim($tenderDoc['URL']) == ''): ?>
+                                            <span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch"></i>
+                                                                <input type="file" name="docFile_<?php echo $i; ?>" id="docFile_<?php echo $i; ?>">
+                                                                <i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>
+                                                                </span>
+                                        <?php else: ?>
+                                            <i class="fa fa-eye" data-toggle="tooltip" data-placement="left" data-original-title="Download Attachment"></i>
+                                            <input type="hidden" name="tenderDocFile_<?php echo $i; ?>" id="tenderDocFile_<?php echo $i; ?>" value="<?php echo $tenderDoc['URL'];?>">
+                                        <?php endif; ?>
+                                    </a>
+                                </li>
+                                <li class=""> <a href="#" class="deleteTenderDoc_<?php echo $i; ?>" onclick="deleteTenderDoc(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                            </ul></td>
+                    </tr>
+                    <?php $i++; endforeach; else: ?>
+                <tr>
+                    <td width="15%"><input class="parent_text" type="text" name="DocType_1" id="DocType_1" maxlength="155" onchange="addNewTenderDocRow(this)" /></td>
+                    <td width="15%"><textarea class="parent_texts" name="DocDesc_1" id="DocDesc_1" onchange="addNewTenderDocRow(this)"></textarea></td>
+                    <td width="4%" class="action_btns_td"><ul class="action_btns">
+                            <li style="float:left;"> <a href="#"> <span  data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch"></i>
+                                            <input type="file" name="tenderDocFile_1" id="tenderDocFile_1">
+                                            </span> </a> </li>
+                            <!--                            <li style="float:left;"> <a class="mainTr_1" href="#"> <span data-toggle="tooltip" data-placement="left" data-original-title="Document Views"><i class="fa fa-eye"></i></span> </a> </li>-->
+                            <li style="float:left;"> <a href="#" class="deleteTenderDoc_1" onclick="deleteTenderDoc(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                        </ul></td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+        <input type="hidden" name="tenderdocumentrowid" id="tenderdocumentrowid" value="<?php echo (isset($tenderDocumentTrans) && count($tenderDocumentTrans) != 0) ? count($tenderDocumentTrans) : 1; ?>" />
+    </div>
+    <textarea placeholder="Enter Remarks" maxlength="255" class="remrk element form-group" maxlength="255" name="narration" id="narration" title="Remarks" onfocus="inputFocus(this)" onblur="inputBlur(this)"><?php if(isset($tenderEnquiry['Narration'])) echo $tenderEnquiry['Narration'];?></textarea>
+
+    <!--div class="clearfix"></div-->
+    <!--continue-->
+    <!--div class="back-bts"><a href="</?php echo $this->basePath().'/project/tender/enquiry-details'; ?>">Continue With Tender Enquiry &nbsp;<i class="fa fa-chevron-circle-right"></i></a></div-->
+    <!--continue-->
+</div>
+<!--Document update-->
+<!--Modal-->
+<div id="clientmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Client</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <div class="form-group">
+                        <input type="text" class="form-control lbl_move" maxlength="150" name="MClientName" id="MClientName"  label="Client Name" />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control lbl_move" maxlength="255" name="MClientAddress" id="MClientAddress" label="Address"  />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control lbl_move" name="MCityId" id="MCityId" data-name="locality" label="City"/>
+                        <input type="hidden" id="state" name="state" class="form-control" data-name="administrative_area_level_1" />
+                        <input type="hidden" id="country" name="country" class="form-control" data-name="country" />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control lbl_move" maxlength="50" name="phoneNo" id="phoneNo" label="Phone No"  onKeyPress="return isNumberKey(event);" />
+                    </div><div class="form-group">
+                        <input type="text" class="form-control lbl_move" maxlength="255" name="eMail" id="eMail" label="Email"  onchange="validateEmail(this)" />
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <div class="col-lg-12">
+                    <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                    <button type="button" id="btn-newclient" class="md_ok" onclick="return ClientUpdate()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal-->
+</div>
+</form>
+<!--form end-->
+</div>
+</div>
+<div class="col-lg-10 savebtn_area">
+<!--    <div class="cont_bt col-md-4"><a class="ripple back-btn" href="#"><i class="fa fa-backward" aria-hidden="true"></i>Back</a></div>-->
+
+<!--    <div class="col-lg-8">-->
+        <ul>
+            <li class="dropdown save_btn float_r ripple"><a href="javascript:void(0);" id="submitData">Next</a></li>
+            <li class="cancel_btn float_r"><a href="<?php echo ($tenderEnquiryId !=0) ? $this->basePath().'/project/tender/tenderregister' :  $this->basePath().'/project/tender/enquiry'; ?>">Cancel</a></li>
+        </ul>
+<!--    </div>-->
+</div>
+</div>
+<!--content end-->
+
+<table id="dummy-tenderdoctype" style="display: none;">
+    <tbody>
+    <tr>
+        <td width="15%"><input maxlength="155" class="parent_text" type="text" id="DocType__1" name="DocType__1" maxlength="155" onchange="addNewTenderDocRow(this)" /></td>
+        <td width="15%"><textarea class="parent_texts" name="DocDesc__1" id="DocDesc__1" onchange="addNewTenderDocRow(this)"></textarea></td>
+        <td width="4%" class="action_btns_td"><ul class="action_btns">
+                <li style="float:left;"> <a href="#"> <span  data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch" ></i>
+            <input type="file" name="tenderDocFile__1" id="tenderDocFile__1">
+            </span> </a> </li>
+                <!--                    <li style="float:left;"> <a class="mainTr__1" href="#"> <span data-toggle="tooltip" data-placement="left" data-original-title="Document Views"><i class="fa fa-eye"></i></span> </a> </li>-->
+                <li style="float:left;"> <a href="#" class="deleteTenderDoc__1" onclick="deleteTenderDoc(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+            </ul></td>
+    </tr>
+    </tbody>
+</table>
+
+
+<script type="text/javascript">
+var arr_clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]'; ?>;
+var arr_projects = <?php echo (isset($projectList)) ? json_encode($projectList) : '[]'; ?>;
+var arr_projecttype = <?php echo (isset($projectTypeResult)) ? json_encode($projectTypeResult) : '[]'; ?>;
+
+var $ClientName = $('#ClientName'),
+    $ClientId = $('#ClientId');
+
+var $ModalClientName = $('#MClientName'),
+    $ModalClientAddress = $('#MClientAddress'),
+    $ModalClientCity = $('#MCityId'),
+    $ModalphoneNo = $('#phoneNo'),
+    $ModaleMail = $('#eMail'),
+    tmpClientData = null,
+    $btn_newclient = $('#btn-newclient');
+
+
+function bindProjectAutoComplete(noSuggestion)
+{
+    var showSuggestion = true;
+    if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+        showSuggestion = false;
+    }
+
+    $('#projectName').unbind('autocomplete');
+    $('#projectName').autocomplete({
+        lookup: arr_projects,
+        showNoSuggestionNotice:false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#projectName').val(suggestion.value);
+                $('#costcentreId').val(suggestion.data);
+                $('#pclientId').val(suggestion.ClientId);
+                $('#workorderId').val(suggestion.WORegisterId);
+                $('#refenquiryId').val(suggestion.TenderEnquiryId);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $('#costcentreId').val(0);
+            $('#pclientId').val(0);
+            $('#workorderId').val(0);
+            $('#refenquiryId').val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $('#costcentreId').val(0);
+                $('#pclientId').val(0);
+                $('#workorderId').val(0);
+                $('#refenquiryId').val(0);
+            } else $(this).removeClass('error');
+        }
+    });
+}
+
+function bindProjectTypeAutoComplete(noSuggestion)
+{
+    var showSuggestion = true;
+    if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+        showSuggestion = false;
+    }
+
+    $('#projectTypeName').unbind('autocomplete');
+    $('#projectTypeName').autocomplete({
+        lookup: arr_projecttype,
+        showNoSuggestionNotice:false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#projectTypeName').val(suggestion.value);
+                $('#ProjectTypeId').val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $('#ProjectTypeId').val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+//                $(this).addClass('error');
+                $('#ProjectTypeId').val(0);
+            } else $(this).removeClass('error');
+        }
+    });
+}
+
+function bindClientAutoComplete(noSuggestion)
+{
+    var showSuggestion = true;
+    if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+        showSuggestion = false;
+    }
+
+    $ClientName.unbind('autocomplete');
+    $ClientName.autocomplete({
+        lookup: arr_clients,
+        showNoSuggestionNotice: showSuggestion,
+        noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" value="Client" onclick="return AddNewClient()">',
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $ClientId.val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $ClientId.val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $ClientId.val(0);
+            } else $(this).removeClass('error');
+        }
+    });
+}
+
+function goNext() {
+    $('#divselect').hide();
+    $('#divmain').show();
+    var ival = parseInt(isNullCheck($('#enquirytypeselect').val(),'number'));
+    if (ival == 1)  { $('#divexist').hide(); $('#divnew').show(); $('#submitData').html('Next'); $('#enquiryType').val('N');  }
+    else if (ival == 2)  { $('#divnew').hide();$('#divexist').show(); $('#submitData').html('Submit');$('#enquiryType').val('E');}
+}
+
+function AddNewClient()
+{
+    if(tmpClientData != null)
+        $btn_newclient.html('Update');
+
+    $('.autocomplete-suggestions').hide();
+    $ModalClientName.val($ClientName.val()).trigger('change');
+    $ModalClientAddress.val('').trigger('change');
+    $ModalClientCity.val('').trigger('change');
+    $ModalphoneNo.val('').trigger('change');
+    $ModaleMail.val('').trigger('change');
+    $("#clientmodal").modal('show');
+}
+
+function ClientUpdate()
+{
+    var clientName = $ModalClientName.val();
+    if(clientName.length == 0) {
+        alert('Client Name is required!');
+        return false;
+    }
+
+    if($ModalClientAddress.val().length == 0) {
+        alert('Address is required!');
+        return false;
+    }
+
+    var clientStatus = CheckClientName(clientName);
+    if(clientStatus == 'restricted') {
+        return false;
+    } else if (clientStatus === true) {
+        alert('Client Name already exists!');
+        return false;
+    }
+
+    if(tmpClientData != null)
+        arr_clients.pop();
+
+    tmpClientData = clientName;
+    arr_clients.push({data: 'new', value: clientName});
+
+    bindClientAutoComplete(); // Rebind data
+    $ClientName.val(clientName);
+    $ClientName.trigger('focus');
+    $("#clientmodal").modal('hide');
+}
+
+function CheckClientName(value)
+{
+    var isExists = false;
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + "project/tender/check-client",
+        data: {rtype:'clientname',search:value},
+        async: false,
+        type: 'post',
+        success: function(data, status, jqXHR){
+            if (data == "Y") {
+                isExists = true;
+            }
+            $('.loading_area').hide();
+        }, error:function(jqXHR, textStatus, errorThrown){
+            $('.loading_area').hide();
+            isExists = true;
+        }
+    });
+    return isExists;
+}
+
+$(function(){
+    var iTenderId = parseInt(isNullCheck($('#TenderEnquiryId').val(),'number'));
+    if (iTenderId!=0) {
+        $('#divmain').show();
+        var sType = isNullCheck($('#enquiryType').val(),'string');
+        if (sType == "E")  { $('#divnew').hide();$('#divexist').show(); $('#submitData').html('Submit');  $('#projectName').prop('readonly',true);}
+        else { $('#divexist').hide(); $('#divnew').show(); $('#submitData').html('Next'); }
+    } else {
+        $('#divselect').show();
+    }
+
+    bindProjectAutoComplete();
+    bindProjectTypeAutoComplete();
+    bindClientAutoComplete();
+    bindDocAttached();
+
+    var tenderdocumentrowid = $('#tenderdocumentrowid').val();
+    $('#DocType_'+tenderdocumentrowid).trigger('blur');
+
+    $('#ProposalCost').trigger('blur');
+});
+
+$('#divContactNo').hide();
+$('#divNewsDate').hide();
+$('#divNewsPageNo').hide();
+function changeSourceType(cst)
+{
+    if(cst==1) {
+        $('#ContactNo').val('');
+        $('#divContactNo').hide();
+        $('#divNewsDate').show();
+        $('#divNewsPageNo').show();
+    } else if(cst!=1 && cst!=2) {
+        $('#NewsDate').val('');
+        $('#NewsPageNo').val('');
+        $('#divNewsDate').hide();
+        $('#divNewsPageNo').hide();
+        $('#divContactNo').show();
+    } else {
+        $('#ContactNo').val('');
+        $('#NewsDate').val('');
+        $('#NewsPageNo').val('');
+        $('#divContactNo').hide();
+        $('#divNewsDate').hide();
+        $('#divNewsPageNo').hide();
+    }
+}
+
+$("#submitData").click(function(){
+    $("form").submit();
+});
+
+var $NameOfWork = $('#NameOfWork');
+
+function tenderValidate()
+{
+    $('.error_message').hide();
+    if($.trim($('#RefDate').val()) == '') {
+        $('#RefDate').closest('.form-group').find(".error_message").show();
+        $('#RefDate').closest('.form-group').find(".error_message").html('<p>please enter reference date...</p>');
+        $('#RefDate').focus();
+        return false;
+    }
+    else {
+        if (!compareDate($('#RefDate').val(), $('#Today').val())) {
+            $('#RefDate').closest('.form-group').find(".error_message").show();
+            $('#RefDate').closest('.form-group').find(".error_message").html('<p>reference date should not be greater than today...</p>');
+            $('#RefDate').focus();
+            return false;
+        }
+    }
+
+    if($.trim($('#RefNo').val()) == '') {
+        $('#RefNo').closest('.form-group').find(".error_message").show();
+        $('#RefNo').focus();
+        return false;
+    }
+
+    if ($('#enquiryType').val() == "E") {
+        if ($.trim($('#projectName').val()) == '') {
+            $('#projectName').closest('.form-group').find(".error_message").show();
+            $('#projectName').focus();
+            return false;
+        }
+        var iCCId = parseInt(isNullCheck($('#costcentreId').val(),'number')),
+            ipClientId = parseInt(isNullCheck($('#pclientId').val(),'number')),
+            iwoid= parseInt(isNullCheck($('#workorderId').val(),'number')),
+            sQtype = isNullCheck($('#quotetype').val(),'string');
+
+        if (iCCId==0 || ipClientId ==0 || iwoid ==0) {
+            $('#projectName').closest('.form-group').find(".error_message").show();
+            $('#projectName').focus();
+            return false;
+        }
+        if (sQtype == "0") {
+            $('#quotetype').closest('.form-group').find(".error_message").show();
+            $('#quotetype').focus();
+            return false;
+        }
+    } else {
+
+        if ($.trim($('#NameOfWork').val()) == '') {
+            $('#NameOfWork').closest('.form-group').find(".error_message").show();
+            $('#NameOfWork').focus();
+            return false;
+        }
+
+        if ($.trim($('#SourceType').val()) == '0') {
+            $('#SourceType').closest('.form-group').find(".error_message").show();
+            $('#SourceType').focus();
+            return false;
+        } else {
+            if ($.trim($('#SourceType').val()) == '1') {
+                if ($.trim($('#NewsDate').val()) == '') {
+                    $('#NewsDate').closest('.form-group').find(".error_message").show();
+                    $('#NewsDate').focus();
+                    return false;
+                }
+                if ($.trim($('#NewsPageNo').val()) == '') {
+                    $('#NewsPageNo').closest('.form-group').find(".error_message").show();
+                    $('#NewsPageNo').focus();
+                    return false;
+                }
+            } else if ($.trim($('#SourceType').val()) != '1' && $.trim($('#SourceType').val()) != '2') {
+                if ($.trim($('#ContactNo').val()) == '') {
+                    $('#ContactNo').closest('.form-group').find(".error_message").show();
+                    $('#ContactNo').focus();
+                    return false;
+                }
+            }
+        }
+        if ($.trim($('#SourceName').val()) == '') {
+            $('#SourceName').closest('.form-group').find(".error_message").show();
+            $('#SourceName').focus();
+            return false;
+        }
+        if ($.trim($('#ClientName').val()) == '') {
+            $('#ClientName').closest('.form-group').find(".error_message").show();
+            $('#ClientName').focus();
+            return false;
+        }
+        if ($.trim($('#CityId').val()) == '0') {
+            $('#CityId').closest('.form-group').find(".error_message").show();
+            $('#CityId').focus();
+            return false;
+        }
+        if ($.trim($('#ProposalCost').val()) == '') {
+            $('#ProposalCost').closest('.form-group').find(".error_message").show();
+            $('#ProposalCost').focus();
+            return false;
+        }
+        if ($.trim($('#ProjectDuration').val()) == '') {
+            $('#ProjectDuration').closest('.form-group').find(".error_message").show();
+            $('#ProjectDuration').focus();
+            return false;
+        }
+
+    }
+
+//    $NameOfWork.removeClass('error');
+//    if($NameOfWork.val().length == 0) {
+//        $NameOfWork.addClass('error');
+//        $NameOfWork.focus();
+//        return false;
+//    }
+//
+//    //Validation for Duplicate NameofWork
+//    var NameExist = true;
+//    if($NameOfWork.val().length != 0) {
+//        $.ajax({
+//            url: getBaseURL() + 'project/tender/enquiry/'+ $('#TenderEnquiryId').val(),
+//            type: "post",
+//            data: {'name': $NameOfWork.val(), 'type': 'NameOfWork'},
+//            async: false,
+//            success: function (data, textStatus, jqXHR) {
+//                if (data == '"N"') {
+//                    alert('Name of Work already Exist');
+//                    /*if($('#panelheading-1').attr('aria-expanded') == "false"){
+//                        $('#panelheading-1').trigger('click');
+//                    }*/
+//                    $NameOfWork.focus();
+//                    NameExist = false;
+//                }
+//            }, error: function (jqXHR, textStatus, errorThrown) {
+//                alert('error');
+//            }
+//        });
+//    }
+//    if(!NameExist)
+//        return false;
+//
+//    return true;
+}
+
+function nameWork(){
+    $NameOfWork.removeClass('error');
+    if($NameOfWork.val().length == 0) {
+        $NameOfWork.addClass('error');
+        $NameOfWork.focus();
+        return false;
+    }
+
+    //Validation for Duplicate NameofWork
+    var NameExist = true;
+    if($NameOfWork.val().length != 0) {
+        $.ajax({
+            url: getBaseURL() + 'project/tender/enquiry/'+ $('#TenderEnquiryId').val(),
+            type: "post",
+            data: {'name': $NameOfWork.val(), 'type': 'NameOfWork'},
+            async: false,
+            success: function (data, textStatus, jqXHR) {
+                if (data == '"N"') {
+                    alert('Name of Work already Exist');
+                    /*if($('#panelheading-1').attr('aria-expanded') == "false"){
+                     $('#panelheading-1').trigger('click');
+                     }*/
+                    $NameOfWork.focus();
+                    NameExist = false;
+                    $NameOfWork.val('');
+                }
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                alert('error');
+            }
+        });
+    }
+    if(!NameExist)
+        return false;
+
+    return true;
+}
+
+<?php if ($tenderEnquiryId !=0 ) { ?>
+changeSourceType(<?php echo $tenderEnquiry['SourceType']; ?>);
+<?php } ?>
+
+/*Mapping Address*/
+navigator.geolocation.getCurrentPosition(showPosition);
+
+$('#plocation').geocomplete({
+    details: "#formWrapper",
+    types: ['(cities)']
+//    componentRestrictions: {}
+});
+
+$('#MClientAddress').geocomplete({
+    details: "#formWrapper",
+    types: ["geocode", "establishment"]
+});
+
+function showPosition(position) {
+    var coordinates = position.coords.latitude + "," + position.coords.longitude;
+    $('#MClientAddress').val(coordinates);
+    $('#MClientAddress').trigger("geocode");
+    if (isNullCheck($('#plocation').val(),'string') =='') $('#plocation').val(' ').trigger("change");
+}
+
+function addNewTenderDocRow(x) {
+    var $x = $(x),
+        $tr = $(x).closest('tr'),
+        key = $x[0].id.split('_')[1];
+    if ($tr.next('tr').length != 0)
+        return;
+
+    var $rowid = $('#tenderdocumentrowid'),
+        rowid = parseInt($rowid.val());
+    $('.deleteTenderDoc_' + rowid).show();
+    var count = parseInt($rowid.val()) + 1,
+        template = $('#dummy-tenderdoctype tbody').html();
+
+    if ($('#DocType_' + key).val().length == 0)
+        return;
+
+    template = template.replace(/__1/g, '_' + count);
+    $tr.parent('tbody').append(template);
+
+    bindDocAttached();
+    $rowid.val(count);
+}
+
+function bindDocAttached() {
+    var tenderDocFiles = $('input[id^=tenderDocFile_]');
+    tenderDocFiles.unbind('change');
+
+    tenderDocFiles.on('change', function() {
+        var $this = $(this);
+        var $tarEl = $(this).siblings('i');
+        var $tooltip = $tarEl.parent('span');
+        var $tarA = $tarEl.closest('a');
+        if($(this).val() != '') {
+            $tarA.addClass('pull-left');
+            $tarEl.removeClass('fa-paperclip').addClass('fa-file-o file-do');
+            $tooltip.attr('data-original-title', 'Document Attached');
+
+            if($tarA.next('i.brkn').length == 0)
+                $('<i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>').insertAfter($tarA);
+
+        } else {
+            $tarA.next('i.brkn').remove();
+            $tarEl.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+            $tooltip.attr('data-original-title', 'Click to attach documents');
+        }
+    });
+}
+
+function removeAttachment($tarEl) {
+
+    if (!confirm('Do you want to Remove')) {
+        return false;
+    }
+
+    var $tarLi = $tarEl.closest('li');
+    var $tarA = $tarLi.find('a');
+    var $tarI = $tarA.find('i.fa-file-o');
+    var $tarIp = $tarLi.find('input[type="hidden"]');
+
+    $tarIp.attr('type', 'file').removeAttr('value');
+//        $tarA.attr('href', '#').removeAttr('download').removeAttr('target');
+    $tarI.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+    $tarA.html('<span class="btn-file butclr_imp">' + $tarA.html() + '</span>');
+    bindDocAttached();
+
+    $tarEl.remove();
+}
+
+function deleteTenderDoc(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        $tbody = $tr.parent('tbody');
+
+    if ($tbody.find('> tr').length == 1) {
+        var template = $('#dummy-tenderdoctype tbody').html();
+        template = template.replace(/__1/g, '_' + 1);
+        $tbody.append(template);
+        $('#tenderdocumentrowid').val(1);
+
+        bindExpandTr();
+    }
+
+    $tr.next('tr.subTr').remove();
+    $tr.remove();
+
+    $('input[id^=DocType_]').trigger('blur');
+    //$('input[id^=DocType_]').trigger('change');
+    return false;
+}
+
+function bindExpandTr() {
+    var $tr = $(".mainTr");
+    $tr.unbind('click');
+    $tr.click(function(e){
+        e.preventDefault();
+        var $subtr = $(this).closest("tr").next(".subTr"),
+            $i = $(this).find("i");
+
+        if(!$subtr.is(":visible")){
+            $subtr.show();
+            $subtr.find(".subDiv").slideDown("slow");
+            $i.addClass("tform");
+        } else{
+            $subtr.find(".subDiv").slideUp("slow");
+            $subtr.slideUp("slow");
+            $i.removeClass("tform");
+        }
+    });
+}
+function validateEmail(x) {
+    var $el = $(x);
+    if(!/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test($el.val()))
+        $el.addClass('error');
+    else
+        $el.removeClass('error');
+
+}
+
+function showReceiptDateText() {
+    $('#lRefDate').hide();
+    $('#tRefDate').show();
+}
+
+function showReceiptDateLabel() {
+    $('#lcdate').html('Ref Date :' + $('#RefDate').val());
+    $('#tRefDate').hide();
+    $('#lRefDate').show();
+}
+
+
+function showReceiptNoText() {
+    $('#lRefNo').hide();
+    $('#tRefNo').show();
+}
+
+function showReceiptNoLabel() {
+    $('#lcno').html('Ref No :' + $('#RefNo').val());
+    $('#tRefNo').hide();
+    $('#lRefNo').show();
+}
+
+</script>

@@ -1,0 +1,199 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<style type="text/css">
+    .downarrow_span	 				{float:right; padding:0px 5px;}
+    .downarrow_span span	 		{font-size:18px;}
+    .downarrow_span_div				{display:none;}
+    .downarrow_span_div.open		{display:block;}
+    .totalright{font-weight:600; color:green; font-size:14px;}
+</style>
+<form name="followup-handingover" id="followup-handingover" class="form-horizontal stginner_cnt" method="post">
+    <input type="hidden" name="CallTypeId" value="<?php echo (isset($CallTypeId)) ? $CallTypeId : 0;  ?>"/>
+    <input type="hidden" name="LeadId" value="<?php echo (isset($leadId)) ? $leadId : 0;  ?>"/>
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+                <h1>HandingOver</h1>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="col-lg-12 clear">
+                    <div class="kickoff_area col-lg-12 clear">
+                        <div class="col-lg-12 clear padlr0">
+                            <div class="col-lg-12 col-md-12 col-sm-12 cnt_sliders padlr0">
+                                <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                    <div class="row">
+                                        <div class="form-group col-lg-12 id="unit">
+                                        <select name="unitNo" id="unitNoId" class="form-control selectpicker show-tick" data-size="5" label="UnitName" title="Select ">
+                                            <option value="">Choose Unit</option>
+                                            <?php if(isset($responseunit)) {
+                                                foreach ($responseunit as $type) { ?>
+                                                    <option
+                                                        value="<?php echo $type['UnitId'] ?>"><?php echo $type['UnitNo'] ?></option>
+                                                <?php }
+                                            }?>
+
+                                        </select>
+                                        <div class="error_message"><p>please select unitname...</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="sam">
+                                <div class="col-lg-12>
+                                    <h1>Check List</h1>
+                                        <div class="table-responsive m_btm20" style="min-height:200px;">
+                                <table id="checklisttable" class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th width="4%">Select</th>
+                                        <th width="10%">Description</th>
+                                        <th width="12%">Date</th>
+                                        <th width="18%">Executive Name</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                    <input type="hidden" name="rowCount" id="rowCount">
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+            <ul>
+                <li class="save_btn float_l">
+                    <a href="<?php echo $this->basepath(); ?>/crm/buyer/followup/<?php echo (isset($leadId)) ? $leadId : 0; ?>"  class="ripple steps_btn">Back</a>
+                </li>
+                <li class="save_btn float_r">
+                    <a href="javascript:void(0);" id="save-btn" onclick="validateOnSubmit();" class="ripple carousel-next-btn">Submit</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</form>
+<script>
+    var $checklistTable = $('#checklisttable');
+
+    $('#sam').hide();
+    $('.datepickerinput').datepicker({
+        format: "dd-mm-yyyy",
+        startDate: new Date(),
+        todayBtn: true,
+        orientation: "top auto",
+        autoclose: true
+    });
+    $('.datepickerlead').datepicker({
+        format: "dd-mm-yyyy",
+        endDate: new Date(),
+        todayBtn: true,
+        autoclose: true
+    });
+    $(document).ready(function() {
+        unitNo =$('#unitNoId');
+        unitNo.on('change', function () {
+            $('#checklisttable tbody').html('');
+            var leadId = $("#LeadId").val();
+            var uname = unitNo.val();
+            if (uname !== '') {
+                $('#sam').show();
+            }
+            $.ajax({
+                url:getBaseURL()+"crm/buyer/handingover",
+                type: "post",
+                data: {'LeadId': leadId,'unitNoId': uname },
+                success: function (data, textStatus, jqXHR) {
+                    var cname = JSON.parse(data);
+                    if(cname == ''){
+                        alert('No records Found');
+                    }
+                    var UnitTemplate = $('#UnitTemplate').html();
+
+                    $.each(cname,function(i,o){
+                        $('#checklisttable tbody').append(UnitTemplate.replace(/__/g,'_'+(i+1)));
+                        $('#CheckName_' + (i+1)).html(o.CheckListName);
+                        $('#CheckListId_' + (i+1)).val(o.CheckListId);
+                        $("#rowCount").val(i+1);
+
+                    });
+                    $('.datepicker').datepicker({
+                        format: "dd-mm-yyyy",
+                        startDate: new Date(),
+                        todayBtn: true,
+                        orientation: "top auto",
+                        autoclose: true
+                    });
+                    bindCheckListExecutiveName_autoComplete();
+                }
+            });
+        });
+    });
+
+    function bindCheckListExecutiveName_autoComplete() {
+
+        $checklistTable.find('tr td .executive-name').autocomplete({
+            lookup:<?php echo (isset($arrExecutives))?json_encode($arrExecutives):'[]'; ?>,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $(this).closest('td').find('.exe').val(suggestion.data);
+
+                    removeError($(this));
+                }
+            }, onSearchStart: function (suggestion) {
+                $(this).closest('td').find('.exe').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).closest('td').find('.exe').val('');
+                    showError($(this), 'Executive Name not found!');
+                } else {
+                    removeError($(this));
+                }
+            }
+        });
+    }
+
+    function validateOnSubmit() {
+
+        if(unitNo.val() == '' ||unitNo.val() == null  ) {
+            alert('Please select Unit');
+            return false;
+        }
+        $('#followup-handingover').submit();
+    }
+</script>
+<script id="UnitTemplate" type="text/template" class="hide">
+    <tr>
+        <td class="tbl_input_td" id="checkselect__">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" value="1" name="select__" id="select__"/>
+                    <label for="select__" ></label>
+                </p>
+            </div>
+        </td>
+        <td id="CheckName__">
+        </td>
+        <input type="hidden" name="CheckListId__" id="CheckListId__" value=""/>
+        <td>
+            <div style="position: relative; width:250px;">
+                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                <input type="text" class="form-control datepicker" name="CheckDate__" id="CheckDate__"  onchange="validateDate(this)"/>
+            </div>
+        </td>
+        <td>
+            <input type="text" class="form-control executive-name" name="Exename__" id="ExeName__"/>
+            <input type="hidden" name="UserId__" class="executive-name exe" id="UserId__" />
+        </td>
+    </tr>
+</script>

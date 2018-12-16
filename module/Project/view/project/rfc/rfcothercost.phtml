@@ -1,0 +1,1637 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>"/>
+<style>
+    .tableFloatingHeaderOriginal {
+        left:0
+    }
+	.modal-body{padding:28px;}
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form  id="formWrapper"  method="post">
+                <div class="col-lg-12">
+                    <h1>Request for Creation - Other Cost <?php echo ($mode != 'edit') ?  'Add' : 'Edit';?></h1>
+                </div>
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid; ?>">
+                <input type="hidden" name="rfcmode" id="rfcmode" value="<?php echo $mode; ?>">
+                <input type="hidden" name="editid" id="editid" value="<?php echo $editid; ?>">
+                <!--form start-->
+                <div class="row">
+                    <div class="col-lg-12 top_ct" >
+                        <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                            <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" label="Reference Date"  value="<?php  if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>" readonly/>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                            <div class="form-group col-lg-12">
+                                <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcid !=0 ) ? $rfcregister['RefNo'] : $svNo; ?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                            <div class="form-group col-lg-12">
+                                <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName']; ?>" readonly/>
+                                <input type="hidden" name="project_id" id="project_id"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId']; ?>"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                            <div class="form-group col-lg-12">
+                                <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName']; ?>" readonly/>
+                                <input type="hidden" name="project_type" id="project_type" value="<?php if(isset($projecttype)) echo $projecttype; else if(isset($rfcregister)) echo $rfcregister['ProjectType']; ?>"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                            <div class="form-group">
+                                <select id="revselection" name="revrequired" class="form-control single_dropdown lbl_move" data-size="6" label="Revision" style="width:100%">
+                                    <option value="Y" <?php echo ($revrequired == 'Y') ? 'selected' : '';?>>Yes</option>
+                                    <option value="N" <?php echo ($revrequired == 'N') ? 'selected' : '';?>>No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive topsp animated fadeInUp">
+                        <table class="table" style=" margin-bottom:0px;" id="OtherCostTable">
+                            <thead>
+                            <tr>
+                                <th>Other Cost Name</th>
+                                <th>Type</th>
+                                <th class="text-right">Amount</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="0"/>
+                        <input type="hidden" name="rowdeleteids" id="rowdeleteids" value="0"/>
+                    </div>
+                </div>
+                <!--table end-->
+
+                <!--New OtherCost-->
+                <div class="col-lg-12">
+                <table  id="NewOtherCostWrapper" style="display: none;">
+                    <tr>
+                        <td ><a href="#" id ="butnewitems" class="btn btn-link" onclick="ShowNewOtherCost(); return false;" >New Other Cost(s) Created <span class='badge badge_count'>0</span></a></td>
+                    </tr>
+                </table>
+                <table class="table" id ="NewOtherCostTable" style="display: none; width:50%; border:1px solid #ccc;">
+                    <thead>
+                    <tr>
+                        <th style="border-right:1px solid #ccc;">Other Cost Name</th>
+                        <th class="text-center">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </div>
+                <input type="hidden" name="NewOtherCostRowId" id="NewOtherCostRowId" value="0" >
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" style="<?php if ($rfcid !=0) { if ($rfcregister['Approve']=='Y') { echo 'display: none;'; } else { echo '';} }?>"><a onclick="submitForm(); return false;"data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+        <li class="can_btn float_l" style="padding-bottom:10px;"><a href="<?php if($rfcid !=0) { echo $this->basePath().'/project/rfc/rfcregister'; } else if ($editid !=0) { echo $this->basePath().'/project/main/othercost';} else { echo $this->basePath().'/project/rfc/rfc-what';}?>">Cancel</a></li>
+    </ul>
+</div>
+
+<!--New Vendor Modal-->
+<div id="NewOtherCostModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1 id="NewOtherCostModalHeader">Create Other Cost</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <input type="hidden" id="MNewOtherCostId"/>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <input type="text" id="MNewOtherCostName" maxlength="255" class="form-control lbl_move" label="Name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select id="MNewOtherCostType" style="width:100%;" class="form-control single_dropdown lbl_move hei-43" data-size="5" label="Type">
+                                <option></option>
+                                <?php if(isset($ohtypes)):
+                                    foreach($ohtypes as $type):?>
+                                        <option value="<?php echo $type['data']; ?>"><?php echo $type['value']; ?></option>
+                                    <?php endforeach; endif; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer"> <a href="#" class="md_cance" data-dismiss="modal"  data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" id="MNewOtherCostBtn" class="md_ok" onclick="return NewOtherCostUpdate()">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Dummy OtherCost New Row-->
+<script id="dummy-new-othercost" type="text/template" class="hide">
+    <tr class="padi05">
+        <td width="30%" style="border-right:1px solid #ccc;"><input type="text" class="parent_padi05" name="NewOtherCostName__" id="NewOtherCostName__" align="right" readonly></td>
+        <td width="3%"><button type="button" id="BtnNewOtherCostEdit__" onclick="return EditNewOtherCost(this.id)" style="margin:0;" > <i class="fa fa-pencil-square-o ctlss"></i> </button></td>
+        <input type="hidden" name="NewOtherCostId__" id="NewOtherCostId__" >
+        <input type="hidden" name="NewOtherCostType__" id="NewOtherCostType__" >
+    </tr>
+</script>
+
+<script id="dummy-othercost" type="text/template" class="hide">
+    <tr id="mainTr__">
+        <input type="hidden" name="TransId__" id="TransId__"/>
+        <input type="hidden" name="UpdateRow__" id="UpdateRow__"/>
+        <td width="13%">
+            <input class="parent_text OtherCostNameInputs" type="text" name="ohname__" id="ohname__" onfocus="return checkOHName(this.id)"/>
+            <input type="hidden" class="OtherCostIdInputs" name="ohid__" id="ohid__"/>
+        </td>
+        <td width="12%">
+            <input class="parent_text" type="text" name="ohtypename__" id="ohtypename__" readonly/>
+            <input type="hidden" name="ohtypeid__" id="ohtypeid__"/>
+        </td>
+        <td width="10%"><input class="parent_text text-right" type="text" name="amount__" id="amount__" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" readonly/></td>
+        <td width="3%" align="center">
+            <ul class="action_btns">
+                <li><a id="deleteTr__" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a id="expandTr__" href="#" class="mainTr" style="display: none;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand" ></i></a></li>
+            </ul>
+        </td>
+    </tr>
+    <!--expand table-->
+    <tr style="display:none;" class="subTr"></tr>
+    <!--expand end-->
+</script>
+<!--service,labour,item,material type table-->
+<script id="dummy-type-1"  type="text/template" class="hide">
+    <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none; overflow-y:scroll; min-height:100%; max-height:350px;">
+            <div class="col-lg-12">
+                <div class="table-responsive topsp animated fadeInUp">
+                    <table class="table" style="margin-bottom:0px;" id="OtherCostSubTable__">
+                        <thead>
+                        <tr>
+                            <th id='ohheader__'>Desc</th>
+                            <th>Unit</th>
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Rate</th>
+                            <th class="text-right">Amount</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <input type="hidden" name="type___TransId_1" id="type___TransId_1"/>
+                            <input type="hidden" name="type___UpdateRow_1" id="type___UpdateRow_1"/>
+                            <td width="15%">
+                                <input class="parent_text" type="text" name="type___desc_1" id="type___desc_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___desctypeid_1" id="type___desctypeid_1"/>
+                            </td>
+                            <td width="5%" >
+                                <input class="parent_text" type="text" name="type___unit_1" id="type___unit_1" readonly/>
+                                <input type="hidden" name="type___unitid_1" id="type___unitid_1"/>
+                            </td>
+                            <td width="8%" >
+                                <input class="parent_text text-right" type="text"  maxlength="15" name="type___qty_1" id="type___qty_1" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" maxlength="12" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___rate_1" id="type___rate_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="12%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_1" id="type___amount_1" readonly/>
+                            </td>
+                            <td width="5%" align="center">
+                                <ul class="action_btns">
+                                    <li><a id="type___deleteTr_1" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>
+                    <input type="hidden" name="type___rowdeleteids" id="type___rowdeleteids" value="0"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</script>
+<!--general & advertisement type table-->
+<script id="dummy-type-2"  type="text/template" class="hide">
+    <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none; overflow-y:scroll; min-height:100%; max-height:350px;">
+            <div class="col-lg-12">
+                <div class="table-responsive topsp animated fadeInUp">
+                    <table class="table" style="margin-bottom:0px;" id="OtherCostSubTable__">
+                        <thead>
+                        <tr>
+                            <th>Expense</th>
+                            <th class="text-right">Amount</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <input type="hidden" name="type___TransId_1" id="type___TransId_1"/>
+                            <input type="hidden" name="type___UpdateRow_1" id="type___UpdateRow_1"/>
+                            <td width="13%">
+                                <input class="parent_text" type="text" name="type___desc_1" id="type___desc_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___desctypeid_1" id="type___desctypeid_1"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" name="type___amount_1" id="type___amount_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcExpenseAmount(this);addNewTypeRow(this,'INPUTDATATYPE');" />
+                            </td>
+                            <td width="5%" align="center">
+                                <ul class="action_btns">
+                                    <li><a id="type___deleteTr_1" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>
+                    <input type="hidden" name="type___rowdeleteids" id="type___rowdeleteids" value="0"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</script>
+<!--salary type table-->
+<script id="dummy-type-3"  type="text/template" class="hide">
+    <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:350px;">
+            <div class="col-lg-12">
+                <div class="table-responsive topsp animated fadeInUp">
+                    <table class="table" style="margin-bottom:0px;" id="OtherCostSubTable__">
+                        <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Nos</th>
+                            <th>Salary Per Month</th>
+                            <th>Working Months</th>
+                            <th class="text-right">Amount</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <input type="hidden" name="type___TransId_1" id="type___TransId_1"/>
+                            <input type="hidden" name="type___UpdateRow_1" id="type___UpdateRow_1"/>
+                            <td width="13%">
+                                <input class="parent_text" type="text" name="type___desc_1" id="type___desc_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___desctypeid_1" id="type___desctypeid_1"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text"  maxlength="5" name="type___nos_1" id="type___nos_1" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="10" name="type___salpermonth_1" id="type___salpermonth_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event, this)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="5" name="type___workingmonths_1" id="type___workingmonths_1" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_1" id="type___amount_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="addNewTypeRow(this,'INPUTDATATYPE');" readonly/>
+                            </td>
+                            <td width="5%" align="center">
+                                <ul class="action_btns">
+                                    <li><a id="type___deleteTr_1" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>
+                    <input type="hidden" name="type___rowdeleteids" id="type___rowdeleteids" value="0"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</script>
+<!--fuel type table-->
+<script id="dummy-type-4"  type="text/template" class="hide">
+    <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:350px;">
+            <div class="col-lg-12">
+                <div class="table-responsive topsp animated fadeInUp">
+                    <table class="table" style="margin-bottom:0px;" id="OtherCostSubTable__">
+                        <thead>
+                        <tr>
+                            <th>Plant & Machinery</th>
+                            <th>Fuel</th>
+                            <th>Unit</th>
+                            <th class="text-right">Rate</th>
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Amount</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <input type="hidden" name="type___TransId_1" id="type___TransId_1"/>
+                            <input type="hidden" name="type___UpdateRow_1" id="type___UpdateRow_1"/>
+                            <td width="13%">
+                                <input class="parent_text" type="text" name="type___desc_1" id="type___desc_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___desctypeid_1" id="type___desctypeid_1"/>
+                            </td>
+                            <td width="13%">
+                                <input class="parent_text" type="text" name="type___fuel_1" id="type___fuel_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___fuelid_1" id="type___fuelid_1"/>
+                            </td>
+                            <td width="8%" >
+                                <input class="parent_text" type="text" name="type___unit_1" id="type___unit_1" readonly/>
+                                <input type="hidden" name="type___unitid_1" id="type___unitid_1"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___rate_1" id="type___rate_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___qty_1" id="type___qty_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_1" id="type___amount_1" readonly/>
+                            </td>
+                            <td width="5%" align="center">
+                                <ul class="action_btns">
+                                    <li><a id="type___deleteTr_1" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>
+                    <input type="hidden" name="type___rowdeleteids" id="type___rowdeleteids" value="0"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</script>
+<!--machinery type table-->
+<script id="dummy-type-5"  type="text/template" class="hide">
+    <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:350px;">
+            <div class="col-lg-12">
+                <div class="table-responsive topsp animated fadeInUp">
+                    <table class="table" style="margin-bottom:0px;" id="OtherCostSubTable__">
+                        <thead>
+                        <tr>
+                            <th>Plant & Machinery</th>
+                            <th>Working Unit</th>
+                            <th>Nos</th>
+                            <th class="text-right">Working Qty</th>
+                            <th class="text-right">Total Qty</th>
+                            <th class="text-right">Rate</th>
+                            <th class="text-right">Amount</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <input type="hidden" name="type___TransId_1" id="type___TransId_1"/>
+                            <input type="hidden" name="type___UpdateRow_1" id="type___UpdateRow_1"/>
+                            <td width="15%">
+                                <input class="parent_text" type="text" name="type___desc_1" id="type___desc_1" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+                                <input type="hidden" name="type___desctypeid_1" id="type___desctypeid_1"/>
+                            </td>
+                            <td width="5%" >
+                                <input class="parent_text" type="text" name="type___unit_1" id="type___unit_1" readonly/>
+                                <input type="hidden" name="type___unitid_1" id="type___unitid_1"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="5" name="type___nos_1" id="type___nos_1" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="10" name="type___wqty_1" id="type___wqty_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="10" name="type___tqty_1" id="type___tqty_1" readonly/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="10" name="type___rate_1" id="type___rate_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+                            </td>
+                            <td width="10%" >
+                                <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_1" id="type___amount_1" readonly/>
+                            </td>
+                            <td width="6%" align="center">
+                                <ul class="action_btns">
+                                    <li><a id="type___deleteTr_1" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                    <li> <a id="type___expandTr_1" href="#" class="mainTr" style="display: none;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand" ></i></a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr style="display:none;" class="subTr">
+                            <td colspan="9" style="padding:0px !important; ">
+                                <div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive topsp animated fadeInUp">
+                                            <table class="table" style="margin-bottom:0px;" id="type___machinerySubTable_1">
+                                                <thead>
+                                                <tr>
+                                                    <th>Item of Work</th>
+                                                    <th>Percentage</th>
+                                                    <th class="text-right">Amount</th>
+                                                    <th>&nbsp;</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <input type="hidden" name="type___m_1_TransId_1" id="type___m_1_TransId_1"/>
+                                                    <input type="hidden" name="type___m_1_UpdateRow_1" id="type___m_1_UpdateRow_1"/>
+                                                    <td width="15%">
+                                                        <input class="parent_text" type="text" name="type___m_1_desc_1" id="type___m_1_desc_1" onfocus="return checkMachineryName(this.id)" data-type="machineryiow"/>
+                                                        <input type="hidden" name="type___m_1_desctypeid_1" id="type___m_1_desctypeid_1"/>
+                                                    </td>
+                                                    <td width="10%" >
+                                                        <input class="parent_text text-right" type="text" name="type___m_1_per_1" id="type___m_1_per_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryPerAmount(this);addNewMachineryRow(this);"/>
+                                                    </td>
+                                                    <td width="10%" >
+                                                        <input class="parent_text text-right" type="text" name="type___m_1_amount_1" id="type___m_1_amount_1" readonly/>
+                                                    </td>
+                                                    <td width="5%" align="center">
+                                                        <ul class="action_btns">
+                                                            <li><a id="type___m_1_deleteTr_1" onclick="deleteMachineryRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <input type="hidden" name="type___m_1_rowid" id="type___m_1_rowid" value="1"/>
+                                            <input type="hidden" name="type___m_1_rowdeleteids" id="type___m_1_rowdeleteids" value="0"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>
+                    <input type="hidden" name="type___rowdeleteids" id="type___rowdeleteids" value="0"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</script>
+<!--service,labour,item,material type tr-->
+<script id="dummy-type-tr-1"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___TransId_0" id="type___TransId_0"/>
+        <input type="hidden" name="type___UpdateRow_0" id="type___UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___desc_0" id="type___desc_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___desctypeid_0" id="type___desctypeid_0"/>
+        </td>
+        <td width="8%" >
+            <input class="parent_text" type="text" name="type___unit_0" id="type___unit_0" readonly/>
+            <input type="hidden" name="type___unitid_0" id="type___unitid_0"/>
+        </td>
+        <td width="8%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___qty_0" id="type___qty_0" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" maxlength="12" onchange="calcAmount(this);addNewTypeRow(this, 'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___rate_0" id="type___rate_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this, 'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_0" id="type___amount_0" readonly/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___deleteTr_0" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<!--general & advertisement type tr-->
+<script id="dummy-type-tr-2"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___TransId_0" id="type___TransId_0"/>
+        <input type="hidden" name="type___UpdateRow_0" id="type___UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___desc_0" id="type___desc_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___desctypeid_0" id="type___desctypeid_0"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" name="type___amount_0" id="type___amount_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcExpenseAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___deleteTr_0" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<!--salary type tr-->
+<script id="dummy-type-tr-3"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___TransId_0" id="type___TransId_0"/>
+        <input type="hidden" name="type___UpdateRow_0" id="type___UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___desc_0" id="type___desc_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___desctypeid_0" id="type___desctypeid_0"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="5" name="type___nos_0" id="type___nos_0" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="10" name="type___salpermonth_0" id="type___salpermonth_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event, this)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="5" name="type___workingmonths_0" id="type___workingmonths_0" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcSalAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_0" id="type___amount_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="addNewTypeRow(this,'INPUTDATATYPE');" readonly/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___deleteTr_0" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<!--fuel type tr-->
+<script id="dummy-type-tr-4"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___TransId_0" id="type___TransId_0"/>
+        <input type="hidden" name="type___UpdateRow_0" id="type___UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___desc_0" id="type___desc_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___desctypeid_0" id="type___desctypeid_0"/>
+        </td>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___fuel_0" id="type___fuel_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___fuelid_0" id="type___fuelid_0"/>
+        </td>
+        <td width="8%" >
+            <input class="parent_text" type="text" name="type___unit_0" id="type___unit_0" readonly/>
+            <input type="hidden" name="type___unitid_0" id="type___unitid_0"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___rate_0" id="type___rate_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___qty_0" id="type___qty_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_0" id="type___amount_0" readonly/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___deleteTr_0" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<!--machinery type tr-->
+<script id="dummy-type-tr-5"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___TransId_0" id="type___TransId_0"/>
+        <input type="hidden" name="type___UpdateRow_0" id="type___UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___desc_0" id="type___desc_0" data-type="INPUTDATATYPE" onfocus="return checkOHTypeName(this.id, 'INPUTDATATYPE')"/>
+            <input type="hidden" name="type___desctypeid_0" id="type___desctypeid_0"/>
+        </td>
+        <td width="8%" >
+            <input class="parent_text" type="text" name="type___unit_0" id="type___unit_0" readonly/>
+            <input type="hidden" name="type___unitid_0" id="type___unitid_0"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="5" name="type___nos_0" id="type___nos_0" onblur="return FormatNum(this, 0)" onkeypress="return isNumberKey(event)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="10" name="type___wqty_0" id="type___wqty_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="10" name="type___tqty_0" id="type___tqty_0" readonly/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="10" name="type___rate_0" id="type___rate_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryAmount(this);addNewTypeRow(this,'INPUTDATATYPE');"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" maxlength="15" name="type___amount_0" id="type___amount_0" readonly/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___deleteTr_0" data-type="INPUTDATATYPE" onclick="deleteTypeRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a id="type___expandTr_0" href="#" class="mainTr" style="display: none;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand" ></i></a></li>
+            </ul>
+        </td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp animated fadeInUp">
+                        <table class="table" style="margin-bottom:0px;" id="type___machinerySubTable_0">
+                            <thead>
+                            <tr>
+                                <th>Desc</th>
+                                <th>Percentage</th>
+                                <th class="text-right">Amount</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <input type="hidden" name="type___m_0_TransId_1" id="type___m_0_TransId_1"/>
+                                <input type="hidden" name="type___m_0_UpdateRow_1" id="type___m_0_UpdateRow_1"/>
+                                <td width="13%">
+                                    <input class="parent_text" type="text" name="type___m_0_desc_1" id="type___m_0_desc_1" onfocus="return checkMachineryName(this.id)" data-type="machineryiow"/>
+                                    <input type="hidden" name="type___m_0_desctypeid_1" id="type___m_0_desctypeid_1"/>
+                                </td>
+                                <td width="10%" >
+                                    <input class="parent_text text-right" type="text" name="type___m_0_per_1" id="type___m_0_per_1" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryPerAmount(this);addNewMachineryRow(this);"/>
+                                </td>
+                                <td width="10%" >
+                                    <input class="parent_text text-right" type="text" name="type___m_0_amount_1" id="type___m_0_amount_1" readonly/>
+                                </td>
+                                <td width="5%" align="center">
+                                    <ul class="action_btns">
+                                        <li><a id="type___m_0_deleteTr_1" onclick="deleteMachineryRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="type___m_0_rowid" id="type___m_0_rowid" value="1"/>
+                        <input type="hidden" name="type___m_0_rowdeleteids" id="type___m_0_rowdeleteids" value="0"/>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<!--machinery tr-->
+<script  id="dummy-machinery-tr"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="type___m__9_TransId_0" id="type___m__9_TransId_0"/>
+        <input type="hidden" name="type___m__9_UpdateRow_0" id="type___m__9_UpdateRow_0"/>
+        <td width="13%">
+            <input class="parent_text" type="text" name="type___m__9_desc_0" id="type___m__9_desc_0" onfocus="return checkMachineryName(this.id)" data-type="machineryiow"/>
+            <input type="hidden" name="type___m__9_desctypeid_0" id="type___m__9_desctypeid_0"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" name="type___m__9_per_0" id="type___m__9_per_0" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="calcMachineryPerAmount(this);addNewMachineryRow(this);"/>
+        </td>
+        <td width="10%" >
+            <input class="parent_text text-right" type="text" name="type___m__9_amount_0" id="type___m__9_amount_0" readonly/>
+        </td>
+        <td width="5%" align="center">
+            <ul class="action_btns">
+                <li><a id="type___m__9_deleteTr_0" onclick="deleteMachineryRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script>
+    var arr_ohs = <?php echo (isset($arr_ohs)) ? json_encode($arr_ohs) : '[]'; ?>;
+    var tmp_arr_ohs = <?php echo (isset($arr_ohs)) ? json_encode($arr_ohs) : '[]'; ?>;
+    var arr_fuel_types = <?php echo (isset($oh_fueltypes)) ? json_encode($oh_fueltypes) : '[]'; ?>;
+    var arr_machinery_iows = <?php echo (isset($oh_items)) ? json_encode($oh_items) : '[]'; ?>;
+    var tmp_arr_machinery_iows = <?php echo (isset($oh_items)) ? json_encode($oh_items) : '[]'; ?>;
+    var editid = <?php echo (isset($editid)) ? $editid : 0; ?>;
+
+    var arr_service = <?php echo (isset($oh_services)) ? json_encode($oh_services) : '[]'; ?>;
+    var arr_labour = <?php echo (isset($oh_labours)) ? json_encode($oh_labours) : '[]'; ?>;
+    var arr_item = <?php echo (isset($oh_items)) ? json_encode($oh_items) : '[]'; ?>;
+    var arr_material = <?php echo (isset($oh_materials)) ? json_encode($oh_materials) : '[]'; ?>;
+    var arr_adminexpense = <?php echo (isset($oh_adminexpenses)) ? json_encode($oh_adminexpenses) : '[]'; ?>;
+    var arr_salary = <?php echo (isset($oh_wfpositions)) ? json_encode($oh_wfpositions) : '[]'; ?>;
+    var arr_fuel = <?php echo (isset($oh_materialtypes)) ? json_encode($oh_materialtypes) : '[]'; ?>;
+    var arr_machinery = <?php echo (isset($oh_machineries)) ? json_encode($oh_machineries) : '[]'; ?>;
+
+    var arr_oh_types = [];
+        arr_oh_types['service'] = arr_service;
+        arr_oh_types['labour'] = arr_labour;
+        arr_oh_types['item'] = arr_item;
+        arr_oh_types['material'] = arr_material;
+        arr_oh_types['adminexpense'] = arr_adminexpense;
+        arr_oh_types['salary'] = arr_salary;
+        arr_oh_types['fuel'] = arr_fuel;
+        arr_oh_types['machinery'] = arr_machinery;
+
+    var tmp_arr_oh_types = [];
+        tmp_arr_oh_types['service'] = [];
+        tmp_arr_oh_types['labour'] = [];
+        tmp_arr_oh_types['item'] = [];
+        tmp_arr_oh_types['material'] = [];
+        tmp_arr_oh_types['adminexpense'] = [];
+        tmp_arr_oh_types['salary'] = [];
+        tmp_arr_oh_types['fuel'] = [];
+        tmp_arr_oh_types['machinery'] = [];
+
+    // New Other Cost Modal Elements
+    var $NewOtherCostWrapper = $('#NewOtherCostWrapper'),
+        $NewOtherCostTable = $('#NewOtherCostTable'),
+        $NewOtherCostModal = $('#NewOtherCostModal'),
+        $NewOtherCostModalHeader = $('#NewOtherCostModalHeader'),
+        $MNewOtherCostBtn = $('#MNewOtherCostBtn'),
+        $MNewOtherCostId = $('#MNewOtherCostId'),
+        $MNewOtherCostName = $('#MNewOtherCostName'),
+        $MNewOtherCostType = $('#MNewOtherCostType');
+
+    // edit fns
+    var arr_rfcohtrans = <?php echo (isset($arr_rfcohtrans)) ? json_encode($arr_rfcohtrans) : '[]'; ?>;
+
+    $(function () {
+        $(".content_wrapper").on('click','.mainTr', function(e){
+            e.preventDefault();
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                $(this).find("i").addClass("tform");
+            }
+            else{
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+                $(this).find("i").removeClass("tform");
+            }
+        });
+
+        // render rows on edit
+        var $rowid = $('#rowid');
+        var template = $('#dummy-othercost').html();
+        var $tbody = $('#OtherCostTable').find('tbody');
+        var rowid = parseInt($rowid.val());
+
+        if(typeof arr_rfcohtrans != 'undefined' && arr_rfcohtrans.length !== 0) {
+            $.each(arr_rfcohtrans, function (i, o) {
+                rowid += 1;
+                $tbody.append(template.replace(/__/g, '_' + rowid));
+
+                // set values
+                $('#TransId_' + rowid).val(o.RFCTransId);
+                $('#ohname_' + rowid).val(o.OHName).prop('readonly', true);
+                $('#ohid_' + rowid).val(o.OHId);
+                $('#ohtypename_' + rowid).val(o.OHTypeName);
+                $('#ohtypeid_' + rowid).val(o.OHTypeId);
+                $('#amount_' + rowid).val(sanitizeNumber(o.Amount,2,true));
+
+                $('#deleteTr_' + rowid).attr('onclick', 'deleteRow(this, event,true);').show();
+                $('#expandTr_' + rowid).show();
+
+                if(o.OHTypeId == 9 || o.OHTypeId == 10) {
+                    $('#expandTr_' + rowid).hide();
+                    $('#amount_' + rowid).prop('readonly', false);
+                }
+
+                // add type row priorly
+                var arr_type_1 = ['1','2','3', '4'];
+                var arr_type_names = {'1': 'item', '2': 'material', '3': 'labour', '4': 'service', '5': 'machinery', '6': 'adminexpense', '7': 'salary', '8': 'fuel'};
+                var typeTemplate = '';
+
+                if($.inArray(o.OHTypeId, arr_type_1) != -1) {
+                    typeTemplate = $('#dummy-type-1').html();
+                    $('#mainTr_' + rowid).next('.subTr').html(typeTemplate.replace(/__/g, '_' + rowid).replace(/INPUTDATATYPE/g, arr_type_names[o.OHTypeId]));
+
+                    if (o.OHTypeId==1) $('#ohheader_'+ rowid).text('Item of Work');
+                    if (o.OHTypeId==2) $('#ohheader_'+ rowid).text('Material Name');
+                    if (o.OHTypeId==3) $('#ohheader_'+ rowid).text('Labour Type');
+                    if (o.OHTypeId==4) $('#ohheader_'+ rowid).text('Service Name');
+
+
+                    var count = 1;
+                    if(typeof o.typeTrans != 'undefined') {
+                        $.each(o.typeTrans, function (i, t) {
+                            $('#type_' + rowid + '_desc_' + count).val(t.Desc).prop('readonly', true);
+                            $('#type_' + rowid + '_TransId_' + count).val(t.RFCTypeTransId);
+                            $('#type_' + rowid + '_desctypeid_' + count).val(t.DescTypeId);
+                            $('#type_' + rowid + '_unit_' + count).val(t.UnitName);
+                            $('#type_' + rowid + '_unitid_' + count).val(t.UnitId);
+                            $('#type_' + rowid + '_qty_' + count).attr('onchange', 'calcAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(t.Qty);
+                            $('#type_' + rowid + '_rate_' + count).val(sanitizeNumber(t.Rate,2,true)).trigger('change');
+                            $('#type_' + rowid + '_rate_' + count).attr('onchange', 'calcAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);');
+                            $('#type_' + rowid + '_amount_' + count).val(sanitizeNumber(t.Amount,2,true));
+                            $('#type_' + rowid + '_deleteTr_' + count).attr('onclick', 'deleteTypeRow(this, event, true);').show();
+                            count++;
+                        });
+                    }
+                } else if(o.OHTypeId == 6) {
+                    typeTemplate = $('#dummy-type-2').html();
+                    $('#mainTr_' + rowid).next('.subTr').html(typeTemplate.replace(/__/g, '_' + rowid).replace(/INPUTDATATYPE/g, arr_type_names[o.OHTypeId]));
+                    var count = 1;
+                    if(typeof o.typeTrans != 'undefined') {
+                        $.each(o.typeTrans, function (i, t) {
+                            $('#type_' + rowid + '_desc_' + count).val(t.Desc).prop('readonly', true);
+                            $('#type_' + rowid + '_TransId_' + count).val(t.RFCTypeTransId);
+                            $('#type_' + rowid + '_desctypeid_' + count).val(t.DescTypeId);
+                            $('#type_' + rowid + '_amount_' + count).val(sanitizeNumber(t.Amount,2,true)).trigger('change');
+                            $('#type_' + rowid + '_amount_' + count).attr('onchange', 'calcExpenseAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);');
+                            $('#type_' + rowid + '_deleteTr_' + count).attr('onclick', 'deleteTypeRow(this, event, true);').show();
+                            count++;
+                        });
+                    }
+                } else if(o.OHTypeId == 7) {
+                    typeTemplate = $('#dummy-type-3').html();
+                    $('#mainTr_' + rowid).next('.subTr').html(typeTemplate.replace(/__/g, '_' + rowid).replace(/INPUTDATATYPE/g, arr_type_names[o.OHTypeId]));
+                    var count = 1;
+                    if(typeof o.typeTrans != 'undefined') {
+                        $.each(o.typeTrans, function (i, t) {
+                            $('#type_' + rowid + '_desc_' + count).val(t.Desc).prop('readonly', true);
+                            $('#type_' + rowid + '_TransId_' + count).val(t.RFCTypeTransId);
+                            $('#type_' + rowid + '_desctypeid_' + count).val(t.DescTypeId);
+                            $('#type_' + rowid + '_nos_' + count).attr('onchange', 'calcSalAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(t.Nos);
+                            $('#type_' + rowid + '_salpermonth_' + count).attr('onchange', 'calcSalAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(sanitizeNumber(t.Salary));
+                            $('#type_' + rowid + '_workingmonths_' + count).val(t.cMonths).trigger('change');
+                            $('#type_' + rowid + '_workingmonths_' + count).attr('onchange', 'calcSalAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);');
+                            $('#type_' + rowid + '_amount_' + count).val(sanitizeNumber(t.Amount,2,true));
+                            $('#type_' + rowid + '_deleteTr_' + count).attr('onclick', 'deleteTypeRow(this, event, true);').show();
+                            count++;
+                        });
+                    }
+                } else if(o.OHTypeId == 8) {
+                    typeTemplate = $('#dummy-type-4').html();
+                    $('#mainTr_' + rowid).next('.subTr').html(typeTemplate.replace(/__/g, '_' + rowid).replace(/INPUTDATATYPE/g, arr_type_names[o.OHTypeId]));
+                    var count = 1;
+                    if(typeof o.typeTrans != 'undefined') {
+                        $.each(o.typeTrans, function (i, t) {
+                            $('#type_' + rowid + '_desc_' + count).val(t.Desc).prop('readonly', true);
+                            $('#type_' + rowid + '_TransId_' + count).val(t.RFCTypeTransId);
+                            $('#type_' + rowid + '_desctypeid_' + count).val(t.DescTypeId);
+                            $('#type_' + rowid + '_fuel_' + count).val(t.Fuel);
+                            $('#type_' + rowid + '_fuelid_' + count).val(t.FuelId);
+                            $('#type_' + rowid + '_unit_' + count).val(t.UnitName);
+                            $('#type_' + rowid + '_unitid_' + count).val(t.UnitId);
+                            $('#type_' + rowid + '_qty_' + count).attr('onchange', 'calcAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(t.Qty);
+                            $('#type_' + rowid + '_rate_' + count).val(sanitizeNumber(t.Rate)).trigger('change');
+                            $('#type_' + rowid + '_rate_' + count).attr('onchange', 'calcAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);');
+                            $('#type_' + rowid + '_amount_' + count).val(sanitizeNumber(t.Amount,2,true));
+                            $('#type_' + rowid + '_deleteTr_' + count).attr('onclick', 'deleteTypeRow(this, event, true);').show();
+                            count++;
+                        });
+                    }
+                } else if(o.OHTypeId == 5) {
+                    typeTemplate = $('#dummy-type-5').html();
+                    $('#mainTr_' + rowid).next('.subTr').html(typeTemplate.replace(/__/g, '_' + rowid).replace(/INPUTDATATYPE/g, arr_type_names[o.OHTypeId]));
+                    var count = 1;
+                    if(typeof o.typeTrans != 'undefined') {
+                        $.each(o.typeTrans, function (i, t) {
+                            $('#type_' + rowid + '_desc_' + count).val(t.ResourceName).prop('readonly', true);
+                            $('#type_' + rowid + '_TransId_' + count).val(t.RFCTypeTransId);
+                            $('#type_' + rowid + '_desctypeid_' + count).val(t.MResourceId);
+                            $('#type_' + rowid + '_nos_' + count).attr('onchange', 'calcMachineryAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(t.Nos);
+                            $('#type_' + rowid + '_unit_' + count).val(t.UnitName);
+                            $('#type_' + rowid + '_unitid_' + count).val(t.UnitId);
+                            $('#type_' + rowid + '_wqty_' + count).attr('onchange', 'calcMachineryAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);').val(t.WorkingQty);
+                            $('#type_' + rowid + '_tqty_' + count).val(t.TotalQty);
+                            $('#type_' + rowid + '_rate_' + count).val(sanitizeNumber(t.Rate)).trigger('change');
+                            $('#type_' + rowid + '_rate_' + count).attr('onchange', 'calcMachineryAmount(this);addNewTypeRow(this,"'+arr_type_names[o.OHTypeId]+'",true);');
+                            $('#type_' + rowid + '_amount_' + count).val(sanitizeNumber(t.Amount,2,true));
+                            $('#type_' + rowid + '_deleteTr_' + count).attr('onclick', 'deleteTypeRow(this, event, true);').show();
+                            $('#type_' + rowid + '_expandTr_' + count).show();
+                            var mcount = 1;
+                            $.each(t.details, function (i, d) {
+                                $('#type_' + rowid + '_m_' + count + '_TransId_' + mcount).val(d.RFCMachineryDetailId);
+                                $('#type_' + rowid + '_m_' + count + '_desc_' + mcount).val(d.Name);
+                                $('#type_' + rowid + '_m_' + count + '_desctypeid_' + mcount).val(d.ProjectIOWId);
+                                $('#type_' + rowid + '_m_' + count + '_per_' + mcount).val(d.Percentage).trigger('change');
+                                $('#type_' + rowid + '_m_' + count + '_per_' + mcount).attr('onchange', 'calcMachineryPerAmount(this);addNewMachineryRow(this,true);');
+                                $('#type_' + rowid + '_m_' + count + '_amount_' + mcount).val(sanitizeNumber(d.Amount,2,true));
+
+                                $('#type_' + rowid + '_m_' + count + '_deleteTr_' + mcount).attr('onclick', 'deleteMachineryRow(this, event, true);');
+                                mcount++;
+                            });
+                            count++;
+                        });
+                    }
+                }
+
+                bindOHTypeAutocomplete(arr_type_names[o.OHTypeId]);
+                if(o.OHTypeId == 8) {
+                    bindOHFuelTypeAutocomplete();
+                }
+            });
+        }
+
+        // init rows
+        if (editid ==0) {
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+            $rowid.val(rowid);
+            bindOHAutocomplete();
+        } else {
+            $rowid.val(rowid);
+        }
+    });
+    function isformValid() {
+        var isValid =true;
+        $trIOW = $('tr[id*=mainTr_]');
+        var iValidRow=0;
+        $.each($trIOW, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id,
+                key = name.split('_')[1];
+            if (name.indexOf('__') != -1) return;
+            if ($('#ohname_' + key).val().length == 0 && $('#ohtypename_' + key).val().length == 0) return;
+            if ($('#ohname_' + key).hasClass('error')) isValid = false;
+            if ($('#ohtypename_' + key).hasClass('error')) isValid = false;
+            iValidRow = +iValidRow +1;
+
+        });
+        if (iValidRow==0) isValid =false;
+        return isValid;
+    }
+
+    function submitForm() {
+        if (isformValid() == false) return;
+        $('#formWrapper').submit();
+    }
+
+    function bindOHAutocomplete() {
+        var $names = $('input[id^=ohname_]');
+        $.each($names, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            $this.unbind('autocomplete');
+            $this.autocomplete({
+                lookup: tmp_arr_ohs,
+                showNoSuggestionNotice:true,
+                noSuggestionNotice: 'Do you want to Create New <input type="button" font-weight:bold" class="btn btn-link" id="NewOtherCost_'+ key1 +'" value="Other Cost" onclick="AddNewOtherCost(\'#'+name+'\')" >',
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#ohname_" + key1).prop('readonly', true);
+                        $("#ohid_" + key1).val(suggestion.data);
+                        $("#ohtypename_" + key1).val(suggestion.OHTypeName);
+                        $("#ohtypeid_" + key1).val(suggestion.OHTypeId);
+                        removeError($(this));
+
+                        $('#expandTr_' + key1).show();
+                        if(suggestion.OHTypeId == 9 || suggestion.OHTypeId == 10) {
+                            $('#expandTr_' + key1).hide();
+                            $('#amount_' + key1).prop('readonly', false);
+                        }
+
+                        // add type row priorly
+                        var arr_type_1 = ['1','2','3', '4'];
+                        var arr_type_names = {'1': 'item', '2': 'material', '3': 'labour', '4': 'service', '5': 'machinery', '6': 'adminexpense', '7': 'salary', '8': 'fuel'};
+                        var template = '';
+                        if($.inArray(suggestion.OHTypeId, arr_type_1) != -1) {
+                            template = $('#dummy-type-1').html();
+                        } else if(suggestion.OHTypeId == 6) {
+                            template = $('#dummy-type-2').html();
+                        } else if(suggestion.OHTypeId == 7) {
+                            template = $('#dummy-type-3').html();
+                        } else if(suggestion.OHTypeId == 8) {
+                            template = $('#dummy-type-4').html();
+                        } else if(suggestion.OHTypeId == 5) {
+                            template = $('#dummy-type-5').html();
+                        }
+
+                        $('#mainTr_' + key1).next('.subTr').html(template.replace(/__/g, '_' + key1).replace(/INPUTDATATYPE/g, arr_type_names[suggestion.OHTypeId]));
+
+
+                        if (suggestion.OHTypeId==1) $('#ohheader_'+ key1).text('Item of Work');
+                        if (suggestion.OHTypeId==2) $('#ohheader_'+ key1).text('Material Name');
+                        if (suggestion.OHTypeId==3) $('#ohheader_'+ key1).text('Labour Type');
+                        if (suggestion.OHTypeId==4) $('#ohheader_'+ key1).text('Service Name');
+
+
+                        addNewRow($(this));
+                        bindOHTypeAutocomplete(arr_type_names[suggestion.OHTypeId]);
+                        if(suggestion.OHTypeId == 8) {
+                            bindOHFuelTypeAutocomplete();
+                        }
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#ohid_" + key1).val(0);
+                    $("#ohtypename_" + key1).val('');
+                    $("#ohtypeid_" + key1).val(0);
+                    removeError($(this));
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length && query.length > 1){
+                        showError($(this), 'Required');
+                        $("#ohid_" + key1).val(0);
+                        $("#ohtypename_" + key1).val('');
+                        $("#ohtypeid_" + key1).val(0);
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        });
+    }
+
+    function bindOHTypeAutocomplete(type) {
+        console.log(type);
+        var $names = $('input[id*=_desc_][data-type='+type+']');
+        $.each($names, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var rowid = arrname[1];
+            var key1 = arrname[3];
+            $this.unbind('autocomplete');
+
+            if(tmp_arr_oh_types[type].length == 0 || typeof tmp_arr_oh_types[type][rowid]  == 'undefined')
+                tmp_arr_oh_types[type][rowid] =  arr_oh_types[type];
+
+            $this.autocomplete({
+                lookup: tmp_arr_oh_types[type][rowid],
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#type_"+rowid+"_desc_" + key1).prop('readonly', true);
+                        $("#type_"+rowid+"_desctypeid_" + key1).val(suggestion.data);
+                        $("#type_"+rowid+"_unit_" + key1).val(suggestion.UnitName);
+                        $("#type_"+rowid+"_unitid_" + key1).val(suggestion.UnitId);
+                        $("#type_"+rowid+"_rate_" + key1).val(suggestion.Rate);
+
+                        removeError($(this));
+                        addNewTypeRow($(this),type);
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#type_"+rowid+"_desctypeid_" + key1).val(0);
+                    $("#type_"+rowid+"_unit_" + key1).val('');
+                    $("#type_"+rowid+"_unitid_" + key1).val(0);
+                    $("#type_"+rowid+"_rate_" + key1).val(0);
+                    removeError($(this));
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length && query.length > 1){
+                        showError($(this), 'Required');
+                        $("#type_"+rowid+"_desctypeid_" + key1).val(0);
+                        $("#type_"+rowid+"_unit_" + key1).val('');
+                        $("#type_"+rowid+"_unitid_" + key1).val(0);
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        });
+    }
+
+    function bindOHFuelTypeAutocomplete() {
+        var $names = $('input[id*=_fuel_]');
+        $.each($names, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var rowid = arrname[1];
+            var key1 = arrname[3];
+            $this.unbind('autocomplete');
+
+            $this.autocomplete({
+                lookup: arr_fuel_types,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#type_"+rowid+"_fuelid_" + key1).val(suggestion.data);
+                        $("#type_"+rowid+"_unit_" + key1).val(suggestion.UnitName);
+                        $("#type_"+rowid+"_unitid_" + key1).val(suggestion.UnitId);
+
+                        removeError($(this));
+                        addNewTypeRow($(this), 'fuel');
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#type_"+rowid+"_fuelid_" + key1).val(0);
+                    $("#type_"+rowid+"_unit_" + key1).val('');
+                    $("#type_"+rowid+"_unitid_" + key1).val(0);
+                    removeError($(this));
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length && query.length > 1){
+                        showError($(this), 'Required');
+                        $("#type_"+rowid+"_fuelid_" + key1).val(0);
+                        $("#type_"+rowid+"_unit_" + key1).val('');
+                        $("#type_"+rowid+"_unitid_" + key1).val(0);
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        });
+    }
+
+    function AddNewOtherCost(x) {
+        $NewOtherCostModalHeader.html('Create Other Cost');
+        $MNewOtherCostBtn.html('Create');
+        $NewOtherCostModal.find('input').val(''); // reset modal inputs
+        $NewOtherCostModal.data('mode', 'add').data('input', x).modal('show');
+        $MNewOtherCostType.select2("enable", true);
+        $('.autocomplete-suggestions').hide();
+        $('#MNewOtherCostName').val($(x).val());
+    }
+
+    function ShowNewOtherCost() {
+        if ($NewOtherCostTable.is(":hidden"))
+            $NewOtherCostTable.show();
+        else
+            $NewOtherCostTable.hide();
+    }
+
+    function EditNewOtherCost(id) {
+        var rowid = id.split('_')[1];
+
+        $NewOtherCostModalHeader.html('Edit Other Cost');
+        $MNewOtherCostBtn.html('Update');
+
+        $NewOtherCostModal.find('input').val(''); // reset modal inputs
+        $MNewOtherCostName.val($('#NewOtherCostName_' + rowid).val());
+        $MNewOtherCostId.val($('#NewOtherCostId_' + rowid).val());
+        $MNewOtherCostType.val($('#NewOtherCostType_' + rowid).val()).select2("enable", false);
+
+        $NewOtherCostModal.data('mode', 'edit').data('id', rowid).modal('show');
+    }
+
+    function NewOtherCostUpdate() {
+        if($MNewOtherCostName.hasClass('error')) // if already exitst
+            return false;
+
+        if($MNewOtherCostName.val().length == 0) {
+            showError($MNewOtherCostName, 'Name is Required!');
+            return false;
+        } else
+            removeError($MNewOtherCostName);
+
+        if($MNewOtherCostType.val().length == 0) {
+            showError($MNewOtherCostType, 'Type is Required!');
+            return false;
+        } else
+            removeError($MNewOtherCostType);
+
+        // add new other cost to array and form
+        var $NewOtherCostRowId = $('#NewOtherCostRowId'),
+            rowid = parseFloatVal($NewOtherCostRowId.val()),
+            OtherCostName = $MNewOtherCostName.val(),
+            OtherCostId = '',
+            OtherCostTypeName = $.trim($MNewOtherCostType.find(':selected').html()),
+            OtherCostTypeId = $MNewOtherCostType.val();
+
+        if($NewOtherCostModal.data('mode') == 'add') {
+            rowid += 1;
+            $NewOtherCostTable.find('tbody').append($('#dummy-new-othercost').html().replace(/__/g, '_' + rowid));
+            $NewOtherCostRowId.val(rowid);
+            OtherCostId = 'New' + rowid;
+            arr_ohs.push({
+                data: OtherCostId,
+                value: OtherCostName,
+                OHTypeName: OtherCostTypeName,
+                OHTypeId: OtherCostTypeId
+            });
+            $NewOtherCostWrapper.find('.badge').html(rowid);
+
+            // set created OtherCost to prior field
+            var refInput = $($NewOtherCostModal.data('input'));
+            refInput.trigger('focus');
+            refInput.val(OtherCostName).trigger('focus');
+        } else {
+            var oldOtherCostName = $('#NewOtherCostName_' + $NewOtherCostModal.data('id')).val(),
+                index = getJsonArrayIndex(arr_ohs, 'value', oldOtherCostName);
+            if(index != -1) {
+                arr_ohs[index].value = OtherCostName;
+                OtherCostId = arr_ohs[index].data;
+
+                updateOtherCostInputs(OtherCostId, OtherCostName);
+            }
+            rowid = $NewOtherCostModal.data('id');
+        }
+
+        // set values
+        $('#NewOtherCostName_' + rowid).val(OtherCostName);
+        $('#NewOtherCostId_' + rowid).val(OtherCostId);
+        $('#NewOtherCostType_' + rowid).val($MNewOtherCostType.val());
+        $NewOtherCostModal.modal('hide');
+        $NewOtherCostWrapper.show();
+    }
+
+    function updateOtherCostInputs(id, name) {
+        $.each($('.OtherCostIdInputs[value="'+id+'"]'),function () {
+            var $name = $(this).siblings('.OtherCostNameInputs');
+            $name.val(name);
+            $name.trigger('focus');
+        });
+    }
+
+    function checkOHName(x) {
+        var arrname = x.split('_'),
+            id= arrname[1],
+            typeids = $('input[id^=ohid_]');
+        tmp_arr_ohs = arr_ohs;
+        tmp_arr_ohs = $.grep(arr_ohs, function (element, index) {
+            var is_selected = true;
+            $.each(typeids, function (i, obj) {
+                var $this = $(this),
+                    key = $this[0].id.split('_')[1];
+                if (key != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+
+        bindOHAutocomplete();
+    }
+
+    function addNewRow(x,updateFlag) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+
+        if(typeof updateFlag != 'undefined' && updateFlag) {
+            $('#UpdateRow_' + key).val(1);
+        }
+
+        if ($tr.nextAll('tr:not(.subTr)').length != 0)
+            return;
+
+        if ($('#ohname_' + key).val().length == 0 || $('#ohid_' + key).val().length == 0 || $('#ohid_' + key).val() == 0
+            || $('#ohtypename_' + key).val().length == 0)
+            return;
+
+        var $rowid = $('#rowid'),
+            rowid = parseInt($rowid.val());
+        $('#deleteTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#dummy-othercost').html();
+
+        $tr.parent('tbody').append(template.replace(/__/g, '_' + count));
+        $rowid.val(count);
+    }
+
+    function deleteRow(x,e,deleteFlag) {
+        e.preventDefault();
+        var $x = $(x),
+            key = $x[0].id.split('_')[1];
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr');
+
+        if(typeof deleteFlag != 'undefined' && deleteFlag) {
+            var $ids = $('#rowdeleteids');
+            $ids.val($ids.val() + ',' + $('#TransId_'+key).val());
+        }
+
+        $tr.next('.subTr').remove();
+        $tr.remove();
+
+        return false;
+    }
+
+    function calcAmount(x) {
+        var rowId =  $(x)[0].id.split('_')[1];
+        var total = 0;
+
+        $.each($('input[id^=type_'+rowId+'_amount_]'), function (i,o) {
+                var keys = $(this)[0].id.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+            var qty = parseFloatVal($('#type_'+rowid+'_qty_' + key).val()),
+                rate = parseFloatVal($('#type_'+rowid+'_rate_' + key).val());
+
+            total += qty * rate;
+            $('#type_'+rowid+'_amount_' + key).val(sanitizeNumber(qty * rate,2,true));
+        });
+
+        $('#amount_' + rowId).val(sanitizeNumber(total,2,true));
+    }
+
+    function calcSalAmount(x) {
+        var rowId =  $(x)[0].id.split('_')[1];
+        var total = 0;
+
+        $.each($('input[id^=type_'+rowId+'_amount_]'), function (i,o) {
+            var keys = $(this)[0].id.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+            var nos = parseFloatVal($('#type_'+rowid+'_nos_' + key).val()),
+                permonth = parseFloatVal($('#type_'+rowid+'_salpermonth_' + key).val()),
+                wmonths = parseFloatVal($('#type_'+rowid+'_workingmonths_' + key).val());
+
+            var subtotal = nos * (permonth * wmonths);
+            total += subtotal;
+            $('#type_'+rowid+'_amount_' + key).val(sanitizeNumber(subtotal,2,true));
+        });
+
+        $('#amount_' + rowId).val(sanitizeNumber(total,2,true));
+    }
+
+    function calcMachineryAmount(x) {
+        var rowId =  $(x)[0].id.split('_')[1];
+        var total = 0;
+
+        $.each($('input[id^=type_'+rowId+'_amount_]'), function (i,o) {
+            var keys = $(this)[0].id.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+            var nos = parseFloatVal($('#type_'+rowid+'_nos_' + key).val()),
+                wqty = parseFloatVal($('#type_'+rowid+'_wqty_' + key).val()),
+                rate= parseFloatVal($('#type_'+rowid+'_rate_' + key).val());
+
+            var subtotal = rate * (nos * wqty);
+            total += subtotal;
+            $('#type_'+rowid+'_tqty_' + key).val(sanitizeNumber(nos * wqty,3));
+            $('#type_'+rowid+'_amount_' + key).val(sanitizeNumber(subtotal,2,true));
+        });
+
+        $('#amount_' + rowId).val(sanitizeNumber(total,2,true));
+    }
+
+    function calcExpenseAmount(x) {
+        var rowId =  $(x)[0].id.split('_')[1];
+        var total = 0;
+
+        $.each($('input[id^=type_'+rowId+'_amount_]'), function (i,o) {
+            var keys = $(this)[0].id.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+            var amt = parseFloatVal($('#type_'+rowid+'_amount_' + key).val());
+
+            total += amt;
+        });
+
+        $('#amount_' + rowId).val(sanitizeNumber(total,2,true));
+    }
+
+    function addNewTypeRow(x,type,updateFlag) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            keys = $x[0].id.split('_'),
+            rowid = keys[1],
+            key = keys[3];
+
+        if(typeof updateFlag != 'undefined' && updateFlag) {
+            $('#type_'+rowid+'_UpdateRow_' + key).val(1);
+        }
+
+        if ($tr.nextAll('tr:not(.subTr)').length != 0)
+            return;
+
+        if ($('#type_'+rowid+'_desctypeid_' + key).val().length == 0 || $('#type_'+rowid+'_desctypeid_' + key).val() == 0 || $('#type_'+rowid+'_desc_' + key).val().length == 0
+            || $('#type_'+rowid+'_amount_' + key).val().length == 0)
+            return;
+
+        $('#type_'+rowid+'_deleteTr_' + key).show();
+
+        var $typerowid = $('#type_'+rowid+'_rowid'),
+            typerowid = parseInt($typerowid.val());
+        var count = typerowid + 1,
+            template = '',
+            type = $('#type_'+rowid+'_desc_' + key).attr('data-type');
+
+        // add type row priorly
+        var arr_type_names = {'1': 'item', '2': 'material', '3': 'labour', '4': 'service', '6': 'adminexpense', '7': 'salary'};
+        if(type == 'adminexpense')
+            template = $('#dummy-type-tr-2').html();
+        else if(type == 'salary')
+            template = $('#dummy-type-tr-3').html();
+        else if(type == 'fuel')
+            template = $('#dummy-type-tr-4').html();
+        else if(type == 'machinery') {
+            template = $('#dummy-type-tr-5').html();
+            $('#type_'+rowid+'_expandTr_' + key).show();
+        } else
+            template = $('#dummy-type-tr-1').html();
+
+        $tr.parent('tbody').append(template.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + count).replace(/INPUTDATATYPE/g, type));
+        $typerowid.val(count);
+
+        bindOHTypeAutocomplete(type);
+        if(type == 'fuel') {
+            bindOHFuelTypeAutocomplete();
+        } else if(type == 'machinery') {
+            bindMachineryIOWAutocomplete();
+        }
+    }
+
+    function deleteTypeRow(x,e,deleteFlag) {
+        e.preventDefault();
+        var $x = $(x),
+            keys = $x[0].id.split('_'),
+            rowid = keys[1],
+            key = keys[3],
+            type = $x.attr('data-type');
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr');
+
+        if(typeof deleteFlag != 'undefined' && deleteFlag) {
+            var $ids = $('#type_'+rowid+'_rowdeleteids');
+            $ids.val($ids.val() + ',' + $('#type_'+rowid+'_TransId_'+key).val());
+        }
+
+        $tr.next('.subTr').remove();
+        $tr.remove();
+
+        if(type == 'salary') {
+            calcSalAmount(x);
+            return false;
+        }
+
+        if(type == 'machinery') {
+            calcMachineryAmount(x);
+            return false;
+        }
+
+        calcAmount(x);
+        return false;
+    }
+
+    function checkOHTypeName(x, type) {
+        var arrname = x.split('_'),
+            rowid=arrname[1],
+            id=arrname[3],
+            typeids = $('input[id^=type_'+rowid+'_desctypeid_]');
+        tmp_arr_oh_types[type][rowid] =  arr_oh_types[type];
+        tmp_arr_oh_types[type][rowid] = $.grep(arr_oh_types[type], function (element, index) {
+            var is_selected = true;
+            $.each(typeids, function (i, obj) {
+                var $this = $(this),
+                    key = $this[0].id.split('_')[3];
+                if (key != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+
+        bindOHTypeAutocomplete(type);
+    }
+
+    function addNewMachineryRow(x,updateFlag) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            keys = $x[0].id.split('_'),
+            rowid = keys[1],
+            mrowid = keys[3],
+            key = keys[5];
+
+        if(typeof updateFlag != 'undefined' && updateFlag) {
+            $('#type_'+rowid+'_m_'+mrowid+'_UpdateRow_' + key).val(1);
+        }
+
+        if ($tr.nextAll('tr:not(.subTr)').length != 0)
+            return;
+
+        if ($('#type_'+rowid+'_m_'+mrowid+'_desctypeid_' + key).val().length == 0 || $('#type_'+rowid+'_m_'+mrowid+'_desctypeid_' + key).val() == 0 || $('#type_'+rowid+'_m_'+mrowid+'_desc_' + key).val().length == 0
+            || $('#type_'+rowid+'_m_'+mrowid+'_amount_' + key).val().length == 0)
+            return;
+
+        $('#type_'+rowid+'_m_'+mrowid+'_deleteTr_' + key).show();
+
+        var $typerowid = $('#type_'+rowid+'_m_'+mrowid+'_rowid'),
+            typerowid = parseInt($typerowid.val());
+        var count = typerowid + 1;
+        var template = '';
+            template = $('#dummy-machinery-tr').html();
+
+        $tr.parent('tbody').append(template.replace(/__9/g, '_' + mrowid).replace(/_0/g, '_' + count).replace(/___/g, '_' + rowid + '_'));
+        $typerowid.val(count);
+    }
+
+    function calcMachineryPerAmount(x) {
+        var keys =  $(x)[0].id.split('_'),
+            rowId =  keys[1],
+            mrowId =  keys[3];
+        var total = 0,
+            totalpercentage = 0;
+
+        $.each($('input[id^=type_'+rowId+'_m_'+mrowId+'_amount_]'), function (i,o) {
+            var keys = $(this)[0].id.split('_'),
+                rowid = keys[1],
+                mrowId = keys[3],
+                key = keys[5];
+            var totalAmt = parseFloatVal($('#type_'+rowId+'_amount_' + mrowId).val()),
+                per = parseFloatVal($('#type_'+rowId+'_m_'+mrowId+'_per_' + key).val());
+
+            totalpercentage += per;
+            if(totalpercentage > 100) {
+                per = 100 -  (totalpercentage - per);
+                if (per < 0) per=0;
+                $('#type_'+rowId+'_m_'+mrowId+'_per_' + key).val(sanitizeNumber(per,2));
+            }
+            var subtotal = totalAmt * (per / 100);
+            $('#type_'+rowId+'_m_'+mrowId+'_amount_' + key).val(sanitizeNumber(subtotal,2,true))
+            total += subtotal;
+
+        });
+
+        $('#amount_' + rowId).val(sanitizeNumber(total,2,true));
+
+//        if(totalpercentage > 100) {
+//            alert('Total percentage for ' + $('type_'+rowId+'_desc_'+mrowId).val() + ' should not exceed 100%');
+//        }
+    }
+
+    function deleteMachineryRow(x,e,deleteFlag) {
+        e.preventDefault();
+        var $x = $(x),
+            keys = $x[0].id.split('_'),
+            rowid = keys[1],
+            mrowid = keys[3],
+            key = keys[5];
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr');
+
+        if(typeof deleteFlag != 'undefined' && deleteFlag) {
+            var $ids = $('#type_'+rowid+'_m_'+mrowid+'_rowdeleteids');
+            $ids.val($ids.val() + ',' + $('#type_'+rowid+'_m_'+mrowid+'_TransId_'+key).val());
+        }
+
+        $tr.remove();
+
+        calcMachineryPerAmount(x);
+        return false;
+    }
+
+    function bindMachineryIOWAutocomplete() {
+        var $names = $('input[id*=_desc_][data-type=machineryiow]');
+        $.each($names, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var rowid = arrname[1];
+            var mrowid = arrname[3];
+            var key1 = arrname[5];
+            $this.unbind('autocomplete');
+
+            $this.autocomplete({
+                lookup: tmp_arr_machinery_iows,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#type_"+rowid+'_m_'+mrowid+"_desctypeid_" + key1).val(suggestion.data);
+
+                        removeError($(this));
+                        addNewMachineryRow($(this));
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#type_"+rowid+'_m_'+mrowid+"_desctypeid_" + key1).val(0);
+                    removeError($(this));
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length && query.length > 1){
+                        showError($(this), 'Required');
+                        $("#type_"+rowid+'_m_'+mrowid+"_desctypeid_" + key1).val(0);
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        });
+    }
+
+    function checkMachineryName(x) {
+        var arrname = x.split('_'),
+            rowid= arrname[1],
+            mrowid= arrname[3],
+            id= arrname[5],
+            typeids = $('input[id^=type_'+rowid+'_m_'+mrowid+'_desctypeid_]');
+        tmp_arr_machinery_iows = arr_machinery_iows;
+        tmp_arr_machinery_iows = $.grep(arr_machinery_iows, function (element, index) {
+            var is_selected = true;
+            $.each(typeids, function (i, obj) {
+                var $this = $(this),
+                    key = $this[0].id.split('_')[5];
+                if (key != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+
+        bindMachineryIOWAutocomplete();
+    }
+</script>

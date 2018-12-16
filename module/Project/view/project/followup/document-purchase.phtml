@@ -1,0 +1,215 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<div class="content_wrapper padlr0">
+  <div class="container-fluid padlr0">
+    <div class="col-lg-12 clear">
+      <h1>Document Purchase <?php echo isset($EnquiryName) ? '- '.$EnquiryName : '';?></h1>
+      <div class="top_ct col-lg-8 col-lg-offset-2">
+        <form id="documentForm" class="form-horizontal" method="post" role="form" onsubmit="return entryValidate();">
+         <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+          <div class="col-lg-12">
+            <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+              <input type="text" readonly name="PurchaseDate" id="PurchaseDate" class="form-control date_picker lbl_move" label="Date Time of Purchase" value="<?php if(isset($EditDocumentPurchase['PurchaseDate'])) echo date("d-m-Y",strtotime($EditDocumentPurchase['PurchaseDate'])); else echo date('d-m-Y');?>" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group"> 
+              <!--								<input type="hidden" name="EnquiryFollowupId" id="EnquiryFollowupId" value="-->
+              <?php //echo $enquiryFollowupId; ?>
+              <!--" />-->
+              <input type="hidden" name="EnquiryId" id="EnquiryId" value="<?php echo $enquiryId; ?>" />
+              <input type="hidden" name="EnquiryCallTypeId" id="EnquiryCallTypeId" value="<?php echo $EnquiryCallTypeId; ?>" />
+              <input type="hidden" name="RefDate" id="RefDate" value="<?php echo $Date; ?>" />
+                <select name="DocumentType[]" id="DocumentType" data-bsfshare="DocumentType" class="form-control multiple_dropdown lbl_move"  multiple="multiple" label="Document Type" style="width:100%;">
+                    <?php
+                    $arrLis=array();
+                    foreach($resDocument as $type){
+                        if(count($DocumentPurchaseTrans)>0) {
+                            foreach($DocumentPurchaseTrans as $list):
+                                if($list['DocumentTypeId'] == $type['data']){
+                                    echo "<option " . ($list['DocumentTypeId'] == $type['data'] ? 'selected' : '') . " value='" . $type['data'] . "' >" . $type['value'] . "</option>";
+                                }else{
+                                    array_push($arrLis, $list['DocumentTypeId']);
+                                }
+                                endforeach;
+                            if(!in_array($type['data'],$arrLis))
+                                echo "<option value='" . $type['data'] . "' >" . $type['value'] . "</option>";
+                        }
+                        else{
+                            echo "<option value='".$type['data']."' >".$type['value']."</option>";
+                        }
+                    }
+                    ?>
+                </select>
+              <input type="hidden" name="DocumentTypeId" id="DocumentTypeId" class="form-control" value="<?php echo isset($EditDocumentPurchase) ? $EditDocumentPurchase['DocumentTypeId']:'';?>" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <input type="text" name="DocumentName" id="DocumentName" class="form-control lbl_move" label="Document Name" value="<?php echo isset($EditDocumentPurchase) ? $EditDocumentPurchase['DocumentName']:'';?>" />
+            </div>
+          </div>
+            <div class="col-lg-12">
+            <div class="form-group">
+              <input type="text" name="DocumentCost" id="DocumentCost" maxlength="10" class="form-control lbl_move text-right" onblur="return FormatNum(this, 2,true)" onKeyPress="return isNumberKey(event);" label="Document Cost" value="<?php echo isset($EditDocumentPurchase) ? $this->commonHelper()->sanitizeNumber($EditDocumentPurchase['DocumentCost'],2,true):'';?>" />
+            </div>
+          </div>
+        <div class="col-lg-12">
+            <div class="form-group">
+                <textarea class="form-control lbl_move textarea-height30" label="Remarks" name="Remarks" id="Remarks"><?php echo isset($EditDocumentPurchase) ? $EditDocumentPurchase['Remarks']:'';?></textarea>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="form-group">
+                <input type="text" name="HandOver" id="HandOver" class="form-control lbl_move" label="Hand over to" value="<?php echo isset($EditDocumentPurchase) ? $EditDocumentPurchase['UserName']:'';?>" />
+                <input type="hidden" name="HandOverId" id="HandOverId" class="form-control" value="<?php echo isset($EditDocumentPurchase) ? $EditDocumentPurchase['UserId']:'';?>"/>
+            </div>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+  <ul>
+    <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Save" id="submitData">Save</a></li>
+        <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/followup/followup';?>" method="post" id="frmfollowup">
+            <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId : 0; ?>"/>
+            <input type="hidden" id="formfrom" name="formfrom"/>
+            <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $EnquiryName; ?>"/>
+            <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Go Back</a></li>
+        </form>
+<!--    <li class="cancel_btn float_l goback-foll"><a href="javascript:void(0);"><i class="fa fa-chevron-circle-left"></i> Go Back</a></li>-->
+  </ul>
+</div>
+<script type="text/javascript">
+$("#submitData").click(function(){
+	$("#documentForm").submit();
+});
+var arrresDocument = <?php if(isset($resDocument)) echo json_encode($resDocument); else echo "[]";?>;
+var arrresUsers = <?php if(isset($resUsers)) echo json_encode($resUsers); else echo "[]";?>;
+//Document Type
+function bindDocumentAutoComplete() {
+    var $documentType = $('input[id^=DocumentType]');
+    $documentType.autocomplete({
+        lookup: arrresDocument,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#DocumentTypeId').val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function (suggestion) {
+            $('#DocumentTypeId').val(0);
+        },
+        onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $('#DocumentTypeId').val(0);
+            } else
+                $(this).removeClass('error');
+        }
+    });
+}
+    //HandOver / Username
+    function bindHandOverAutoComplete() {
+        var $HandOver = $('input[id^=HandOver]');
+        $HandOver.autocomplete({
+            lookup: arrresUsers,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    $('#HandOverId').val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                $('#HandOverId').val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $('#HandOverId').val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+    }
+
+$(function() {
+    bindDocumentAutoComplete();
+    bindHandOverAutoComplete();
+
+    /*var DocumentType = $('#DocumentType'),
+        DocumentName = $('#DocumentName'),
+        DocumentCost = $('#DocumentCost'),
+        PurchaseDate = $('#PurchaseDate'),
+        HandOver = $('#HandOver'),
+        Remarks = $('#Remarks');
+
+        var arrEditDocumentPurchase = <?php if(isset($EditDocumentPurchase)) echo json_encode($EditDocumentPurchase); else echo "[]";?>;
+        if(arrEditDocumentPurchase.length != 0) {
+            var d1 =arrEditDocumentPurchase.PurchaseDate.substring(8,10) + '-' + arrEditDocumentPurchase.PurchaseDate.substring(5,7) + '-' + arrEditDocumentPurchase.PurchaseDate.substring(0,4);
+            DocumentType.val(arrEditDocumentPurchase.DocumentTypeName);
+            DocumentName.val(arrEditDocumentPurchase.DocumentName);
+            DocumentCost.val(arrEditDocumentPurchase.DocumentCost);
+            PurchaseDate.val(d1);
+            HandOver.val(arrEditDocumentPurchase.UserName);
+            Remarks.val(arrEditDocumentPurchase.Remarks);
+            $('#HandOverId').val(arrEditDocumentPurchase.UserId);
+            $('#DocumentTypeId').val(arrEditDocumentPurchase.DocumentTypeId);
+        }*/
+});
+function entryValidate()
+{
+    if($('#DocumentType').val().length == 0) {
+        alert('Document Type is Required!');
+        return false;
+    }
+
+    if($('#DocumentName').val().length == 0) {
+        alert('Document Name is Required!');
+        return false;
+    }
+
+    if($('#DocumentCost').val().length == 0) {
+        alert('Document Cost is Required!');
+        return false;
+    }
+
+    if($('#PurchaseDate').val().length == 0) {
+        alert('Purchase Date is Required!');
+        return false;
+    }
+
+    if($('#HandOver').val().length == 0) {
+        alert('Hand Over To is Required!');
+        return false;
+    }
+
+    if($('#Remarks').val().length == 0) {
+        alert('Remarks is Required!');
+        return false;
+    }
+}
+function backfn() {
+    $('#formfrom').val("title");
+    $('#frmfollowup').submit();
+}
+</script>

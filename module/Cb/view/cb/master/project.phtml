@@ -1,0 +1,471 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<!--<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+</style>-->
+<style>
+	#treeGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Project Master</h1>
+            <div class="edit_del float_r">
+                <ul>
+                    <li>
+                        <a title="Add Project" href="#" onclick="projectAddEdit('add'); return false;" class="edit_al" style=" display:block;"><i class="fa fa-plus"></i> Add Project</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive clear">
+                <div id="treeGrid"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delProjectName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                    <div class="row m_tb40">
+                        <div class="col-lg-12 form-group req_flds">
+                          <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                        </div>
+                    </div>
+                    </form>
+            	</div>        
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="headerText">Edit Project</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                	<form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+                    <div class="row">
+                        <div class="form-group req_flds padtop10 col-lg-12">
+                            <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                            <input type="text" id="projectName" name="projectName" autocomplete="off" class="form-control lbl_move" maxlength="150" label="Name"/>
+                            <input type="hidden" name="projectId" id="projectId"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <textarea class="form-control lbl_move" label="Description" autocomplete="off" name="projectDescription" id="projectDescription"  maxlength="250"></textarea>
+                        </div>
+                    </div>
+                    <h1 class="vendorrequest_text commargin_bottom" style="color:#06C;">New</h1>
+                    <div class="row commargin_top_20">
+                        <div class="form-group req_flds col-lg-12">
+                            <strong class="new-pg" id="newProjectType">New</strong>
+                            <input type="text" name="ProjectTypeName" id="ProjectTypeName" autocomplete="off" class="form-control lbl_move" label="Type"/>
+                            <input type="hidden" name="ProjectTypeId" id="ProjectTypeId"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <strong class="new-pg" id="newClient">New</strong>
+                            <input type="text" name="ClientName" id="ClientName" autocomplete="off" class="form-control lbl_move" label="Client Name"/>
+                            <input type="hidden" name="ClientId" id="ClientId"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" class="form-control geo lbl_move" autocomplete="off" label="Address" name="address" id="address" placeholder=""/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" id="city" name="city" autocomplete="off" class="form-control lbl_move" label="City" data-name="locality"/>
+                            <input type="hidden" id="state" name="state" class="form-control" data-name="administrative_area_level_1"/>
+                            <input type="hidden" id="country" name="country" class="form-control" data-name="country"/>
+                        </div>
+                    </div>
+                	</form>	
+                </div> 
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+	var arr_projecttypes = <?php echo (isset($projecttypes)) ? json_encode($projecttypes) : '[]';?>;
+    var arr_clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]';?>;
+    var allowNewClient = <?php echo (isset($clients) && count($clients) >= $NoOfClientCount) ? 'false' : 'true'; ?>;
+	
+	var $ProjectTypeName = $('#ProjectTypeName'),
+        $ProjectTypeId = $('#ProjectTypeId'),
+        $ClientName = $('#ClientName'),
+        $ClientId = $('#ClientId');
+		
+	$(function () {
+        $ProjectTypeName.autocomplete({
+            lookup: arr_projecttypes,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $ProjectTypeId.val(suggestion.data);
+                    $('#newProjectType').hide();
+                }
+            }, onSearchStart: function (suggestion) {
+                $ProjectTypeId.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $('#newProjectType').show();
+                    $ProjectTypeId.val('new');
+                } else $('#newProjectType').hide();
+            }
+        });
+
+        $ClientName.autocomplete({
+            lookup: arr_clients,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $ClientId.val(suggestion.data);
+                    removeError($(this));
+                    $('#newClient').hide();
+                }
+            }, onSearchStart: function (suggestion) {
+                $ClientId.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length && allowNewClient) {
+                    $('#newClient').show();
+                    $ClientId.val('new');
+                } else if (!suggestions.length && !allowNewClient) {
+                    showError($(this), 'Required');
+                    $ClientId.val(0);
+                } else
+                    $('#newClient').hide();
+            }
+        });
+        //bindJqxGridAutoResize();
+    });
+
+    var data = <?php echo (isset($projectReg)) ? json_encode($projectReg) : ''?>,
+        $treeGrid = $("#treeGrid"),
+        $deleteModal = $('#DeleteModal'),
+		$editModal = $('#EditModal'),
+        $remarks = $('#remarks'),
+		$projectName = $('#projectName'),
+		$projecttypeName = $('#ProjectTypeName'),
+        $projecttypeId = $('#ProjectTypeId'),
+        $clientName = $('#ClientName'),
+        $clientId = $('#ClientId'),
+		$projectDescription = $('#projectDescription'),
+		$address = $('#address'),
+		$projectNamenew = $('#projectNamenew');
+    $(function () {
+        var source = {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ProjectId', type: 'number' },
+                { name: 'ProjectName', type: 'string' },
+				{ name: 'ProjectDescription', type: 'string' },
+				{ name: 'ProjectTypeId', type: 'number' },
+				{ name: 'ProjectTypeName', type: 'string' },
+				{ name: 'ClientId', type: 'number' },
+				{ name: 'ClientName', type: 'string' },
+				{ name: 'Address', type: 'string' },
+				{ name: 'CityName', type: 'string' }
+            ],
+            id: 'ProjectId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            filterable:true,
+            pageable:true,
+            rowDetails: true,
+            autoheight: true,
+            selectionmode: 'singlerow',
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+			showfilterrow: true,
+            columns: [
+                { text: 'ProjectId', datafield: 'ProjectId', hidden: true, filterable: false},
+                { text: 'Name', dataField: 'ProjectName', width:'15%'},
+				{ text: 'Description', dataField: 'ProjectDescription', width:'20%'},
+				{ text: 'ProjectTypeId', dataField: 'ProjectTypeId', hidden: true, filterable: false},
+				{ text: 'Type', dataField: 'ProjectTypeName', width:'13%'},
+				{ text: 'ClientId', dataField: 'ClientId', hidden: true, filterable: false},
+				{ text: 'Client Name', dataField: 'ClientName', width:'15%'},
+				{ text: 'Address', dataField: 'Address', width:'20%'},
+				{ text: 'City', dataField: 'CityName' , width:'10%'},
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width:'7%',
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Edit" href="#" onclick="projectAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="projectDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'cb/master/deleteproject',
+                type: 'POST',
+                async: false,
+                data: {"ProjectId": rowData.ProjectId, "Remarks": remarks, "Type": 'update'},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Cannot delete this project, it is already in use!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete the Project!');
+                }
+            });
+            $remarks.val('');	
+        });
+    });
+
+    function addUpdateFn() {
+        var projectName = $projectName.val();
+        var projecttypeName = $projecttypeName.val();
+        var clientName = $clientName.val();
+
+        var projecttypeId = $projecttypeId.val();
+        var clientId = $clientId.val();
+        var projectDescription = $projectDescription.val();
+        var address = $address.val();
+        //var city = $city.val();
+
+        validate(function(isSuccess) {
+
+            if(isSuccess === false) {
+                return false;
+            } else {
+                $editModal.modal('hide');
+                var mode = $editModal.data('mode');
+                if(mode == 'edit') {
+                    var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+                    $.ajax({
+                        url: getBaseURL() + 'cb/master/editproject',
+                        type: 'POST',
+                        data: $('#addEditForm').serialize(),
+                        //data: {"ProjectId": rowData.ProjectId, "projectName": projectName, "projecttypeName": projecttypeName, "projecttypeId": projecttypeId, "clientName": clientName, "clientId": clientId, "projectDescription": projectDescription, "address": address},
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $treeGrid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                            } else {
+                                alert('Failed to Edit the Project!');
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            alert('Failed to Edit the Project!')
+                        }
+                    });
+                } else if(mode == 'add') {
+                    $.ajax({
+                        url: getBaseURL() + 'cb/master/addproject',
+                        type: 'POST',
+                        data: $('#addEditForm').serialize(),
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $treeGrid.jqxGrid('addrow',null,JSON.parse(data));
+                            } else {
+                                alert('Failed to Add Project!');
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            alert('Failed to Add Project!');
+                        }
+                    });
+                }
+                $("#projectId").val(0);
+                $("#projectName").val('');
+                $("#ProjectTypeId").val(0);
+                $("#ProjectTypeName").val('');
+                $("#ClientId").val(0);
+                $("#ClientName").val('');
+                $("#projectDescription").val('');
+                $("#address").val('');
+            }
+        });
+
+
+        function validate(callback) {
+            if(projectName.length == 0) {
+                showError($projectName, 'Required!');
+                return;
+            } else {
+                removeError($projectName);
+            }
+
+            if(projecttypeName.length == 0) {
+                showError($projecttypeName, 'Required!');
+                return;
+            } else {
+                removeError($projecttypeName);
+            }
+
+            if(clientName.length == 0 || clientId == 0) {
+                showError($clientName, 'Required!');
+                return;
+            } else {
+                removeError($clientName);
+            }
+
+            //validate project name already found
+            $.ajax({
+                url:getBaseURL()+ 'cb/master/checkprojectfound',
+                type:"post",
+                data: $('#addEditForm').serialize(),
+                async: false,
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    //alert(data)
+                    if(data.results != false){
+                        showError($projectName, 'Project Name already found!');
+                        callback(false);
+                        return false;
+                    }
+                    else{
+                        removeError($projectName);
+                        callback(true);
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    callback(false);
+                    return false;
+                }
+            });
+        }
+    }
+
+    function projectDelete(x, row) {
+        $(x).prop('disabled', true);
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $.ajax({
+            url: getBaseURL() + 'cb/master/deleteproject',
+            type: 'POST',
+            async: false,
+            data: {"ProjectId": rowData.ProjectId, "Type": 'check'},
+            success:function(data, textStatus, jqXHR){
+                $(x).prop('disabled', false);
+                if (jqXHR.status == 200){
+                    $deleteModal.data('row', row).modal('show');
+                    $('#delProjectName').html(rowData.ProjectName);
+                    $("#remarks").val('');
+                } else
+                    alert('Cannot delete this project, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $(x).prop('disabled', false);
+                alert('Cannot delete this project!');
+            }
+        });
+    }
+
+
+
+    function projectAddEdit(mode,row) {
+        removeError($("#projectName"));
+        if(mode== 'edit') {
+            var rowData = $treeGrid.jqxGrid('getrowdata', row);
+            $editModal.data('row', row).data('mode', 'edit').modal('show');
+            $("#projectId").val(rowData.ProjectId);
+            $("#projectName").val(rowData.ProjectName);
+            $("#projectName").trigger('change');
+            $("#ProjectTypeId").val(rowData.ProjectTypeId);
+            $("#ProjectTypeName").val(rowData.ProjectTypeName);
+            $("#ProjectTypeName").trigger('change');
+            $("#ClientId").val(rowData.ProjectTypeId);
+            $("#ClientName").val(rowData.ClientName);
+            $("#ClientName").trigger('change');
+            $("#projectDescription").val(rowData.ProjectDescription);
+            $("#projectDescription").trigger('change');
+            $("#address").val(rowData.Address);
+            $("#address").trigger('change');
+            $("#city").val(rowData.CityName);
+            $("#city").trigger('change');
+            $("#headerText").html("Edit Project");
+            $("#btnEditYes").html("Update");
+        } else if(mode== 'add'){
+            $editModal.data('mode', 'add').modal('show');
+            $("#projectId").val(0);
+            $("#projectName").val('');
+            $("#ProjectTypeId").val(0);
+            $("#ProjectTypeName").val('');
+            $("#ClientId").val(0);
+            $("#ClientName").val('');
+            $("#projectDescription").val('');
+            $("#address").val('');
+            $("#city").val('');
+            $("#headerText").html("New Project");
+            $("#btnEditYes").html("Create");
+            $('#newClient').hide();
+            $('#newProjectType').hide();
+        }
+    }
+</script>
+	
+

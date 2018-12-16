@@ -1,0 +1,81 @@
+<style type="text/css">
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="col-lg-12 padlr0">
+            	<h1>Inventory Bills
+                	<div class="stgedit_btn req_addbtn brad_50">
+                        <a href="<?php echo $this->basePath(); ?>/crm/property/inventory-bill" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;Maintenance&nbsp;Bill"><i class="fa fa-plus"></i></a>
+                    </div>
+                </h1>
+            </div>
+            <div class="col-lg-12 padlr0 tmss commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function() {
+        var $treeGrid = $('#treeGrid');
+        var source = {
+            localdata:<?php echo (isset($jsonInvBills))?$jsonInvBills:'[]'; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'RegisterId', type: 'number' },
+                { name: 'RefNo', type: 'string' },
+                { name: 'RefDate', type: "date", format: 'dd/MM/yyyy' },
+                { name: 'UnitName', type: 'string' },
+                { name: 'LeadName', type: "string" },
+                { name: 'NetAmount', type: 'string' }
+            ],
+            id: 'RegisterId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $treeGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            //rowsheight:60,
+            autorowheight: true,
+            filterable: true,
+            sortable: true,
+            //filtermode: 'advanced',
+            columnsResize: true,
+            showfilterrow: true,
+            ready:function(){
+                var localizationobj = {};
+                localizationobj.emptydatastring = "No Bills found!";
+                $treeGrid.jqxGrid('localizestrings', localizationobj);
+            },
+            source:dataAdapter,
+            columns: [
+                { text: 'RegisterId', dataField: 'RegisterId',hidden: true, filterable: false},
+                { text: 'RefNo', dataField: 'RefNo',width:'15%'},
+                { text: 'RefDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'RefDate',width:'15%'},
+                { text: 'Unit Name', dataField: 'UnitName',width:'20%'},
+                { text: 'Lead Name', dataField: 'LeadName',width:'25%'},
+                { text: 'Amount', dataField: 'NetAmount',width:'20%'},
+                { text: '', sortable: false, filterable: false,width:'5%',align: 'left',
+                    cellsrenderer: function (row) {
+                        var RegisterId = $treeGrid.jqxGrid('getCellValue', row, 'RegisterId')
+                        return '<a title="Edit" href="'+ getBaseURL() + 'crm/property/inventory-bill/'+RegisterId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>'
+                    }
+                }
+            ]
+        });
+    });
+</script>

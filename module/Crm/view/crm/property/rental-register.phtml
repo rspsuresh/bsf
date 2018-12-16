@@ -1,0 +1,179 @@
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important;padding:5px 15px !important;}
+.top-ic5                                            {cursor:pointer;padding-top:10px !important;}
+/*--------------Jqx Grid jqx All-------------------*/
+#jqxGrid									{min-height:200px !important;}
+#jqxGrid .jqx-grid-header 					{height:60px !important;}
+.jqx-grid-groups-row						{padding-left:5px !important;}
+.jqx-grid-pager-input						{padding: 2px; text-align: center !important; width: 35px;}
+.jqx-dropdownlist-state-normal				{display: block;  float: right;height: 16px !important;margin-right: 7px;margin-top: 0;  padding-bottom: 2px !important;padding-top: 2px !important; width: 40px;}
+.jqx-button									{cursor: pointer;float: right;margin-right: 3px !important;margin-top: 0 !important;padding: 0 !important;width: 20px !important;}
+.jqx-button > .jqx-icon-arrow-left,
+.jqx-button >.jqx-icon-arrow-right			{height: 21px !important;margin-left: 0 !important;width: 20px !important;}
+.jqx-listitem-element						{height: 25px !important;}
+.jqx-input									{height: 25px !important; margin:2px 4px !important;}
+.jqx-grid-pager .jqx-grid-pager-input		{height:20px !important; margin:0px 4px !important;}
+#jqxGrid .jqx-grid-cell-right-align 		{text-align:right !important; padding-right:8px;}
+#jqxGrid .jqx-grid-cell-left-align 			{padding-left:8px;}
+.jqx-grid-column-menubutton::after			{left:4px;top:10px;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 col-md-6 col-sm-6 padlr0">Rental Register</h1>
+          <!--  <div class="col-lg-6 col-md-6 col-sm-6">
+                <ul>
+                    <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple"  id="print" data-original-title="ExportPrint" data-placement="left" data-toggle="tooltip"><img src="<?php //echo $this->basePath(); ?>/images/icons-394.png" /></a></li>
+                    <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="excelExport" data-original-title="ExportExcel" data-placement="left" data-toggle="tooltip"><img src="<?php //echo $this->basePath(); ?>/images/icons-393.png" /></a></li>
+                    <li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="csvExport" data-original-title="ExportCSV" data-placement="left" data-toggle="tooltip"><img src="<?php// echo $this->basePath(); ?>/images/icons-392.png" /></a></li>-->
+                    <!--<li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn4  ripple" id="htmlExport">Export to HTML</a></li>-->
+              <!--  </ul>
+            </div>-->
+        </div>
+        <div class="col-lg-12 commargin_top clear">
+            <div class="table-responsive clear">
+                <div id="jqxGrid"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delete Conformation Model-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete this Entry?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data = <?php echo (isset($payList)) ? json_encode($payList) : ''?>,
+        $deleteModal = $('#DeleteModal'),
+        $jqxGrid = $("#jqxGrid"),
+        $remarks = $('#remarks');
+    $(function () {
+        var source = {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                {name: 'RegisterId', type: 'int'},
+                {name: 'UnitId', type: 'int'},
+                {name: 'UnitNo', type: 'string'},
+                {name: 'PVNo', type: 'string'},
+                {name: 'PVDate', type: 'date'},
+                {name: 'LeadName', type: 'string'},
+                {name: 'ProjectName', type: 'string'},
+                {name: 'TotalAmountPayable', type: 'number'}
+            ],
+            id: 'RegisterId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $jqxGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            filterable: true,
+            pageable: true,
+			pagerMode: 'advanced',
+			pagerHeight: 40,
+			rowsheight:40,
+            rowDetails: true,
+            autoheight: true,
+            showfilterrow: true,
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            columns: [
+                {text: 'Register Id', datafield: 'RegisterId',hidden: true, filterable: false},
+                {text: 'Unit Id', datafield: 'UnitId',hidden: true, filterable: false},
+                {text: 'Unit No', datafield: 'UnitNo',width: '15%'},
+                {text: 'PV No', datafield: 'PVNo', width: '15%'},
+                {text: 'PV Date', datafield: 'PVDate', filtertype: 'date',cellsformat: 'dd-MM-yyyy',width: '15%'},
+                {text: 'Lead Name', datafield: 'LeadName', width: '15%'},
+                { text: 'Project Name', dataField: 'ProjectName', width:'15%'},
+                { text: 'Amount', dataField: 'TotalAmountPayable', cellsalign: 'left', width:'15%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($jqxGrid.jqxGrid('getCellValue', row, 'TotalAmountPayable'),2,true) + '</div>';
+                    }},
+                {text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                    cellsrenderer: function (row) {
+                        var RegisterId = $jqxGrid.jqxGrid('getCellValue', row, 'RegisterId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/property/rental-edit/'+RegisterId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o top-ic5"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" onclick="pmDelete(' + row + ');return false;"><i class="fa fa-trash-o top-ic5"></i></a>'
+                         +'<a title="print" href="'+ getBaseURL() + 'crm/property/rental-print/'+RegisterId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-print reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $jqxGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'crm/property/rentaldelete',
+                type: 'POST',
+                async: false,
+                data: {"RegisterId": rowData.RegisterId, "Remarks": remarks},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $jqxGrid.jqxGrid("deleterow", rowData.RegisterId);
+                    else
+                        alert('Failed to delete!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete!');
+                }
+            });
+            $remarks.val('');
+        });
+    });
+
+    function pmDelete(row) {
+        var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+        $("#remarks").val('');
+    }
+    $("#excelExport").click(function () {
+        $("#jqxGrid").jqxTreeGrid('exportData', 'xls');
+    });
+    $("#csvExport").click(function () {
+        $("#jqxGrid").jqxTreeGrid('exportData', 'csv');
+    });
+
+    $("#print").click(function () {
+        $("#jqxGrid").jqxTreeGrid('exportData', 'html');
+    });
+</script>

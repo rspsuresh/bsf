@@ -1,0 +1,737 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/cb.css';?>" />
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&amp;key=AIzaSyDaNPyxJ7NKmZ4rC8awB-BlBh6ieH1Q9os"></script>
+<style>
+.panel 							{ border-radius:0px !important; }
+.panel-info { border:none; border-top:none; }
+.chat_content { float:left; width:100%; }
+.toolbar_ddown ul { height:314px !important; border:none !important; }
+.toolbar_ddown { border:none !important; }
+#ContentWrapper { display: none; }
+.form-control { box-shadow:none !important }
+.top-lic { padding-top:50px; }
+.orcls p { text-align:center;color:#000; width:35px; border-radius:50%; height:35px; border:1px solid #1A5A94; background:#fff; line-height:35px; font-size:12px; }
+.pro_kickoff_inputs input[type="text"]:disabled	{ opacity:0.7 !important; background-color:#dedede !important; }
+.setup_add_btn { position:absolute; top:5px; right:-40px; }
+.setup_add_btn span { background:#fff;border:1px solid #c2c2c2;border-radius:50%;font-size:16px;height:35px;line-height:35px;text-align:center;width:35px;}
+.error-shown{border:1px solid red !important;}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			<form method="post" id="formWrapper" >
+				<div class="col-lg-12">
+					<h1 class="text-center" data-bsfhead="Project Kickoff">Project Kickoff</h1>
+					<div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+						<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+							<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-lic pro_kickoff_inputs">
+								<div class="form-group divfirst">
+									<input type="text" name="propertyName" id="propertyName" class="form-control lbl_move" data-bsfshare="Property Name" label="Name of the Property" autofocus onblur="return CheckProperty();" value="<?php if($landName != '') { echo $landName; } ?>" />
+									<input type="hidden" id="enquiryId" name="enquiryId" value="<?php if($enquiryId != '') { echo $enquiryId; } ?>" />
+                                    <input type="hidden" id="newCC" name="newCC" value="0" />
+									<div class="error_message"><p><?php if($error != '') { echo $error; } else { ?>please select a property...<?php } ?></p></div>
+								</div>
+								<div class="form-group divexist" style="display:none;padding-bottom:30px;">
+                                    <h1 id="hproperty"><?php if($landName != '') { echo $landName; } ?></h1>
+                                    <div class="radio_check">
+										<p>
+											<input type="radio" value="1" id="newKf" name="kickoff" onclick="return showNewKf('n');" />
+											<label for="newKf">New Kickoff</label>
+										</p>
+										<p>
+											<input type="radio" value="2" id="existKf" name="kickoff" onclick="return showNewKf('e');" <?php if($enquiryId!=0) echo "checked"; else '';?> />
+											<label for="existKf">Existing Kickoff</label>
+										</p>
+									</div>
+								</div>
+								<div class="form-group divfive" style="display: none">
+                                    <input type="text" name="landproperty" id="landproperty" value="" class="form-control lbl_move" data-bsfshare="Project KickOff" label="Project KickOff" />
+                                    <input type="hidden" name="projectKfId" id="projectKfId" value=""/>
+									<div class="error_message"><p>please select project kickoff...</p></div>
+								</div>
+								<div class="form-group divthird position_rel" style="display: none">
+									<select class="single_dropdown lbl_move" name="costCentreId" id="costCentreId" style="width:100%;" data-bsfshare="Project Division" label="Select Project Division...">
+										<option value=""></option>
+										<?php foreach($costCentre as $cc) { ?>
+										<option value="<?php echo $cc['CostCentreId']; ?>"><?php echo $cc['CostCentreName']; ?></option>
+										<?php } ?>
+									</select>
+									<div class="error_message"><p>please select project division...</p></div>
+									<a href="javascript:void(0);" class="setup_add_btn ccForm" data-toggle="tooltip" data-placement="right" title="Add Division"><span class="float_r"><i class="fa fa-plus"></i></span></a>
+								</div>
+								<div class="form-group divsecond" style="display: none">
+									<input type="text" name="newProjectName" id="newProjectName" class="form-control lbl_move" data-bsfshare="New ProjectName" label="Project Name" />
+									<input type="hidden" id="newProject" name="newProject" value="0" />
+									<div class="error_message"><p>please enter new project name...</p></div>
+								</div>
+								<div class="form-group divfour" style="display:none;padding-bottom:30px;">
+                                    <input type="text" name="conception" id="conception" class="form-control lbl_move" data-bsfshare="Conception Name" label="Conception Name" />
+                                    <input type="hidden" id="conceptionid" name="conceptionid" value="0" />
+
+<!--									<div class="radio_check">-->
+<!--										<p>-->
+<!--											<input type="radio" value="1" id="newConcept" name="conception" checked />-->
+<!--											<label for="newConcept">New conception</label>-->
+<!--										</p>-->
+<!--										<p>-->
+<!--											<input type="radio" value="2" id="existConcept" name="conception" />-->
+<!--											<label for="existConcept">Existing conception</label>-->
+<!--										</p>-->
+<!--									</div>-->
+								</div>
+								<div class="col-lg-offset-5 col-md-offset-5 col-sm-offset-5 col-xs-offset-5 form-group orcls divfirst" style="margin-bottom:15px;">
+									<p>Or</p>
+								</div>
+								<div class="form-group divfirst">
+									<input type="text" name="projectName" id="projectName" class="form-control lbl_move"  data-bsfshare="ProjectName" label="Project Name" onblur="return CheckProject();" />
+                                    <input type="hidden" id="projectId" name="projectId" value="0" />
+									<div class="error_message"><p>please enter project name...</p></div>
+									<div  id="dnewproject" class="add-ntnew"><a href="javascript:createNewProject('n');">New Project <i class="fa fa-plus-circle"></i></a></div>
+								</div>
+							</div>
+							<div class="clearfix"></div>
+							<div class="next-bt col-lg-12" style="margin-bottom:30px;">
+								<a id="backlink" href="javascript:createNewProject('b');" style="display:none;"><i class="fa fa-chevron-circle-left"></i> Back</a>
+								&nbsp;&nbsp;&nbsp;&nbsp;<a id="stepone" href="javascript:createNewProject('e');">Next <i class="fa fa-chevron-circle-right"></i></a>
+								<a id="steptwo" href="javascript:submitProperty();" style="display:none;">Next <i class="fa fa-chevron-circle-right"></i></a>
+							</div>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				<!--Modal-->
+				<div id="ccForm" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-body">
+								<div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+									<table class="table" style="margin-bottom:0;" id="ccTable">
+										<thead>
+											<tr>
+												<th class="th-modal" colspan="2">ADD Division</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td width="40%">Name<span>*</span></td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="costCentre" id="costCentre" value="" class="tbl_input" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Company Name<span>*</span></td>
+												<td width="60%" class="tbl_input_td">
+                                                <div class="select-style">
+													<select  name="companyId" id="companyId">
+														<option value="">Select Company</option>
+														<?php foreach($companyMaster as $cc) { ?>
+														<option value="<?php echo $cc['CompanyId']; ?>"><?php echo $cc['CompanyName']; ?></option>
+														<?php } ?>
+													</select>
+                                                    </div>
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Company Branch Name</td>
+												<td width="60%" class="tbl_input_td">
+                                                  <div class="select-style">
+													<select name="branchId" id="branchId">
+														<option value="">Select Branch</option>
+													</select>
+                                                    </div>
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Address<span>*</span></td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" data-name="name" name="address" id="address" value="" class="tbl_input" /> <!-- id="geocomplete" -->
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">City<span>*</span></td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" data-name="locality" name="city" id="city" value="" class="tbl_input" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Pin Code</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" data-name="postal_code" name="pinCode" id="pinCode" value="" class="tbl_input" onkeypress="return isNumberKey(event);" maxlength="6" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Phone</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="phone" id="phone" value="" class="tbl_input" onkeypress="return isNumberKey(event);" maxlength="11" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Fax</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="fax" id="fax" value="" class="tbl_input" onkeypress="return isNumberKey(event);" maxlength="11" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Mobile</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="mobile" id="mobile" value="" class="tbl_input" onkeypress="return isNumberKey(event);" maxlength="11" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Email</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="email" id="email" value="" class="tbl_input" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Web</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="web" id="web" value="" class="tbl_input" />
+												</td>
+											</tr>
+											<tr>
+												<td width="40%">Contact Person</td>
+												<td width="60%" class="tbl_input_td">
+													<input type="text" name="contactPerson" id="contactPerson" value="" class="tbl_input" />
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="clearfix"></div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="cancel_bt" data-dismiss="modal">Cancel</button>
+								<button type="button" class="saves_ok" onclick="return addCostCentre();">OK</button>
+							</div>
+						</div>
+					</div>
+				</div>
+                <div id="msgBox" class="modal fade" role="dialog">
+                    <div class="modal-dialog ">
+                        <div class="modal-content">
+                        	<div class="modal-header">
+                                <h1 id="myModalLabel">Success Message</h1>
+                            </div>
+                            <div class="modal-body modal_body_min_h200">
+                            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                                    <div class="success_box animated fadeIn">
+                                        <div class="icon icon-success svg">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="72px" height="72px">
+                                            <g fill="none" stroke="#8EC343" stroke-width="2">
+                                              <circle cx="36" cy="36" r="35" style="stroke-dasharray:240px, 240px; stroke-dashoffset: 480px;"></circle>
+                                              <path d="M17.417,37.778l9.93,9.909l25.444-25.393" style="stroke-dasharray:50px, 50px; stroke-dashoffset: 0px;"></path>
+                                            </g>
+                                          </svg>
+                                        </div>
+                                        <h1 class="txt_center animated fadeInDown clear">
+                                           <?php echo $successMsg; ?>
+                                        </h1>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="modal-footer clear">
+                                <div class="col-lg-12 savebtn_area no_border">
+                                    <ul>
+                                        <li class="save_btn float_r"> 
+                                            <a href="javascript:void(0);" class="ripple saves_ok" onclick="return closePop();">Ok</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<!--Modal-->
+			</form>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(function(){
+    <?php if($enquiryId!=0){?>
+    $('.divfive').show();
+    <?php }?>
+	navigator.geolocation.getCurrentPosition(showPosition);
+	$("#geocomplete").geocomplete({
+		//map: ".map_canvas",
+		//location: $('#co-ordinates').val(),
+		details: "#formWrapper",
+		types: ["geocode", "establishment"]
+		//types: ["geocode"],
+	});
+	$("#find").click(function(){
+		$("#geocomplete").trigger("geocode");
+	});
+	function showPosition(position) {
+		var coordinates = position.coords.latitude + "," + position.coords.longitude;
+		$('#geocomplete').val(coordinates);
+		$("#geocomplete").trigger("geocode");
+	}
+});
+
+var arrPropertyNames = <?php echo json_encode($propertyNames); ?>;
+var arrProjectNames = <?php echo json_encode($projectNames); ?>;
+var arrLandProjectlist = [];
+var arrLandConceptionlist = [];
+var $propertyName = $('#propertyName'),
+	$enquiryId = $('#enquiryId'),
+	$projectName = $('#projectName'),
+	$projectId = $('#projectId'),
+	$newProjectName = $('#newProjectName'),
+	$newProject = $('#newProject'),
+	$costCentre = $('#costCentre'),
+	$costCentreId = $('#costCentreId'),
+	$projectKfId = $('#projectKfId');
+
+
+$(function () {
+	// bind property name autocomplete
+	$propertyName.autocomplete({
+		lookup: arrPropertyNames,
+		showNoSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		},
+		onSelect: function (suggestion) {
+			if (suggestion) {
+				$enquiryId.val(suggestion.data);
+				//$projectId.val(suggestion.ProjectId);
+				/*if (parseInt(isNullCheck(suggestion.ProjectId,'number')) ==0) {
+					$newProjectName.val(suggestion.value);
+				}*/
+				CheckProperty();
+				$(this).removeClass('error');
+			}
+		},
+		onSearchStart: function (suggestion) {
+			$enquiryId.val(0);
+			$projectId.val(0);
+			$newProjectName.val('');
+			CheckProperty();
+		},
+		onSearchComplete: function (query, suggestions) {
+			if (!suggestions.length) {
+				$(this).addClass('error');
+				$enquiryId.val(0);
+				$projectId.val(0);
+				$newProjectName.val('');
+				CheckProperty();
+			} else {
+				$(this).removeClass('error');
+			}
+		}
+	});
+	
+	$projectName.autocomplete({
+		lookup: arrProjectNames,
+		showNoSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		},
+		onSelect: function (suggestion) {
+			if (suggestion) {
+				$projectId.val(suggestion.data);
+				CheckProject();
+				$(this).removeClass('error');
+			}
+		},
+		onSearchStart: function (suggestion) {
+			$projectId.val(0);
+			CheckProject();
+		},
+		onSearchComplete: function (query, suggestions) {
+			if (!suggestions.length) {
+				$(this).addClass('error');
+				$projectId.val(0);
+				CheckProject();
+			} else {
+				$(this).removeClass('error');
+			}
+		}
+	});
+});
+
+function bindLandProject() {
+    var iEnquiryId =$enquiryId.val();
+    getLandProjectList(iEnquiryId);
+    $('#landproperty').unbind('autocomplete');
+    $('#landproperty').autocomplete({
+        lookup: arrLandProjectlist,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#projectKfId').val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function (suggestion) {
+            $('#projectKfId').val(0);
+        },
+        onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $('#projectKfId').val(0);
+            } else {
+                $(this).removeClass('error');
+            }
+        }
+    });
+}
+
+function getLandProjectList(enquiryId) {
+    arrLandProjectlist = [];
+    $.ajax({
+        url: getBaseURL() + "kickoff/index/getlandprojectList",
+        async: false,
+        data: {'enquiryId': enquiryId},
+        type: 'post',
+        success: function (data, status) {
+            arrLandProjectlist = jQuery.parseJSON(data);
+        }
+    });
+}
+
+function bindLandConception() {
+    var iEnquiryId =$enquiryId.val();
+    getConceptionList(iEnquiryId);
+    $('#conception').unbind('autocomplete');
+    $('#conception').autocomplete({
+        lookup: arrLandConceptionlist,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#conceptionid').val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function (suggestion) {
+            $('#conceptionid').val(0);
+        },
+        onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $('#conceptionid').val(0);
+            } else {
+                $(this).removeClass('error');
+            }
+        }
+    });
+}
+
+function getConceptionList(enquiryId) {
+    arrLandConceptionlist = [];
+    $.ajax({
+        url: getBaseURL() + "kickoff/index/getlandconceptionList",
+        async: false,
+        data: {'enquiryId': enquiryId},
+        type: 'post',
+        success: function (data, status) {
+            arrLandConceptionlist = jQuery.parseJSON(data);
+        }
+    });
+}
+
+
+function CheckProject()
+{
+	var pname = isNullCheck($projectName.val(),'string');
+	var id = isNullCheck($projectId.val(),'number');
+	if(id != 0 && pname != '') {
+		$propertyName.prop("disabled", true);
+	} else {
+		$propertyName.prop("disabled", false);
+	}
+}
+
+function CheckProperty()
+{
+	var ptname = isNullCheck($propertyName.val(),'string');
+    $('#hproperty').html(ptname);
+	var id = isNullCheck($enquiryId.val(),'number');
+	if(id != 0 && ptname != '') {
+		$projectName.prop("disabled", true);
+        $('#dnewproject').hide();
+	} else {
+		$projectName.prop("disabled", false);
+        $('#dnewproject').show();
+	}
+}
+
+function createNewProject(ctype)
+{
+    $('.error_message').hide();
+	$('#newConcept').prop("checked", true);
+
+	if($enquiryId.val() == 0 && $projectId.val() != 0) {
+        submitProperty();
+	} else {
+		if(ctype == 'n' || ctype == 'b') {
+			$propertyName.val('');
+			$enquiryId.val(0);
+			$projectName.val('')
+			$projectId.val(0);
+			$newProjectName.val('');
+			$newProject.val(0);
+			$propertyName.prop("disabled", false);
+			$projectName.prop("disabled", false);
+		}
+		if(ctype == 'n') {
+			$('.divfirst').hide();
+			$('#stepone').hide();
+			$('.divsecond').show();
+			$('.divthird').show();
+			$('#backlink').show();
+			$('#steptwo').show();
+			$newProject.val(1);
+		} else if(ctype == 'b') {
+			$('#backlink').hide();
+			$('#steptwo').hide();
+			$('.divsecond').hide();
+			$('.divthird').hide();
+			$('.divfour').hide();
+			$('.divexist').hide();
+			$('.divfive').hide();
+			$('.divfirst').show();
+			$('#stepone').show();
+			$('#newKf').prop("checked", false);
+			$('#existKf').prop("checked", false);
+		} else if(ctype == 'e') {
+            if($enquiryId.val() == 0 && $projectId.val() == 0) return;
+
+			var id = isNullCheck($enquiryId.val(),'number'),
+				iPName = isNullCheck($propertyName.val(),'string');
+			if(id == 0 || iPName == '') {
+                return;
+			} else {
+				$.post(getBaseURL()+'kickoff/index/get-kickoff', { enquiryId: $enquiryId.val() },
+				function(data) {
+					$('#projectKfId').empty();
+					$('#projectKfId').append('<option value="">Select</option>');
+					var returnData = JSON.parse(data);
+					if(returnData.length == 0) {
+                        $('.divfirst').hide();
+						$('#stepone').hide();
+                        $('.divexist').show();
+						$('.divsecond').show();
+						$('.divthird').show();
+						$('.divfour').show();
+						$('#backlink').show();
+						$('#steptwo').show();
+                        $('existKf').prop('disabled',true);
+                        $('#newKf').prop("checked", true);
+                        showNewKf('n');
+                        bindLandConception();
+					} else {
+						$.each(returnData, function(key, value){
+							$('#projectKfId')
+								.append($("<option></option>")
+								.attr("value",value.KickoffId)
+								.text(value.ProjectName));
+						});
+						
+						$('.divfirst').hide();
+						$('#stepone').hide();
+						$('.divexist').show();
+                        $('existKf').prop('disabled',false);
+						$('#backlink').show();
+                        $('#existKf').prop("checked", true);
+                        showNewKf('e');
+                        bindLandProject();
+						//$('#steptwo').show();
+					}
+				});
+			}
+		}
+	}
+}
+
+function showNewKf(ktype)
+{
+	if(ktype == 'n') {
+		$('.divfive').hide();
+		$('.divsecond').show();
+		$('.divthird').show();
+		$('.divfour').show();
+		$('#steptwo').show();
+	} else {
+		$('.divsecond').hide();
+		$('.divthird').hide();
+		$('.divfour').hide();
+		$('.divfive').show();
+		$('#steptwo').show();
+	}
+}
+
+function submitProperty()
+{
+    $('.error_message').hide();
+	var id = isNullCheck($enquiryId.val(),'number'),
+		iProjectId = isNullCheck($projectId.val(),'number'),
+		iCostCentreId = isNullCheck($costCentreId.val(),'number'),
+		iCostCentre = isNullCheck($costCentre.val(),'string'),
+		iNewProject = isNullCheck($newProject.val(),'number'),
+		sProjectName = isNullCheck($newProjectName.val(),'string'),
+		iKfId = isNullCheck($projectKfId.val(),'number');
+
+	if($('#existKf').prop("checked") == false) {
+		if(id != 0 || iNewProject != 0) {
+			if (iCostCentreId == 0 && iCostCentre == '') {
+				$costCentreId.closest('.form-group').find(".error_message").show();
+				return;
+			}
+			if (sProjectName == "") {
+				$newProjectName.closest('.form-group').find(".error_message").show();
+				return;
+			}
+		}
+	} else {
+        if (iKfId == 0) {
+			$projectKfId.closest('.form-group').find(".error_message").show();
+			return;
+		}
+	}
+	$('#formWrapper').submit();
+}
+
+$("#companyId").change(function() {
+	$.post(getBaseURL()+'kickoff/index/get-branches', { companyId: $(this).val() },
+	function(data) {
+		$('#branchId').empty();
+		$('#branchId').append('<option value="">Select Branch</option>');
+		var returnData = JSON.parse(data);
+		$.each(returnData, function(key, value){
+			$('#branchId')
+				.append($("<option></option>")
+				.attr("value",value.BranchId)
+				.text(value.BranchName));
+		});
+	});
+});
+
+$(".ccForm").click(function() {
+	$('.error_message').hide();
+	$("#ccForm").modal('show');
+});
+
+function closePop()
+{
+    window.location.href= getBaseURL() + "kickoff/index/project-kickoff";
+}
+
+function addCostCentre()
+{
+    if($("#costCentre").val() =="")
+	{
+	
+	  $("#costCentre").addClass("error-shown");
+	  return false;
+	}
+	if($("#companyId").val() =="")
+	{
+	
+	 $("#companyId").addClass("error-shown");
+	  return false;
+	}
+	if($("#address").val() =="")
+	{
+	 
+	  $("#address").addClass("error-shown");
+	  return false;
+	}
+	if($("#city").val()=="")
+	{  
+	    $("#city").addClass("error-shown");
+	  return false;
+	}
+	// $("#costCentre").keyup(function(){
+	// alert("hfdufhd");
+    // $("#costCentre").removeClass("error-shown");
+    // });
+	// $("#companyId").keyup(function(){
+    // $("#companyId").removeClass("error-shown");
+    // });
+	// $("#address").keyup(function(){
+    // $("#address").removeClass("error-shown");
+    // });
+	// $("#city").keyup(function(){
+    // $("#city").removeClass("error-shown");
+    // });
+    $.post(getBaseURL()+'kickoff/index/add-cost-centre', { costCentre: $('#costCentre').val(), city: $('#city').val(), companyId: $('#companyId').val(), branchId: $('#branchId').val(), address: $('#address').val(), pinCode: $('#pinCode').val(), phone: $('#phone').val(), fax: $('#fax').val(), mobile: $('#mobile').val(), email: $('#email').val(), web: $('#web').val(), contactPerson: $('#contactPerson').val() },
+    function(data) {
+        $('#costCentreId').empty();
+        $('#costCentreId').append('<option value="">Select Project Division</option>');
+        var returnData = JSON.parse(data);
+        $.each(returnData, function(key, value){
+            $('#costCentreId')
+                .append($("<option></option>")
+                    .attr("value",value.CostCentreId)
+                    .text(value.CostCentreName));
+        });
+        $("#costCentreId option").each(function() {
+            if($(this).text() == $('#costCentre').val()) {
+                $(this).attr('selected', 'selected').trigger('change');
+            }
+        });
+        $('#newCC').val('1');
+        $('#ccTable input:text').each(function() {
+            $(this).val('');
+        });
+        $('#companyId').val('').trigger('change');
+        $('#branchId').val('').trigger('change');
+        $("#ccForm").modal('hide');
+    });
+}
+
+<?php if($enquiryId != '') { ?>
+createNewProject('e');
+<?php } ?>
+<?php if($successMsg != '') { ?>
+$("#msgBox").modal('show');
+<?php } ?>
+</script>
+<script>
+   $("#costCentre").keyup(function(){
+    $("#costCentre").removeClass("error-shown");
+    });
+	 $("#companyId").change(function () {
+        var end = this.value;
+        if($('#companyId').val() !="")
+		  {
+		  $("#companyId").removeClass("error-shown");
+		  }
+    });
+	$("#address").keyup(function(){
+    $("#address").removeClass("error-shown");
+    });
+	$("#city").keyup(function(){
+    $("#city").removeClass("error-shown");
+    });
+</script>

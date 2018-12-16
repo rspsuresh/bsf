@@ -1,0 +1,157 @@
+<form id="theForm" class="form-horizontal" method="post">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+                <h1><?php echo (isset($agreementName)) ? $agreementName['AgreementTypeName'] : 'Agreement'; ?> Generation</h1>
+                <input type="hidden" name="agreementTypeId" id="agreementTypeId" value="<?php echo (isset($agreementName)) ? $agreementName['AgreementTypeId'] : ''; ?>" />
+                <input type="hidden" name="buyerId" id="buyerId" value="<?php echo (isset($buyerId)) ? $buyerId : ''; ?>" />
+                <input type="hidden" name="agreementId" id="agreementId" value="<?php echo (isset($agreementId)) ? $agreementId : ''; ?>" />
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="row">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                        <div class="row">
+                            <div class="form-group padtop20 col-lg-12">
+                                <select name="UnitNo" id="UnitNo" class="form-control single_dropdown2 lbl_move" label="Select Unit No" style="width:100%;" onchange="askTemplateContent();">
+                                    <option value=""></option>
+                                    <?php if(isset($unitDetails)) {
+                                        foreach ($unitDetails as $uDetails) { ?>
+                                            <option value="<?php echo $uDetails['UnitId']; ?>"><?php echo $uDetails['UnitNo']; ?></option>
+                                        <?php }
+                                    }?>
+                                </select>
+                                <div class="error_message"><p>please select unit no...</p></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <span class="date_icon "><i class="fa fa-calendar"></i></span>
+                                <input type="text" name="lead_date" id="lead_date" class="form-control date_picker lbl_move" label="Agreement Date"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class=" col-lg-12">
+                                <select name="agreementSelect" id="agreementSelect" class="form-control single_dropdown2 lbl_move" label="Select Agreement" onchange="askTemplateContent();" style="width:100%;" >
+                                    <option value=""></option>
+                                    <?php if(isset($agreementTemplate)) {
+                                        foreach ($agreementTemplate as $agreeList) { ?>
+                                            <option value="<?php echo $agreeList['TemplateId']; ?>"><?php echo $agreeList['TemplateName']; ?></option>
+                                        <?php }
+                                    }?>
+                                </select>
+                                <div class="error_message"><p>please select Agreement Template...</p></div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="templateContentHide" name="templateContentHide" />
+                        <input type="hidden" id="buyerId" name="buyerId" value="<?php echo (isset($buyerId)) ? $buyerId : ''; ?>" />
+                        <div class="row">
+                            <div class="form-group m_top10 col-lg-12">
+                                <a href="#" data-toggle="modal" data-target="#preview" style="display:none;" class="agreement_preview_a float_r"><span><i class="fa fa-newspaper-o" aria-hidden="true"></i></span> Preview</a>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 savebtn_area no_border">
+                            <ul>
+                                <li class="save_btn m_auto">
+                                    <a href="javascript:void(0);" class="ripple continue" onclick="validateSubmit();" id="Generate">Generate</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="myModalLabel">Agreement Preview</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <div class="clear"></div>
+                    <div class="agreement_paper_area m_top10">
+                        <img src="<?php echo $this->basePath(); ?>/images/agreement_duplicate.jpg" class="agrment_duplicate_img clear" alt="" title=""/>
+                        <div id="templateContent"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        unitNo = $('#UnitNo');
+        agreeTemp = $('#agreementSelect');
+    });
+
+    function askTemplateContent() {
+
+        var unitId = $.trim(unitNo.val());
+        var agreementId = $.trim(agreeTemp.val());
+        var agreementTypeId = $.trim($('#agreementTypeId').val());
+        if(unitId != "" && agreementId != "") {
+            $.ajax({
+                url:getBaseURL()+'crm/buyer/agreement-generation',
+                type:'POST',
+                data:{unitId : unitId,agreementId : agreementId,agreementTypeId : agreementTypeId,buyerId : $('#buyerId').val(),docDate : $('#lead_date').val() },
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status != 200) {
+                        alert('Failed to generate Template !');
+                        return false;
+                    }
+                    else
+                    {
+                        $('#templateContent').html(data);
+                        $('.agreement_preview_a').show();
+
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to generate Template !');
+                }
+            });
+        } else {
+            $('.agreement_preview_a').hide();
+        }
+    }
+
+    function validateSubmit() {
+        removeErrorMsg(unitNo);
+        removeErrorMsg(agreeTemp);
+        if($.trim(unitNo.val())=="") {
+            showErrorMsg(unitNo,"Please select a Unit No ...");
+            return false;
+        }
+        if($.trim(agreeTemp.val())=="") {
+            showErrorMsg(agreeTemp,"Please select a agreement Template ...");
+            return false;
+        }
+        $('#templateContentHide').val($('#templateContent').html());
+
+        $('#theForm').submit();
+    }
+    function showErrorMsg($tarIp, msg) {
+        var $tarErrorMsg = $tarIp.parent().next('.error_message');
+        $tarErrorMsg.find('p').text(msg);
+        $tarErrorMsg.show();
+    }
+
+    function removeErrorMsg($tarIp) {
+        var $tarErrorMsg = $tarIp.parent().next('.error_message');
+        $tarErrorMsg.hide();
+    }
+</script>

@@ -1,0 +1,118 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px!important;padding:5px 15px !important;}
+#grid .jqx-grid-header {height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Contract Enquiry Register - Report</h1>
+            </div>
+            <div class="row" data-visibility="hide">
+                <div class="col-lg-8 col-lg-offset-3 col-sm-8 col-sm-offset-3 edit_del">
+                    <div class="col-lg-12">
+                        <ul>
+                            <li><button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button></li>
+                        </ul></div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="col-lg-12 padtop10">
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive clear">
+                        <div id="grid"> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var data = <?php echo (isset($arrEnquires)) ? json_encode($arrEnquires) : ''?>,
+        $grid = $("#grid");
+    $(function () {
+        var source = {
+            localdata:data,
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'RefDate'},
+                { name: 'RefNo',type:'string'},
+                { name: 'NameOfWork', type: 'string' },
+                { name: 'ProposalCost', type: 'string' },
+                { name: 'Duration', type: 'string' }
+            ]
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $grid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            autoheight: true,
+            filterable: true,
+            showfilterrow: true,
+            statusbarheight: 50,
+            sortable: true,
+            pageable:true,
+            rowDetails: true,
+            columns: [
+                { text: 'RefNo', datafield: 'RefNo', width:'20%'},
+                { text: 'Date', dataField: 'RefDate', width:'15%'},
+                { text: 'Name Of Work', dataField: 'NameOfWork', width:'35%'},
+                { text: 'Proposal Cost', dataField: 'ProposalCost', width:'20%'},
+                { text: 'Duration', dataField: 'Duration',width:'10%',
+                    cellsrenderer: function (row) {
+                        var duration = sanitizeNumber($grid.jqxGrid('getCellValue', row, 'Duration'),0);
+                        if(duration == 0)
+                            return '';
+
+                        duration = '<div class="text-center"  style="margin-top: 10px;">' + duration;
+                        switch ($.trim($grid.jqxGrid('getCellValue', row, 'PeriodType'))) {
+                            case 'D':
+                                duration += ' Day(s)';
+                                break;
+                            case 'M':
+                                duration += ' Month(s)';
+                                break;
+                            case 'Y':
+                                duration += ' Year(s)';
+                                break;
+                            default:
+                                duration;
+                                break;
+                        }
+                        return duration += '</div>';
+                    }
+                }
+                /*{ text: 'Amount', dataField: 'OrderAmount',width:'10%', cellsalign: 'right',aggregatesrenderer:aggregatesrenderer,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumber($grid.jqxGrid('getCellValue', row, 'OrderAmount'),2, true) + '</div>';
+                    }
+                }*/
+            ]
+        });
+    });
+    $('#print-btn').click(function () {
+        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>Contract Enquiry Register - Report</title>\n' +
+                '<h1>Contract Enquiry Register - Report</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+    });
+</script>

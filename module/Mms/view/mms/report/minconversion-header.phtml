@@ -1,0 +1,800 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/gridstack/jquery.minicolors.css">
+<style type="text/css">
+    /*border: 1px solid #333;*/
+    /*DragResize*/
+
+    /* Required CSS classes: must be included in all pages using this script */
+    /* Apply the element you want to drag/resize */
+    .drsElement {
+        position: absolute;
+        border: 1px solid #333;
+    }
+    /*
+     The main mouse handle that moves the whole element.
+     You can apply to the same tag as drsElement if you want.
+    */
+    .drsMoveHandle {
+        height: 20px;
+        background-color: #CCC;
+        border-bottom: 1px solid #666;
+        cursor: move;
+    }
+    /*
+     The DragResize object name is automatically applied to all generated
+     corner resize handles, as well as one of the individual classes below.
+    */
+    .dragresize {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        font-size: 1px;
+        background: #EEE;
+        border: 1px solid #333;
+    }
+    /*
+     Individual corner classes - required for resize support.
+     These are based on the object name plus the handle ID.
+    */
+    .dragresize-tl {
+        top: -8px;
+        left: -8px;
+        cursor: nw-resize;
+    }
+    .dragresize-tm {
+        top: -8px;
+        left: 50%;
+        margin-left: -4px;
+        cursor: n-resize;
+    }
+    .dragresize-tr {
+        top: -8px;
+        right: -8px;
+        cursor: ne-resize;
+    }
+    .dragresize-ml {
+        top: 50%;
+        margin-top: -4px;
+        left: -8px;
+        cursor: w-resize;
+    }
+    .dragresize-mr {
+        top: 50%;
+        margin-top: -4px;
+        right: -8px;
+        cursor: e-resize;
+    }
+    .dragresize-bl {
+        bottom: -8px;
+        left: -8px;
+        cursor: sw-resize;
+    }
+    .dragresize-bm {
+        bottom: -8px;
+        left: 50%;
+        margin-left: -4px;
+        cursor: s-resize;
+    }
+    .dragresize-br {
+        bottom: -8px;
+        right: -8px;
+        cursor: se-resize;
+    }
+    /*DragResize End*/
+
+
+
+    /*Main*/
+    .text-bold, .text-bold * {
+        font-weight: bold !important;
+    }
+    .text-italic, .text-italic * {
+        font-style: italic !important;
+    }
+    .text-underline, .text-underline * {
+        text-decoration: underline !important;
+    }
+    .style-left, .style-left * {
+        text-align: left;
+    }
+    .style-center, .style-center * {
+        text-align: center;
+    }
+    .style-right, .style-right * {
+        text-align: right;
+    }
+    .style-justify, .style-justify * {
+        text-align: justify;
+    }
+    #styleOptions {
+        display:  none;
+    }
+    #ElementTemplate,
+    .remScnt {
+        display:none;
+    }
+    .remScnt{position:absolute; right:5px; top:3px; background:none;  font-size:14px;}
+    .remScnt > .fa.fa-trash-o {
+        text-decoration: none !important;
+        font-style: normal !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        color:#266AA8;
+        background: transparent !important;
+        border: none !important;
+    }
+    .minicolors-theme-bootstrap .minicolors-swatch {
+        width:25px !important;
+        height:25px !important;
+        left:6px !important;
+        top:40px !important;
+    }
+</style>
+<script type="text/javascript">
+    $('#ex1').slider({
+        formatter: function(value) {
+            return 'Current value: ' + value;
+        }
+    });
+</script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/gridstack/dragresize.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gridstack/jquery.minicolors.js"></script><!-- MiniColors -->
+
+<script type="text/javascript">
+    //<![CDATA[
+
+    // Using DragResize is simple!
+    // You first declare a new DragResize() object, passing its own name and an object
+    // whose keys constitute optional parameters/settings:
+
+    var dragresize = new DragResize('dragresize',
+        { minWidth: 50, minHeight:30, minLeft:8, minTop:8, maxLeft: 692, maxTop: 600 });
+    //{ minWidth: 50, minHeight: 50, minLeft: 10, minTop: 10, maxLeft: 700, maxTop: 600 });
+
+
+    // Optional settings/properties of the DragResize object are:
+    //  enabled: Toggle whether the object is active.
+    //  handles[]: An array of drag handles to use (see the .JS file).
+    //  minWidth, minHeight: Minimum size to which elements are resized (in pixels).
+    //  minLeft, maxLeft, minTop, maxTop: Bounding box (in pixels).
+
+    // Next, you must define two functions, isElement and isHandle. These are passed
+    // a given DOM element, and must "return true" if the element in question is a
+    // draggable element or draggable handle. Here, I'm checking for the CSS classname
+    // of the elements, but you have have any combination of conditions you like:
+
+    dragresize.isElement = function(elm)
+    {
+        if (elm.className && elm.className.indexOf('drsElement') > -1) return true;
+    };
+    dragresize.isHandle = function(elm)
+    {
+        if (elm.className && elm.className.indexOf('drsMoveHandle') > -1) return true;
+    };
+
+    // You can define optional functions that are called as elements are dragged/resized.
+    // Some are passed true if the source event was a resize, or false if it's a drag.
+    // The focus/blur events are called as handles are added/removed from an object,
+    // and the others are called as users drag, move and release the object's handles.
+    // You might use these to examine the properties of the DragResize object to sync
+    // other page elements, etc.
+
+    dragresize.ondragfocus = function() {
+        //dragresize.minLeft = document.getElementById('drag_cont').offsetLeft;
+        //console.log(dragresize.minLeft);
+    };
+    dragresize.ondragstart = function(isResize) {
+        //if (!this.element.origZIndex) this.element.origZIndex = this.element.style.zIndex;
+    };
+    dragresize.ondragmove = function(isResize) { };
+    dragresize.ondragend = function(isResize) {
+        var ux=dragresize.elmX;
+        var uh=dragresize.elmY;
+        //alert("x position is = " + ux);
+        //this.element.style.zIndex  = this.element.origZIndex;
+    };
+    dragresize.ondragblur = function() { };
+
+
+    // Finally, you must apply() your DragResize object to a DOM node; all children of this
+    // node will then be made draggable. Here, I'm applying to the entire document.
+    dragresize.apply(document);
+    //]]>
+</script>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Details</h1>
+            </div>
+            <!--form start-->
+            <div class="col-lg-12">
+                <!--bill details-->
+                <form method="post">
+                    <input type="hidden" name="htmlcontent" id="htmlcontent" />
+<!--                    <input type="hidden" name="clientId" id="clientId" value="--><?php //echo (isset($woregister)) ? $woregister['ClientId'] : 0;?><!--"  />-->
+                </form>
+                <div class="col-lg-9 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0" id="htmlwrapper">
+                    <style>
+                        p{color:#000;font-size:14px;text-align:left;padding-top:-8px; line-height:24px !important; font-family:'Open Sans', sans-serif !important;}
+
+                    </style>
+
+                    <div class="rep-resize">
+                        <div class="bill-deta" style="width:700px; background:#fff;">
+                            <?php echo (isset($template)) ? $template : '';?>
+                        </div>
+                    </div>
+                </div>
+                <!--bill details-->
+
+                <!--font-style-->
+                <div class="col-lg-3 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+
+                    <div id="sidebar">
+                        <div class="sidebar-inn">
+
+                            <div class="rig-sty">
+
+                                <div class="right-settings">
+                                    <h1>SETTINGS <i class="fa fa-cog set-i"></i></h1>
+                                    <ul>
+                                        <li> <span>Font Size</span>
+                                            <div class="select-style selectsize">
+                                                <select name="fontsize" id="fontsize" class="single_dropdown2" style="width:100%;" label="select fontsize">
+                                                    <option value="6" >6</option>
+                                                    <option value="7" >7</option>
+                                                    <option value="8" >8</option>
+                                                    <option value="9" >9</option>
+                                                    <option value="10" >10</option>
+                                                    <option value="11" >11</option>
+                                                    <option value="12" >12</option>
+                                                    <option value="13" >13</option>
+                                                    <option value="14" >14</option>
+                                                    <option value="15" >15</option>
+                                                    <option value="16" >16</option>
+                                                    <option value="17" >17</option>
+                                                    <option value="18" >18</option>
+                                                    <option value="19" >19</option>
+                                                    <option value="20" >20</option>
+                                                    <option value="22" >22</option>
+                                                    <option value="24" >24</option>
+                                                </select>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="fnt-sty">
+                                    <ul>
+                                        <span>Font Style</span>
+                                        <li>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check selector" >
+                                                    <input class='selector' type="checkbox" name="bold" tagname='cid1' cid="1" id="bold" value="text-bold">
+                                                    <label class="ripple" for="bold">Bold</label>
+                                                </p>
+                                            </div>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check selector">
+                                                    <input  class='selector' type="checkbox" name="italic" tagname='cid2' cid="2" id="italic" value="text-italic">
+                                                    <label class="ripple" for="italic">Italic</label>
+                                                </p>
+                                            </div>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check selector">
+                                                    <input class='selector' type="checkbox" name="underline" tagname='cid21' cid="21" id="underline" value="text-underline">
+                                                    <label class="ripple" for="underline">Underline</label>
+                                                </p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="fnt-sty-wrg">
+                                    <ul>
+                                        <span>Alignment</span>
+                                        <li>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check">
+                                                    <input type="radio" class="selector radio" name="alignment" tagname='cid3' cid="3" id="left" value="style-left" >
+                                                    <label for="left" class="ripple" >Left</label>
+                                                </p>
+                                            </div>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check">
+                                                    <input type="radio" class="selector radio" name="alignment" tagname='cid4' cid="4" id="centre" value="style-center">
+                                                    <label for="centre" class="ripple" >Center</label>
+                                                </p>
+                                            </div>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check selector">
+                                                    <input type="radio" class="selector radio" name="alignment" tagname='cid5' cid="5" id="right" value="style-right">
+                                                    <label for="right" class="ripple" >Right</label>
+                                                </p>
+                                            </div>
+                                            <div class="radio_check">
+                                                <p class="rdochck_subscrb radio_check selector">
+                                                    <input type="radio" class="selector radio" name="alignment" tagname='cid5' cid="5" id="justify" value="style-justify">
+                                                    <label for="justify" class="ripple" >Justify</label>
+                                                </p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="dis-pas">
+                                    <ul>
+                                        <span>Background Color</span>
+                                        <li>
+                                            <input type="text" id="b_color" class="form-control demo" data-format="rgb" value="#fff">
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="dis-pas">
+                                    <ul>
+                                        <span>Text Color</span>
+                                        <li>
+                                            <input type="text" id="t_color" class="form-control demo" data-format="rgb" value="#fff">
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="dis-pas">
+                                    <ul>
+                                        <span>Border Color</span>
+                                        <li>
+                                            <input type="text" id="bor_clr" class="form-control demo" data-format="rgb" value="#fff">
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="dis-pas">
+                                    <ul>
+                                        <span>Border Size</span>
+                                        <li>
+                                            <div class="select-style sel-wets">
+                                                <select id="bor_size">
+                                                    <option value="0px">None</option>
+                                                    <option value="1px" selected>Thin</option>
+                                                    <option value="2px">Thick</option>
+                                                    <option value="4px">Thicker</option>
+                                                </select>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="dis-pas">
+                                    <ul>
+                                        <span>Border Style</span>
+                                        <li>
+                                            <div class="select-style sel-wets">
+                                                <select id="bor_style">
+                                                    <option value="hidden">None</option>
+                                                    <option value="dotted">Dotted</option>
+                                                    <option value="dashed">Dashed</option>
+                                                    <option value="solid" selected>Solid</option>
+                                                    <option value="double">Double</option>
+                                                </select>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="add-weg">
+                                <h1>Controls <i class="fa fa-wrench set-i"></i> </h1>
+                                <ul>
+                                    <li>
+                                        <label>Select Widget group</label>
+                                        <div class="select-style ctr-set">
+                                            <select id="selectGridGroupItems">
+                                                <option>Header Info</option>
+                                                <?php if($type=="work"){?>
+                                                <option>Register Details</option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <li><button type="button" onclick="addWidgetGroup();">Add Widget group</button></li>
+
+
+                                    <li>
+                                        <label>Select Widget</label>
+                                        <div class="select-style ctr-set">
+                                            <select id="selectGridItems">
+                                                <option>Project Name</option>
+                                                <?php if($type=="work"){?>
+                                                <option>Request Date</option>
+                                                <option>CostCentre Name</option>
+                                                <option>Address</option>
+                                                <option>City</option>
+                                                <option>State</option>
+                                                <option>Country</option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <li><button type="button" onclick="addWidget();">Add Widget</button>  <button id="save-btn" type="button">Save</button></li>
+
+                                </ul>
+                            </div>
+                            <div class="inc-size">
+
+                                <label for="amount">Ratio (5% increments)</label>
+
+                                <input type="text" id="amount" readonly >
+                                <div class="ine-pag"><div id="slider"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!--font-style-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ElementTemplate">
+        <?php echo (isset($template)) ? $template : '';?>
+        <div class="drsElement drsMoveHandle drsGroupItem" data-name="Workorderamountinwords field" style="left:10px;top:0px;width:260px;height:30px;background-color:rgb(255, 255, 255);color:rgb(0, 0, 0);border: 1px solid rgb(0, 0, 0);border-width:1px;border-style:solid;border-color:rgb(0, 0, 0);">
+            <p style="display:inline;clear:both;font-family:'Open Sans', sans-serif !important; padding-left:5px; font-weight:normal;">WO Amount (in Words) :</p>
+            <span id="wo_OrderAmountinwords" style="font-family:'Open Sans', sans-serif !important; padding-left:10px !important; color:#000;font-size:14px; font-weight:normal;"></span>
+            <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button>
+        </div>
+    <?php ?>
+
+</div>
+<script type="text/javascript">
+    $(function() {
+        var $options = $('#styleOptions'),
+            $sel_el = null,
+            scntDiv = $('#p_scents'),
+            $elementTemplate = $('#ElementTemplate'),
+            $selectGridItems = $('#selectGridItems');
+
+        // initialize color picker
+        $('.demo').each( function() {
+            //
+            // Dear reader, it's actually very easy to initialize MiniColors. For example:
+            //
+            //  $(selector).minicolors();
+            //
+            // The way I've done it below is just for the demo, so don't get confused
+            // by it. Also, data- attributes aren't supported at this time...they're
+            // only used for this demo.
+            //
+            $(this).minicolors({
+                control: $(this).attr('data-control') || 'hue',
+                defaultValue: $(this).attr('data-defaultValue') || '',
+                format: $(this).attr('data-format') || 'hex',
+                keywords: $(this).attr('data-keywords') || '',
+                inline: $(this).attr('data-inline') === 'true',
+                letterCase: $(this).attr('data-letterCase') || 'lowercase',
+                opacity: $(this).attr('data-opacity'),
+                position: $(this).attr('data-position') || 'bottom left',
+                change: function(value, opacity) {
+                    if( !value ) return;
+                    if( opacity ) value += ', ' + opacity;
+                    if( typeof console === 'object' ) {
+                        //console.log(value);
+                    }
+                },
+                theme: 'bootstrap'
+            });
+        });
+
+
+        // Main Fns
+        $('#p_scents').on('dblclick','.drsElement p',function (e) {
+            e.stopPropagation();
+            if($(this).hasClass('not-editable'))
+                return;
+            $(this).prop('contenteditable', 'true');
+            $(this).focus();
+        });
+
+        // on click show options
+        $('#p_scents').on('click','.drsElement',function (e) {
+            e.stopPropagation();
+            $sel_el = $(this);
+
+            var styleProps = $( this ).css([
+                "width", "height", "color","font-size", "background-color", "font-weight", "font-style", "text-align", "text-decoration", "style-left", "style-center", "style-right", "style-justify", "border-color", "border-width", "border-style", "border"
+            ]);
+
+            $.each( styleProps, function( prop1, value ) {
+                //var fsize = parseInt($sel_el.find('*').css('font-size'));
+                if(prop1=="font-size"){
+                    var fsize = value;
+                    fsize = fsize.replace('px', '');
+                    $('#fontsize').val(fsize);
+                } else if(prop1=="background-color"){
+                    var bcolors = value;
+                    $('#b_color').val(bcolors).next('.minicolors-swatch').find('> .minicolors-swatch-color').css("background-color", bcolors);
+                } else if(prop1=="color"){
+                    var bcolors = value;
+                    $('#t_color').val(bcolors).next('.minicolors-swatch').find('> .minicolors-swatch-color').css("background-color", bcolors);
+                } else if(prop1=="border"){
+                    var selectedvalue = value;
+                    //console.log(selectedvalue);
+
+                } else if(prop1=="border-width"){
+                    var selectedvalue = value;
+                    //console.log(selectedvalue);
+                    $('#bor_size').val(selectedvalue);
+                    //$('#bor_size').trigger('change');
+                } else if(prop1=="border-style"){
+                    var selectedvalue = value;
+                    //console.log(selectedvalue);
+                    $('#bor_style').val(selectedvalue);
+                    //$('#bor_style').trigger('change');
+                } else if(prop1=="border-color"){
+                    var bcolors = value;
+                    //console.log(bcolors);
+                    $('#bor_clr').val(bcolors).next('.minicolors-swatch').find('> .minicolors-swatch-color').css("background-color", bcolors);
+                } else if(prop1=="font-weight"){
+                    if(value=="bold"){
+                        $('#bold').prop( "checked", true );
+                    }else{
+                        $('#bold').prop( "checked", false );
+                    }
+                    $('#bold').trigger('change');
+                } else if(prop1=="font-style"){
+                    if(value=="italic"){
+                        $('#italic').prop( "checked", true );
+                    }else{
+                        $('#italic').prop( "checked", false );
+                    }
+                } else if(prop1=="text-decoration"){
+                    if(value=="underline"){
+                        $('#underline').prop( "checked", true );
+                    }else{
+                        $('#underline').prop( "checked", false );
+                    }
+                } else if(prop1=="text-align"){
+                    if(value=="justify"){
+                        $('input:radio[name=alignment]').filter('[value=style-justify]').prop('checked', true);
+                    } else if(value=="right"){
+                        $('input:radio[name=alignment]').filter('[value=style-right]').prop('checked', true);
+                    } else if(value=="center"){
+                        $('input:radio[name=alignment]').filter('[value=style-center]').prop('checked', true);
+                    } else{
+                        $('input:radio[name=alignment]').filter('[value=style-left]').prop('checked', true);
+                    }
+                }
+
+
+            });
+
+            // show delete icon
+            $('.remScnt').hide();
+            $(this).find('.remScnt').show();
+
+            $options.fadeIn();
+            //for group det
+            var vWidth = 0;
+            var vHeight = 0;
+            vWidth = parseInt($sel_el.closest('#p_scents').css("width"))-6;
+            vHeight = parseInt($sel_el.closest('#p_scents').css("height"))-30;
+
+            if($sel_el.hasClass('drsGroupItem')){
+                //console.log($sel_el.closest('.drsItem'));
+                vWidth = parseInt($sel_el.closest('.drsItem').css("width"))-5;
+                vHeight = parseInt($sel_el.closest('.drsItem').css("height"))-5;
+                //for individual field
+                if(!$.isNumeric(vWidth) && !$.isNumeric(vHeight)){
+                    vWidth = parseInt($sel_el.closest('#p_scents').css("width"))-6;
+                    vHeight = parseInt($sel_el.closest('#p_scents').css("height"))-30;
+                }
+            }
+            //console.log(vWidth);
+            //console.log(vHeight);
+            resizeWidthHeightFix(vWidth,vHeight);
+        });
+
+        $('body').on('click',function () {
+            $('.remScnt').hide();
+        });
+
+        $('#addScnt').click( function() {
+            $('<div class="drsElement drsMoveHandle" data-name="test"   style="left: 30px; top: 360px; width: 100px; height: 100px; background: #FDC; text-align: center"> Content test <button type="button" class="remScnt"><i class="fa fa-trash-o"></i></button></div>').appendTo(scntDiv);
+            return false;
+        });
+
+        scntDiv.on('click', '.remScnt', function() {
+            var $el = $(this).parent('.drsElement'),
+                name = $el.data('name');
+            // $elementTemplate.append($el[0].outerHTML);
+            // $selectGridItems.append('<option>'+name+'</option>');
+            $el.remove();
+        });
+
+        $("#fontsize").change(function() {
+            $sel_el.css("font-size", $(this).val() + "px").find('*').css("font-size", $(this).val() + "px");
+        });
+
+        $("#b_color").change(function() {
+            $sel_el.css("background-color", $(this).val()).find('*').css("background-color", $(this).val());
+        });
+
+        $("#t_color").change(function() {
+            $sel_el.css("color", $(this).val()).find('*').css("color", $(this).val());
+        });
+
+        $("#bor_clr").change(function() {
+            $sel_el.css("border-color", $(this).val());
+        });
+
+        $("#bor_size").change(function(){
+            $sel_el.css("border-width", $(this).val());
+        });
+
+        $("#bor_style").change(function(){
+            $sel_el.css("border-style", $(this).val());
+        });
+
+        $('.selector').click(function () {
+            var $this = $(this),
+                value = $this.attr('value');
+
+            if($this.is(':checked')) {
+                $sel_el.addClass(value);
+            } else {
+                $sel_el.removeClass(value);
+            }
+        });
+
+        $('.radio').click(function () {
+            var $this = $(this);
+            //value = $this.attr('value');
+            var value = $("input[name='alignment']:checked").val();
+            $sel_el.removeClass('style-left style-right style-center style-justify');
+            $sel_el.addClass(value);
+        });
+
+        $("#save-btn").click(function(ev){
+            ev.preventDefault();
+
+            $('#htmlcontent').val($('#htmlwrapper .bill-deta').html());
+//            console.log($('#htmlcontent').val($('#htmlwrapper .bill-deta').html()))
+            $('form').submit();
+        });
+    });
+
+    function addWidget() {
+        var $elementTemplate = $('#ElementTemplate');
+        //console.log($elementTemplate.find('.drsElement'));
+        if($elementTemplate.find('.drsElement').length == 0)
+            return false;
+
+        var $option = $('#selectGridItems').find('option:selected'),
+            name = $option.val();
+        console.log(name)
+
+        if(name.length == 0)
+            return false;
+
+        var $el = $elementTemplate.find('.drsElement[data-name="'+name+'"]');
+		console.log($elementTemplate.find('.drsElement[data-name="'+name+'"]'));
+        if($el.length == 0)
+            return false;
+
+        $($el[0].outerHTML).appendTo($('#p_scents'));
+        //$el.remove();
+        //$option.remove();
+    }
+
+    function addWidgetGroup() {
+        var $elementTemplate = $('#ElementTemplate');
+//        console.log($elementTemplate.find('.drsElement[data-name="Header Info"]'));
+        if($elementTemplate.find('.drsElement').length == 0)
+            return false;
+
+        var $option = $('#selectGridGroupItems').find('option:selected'),
+            name = $option.val();
+
+        if(name.length == 0)
+            return false;
+
+        var $el = $elementTemplate.find('.drsElement[data-name="'+name+'"]');
+        console.log($elementTemplate);
+        console.log($el);
+
+        if($el.length == 0)
+            return false;
+
+        $($el[0].outerHTML).appendTo($('#p_scents'));
+        //$el.remove();
+        //$option.remove();
+    }
+
+    function resizeWidthHeightFix(width, height) {
+        var dragresize = new DragResize('dragresize',{ minWidth: 50, minHeight:30, minLeft:8, minTop:8, maxLeft: width, maxTop: height });
+
+        dragresize.isElement = function(elm)
+        {
+            if (elm.className && elm.className.indexOf('drsElement') > -1) return true;
+        };
+        dragresize.isHandle = function(elm)
+        {
+            if (elm.className && elm.className.indexOf('drsMoveHandle') > -1) return true;
+        };
+
+        dragresize.ondragfocus = function() { };
+        dragresize.ondragstart = function(isResize) {
+            //console.log(this.element.style.zIndex);
+            //if (!this.element.origZIndex) this.element.origZIndex = this.element.style.zIndex;
+        };
+        dragresize.ondragmove = function(isResize) { };
+        dragresize.ondragend = function(isResize) {
+            //this.element.style.zIndex  = this.element.origZIndex;
+            //console.log(this.element.origZIndex);
+        };
+        dragresize.ondragblur = function() { };
+
+        // Finally, you must apply() your DragResize object to a DOM node; all children of this
+        // node will then be made draggable. Here, I'm applying to the entire document.
+        dragresize.apply(document);
+    }
+</script>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!--<script src="https://code.jquery.com/jquery-1.10.2.js"></script>-->
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<script>
+    $(function() {
+        //var def_p_scents_height = 630;
+        //var cur_p_scents_height = parseInt($("#p_scents").css("height"));
+        //var set_p_scents_height =  parseInt(((cur_p_scents_height / def_p_scents_height) * 100));
+        //console.log(def_p_scents_height);
+        //console.log(cur_p_scents_height);
+        //console.log(set_p_scents_height);
+        var cur_p_scents_height = parseInt($("#p_scents").css("height"));
+        //console.log(cur_p_scents_height);
+        $(".bill-deta").css("height", cur_p_scents_height+ "px");
+
+        $( "#slider" ).slider({
+            value:100,
+            min: 30,
+            max: 100,
+            step: 5,
+            slide: function( event, ui ) {
+                $( "#amount" ).val( ui.value + " %" );
+                //console.log((ui.value * 6)+ "px");
+                $(".bill-deta").css("height", (ui.value * 6.3)+ "px");
+                $("#p_scents").css("height", (ui.value * 6.3)+ "px");
+                resizeHeight((ui.value * 6));
+            }
+        });
+
+        $( "#amount" ).val( + " %");
+        //$(".bill-deta").css("height", (set_p_scents_height * 6.3)+ "px");
+        //$("#p_scents").css("height", (set_p_scents_height * 6.3)+ "px");
+
+    });
+
+    function resizeHeight(height) {
+        var dragresize = new DragResize('dragresize',{ minWidth: 50, minHeight:30, minLeft:8, minTop:8, maxLeft: 692, maxTop: height });
+
+        dragresize.isElement = function(elm)
+        {
+            if (elm.className && elm.className.indexOf('drsElement') > -1) return true;
+        };
+        dragresize.isHandle = function(elm)
+        {
+            if (elm.className && elm.className.indexOf('drsMoveHandle') > -1) return true;
+        };
+
+        dragresize.ondragfocus = function() { };
+        dragresize.ondragstart = function(isResize) {
+            //if (!this.element.origZIndex) this.element.origZIndex = this.element.style.zIndex;
+        };
+        dragresize.ondragmove = function(isResize) { };
+        dragresize.ondragend = function(isResize) {
+            //this.element.style.zIndex  = this.element.origZIndex;
+        };
+        dragresize.ondragblur = function() { };
+
+        // Finally, you must apply() your DragResize object to a DOM node; all children of this
+        // node will then be made draggable. Here, I'm applying to the entire document.
+        dragresize.apply(document);
+    }
+</script>

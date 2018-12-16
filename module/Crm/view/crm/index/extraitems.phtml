@@ -1,0 +1,323 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<!-- dummy row -->
+<script id="dummy-row"  type="text/template" class="hide">
+	<tr>
+		<td width="10%" class="tbl_input_td">
+		<input class="tbl_input" type="text" value="" name="desc__" id="desc__"/>
+		<td width="9%" id="code__" ></td>
+		<td width="10%" id="unitName__"></td>
+		<td width="9%" id="rate__" class="txt_right"></td>
+		<td width="3%" align="center" class="action_btns_td">
+			<ul class="action_btns">
+				<li>
+					<a class="deleteTr__" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+				</li>
+			</ul>
+		</td>
+	</tr>
+</script>
+<!-- dummy row -->
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+    	<div class="row">
+			<!-- newly addind Div-->
+			<form action="" method="post" onsubmit="return validate();">
+                <div id="Step1">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Extra Items</h1>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="row form-group">   
+                                <div class="form-group col-lg-12 m3_auto padtop20">
+                                    <input type="text" name="unitname" id="unitname" class="form-control lbl_move" label="Project/Unit/Buyer" value="" />
+                                    <input type="hidden" name="projectId" id="projectid" value=""/>
+									<input type="hidden" name="unitId" id="unitId" value=""/>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 savebtn_area no_border">
+                                <ul>
+                                    <li class="save_btn m_auto">
+                                        <a href="javascript:void(0);" class="ripple" onclick="show_step2();">Continue</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="Step2">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Extra Bill</h1>
+                    </div>
+                    <input type="hidden" name="count" id="count" value="0" />
+                    <input type="hidden" name="finalCount" id="finalCount" value="0" />
+                    <div class="col-lg-12 clear">
+                        <div class="table-responsive">
+                            <table id="extra-bill-table" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Unit Name</th>
+                                        <th class="txt_right">Rate</th>
+                                        <th>&nbsp; </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="startcount" data-count="0">
+                                    <tr>
+                                        <input class="tbl_input" type="text" value="" name="desc_0" id="desc_0"/>
+                                        </td>
+                                        <td width="9%" id="code_0" ></td>
+                                        <td width="10%" id="unitName_0"></td>
+                                        <td width="6%" id="rate_0" class="txt_right"></td>
+                                        
+                                        <td width="3%" align="center" class="action_btns_td">
+                                            <ul class="action_btns">
+                                                <li>
+                                                    <a class="deleteTr_0" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 savebtn_area clear">
+                        <ul>
+                            <li class="dropdown save_btn float_l">
+                                <a href="javascript:void(0);" onclick="$('#Step1').show(); $('#Step2').hide();" class="ripple">back</a>
+                            </li>
+                            <li class="dropdown save_btn float_r">
+                            	<input type="submit" name="submit" class="ripple" value="Add ExtraItems"/>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+		  	</form>
+        </div>
+	</div>
+</div>
+<script>
+$(document).ready(function() {
+	$('#Step1').show();
+	$('#Step2').hide();
+});
+var extraItemData,tmpExtraItemData;
+$(document).ready(function() {
+	$(".multiple_dropdown").select2({
+	});
+});
+var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+var $unitname = $('#unitname'),$UnitId = $('#unitId'),$ProjectId=$('#projectid');
+$unitname.autocomplete({
+  lookup: arr_Units,
+  showNoSuggestionNotice: false,
+  lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+      if (queryLowerCase == '*') {
+          return suggestion.value;
+      } else {
+          var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+          return re.test(suggestion.value);
+      }
+  }, onSelect: function (suggestion) {
+      if (suggestion) {
+          $UnitId.val(suggestion.data);
+          $ProjectId.val(suggestion.ProjectId);
+          $(this).removeClass('error');
+      }
+  }, onSearchStart: function (suggestion) {
+      $UnitId.val(0);
+  }, onSearchComplete: function (query, suggestions) {
+      if (!suggestions.length) {
+          $UnitId.val(0);
+          $(this).addClass('error');
+      } else $(this).removeClass('error');
+  }
+});
+  
+function bindOtherCostAutoComplete() {
+    var $otherCost = $('input[id^=desc_');
+    $.each($otherCost, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+        checkOtherCost(name);
+        $this.unbind('autocomplete');
+        $this.autocomplete({
+            lookup: tmpExtraItemData,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+
+                    $("#extraItemId_" + key1).val(suggestion.data);
+                    $("#transAmount_" + key1).val(sanitizeNumber(suggestion.Amount));
+					$("#transQuantity_" + key1).val(sanitizeNumber(suggestion.Quantity));
+					$("#transRate_" + key1).val(sanitizeNumber(suggestion.Rate));
+					$('#code_' + key1).html(suggestion.Code);
+                    $('#unitName_' + key1).html(suggestion.UnitName);
+                    $('#wQty_' + key1).html(suggestion.Quantity);
+                    $('#rate_' + key1).html(suggestion.Rate);
+                    $('#amount_' + key1).html(suggestion.Amount);
+                    removeError($(this));
+
+                    $(this).prop('disabled', true);
+                    addNewRow($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                $("#extraItemId_" + key1).val(0);
+                removeError($(this));
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length && query.length > 1){
+                    showError($(this), 'Required');
+                    $("#extraItemId_" + key1).val(0);
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+function addNewRow(x) {
+    var $tr = $(x).closest('tr');
+    /* if ($tr.next('tr').length != 0)
+        return; */
+    //count = parseInt($('#startcount').attr('data-count'));
+    count = parseInt($('#count').val());
+    $('.deleteTr_' + count).show();
+    template = $('#dummy-row').html();
+    count++;
+    template = template.replace(/__/g, '_' + count);
+    $(template).insertAfter($tr);
+    $('#count').val(count);
+    var finalvalue =  parseInt($('#finalCount').val());
+    finalvalue++;
+    $('#finalCount').val(finalvalue);
+    bindOtherCostAutoComplete();
+}
+function deleteRow(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+	var $x = $(x),
+        $tr = $x.closest('tr');
+    $tr.remove();
+	var finalCount = parseInt($('#finalCount').val());
+	finalCount--;
+	$('#finalCount').val(finalCount);
+    bindOtherCostAutoComplete();
+    return false;
+}
+	
+function checkOtherCost(x) {
+    var arrname = x.split('_'),
+        id= arrname[1],
+        extraid = $('input[id^=extraItemId_]');
+    tmpExtraItemData = extraItemData;
+    tmpExtraItemData = $.grep(extraItemData, function (element, index) {
+        var is_selected = true;
+        $.each(extraid, function (i, obj) {
+            var $this = $(this),
+                key = $this[0].id.split('_')[1];
+            if (key != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                }
+            }
+        });
+        return is_selected;
+    });
+}
+
+function show_step2() {	
+	if($('#booking_no').val()==0){
+		alert("Plese Enter Bill Number");
+		return false
+	}
+	if($('#unitId').val()!=""){
+		load_extraItemList(function() {
+			$('#Step1').hide();
+			$('#Step2').show();
+		});
+		} else {
+		alert("Please Select Project/unit/buyer");
+		}
+}
+
+function load_extraItemList(callback) {
+
+    var ProjectId = $ProjectId.val();
+    var UnitId = $UnitId.val();
+    if (/^\d+$/.test(ProjectId) === false) {
+        return;
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'crm/index/extraitemlist',
+        data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", ProjectId: ProjectId , UnitId: UnitId},
+        type: 'POST',
+        success: function (data, status, xhr) {
+            if (data.extra_item_list.length > 0) {
+                extraItemData = data.extra_item_list;
+                tmpExtraItemData = data.extra_item_list;
+
+                bindOtherCostAutoComplete();
+            }
+
+            if (callback) {
+                callback();
+            }
+        },
+        error: function (xhr, status, error) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+</script>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+
+});
+</script>
+<!--table Add lines start--> 
+<script>
+$(".mainTr").click(function(e){
+	e.preventDefault();
+	if(!$(this).closest("tr").next(".subTr").is(":visible")){
+		$(this).closest("tr").next(".subTr").show();
+		$(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");	
+		$(this).find("i").addClass("t ");
+	}
+		else{
+		$(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+		$(this).closest("tr").next(".subTr").slideUp("slow");
+		$(this).find("i").removeClass("tform");
+	}
+})
+
+function validate(){
+	if($('#booking_no').val()==0){
+		alert("Plese Enter Bill Number");
+		return false
+	}
+	if($('#finalCount').val()==0){
+		alert("Atlease one Extra Item Must be Selected");
+		return false
+	}
+}
+</script>

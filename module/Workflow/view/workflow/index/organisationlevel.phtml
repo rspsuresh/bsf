@@ -1,0 +1,686 @@
+<style>
+    .search-container label {
+        right: 10px;
+        position: absolute;
+        top: 30px;
+        z-index:999;
+        color:#ccc;
+    }
+    .sr-only {
+        border: 0 none;
+        clip: rect(0px, 0px, 0px, 0px);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+    }
+    .search-container {
+        font-size: 18px;
+        margin: -20px auto 0;
+        padding-top: 20px;
+        position: relative;
+    }
+    .card {
+        margin: 15px 0;
+        padding: 11px;
+    }
+    .panel {margin-bottom:5px}
+    .panel-body{background:#F7F7F7;padding:5px 5px 5px !important}
+    .accordion_head{background:#DDE3F0 !important; border-bottom:1px solid #2d74b4 !important;}
+    .panel{margin-bottom:5px; box-shadow:none;background:#F0F0F5 !important; border:1px solid #DFDFE8}
+    .table-fixed tbody{max-height:250px;min-height:20px; overflow-y:auto;width:100%}
+    .table-fixed thead,.table-fixed tbody,.table-fixed tr,.table-fixed td,.table-fixed th{display:block}
+    .table-fixed tbody td,.table-fixed thead>tr>th{float:left; border-bottom:0;position:relative;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}
+    .table-fixed tbody td{height:55px;}
+    input[type="text"]:disabled {background: #f1f1f1;}
+</style>
+<?php $RowList=0;?>
+<script>
+    var cid = [];
+</script>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12 col-sm-12">
+            <h1 class="col-lg-6 col-md-6 col-sm-5 padlr0" data-bsfhead="Level">Level
+                <div class="stgedit_btn req_addbtn brad_50">
+                    <a href="javascript:void(0);" class="ripple mainTr" rel="oc" data-expandid="0" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Level" onclick="getDeptId(this);"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+            <div class="col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 padlr0">
+                <div class="input-group col-md-12">
+                    <input name="search_all" id="search_all" type="text" onkeyup="departmentSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+                </div>
+            </div>
+        </div>
+        <div id="add_data"></div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive" style="min-height:200px;">
+                <table class="table table-hover tbltop_bdr0" style="margin-bottom: 0;" id="levelTable">
+                    <thead>
+                    <tr>
+                        <th width="52">OrderNo</th>
+                        <th width="70%">Level</th>
+                        <th width="27%">&nbsp;</th>
+                    </tr>
+                    </thead>
+                </table>
+                <table class="table table-hover tbltop_bdr0" id="sort-table">
+                    <?php $k=0;
+                    foreach($resultLevelReg as $resultLevelRegs):
+                        $k+=1;?>
+                        <tbody>
+                        <tr id="index_<?php echo $k; ?>">
+                            <td width="52"><label for="lorderId_<?php echo $k; ?>"> <?php echo $resultLevelRegs['OrderId']; ?></label></td>
+                            <input type="hidden" id="orderId_<?php echo $k; ?>" value="<?php echo $resultLevelRegs['OrderId']; ?>"/>
+                            <input type="hidden" id="mLevelId_<?php echo $k; ?>" value="<?php echo $resultLevelRegs['LevelId']; ?>"/>
+                            <td><?php echo $resultLevelRegs['LevelName']; ?></td>
+                            <td class="action_btns_td">
+                                <ul class="action_btns">
+                                    <li>
+                                        <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" data-original-title="Delete" onclick="levelDelete(this, '<?php echo $resultLevelRegs['LevelId']; ?>', '<?php echo $resultLevelRegs['LevelName']; ?>', '<?php echo $k; ?>')">
+                                            <span><i class="fa fa-trash-o"></i></span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="<?php echo $resultLevelRegs['LevelId']; ?>" onclick="editDept('<?php echo $resultLevelRegs['LevelId']; ?>',$(this));getDeptId(this);" rel="rt" data-placement="left" data-original-title="Edit">
+                                            <span><i class="fa fa-edit"></i></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    <?php endforeach; ?>
+                    <input type="hidden" id="rtCount" name="rtCount" value="<?php echo count($resultLevelReg); ?>" />
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 data-bsfhead="Delete LevelName">Why do you want to delete <span id="delLevelName" class="bld-txt"></span>?</h1>
+                <input type="hidden" name="deleteLevelId" id="deleteLevelId" value="" />
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea data-bsfshare="Remarks" id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks">
+                                </textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+var fixHelperModified = function(e, tr) {
+        var $originals = tr.children();
+        var $helper = tr.clone();
+        $helper.children().each(function(index) {
+            $(this).width($originals.eq(index).width())
+        });
+        return $helper;
+    },
+    updateIndex = function(e, ui) {
+        $('td.index', ui.item.parent()).each(function (i) {
+            $(this).html(i + 1);
+        });
+    };
+$(function () {
+    $('#sort-table').sortable({
+        helper: fixHelperModified,
+        stop: updateIndex,
+        axis: 'y',
+        distance: 40,
+        update: function( event, ui ) {
+            updateSortOrder();
+        }
+    });
+});
+
+function updateSortOrder() {
+    arrLevel = [];
+    var $resnames = $('input[id*=mLevelId_]');
+    $.each($resnames, function (i, obj) {
+        var id = $(this)[0].id,
+            key = id.split("_")[1],
+            iLevelId = $('#'+id).val(),
+            iOrder = +i+1;
+
+        $('#orderId_'+ key).val(iOrder);
+        $("label[for='lorderId_" + key + "']").html(iOrder);
+
+        arrLevel.push({
+            LevelId: iLevelId,
+            OrderId: iOrder
+        });
+    });
+    if (arrLevel.length >0) {
+        $.ajax({
+            url: getBaseURL() + "workflow/index/updatelevelsortorder",
+            type: "POST",
+            data: {'arrLevel':JSON.stringify(arrLevel)},
+            async: false,
+            success: function (data, textStatus, jqXHR) {
+
+            }
+        });
+    }
+}
+
+$(".error_message").hide();
+var $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+$inputCheckBox = $("input:checkbox");
+
+$(document).ready(function(){
+    actBindId=0;
+    triggerSelectAjax();
+});
+
+$(document).on('click','.mainTr',function() {
+    var relDiv = $(this);
+    cid = [];
+    cid1 = [];
+    cid2 = [];
+
+    if(relDiv.attr('rel')=='oc') {
+        $('.close_tr').remove();
+        $('#add_data').html('');
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/leveledit',
+            type: 'POST',
+            async: false,
+            data: {"levelId": 0,"ActionType":'Edit'},
+            success:function(data, textStatus, jqXHR) {
+                $('#add_data').html(data);
+                $('.card-body').slimScroll({
+                    height : '100%',
+                    alwaysVisible: false,
+                    railVisible: true,
+                    railColor: '#cececd',
+                    railOpacity: 1
+                });
+                $(".lbl_move").polymerForm();
+                $(".lbl_move").each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+
+                $(".single_dropdown").select2({
+                    placeholder: "",
+                    allowClear: true
+                });
+
+
+                $('#ocDivDept_1').show("slow");
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Request Failed');
+            }
+        });
+    }
+});
+
+//$(".mainTr").click(function(){
+//    actBindId=$(this).attr('data-expandid');
+//    var levelArr = <?php //echo (isset($ResultCriticalActSel)) ? json_encode($ResultCriticalActSel) : '[]'; ?>//;
+//    $.each(levelArr,function(i,o) {
+//        if(o.LevelId==actBindId) {
+//            cid.push(o.RoleId);
+//        }
+//    });
+//    criticalValueBasedApproval(actBindId);
+//    var relDiv = $(this).attr('rel');
+//    var relVal = relDiv.split("_");
+//    cid = [];
+//    //cid1 = [];
+//    //cid2 = [];
+//
+//    if(relVal[0]=='rt') {
+//        $("#rtDivDept_"+relVal[1]).slideToggle("slow");
+//        var key=$(this).data('expandid');
+//        //cid = $("#hidcid_"+key).val().split(',');
+//    } else {
+//        $("#ocDivDept_"+relVal[1]).slideToggle("slow");
+//    }
+//
+//    var rtCount = $('#rtCount').val();
+//    var ocCount = $('#ocCount').val();
+//    for(i=1;i<=rtCount;i++) {
+//        if(relVal[0] == 'rt') {
+//            if(relVal[1] != i) {
+//                $("#rtDivDept_"+i).slideUp("slow");
+//            }
+//        } else {
+//            $("#rtDivDept_"+i).slideUp("slow");
+//        }
+//    }
+//    for(i=1;i<=ocCount;i++) {
+//        if(relVal[0] == 'oc') {
+//            if(relVal[1] != i) {
+//                $("#ocDivDept_"+i).slideUp("slow");
+//            }
+//        } else {
+//            $("#ocDivDept_"+i).slideUp("slow");
+//        }
+//    }
+//});
+
+$('.panel-heading').click(function(){
+    $('.panel-heading').removeClass('accordion_head_crnt');
+    if($(this).next('div.in'))
+        $(this).addClass('accordion_head_crnt');
+    else
+        $(this).removeClass('accordion_head_crnt');
+});
+
+
+$('.sampleUI input:checkbox').bind('click', function (){
+    var current = $(this).closest('li'),
+        $checkbox = current.find("input:checkbox"),
+        key = $checkbox.data('id');
+    if($checkbox.is(':checked')){
+        var prependToDiv = $('#checkedUl_' + key);
+        current.animate({
+            top: -30,
+            left: prependToDiv.offset().left
+        }, 200, function() {
+            current.prependTo(prependToDiv).css({
+                top: 'auto',
+                left: 'auto'
+            });
+        });
+    }
+    else{
+        var prependToDiv = $('#unCheckedUl_' + key);
+        current.animate({
+            top: -30,
+            left: -prependToDiv.offset().left
+
+        }, 200, function() {
+            current.prependTo(prependToDiv).css({
+                top: 'auto',
+                left: 'auto'
+            });
+        });
+    }
+});
+
+$inputCheckBox.click(function(){
+    var id = $(this).attr("cid");
+    if($(this).is(":checked")){
+
+        if($(this).attr("tagname") == 'cid'){
+            cid.push(id);
+            $(this).closest("li").addClass('check_vendor_background');
+        }
+    }
+    else{
+        //cid.splice($.inArray($(this).attr("resurceid"), resourceId),1)
+        if($(this).attr("tagname") == 'cid'){
+            cid.splice($.inArray(id, cid), 1);
+            $(this).closest("li").removeClass('check_vendor_background');
+        }
+    }
+
+});
+function triggerSelectAjax() {
+    $inputCheckBox.change(function() {
+
+        criticalValueBasedApproval(actBindId);
+    });
+
+
+
+}
+
+//$("#submitData").click(function(){
+//    alert('kk1');
+//    $(".error_message").hide();
+//    var levelName=$("#levelName_0");
+////    var rate=$("#rate_0");
+////    var percentage=$("#percentage_0");
+////    var lumpsum=$("#lumpsum_0");
+//    if($.trim(levelName.val()) == ""){
+//        levelName.closest(".req_flds").find(".error_message").show();
+//        levelName.focus();
+//        return false;
+//    }
+//    alert('kk');
+//
+//    if($.trim(levelName.val()) != ""){
+//        $valid=1;
+//        $.ajax({
+//            url: getBaseURL() + 'workflow/index/deleteorglevel',
+//            type: 'POST',
+//            data: {"LevelId": 0, "Remarks": "", "Type": 'check',"levelName": levelName.val() },
+//            success:function(data, textStatus, jqXHR){
+//                if (jqXHR.status != 200) {
+//                    $valid=0;
+//                    alert('Already Exists Level Name!');
+//                }
+//            },
+//            error:function(jqXHR, textStatus, errorThrown){
+//                $valid=0;
+//            }
+//        });
+//    }
+////    if($valid==0){
+////        levelName.closest(".req_flds").find(".error_message").show();
+////        levelName.focus();
+////        return false;
+////    }
+////    if($.trim(rate.val()) == ""){
+////        rate.closest(".req_flds").find(".error_message").show();
+////        rate.focus();
+////        return false;
+////    }
+////    if($.trim(percentage.val()) == ""){
+////        percentage.closest(".req_flds").find(".error_message").html('<p>Please enter Percentage...</p>').show();
+////        percentage.focus();
+////        return false;
+////    }
+////    if(parseFloat($.trim(percentage.val()))>100){
+////        percentage.closest(".req_flds").find(".error_message").html('<p>% must be less than 100...</p>').show();
+////        percentage.focus();
+////        return false;
+////    }
+////    if($.trim(lumpsum.val()) == ""){
+////        lumpsum.closest(".req_flds").find(".error_message").show();
+////        lumpsum.focus();
+////        return false;
+////    }
+////    $("#hidcid").val(cid);
+//    $("#addForm").submit();
+//
+//
+//});
+
+//$(".editSubmitBtn").click(function(){
+//    $(".error_message").hide();
+//    var key=$(this).data('editid');
+//    var levelName=$("#levelName_" + key);
+//    var rate=$("#rate_" + key);
+//    var percentage=$("#percentage_" + key);
+//    var lumpsum=$("#lumpsum_" + key);
+//    if($.trim(levelName.val()) == ""){
+//        levelName.closest(".req_flds").find(".error_message").show();
+//        levelName.focus();
+//        return false;
+//    }
+//    if($.trim(levelName.val()) != ""){
+//        $valid=1;
+//        $levelLName=levelName.val();
+//        $levelLId=$("#LevelId_" + key).val();
+//        $.ajax({
+//            url: getBaseURL() + 'workflow/index/deleteorglevel',
+//            type: 'POST',
+//            data: {"LevelId": $levelLId, "Remarks": "", "Type": 'check',"levelName": $levelLName },
+//            async: false,
+//            success:function(data, textStatus, jqXHR){
+//                if (jqXHR.status != 200) {
+//                    $valid=0;
+//                    alert('Already Exists Level Name!');
+//                }
+//            },
+//            error:function(jqXHR, textStatus, errorThrown){
+//                $valid=0;
+//            }
+//        });
+//    }
+//    if($valid==0){
+//        levelName.closest(".req_flds").find(".error_message").show();
+//        levelName.focus();
+//        return false;
+//    }
+//    if($.trim(rate.val()) == ""){
+//        rate.closest(".req_flds").find(".error_message").show();
+//        rate.focus();
+//        return false;
+//    }
+//    if($.trim(percentage.val()) == ""){
+//        percentage.closest(".req_flds").find(".error_message").html('<p>Please enter Percentage...</p>').show();
+//        percentage.focus();
+//        return false;
+//    }
+//    if(parseFloat($.trim(percentage.val()))>100){
+//        percentage.closest(".req_flds").find(".error_message").html('<p>% must be less than 100...</p>').show();
+//        percentage.focus();
+//        return false;
+//    }
+//    if($.trim(lumpsum.val()) == ""){
+//        lumpsum.closest(".req_flds").find(".error_message").show();
+//        lumpsum.focus();
+//        return false;
+//    }
+//    $("#hidcid_" + key).val(cid);
+//    $("#editform_" + key).submit();
+//});
+
+$('#btnDeleteYes').on('click', function () {
+    var remarks = $remarks.val();
+    //console.log($('#delLevelName').val())
+    if(remarks.length == 0) {
+        showError($remarks, 'Required!');
+        return;
+    } else {
+        removeError($remarks);
+    }
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/deleteorglevel',
+        type: 'POST',
+        data: {"LevelId": $('#deleteLevelId').val(), "Remarks": remarks, "Type": 'update'},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                $('#index_'+$deleteModal.attr('data-rowid')).remove();
+                $('#rtDivDept_'+$deleteModal.attr('data-rowid')).remove();
+            } else
+                alert('Cannot delete this Level, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Failed to delete the Level!');
+        }
+    });
+    $deleteModal.modal('hide');
+    $remarks.val('');
+});
+
+function levelDelete(x, id, name, indexrowId) {
+    $deleteModal.attr('data-rowid', indexrowId).modal('show');
+    $("#remarks").val('');
+    $("#deleteLevelId").val(id);
+    $('#delLevelName').html(name);
+}
+
+function criticalValueBasedApproval(val) {
+    $.ajax({
+        url: getBaseURL() + "workflow/index/organisationlevel",
+        type: "POST",
+        data: {'cId': JSON.stringify(cid),'levelId':val},
+        success: function (data, textStatus, jqXHR) {
+            if(val==0) {
+                $('#critical_based').html('');
+                $('#critical_based').html(data);
+            } else {
+                $('#critical_based_'+val).html('');
+                $('#critical_based_'+val).html(data);
+            }
+
+        }
+
+
+    });
+    chkselect();
+}
+function bindVal() {
+    actBindId=0;
+
+}
+function selectAll(dId) {
+    $inputCheckBox.unbind('change');
+    if($("#select_all_"+dId).is(':checked') ) {
+        $('*[data-id='+dId+']:not(:checked)').trigger('click');
+    }else {
+        $('*[data-id='+dId+']:checked').trigger('click');
+    }
+    setTimeout(function() { triggerSelectAjax(); criticalValueBasedApproval(actBindId);}, 150);
+
+
+}
+function checkSelectAll(cId) {
+    $inputCheckBox.unbind('change');
+    if($('*[data-id='+cId+']:checked').length != $('*[data-id='+cId+']').length) {
+        $("#select_all_"+cId).prop('checked',false);
+    } else {
+        $("#select_all_"+cId).prop('checked',true);
+    }
+    setTimeout(function() { triggerSelectAjax(); criticalValueBasedApproval(actBindId);}, 150);
+
+
+}
+function chkselect() {
+
+    var rowlist = '<?php echo isset($RowList)? $RowList :'' ?>';
+    for (var i = 1; i <= rowlist; i++) {
+
+        var len = $(".lilen_" + i).find('li').length;
+        var len1 = $(".sellen_" + i).find('li').length;
+        if (len <= 0 && len1 >0) {
+            $(".mycheck_" + i).attr('checked', true);
+        }
+        else if(len > 0 && len1 > 0){
+            $(".mycheck_" + i).attr('checked', false);
+        }
+        else{
+            $(".mycheck_" + i).attr('checked', false);
+        }
+
+    }
+
+}
+
+
+function chkSearch(x) {
+    var $x = $(x),
+        searchText = $.trim($x.val()),
+        $checklistWrapper = $x.parents('.headingWrapper').next('.card'),
+        delayTimer = 0;
+
+    //console.log($checklistWrapper);
+    clearTimeout(delayTimer);
+    delayTimer = setTimeout(function () {
+        if(searchText.length == 0) {
+            //$checklistWrapper.find('.search-element').closest('.search-item').show();
+            $checklistWrapper.find('.search-element').closest('tr').show();
+            return;
+        }
+        var $foundChks = $checklistWrapper.find('.search-element');
+        //  console.log($foundChks);
+        $.each($foundChks, function () {
+            var name = $(this).attr('data-name').toLowerCase();
+            // console.log(name);
+            if(name.indexOf(searchText.toLowerCase()) == -1) {
+                $(this).closest('tr').fadeOut(100);
+                //$(this).closest('.search-item').fadeOut(100);
+                return;
+            }
+            //$(this).closest('.search-item').fadeIn(100);
+            $(this).closest('tr').fadeIn(100);
+        });
+    }, 300);
+}
+function checkfromValue(id) {
+    var key = id.split('_')[1],
+        dfValue = parseFloatVal(isNullCheck($('#' + id).val(),'number')),
+        dtValue = parseFloatVal(isNullCheck($('#tovalue_' + key).val(),'number'));
+
+    if (dfValue > dtValue) {
+        $('#tovalue_' + key).val(sanitizeNumber(dfValue,2));
+    } else {
+        $('#' + id).val(sanitizeNumber(dfValue,2));
+    }
+}
+function checktoValue(id) {
+    var key = id.split('_')[1],
+        dtValue = parseFloatVal(isNullCheck($('#' + id).val(),'number')),
+        dfValue = parseFloatVal(isNullCheck($('#fromvalue_' + key).val(),'number'));
+
+    if (dfValue > dtValue) {
+        $('#' + id).val(sanitizeNumber(dfValue,2));
+    } else {
+        $('#' + id).val(sanitizeNumber(dtValue,2));
+    }
+}
+function checkvarianceValue(id) {
+    var key = id.split('_')[1],
+        dValue = parseFloatVal(isNullCheck($('#' + id).val(),'number'));
+    if (dValue >100)  $('#' + id).val(sanitizeNumber(100,2));
+    else $('#' + id).val(sanitizeNumber(dValue,2));
+}
+$(document).on('click','.close',function() {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+});
+function getDeptId(data) {
+    curDeptId = $(data).attr('data-expandid');
+}
+function editDept(Id,_this) {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/leveledit',
+        type: 'POST',
+        async: false,
+        data: {'LevelId': Id,'ActionType':'Edit'},
+        success:function(data, textStatus, jqXHR){
+            $(data).insertAfter(_this.closest('tr'));
+            $('.card-body').slimScroll({
+                height : '100%',
+                alwaysVisible: false,
+                railVisible: true,
+                railColor: '#cececd',
+                railOpacity: 1
+            });
+            $(".lbl_move").polymerForm();
+            $(".lbl_move").each(function() {
+                if($(this).val() != '' && $(this).val() != null) {
+                    $(this).closest('div').addClass('dirty');
+                }
+            });
+            _this.closest('tr').next('tr').show("slow");
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+        }
+    });
+}
+</script>

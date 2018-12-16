@@ -1,0 +1,413 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/typeahead.bundle.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/mab-jquery-taginput.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+.panel                          {border-radius:0px !important;}
+.panel-info 					{border:none;border-top:none;}
+.table-responsive table.table tr td{    vertical-align: top !important;}
+.select2-container--default .select2-selection--multiple .select2-selection__choice{ margin-top:2px !important; margin-bottom:2px !important;}
+.autocomplete-group{ background:#E2EBEF; border-bottom:1px dashed #ccc;}
+.autocomplete-group strong{ border-bottom:none; font-size:18px;font-weight:normal; color:#009688;}
+.autocomplete-suggestion{padding: 4px 7px; background:#F9F9EE; color:#333;}
+.select2-selection__rendered{ border:1px solid #ccc; min-height:33px; max-height:100%;}
+.select2-container--default .select2-selection--multiple .select2-selection__choice:last-child{ margin-bottom:5px !important;}
+.select2-container--default .select2-selection--multiple .select2-selection__choice{ background:#ECEBE6; color:#009688; font-size:13px; font-weight:600;}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover{ background:#C1BFB4; color:#333; }
+.select2-selection__rendered:hover{-moz-box-shadow: 0 0 5px #ccc;-webkit-box-shadow: 0 0 5px#ccc;box-shadow: 0 0 5px #ccc; border:1px solid #90B16B;}
+</style>
+<?php
+    $accountOptions = '';
+    foreach($accounts as $account) {
+        $accountOptions .= '<option value="'.$account['Name'].'" data-id="'.$account['Id'].'">'.$account['Name'].'</option>';
+    }
+?>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form  id="formWrapper"  method="post">
+            <input type="hidden" name="mode" id="mode" value="<?php echo (isset($mode)) ? $mode  : 'add'; ?>"/>
+            <input type="hidden" name="ExpenseId" id="ExpenseId" value="<?php echo (isset($expenseid)) ? $expenseid : 0; ?>"/>
+            <div class="row">
+                <div class="col-lg-12">
+                <div class="col-lg-6" style="padding-left:0px !important;">
+                    <h1>Expense Entry </h1></div>
+       <div class="col-lg-6">
+  <div class="round-cont">
+  <!--client-->
+    <div class="round-cont-main">
+      <div class="front">
+        <div class="cont">
+          <p><i class="fa fa-users"></i></p><span class="details">Client</span> 
+        </div>
+      </div>
+      <div class="back">
+        <div class="cont">
+          <p><i class="fa fa-users"></i></p>
+         <span class="details">Client</span> 
+        </div>
+      </div>
+    </div>
+    <!--client-->
+    <!--Vendor-->
+    <div class="round-cont-main-ven">
+      <div class="front-ven">
+        <div class="cont-ven">
+         <p> <i class="fa fa-user"></i></p>
+          <span>Vendor</span>
+        </div>
+      </div>
+      <div class="back-ven">
+        <div class="cont-ven">
+         <p> <i class="fa fa-user"></i></p><span>Vendor</span>
+        </div>
+      </div>
+    </div>
+    <!--Vendor-->
+  </div>
+</div>
+                        <!-- <div class="col-lg-6"><span class="client-use">C</span>
+                    <span class="vendor-use">V</span></div>-->
+                </div>
+                <div class="clearfix"></div>
+               
+                <div class="col-lg-12 bg-col clear">
+                    <div class="col-lg-4 form-group" style="padding-left:0px !important;">
+                        <input type="text" id="WONo" class="form-control lbl_move" label="Workorder" value="<?php echo (isset($expense)) ? $expense['WONo'] : '';?>"/>
+                        <input type="hidden" id="WorkOrderId" name="WorkOrderId" value="<?php echo (isset($expense)) ? $expense['WorkOrderId'] : '';?>"/>
+                    </div>
+                    <div class="col-lg-3 form-group" style="padding-left:0px !important;"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="ExpenseDate" id="ExpenseDate" class="form-control date_picker lbl_move" readonly="readonly" label="Date" onchange="validateDate(this)"  value="<?php echo (isset($expense)) ? date('d-m-Y', strtotime($expense['ExpenseDate'])) : date('d-m-Y');?>"/>
+                    </div>
+                    <div class="col-lg-3 form-group" style="padding-left:0px !important;">
+                        <input type="text" name="ExpenseNo" id="ExpenseNo" class="form-control lbl_move" label="Expense No." maxlength="100" onchange="CheckExpenseNo(this, this.value)" value="<?php echo (!isset($expense) && $genType) ? $svNo : ''; echo (isset($expense)) ? $expense['ExpenseNo'] : '';?>" <?php echo (isset($expense) || $genType) ? 'readonly': ''; ?>/>
+                    </div>
+                </div>
+               
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                        <table class="table" style=" margin-bottom:0px;" id="expenseTable">
+                            <thead>
+                            <tr>
+                                <th>Tags</th>
+                                <th>Description</th>
+                                <th>Payment paid to</th>
+                                <th class="text-right">Amount</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody class="total">
+                            <tr class="padi05">
+                                <td colspan="2"></td>
+                                <td align="right" class="rate_pri">Total</td>
+                                <td width="5%"><input class="parent_padi05 text-right" type="text" name="AmountTotal" id="AmountTotal" readonly/></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="1"/>
+                        <input type="hidden" name="rowdeleteids" id="rowdeleteids"/>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a onclick="submitForm(); return false;"data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+        <li class="can_btn float_l" style="padding-bottom:10px;"><a href="<?php echo $this->basePath(); ?>/cb/expense/index">Cancel</a></li>
+    </ul>
+</div>
+<script id="dummy-expense"  type="text/template" class="hide">
+    <tr>
+        <input type="hidden" name="TransId__" id="TransId__"/>
+        <input type="hidden" name="UpdateRow__" id="UpdateRow__"/>
+        <td width="15%" style="position:relative;">
+            <select class="tag-input parent_text" name="tags__[]" id="tags__" multiple="multiple" style="width: 100%" onchange="addNewRow(this)">
+                <?php echo $accountOptions; ?>
+            </select>
+        </td>
+        <td width="10%"><textarea class="parent_texts" name="desc__" id="desc__" onchange="addNewRow(this)"></textarea></td>
+        <td width="5%">
+            <input class="parent_text" type="text" name="paidTo__" id="paidTo__"/>
+            <input type="hidden" name="paidToId__" id="paidToId__"/>
+            <input type="hidden" name="paidToCategory__" id="paidToCategory__"/>
+        </td>
+        <td width="5%"><input class="parent_text text-right" type="text" name="Amount__" id="Amount__" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" onchange="addNewRow(this)"/></td>
+        <td width="1%" align="center">
+            <ul class="action_btns">
+                <li><a id="deleteTr__" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    var $WorkOrderId = $('#WorkOrderId'),
+        $WONo = $('#WONo');
+    var arr_wos = <?php echo (isset($workorders)) ? json_encode($workorders) : '[]';?>;
+    var clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]';?>;
+    var vendors = <?php echo (isset($vendors)) ? json_encode($vendors) : '[]';?>;
+    var arr_paidTo = [];
+    $.each(clients, function(i, obj) {
+        arr_paidTo.push({value: obj.value,id:obj.id,data: { category: 'Client' }})
+    });
+    $.each(vendors, function(i, obj) {
+        arr_paidTo.push({value: obj.value,id:obj.id,data: { category: 'Vendor' }})
+    });
+
+
+    var expenseTrans = <?php echo (isset($expenseTrans)) ? json_encode($expenseTrans) : '[]';?>;
+
+    $(function(){
+        var $rowid = $('#rowid');
+        var template = $('#dummy-expense').html();
+        var rowid = 0;
+        var $tbody = $('#expenseTable').find('tbody.main');
+        if(expenseTrans.length != 0) {
+            $.each(expenseTrans, function(i, o) {
+                rowid += 1;
+                $tbody.append(template.replace(/__/g, '_' + rowid));
+                var tags = o.AccountIds.split(','),
+                    $tags = $('#tags_' + rowid);
+                $.each(tags, function (i, id) {
+                    $tags.find('option[data-id="'+id+'"]').prop('selected', true);
+                });
+
+                $('#TransId_' + rowid).val(o.TransId);
+                $('#desc_' + rowid).text(o.Description);
+                $('#Amount_' + rowid).val(sanitizeNumber(o.Amount,2,true,true));
+
+                if(parseFloatVal(o.ClientId) != 0) {
+                    var paidTo = o.ClientName;
+                    var paidToId = o.ClientId;
+                    var paidToCategory = 'Client';
+                    $('#paidTo_' + rowid).addClass('tag-client');
+                } else if (parseFloatVal(o.VendorId) != 0) {
+                    var paidTo = o.VendorName;
+                    var paidToId = o.VendorId;
+                    var paidToCategory = 'Vendor';
+                    $('#paidTo_' + rowid).addClass('tag-vendor');
+                }
+
+                $('#paidTo_' + rowid).val(paidTo);
+                $('#paidToId_' + rowid).val(paidToId);
+                $('#paidToCategory_' + rowid).val(paidToCategory);
+                $('#deleteTr_' + rowid).attr('data-deleteflag', 'true').show();
+            });
+            calcTotal();
+        }
+        rowid += 1;
+        $tbody.append(template.replace(/__/g, '_' + rowid));
+        $rowid.val(rowid);
+
+        initSelectTags();
+
+        // bind workorder autocomplete
+        $WONo.autocomplete({
+            lookup: arr_wos,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $WorkOrderId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $WorkOrderId.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $WorkOrderId.val(0);
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+
+        bindPaymentPaidToAutoComplete();
+
+        // prompt dialog on page navigation
+        initPageChangeFn();
+    });
+
+    function initSelectTags() {
+        $('.tag-input:not(.select2-hidden-accessible)').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            maximumInputLength: 100
+        });
+    }
+
+    function bindPaymentPaidToAutoComplete() {
+        var $paidToIds = $('input[id^=paidTo_]');
+        $.each($paidToIds, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            $this.unbind('autocomplete');
+            $this.autocomplete({
+                lookup: arr_paidTo,
+                groupBy: 'category',
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        var category = suggestion.data.category;
+                        $("#paidToId_" + key1).val(suggestion.id);
+                        $("#paidToCategory_" + key1).val(category);
+
+                        $this.removeClass('tag-client tag-vendor');
+
+                        if(category == 'Client') {
+                            $this.addClass('tag-client');
+                        } else if (category == 'Vendor') {
+                            $this.addClass('tag-vendor');
+                        }
+
+                        addNewRow($this);
+
+                        removeError($(this));
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#paidToId_" + key1).val(0);
+                    $("#paidToCategory_" + key1).val('');
+                    removeError($(this));
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length && query.length > 1){
+                        showError($(this), 'Required');
+                        $("#paidToId_" + key1).val(0);
+                        $("#paidToCategory_" + key1).val('');
+                    } else {
+                        removeError($(this));
+                    }
+                }
+            });
+        });
+    }
+
+    function submitForm() {
+        var $woid = $('#WorkOrderId'),
+            woid = $woid.val();
+        if(woid.length == 0 || woid == 0) {
+            $('#WONo').focus();
+            alert("Workorder is Required");
+            return false;
+        }
+
+        var $exno = $('#ExpenseNo'),
+            exno = $exno.val();
+        if(exno.length == 0 || exno == 0) {
+            $exno.focus();
+            alert("Expense No. is Required");
+            return false;
+        }
+
+        var amt = parseFloatVal($('#AmountTotal').val());
+        if(amt == 0) {
+            alert('Atleast fill all the columns in a row!');
+            return false;
+        }
+
+        // check for error(s)
+        var $err_inputs = $('.error');
+        if($err_inputs.length != 0) {
+            alert('Kindly notice the errors');
+            $.each($err_inputs, function () {
+                var $this = $(this),
+                    $subTr = $this.closest('.subTr'),
+                    $subDivTr = $subTr.closest('.subDiv').parents('.subTr');
+
+                if(!$subTr.is(':visible')) {
+                    $subTr.prev('tr').find('.mainTr').trigger('click');
+                }
+
+                // SubDivs Parent
+                if($subDivTr.length != 0 && !$subDivTr.is(':visible')) {
+                    $subDivTr.prev('tr').find('.mainTr').trigger('click');
+                }
+            });
+            return false;
+        }
+
+        setPageChanges(false);
+        $('#formWrapper').submit();
+    }
+
+    function addNewRow(x) {
+        calcTotal();
+
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+
+        if(parseFloatVal($('#TransId_'+key).val()) != 0)
+            $('#UpdateRow_' + key).val(1);
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#tags_' + key).val() == null || $('#tags_' + key).val().length == 0 || $('#desc_' + key).val().length == 0 || $('#paidToId_' + key).val().length == 0
+            || $('#paidToId_' + key).val() == 0 || $('#Amount_' + key).val() == 0)
+            return;
+
+        var $rowid = $('#rowid'),
+            rowid = parseInt($rowid.val());
+        $('#deleteTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#dummy-expense').html();
+
+        template = template.replace(/__/g, '_' + count);
+        $tr.parent('tbody.main').append(template);
+        $rowid.val(count);
+        bindPaymentPaidToAutoComplete();
+        initSelectTags();
+    }
+
+    function calcTotal() {
+        var $amt = $('input[id^=Amount_]'),
+            gTotal = 0;
+        $.each($amt, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+
+            gTotal += parseFloatVal($this.val());
+        });
+        $('#AmountTotal').val(sanitizeNumber(gTotal,2,true));
+    }
+
+    function deleteRow(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $x = $(x),
+            key = $x[0].id.split('_')[1],
+            $tr = $x.closest('tr');
+        if(typeof $x.attr('data-deleteflag') !== 'undefined' && $x.attr('data-deleteflag') == 'true') {
+            var ids = $('#rowdeleteids').val();
+            if(ids.length == 0)
+                $('#rowdeleteids').val($('#TransId_'+key).val());
+            else
+                $('#rowdeleteids').val(ids + ',' + $('#TransId_'+key).val());
+        }
+
+        $tr.remove();
+        setPageChanges(true);
+        calcTotal();
+        return false;
+    }
+</script>

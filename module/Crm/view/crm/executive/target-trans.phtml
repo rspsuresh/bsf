@@ -1,0 +1,189 @@
+<style>
+    .clr_rd{color:#f00;}
+    .headcol_l{
+        width:15%;
+    }
+</style>
+
+
+
+
+                    <div class="matrix_table_area">
+                        <table class="table matrix_table clear" >
+                            <thead>
+							
+                                <tr>
+								  <th  class="headcol_l headcol_l1">Target Period</th>
+								<?php 
+								foreach($results as $ExeLoad){
+                                	?>
+                                  <th colspan="2" id="Executive" class="txt_center" style="border-bottom:0px !important;"><span data-placement="bottom" data-toggle="tooltip" data-original-title=""><input type="hidden" name="ExeId[]" value="<?php echo $ExeLoad['UserId']?>"><?php echo $ExeLoad['EmployeeName']?></span></th>
+								<?php } ?>
+								  <th colspan="2" class="txt_center" style="border-bottom:0px !important;"><span data-placement="bottom" data-toggle="tooltip" data-original-title="">Total</span></th>
+                                </tr>
+								 <tr>
+								 <th class="headcol_l headcol_l1">&nbsp;</th>
+								  <?php 
+								foreach($results as $ExeLoad){
+									
+								?> 
+                                    <th class="txt_center">Amount</th>
+                                    <th class="txt_center">Unit</th>
+                                 <?php } ?>
+								 <th class="txt_center">Amount</th>
+								  <th class="txt_center">Unit</th>
+								 </tr>
+                            </thead>
+                            <tbody>
+							
+							
+							<!--loop-->
+							<?php
+							$total=0;
+							$tunit=0;
+							$tot=0;
+							$tunt=0;
+							 if ($targetType==1) {
+							    $nxtmonth=1;
+							 }
+                             else if ($targetType==2) {
+							    $nxtmonth=2;
+							 }
+                             else if ($targetType==3) {
+							    $nxtmonth=3;
+							 }
+                             else if ($targetType==4) {
+							    $nxtmonth=6;
+							 }
+                             else if ($targetType==5) {
+							    $nxtmonth=12;
+							 }
+                             ?>
+							
+                            <?php for($counter = 0;$counter<$iCount;$counter++){
+							    $total+=$targetAmount;
+							    $tunit+=$targetUnit;
+                                $addMonth=$nxtmonth-1;?>
+								<tr>
+                                    <?php
+                                    if($nxtmonth==1){
+                                        $curMonth = date('M-Y', strtotime("+$counter month", strtotime($targetFrom))); ?>
+                                        <td  class="headcol_l" id="monthval"><?php echo $curMonth;?></td>
+										<input type="hidden" name="targetFromPeriod[]" value="<?php echo $curMonth;?>">
+										<input type="hidden" name="targetToPeriod[]" value="<?php echo $curMonth;?>">
+                                    <?php
+                                    }
+                                    else {
+                                        if($counter==0) {
+                                            $curMonth = date('M-Y', strtotime("+$counter month", strtotime($targetFrom)));
+                                        }
+                                        $pairMonth = date('M-Y', strtotime("+$addMonth month", strtotime($curMonth)));?>
+								        <td class="headcol_l" id="monthval"><?php echo $curMonth; echo "-".$pairMonth; ?></td>
+										<input type="hidden" name="targetFromPeriod[]" value="<?php echo $curMonth;?>">
+										<input type="hidden" name="targetToPeriod[]" value="<?php echo $pairMonth;?>">
+                                        <?php
+                                        $curMonth = date('M-Y', strtotime("+1 month", strtotime($pairMonth)));
+                                    }
+                                    $Amt=0;
+                                    $Unt=0;?>
+                                    <?php
+                                    foreach($results as $ExeLoad){
+                                        $Amt+=$targetAmount;
+                                        $Unt+=$targetUnit;
+                                        ?>
+                                        <td class="tbl_input_td">
+                                            <input type="text" id="targetAmount" class="txt_right columnamt_<?php echo $ExeLoad['UserId']; ?> rowamt_<?php echo $counter; ?> amount" name="targetAmount_<?php echo $counter; ?>_<?php echo $ExeLoad['UserId']; ?>" onchange=" calculateAmountUnit(this); " onblur="return FormatNum(this, 2);" onkeypress="return isDecimal(event,this);" value="<?php echo number_format((float)$targetAmount, 2, '.', '');  ?>" />
+                                        </td>
+                                        <td class="tbl_input_td">
+                                            <input type="text" id="tarUnt" class="txt_right columnunt_<?php echo $ExeLoad['UserId']; ?> rowunt_<?php echo $counter; ?> unit" name="targetUnit_<?php echo $counter; ?>_<?php echo $ExeLoad['UserId']; ?>" onchange=" calculateAmountUnit(this); " onkeypress="return isDecimal(event,this);" value="<?php echo $targetUnit ?>"/>
+                                        </td>
+                                    <?php
+                                    } ?>
+                                    <td class="tbl_input_td"><input type="text"  class="txt_right rowamt_amount_<?php echo $counter; ?> totamount special"  onKeyPress="return isDecimal(event)" onChange="calculateTotalAmtUnt(this);" value="<?php echo number_format((float)$Amt, 2, '.', '');?>" readonly /> </td>
+                                    <td class="tbl_input_td"><input type="text"  class="txt_right rowunt_unit_<?php echo $counter; ?> totunit" onKeyPress="return isDecimal(event)" onChange="calculateTotalAmtUnt(this);" value="<?php echo $Unt ?>" readonly /> </td>
+                            </tr>
+							<?php }?>
+							<tr>
+								<td class="headcol_l clr_rd" value="Total">Total</td>
+							<?php foreach($results as $ExeLoad){	
+							  
+							?>
+							<td class="tbl_input_td"><input type="text"  class="txt_right clr_rd columnamt_amount_<?php echo $ExeLoad['UserId']; ?>" onKeyPress="return isDecimal(event)" value="<?php echo number_format((float)$total, 2, '.', '');?>" readonly /> </td>
+							<td class="tbl_input_td"><input type="text"  class="txt_right clr_rd columnunt_unit_<?php echo $ExeLoad['UserId']; ?>" onKeyPress="return isDecimal(event)"  value="<?php echo $tunit ?>" readonly /> </td>
+							<?php }?>
+							
+							<?php
+                        		 for($counter = 0;$counter<$iCount;$counter++){
+								$tot+=$Amt;
+							  $tunt+=$Unt;
+								}?>	
+							<td class="tbl_input_td"><input type="text" id="total_totamount" class="txt_right clr_rd" onKeyPress="return isDecimal(event)" value="<?php echo number_format((float)$tot, 2, '.', '');?>" readonly /> </td>
+							<td class="tbl_input_td"><input type="text" id="total_totunit"  class="txt_right clr_rd" onKeyPress="return isDecimal(event)" value="<?php echo $tunt ?>" readonly /> </td>
+								</tr>
+                        </tbody>
+                        </table>
+                	</div>
+					<script>
+                    //change in amount row and column wise calculation in table
+					function calculateAmountUnit(ele) {
+                        var strClass = $(ele).attr('class');
+                        var arr = strClass.split(' ');
+                        var arr1 = arr[1].split('_');
+                        var arr2 = arr[2].split('_');
+                        var colTot = 0;
+                        var rowTot = 0;
+                        $.each($("."+arr1[0]+"_"+arr1[1]), function() {
+                            colTot += parseFloatVal($(this).val());
+                        });
+                        $.each($("."+arr2[0]+"_"+arr2[1]), function() {
+                            rowTot += parseFloatVal($(this).val());
+                        });
+                        if(arr[3] == 'amount') {
+                            $("." + arr1[0] + "_" + arr[3] + "_" + arr1[1]).val(sanitizeNumber(colTot, 2));
+                            $("." + arr2[0] + "_" + arr[3] + "_" + arr2[1]).val(sanitizeNumber(rowTot, 2)).trigger('change');
+                            return;
+                        }
+                        $("." + arr1[0] + "_" + arr[3] + "_" + arr1[1]).val(colTot);
+                        $("." + arr2[0] + "_" + arr[3] + "_" + arr2[1]).val(rowTot).trigger('change');
+
+                    }
+
+                    //change in total amount and total unit calculation in table
+                    function calculateTotalAmtUnt(tot) {
+                        var strClass = $(tot).attr('class');
+                        var arr = strClass.split(' ');
+                        var colTot = 0;
+                        $.each($("." + arr[2]), function () {
+                            colTot += parseFloatVal($(this).val());
+                        });
+                        if(arr[2] == 'totamount') {
+                            $("#total_" + arr[2]).val(sanitizeNumber(colTot, 2));
+                            return;
+                        }
+                        $("#total_" + arr[2]).val(colTot);
+                    }
+
+                    $(".special").keypress(function (e) {
+                        var key = e.which || e.keyCode;
+                        if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+                                // numbers
+                            key >= 48 && key <= 57 ||
+                                // Numeric keypad
+                            key >= 96 && key <= 105 ||
+                                // Backspace and Tab and Enter
+                            key == 8 || key == 9 || key == 13 ||
+                                // Home and End
+                            key == 35 || key == 36 ||
+                                // left and right arrows
+                            key == 37 || key == 39 || (key == 190 &&  this.value.split('.').length === 1) ||
+                                // Del and Ins
+                            key == 46 || key == 45){
+                            return true;}
+                        else{
+                            return false;}
+
+                    });
+
+
+					</script>
+				

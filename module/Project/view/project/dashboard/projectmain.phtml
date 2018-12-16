@@ -1,0 +1,1191 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/jqx.bases.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/dark.js"></script>
+<!-----scheduler js end----->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Dashboard</h1>
+        <!--Short by-->
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="margin-bottom:10px; padding-right:0px !important;">
+            <label class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 control-label text-right">Select Project by</label>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="padding-right:0px !important;">
+                <select name="projectId" id="projectId" class="form-control multiple_dropdown lbl_move" onchange="return ChangeProject()" data-size="6" title="Select Project..." style="width:100%;">
+                    <option value="0" selected>All</option>
+                    <?php if(isset($projectlists)):?>
+                        <?php foreach ( $projectlists as $project ):?>
+                            <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                        <?php endforeach; ?>
+                    <?php  endif; ?>
+                </select>
+            </div>
+            <!--Short by end-->
+        </div>
+        <!--three feild start-->
+        <div class="col-md-3 col-sm-6">
+            <div class="panel panel1 rfc-primary">
+                <div class="panel-heading pnl-overflow" style="cursor:pointer;" data-toggle="modal" data-target="#running_projects">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="circle-icon"><i class="fa fa-rocket fa-5x"></i></div>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge"><?php echo (isset($projects)) ? $projects['count'] : '0';?></div>
+                            <div>Running Projects</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="panel panel1 panel-green">
+                <div class="panel-heading pnl-overflow" style="cursor:pointer;" data-toggle="modal" data-target="#running_projects">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="circle-icon circle-icon1"><i class="fa fa-line-chart fa-5x"></i> </div>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge"><?php echo (isset($projects)) ? $this->commonHelper()->sanitizeNumber($projects['ProjectCost'],true,true) : '0';?></div>
+                            <div>Budget Cost</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="panel panel1 panel-yellow">
+                <div class="panel-heading  pnl-overflow" style="cursor:pointer;" data-toggle="modal" data-target="#running_projects">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="circle-icon circle-icon2"><i class="fa fa-list-alt fa-5x"></i> </div>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge"><?php echo (isset($projects)) ? $this->commonHelper()->sanitizeNumber($projects['ProjectCompleted'],true,true) : '0';?></div>
+                            <div>Works Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="panel panel1 panel-red">
+                <div class="panel-heading pnl-overflow" style="cursor:pointer;" data-toggle="modal" data-target="#running_projects">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <div class="circle-icon circle-icon3"><i class="fa fa-hand-o-up fa-5x"></i> </div>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge"><?php echo (isset($projects)) ? $this->commonHelper()->sanitizeNumber( ($projects['ProjectCost'] - $projects['ProjectCompleted']) ,true,true) : '0';?></div>
+                            <div>Works on Hand</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--box start-->
+        </div>
+        <!--box start-->
+        <div class="clear clearfix"></div>
+        <div class="col-lg-12">
+            <header class="panel-heading">
+                <div class="col-md-1 col-xs-2"><span class="musicbar animate inline m-l-sm col-md-8" style="width:20px;height:20px"> <span class="bar1 a1 bg-primary lter"></span> <span class="bar2 a2 bg-info lt"></span> <span class="bar3 a3 bg-success"></span> <span class="bar4 a4 bg-warning dk"></span> <span class="bar5 a5 bg-danger dker"></span> </span></div>
+                Projects Status</header>
+            <div id="rfc-chart1" class="top_rfc"></div>
+        </div>
+        <!--chart5 complete-->
+        <div class="col-lg-12">
+            <div class="col-lg-4 col-sm-4">
+                <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+                    <div class="col-lg-8 col-xs-12 col-sm-8"> <span class="musicbar animate inline m-l-sm col-md-8 " style="width:20px;height:20px"> <span class="bar1 a1 bg-primary lter"></span> <span class="bar2 a2 bg-info lt"></span> <span class="bar3 a3 bg-success"></span> <span class="bar4 a4 bg-warning dk"></span> <span class="bar5 a5 bg-danger dker"></span> </span> &nbsp; &nbsp;Business Type</div>
+                </header>
+                <div id="rfc-chart5" class="top_rfc"></div>
+            </div>
+            <div class="col-lg-4 col-sm-4">
+                <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+                    <div class="col-lg-8 col-xs-12 col-sm-8"> <span class="musicbar animate inline m-l-sm col-md-8" style="width:20px;height:20px"> <span class="bar1 a1 bg-primary lter"></span> <span class="bar2 a2 bg-info lt"></span> <span class="bar3 a3 bg-success"></span> <span class="bar4 a4 bg-warning dk"></span> <span class="bar5 a5 bg-danger dker"></span> </span> &nbsp; &nbsp;Project Type</div>
+                </header>
+                <div id="rfc-chart2" class="top_rfc"></div>
+            </div>
+
+            <div class="col-lg-4 col-sm-4">
+                <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+                    <div class="col-lg-8 col-xs-12 col-sm-8"> <span class="musicbar animate inline m-l-sm col-md-8 " style="width:20px;height:20px"> <span class="bar1 a1 bg-primary lter"></span> <span class="bar2 a2 bg-info lt"></span> <span class="bar3 a3 bg-success"></span> <span class="bar4 a4 bg-warning dk"></span> <span class="bar5 a5 bg-danger dker"></span> </span> &nbsp; &nbsp;City</div>
+                </header>
+                <div id="rfc-chart3" class="top_rfc"></div>
+            </div>
+        </div>
+        <div class="clear"></div>
+        <div class="col-lg-12">
+            <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+                <div class="col-lg-10 col-xs-12 col-sm-10"> <span class="musicbar animate inline m-l-sm col-md-8" style="width:20px;height:20px"> <span class="bar1 a1 bg-primary lter"></span> <span class="bar2 a2 bg-info lt"></span> <span class="bar3 a3 bg-success"></span> <span class="bar4 a4 bg-warning dk"></span> <span class="bar5 a5 bg-danger dker"></span> </span> &nbsp; &nbsp;Monthly Status</div>
+                <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0" style="padding-right:0px !important;">
+                    <select name="year" id="year" class="form-control selectpicker show-tick" data-size="6" onchange="changeYear()" title="Select Year">
+                        <?php foreach ($yearlists as $ytrans):?>
+                            <option value="<?php echo $ytrans['Year'];?>"><?php echo $ytrans['Year'];?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </header>
+            <div class="col-lg-8 col-sm-8">
+                <div class="panel-body" style="padding: 12px !important;">
+                    <div id="rfc-chart4" class="top_rfc"></div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4">
+                <div class="panel-body" style="padding: 12px !important;">
+                    <div id="rfc-chart6" class="top_rfc"></div>
+                </div>
+                <div class="panel-body" style="padding: 12px !important;">
+                    <div id="rfc-chart7" class="top_rfc"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="running_projects" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="myModalLabel">Running Projects</h1>
+            </div>
+            <div class="modal-body modal_body_min_h200 animated zoomInUp">
+                <div class="col-lg-12">
+                    <div class="table-responsive clear">
+                        <div id="rProjectGrid"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" data-dismiss="modal" class="ripple">Continue</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" data-dismiss="modal" class="ripple">back</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var arrrunningprojects = <?php echo (isset($running_projects)) ? json_encode($running_projects) : '[]';?>;
+var arrStatus= [];
+var arrStatusTotal= [];
+
+$(function () {
+    populateChart1();
+    populateChart2();
+    populateChart3();
+    populateChart5();
+//    populateChart4();
+    changeYear();
+//    populateChart6();
+//    populateChart7();
+    populateRunningProjects();
+});
+
+function changeYear() {
+    var iYear = $('#year').val();
+    arrStatus= [];
+    arrStatusTotal= [];
+    $.ajax({
+        url: getBaseURL() + "project/dashboard/projectmain",
+        type: 'post',
+        async: false,
+        data: {'Type': 'getyeardata','Year': iYear},
+        success: function (data,status, xhr) {
+            if(xhr.status == 200) {
+                var obj = JSON.parse(data);
+                arrStatus= obj['Status'];
+                arrStatusTotal= obj['Total'];
+            }
+        }
+    });
+    populateChart4();
+    populateChart6();
+    populateChart7();
+}
+
+function ChangeProject() {
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    window.location.href = getBaseURL() + "project/dashboard/projectdashboard/" + iProjectId;
+}
+
+function populateChart1() {
+    var chart = AmCharts.makeChart("rfc-chart1", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": <?php echo (isset($projects_status)) ? json_encode($projects_status) : '[]';?>,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+//                "labelFunction": function(value) {
+//                    return + Math.round(value) ;
+//                }
+        },
+            {
+                "unit":"%",
+                "id": "v2",
+                "position": "right",
+                "autoGridCount": false,
+                "title": "% of Completion"
+            }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Budget Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Budget Cost",
+            "type": "column",
+            "valueField": "ProjectCost"
+        }, {
+            "id": "g4",
+            "valueAxis": "v1",
+            "balloonText": "Project Completed : <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "lineColor": "#228B22",
+            "fillColors": "#228B22",
+            "title": "Work Done Cost",
+            "type": "column",
+            "clustered":false,
+            "columnWidth":0.5,
+            "valueField": "ProjectCompleted"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#4B0082",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Schedule %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "SchPer",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Schedule Completion :<b style='font-size: 130%'>"+val+"</b>%";
+                }
+            },
+            {
+                "id": "g2",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#FF0000",
+                "type": "smoothedLine",
+                "title": "Completion %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "CompPer",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Actual Completion :<b style='font-size: 130%'>"+val+"</b>%";
+                }
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "ProjectName",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function populateChart2() {
+    var chart = AmCharts.makeChart( "rfc-chart2", {
+        "type": "pie",
+        "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+        "theme": "light",
+        "dataProvider": <?php echo (isset($projects_type_wise)) ? json_encode($projects_type_wise) : '[]';?>,
+        "valueField": "count",
+        "titleField": "ProjectTypeName",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:10px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateChart3() {
+    var chart = AmCharts.makeChart( "rfc-chart3", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": <?php echo (isset($projects_city_wise)) ? json_encode($projects_city_wise) : '[]';?>,
+        "valueField": "count",
+        "titleField": "CityName",
+        "startEffect": "elastic",
+        "startDuration": 2,
+        "labelRadius": 15,
+        "radius": "30%",
+        "innerRadius": "60%",
+        "depth3D": 10,
+        "balloonText": "[[title]]<br><span style='font-size:10x'><b>[[value]]</b> ([[percents]]%)</span>",
+        "angle": 15,
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateChart5() {
+    var chart = AmCharts.makeChart( "rfc-chart5", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": <?php echo (isset($projects_business_wise )) ? json_encode($projects_business_wise ) : '[]';?>,
+        "valueField": "count",
+        "titleField": "BusinessTypeName",
+        "startEffect": "elastic",
+        "startDuration": 2,
+        "labelRadius": 15,
+        "radius": "30%",
+        "innerRadius": "60%",
+        "depth3D": 10,
+        "balloonText": "[[title]]<br><span style='font-size:10px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "angle": 15,
+        "export": {
+            "enabled": true
+        }
+    });
+}
+
+function populateChart4() {
+
+    var chart = AmCharts.makeChart("rfc-chart4", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": arrStatus,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }
+        ],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FF1493",
+            "fillColors": "#FF1493",
+            "balloonText": "Budget Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Scheduled",
+            "type": "column",
+            "valueField": "SchAmt"
+        }, {
+            "id": "g4",
+            "valueAxis": "v1",
+            "balloonText": "Project Completed : <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "lineColor": "#808000",
+            "fillColors": "#808000",
+            "title": "Work Done",
+            "type": "column",
+            "valueField": "WorkDone"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v1",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#008B8B",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Receivable",
+                "useLineColorForBulletBorder": true,
+                "valueField": "BillAmount",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0,true);
+                    return "Receivable :<b>"+val+"</b>";
+                }
+            },
+            {
+                "id": "g2",
+                "valueAxis": "v1",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#000080",
+                "type": "smoothedLine",
+                "title": "Received",
+                "useLineColorForBulletBorder": true,
+                "valueField": "Receipt",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0,true);
+                    return "Received :<b>"+val+"</b>";
+                }
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "PDate",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function populateChart6() {
+
+    var dschAmt = 0,dWorkDone = 0,dv1= 0, dv2=0;
+    if (arrStatusTotal.length >0) {
+        dschAmt = arrStatusTotal.SchAmt;
+        dWorkDone = arrStatusTotal.WorkDone;
+        if (dschAmt != 0) dv1 = (dWorkDone / dschAmt) * 100;
+        dv2 = 100 - dv1;
+    }
+
+    var chartData = [ {
+        "category": "Work Status",
+        "value1": dv1,
+        "value2": dv2
+    } ];
+
+    var chart = AmCharts.makeChart("rfc-chart6", {
+        "theme": "light",
+        "type": "serial",
+        "depth3D": 100,
+        "angle": 15,
+        "dataProvider": chartData,
+        "valueAxes": [{
+            "stackType": "100%",
+            "gridAlpha": 0
+        }
+        ],
+        "graphs": [{
+            "type": "column",
+            "topRadius": 1,
+            "columnWidth": 1,
+            "showOnAxis": true,
+            "lineThickness": 2,
+            "lineAlpha": 0.5,
+            "lineColor": "#FFFFFF",
+            "fillColors": "#FF4500",
+//            "fillColors": "#228B22",
+            "fillAlphas": 0.8,
+            "valueField": "value1",
+            "balloonText": "Work Completed:<br><span style='font-size:10px'><b>([[value]]%)</span>",
+            "labelText":"[[value]]%",
+            "labelPosition":"middle"
+        }, {
+            "type": "column",
+            "topRadius": 1,
+            "columnWidth": 1,
+            "showOnAxis": true,
+            "lineThickness": 2,
+            "lineAlpha": 0.5,
+            "lineColor": "#cdcdcd",
+            "fillColors": "#cdcdcd",
+            "fillAlphas": 0.5,
+            "valueField": "value2"
+        }],
+        "categoryField": "category",
+        "categoryAxis": {
+            "axisAlpha": 0,
+//            "labelOffset": 40,
+            "gridAlpha": 0
+        },
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateChart7() {
+    var dschAmt = 0,dWorkDone = 0,dv1= 0, dv2=0;
+
+    if (arrStatusTotal.length >0) {
+        dBillAmt = arrStatusTotal.BillAmount;
+        dReceipt = arrStatusTotal.Receipt;
+        if (dBillAmt != 0) dv1 = (dReceipt / dBillAmt) * 100;
+        dv2 = 100 - dv1;
+    }
+
+    var chartData = [{
+        "category": "Receipt",
+        "value1": dv1,
+        "value2": dv2
+    }];
+
+    var chart = AmCharts.makeChart("rfc-chart7", {
+        "theme": "light",
+        "type": "serial",
+        "depth3D": 100,
+        "angle": 15,
+        "dataProvider": chartData,
+        "valueAxes": [{
+            "stackType": "100%",
+            "gridAlpha": 0
+        }
+        ],
+        "graphs": [{
+            "type": "column",
+            "topRadius": 1,
+            "columnWidth": 1,
+            "showOnAxis": true,
+            "lineThickness": 2,
+            "lineAlpha": 0.5,
+            "lineColor": "#FFFFFF",
+//            "fillColors": "#8d003b",
+            "fillColors": "#8d003b",
+            "fillAlphas": 0.8,
+            "valueField": "value1",
+            "balloonText": "Receipt:<br><span style='font-size:10px'><b>([[value]]%)</span>",
+            "labelText": "[[value]]%",
+            "labelPosition": "middle"
+        }, {
+            "type": "column",
+            "topRadius": 1,
+            "columnWidth": 1,
+            "showOnAxis": true,
+            "lineThickness": 2,
+            "lineAlpha": 0.5,
+            "lineColor": "#cdcdcd",
+            "fillColors": "#cdcdcd",
+            "fillAlphas": 0.5,
+            "valueField": "value2"
+        }],
+        "categoryField": "category",
+        "categoryAxis": {
+            "axisAlpha": 0,
+//            "labelOffset": 40,
+            "gridAlpha": 0
+        },
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateRunningProjects() {
+    var $rProjectGrid = $("#rProjectGrid");
+    var rfcsource =
+    {
+        dataType: "json",
+        dataFields: [
+            { name: 'ProjectName', type: 'string' },
+            { name: 'ProjectCost', type: 'number'},
+            { name: 'ProjectCompleted', type: 'number' },
+            { name: 'WorksHand', type: 'number' }
+        ],
+        id: 'ProjectId',
+        localdata: arrrunningprojects
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+
+    $rProjectGrid.jqxGrid({
+        width: '100%',
+        theme: 'bootstrap',
+        pagerButtonsCount: 6,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable:true,
+        altrows: true,
+        enabletooltips: true,
+        autoheight: true,
+        editable: false,
+        showstatusbar: true,
+//            statusbarheight: 50,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            { text: 'ProjectId', datafield: 'ProjectId', hidden: true},
+            { text: 'ProjectName', datafield: 'ProjectName', width: '40%',
+                aggregates: ['count'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:16px;padding:5px;font-weight:bold; overflow: hidden;">'+ value + ' Projects' +'</div>';
+                    });
+                    return renderstring;
+                }  },
+            { text: 'Budget Cost', dataField: 'ProjectCost',width:'20%', cellsalign: 'right',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($rProjectGrid.jqxGrid('getCellValue', row, 'ProjectCost'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:16px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            { text: 'Works Completed', dataField: 'ProjectCompleted',width:'20%', cellsalign: 'right',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($rProjectGrid.jqxGrid('getCellValue', row, 'ProjectCompleted'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:16px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            { text: 'Works on Hand', dataField: 'WorksHand',width:'20%', cellsalign: 'right',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($rProjectGrid.jqxGrid('getCellValue', row, 'WorksHand'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:16px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+        ]
+    });
+}
+</script>
+<!--<script type="text/javascript">-->
+<!--    var $treeGrid = $("#treeGrid");-->
+<!--    $(function () {-->
+<!--        var source = {-->
+<!--            async: false,-->
+<!--            dataType: "json",-->
+<!--            dataFields: [-->
+<!--                { name: 'ResourceGroupId'},-->
+<!--                { name: 'ParentId'},-->
+<!--                { name: 'ResourceGroupName'},-->
+<!--                { name: 'TypeName'},-->
+<!--                { name: 'LastLevel'},-->
+<!--                { name: 'Code'}-->
+<!--            ],-->
+<!--            hierarchy:-->
+<!--            {-->
+<!--                keyDataField: { name: 'ResourceGroupId' },-->
+<!--                parentDataField: { name: 'ParentId' }-->
+<!--            },-->
+<!--            id: 'ResourceGroupId',-->
+<!--            url: getBaseURL() + "project/main/getresourcegroup"-->
+<!--        };-->
+<!---->
+<!---->
+<!--        var cellsRenderer = function (row, column, value, rowData)-->
+<!--        {-->
+<!--            if (rowData.records !== undefined)-->
+<!--            {-->
+<!--                return '<span style="font-weight: bold;">' + value + '</span>';-->
+<!--            } else-->
+<!--            {-->
+<!--                return '<span>' + value + '</span>';-->
+<!--            }-->
+<!--        };-->
+<!---->
+<!--        var dataAdapter = new $.jqx.dataAdapter(source);-->
+<!---->
+<!--        $treeGrid.jqxTreeGrid({-->
+<!--            width: "100%",-->
+<!--            source: dataAdapter,-->
+<!--            height:"400",-->
+<!--            filterable: true,-->
+<!--            sortable: true,-->
+<!--            pageable:true,-->
+<!--//        rowDetails: true,-->
+<!--//        rowDetailsRenderer: function (rowKey, row) {-->
+<!--//            if(row.LastLevel == 0)-->
+<!--//                return '';-->
+<!--//-->
+<!--//            return renderRowDetail(row.ResourceGroupId);-->
+<!--//        },-->
+<!--            columns: [-->
+<!--                { text: 'Code', dataField: 'Code', cellsRenderer: cellsRenderer,width:'20%' },-->
+<!--                { text: 'Resource Group', dataField: 'ResourceGroupName',cellsRenderer: cellsRenderer,width:'50%' },-->
+<!--                { text: 'Type', dataField: 'TypeName',cellsRenderer: cellsRenderer,width:'20%' },-->
+<!--                { text: 'Action', sortable: false, filterable: false, width:'10%', align: 'left',-->
+<!--                    cellsrenderer: function (row) {-->
+<!--                        var ResourceGroupId = $treeGrid.jqxTreeGrid('getCellValue', row, 'ResourceGroupId'),-->
+<!--                            parentId = $treeGrid.jqxTreeGrid('getCellValue', row, 'ParentId'),-->
+<!--                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'project/rfc/rfcresourcegroup/0/edit/'+ResourceGroupId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';-->
+<!---->
+<!--                        if ($treeGrid.jqxTreeGrid('getRow', row).leaf != true)-->
+<!--                            return editLink;-->
+<!---->
+<!--                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: checkRFCDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';-->
+<!--                    }-->
+<!--                }-->
+<!--            ]-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
+<!---------------Dashboard style --------------->
+<style>
+#rfc-chart1, #rfc-chart4 {width:100%;height:400px;font-size:11px;overflow:hidden!important;}
+#rfc-chart2, #rfc-chart3,#rfc-chart5 {width:100%;height:200px;font-size:10px;overflow:hidden!important;}
+#rfc-chart6, #rfc-chart7 {width:100%;height:180px;font-size:8px;overflow:hidden!important;}
+.top_rfc		 				{background:#fff;padding:5px 0;margin-bottom:20px; border:1px solid #BFDBDE;}
+.rfc-primary 					{border-bottom:2px solid #337ab7 !important;}
+.panel1:hover::before, .panel1:focus::before, .panel1:active::before {left:0;right:0;}
+.panel1::before 				{background:#2098d1 none repeat scroll 0 0;content: "";height:2px;left:50%;position:absolute;right:50%;top:0;transition-duration:0.3s;transition-property:left, right;transition-timing-function: ease-out;z-index: -1;}
+.panel1 						{backface-visibility:hidden;box-shadow:0 0 1px rgba(0, 0, 0, 0);display:inline-block;overflow:hidden;position:relative;transform: translateZ(0px);vertical-align: middle;}
+.panel 							{background-color:#fff;	border:1px solid #e8e8e8;border-radius:4px;box-shadow:0 1px 1px rgba(0, 0, 0, 0.05);margin:20px 0 30px 0;box-shadow:1px 1px 0 0 rgba(50, 50, 50, 0.23);width:100%;}
+.rfc-primary > .panel-heading 	{border-bottom:2px solid #337ab7;background:none;color:#000 !important;}
+.panel-green 					{border-bottom:2px solid #5cb85c;}
+.panel-red 						{border-bottom:2px solid #d9534f;}
+.rfc-primary > .panel-heading 	{color:#fff;}
+.huge 							{font-size:25px;color:#000;}
+.text-right 					{font-size:15px;color:#666;font-family:"Open Sans", sans-serif;}
+.panel-yellow 					{border-bottom:2px solid #f0ad4e;}
+.panel1 > .panel-heading 		{background:none;border:none}
+.panel-heading 					{color:#266AA8;font-weight:400;font-size:18px;padding:10px 15px;background:#FBF8E9;transition: margin 0.5s ease-out 0s; border-bottom:1px solid #337ab7; border-radius:5px 5px 0px 0px !important;}
+.fa-5x 							{color:#fff;font-size:28px;line-height:61px;margin-left:13px;overflow:hidden;transition:all 0.3s ease 0s;}
+.fa-5x:hover				    {-moz-transform: scale(1.7);-webkit-transform: scale(1.7);transform: scale(1.7);}
+/*--
+icon-animation--*/
+
+.musicbar 						{position:relative;}
+.inline 						{display:inline-block !important;}
+.animate .a1 					{animation: 1s ease 0s alternate both infinite running movingbar1;}
+.bg-primary.lter, .bg-primary .lter {background-color:#797fb4;}
+.musicbar span 					{bottom:0;position:absolute;text-indent:-9999px;width:15%;}
+.bar1 							{height:60%;left:0;}
+.animate .a2 					{animation: 1.5s ease 0s alternate both infinite running movingbar2;}
+.bg-info.lt, .bg-info .lt 		{background-color:#62bcce;}
+.musicbar span 					{bottom:0;position:absolute;text-indent:-9999px;width:15%;}
+.bar2 							{height:45%;left:20%;}
+.animate .a3 					{animation: 1.2s ease 0s alternate both infinite running movingbar3;}
+.musicbar span					{bottom:0;position:absolute;text-indent:-9999px;width:15%;}
+.bar3 							{height:90%;left:40%;}
+.bg-success 					{background-color:#1ab667;color:#a9f3ce;}
+.animate .a4 					{animation:1.1s ease 0s alternate both infinite running movingbar4;}
+.bg-warning.dk, .bg-warning .dk {background-color:#fcd417;}
+.musicbar span 					{bottom:0;position:absolute;text-indent:-9999px;width:15%;}
+.bar4							{height:60%;left:60%;}
+.bg-warning 					{background-color:#fad733;color:#fffefa;}
+.animate .a5 					{animation: 1.2s ease 0s alternate both infinite running movingbar5;}
+.bg-danger.dker, .bg-danger .dker {background-color:#f21b1b;}
+.musicbar span 					{bottom: 0;position:absolute;text-indent:-9999px;width:15%;}
+.bar5 							{height:40%;left:80%;}
+
+@-webkit-keyframes movingbar1 {
+    0% {
+        height:32%;
+    }
+    25% {
+        height:80%;
+    }
+    50% {
+        height:56%;
+    }
+    75% {
+        height:100%;
+    }
+    100% {
+        height:84%;
+    }
+}
+@-moz-keyframes movingbar1 {
+    0% {
+        height:32%;
+    }
+    25% {
+        height:80%;
+    }
+    50% {
+        height:56%;
+    }
+    75% {
+        height:100%;
+    }
+    100% {
+        height:84%;
+    }
+}
+@keyframes movingbar1 {
+    0% {
+        height:32%;
+    }
+    25% {
+        height:80%;
+    }
+    50% {
+        height:56%;
+    }
+    75% {
+        height:100%;
+    }
+    100% {
+        height:84%;
+    }
+}
+@-webkit-keyframes movingbar2 {
+    0% {
+        height:20%;
+    }
+    25% {
+        height:58%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:74%;
+    }
+    100% {
+        height:53%;
+    }
+}
+@-moz-keyframes movingbar2 {
+    0% {
+        height:20%;
+    }
+    25% {
+        height:58%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:74%;
+    }
+    100% {
+        height:53%;
+    }
+}
+@keyframes movingbar2 {
+    0% {
+        height:20%;
+    }
+    25% {
+        height:58%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:74%;
+    }
+    100% {
+        height:53%;
+    }
+}
+@-webkit-keyframes movingbar3 {
+    0% {
+        height:34%;
+    }
+    25% {
+        height:69%;
+    }
+    50% {
+        height:100%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:41%;
+    }
+}
+@-moz-keyframes movingbar3 {
+    0% {
+        height:34%;
+    }
+    25% {
+        height:69%;
+    }
+    50% {
+        height:100%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:41%;
+    }
+}
+@keyframes movingbar3 {
+    0% {
+        height:34%;
+    }
+    25% {
+        height:69%;
+    }
+    50% {
+        height:100%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:41%;
+    }
+}
+@-webkit-keyframes movingbar4 {
+    0% {
+        height:80%;
+    }
+    25% {
+        height:49%;
+    }
+    50% {
+        height:59%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:65%;
+    }
+}
+@-moz-keyframes movingbar4 {
+    0% {
+        height:80%;
+    }
+    25% {
+        height:49%;
+    }
+    50% {
+        height:59%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:65%;
+    }
+}
+@keyframes movingbar4 {
+    0% {
+        height:80%;
+    }
+    25% {
+        height:49%;
+    }
+    50% {
+        height:59%;
+    }
+    75% {
+        height:82%;
+    }
+    100% {
+        height:65%;
+    }
+}
+@-webkit-keyframes movingbar5 {
+    0% {
+        height:50%;
+    }
+    25% {
+        height:30%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:50%;
+    }
+    100% {
+        height:65%;
+    }
+}
+@-moz-keyframes movingbar5 {
+    0% {
+        height:50%;
+    }
+    25% {
+        height:30%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:50%;
+    }
+    100% {
+        height:65%;
+    }
+}
+@keyframes movingbar5 {
+    0% {
+        height:50%;
+    }
+    25% {
+        height:30%;
+    }
+    50% {
+        height:90%;
+    }
+    75% {
+        height:50%;
+    }
+    100% {
+        height:65%;
+    }
+}
+/*--icon animation end--*/
+
+
+/*--three circle css end--*/
+.table-bordered 													 {border:1px solid #ddd;}
+.table-bordered > thead > tr > th, .table-bordered > thead > tr > td {border-bottom-width:2px;}
+.table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {border: 1px solid #ddd;}
+/*--table css end--*/
+.marquee-txt.up p 													 {transform:translateY(100%);-moz-transform:translateY(100%);-webkit-transform:translateY(100%);}
+.marquee-txt.up p:nth-child(1) 										 {animation: up-one 20s ease infinite;-moz-animation: up-one 20s ease infinite;-webkit-animation: up-one 20s ease infinite;}
+.marquee-txt.up p:nth-child(2) 										 {animation: up-two 20s ease infinite;-moz-animation: up-two 20s ease infinite;-webkit-animation: up-two 20s ease infinite;}
+/*================================
+	Move the Marquee Upwards
+==================================*/
+
+/** Mozilla Firefox Keyframes **/
+@-moz-keyframes up-one {
+    0% {
+        -moz-transform:translateY(100%);
+    }
+    10% {
+        -moz-transform:translateY(0);
+    }
+    40% {
+        -moz-transform:translateY(0);
+    }
+    50% {
+        -moz-transform:translateY(-100%);
+    }
+    100% {
+        -moz-transform:translateY(-100%);
+    }
+}
+@-moz-keyframes up-two {
+    0% {
+        -moz-transform:translateY(100%);
+    }
+    50% {
+        -moz-transform:translateY(100%);
+    }
+    60% {
+        -moz-transform:translateY(0);
+    }
+    90% {
+        -moz-transform:translateY(0);
+    }
+    100% {
+        -moz-transform:translateY(-100%);
+    }
+}
+
+.marquee-txt 															{height:60px;margin-bottom:10px;overflow:hidden;position:relative;border:1px solid #dcdbd9;background-color:#ededed;-webkit-border-radius: 5px;	border-radius:5px;	-webkit-transition: background-color 350ms;	-moz-transition: background-color 350ms;transition: background-color 350ms;}
+.marquee-txt p														    {position:absolute;	font-family: Tahoma, Arial, sans-serif;	width:100%;	height:100%;margin:0;line-height:50px;text-align:center;color:#ff0000;filter:dropshadow(color=#000000, offx=1, offy=1);	transform:translateX(100%); -moz-transform:translateX(100%);-webkit-transform:translateX(100%);}
+.circle-icon 															{width:55px;height:55px;border-radius:100%;background:#337ab7}
+.circle-icon1 															{background:#5cb85c}
+.circle-icon2 															{background:#f0ad4e}
+.circle-icon3 															{background:#d9534f}
+/*-----message list--*/
+.message-list 															{list-style-type: none;margin: 0;padding: 0;}
+.flat-blue a 															{color:#363c46;}
+.message-list > li 														{border-bottom:1px dotted #eee;padding:10px;}
+.message-list > li .profile-img 										{height:60px;width:60px;border:2px solid rgba(0, 112, 255, 0.4);border-radius:50%;}
+.message-list > li .profile-img:hover								    {border: 2px solid rgba(0, 112, 255, 0.9);}
+.pull-left 																{float:left;}
+.message-list > li > .message-block 									{min-height:60px;padding-left:70px;}
+.message-list > li > .message-block .username 							{font-size:12px;font-weight:bold;color:#333;}
+.message-list > li > .message-block .message-datetime 					{color:#aaa;font-size:10px;}
+.message-list > li > .message-block .message 							{font-size:12px;color:#333;}
+/*datepicker*/
+.ui-datepicker-calendar 												{display:none;}
+.month_year 															{border:1px solid #dbdbdb !important;}
+/*project info*/
+.project-img 															{padding:0 27px 0 0;position:relative;height:400px;overflow:hidden;margin-left:-9px}
+.project-info 															{background:rgba(255, 255, 255, 0.7);z-index:1;position:absolute;top:98px;height:320px;border:1px solid #dbdbdb;box-shadow: 1px 0px 0px rba(0, 0, 0, 0.2);overflow:auto}
+.creat-icon 															{width:40px;height:40px;border-top-right-radius:2em;border-bottom-right-radius:2em;background:#e3edf1 none repeat scroll 0 0;border:2px solid #93cee5;float:left}
+.rfc_regs ul li a 														{width:85%}
+/*list news*/
+.top_rfc1-1 															{height:400px;overflow:hidden;}
+@media screen and (min-width : 768px) and (max-width : 1026px) {
+    .circle-icon 															{height:55px;margin-top:15px;width:55px;}
+    .fa-5x 																	{color:#fff;font-size:23px;line-height:56px;margin-left:16px;}
+    .panel 																	{margin:10px 0}
+    .carousel-indicators 													{bottom:-31px;}
+    .panel-heading 															{font-size:15px}
+    .rfc_regs ul li a 														{width:80%;}
+    .project-info 															{top:80px}
+}
+@media only screen and (min-width : 320px) and (max-width : 767px) {
+    .rfc_regs ul li a 														{width:80%;}
+    .panel-heading 															{height:auto !important}
+    .project-info 															{top:108px;}
+    .circle-icon 															{height:55px;margin-top:15px;width:55px;}
+    .fa-5x 																	{color:#fff;font-size:23px;line-height:56px;margin-left:16px;}
+    .panel 																	{margin:10px 0px;}
+    .huge 																	{font-size:34px}
+}
+</style>
+<!---------------Dashboard style end--------------->

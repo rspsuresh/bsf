@@ -1,0 +1,614 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<style>
+.form-group1{margin-bottom:8px;}
+.form-group1 label{font-size:14px !important; padding-bottom:5px}
+.form-group1.lbl_move{height:38px !important}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 id="titleTag" class="text-center">Security Deposit</h1>
+            </div>
+            <form method="post" id="formWrapper">
+                <div id="stageOne" class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                    <div class="col-lg-4 col-lg-offset-8 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8">
+                        <div class="form-group col-lg-8 col-lg-offset-4">
+                            <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="sdeDate" id="sdeDate" class="date_picker parnt-text" value="<?php echo date("d-m-Y"); ?>" readonly />
+                            <input type="hidden" id="secDepId" name="secDepId" value="<?php echo $secDepId; ?>" />
+                            <input type="hidden" id="sdType" name="sdType" value="<?php if($sdType != '') { echo $sdType; } else { echo 'N'; } ?>" />
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active">
+                                <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <!--<h5 class="select-title">Select type?</h5>-->
+                                        <select class="form-control single_dropdown lbl_move" label="Select Type" style="width:100%;" name="type" id="type">
+                                            <option value=""></option>
+                                            <option value="N" <?php if(isset($sdRegister) && $sdRegister['Status']=='N') { ?>selected<?php } ?>>New Deposit</option>
+                                            <option value="E" <?php if(isset($sdRegister) && $sdRegister['Status']=='E') { ?>selected<?php } ?>>Renewal/Extend</option>
+                                            <option value="R" <?php if(isset($sdRegister) && $sdRegister['Status']=='R') { ?>selected<?php } ?>>Return/Refund</option>
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <!--<h5 class="select-title">Select type?</h5>-->
+                                        <select class="form-control single_dropdown lbl_move" label="Select Order Type" style="width:100%;" name="orderType" id="orderType">
+                                            <option value=""></option>
+                                            <option value="W" >Work</option>
+                                            <option value="H" >Hire</option>
+                                            <option value="S" >Service</option>
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id='cost' class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group depHide">
+                                            <input type="text" class="form-control lbl_move" label="Select Cost Centre" value="<?php if(isset($arRegister) && trim($arRegister['CostCentreId']) != '') { echo $arRegister['CostCentreId']; } else { echo ''; } ?>" name="costCentreName" id="costCentreName" />
+                                            <input type="hidden"  value="" name="costCentreId" id="costCentreId" />
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id='vend' class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group depHide" >
+                                            <input type="text" class="form-control lbl_move" label="Select Contractor" value="<?php if(isset($arRegister) && trim($arRegister['VendorId']) != '') { echo $arRegister['VendorId']; } else { echo ''; } ?>" name="vendorName" id="vendorName" />
+                                            <input type="hidden"  value="" name="vendorId" id="vendorId" />
+                                            <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id="selOrdDiv" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group depHide" style="display: none;">
+                                        <select class="form-control single_dropdown lbl_move" label="Select Order No" style="width:100%;" name="eOrderNo" id="eOrderNo">
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id="depos" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group depHide" style="display: none;">
+                                        <select class="form-control single_dropdown lbl_move" label="Select Deposit No" style="width:100%;" name="depNo" id="depNo">
+                                            <option value=""></option>
+                                            <?php foreach($depositSelect as $occ) { ?>
+                                                <option value="<?php echo $occ['SDRegisterId']; ?>"><?php echo $occ['RefNo']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5 col-md-7 col-md-offset-5 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-3">
+                                <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next <span><i class="fa fa-arrow-right"></i></span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="stageTwo" style="display:none;">
+                    <div class="col-lg-12">
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Cost Centre</label>
+                                        <span class="hprojName"><?php if(isset($sdRegister) && $sdRegister['CostCentreName'] != '') { echo $sdRegister['CostCentreName']; } else { echo ''; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Contractor</label>
+                                        <span class="hconName"><?php if(isset($sdRegister) && $sdRegister['VendorName'] != '') { echo $sdRegister['VendorName']; } else { echo ''; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Order Type</label>
+                                        <span class="sdOrderType"><?php if(isset($sdRegister) && $sdRegister['VendorName'] != '') { echo $sdRegister['VendorName']; } else { echo ''; } ?></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box2th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Trans Date</label>
+                                        <span><input type="text" id="sdDate" name="sdDate" class="date_picker" value="<?php if(isset($sdRegister) && ($sdRegister['TransDate'] != NULL)) { echo date("d-m-Y", strtotime($sdRegister['TransDate'])); } else { echo date("d-m-Y"); } ?>" <?php if($sdType == 'E' || $sdType == 'R') { ?>disabled<?php } ?> readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref Date</label>
+                                        <span><input type="text" id="refDate" name="refDate" class="date_picker" value="<?php if(isset($sdRegister) && ($sdRegister['RefDate'] != NULL)) { echo date("d-m-Y", strtotime($sdRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box3th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Trans No</label>
+                                        <span><input type="text" id="sdNo" name="sdNo" value="<?php if(isset($sdRegister) && $sdRegister['TransNo'] != '') { echo $sdRegister['TransNo']; } else { echo ($genType) ? $sdNo : ''; } ?>" <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?> /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref No</label>
+                                        <span><input type="text" id="refNo" name="refNo" value="<?php if(isset($sdRegister) && $sdRegister['RefNo'] != '') { echo $sdRegister['RefNo']; } else { echo ($genType) ? $sdNo : ''; }  ?>"  <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?> /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slic">
+                        <ul>
+                            <li class="face"><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-12 col-sm-12 col-xs-12 padtop20" style="background:#E9ECF0;border:1px solid #ddd">
+                                <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									<label>Order No</label>
+                                        <select id="orderNo" name="orderNo" class="single_dropdown lbl_move"  style="width:100%; height:50px;" <?php if(isset($sdRegister)) { echo 'disabled'; }?> >
+                                            <?php if(isset($arr_orderNo)){
+                                                foreach($arr_orderNo as $arr_order){?>
+                                                    <option value="<?php echo $arr_order['data']; ?>" <?php if($arr_order['data']==$sdRegister['OrderId']) { ?>selected<?php } ?>><?php echo $arr_order['value']; ?></option>
+                                            <?php }} ?>
+                                        </select>
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                 <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									<label>Order Amount</label>
+                                        <input type="text" id="amount" name="amount" class="lbl_move" value="<?php if(isset($sdRegister) && $sdRegister['Amount'] != '') {echo $this->commonHelper()->sanitizeNumber($sdRegister['Amount'],2);} else { echo ''; } ?>" onkeypress="return isDecimal(event,this);" <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?> />
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									<label>SD Amount</label>
+                                        <input type="text" id="sdAmt" name="sdAmt" class="lbl_move"  value="<?php if(isset($sdRegister) && $sdRegister['SDAmount'] != '') { echo $this->commonHelper()->sanitizeNumber($sdRegister['SDAmount'],2); } else { echo ''; } ?>" onblur="return checkAmt($(this).val()),FormatNum(this, 2)" onkeypress="return isDecimal(event,this);" <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?> />
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                 <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									 <label>Mode of Payment</label>
+                                        <select id="payMode" name="payMode" class="single_dropdown lbl_move" style="width:100%; height:50px;" <?php if($sdType == 'E' || $sdType == 'R') { ?>disabled<?php } ?>>
+                                            <option value=""></option>
+                                            <?php foreach($paymentMode as $pm) { ?>
+                                                <option value="<?php echo $pm['TransId']; ?>" <?php if(isset($sdRegister) && $sdRegister['PayModeId']==$pm['TransId']) { ?>selected<?php } ?>><?php echo $pm['PaymentMode']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+									<div class="col-md-12 col-sm-12" style="padding:0 !important">
+                                 <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									 <label>From Date</label>
+                                        <input type="text" id="fromDate" name="fromDate" class="lbl_move date_picker"value="<?php if(isset($sdRegister) && ($sdRegister['FromDate'] != NULL)) { echo date("d-m-Y", strtotime($sdRegister['FromDate'])); } else { echo date("d-m-Y"); } ?>" <?php if($sdType == 'E' || $sdType == 'R') { ?>disabled<?php } ?> readonly />
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                 <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									<label>To Date</label>
+                                        <input type="text" id="toDate" name="toDate" class="lbl_move date_picker" value="<?php if(isset($sdRegister) && ($sdRegister['ToDate'] != NULL)) { echo date("d-m-Y", strtotime($sdRegister['ToDate'])); } else { echo date("d-m-Y"); } ?>" <?php if($sdType == 'R') { ?>disabled<?php } ?> readonly />
+                                        <div class="error_message"></div>
+                                    </div>
+									</div>
+                                 <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									 <label>Bank Name</label>
+                                        <input type="text" id="bankName" name="bankName" class="lbl_move"value="<?php if(isset($sdRegister) && $sdRegister['BankName'] != '') { echo $sdRegister['BankName']; } else { echo ''; } ?>" <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?> />
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                <div class="form-group1 col-lg-6 col-md-6 col-sm-6">
+									<label>Valid Upto</label>
+                                        <input type="text" id="validUpto" name="validUpto" class="lbl_move date_picker"  value="<?php if(isset($sdRegister) && ($sdRegister['ValidUpto'] != NULL)) { echo date("d-m-Y", strtotime($sdRegister['ValidUpto'])); } else { echo date("d-m-Y"); } ?>" <?php if($sdType == 'R') { ?>disabled<?php } ?> readonly />
+                                        <div class="error_message">
+                                            <p>Required</p>
+                                        </div>
+                                    </div>
+                                 <div class="form-group1 col-lg-12 col-md-12 col-sm-12">
+                                    <div class="col-lg-6 col-md-6 col-sm-6" style="padding:0 !important">
+									 <label>Narration</label>
+                                        <textarea id="narration" name="narration" class="form-control lbl_move" <?php if($sdType == 'E' || $sdType == 'R') { ?>readonly<?php } ?>><?php if(isset($sdRegister) && $sdRegister['Narration'] != '') { echo $sdRegister['Narration']; } ?></textarea>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+<div id="submitDiv" class="col-lg-12 savebtn_area" style="display:none">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Submit" onclick="return submitForm();">Submit</a>
+        <?php if(isset($sdRegister)){?>
+            <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/security-deposit-register';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+        <?php }else{?>
+            <li class="cancel_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Go back!" onclick="return showBack('a');">Back</a></li>
+        <?php }?>
+    </ul>
+</div>
+<script>
+    var opCostCentre=<?php echo (isset($opCostCentre)) ? json_encode($opCostCentre) : '[]';?>;
+    var vendorMaster=<?php echo (isset($vendorMaster)) ? json_encode($vendorMaster) : '[]';?>;
+    $("#backPrev").hide();
+    $(function(){
+        $('.ripple').materialripple();
+        bindcostCentreAutoComplete();
+        bindContractorAutoComplete();
+    });
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    var $type = $('#type'),
+        $costCentreId = $('#costCentreId'),
+        $vendorId = $('#vendorId'),
+        $orderType = $('#orderType'),
+        $eOrderNo = $('#eOrderNo');
+
+    $costCentreId.on('change', function() {
+        getOrders('');
+    });
+    $vendorId.on('change', function() {
+        getOrders('');
+    });
+    $eOrderNo.on('change', function() {
+        getOrders($(this).val());
+    });
+    $orderType.on('change', function() {
+        getOrders($(this).val());
+    });
+    $type.on('change', function() {
+        if($type.val() == 'N'){
+            $('#cost').show();
+            $('#vend').show();
+            $('#depos').hide();
+//        $('#selOrdDiv').show();
+        }else if($type.val() == 'E'){
+            $('#cost').hide();
+            $('#vend').hide();
+            $('#selOrdDiv').hide();
+            $('#depos').show();
+//        $('#eOrderNo').hide();
+        }else if($type.val() == 'R'){
+            $('#cost').hide();
+            $('#vend').hide();
+            $('#selOrdDiv').hide();
+            $('#depos').show();
+        }
+    });
+
+    function getOrders(ordId)
+    {       var sdorder=$orderType.val();
+        if(sdorder == 'W'){
+            $(".sdOrderType").text('Work');
+        }else if(sdorder =='H'){
+            $(".sdOrderType").text('Hire');
+        }else if(sdorder =='S'){
+            $(".sdOrderType").text('Service');
+        }
+        if($costCentreId.val() != '' && $vendorId.val() != '' && sdorder !='') {
+            $('#selOrdDiv').show();
+            $.post(getBaseURL()+'wpm/labourstrength/get-sd-orders', { ccId: $costCentreId.val(), vId: $vendorId.val(),orderType:$orderType.val() },
+                function(data) {
+                    if(ordId == '') {
+                        $('#eOrderNo').empty();
+                        $('#eOrderNo').append('<option value="">Select Order No</option>');
+                        var returnData = JSON.parse(data);
+                        $.each(returnData, function (key, value) {
+                            $('#eOrderNo')
+                                .append($("<option></option>")
+                                    .attr("value", value.data)
+                                    .text(value.value));
+                        });
+                    } else {
+                        $('#orderNo').empty();
+                        $('#orderNo').append('<option value="">Select Order No</option>');
+                        var returnData = JSON.parse(data);
+                        $.each(returnData, function (key, value) {
+                            $('#orderNo')
+                                .append($("<option></option>")
+                                    .attr("value", value.data)
+                                    .attr("Amt", value.Amount)
+                                    .text(value.value));
+                        });
+                        $('#orderNo').val(ordId).trigger('change');
+                    }
+                });
+        } else {
+            $('#selOrdDiv').hide();
+        }
+    }
+    $('#orderNo').on("change",function() {
+        $('#amount').val(sanitizeNumber($("#orderNo option:selected").attr('Amt')),2);
+    });
+
+    function validateLabStg()
+    {
+        $('.error_message').hide();
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+
+//    console.log(currentIndex)
+        //alert(currentIndex);
+        if($type.val() == 'N') {
+            var lType = isNullCheck($type.val(),'string');
+            var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+            var costcentre = isNullCheck($('#costCentreName').val(),'string');
+            var lVendorId = isNullCheck($vendorId.val(),'number');
+            var leOrderNo = isNullCheck($eOrderNo.val(),'number');
+
+            if (lType == '') {
+                $type.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                $('#sdDate').val($('#sdeDate').val());
+                /*getValueOfSlider('next');
+                 $('#carousel-example-generic').carousel({
+                 slide: "next"
+                 });*/
+            }
+
+            if (lCostCentreId == 0) {
+                $costCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var projName = $('#costCentreId option:selected').text();
+                $('.projName').val(projName);
+                $('.hprojName').html(costcentre);
+                /*getValueOfSlider('next');
+                 $('#carousel-example-generic').carousel({
+                 slide: "next"
+                 });*/
+            }
+            if (lVendorId == 0) {
+                $vendorId.closest('.form-group').find(".error_message").show();
+                return;
+            } else if (leOrderNo == 0) {
+                $eOrderNo.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var conName = $('#vendorName').val();
+                var orderName = $('#eOrderNo option:selected').text();
+                $('.conName').val(conName);
+                $('.hconName').html(conName);
+                $('.orderName').val(orderName);
+//            getValueOfSlider('next');
+                $('#carousel-example-generic').carousel({
+                    slide: "next"
+                });
+                $('#stageTwo').show();
+                $('#stageOne').hide();
+                $('#submitDiv').show();
+            }
+        } else {
+            if($type.val() == 'E' || $type.val() == 'R') {
+                console.log(123455)
+                $.post(getBaseURL()+'wpm/labourstrength/get-sd-id', { ccId: $costCentreId.val(), vId: $vendorId.val(), ordId: $('#depNo').val() },
+                    function(data) {
+                        var rData = JSON.parse(data);
+                        window.location.href= getBaseURL() + "wpm/labourstrength/security-deposit/"+rData.Id+"/"+$type.val();
+                    });
+            } else {
+                showBack('e');
+            }
+        }
+    }
+
+    function goBack()
+    {
+        $('#carousel-example-generic').carousel({
+            slide: "prev"
+        });
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function showBack(sbType)
+    {
+        if(sbType == 'a') {
+            $('#stageTwo').hide();
+            $('#stageOne').show();
+            $('#submitDiv').hide();
+            $('#titleTag').addClass('text-center');
+        } else {
+            $('#stageOne').hide();
+            $('#stageTwo').show();
+            //$('#titleTag').removeClass('text-center');
+        }
+    }
+
+    function submitForm()
+    {
+        $('.error_message').hide();
+        var errFlag = 0;
+
+        $('#sdNo').removeClass('red_bdr');
+        $('#refNo').removeClass('red_bdr');
+        var sdAmount=parseFloat($('#sdAmt').val()),
+            orderAmount=parseFloat($('#amount').val());
+        if(orderAmount < sdAmount){
+            $('#sdAmt').addClass('red_bdr');
+            $('#sdAmt').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#sdNo').val()) == '') {
+            $('#sdNo').addClass('red_bdr');
+            $('#sdNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#refNo').val()) == '') {
+            $('#refNo').addClass('red_bdr');
+            $('#refNo').focus();
+            errFlag = 1;
+            return false;
+        }
+//        if($.trim($('#orderNo').val()) == '') {
+//            $('#orderNo').closest('.form-group').find(".error_message").show();
+//            $('#orderNo').focus();
+//            errFlag = 1;
+//            return false;
+//        }
+        if($.trim($('#amount').val()) == '') {
+            $('#amount').closest('.form-group').find(".error_message").show();
+            $('#amount').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#sdAmt').val()) == '') {
+            $('#sdAmt').closest('.form-group').find(".error_message").show();
+            $('#sdAmt').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#payMode').val()) == '') {
+            $('#payMode').closest('.form-group').find(".error_message").show();
+            $('#payMode').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#fromDate').val()) == '') {
+            $('#fromDate').closest('.form-group').find(".error_message").show();
+            $('#fromDate').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#toDate').val()) == '') {
+            $('#toDate').closest('.form-group').find(".error_message").html('<p>Required</p>');
+            $('#toDate').closest('.form-group').find(".error_message").show();
+            $('#toDate').focus();
+            errFlag = 1;
+            return false;
+        }
+        if (!compareDate($('#fromDate').val(), $('#toDate').val())) {
+            $('#toDate').closest('.form-group').find(".error_message").html('<p>It should be greater than from date</p>');
+            $('#toDate').closest('.form-group').find(".error_message").show();
+            $('#toDate').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#bankName').val()) == '') {
+            $('#bankName').closest('.form-group').find(".error_message").show();
+            $('#bankName').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#validUpto').val()) == '') {
+            $('#validUpto').closest('.form-group').find(".error_message").show();
+            $('#validUpto').focus();
+            errFlag = 1;
+            return false;
+        }
+
+        if(errFlag == 0) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    <?php if(isset($sdRegister) && count($sdRegister) != 0) { ?>
+    var orderId = '<?php echo $sdRegister['OrderId']; ?>';
+    getOrders(orderId);
+    $('#stageOne').hide();
+    $('#stageTwo').show();
+    $('#submitDiv').show();
+    <?php } ?>
+    <?php if(isset($sdRegister)){?>
+    <?php if($sdRegister['Approve'] == 'Y'){?>
+    $('.save_btn').hide();
+    <?php }else{?>
+    $('.save_btn').show();
+    <?php } ?>
+    <?php } ?>
+
+<!--    --><?php //if(isset($sdRegister)){?>
+//    $('#orderNo').val('<?php //$sdRegister['OrderId'];?>//').trigger('change');
+//    <?php //} ?>
+    //costCentre AutoComplete
+    function bindcostCentreAutoComplete()
+    {
+        $('#costCentreName').autocomplete({
+            lookup:opCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#costCentreId').val(suggestion.data).trigger('change');
+                    $('#costCentreName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#costCentreId').val(0);
+//                $('#costCentreName').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#costCentreId').val(0);
+//                    $('#costCentreName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+
+    //Contractor AutoComplete
+    function bindContractorAutoComplete()
+    {
+        $('#vendorName').autocomplete({
+            lookup:vendorMaster,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#vendorId').val(suggestion.data).trigger('change');
+                    $('#vendorName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#vendorId').val(0);
+//                $('#vendorName').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#vendorId').val(0);
+//                    $('#vendorName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+    //Amt check
+    function checkAmt(x){
+        var sdAmount=parseFloat(x),
+            orderAmount=parseFloat($('#amount').val());
+        if(orderAmount < sdAmount){
+            alert("Security Deposit Amount Does Not Exist Order Amount");
+            return false;
+        }
+    }
+</script>

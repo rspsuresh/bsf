@@ -1,0 +1,120 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<style>
+    .form-control {
+        box-shadow:none !important
+    }
+	.textarea-height30								{ height:80px !important;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form class="form-horizontal" method="post" id="formBid">
+                <div class="col-lg-12">
+                    <?php if($CallTypeId == 8){ ?>
+                    <h1>Pre - Qualification Bid status <?php echo isset($EnquiryName) ? '- ' .$EnquiryName:'';?></h1>
+                    <?php } else if($CallTypeId == 9) { ?>
+                    <h1>Technical - Bid Opening <?php echo isset($EnquiryName) ? '- ' .$EnquiryName:'';?></h1>
+                    <?php } ?>
+                </div>
+                <!--form start-->
+
+                <div class="col-lg-12 zoomIn animated padtop20">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2">
+                        <div class="col-sm-6 col-sm-offset-3 top-next">
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                        <input type="text" name="ref_date" id="ref_date" class="form-control date_picker lbl_move" value="<?php if(isset($ContractBidStatus)) echo date('d-m-Y', strtotime($ContractBidStatus['RefDate'])); else echo date('d-m-Y');?>" readonly  label="Date"/>
+                                        <input type="hidden" name="CallTypeId" id="CallTypeId" class="form-control" value="<?php if(isset($CallTypeId)) echo $CallTypeId; else echo "";?>"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-12">
+                                        <select class="form-control single_dropdown lbl_move" name="Status" id="Status" label="Current status" style="width:100%;">
+                                            <option></option>
+                                            <option value="Win">Win</option>
+                                            <option value="Loss">Loss</option>
+                                            <option value="NoResult">No Result</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-12">
+                                        <input type="text" name="Participants" id="Participants" maxlength="3" class="form-control lbl_move" value="" onKeyPress="return isNumberKey(event);" label="Number Of Participants"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-12">
+                                        <textarea class="form-control lbl_move textarea-height30" name="Remarks" id="Remarks" label="Remarks"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<div class="next-bt"><a href="#">Next <i class="fa fa-chevron-circle-right"></i></a></div>-->
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="formSubmit();" class="ripple">Save</a></li>
+        <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/followup/followup';?>" method="post" id="frmfollowup">
+            <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+            <input type="hidden" id="formfrom" name="formfrom"/>
+            <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $EnquiryName; ?>"/>
+            <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Go Back</a></li>
+        </form>
+    </ul>
+</div>
+<!--datepicker-->
+<script type="text/javascript">
+    $(function(){
+        var arrContractBidStatus = <?php if(isset($ContractBidStatus)) echo json_encode($ContractBidStatus); else echo "[]";?>;
+
+        if(arrContractBidStatus.length != 0) {
+            $("#Status option[value= '"+arrContractBidStatus.BStatus+"']").prop('selected', true);
+            $("#Status").trigger('change');
+//            $("#ref_date").trigger('change');
+            $('#Participants').val(arrContractBidStatus.NoOfParticipants).trigger('change');;
+            $('#Remarks').val(arrContractBidStatus.Remarks).trigger('change');;
+        }
+        $('.ripple').materialripple();
+        var dp1 = $('.date_picker').datepicker().on('changeDate', function() {
+            $('.datepicker').hide();
+        }).data('datepicker');
+        $('.toolbar_ddown ul').slimScroll({
+            height : '100%',
+            alwaysVisible: false,
+            railVisible: true,
+            railColor: '#cececd',
+            railOpacity: 1
+        });
+    });
+    function formSubmit() {
+        if($('#Status').val()==''){
+            alert("Please Enter Status");
+            return false;
+        }
+        if($('#Participants').val()==''){
+            alert("Please Enter Number Of Participants");
+            return false;
+        }
+        if($('#ref_date').val()==''){
+            alert("Please Enter Date");
+            return false;
+        }
+        $('#formBid').submit();
+    }
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+
+</script>
+<!--datepicker-->
+

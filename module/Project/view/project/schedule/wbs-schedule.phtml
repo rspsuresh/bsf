@@ -1,0 +1,259 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<style>
+    .top_ct {
+        margin-top:15px !important;
+    }
+</style>
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.all.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.theme.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.core.min.css" rel="stylesheet" />
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.globalize.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.easing-1.3.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jsrender.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/ej.web.all.min.js"></script>
+<!--STYLE-->
+
+<!--Container-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form method="post">
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - WBS Schedule</h1>
+                </div>
+                <!--excel-->
+                <div class="fixed-action-btn active">
+                    <a class="btn-floating btn-large">
+                        <i class="fa fa-paperclip"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a class="btn-floating hide-input-file" data-toggle="tooltip" data-placement="top" data-original-title="Import From Excel">
+                                <i class="fa fa-file-excel-o"></i>
+                                <input type="file" name="myfile" id="myfile" class="input-large" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="fileupload(this)" />
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn-floating" href="#" download data-toggle="tooltip" data-placement="top" data-original-title="Download Sample">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!--excel end-->
+                <!--form start-->
+                <div class="col-lg-12 top_ct">
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" label="Reference Date" value="<?php if ($rfcId != 0) { echo date("d-m-Y", strtotime($rfcRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="refNo" id="refNo" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcId != 0) ? $rfcRegister['RefNo'] : $svNo; ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="projectName" id="projectName" class="form-control lbl_move" label="Project Name" value="<?php if(isset($projectinfo)) { echo $projectinfo['ProjectName']; } else if(isset($rfcRegister['ProjectName'])) { echo $rfcRegister['ProjectName']; } ?>" />
+                            <input type="hidden" name="projectId" id="projectId" value="<?php if(isset($projectinfo)) { echo $projectinfo['ProjectId']; } else if(isset($rfcRegister['ProjectId'])) { echo $rfcRegister['ProjectId']; } ?>" />
+                            <input type="hidden" name="rfcId" id="rfcId" value="<?php echo ($rfcId != 0) ? $rfcId : ''; ?>" />
+                            <input type="hidden" name="rfcType" id="rfcType" value="<?php echo ($rfcId != 0) ? 'WBS-Schedule-Edit' : 'WBS-Schedule-Add'; ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="projectTypeName" id="projectTypeName" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) { echo $projecttypename; } else if(isset($rfcRegister['ProjectType'])) { if($rfcRegister['ProjectType']=='B') { echo 'Budget'; } else if($rfcRegister['ProjectType']=='P') { echo 'Plan'; } } ?>" />
+                            <input type="hidden" name="projectType" id="projectType" value="<?php if(isset($projecttype)) { echo $projecttype; } else if(isset($rfcRegister['ProjectType'])) { echo $rfcRegister['ProjectType']; } ?>" />
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="text-center" id="nodataheader" style="display: none" ><h1>No Schedule Data Found!</h1></div>
+                <!--table Jq Gride start-->
+                <div class="col-lg-12 col-lg-offset-0">
+                    <ul class="print_bt">
+                        <!--						<li id="holiday-btn"><a href="javascript:void(0);" id="holiday" onclick="return ShowHoliday()" data-toggle="tooltip" class="ripple" title="Holiday"><i class="fa fa-calendar"></i> Holiday</a>-->
+                        <li id="print-btn"><a href="javascript:void(0);" id="print" data-toggle="tooltip" class="ripple" title="Print"><i class="fa fa-print"></i> Print</a></li>
+                    </ul>
+                    <div class="table-responsive clear">
+                        <div id="gantt" style="position: height: 100%; width: 100%;"></div>
+                    </div>
+                </div>
+                <!--table Jq Gride end-->
+            </form>
+        </div>
+    </div>
+</div>
+<!--container-->
+
+<!--footer-->
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <input type="hidden" name="arrshdetails" id="arrshdetails" value="" />
+        <input type="hidden" name="arrcompdetails" id="arrcompdetails" value="" />
+        <li class="dropdown save_btn float_r" id="submit-btn"><a href="javascript:void(0);" id="overallUpdate" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="back-btn"><a href="<?php echo $this->basePath() . '/project/rfc/rfc-what'; ?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+<!--footer-->
+
+<!--Modal-->
+<div id="holidayform" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>List of Holidays</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+                    <table class="table" id="holidayTable" style="margin-bottom: 0">
+                        <thead>
+                        <tr>
+                            <th class="th-modal">Name of Holiday</th>
+                            <th class="th-modal">Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach($hdaylist as $trans): ?>
+                            <tr>
+                                <td width="80%"><input type="text" name="hnote" id="hnote" value="<?php echo $trans['label']; ?>" readonly /></td>
+                                <td width="20%"><input type="text" name="hdate" id="hdate" value="<?php echo date("d-m-Y", strtotime($trans['day'])); ?>" readonly /></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel_bt" data-dismiss="modal">Cancel</button>
+                <button type="button" class="saves_ok" id="btnholiday" onclick="return holiday()" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal end-->
+
+<script type="text/javascript">
+    //DATA SOURCE DECLARATION OF GANTT CONTROL
+    var weektype = '<?php if(isset($weektype)) echo $weektype; else ""; ?>';
+    var data =[ <?php if(isset($strText)) echo $strText; else '""'; ?> ];
+    var hday = [ <?php if(isset($strHDay)) echo $strHDay; else '[]';?> ];
+    var scheduleType="wbs";
+    var arrshdetails=[];
+    var arrcompdetails=[];
+
+    $(function () {
+        $('#arrshdetails').val(JSON.stringify(arrshdetails));
+        $('#arrcompdetails').val(JSON.stringify(arrcompdetails));
+
+        if (data.length==0) {
+            $('#liqty').hide();
+            $('#submit-btn').hide();
+            $('#nodataheader').show();
+            return;
+        }
+        $("#gantt").ejGantt({
+            dataSource: data,
+            allowColumnResize: true,
+            allowSorting: true,
+            allowSelection: true,
+            enableResize: true,
+            enableContextMenu: true,
+            taskIdMapping: "TaskID",
+            taskNameMapping: "TaskName",
+            startDateMapping: "StartDate",
+            progressMapping: "Progress",
+            durationMapping: "Duration",
+            endDateMapping: "EndDate",
+            childMapping: "Children", // "subtasks", //Children
+            enableVirtualization: false,
+            dateFormat: "dd/MM/yyyy",
+            highlightWeekEnds: true,
+            includeWeekend: false,
+            holidays: hday,
+
+            <?php
+            echo 'scheduleStartDate: "' .$stdate. '" ,';
+            echo 'scheduleEndDate: "' .$eddate. '" ,';
+            ?>
+
+            //scheduleStartDate: "12/01/2014",
+            //scheduleEndDate: "03/30/2015",
+
+            //Resources mapping
+            //resourceInfoMapping: "resourceId",
+            //resourceNameMapping: "resourceName",
+            //resourceIdMapping: "resourceId",
+            //resources: projectResources,
+
+            predecessorMapping: "Predecessor",
+
+            //beginEdit: beginEdit,
+
+            showResourceNames: true,
+            toolbarSettings: {
+                showToolbar: true,
+                toolbarItems: [
+                    //ej.Gantt.ToolbarItems.Add,
+                    ej.Gantt.ToolbarItems.Edit,
+                    //ej.Gantt.ToolbarItems.Delete,
+                    ej.Gantt.ToolbarItems.Update,
+                    ej.Gantt.ToolbarItems.Cancel,
+                    //ej.Gantt.ToolbarItems.Indent,
+                    //ej.Gantt.ToolbarItems.Outdent,
+                    ej.Gantt.ToolbarItems.ExpandAll,
+                    ej.Gantt.ToolbarItems.CollapseAll,
+                    ej.Gantt.ToolbarItems.Search
+                ]
+            },
+
+            editSettings: {
+                allowEditing: true,
+                allowAdding: false,
+                allowDeleting: false,
+                allowIndent: false,
+                allowOutdent: false,
+                editMode: "cellEditing"
+            },
+
+            showGridCellTooltip: true,
+            treeColumnIndex: 1,
+
+            //Adding column in Gantt
+            load: function () {
+                var columns = this.getColumns();
+                columns.splice(7, 0,
+                    {
+                        field: "parent",
+                        visible: false
+                    });
+                columns.splice(8, 0,
+                    {
+                        field: "iowid",
+                        visible: false
+                    });
+                columns.splice(9, 0,
+                    {
+                        field: "wbsid",
+                        visible: false
+                    });
+            }
+            //End Adding column in Gantt
+        });
+    });
+    //Non Edit taskname Column
+    //function beginEdit(args) {
+    //	if (this.getColumns()[args.columnIndex].field === "parent") {
+    //		args.cancel = true;
+    //	}
+    //}
+    function ShowHoliday()
+    {
+        $("#holidayform").modal('show');
+    }
+</script>

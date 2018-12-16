@@ -1,0 +1,139 @@
+<style>
+   .jqx-grid-header {height:75px !important;}
+   .reg-icon-file{color:hsl(208, 41%, 58%) !important;margin-top:10px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-9 col-md-6 col-sm-6">
+                <h1>Purchase Bill Return Register
+                    <div class="stgedit_btn req_addbtn brad_50">
+                        <a href="<?php echo $this->basePath();?>/mms/billreturn/return-wizard" class="ripple" data-toggle="tooltip" data-placement="right" title="Add New Bill Return"><i class="fa fa-plus"></i></a>
+                    </div>
+                </h1>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+                    <div id="dataTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r">
+            <a href="<?php echo $this->basePath();?>/mms/master/resourceview" class="ripple">Close</a>
+        </li>
+    </ul>
+</div>
+
+<script>
+    $(document).ready(function () {
+		var $treeGrid = $("#dataTable");
+        var source =
+        {
+            localdata:<?php echo json_encode($gridResult); ?>,
+            dataType: "json",
+            dataFields: [
+
+                { name: 'PRRegisterId', type: 'string'},
+				{ name: 'PRNo', type: 'string' },
+                { name: 'PRDate', type: 'string', type: "date", format: 'DD-MM-yyyy'  },
+                { name: 'BillDate', type: 'string', type: "date", format: 'DD-MM-yyyy'  },
+                { name: 'CostCentreName', type: 'string' },
+                { name: 'SupplierName', type: 'string' },
+                { name: 'Approve', type: 'string' },
+            ],
+            id: 'PRRegisterId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $("#dataTable").jqxGrid(
+            {
+                width: '100%',
+                pageable: true,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight:true,
+                //rowsheight:60,
+                autorowheight: true,
+                filterable: true,
+                sortable: true,
+                //filtermode: 'advanced',
+                columnsResize: true,
+                showfilterrow: true,
+                ready:function(){
+                    var localizationobj = {};
+                    localizationobj.emptydatastring = "No request to display";
+                    $("#dataTable").jqxGrid('localizestrings', localizationobj);
+                },
+                source:dataAdapter,
+                columns: [
+                    {text: 'PRRegisterId', datafield: 'PRRegisterId', hidden: true, filterable: false},
+                    { text: 'PRNo', dataField: 'PRNo', cellsalign: 'center',width:'10%' },
+                    { text: 'PRDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'PRDate', width:'10%', cellsalign: 'center', align: 'center' },
+                    { text: 'BillDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'BillDate', width:'10%', cellsalign: 'center', align: 'center' },
+                    { text: 'CostCentreName', dataField: 'CostCentreName', width: '25%', cellsalign: 'center', align: 'center' },
+                    { text: 'SupplierName', dataField: 'SupplierName', cellsalign: 'center',width: '22%' },
+                    { text: 'Approve', dataField: 'Approve',hidden: false, cellsalign: 'center',width: '10%' },
+					{ text: 'Action', sortable: false, filterable: false, cellsalign: 'center',width:'12%',
+						cellsrenderer: function (row) {
+                            var rowData = $("#dataTable").jqxGrid('getrowdata', row);
+                            var PRRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'PRRegisterId');
+                            var Approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve');
+                            if(Approve == "Yes" || Approve == "Partial") {
+                                var editLink = '<a title="Detailed" href="' + getBaseURL() + 'mms/billreturn/returnbill-detailed/' + rowData.uid + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/billreturn/billreturn-report/' + PRRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                            }
+                            else {
+                                var editLink = '<a href="' + getBaseURL() + 'mms/billreturn/return-entry' + PRRegisterId + '" "javascript:void(0);" title="Edit" onclick="rebilledit(' + PRRegisterId + ',' + row + ');return false;""><i class="fa fa-pencil-square-o reg-icon"></i></a>' + //<a title="Edit" href="'+ getBaseURL() + 'mms/billreturn/return-entry/'+PRRegisterId+'" style="padding-left: 15px; margin-top:8px;">
+                                    "&nbsp;&nbsp;" + '<a href="' + getBaseURL() + 'mms/billreturn/returnbill-delete' + PRRegisterId + '" "javascript:void(0);" title="Delete" onclick="rebilldelete(' + PRRegisterId + ',' + row + ');return false;""><i class="fa fa-trash-o reg-icon"></i></a>' + //<a title="Delete" href="'+ getBaseURL() + 'mms/purchase/deletePO/'+PoRegisterId+'"  style="padding-left: 15px; margin-top:8px;" >
+                                    '<a title="Detailed" href="' + getBaseURL() + 'mms/billreturn/returnbill-detailed/' + rowData.uid + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/billreturn/billreturn-report/' + PRRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                            }
+						}
+					}
+                ]
+            });
+        // $("#dataTable").bind('rowselect',function (event) {
+            // var args = event.args;
+            //row's bound index.
+            // var rowBoundIndex = args.rowindex;
+            //row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+            // var rowData = args.row;
+            // location.replace('returnbill-detailed/'+rowData.uid);
+        // });
+    });
+    $('#activity').change(function(){
+        if(!$(this).is(':checked'))
+            $('#activityCenter').hide();
+        else
+            $('#activityCenter').show();
+    });
+
+    function rebilldelete(rebillid,row) {
+        var rowData = $("#dataTable").jqxGrid('getrowdata', row);
+
+        if(rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial")
+        {
+            alert("Can't Delete Already Approved");
+            return;
+        }
+        var val = confirm("Do you want to delete this bill return ?");
+        if(val==true) {
+            location.replace('returnbill-delete/'+rebillid);
+        }
+    }
+    function rebilledit(rebillid,row) {
+        var rowData = $("#dataTable").jqxGrid('getrowdata', row);
+
+        if (rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial") {
+            alert("Can't Edit Already Approved");
+            return;
+        }
+        location.replace('return-entry/'+rebillid);
+    }
+
+</script>

@@ -1,0 +1,137 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<style>
+    .tr_hot 						{background:#f9eaea;}
+    .tr_warm 						{background:#f8f1e4;}
+    .mar_15							{margin-top:15px;}
+    .pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important; padding:5px 15px !important;}
+    #jqxGrid .jqx-grid-header 		{height:75px !important;}
+    .modal-dialog {margin: 29px 610px!important;width: 600px;}
+</style>
+<div class="row">
+
+    <div class="col-lg-12">
+        <div class="table-responsive clear">
+            <h1>MINShort-Close</h1>
+            <div id="subGrid">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="mdlDelete" tabindex="-5" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:90px !important;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Confirmation</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <h3 style="text-align:center; ">Do you want to delete the row?</h3>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDelete" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function (){
+        $.ajax({
+            url:getBaseURL()+"mms/min/minshortclose-register",
+            type:"post",
+            data:"mode=first",
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(JSON.stringify(data))
+                var source =
+                {
+                    dataFields: [
+                        { name: 'MINNo', type: 'string' },
+                        { name: 'Approve', type: 'string' },
+                        { name: 'DCRegisterId', type: 'string' }
+                    ],
+                    localdata:data,
+                    id: 'DCRegisterId',
+                    datatype: "json",
+                    async: false
+
+                };
+
+                var dcAdapter = new $.jqx.dataAdapter(source);
+
+                // create jqxgrid
+                $("#subGrid").jqxGrid({
+                    width: '100%',
+                    autoheight:true,
+                    source: dcAdapter,
+                    sortable: true,
+                    filterable: true,
+                    pageable: true,
+                    ready: function () {
+                    },
+                    columns: [
+
+                        { text: 'MINNo', dataField: 'MINNo'},
+                        { text: 'Approve', dataField: 'Approve' },
+                        { text: 'DCRegisterId', dataField: 'DCRegisterId',hidden: 'true'},
+                        {text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                            cellsrenderer: function (row) {
+                                var DCRegisterId =  $("#subGrid").jqxGrid('getCellValue', row, 'DCRegisterId'),
+                                    editLink = '<a title="Edit" href="'+ getBaseURL() + 'mms/min/min-shortclose/'+DCRegisterId+'" style="padding-left: 15px; padding-top:10px;"><i class="fa fa-pencil-square-o reg-icon top-ic5"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a title="Delete" onclick="resouceRowDelete(' + row + ');return false;"><i class="fa fa-trash-o reg-icon top-ic5"></i></a>';
+                            }
+                        }
+
+                    ]
+                });
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+
+    });
+        $('#btnDelete').on('click', function () {
+            $('#mdlDelete').modal('hide');
+            var rowData = $("#subGrid").jqxGrid('getrowdata', $('#mdlDelete').data('row'));
+
+            $.ajax({
+                url: getBaseURL() + 'mms/min/minshortclose-delete',
+                type: 'POST',
+                async: false,
+                data: {"DCRegisterId": rowData.DCRegisterId},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $("#subGrid").jqxGrid("deleterow", rowData.DCRegisterId);
+                    else
+                        alert('Failed to delete!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete!');
+                }
+            });
+        });
+        function resouceRowDelete(row) {
+            var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+            $('#mdlDelete').data('row', row).modal('show');
+        }
+
+</script>

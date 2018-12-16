@@ -1,0 +1,206 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap-ui.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.fmatter.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.jqGrid.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/i18n/grid.locale-en.js"></script>
+<style>.rf-fixed	   	 {margin-top:-10px;}</style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <?php if ($projectId !=0) { ?>
+      <div class="col-lg-12 page_tittle" id="pagetittle">
+        <h1 class="col-lg-6 col-sm-6">Revision Report</h1>
+        <div class="col-lg-6 col-sm-6">
+          <div class="form-group">
+            <label class="col-sm-6 sel-type">Select Project</label>
+            <div class="col-lg-12 form-group">
+              <select name="project_id" id="project_id" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+             
+                <?php if(isset($projectlists)):?>
+                <?php foreach ( $projectlists as $project ):?>
+                <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+              </select>
+            </div>
+          </div>
+        </div>
+          <div class="fixed-action-btn active rf-fixed">
+                        <a class="btn-floating btn-large">
+                            <i class="fa fa-print"></i>
+                        </a>
+                        <ul>
+                            <li>
+                                <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="bottom" data-original-title="Print Report">
+                                    <i class="fa fa-print"></i>
+
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="bottom" data-original-title="Download Excel">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="csvExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="bottom" data-original-title="Export CSV">
+                                    <i class="fa fa-file-archive-o"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+        <!--<div class="col-lg-4">
+                        <div class="form-group">
+                            <label class="col-sm-4 sel-type">Select Type</label>
+                            <div class="col-lg-8 form-group">
+                                <select name="revtype" id="revtype" onChange="ChangeProject();" class="form-control selectpicker show-tick" style="width:100%;">
+                                    <option value="">Select Type</option>
+                                    <option value="B" <?php /*echo $revtype=='B' ? 'selected' : ''; */?>>Budget</option>
+                                    <option value="P" <?php /*echo $revtype=='P' ? 'selected' : ''; */?>>Plan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>--> 
+      </div>
+      
+      <div class="col-lg-12 clear" id="gridWrapper" >
+        <div class="table-responsive clear">
+          <table id='grid'>
+          </table>
+          <div id='pager'></div>
+        </div>
+      </div>
+      <?php } else { ?>
+      <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts"  id="formWrapper">
+          <div class="col-lg-12 frmwrk_div" id="projects_list">
+            <select name="newproject_id" id="newproject_id" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%">
+              <?php if(isset($projectlists)):?>
+              <?php foreach ( $projectlists as $project ):?>
+              <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+              <?php endforeach; ?>
+              <?php  endif; ?>
+            </select>
+          </div>
+          <!--<div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                        <select name="newrevtype" id="newrevtype" class="form-control selectpicker show-tick" data-size="6" title="Select Type...">
+                            <option value="">Select Type</option>
+                            <option value="B">Budget</option>
+                            <option value="P">Plan</option>
+                        </select>
+                    </div>-->
+          <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+            <ul>
+              <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <?php } ?>
+    </div>
+  </div>
+</div>
+<script>
+
+    var mydata = <?php echo json_encode($iowlists); ?>;
+
+    var $project = $('#project_select'),
+        $projectNew = $('#newproject_id'),
+        $type_list = $('#types_list'),
+        $type = $('#type_select');
+
+    $(function () {
+        $projectNew.on('change', function() {
+            var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+            if (nproj_id !=0) $type_list.show();
+            else $type_list.hide();
+        });
+    });
+
+    $("#grid").jqGrid('jqPivot',
+        mydata,
+        {
+            xDimension : [
+                {dataName: 'SerialNo', label : 'SerialNo', width: 90},
+                {dataName: 'Specification', label : 'Specification', width: 90}
+            ],
+            yDimension : [
+                {dataName: 'RevisionName'}
+            ],
+            aggregates : [
+                {member : 'Qty', aggregator : 'sum',width:90, label:'Qty',formatter: 'number',align:'center'}
+            ],
+            rowTotals: true,
+            colTotals : true
+        },
+        {
+            width: '100%',
+            rowNum : 10,
+            pager: "#pager",
+            caption: "Revision"
+        }
+    );
+
+    var createExcelFromGrid = function(gridID,filename) {
+        var grid = $('#' + gridID);
+        var rowIDList = grid.getDataIDs();
+        var row = grid.getRowData(rowIDList[0]);
+        var colNames = [];
+        var i = 0;
+        for(var cName in row) {
+            colNames[i++] = cName; // Capture Column Names
+        }
+        var html = "";
+        for(var j=0;j<rowIDList.length;j++) {
+            row = grid.getRowData(rowIDList[j]); // Get Each Row
+            for(var i = 0 ; i<colNames.length ; i++ ) {
+                html += row[colNames[i]] + ';'; // Create a CSV delimited with ;
+            }
+            html += '\n';
+        }
+        html += '\n';
+
+        var a         = document.createElement('a');
+        a.id = 'ExcelDL';
+        a.href        = 'data:application/vnd.ms-excel,' + html;
+        a.download    = filename ? filename + ".xls" : 'DataList.xls';
+        document.body.appendChild(a);
+        a.click(); // Downloads the excel document
+        document.getElementById('ExcelDL').remove();
+    }
+
+    function submitForm() {
+        var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+        /*var  nrevtype= isNullCheck($('#newrevtype').val(),'string');*/
+
+        if (nproj_id ==0) {
+            alert("select Project");
+            return;
+        }
+        /*if (nrevtype =="") {
+            alert("Select Type");
+            return;
+        }*/
+
+        window.location.href = getBaseURL() + "project/report/planquantity-report/" + nproj_id;
+    }
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#project_id').val(),'number');
+        /*var sType= isNullCheck($('#revtype').val(),'string');*/
+        window.location.href = getBaseURL() + "project/report/planquantity-report/" + iProjectId;
+    }
+
+    $('#export-button').click(function(){
+
+        createExcelFromGrid;
+//        var postData = $("#list").jqGrid('getGridParam','postData');
+//        var str='';
+//        for(i in postData)
+//            str+=i+"="+postData[i]+"&";
+//        window.location.href=("<?php //echo $this->baseUrl() ?>///user/listpayments?export=excel&"+
+//        str + new Date().getTime());
+    });
+
+</script> 

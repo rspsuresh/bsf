@@ -1,0 +1,174 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    /*border: 1px solid #333;*/
+    /*DragResize*/
+
+    /* Required CSS classes: must be included in all pages using this script */
+    /* Apply the element you want to drag/resize */
+    .drsElement{position: absolute;border: 1px solid #333;}
+    /*
+     The main mouse handle that moves the whole element.
+     You can apply to the same tag as drsElement if you want.
+    */
+    .drsMoveHandle{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+    /*
+     The DragResize object name is automatically applied to all generated
+     corner resize handles, as well as one of the individual classes below.
+    */
+    .dragresize{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+    /*
+     Individual corner classes - required for resize support.
+     These are based on the object name plus the handle ID.
+    */
+    .dragresize-tl{top:-8px;left:-8px;cursor:nw-resize;}
+    .dragresize-tm{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+    .dragresize-tr{top:-8px;right:-8px;cursor:ne-resize;}
+    .dragresize-ml{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+    .dragresize-mr{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+    .dragresize-bl{bottom:-8px;left:-8px;cursor:sw-resize;}
+    .dragresize-bm{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+    .dragresize-br{bottom:-8px;right:-8px;cursor:se-resize;}
+    /*DragResize End*/
+    /*Main*/
+    .text-bold, .text-bold * {ont-weight: bold !important;}
+    .text-italic, .text-italic * {font-style: italic !important;}
+    .text-underline, .text-underline * {text-decoration: underline !important;}
+    .style-left, .style-left * {text-align: left;}
+    .style-center, .style-center * {text-align: center;}
+    .style-right, .style-right * {text-align: right;}
+    .style-justify, .style-justify * {text-align: justify;}
+    #styleOptions {display:  none;}
+    #ElementTemplate,
+    .remScnt {
+        display:none;
+    }
+    .remScnt{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+    .remScnt > .fa.fa-trash-o {
+        text-decoration: none !important;
+        font-style: normal !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        color: #000 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    .up-buttm-10					{margin-top:8px; margin-bottom:8px;}
+    /*------ scroll top
+    .navbar-fixed-top + .content-container {
+        margin-top: 70px;
+    }
+    .content-container {
+        margin: 0 130px;
+    }
+
+
+
+    #top-link-block.affix-top {
+        position: absolute;
+        bottom: -82px;
+        right: 10px;
+    }
+    #top-link-block.affix {
+        position: fixed;
+        bottom:60px;
+        right: 10px;
+    }
+    scroll top ------*/
+</style>
+<form method="post" action="<?php echo $this->basePath(); ?>/application/print" target="_blank">
+    <input type="hidden" name="htmlcontent" id="htmlcontent" />
+    <input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($dpeRegister)) ? $dpeRegister['ClientId'] : 0;?>"  />
+    <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+
+<div style="width:700px; margin:auto; padding-top:20px; position:relative;">
+    <div id="htmlwrapper">
+
+        <?php echo (isset($template)) ? $template : '';?>
+        <div style="margin-bottom:30px; margin-top:20px; display:block">
+            <table class="table bill-cum" style=" margin-bottom:0px; margin-top:10px;" id="EntryTable" cellpadding="0" cellspacing="0" width="520">
+                <thead>
+                <tr>
+                    <?php if($dpeRegister['WOType']=='activity'){?>
+                        <th class="thscss text-left" align="left">Code</th>
+                        <th class="thscss text-left" align="left">Resource Name</th>
+                    <?php } else{?>
+                        <th class="thscss text-left" align="left">Serial No</th>
+                        <th class="thscss text-left" align="left">Specification</th>
+                    <?php }?>
+                    <th class="thscss text-right" align="right">Qty</th>
+                    <th class="thscss text-right" align="right">Rate</th>
+                    <th class="thscss text-right" align="right">Amount</th>
+                </tr>
+                </thead>
+                <tbody class="main">
+                <?php
+                $CurAmtTotal = 0;
+                if(isset($woboq)):
+                    foreach($woboq as $trans):
+                        $CurAmtTotal += $trans['Amount'];;
+                        ?>
+                        <tr class="padi05">
+                            <?php if($dpeRegister['WOType']=='activity'){?>
+                                <td width="5%" class="tdpds text-left" align="left"><?php echo $trans['Code'];?></td>
+                                <td width="5%" class="tdpds text-left" align="left"><?php echo $trans['ResourceName'];?></td>
+                            <?php } else{?>
+                                <td width="5%" class="tdpds text-left" align="left"><?php echo $trans['SerialNo'];?></td>
+                                <td width="5%" class="tdpds text-left" align="left"><?php echo $trans['Specification'];?></td>
+                            <?php }?>
+                            <td width="5%" class="tdpds text-right" align="right"><?php echo (isset($trans)) ? $this->commonHelper()->sanitizeNumber($trans['Qty'], 2, true) : 0.00;?></td>
+                            <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'], 2, true);?></td>
+                            <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Amount'], 2, true);?></td>
+                        </tr>
+                    <?php endforeach; endif;?>
+                </tbody>
+                <tbody class="total">
+                <tr>
+                    <td width="5" class="tdpds">&nbsp;</td>
+                    <td colspan="3" align="right" class="tdpds text-right">Total</td>
+                    <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal, 2, true);?></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <?php echo (isset($footertemplate)) ? $footertemplate : '';?>
+    </div>
+    <div class="fixed-action-btn-ra active">
+        <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+    </div>
+</div>
+<?php
+if(isset($dpeRegister) && $dpeRegister['LogoPath']!="") {
+    $imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/'.$dpeRegister['LogoPath'];
+}
+?>
+<script type="text/javascript">
+
+    $(function() {
+        $('#browse_1').attr('onclick',false);
+        $('#browse_1').find("div").removeClass("ovrly").removeClass("buttons");
+        var woregister = <?php echo (isset($dpeRegister))?json_encode($dpeRegister):'[]'; ?>;
+        var currentdate = '<?php echo date('d-m-Y'); ?>';
+        var imgUrl = '<?php echo $imgUrl; ?>';
+        var $p_scents = $('#p_scents');
+        var $g_scents = $('#g_scents');
+        $p_scents.find('.remScnt').remove();
+        $g_scents.find('.remScnt').remove();
+        $.each(woregister, function(index, value) {
+            if(value != null && value != '') {
+                $p_scents.find('#wo_' + index).text(value);
+                $g_scents.find('#wo_' + index).text(value);
+            }
+
+        });
+        $p_scents.find('#req_LogoPath').attr('src', imgUrl);
+        $p_scents.find('#wo_Date').text(currentdate);
+
+        $(".exportAction").click(function(){
+            $('#htmlcontent').val($('#htmlwrapper').html());
+            $('form').submit();
+        });
+    });
+
+</script>
+

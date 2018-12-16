@@ -1,0 +1,155 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1 class="col-lg-6 padlr0">Agreement Template Register</h1>
+            </div>
+            <div class="col-lg-12 padlr0">
+
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="treeGrid"> </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times"></i></button>
+                <h1>Why do you want to delete Template : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                                <form class="form-horizontal">
+                                    <div class="row">
+                                        <div class="form-group req_flds">
+                                            <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Remarks">
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                    <a href="#" id="btnDeleteYes" class="md_ok">Delete</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data = <?php echo (isset($TempDetail)) ? json_encode($TempDetail) : '[]'?>,
+        $treeGrid = $("#treeGrid"),
+        $deleteModal = $('#DeleteModal'),
+        $remarks = $('#remarks');
+    $(function () {
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'TemplateId', type: 'number' },
+                { name: 'TemplateName', type: 'string' },
+                { name: 'AgreementTypeName', type: 'string' },
+                { name: 'CreatedDate', type: "date", format: 'DD-MM-yyyy'}
+            ],
+            id: 'TemplateId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid({
+            width: "100%",
+            autorowheight: true,
+            autoheight: true,
+            pageable:true,
+            sortable: true,
+            pagerButtonsCount: 6,
+            showfilterrow: true,
+            filterable: true,
+            rowDetails: true,
+            selectionmode: 'singlerow',
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            source: dataAdapter,
+            columns: [
+                { text: 'TemplateId', datafield: 'TemplateId',hidden: true, filterable: false},
+                { text: 'Template Name', dataField: 'TemplateName',width:'30%'},
+                { text: 'Agreement Type', dataField: 'AgreementTypeName',width:'30%'},
+                { text: 'Created Date', dataField: 'CreatedDate',filtertype: 'date',width:'25%', cellsformat: 'd'},
+                { text: 'Action', sortable: false, filterable: false,align: 'left',width:'15%',
+                    cellsrenderer: function (row) {
+                        var TemplateId = $treeGrid.jqxGrid('getCellValue', row, 'TemplateId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/property/agreement-template/'+TemplateId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: templateDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'crm/property/agreement-template-register',
+                    type: 'POST',
+                    data: {"TemplateId": rowData.TemplateId, "Remarks": remarks},
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200) {
+                            $treeGrid.jqxGrid("deleterow", rowData.TemplateId);
+                        }
+                        else {
+                            alert('Failed to delete the Template!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        if (jqXHR.status == 403)
+                            alert(jqXHR.responseText);
+                        else
+                            alert(textStatus+"-----"+errorThrown);
+                    }
+                });
+            $remarks.val('');
+        });
+    });
+
+    function templateDelete(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+        $('#delEntryName').html(rowData.TemplateName);
+        $("#remarks").val('');
+    }
+</script>

@@ -1,0 +1,492 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="col-lg-12">
+            <h1 class="text-center">Labour Strength</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="row">
+                <form method="post" id="formWrapper" enctype="multipart/form-data" action="<?php echo $this->basePath(); ?>/wpm/labourstrength/entry-form">
+                    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                        <div class="col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-0 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-8 col-lg-offset-4">
+                                <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                                <input type="text" name="LSDate" id="LSDate" class="date_picker parnt-text" value="<?php if(isset($lsRegister) && ($lsRegister['LSDate'] != NULL)) { echo date("d-m-Y", strtotime($lsRegister['LSDate'])); } else { echo date("d-m-Y"); } ?>" readonly />
+                                <input type="hidden" id="labourId" name="labourId" value="<?php echo $labourId; ?>" />
+                                <input type="hidden" id="WBSRequired" name="WBSRequired" value="<?php if(isset($lsRegister)) { echo $lsRegister['WBSRequired']; } else { echo '1'; } ?>" />
+                                <input type="hidden" name="frm_index" value="1" />
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" role="listbox">
+                                <div class="item active">
+                                    <div class="col-lg-9 col-lg-offset-3 top-sl-10">
+                                        <div class="col-lg-8 form-group">
+                                            <input class="parent_text form-control lbl_move" type="text" name="costCentreName" id="costCentreName" label="Select Cost Centre" value="" />
+                                            <input type="hidden" id="CostCentreId" name="CostCentreId" />
+                                            <input type="hidden" id="wbsvalue" name="wbsvalue" value="" />
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 form-group" style="display:none;" id="labentry">
+                                            <div class="radio_check">
+                                                <p style="padding-top:10px;">
+                                                    <input type="radio" name="EntryForm" id="directEntry" value="D" <?php if(isset($lsRegister) && $lsRegister['EntryForm']=='D') { ?>checked<?php } else if(!isset($lsRegister)) { ?>checked<?php } ?> />
+                                                    <label for="directEntry">Direct Entry</label>
+                                                </p>
+                                                <p style="padding-top:10px;">
+                                                    <input type="radio" name="EntryForm" id="excelEntry" value="E" class="excelClick" <?php if(isset($lsRegister) && $lsRegister['EntryForm']=='E') { ?>checked<?php } ?> />
+                                                    <label for="excelEntry">From Excel Import</label>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-8 form-group" style="display:none;" id="labdirectentry">
+                                            <div class="radio_check">
+                                                <p style="text-align:left;">
+                                                    <input type="checkbox" name="LabourNameWise" id="LabourNameWise" value="1" <?php if(isset($lsRegister) && $lsRegister['LabourNameWise']=='1') { ?>checked<?php } ?><?php if(isset($LabourNameWise) && $LabourNameWise == 1){?> checked<?php } ?> />
+                                                    <label for="LabourNameWise">Yes, I like to make with Individual Labour Names</label>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 col-lg-offset-3 col-md-4 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-12 form-group" style="display:none" id="laupload">
+											<span class="lab-str btn-file-str"> <i class="fa fa-folder-open"></i> Upload File
+												<input type="file" name="upFile" id="upFile" />
+                                                <div class="error_message upl_err" style="padding-top:10px;"><p>Required</p></div>
+											</span>
+                                            <div class="filename" id="fileshow" style="display:none;margin-top:10px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5">
+                                    <li id="backPrev"><a href="javascript:void(0);" onclick="return goBack();"><span><i class="fa fa-arrow-left"></i></span> Back</a></li>
+                                    <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next <span><i class="fa fa-arrow-right"></i></span></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="excelmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog modal-lg" style="width: 90%">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                                    <h1>Labour Strength Entry Sheet - Validation Steps</h1>
+                                </div>
+                                <div class="modal-body model-middle">
+                                    <div class="col-lg-12">
+                                        <div class="row">
+                                            <div class="step_by_liner animated slideInDown"></div>
+                                            <ul class="step_by stepby_mb23">
+                                                <li class="opacity_08">
+                                                    <div id="divstep1" class="step_by_sep animated slideInRight">
+                                                        <p>1</p>
+                                                    </div>
+                                                    <p id="p_1" class="stepli_p2">Fields</p>
+                                                </li>
+                                                <li class="opacity_08">
+                                                    <div id="divstep2" class="step_by_sep animated slideInRight">
+                                                        <p>2</p>
+                                                    </div>
+                                                    <p id="p_2">RowType</p>
+                                                </li>
+                                                <li class="opacity_08">
+                                                    <div id="divstep3" class="step_by_sep animated slideInRight">
+                                                        <p>3</p>
+                                                    </div>
+                                                    <p id="p_3">Labour Nmae</p>
+                                                </li>
+                                                <li class="opacity_08">
+                                                    <div id="divstep4" class="step_by_sep animated slideInRight">
+                                                        <p>4</p>
+                                                    </div>
+                                                    <p id="p_4">Wbs Name</p>
+                                                </li>
+
+                                                <li class="opacity_08">
+                                                    <div id="divstep5" class="step_by_sep animated slideInRight">
+                                                        <p>5</p>
+                                                    </div>
+                                                    <p id="p_7">Finalise</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12  col-md-12 col-sm-12 cnt_slider">
+                                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                            <div class="carousel-inner" role="listbox">
+                                                <div class="item active" id="divitem1">
+                                                    <div class="col-md-7 col-md-offset-3">
+                                                        <h1 class="h1-head">Assign Fields</h1>
+                                                        <div class="table-responsive popuptable animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+                                                            <table class="table" width="100%" style=" margin-bottom:0px;">
+                                                                <tbody>
+                                                                <tr id="excelfieldTable"></tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="item" id="divitem2">
+                                                    <h1 class="h1-head">Bill of Quantities</h1>
+                                                    <div class="table-responsive parent-scroll" id="diviowtable" style="display: block">
+                                                        <table class="fixTable table" style="margin-bottom:0px;" id="excelTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="th-modal">Parent</th>
+                                                                <th class="th-modal">RefNo</th>
+                                                                <th class="th-modal">Specification</th>
+                                                                <th class="th-modal">Unit</th>
+                                                                <th class="th-modal">Qty</th>
+                                                                <th class="th-modal text-right">Rate</th>
+                                                                <th class="th-modal text-right">Amount</th>
+                                                                <th class="th-modal">RowType</th>
+                                                                <th class="th-modal">&nbsp; </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr id="excelrowid_1">
+                                                                <td style="width:20%"><input type="text" class="parent_text"  id="excelparent_1" ></td>
+                                                                <td style="width:10%"><input type="text" class="parent_text"  id="excelserialno_1" ></td>
+                                                                <!--                                            <td style="width:10%"><input type="text" class="parent_text"  id="excelcode_1" ></td>-->
+                                                                <td style="width:25%"><input type="text" class="parent_text"  id="excelspec_1" ></td>
+                                                                <td style="width:10%"><input type="text" class="parent_text"  id="excelunit_1" onfocus="excelUnitFocus(this.id)" onchange="excelUnitvalid(this.id)"></td>
+                                                                <td style="width:10%"><input type="text" class="parent_text text-right"  maxlength="15" id="excelqty_1" onkeypress="return isDecimal(event,this)"></td>
+                                                                <td style="width:10%"><input type="text" class="parent_text text-right"  maxlength="15" id="excelrate_1" onkeypress="return isDecimal(event,this)"></td>
+                                                                <td style="width:10%"><input type="text" class="parent_text text-right"  maxlength="15" id="excelamount_1" onkeypress="return isDecimal(event,this)"></td>
+                                                                <td style="width:5%"><input type="text" class="parent_text"  id="excelrowtype_1" onchange="validRowType(this.id)"></td>
+                                                                <td width="3%" align="center"><a href="javascript:void(0);" class="excelTrDelete_1" style="margin-right: 10px;display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a></td>
+                                                                <input type="hidden" id="exceliowid_1" >
+                                                                <input type="hidden" id="excelparentid_1">
+                                                                <input type="hidden" id="excelwgid_1" >
+                                                                <input type="hidden" id="excelwgtypeid_1" >
+                                                                <input type="hidden" id="excelunitid_1" >
+                                                                <input type="hidden" id="excelresid_1" >
+                                                                <input type="hidden" id="excelrestypeid_1" >
+                                                                <input type="hidden" id="excelnewresspec_1" >
+                                                                <input type="hidden" id="excelnewworkgroupname_1" >
+                                                                <input type="hidden" id="excelparentspec_1" >
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="item" id="divitem3">
+                                                    <h1 class="h1-head">Undefined WorkGroup</h1>
+                                                    <div class="table-responsive parent-scroll" id="divwgtable" style="display: block">
+                                                        <table class="fixTable table" style="margin-bottom:0px;" id="excelwgTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Undefined WorkGroup</th>
+                                                                <th>Library WorkGroup</th>
+                                                                <th>WorkType</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="width:35%"><input type="text" class="parent_text"  id="excelunworkgroup_1" readonly></td>
+                                                                <td style="width:30%"><input type="text" class="parent_text"  id="excelrefworkgroup_1"></td>
+                                                                <td style="width:30%"><input type="text" class="parent_text"  id="excelrefworktype_1"></td>
+                                                                <input type="hidden" id="excelrefworkgroupid_1" >
+                                                                <input type="hidden" id="excelrefworktypeid_1" >
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="item" id="divitem4">
+                                                    <h1 class="h1-head">Undefined Resource</h1>
+                                                    <div class="table-responsive parent-scroll form-group" id="divrestable" style="display: block">
+                                                        <table class="fixTable table" style=" box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);border:1px solid #ddd" id="excelresTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width:20%" class="th-modal">Undefined Resource</th>
+                                                                <th style="width:20%" class="th-modal">Resource</th>
+                                                                <th style="width:20%" class="th-modal">Resource Group</th>
+                                                                <th style="width:10%" class="th-modal">Unit</th>
+                                                                <th style="width:10%" class="th-modal">Type</th>
+                                                                <th style="width:10%" class="th-modal">MaterialType</th>
+                                                                <th style="width:10%" class="th-modal text-right">WorkingUnit</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="width:20%"><input type="text" class="parent_text"  id="excelresresource_1" readonly></td>
+                                                                <td style="width:20%"><input type="text" class="parent_text"  id="excelresoldresource_1" onfocus="return checkExcelResourceFocus(this.id)"></td>
+                                                                <td style="width:20%"><input type="text" class="parent_text"  id="excelresresgroup_1"></td>
+                                                                <td style="width:10%"><input style="display: none;" type="text" class="parent_text"  id="excelresunit_1"></td>
+                                                                <td style="width:10%"><input style="display: none;" type="text" class="parent_text"  id="excelrestype_1" readonly></td>
+                                                                <td style="width:10%">
+                                                                    <select style="display: none;" id ="excelresmaterialtype_1">
+                                                                        <option value="G">General</option>
+                                                                        <option value="F">Fuel</option>
+                                                                        <option value="S">Steel</option>
+                                                                        <option value="P">Production</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style="width:10%"><input style="display: none;" type="text" class="parent_text"  id="excelreswunit_1"></td>
+                                                                <input type="hidden" id="excelresold_1" >
+                                                                <input type="hidden" id="excelresunitid_1" >
+                                                                <input type="hidden" id="excelresresgroupid_1" >
+                                                                <input type="hidden" id="excelresrestypeid_1" >
+                                                                <input type="hidden" id="excelreswunitid_1" >
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="item" id="divitem5">
+                                                    <h1 class="h1-head">Undefined Units</h1>
+                                                    <div class="table-responsive parent-scroll" id="divunittable" style="display: block">
+                                                        <table class="fixTable table" style="margin-bottom:0px;" id="excelunitTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Undefined Unit</th>
+                                                                <th>Unit</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="width:50%"><input type="text" class="parent_text"  id="excelununit_1" readonly></td>
+                                                                <td style="width:50%"><input type="text" class="parent_text"  id="excelrefunit_1"></td>
+                                                                <input type="hidden" id="excelrefunitid_1" >
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="modal-footer">
+                                    <div align="carousel">
+                                        <a class="carousel-control md_ok" id="carouselNext" href="javascript:void(0);" data-slide="next">Next</a></div>
+                                    <a style="display: none" class="carousel-control md_ok" id="carouselApply" href="javascript:IOWUpdate();">Apply</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#backPrev").hide();
+    var arrCostCentre = <?php echo (isset($opCostCentre)) ? json_encode($opCostCentre) : '[]'; ?>;
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    $('.excelClick').on('click', function() {
+        $('.upl_err').hide();
+    });
+
+    $('#LabourNameWise').on('click', function() {
+        if($(this).is(":checked"))
+            $('#WBSRequired').val(0);
+        else
+            $('#WBSRequired').val(1);
+    });
+
+    var $costCentreId = $('#CostCentreId');
+    var $wbsvalue=$('#wbsvalue');
+
+    $(function () {
+        bindCostCentreAutoComplete();
+        <?php if(isset($backvalues)){?>
+        $('#costCentreName').val('<?php echo $backvalues['backCostCentreName'] ?>').trigger('change');
+        $('#wbsvalue').val('<?php echo $backvalues['backwbscheck'] ?>');
+        $('#EntryForm').val('<?php echo $backvalues['backEntryForm'] ?>');
+        $('#WBSRequired').val('<?php echo $backvalues['backWBSRequired'] ?>');
+        //$('#LabourNameWise').val('<?php echo $backvalues['backLabourNameWise'] ?>');
+        <?php if( $backvalues['backLabourNameWise'] ==1) { ?>
+        $('#LabourNameWise').prop('checked', true);
+        <?php } ?>
+        <?php } ?>
+    });
+        /*$('input[type="file"]').change(function(e){
+            alert("wheu");
+            var fileName = e.target.files[0].name;
+            $("#fileshow").show().html(fileName);
+            $('#excelmodal').modal('show');
+
+            var file_data = $("#upFile").prop("files")[0];
+              console.log(file_data);                        // Getting the properties of file from file field
+            var form_data = new FormData();                  // Creating object of FormData class
+            form_data.append("file", file_data)              // Appending parameter named file with properties of file_field to form_data
+
+            $.ajax({
+                url: getBaseURL() + "wpm/labourstrength/entry",
+                dataType: 'script',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,                         // Setting the data attribute of ajax with file_data
+                type: 'post',
+                success: function (data, status, xhr) {
+                    var obj = jQuery.parseJSON(data);
+
+                    $("#excelfieldTable").find("th").remove();
+                    $("#excelfieldTable").find("td").remove();
+                    //$("#excelfield").find("td").remove();
+
+                    var sStr="Select Field";
+                    for (var i = 0; i < obj.length; i++) {
+                        $("#excelfieldTable").append('<tr><th width="20%"><input id="efield_'+i+'" class="text-reon text-right" type="text" value="'+obj[i]['Field']+'" style="background: transparent;"/></th>' +
+                        '<td width="70%"><input id="field_'+i+'" class="parent_text" type="text"'+sStr+' onfocus="checkexcelFieldFocus(this.id)"</td></tr>');
+                        $('#efield_'+i).prop('readonly', true);
+
+                    }
+
+                  *//*  bindexcelFieldComplete();
+                    $('#divitem1').addClass('active');
+                    iExcelStep=1;
+                    $('#divstep1').removeClass('stepsep_active');
+                    $('#divstep2').removeClass('stepsep_active');
+                    $('#divstep3').removeClass('stepsep_active');
+                    $('#divstep4').removeClass('stepsep_active');
+                    $('#divstep5').removeClass('stepsep_active');
+                    $('#divstep6').removeClass('stepsep_active');
+                    $('#divstep7').removeClass('stepsep_active');
+
+                    $('#p_1').removeClass("stepli_p2");
+                    $('#p_2').removeClass("stepli_p2");
+                    $('#p_3').removeClass("stepli_p2");
+                    $('#p_4').removeClass("stepli_p2");
+                    $('#p_5').removeClass("stepli_p2");
+                    $('#p_6').removeClass("stepli_p2");
+                    $('#p_7').removeClass("stepli_p2");
+
+                    $('#divitem2').removeClass('active');
+                    $('#divitem3').removeClass('active');
+                    $('#divitem4').removeClass('active');
+                    $('#divitem5').removeClass('active');
+                    $('#carouselNext').show();
+                    $('#carouselApply').hide();
+                    $("#excelmodal").modal('show');*//*
+                },
+                error: function (xhr, status, errorThrown) {
+                    if (xhr.status == 400)
+                        alert(xhr.responseText);
+                    else
+                        alert(errorThrown);
+                }
+            })
+        });
+    });*/
+
+    function bindCostCentreAutoComplete() {
+        $('#costCentreName').autocomplete({
+            lookup: arrCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $this = $(this);
+                    $('#CostCentreId').val(suggestion.data);
+                    $('#wbsvalue').val(suggestion.wbs);
+                    $(this).removeClass('error');
+                    costCentreChange();
+                }
+
+            }, onSearchStart: function (suggestion) {
+                $('#CostCentreId').val(0);
+                $('#wbsvalue').val("");
+                $(this).removeClass('error');
+
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) {
+                    $(this).addClass('error');
+                    $('#CostCentreId').val(0);
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+
+    function validateLabStg()
+    {
+
+        $('.error_message').hide();
+        $('.upl_err').hide();
+        var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+        var enForm = $("input[name='entryForm']:checked").val();
+
+        if (lCostCentreId == 0) {
+            $costCentreId.closest('.form-group').find(".error_message").show();
+            return;
+        } else {
+           /* alert("else");
+            if($('#excelEntry').val() =='E') {
+                if ($('#upFile').val() == '') {
+                    $(".upl_err").show();
+                    return ;
+                }
+            }*/
+
+            $('#formWrapper').submit();
+        }
+    }
+
+    function goBack()
+    {
+        var curItem = $('#carousel-example-generic .item.active').index();
+        if(curItem == 3) {
+            $('#carousel-example-generic').carousel(1);
+        } else {
+            $('#carousel-example-generic').carousel({
+                slide: "prev"
+            });
+        }
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function costCentreChange() {
+        $("#labentry").show();
+        if ($("#directEntry").is(":checked") && $("#directEntry").val() =='D') {
+            $("#labdirectentry").show();
+        }
+        $("#excelEntry").click(function() {
+            $("#excelEntry").attr('checked', 'checked');
+            $("#labdirectentry").hide();
+            $("#laupload").show();
+        });
+        $("#directEntry").click(function() {
+            $("#directEntry").attr('checked', 'checked');
+            $("#labdirectentry").show();
+            $("#laupload").hide();
+        });
+    }
+
+
+    /*$('select#CostCentreId').change(function() {
+
+    });*/
+
+    <?php if(isset($lsRegister)) { ?>
+    $("#labentry").show();
+    $("#labdirectentry").show();
+    <?php } ?>
+
+
+</script>

@@ -1,0 +1,330 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    #treeGrid .jqx-grid-header {
+        height:75px !important;
+    }
+
+    .social_profiles{ display:none !important;}
+    .pro-sett ul.left-65 li a{width:auto !important; padding:0px 5px; font-size:14px !important;}
+    .pro-sett ul.left-65	 {left: -295px !important;}
+    .fnt-s12				 {font-size:13px !important;}
+    .pro-flt-sett i			 { color:#FFF;}
+    .pro-sett ul.left-65 li a:hover{ background:#00bcd4!important;}
+
+    .pro-flt-sett{ background:#00bcd4!important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="fixed-action-btn active" data-toggle="tooltip" data-placement="left" id="divExcelImport" title="Import From Excel">
+                 <span class="butclr-ns btn-file">
+                    <p class="sam-up"><i class="fa fa-folder-open sap"></i></p>
+                    <input type="file" name="myfile" id="myfile" class="input-large filestyle" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="getexcelfield(this)">
+                 </span>
+            </div>
+            <h1 class="float_l" style="margin-bottom:30px;">HSN Master</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive clear">
+                <div id="treeGrid"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="excelfieldmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" style="width: 50%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Resource Import Sheet - Assign Fields</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive popuptable animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">
+                    <table class="table" width="100%" style=" margin-bottom:0px;">
+                        <tbody>
+                        <tr id="excelfieldTable">
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer"> <a href="javascript:void(0);" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return fileupload()" >Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+
+var bExcelHSNCode = false,
+    bExcelHSNName = false,
+    bExcelHSNSectionId = false,
+    bExcelUpdate =false;
+
+var formData = new FormData();
+var arrayField =[];
+arrayField = [{ data :1, value: 'HSNCode' },
+    { data :2, value: 'Description' },
+    { data :3, value: 'SectionId' }
+];
+
+var arrayFieldR = arrayField;
+var data = <?php echo (isset($hsnmaster)) ? json_encode($hsnmaster) : '[]';?>,
+//    sectiondata = <?php //echo (isset($sectionmaster)) ? json_encode($sectionmaster) : '[]';?>//,
+    $treeGrid = $("#treeGrid"),
+    $editModal = $('#EditModal'),
+    $qualifierName = $('#qualifierName');
+
+$(function () {
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'HSNId', type: 'number' },
+            { name: 'HSNCode', type: 'string' },
+            { name: 'Description', type: 'string' },
+            { name: 'SectionName', type: 'string' },
+            { name: 'HSNType', type: 'string' }
+        ],
+        id: 'HSNId'
+    };
+
+//    var list = {
+//        localdata:sectiondata,
+//        dataType: "json",
+//        dataFields: [
+//            { name: 'SectionId', type: 'number' },
+//            { name: 'SectionName', type: 'string' }
+//        ],
+//        id: 'SectionId'
+//    };
+//    var list = new $.jqx.dataAdapter(list, { autoBind: true, async: false });
+
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        showfilterrow: true,
+        columns: [
+            { text: 'HSNId', datafield: 'HSNId', hidden: true, filterable: false},
+            { text: 'HSNType', datafield: 'HSNType', hidden: true},
+            { text: 'HSNCode', dataField: 'HSNCode', width:'10%',
+                cellsrenderer: function (row) {
+                    var sHType = $treeGrid.jqxGrid('getcellvalue', row, "HSNType"),sCode="";
+                    if (sHType =='C')  sCode = '<div style="font-size:13px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'HSNCode') + '</div>';
+                    else if (sHType =='H')  sCode = '<div style="font-size:12px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'HSNCode') + '</div>';
+                    else sCode ='<div style="font-size:12px;">' + $treeGrid.jqxGrid('getCellValue', row, 'HSNCode') + '</div>';
+                    return sCode;
+                }
+            },
+            { text: 'Description', dataField: 'Description', width:'70%',
+                cellsrenderer: function (row) {
+                    var sHType = $treeGrid.jqxGrid('getcellvalue', row, "HSNType"),sCode="";
+                    if (sHType =='C')  sCode = '<div style="font-size:13px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'Description') + '</div>';
+                    else if (sHType =='H')  sCode = '<div style="font-size:12px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'Description') + '</div>';
+                    else sCode ='<div style="font-size:12px;">' + $treeGrid.jqxGrid('getCellValue', row, 'Description') + '</div>';
+                    return sCode;
+                }
+            },
+            { text: 'SectionName', columntype: 'dropdownlist', dataField: 'SectionName', width:'20%',
+                cellsrenderer: function (row) {
+                    var sHType = $treeGrid.jqxGrid('getcellvalue', row, "HSNType"),sCode="";
+                    if (sHType =='C')  sCode = '<div style="font-size:13px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'SectionName') + '</div>';
+                    else if (sHType =='H')  sCode = '<div style="font-size:12px; font-weight:600;">' + $treeGrid.jqxGrid('getCellValue', row, 'SectionName') + '</div>';
+                    else sCode ='<div style="font-size:12px;">' + $treeGrid.jqxGrid('getCellValue', row, 'SectionName') + '</div>';
+                    return sCode;
+                }
+//                ,
+//                initeditor: function (row, column, editor) {
+//                    editor.jqxDropDownList('Open');
+//                    editor.jqxDropDownList({ displayMember: 'SectionName', source: list});
+//                }
+            },
+        ]
+    });
+});
+
+//ExcelImport
+function getexcelfield(x) {
+    var bValid=true;
+
+    bExcelHSNCode = false;
+    bExcelHSNName = false;
+    bExcelHSNSectionId = false;
+
+    formData = new FormData();
+    formData.append('file', $('#myfile').prop("files")[0]);
+    $.ajax({
+        url: getBaseURL() +"project/qualifier/gethsnfielddata",
+        async: false,
+        dataType: 'script',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: formData,
+        type: 'post',
+        success: function(data,status, xhr) {
+            var obj = jQuery.parseJSON(data);
+
+            $("#excelfieldTable").find("th").remove();
+            $("#excelfieldTable").find("td").remove();
+//            $("#excelfield").find("td").remove();
+
+            var sStr="Select Field";
+            for (var i = 0; i < obj.length; i++) {
+                $("#excelfieldTable").append('<tr><th width="20%"><input id="efield_'+i+'" class="text-reon text-right" type="text" value="'+obj[i]['Field']+'" style="background: transparent;"/></th> <td width="70%"><input id="field_'+i+'" class="parent_text" type="text"'+sStr+' onfocus="checkexcelFieldFocus(this.id)"</td></tr>');
+//                $("#excelfield").append('<td><input id="field_'+i+'" class="parent_text" type="text"'+sStr+' onfocus="checkexcelFieldFocus(this.id)"</td>');
+                $('#efield_'+i).prop('readonly', true);
+
+                if (obj[i]['Field'].trim().toUpperCase() == 'HSNCODE') { $('#field_'+i).val('HSNCode'); bExcelHSNCode=true; }
+                if (obj[i]['Field'].trim().toUpperCase() == 'DESCRIPTION') { $('#field_'+i).val('Description'); bExcelHSNName=true;}
+                if (obj[i]['Field'].trim().toUpperCase() == 'SECTIONID') { $('#field_'+i).val('SectionId'); bExcelHSNSectionId=true; }
+            }
+
+            bindexcelFieldComplete();
+            $("#excelfieldmodal").modal('show');
+        },
+        error: function(xhr, status, errorThrown) {
+            if (xhr.status == 400)
+                alert(xhr.responseText);
+            else
+                alert(errorThrown);
+        }
+    });
+    clearInputFile($('#myfile'));
+}
+
+function bindexcelFieldComplete() {
+    var $excelfield = $('input[id^=field_]');
+    $excelfield.unbind('autocomplete');
+    $.each($excelfield, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+        checkexcelFieldUsed(key1);
+        $this.autocomplete({
+            lookup: arrayFieldR,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) removeError($(this));
+            }, onSearchStart: function(suggestion) {
+                //$("#materialAdvId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) showError($(this), 'Invalid');
+                else removeError($(this));
+            }
+        });
+    });
+}
+
+function clearInputFile(file){
+    var f = file[0];
+    if(f.value){
+        try{
+            f.value = '';
+        }catch(err){ }
+        if(f.value){
+            var form = document.createElement('form'),
+                parentNode = f.parentNode, ref = f.nextSibling;
+            form.appendChild(f);
+            form.reset();
+            parentNode.insertBefore(f,ref);
+        }
+    }
+}
+function checkexcelFieldFocus(x) {
+    var arrname = x.split('_');
+    var key1 = arrname[1];
+    checkexcelFieldUsed(key1);
+}
+function checkexcelFieldUsed(id) {
+    var reskeyid = $('input[id*=field_]');
+    arrayFieldR = arrayField;
+    arrayFieldR= $.grep(arrayField, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.value == $this.val()) {
+                    is_selected = false;
+                }
+            }
+        });
+        return is_selected;
+    });
+}
+function fileupload() {
+    var isValid=true;
+    var $excelpids = $('input[id^=field_]');
+    $.each($excelpids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        var key1 = name.split('_')[1];
+        if ($('#field_' + key1).hasClass('error')) {
+            isValid=false;
+            return;
+        }
+    });
+    if (isValid==false) {alert ("Please Assign Fields Correctly"); return;}
+
+    $("#excelfieldmodal").modal('hide');
+    var bValid=true;
+    var arrHeader =[];
+    for (var i = 0; i < $("#excelfieldTable").find("th").length; i++) {
+        arrHeader.push({efield: $('#efield_'+i).val(), field: $('#field_'+i).val()});
+    }
+    arrHeader =  JSON.stringify(arrHeader);
+    formData.append('arrHeader', arrHeader);
+    formData.append('csrf', "<?php echo isset($csrf)?$csrf:''; ?>");
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() +"project/qualifier/uploadhsndata",
+        async: false,
+        dataType: 'script',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data:  formData,
+        type: 'post',
+        success: function(data,status, xhr) {
+            if (data == "Y") {
+                alert("Successfully Imported");
+            }
+        },
+        error: function(xhr, status, errorThrown) {
+            if (xhr.status == 400)
+                alert(xhr.responseText);
+            else
+                alert(errorThrown);
+        }
+    });
+    $('.loading_area').hide();
+//    if (bExcelCode==false) $('.excel-code-txt').hide();
+    clearInputFile($('#myfile'));
+}
+</script>

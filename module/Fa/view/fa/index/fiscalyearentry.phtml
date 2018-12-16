@@ -1,0 +1,240 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<!--<link rel="stylesheet" href="http://rawgit.com/wenzhixin/bootstrap-table/master/src/bootstrap-table.css" />
+<script src="http://rawgit.com/wenzhixin/bootstrap-table/master/src/bootstrap-table.js"></script>-->
+<style type="text/css">
+/*.scrl {overflow-y: scroll !important;min-height:100% !important;max-height:500px !important;}*/
+.rt_bx-clr{color:#07549b;font-size:16px;padding-bottom:6px;}
+.table-responsive {overflow-x:inherit !important;}
+.hgh{min-height:500px;max-height:100%;}
+
+.Checkbox {
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.Checkbox > * {
+  position: absolute;
+}
+.Checkbox-visible {
+  border: 1px solid gray;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  background: #fff;
+  border: 1px solid #dedede;
+  border-radius: 3px;
+}
+.Checkbox > input {
+  z-index: 1;
+  opacity: 0;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translatex(-50%) translatey(-50%);
+          transform: translatex(-50%) translatey(-50%);
+  display: block;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+.Checkbox > input:checked + .Checkbox-visible {
+  background: #337ab7;
+  border-color: #337ab7;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nMTQnIGhlaWdodD0nMTQnIHZpZXdCb3g9JzAgMCAxNCAxNCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48dGl0bGU+d2hpdGU8L3RpdGxlPjxwYXRoIGQ9J001LjM3OCAxMS4zN0wyIDcuNTlsMS40MzgtMS4yODZMNS4zNzQgOC40N2w1LjE4NS01Ljg0TDEyIDMuOTFsLTYuNjIyIDcuNDYnIGZpbGw9JyNmZmYnLz48L3N2Zz4=);
+}
+.Checkbox > input:hover + .Checkbox-visible {
+  border-color: #cccccc;
+}
+.Checkbox > input:hover:checked + .Checkbox-visible {
+  border-color: #558cbb;
+}
+.Checkbox > input:focus + .Checkbox-visible {
+  border-color: #337ab7;
+}
+
+.table-fixed tbody{height:470px;overflow-y:auto;width:100%;}
+.table-fixed thead,.table-fixed tbody,.table-fixed tr,.table-fixed td,.table-fixed th{display:block;}
+.table-fixed tbody td,.table-fixed thead>tr>th{float:left; border-bottom:0;position:relative;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap;}
+
+
+</style>
+<form id="formWrapper" method="post" onsubmit="return entryValidate();">
+	<h2 class="vendordetail_change">New Fiscal Year</h2>
+	<div class="right_lbox_inner_cnt">
+		<div class="col-lg-12">
+			<div class="form-horizontal">
+				<div class="row">
+					<div class="col-lg-12">
+						<div id="fiscal1" class="prt-next">
+							<div class="form-group">
+								<div class="col-lg-12">
+								<label class="rt_bx-clr">What is The New Fiscal Year Name ?</label>
+									<input type="text" name="fiscalYearName" id="fiscalYearName" class="form-control lbl_move" label="What is the new Fiscal Year Name ?" value="<?php echo (isset($fiscalList)) ? $fiscalList['FName'] : '';?>" />
+									<input type="hidden" class="form-control lbl_move" name="FYearId" id="FYearId" value="<?php echo (isset($FYearId)) ? $FYearId:'0';?>"/>
+									<input type="hidden" class="form-control lbl_move" name="type" id="type"/>
+									<span class="error" id="errorfiscalYearName"></span>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-lg-12">
+								<label class="rt_bx-clr">Start Date</label>
+									<input type="text" class="date_picker form-control" label="Start Date" name="startDate" id="startDate" onchange="setEndDate()" value="<?php echo (isset($fiscalList)) ? $fiscalList['StartDate'] : '';?>" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-lg-12">
+								<label class="rt_bx-clr">End Date</label>
+									<input readonly disabled type="text" class="date_picker form-control" label="End Date" name="endDate" id="endDate" value="<?php echo (isset($fiscalList)) ? $fiscalList['EndDate'] : '';?>" />
+								</div>  
+							</div>							
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div id="fiscal2" style="display: none;">
+						<div class="col-lg-12">
+							<div class="table-responsive" style="margin-top:10px;margin-bottom:10px;">
+								<table class="table table-fixed">
+									<thead class="">
+									<tr>
+										<th width="15%" class="bg_clo">Select</th>
+										<th width="50%" class="bg_clo">Company</th>
+										<th width="35%" class="bg_clo">Posting Lock</th>
+									</tr>
+									</thead>
+                                    <tbody>
+                                        <?php if(isset($companyMasterList)) { $i=0;
+                                            $companyCount=count($companyMasterList); ?>
+                                            <input type="hidden" name="companyCount" id="companyCount" value="<?php echo $companyCount;?>">
+                                            <?php foreach($companyMasterList as $companyList): $i++; ?>
+
+                                        <tr>
+                                            <td width="15%">
+                                                <!--<div class="checkbox-styled">
+													<label>
+														<input type="checkbox" name="sel_<?php echo $i;?>" id="sel_<?php echo $i;?>" <?php if($companyList['Sel'] ==1 ) { echo "checked"; }?> value="1">
+														<span></span>
+													</label>
+												</div>-->
+												<div class="Checkbox">
+													<input type="checkbox" name="sel_<?php echo $i;?>" id="sel_<?php echo $i;?>" <?php if($companyList['Sel'] ==1 ) { echo "checked"; }?> value="1" />
+													<div class="Checkbox-visible"></div>
+												</div>
+                                            </td>
+                                            <td width="50%">
+                                                <?php echo $companyList['CompanyName'];?>
+                                                <input type="hidden" name="companyId_<?php echo $i;?>" id="companyId_<?php echo $i;?>" value="<?php echo $companyList['CompanyId'];?>"/>
+                                            </td>
+                                            <td width="35%">
+                                                <select class="single_dropdown2" style="width: 100%" name="postingLock_<?php echo $i;?>" id="postingLock_<?php echo $i;?>">
+                                                    <option value="0" <?php if($companyList['Type'] == 0 ) { echo "selected"; }?> >Select</option>
+                                                    <option value="1" <?php if($companyList['Type'] == 1 ) { echo "selected"; }?> >Monthly</option>
+                                                    <option value="2" <?php if($companyList['Type'] == 2 ) { echo "selected"; }?> >Quarterly</option>
+                                                    <option value="3" <?php if($companyList['Type'] == 3 ) { echo "selected"; }?> >Half yearly</option>
+                                                    <option value="4" <?php if($companyList['Type'] == 4 ) { echo "selected"; }?> >Yearly</option>
+                                                </select>
+                                            </td>
+
+                                        </tr>
+
+                                        <?php endforeach; } else { ?>
+                                            <td colspan="3"><p style="text-align: center;padding: 88px;">No data to display</p></td>
+                                        <?php } ?>
+                                    </tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<p class="rightlbox_btn rightlbox_btnchng fiscal1"><a href="javascript:void(0);" onclick="nextFiscal();" class="ripple">Next</a></p>
+<p class="rightlbox_btn rightlbox_btnchng fiscal2 clears" style="display: none;">
+	<a href="javascript:void(0);" onclick="previousFiscal();" class=" fiscal2 ripple" title="Back">Back</a>
+	<a href="javascript:void(0);" onclick="submitForm();" id="submitFId" class="ripple" title="Submit">Submit</a>
+</p>
+	<!--<ul>
+		<li class="dropdown save_btn float_r fiscal1"><a href="javascript:void(0);" onclick="nextFiscal();" data-toggle="tooltip" class="ripple" title="Next">Next</a></li>
+		<li class="dropdown save_btn float_r fiscal2" style="display: none;"><a href="javascript:void(0);" onclick="submitForm();" id="submitFId" data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+		<li class="cancel_btn float_r left fiscal2" style="display: none;"><a href="javascript:void(0);" onclick="previousFiscal();" data-toggle="tooltip" class="ripple" title="Back">Back</a></li>
+	</ul>-->
+
+<script type="text/javascript">
+    $(function () {
+        $('.right_lightbox').attr('pageRefresh','0');
+    });
+    $(".single_dropdown2").select2({
+        placeholder: ""
+    });
+    $(".date_picker").datepicker({
+        format: "dd-mm-yyyy",
+        viewMode: "months",
+        minViewMode: "months",
+        autoclose: true
+    });
+
+    function nextFiscal(){
+        if($.trim($('#fiscalYearName').val()).length == 0) {
+            $('#fiscalYearName').focus();
+            $('#errorfiscalYearName').text('Fiscal Year is Required');
+            return false;
+        }else{
+            $('#errorfiscalYearName').text('');
+        }
+
+        $('#fiscal1').hide();
+        $('.fiscal1').hide();
+        $('#fiscal2').show();
+        $('.fiscal2').show();
+    }
+    function previousFiscal(){
+        $('#fiscal2').hide();
+        $('.fiscal2').hide();
+        $('#fiscal1').show();
+        $('.fiscal1').show();
+    }
+
+    function entryValidate(){
+        if($('#fiscalYearName').val().length == 0) {
+            $('#fiscalYearName').focus();
+            $('#errorfiscalYearName').text('Fiscal Year is Required!');
+            return false;
+        }else{
+            $('#errorfiscalYearName').text('');
+        }
+
+    }
+    function submitForm(){
+        $('#endDate').attr('disabled',false);
+        $('#type').val('addEditDetails');
+
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/fiscalyearentry",
+            type:"post",
+            //async:false,
+            data:$('#formWrapper').serialize(),
+            success:function(data, textStatus, jqXHR){
+                $('.right_lightbox').hide().attr('pageRefresh','1').trigger('change');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+    function setEndDate(){
+        var startDate=$('#startDate').val();
+        startDate=$.datepicker.parseDate('dd-mm-yy', startDate);
+        var endDate=startDate.setFullYear(startDate.getFullYear() + 1);
+        endDate=prettyDate(new Date(endDate));
+        $('#endDate').val(endDate);
+
+    }
+    function prettyDate(date) {
+        var months = ['01', '02', '03', '04', '05', '06',
+            '07', '08', '09', '10', '11', '12'];
+
+        return date.getUTCDate() + '-' + months[date.getUTCMonth()] + '-' + date.getUTCFullYear();
+    }
+</script>

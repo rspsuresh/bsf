@@ -1,0 +1,176 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    .drsElement{position: absolute;border: 1px solid #333;}
+    .drsMoveHandle{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+    .dragresize{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+    .dragresize-tl{top:-8px;left:-8px;cursor:nw-resize;}
+    .dragresize-tm{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+    .dragresize-tr{top:-8px;right:-8px;cursor:ne-resize;}
+    .dragresize-ml{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+    .dragresize-mr{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+    .dragresize-bl{bottom:-8px;left:-8px;cursor:sw-resize;}
+    .dragresize-bm{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+    .dragresize-br{bottom:-8px;right:-8px;cursor:se-resize;}
+    .text-bold, .text-bold * {ont-weight: bold !important;}
+    .text-italic, .text-italic * {font-style: italic !important;}
+    .text-underline, .text-underline * {text-decoration: underline !important;}
+    .style-left, .style-left * {text-align: left;}
+    .style-center, .style-center * {text-align: center;}
+    .style-right, .style-right * {text-align: right;}
+    .style-justify, .style-justify * {text-align: justify;}
+    #styleOptions {display:  none;}
+    #ElementTemplate,
+    .remScnt {
+        display:none;
+    }
+    .remScnt{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+    .remScnt > .fa.fa-trash-o {
+        text-decoration: none !important;
+        font-style: normal !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        color: #000 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    .up-buttm-10					{margin-top:8px; margin-bottom:8px;}
+    .plus-action{color:#478505;font-size:19px}
+    .h3-head{font-size:16px; color:#333; line-height:30px}
+    .total td{color:#666; font-weight:500}
+    .total td b{color:#333}
+</style>
+<form method="post" action="<?php echo $this->basePath(); ?>/application/printpreview/preview" target="_blank">
+    <input type="hidden" name="htmlcontent" id="htmlcontent" />
+    <input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($soRegister)) ? $soRegister['ClientId'] : 0;?>"  />
+    <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+
+<div style="width:700px; margin:auto; padding-top:20px; position:relative;">
+    <div id="htmlwrapper">
+
+        <?php echo (isset($template)) ? $template : '';?>
+<!--        <div>-->
+<!--            <textarea style="height:60px" class="parent_texts"></textarea>-->
+<!--        </div>              -->
+        <div style="margin-bottom:30px; margin-top:20px; display:block">
+            <table class="table bill-cum" style=" margin-bottom:0px; margin-top:10px;" id="EntryTable" cellpadding="0" cellspacing="0" width="520">
+                <thead>
+                <tr>
+                    <th width="27%" class="thscss text-left" align="left">Service Name</th>
+                    <th width="7%" class="thscss text-right" align="right">Qty</th>
+                    <th width="14%" class="thscss text-right" align="right">Rate</th>
+                    <th width="8%" class="thscss text-right" align="right">Amount</th>
+                    <th width="3%"></th>
+                </tr>
+                </thead>
+                <tbody class="main">
+                <?php
+                $CurAmtTotal = 0;
+                if(isset($woboq)):
+                    foreach($woboq as $trans):
+                        $CurAmtTotal += $trans['Amount'];
+                        ?>
+                        <tr class="padi05">
+                            <td width="6%" class="tdpds text-left" align="left"><?php echo $trans['ServiceName'];?></td>
+                            <td width="6%" class="tdpds text-right" align="right"><?php echo (isset($trans)) ? $this->commonHelper()->sanitizeNumber($trans['Qty'], 2, true) : 0.00;?></td>
+                            <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'], 2, true);?></td>
+                            <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Amount'], 2, true);?></td>
+                            <td></td>
+                        </tr>
+                    <?php endforeach; endif;?>
+                <tr class="total">
+                    <td colspan="3" align="right" class="tdpds text-right">Base Amount</td>
+                    <td width="6%" align="right"><b><?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal, 2, true);?></b> </td>
+                </tr>
+                <?php if(isset($qualLists)){
+                    foreach($qualLists as $qualList){
+                        ?>
+                        <tr class="total">
+                            <td colspan="3" align="right" class="tdpds text-right"><?php echo $qualList['QualifierName'];?><span style="color:#EB4600;margin-left:10px;font-weight:800;"><?php echo $qualList['tots'];?></span></td>
+                            <td width="6%" style="text-align:right"><b><?php echo $qualList['NetAmt'];?></b></td>
+                            <td>
+                                <?php if($qualList['Sign']=="+"){?>
+                                    <i class="fa fa-plus-circle plus-action" aria-hidden="true"></i>
+                                <?php } else { ?>
+                                    <i class="fa fa-minus-circle plus-action" aria-hidden="true" style="color:#ff0000"></i>
+                                <?php }?>
+                            </td>
+                        </tr>
+                    <?php
+                    }
+                } ?>
+                <!--					  <tr class="total">-->
+                <!--                    <td colspan="3" align="right" class="tdpds text-right">Service Tax</td>-->
+                <!--                    <td width="6%" style="text-align:right"><b>567657</b></td>-->
+                <!--					<td><i class="fa fa-minus-circle plus-action" aria-hidden="true" style="color:#ff0000"></i></td>-->
+                <!--					</tr>-->
+                <tr class="total">
+                    <td colspan="3" align="right" class="tdpds text-right"><b>Total Amount</b></td>
+                    <td width="6%"style="color:#478505;font-size:16px;font-weight:600;text-align:right"><?php echo $this->commonHelper()->sanitizeNumber($soRegister['NetAmount'], 2, true);?></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="font-size:12px;font-weight:600;" ><?php echo $soAmtinwords;?></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="display:block;margin-top:10px;">
+            <h3 class="h3-head">Terms and condition</h3>
+            <table class="table bill-cum">
+                <tbody>
+                <tr class="total">
+                    <td width="15%" colspan="3" align="right" class="tdpds text-right"><b>Discount</b></td>
+                    <td width="5%" align="right"><b>4875</b></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="display:block;margin-top:10px;">
+            <textarea style="height:60px" class="parent_texts"></textarea>
+        </div>
+        <?php echo (isset($footertemplate)) ? $footertemplate : '';?>
+    </div>
+    <div class="fixed-action-btn-ra active">
+        <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+    </div>
+    <div style="display:block;margin:10px 0;">
+        <h3 class="h3-head">Enclosures</h3>
+        <textarea style="height:60px" class="parent_texts"></textarea>
+    </div>
+</div>
+<?php
+if(isset($soRegister) && $soRegister['LogoPath']!="") {
+    $imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/'.$soRegister['LogoPath'];
+}
+?>
+<script type="text/javascript">
+
+    $(function() {
+        $("textarea#textBox").attr('style','border:none');
+        $('#browse_1').attr('onclick',false);
+        $('#browse_1').find("div").removeClass("ovrly").removeClass("buttons");
+        var woregister = <?php echo (isset($soRegister))?json_encode($soRegister):'[]'; ?>;
+        var currentdate = '<?php echo date('d-m-Y'); ?>';
+        var imgUrl = '<?php echo $imgUrl; ?>';
+        var $p_scents = $('#p_scents');
+        var $g_scents = $('#g_scents');
+        $p_scents.find('.remScnt').remove();
+        $g_scents.find('.remScnt').remove();
+        $.each(woregister, function(index, value) {
+            if(value != null && value != '') {
+                $p_scents.find('#req_' + index).text(value);
+                $g_scents.find('#req_' + index).text(value);
+            }
+
+        });
+        $p_scents.find('#req_LogoPath').attr('src', imgUrl);
+        $p_scents.find('#wo_Date').text(currentdate);
+
+        $(".exportAction").click(function(){
+            $('#htmlcontent').val($('#htmlwrapper').html());
+            $('form').submit();
+        });
+    });
+
+</script>

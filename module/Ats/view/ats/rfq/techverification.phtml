@@ -1,0 +1,145 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<style type="text/css">
+	.content_wrapper{min-height:515px !important;}
+</style>
+<div class="content_wrapper">
+	<div class="container-fluid">
+		<div class="row">
+			<div id="divnewpagetittle" >
+				<h1 class="text-center">Tech Verification Info</h1>
+			</div>
+			<form id="formSubmit" action="" method="post">
+				<div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+					<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next">
+						<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+							<div class="col-lg-12 frmwrk_div req_flds" id="projects_list">
+								<select name="project_idNew" id="project_selectNew" label="Select Rfq No" class="form-control single_dropdown lbl_move" data-size="6" title="Select Rfq No..." style="width:100%;">
+									<option value="">Select Rfq No</option>
+									<?php if(isset($rfq)):?>
+										<?php foreach ( $rfq as $rfqno ):?>
+											<option value="<?php echo $rfqno[ 'RFQRegId' ];?>"><?php echo $rfqno[ 'RFQNo' ];?></option>
+										<?php endforeach; ?>
+									<?php  endif; ?>
+								</select>
+								<div class="error_message"><p>Please Select Rfq No..</p></div>
+							</div>
+							<div class="col-lg-12 frmwrk_div req_flds" id="vendor">
+								<select name="vendorname" id="vendorname" label="Select Vendor Name" class="form-control single_dropdown lbl_move" data-size="6" title="Select Vendor Name..." style="width:100%;" onchange="showOptions1(this);">
+									
+								</select>
+								<div class="error_message"><p>Please Select Vendor Name..</p></div>
+                            </div>
+							<div class="col-lg-12 frmwrk_div" id="type">	
+								<div class="radio_check">
+									<p class="stat_lbl" id="tech">
+										<input type="radio" value="1" id="In" name="Type"/> 
+										<label for="In" class="">Tech Verification</label>
+									</p>
+									<p class="stat_lbl" id="bid">
+										<input type="radio" value="2" id="Out" name="Type"/>
+										<label for="Out" class="">Bid Manually</label>
+									</p>
+								</div>
+							</div>
+							<div class="savebtn_areas col-lg-8 col-sm-7 col-sm-offset-3 col-xs-offset-4 col-lg-offset-3">
+								<ul>
+									<li class="subs"><a onclick="return submitForm()" href="javascript:void(0);" id="continue">Next</a></li>
+								</ul>
+							</div>
+						
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script>
+$('#vendor').hide();
+$('#type').hide();
+function showOptions1(s){
+	//var adVALUE =s[s.selectedIndex].value; 
+	var rfqid = $("#project_selectNew").val();
+	var vendorid = $("#vendorname").val();
+	var selected = $("input[type='radio'][name='Type']:checked");
+	console.log(selected);
+	if (selected.val() == 1) {
+		$('#continue').attr('href',"<?php echo $this->basePath(); ?>/ats/response/techinfo-entry/"+rfqid+"/"+vendorid);
+	}else{
+		$('#continue').attr('href',"<?php echo $this->basePath(); ?>/ats/response/response-entry/"+rfqid+"/"+vendorid);
+	}	
+}
+function submitForm() {
+	$('.error_message').hide();
+	if ($('#project_selectNew').val() == '') { 	
+		$('#project_selectNew').closest('.req_flds').find('.error_message').show();
+		return false;
+	}else if($('#vendorname').val() == '') { 	
+		$('#vendorname').closest('.req_flds').find('.error_message').show();
+		return false;
+	}
+}
+$('select, textarea').on('change', function() {
+	entryShow();
+});
+function entryShow() {
+	$('#vendor').hide();
+	$('#type').hide();
+	if ($('#project_selectNew').val() != '') {
+		$('#vendor').show();
+	}
+}
+$('#project_selectNew').on('change',function() {
+    var target = $('#project_selectNew').val();
+	if($.trim(target)!="") {
+		$.ajax({
+			url: getBaseURL() + "ats/rfq/techverification",
+			type: "post",
+			async: false,
+			data:"rfqId="+target+"&mode=rfqno",
+			success: function (data, textStatus, jqXHR) {	
+				var vendorDetails = JSON.parse(data);
+				$('#vendorname').html('');
+				var toAppend = '<option value=""></option>';
+				if(vendorDetails.length>0) {
+					$.each(vendorDetails, function (i, o) {
+						toAppend += '<option value="' + o.VendorId + '">' + o.VendorName + '</option>';
+					});
+					$('#vendorname').append(toAppend);
+					$('#vendorname').select2();
+				}
+			},
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(textStatus + "-----" + errorThrown);
+			}
+		});
+	} 
+});
+
+$('#vendorname').on('change',function() {
+	$('#type').show();
+	var vendorid = $('#vendorname').val();
+	var rfqId = $('#project_selectNew').val();
+	$.ajax({
+		url: getBaseURL() + "ats/rfq/techverification",
+		type: "post",
+		async: false,
+		data:"rfqId="+rfqId+"&vendorid="+vendorid+"&mode=hide",
+		success: function (data, textStatus, jqXHR) {	
+			var Details = JSON.parse(data);
+			if(Details == false) {
+				$("#bid").hide();
+				$("#tech").show();
+				$("#In").attr( 'checked', true )
+			}else{
+				$("#tech").hide();
+				$("#bid").show();
+				$("#Out").attr( 'checked', true )
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			alert(textStatus + "-----" + errorThrown);
+		}
+	});
+});
+</script>

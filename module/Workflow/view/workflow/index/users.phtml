@@ -1,0 +1,128 @@
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 col-md-6 col-sm-5 padlr0">Users
+            	<div <?php if($curUser==1) { echo 'style="display:block";'; } else { echo 'style="display:none";'; } ?> class="stgedit_btn <?php if($curUser==1) { echo 'req_addbtn'; } ?> brad_50">
+                    <a href="user-entry" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Users"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+            <div class="col-lg-6 col-md-6 col-sm-7 padlr0">
+                <label class="col-lg-3 col-lg-offset-1 col-md-3 col-md-offset-1 col-sm-4 col-sm-offset-1 control-label text-right">Filter</label>
+                <div class="col-lg-6 col-md-6 col-sm-6 m_btm10">
+				<div class="input-group col-md-12">
+                    <input name="search_all" id="search_all" type="text" onkeyup="userSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+						</div>
+                </div>
+				<ul class="grid_change m_top10 float_r">
+                    <li><a class="grid_change_line grid_change_active" href="users"><span><i class="fa fa-th"></i></span></a></li>
+                    <li><a class="grid_change_box" href="userlist"><span><i class="fa fa-list-ul"></i></span></a></li>
+                </ul>
+            </div>
+        </div> 
+        <div class="col-lg-12 clear">
+            <div class="row">
+                <ul class="col-lg-12 users_grid animated fadeIn">
+                    <?php
+                    foreach($resultReg as $i): ?>
+                        <li class="col-lg-12 col-md-12 col-sm-12 padlr0">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 detail-list">
+                                <h3>&nbsp;<?php echo $i['EmployeeName'] ?></h3>
+                                <p>&nbsp;<?php echo $i['PositionName'] ?></p>
+                                <p class="user_email"><i class="fa fa-envelope" aria-hidden="true"></i>&nbsp; <?php echo $i['Email']; ?></p>
+								<p class="user_phone"><span><i class="fa fa-phone-square" aria-hidden="true"></i>&nbsp; <?php echo $i['Mobile']; ?></span></p>
+                            </div>
+                            <div>
+                                <span class="comp_arrowlink"><a href="user-view/<?php echo $i['UserId'] ?>" class="brad_50" data-toggle="tooltip" data-placement="left" title="View&nbsp;Profile"><i class="fa fa-gg"></i></a></span>
+                                <div <?php if($curUser==1) { echo 'style="display:block";'; } else { echo 'style="display:none";'; } ?> class="user_editlink comp_editlink brad_50"><a href="user-entry/<?php echo $i['UserId'] ?>" class="ripple brad_50" data-toggle="tooltip" data-placement="top" title="Edit&nbsp;Profile"><i class="fa fa-pencil"></i></a></div>
+                               <div class="usersgrid_logo compgrid_logo brad_50 m_auto">
+                                    <span><img class="brad_50" src="<?php if(isset($i['UserLogo']) && trim($i['UserLogo'])!='') { echo $this->basePath(); ?>/<?php echo $i['UserLogo']; } else { echo $this->basePath(); ?>/images/no-img1.jpg<?php } ?>" /></span>
+                                </div>
+                            </div>
+                            <ul>
+                                <li>&nbsp;<?php echo $i['Dept_Name'] ?></li>
+                                <li>&nbsp;<?php echo $i['LevelName'] ?></li>
+                                <li>&nbsp;<?php echo $i['UserName'] ?></li>
+                            </ul>
+                            <a href="javascript:void(0);" id="lock_type_<?php echo $i['UserId']; ?>" <?php if($curUser==1 && $i['UserId']!=1) { echo 'onclick="activate('.$i['UserId'].','.$i['Lock'].');"'; } ?> class="act_deactivate_icon ripple" data-toggle="tooltip" data-placement="left" data-original-title="<?php if($i['Lock']==0) { echo 'Active'; } else { echo 'De-active'; } ?>">
+                            	<span <?php if($i['Lock']==0) { echo 'style="display:none;"'; } ?> id="unlock_symbol_<?php echo $i['UserId']; ?>" class="act_span_icon"><i class="fa fa-check-square-o"></i></span>
+                            	<span <?php if($i['Lock']==1) { echo 'style="display:none;"'; } ?> id="lock_symbol_<?php echo $i['UserId']; ?>" class="deact_span_icon"><i class="fa fa-check-square"></i></span>
+                            </a> 
+                        </li>
+                    <?php endforeach; ?>
+                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    globalTimeout = null;
+function userSearch(strSearch) {
+    if (globalTimeout != null) {
+        clearTimeout(globalTimeout);
+    }
+    globalTimeout = setTimeout(function() {
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/users',
+        type: 'POST',
+        data: {"searchStr": $.trim(strSearch),"mode":'search'},
+        async: true,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                $('.row').html('');
+                $('.row').html(data);
+                $('[data-toggle="tooltip"]').tooltip();
+            } else
+                alert('Failed...');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Failed....');
+        }
+    });
+        globalTimeout=null;
+    }, 500);
+}
+function activate(userId,type) {
+    var ques ="";
+    if(type==1) {
+        ques="Are you sure, you want to activate this User?"
+    } else {
+        ques="Are you sure, you want to de-activate this User?"
+    }
+    if(confirm(ques)) {
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/users',
+            type: 'POST',
+            data: {"userId": userId, "mode": 'activate', "type": type},
+            success: function (data, textStatus, jqXHR) {
+                if (jqXHR.status == 200) {
+                    var lockType = "";
+                    var typeChange = data;
+                    if (typeChange == 1) {
+                        lockType = "De-active";
+                        $('#lock_symbol_' + userId).hide();
+                        $('#unlock_symbol_' + userId).show();
+                    } else {
+                        lockType = "Active";
+                        $('#unlock_symbol_' + userId).hide();
+                        $('#lock_symbol_' + userId).show();
+                    }
+                    $('#lock_type_' + userId).attr('data-original-title', lockType);
+                    $('#lock_type_' + userId).attr("onclick", "activate('" + userId + "','" + typeChange + "');");
+                    $('[data-toggle="tooltip"]').tooltip();
+                } else
+                    alert('Failed...');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Failed....');
+            }
+        });
+    } else{
+        return false;
+    }
+}
+</script>

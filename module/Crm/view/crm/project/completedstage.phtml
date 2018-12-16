@@ -1,0 +1,181 @@
+<style type="text/css">
+    #treeGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times"></i></button>
+                <h1>Why do you want to delete Stage Completion : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                                <form id="delete-stage-completion-form" class="form-horizontal">
+                                    <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+                                    <input type="hidden" name="StageCompletionId" id="StageCompletionId">
+                                    <div class="row">
+                                        <div class="form-group req_flds">
+                                            <textarea id="DeleteRemarks" name="DeleteRemarks" maxlength="250" class="form-control lbl_move" label="Remarks"/></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                    <a href="#" id="btnDeleteYes" class="md_ok">Delete</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Completed Stages
+                <div class="stgedit_btn req_addbtn brad_50">
+                    <a href="<?php echo $this->basePath();?>/crm/project/stagecompletion" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+            <div class="col-lg-12 padlr0 tmss commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $treeGrid = $('#treeGrid'),
+        $deleteModal = $('#DeleteModal');
+
+    $(document).ready(function () {
+
+        var source =
+        {
+            localdata:<?php echo (isset($gridResult)) ? json_encode($gridResult) : "[]"; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'ProjectId', type: 'string' },
+                { name: 'CompletionDate', type: "date", format: 'DD-MM-yyyy'  },
+                { name: 'ProjectName', type: 'string' },
+                { name: 'StageCompletionNo', type: 'string' },
+                { name: 'StageCompletionId', type: 'number' },
+                { name: 'StageName', type: 'string' },
+                { name: 'PBRaised', type: 'number' }
+            ],
+            id: 'StageCompletionId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $("#treeGrid").jqxGrid(
+            {
+                width: '100%',
+                pageable: true,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight:true,
+                //rowsheight:60,
+                autorowheight: true,
+                filterable: true,
+                sortable: true,
+                //filtermode: 'advanced',
+                columnsResize: true,
+                showfilterrow: true,
+                ready:function(){
+                    var localizationobj = {};
+                    localizationobj.emptydatastring = "No request to display";
+                    $("#treeGrid").jqxGrid('localizestrings', localizationobj);
+                },
+                source:dataAdapter,
+                columns: [
+                    { text: 'StageCompletionId', dataField: 'StageCompletionId',hidden: true, filterable: false},
+                    { text: 'PBRaised', dataField: 'PBRaised',hidden: true, filterable: false},
+                    { text: 'RefNo', dataField: 'StageCompletionNo',width:'10%'},
+                    { text: 'Date', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'CompletionDate',width:'15%'},
+                    { text: 'ProjectName', dataField: 'ProjectName',width:'25%'},
+                    { text: 'StageName', dataField: 'StageName',width:'20%'},
+                    { text: 'Action', sortable: false, filterable: false,width:'10%',align: 'left',
+                        cellsrenderer: function (row) {
+                            var StageCompletionId = $("#treeGrid").jqxGrid('getCellValue', row, 'StageCompletionId'),
+                                PBRaised = $("#treeGrid").jqxGrid('getCellValue', row, 'PBRaised'),
+                                editLink;
+                            if(PBRaised != 0){
+                                // view
+                                editLink = '<a title="View" href="'+ getBaseURL() + 'crm/project/stagecompletion-edit/'+StageCompletionId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-eye reg-icon"></i></a>'
+                            } else {
+                                // edit or delete
+                                editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/project/stagecompletion-edit/'+StageCompletionId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>'
+                                + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: deleteStageCompletion('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                            }
+                            return editLink;
+                        }
+                    },
+                    { text: 'Progress Bill', sortable: false, filterable: false, width:'20%',
+                        cellsrenderer: function (row) {
+                            var StageCompletionId = $("#treeGrid").jqxGrid('getCellValue', row, 'StageCompletionId'),
+                                PBRaised = $("#treeGrid").jqxGrid('getCellValue', row, 'PBRaised'),
+                                proj = $("#treeGrid").jqxGrid('getCellValue', row, 'ProjectName'),
+                                genetrateBill;
+                               //console.log(PBRaised);
+                           if(PBRaised == '0'){
+                                genetrateBill = '<a title="Generate Progress Bill" href="'+ getBaseURL() + 'crm/bill/progress/'+StageCompletionId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-file-text-o" style="padding-right:5px;"></i> Generate Bill</a>';
+                            }
+                            else if(parseInt(PBRaised)  == '1'){
+                                genetrateBill ='<span style="margin-left: 15px; background-color:#5BB856; margin-top:8px;padding:2px 4px; display:inline-block; color:#fff;"><i class="fa fa-check" style="color:#fff;"></i>Bill Generated</span>';
+                            }
+                            else{
+                                genetrateBill = '<span>-</span>';
+                            }
+                            return genetrateBill;
+                        }
+                    }
+                ]
+            });
+
+        bindDeleteStageCompletionYes_onClick();
+
+        function bindDeleteStageCompletionYes_onClick() {
+            $('#btnDeleteYes').on('click', function(ev) {
+                ev.preventDefault();
+
+                var $DeleteRemarks = $('#DeleteRemarks');
+                var deleteRemarks = $DeleteRemarks.val().trim();
+                if(deleteRemarks.length <= 0) {
+                    showError($DeleteRemarks, 'Remarks is required!');
+                    return;
+                }
+
+                var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'crm/project/deleteStageCompletion',
+                    data: $('#delete-stage-completion-form').serialize(),
+                    type: 'POST',
+                    success: function(data, status, xhr) {
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                        $deleteModal.modal('hide');
+                    },
+                    error: function(xhr, status, error) {
+                        alert(xhr.responseText);
+                    }
+                });
+            });
+        }
+    });
+
+    function deleteStageCompletion(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+        $('#delEntryName').html(rowData.StageCompletionNo);
+        $('#StageCompletionId').val(rowData.StageCompletionId);
+        $("#DeleteRemarks").val('');
+    }
+</script>

@@ -1,0 +1,198 @@
+
+<style type="text/css">
+    .adj{font-size:15px !important;margin-bottom:4px;color:#3a4ed5}
+    .upload_file_input {float: left!important;width:100% !important;}
+	.bind_file{clear:both;}
+
+</style>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script>
+    tinymce.init({
+        selector: "textarea"
+//        file_browser_callback : 'myFileBrowser'
+    });
+</script>
+<div class="uploading_area" style="display: none;">
+    <div class="uploading_text"><p id="loadingArea">Uploading Files...</p></div>
+</div>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Bulk Mail</h1>
+            <div class="box no_border">
+                <form id="mailForm" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="type" id="type" value="mailRequest" />
+                    <input type="hidden" name="leadArray" id="leadArray" value="<?php echo (isset($leadArray)) ? $leadArray : ''; ?>" />
+                    <div class="box-body">
+                        <div class="form-group m_btm20">
+                            <input type="text" name="subject" id="subject" class="form-control padlr0 emptyMail" placeholder="Subject:" />
+                        </div>
+                        <div class="form-group">
+                            <textarea id="compose-textarea" name="compose-textarea" class="form-control emptyMailTextArea" style="height: 250px"></textarea>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group col-lg-12">
+                            <p class="help-block">Max. 32MB</p>
+                            <div class="btn btn-default btn-file col-lg-2">
+                                <i class="fa fa-paperclip"></i> Attachment <input type="file" multiple name="file[]" id="file" onchange="loader();"/>
+                            </div>
+                            <div class="col-lg-1 pull-right">
+                                <button type="submit" class="btn btn-primary" onclick="sendMail();"><i class="fa fa-envelope-o"></i> Send</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="bind_file"></div>
+							<div class="clearfix"></div>
+                        </div>
+                    </div>
+                </form><!-- /.box-body -->
+            </div><!-- /. box -->
+        </div>
+        <div id="msgBoxSuccess" class="modal fade" role="dialog">
+            <div class="modal-dialog ">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 id="myModalLabel">Success Message</h1>
+                    </div>
+                    <div class="modal-body modal_body_min_h200">
+                        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div class="success_box animated fadeIn">
+                                <div class="icon icon-success svg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="72px" height="72px">
+                                        <g fill="none" stroke="#8EC343" stroke-width="2">
+                                            <circle cx="36" cy="36" r="35" style="stroke-dasharray:240px, 240px; stroke-dashoffset: 480px;"></circle>
+                                            <path d="M17.417,37.778l9.93,9.909l25.444-25.393" style="stroke-dasharray:50px, 50px; stroke-dashoffset: 0px;"></path>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <h1 class="txt_center animated fadeInDown clear">
+                                    Your Mail has been Sent
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer clear">
+                        <div class="col-lg-12 savebtn_area no_border">
+                            <ul>
+                                <li class="save_btn float_r">
+                                    <a href="javascript:void(0);" class="ripple saves_ok" onclick="return closePop(1);">Ok</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="msgBoxError" class="modal fade" role="dialog">
+            <div class="modal-dialog ">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 id="myModalLabel">Error Message</h1>
+                    </div>
+                    <div class="modal-body modal_body_min_h200">
+                        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div class="success_box animated fadeIn">
+                                <div class="icon icon-success svg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="72px" height="72px">
+                                        <g fill="none" stroke="#8EC343" stroke-width="2">
+                                            <circle cx="36" cy="36" r="35" style="stroke-dasharray:240px, 240px; stroke-dashoffset: 480px;"></circle>
+                                            <path d="M17.417,37.778l9.93,9.909l25.444-25.393" style="stroke-dasharray:50px, 50px; stroke-dashoffset: 0px;"></path>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <h1 class="txt_center animated fadeInDown clear">
+                                    Failed to Send Mail
+                                </h1>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer clear">
+                        <div class="col-lg-12 savebtn_area no_border">
+                            <ul>
+                                <li class="save_btn float_r">
+                                    <a href="javascript:void(0);" class="ripple saves_ok" onclick="return closePop(2);">Ok</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        dCount=0;
+        $(document).on('mouseover','.closeHover',function() {
+            $(this).addClass('adj');
+        }).on('mouseout','.closeHover',function(){
+            $(this).removeClass('adj');
+        });
+
+    });
+    function closePop(el){
+        if(el==1) {
+            $('#msgBoxSuccess').modal('hide');
+            $(location).attr('href',"<?php echo $this->basePath(); ?>/crm/lead/bulk-lead-mail");
+
+        } else {
+            $('#msgBoxError').modal('hide');
+        }
+    }
+    function sendMail() {
+        $('#loadingArea').text('Sending Mail...');
+        $('.uploading_area').show();
+        $('#type').val('mailRequest');
+        tinyMCE.triggerSave();
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/bulk-mail-send',
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            data: new FormData($('#mailForm')[0]),
+            success:function(data, textStatus, jqXHR){
+                $('.uploading_area').hide();
+                $('#msgBoxSuccess').modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('.uploading_area').hide();
+                $('#msgBoxError').modal('show');
+            }
+        });
+    }
+    function loader() {
+        // var len= $('#file').prop("files");
+        var val="";
+        $('#loadingArea').text('Uploading Files...');
+        $('.uploading_area').show();
+        $('#type').val('ajaxloader');
+
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/bulk-mail-send',
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            data: new FormData($('#mailForm')[0]),
+            success:function(data, textStatus, jqXHR){
+                data = JSON.parse(data);
+                $('.input-attachment-url').remove();
+                $.each(data,function(i,o){
+                    dCount++;
+                    $('#mailForm').append('<input class="aFile_'+dCount+'" type="hidden" name="fileattached[]" value="'+ o.url+'">');
+                    val+='<span class="aFile_'+dCount+'" style="position: relative;display: block;float: left;width: 20% !important;"><input type="text" class="upload_file_input adj" style="position:relative;" value="'+ o.name+'" name="uploadedFile" id="uploadedFile" label="Select File" /><i class="fa fa-times closeHover" id="'+dCount+'" onclick="closeFile(this.id)" style="cursor: pointer;position: absolute;margin-right: 6px;top: 2px;right: 0;" ></i></span>';
+
+                });
+                $('.bind_file').append(val);
+                $('.uploading_area').hide();
+
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('.uploading_area').hide();
+            }
+        });
+    }
+    function closeFile(cId) {
+        $('.aFile_'+cId).remove();
+    }
+</script>

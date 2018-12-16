@@ -1,0 +1,765 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.all.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.theme.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.core.min.css" rel="stylesheet" />
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.globalize.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.easing-1.3.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jsrender.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/ej.web.all.min.js"></script>
+
+<style>
+    .top_ct {
+        margin-top:15px !important;
+    }
+    input[type=checkbox] {position: relative;right: -10px;width: auto;float:left; margin-right:12px; z-index: 1;opacity: 0;  cursor: pointer;}
+    input[type=checkbox]:checked + label:after {opacity: 1;}
+    input[type=checkbox]:checked:hover + label:after {opacity: 1;}
+    input[type=checkbox]:hover + label:after {opacity: 0.3;}
+    input[type=checkbox] + label {position: relative; float: left; left: 0;width: auto;cursor: pointer;}
+    input[type=checkbox] + label:before {display: inline-block;position: absolute;top: -1px;left:-17px;width: 18px;height: 18px;
+        background: white;content: '';border-radius: 2px;border: 1px solid #ABABAB;}
+    input[type=checkbox] + label:after {-moz-transform: rotate(-45deg); -ms-transform: rotate(-45deg); -webkit-transform: rotate(-45deg); transform: rotate(-45deg);display: block;position: absolute;top: 5px;left: -12px;width: 8px;height: 4px;
+        opacity: 0;background: transparent;border-left: 2px solid #295E26;border-bottom: 2px solid #295E26;content: '';}
+
+    .row_header input[type=text] {font-weight:600 !important; font-size:15px !important; color: #015de6;background:#DCDCDC!important;}
+
+    .table-fixed thead {
+        width: 100%;
+    }
+    .table-fixed thead tr th{background:#CED8ED}
+    .table-fixed tbody.bodyqty {
+        height: 200px;
+        overflow-y: auto;
+        width: 100%;
+    }
+    .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+        display: block;
+    }
+    .table-fixed tbody td, .table-fixed thead > tr> th {
+        float: left;
+        border-bottom-width: 0;
+    }
+</style>
+<!--Container-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form method="post">
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - Schedule</h1>
+                </div>
+                <!--excel-->
+                <div class="fixed-action-btn active">
+                    <a class="btn-floating btn-large">
+                        <i class="fa fa-paperclip"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a class="btn-floating hide-input-file" data-toggle="tooltip" data-placement="top" data-original-title="Import From Excel">
+                                <i class="fa fa-file-excel-o"></i>
+                                <input type="file" name="myfile" id="myfile" class="input-large" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="fileupload(this)" />
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn-floating" href="#" download data-toggle="tooltip" data-placement="top" data-original-title="Download Sample">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!--excel end-->
+                <!--form start-->
+                <div class="col-lg-12 top_ct">
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" label="Reference Date" value="<?php if ($rfcId != 0) { echo date("d-m-Y", strtotime($rfcRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="refNo" id="refNo" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcId != 0) ? $rfcRegister['RefNo'] : $svNo; ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="projectName" id="projectName" class="form-control lbl_move" label="Project Name" value="<?php if(isset($projectinfo)) { echo $projectinfo['ProjectName']; } else if(isset($rfcRegister['ProjectName'])) { echo $rfcRegister['ProjectName']; } ?>" />
+                            <input type="hidden" name="projectId" id="projectId" value="<?php if(isset($projectinfo)) { echo $projectinfo['ProjectId']; } else if(isset($rfcRegister['ProjectId'])) { echo $rfcRegister['ProjectId']; } ?>" />
+                            <input type="hidden" name="rfcId" id="rfcId" value="<?php echo ($rfcId != 0) ? $rfcId : ''; ?>" />
+                            <input type="hidden" name="rfcType" id="rfcType" value="<?php echo ($rfcId != 0) ? 'Schedule-Edit' : 'Schedule-Add'; ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="projectTypeName" id="projectTypeName" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) { echo $projecttypename; } else if(isset($rfcRegister['ProjectType'])) { if($rfcRegister['ProjectType']=='B') { echo 'Budget'; } else if($rfcRegister['ProjectType']=='P') { echo 'Plan'; } } ?>" />
+                            <input type="hidden" name="projectType" id="projectType" value="<?php if(isset($projecttype)) { echo $projecttype; } else if(isset($rfcRegister['ProjectType'])) { echo $rfcRegister['ProjectType']; } ?>" />
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <!--table Jq Gride start-->
+                <div class="text-center" id="nodataheader" style="display: none" ><h1>No Schedule Data Found!</h1></div>
+
+                <div class="col-lg-12 col-lg-offset-0">
+                    <!--					<ul class="print_bt">-->
+                    <!--						<li id="holiday-btn"><a href="javascript:void(0);" id="holiday" onclick="return ShowHoliday()" data-toggle="tooltip" class="ripple" title="Holiday"><i class="fa fa-calendar"></i> Holiday</a>-->
+                    <!--						<li id="print-btn"><a href="javascript:void(0);" id="print" data-toggle="tooltip" class="ripple" title="Print"><i class="fa fa-print"></i> Print</a></li>-->
+                    <!--					</ul>-->
+                    <div class="table-responsive clear">
+                        <div id="gantt" style="position: height: 100%; width: 100%;"></div>
+                    </div>
+                </div>
+                <!--table Jq Gride end-->
+            </form>
+        </div>
+    </div>
+</div>
+<div>
+</div>
+
+<!--container-->
+<div class="col-lg-12 clear">
+    <!--    <ul>-->
+    <!--        <li id ="liqty"><a class="edit-btn edit_al" href='javascript:showQtyForm();'> <i class="fa fa-plus-circle"></i>Show Qty Details</a></li>-->
+    <!--    </ul>-->
+    <!--    <a href="javascript:void(0);" data-original-title="From WorkGroup" data-placement="left" data-toggle="tooltip" class="from_work_btn" onclick="" ><i class="fa fa-window-restore" aria-hidden="true"></i></a>-->
+    <ul>
+        <!--        <input type="checkbox" name="" value ="" id="showqty" class="ripple"/> <label for="checkbox">&nbsp; Show Qty Details</label> <br><br>-->
+        <input type="hidden" name="arrshdetails" id="arrshdetails" value="" />
+        <input type="hidden" name="arrcompdetails" id="arrcompdetails" value="" />
+        <li class="dropdown save_btn float_r" id="submit-btn"><a href="javascript:void(0);" id="overallUpdate" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="back-btn"><a href="<?php echo $this->basePath() . '/project/rfc/rfc-what'; ?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+<!--footer-->
+
+<div class="modal fade bs-example-modal-lg1" id ="datamodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg modal-lg1">
+        <div class="modal-content">
+            <div class="col-lg-12 clear">
+                <div class="modal-header col-sm-12">
+                    <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                    <h1><i class="fa fa-clipboard"></i> Task Details</h1>
+                </div>
+                <!--            <input type="checkbox" name="" value ="" id="showqty" class="ripple" onchange="showQtyDetails(this.id)"/> <label for="checkbox">&nbsp; Show Qty Details</label> <br><br>-->
+                <div class="modal-body col-lg-12" style="background: #fff">
+                    <div class="table-responsive clear" id="divtable">
+                        <div class="col-lg-12">
+                            <table class="table" style=" margin-bottom:0px;" id="tasktable">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">TaskId</th>
+                                    <th>TaskName</th>
+                                    <th class="text-center">Start Date</th>
+                                    <th class="text-center">End Date</th>
+                                    <th class="text-center">Duration</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <td width="5%"><input class="parent_text text-center" type="text" id ="taskid" readonly></td>
+                                <td width="20%">
+                                    <textarea  class="parent_texts" id ="taskname"  readonly></textarea>
+                                </td>
+                                <td width="10%"><input class="parent_text text-center" type="text" id ="startdate" readonly></td>
+                                <td width="10%"><input class="parent_text text-center" type="text" id ="enddate" readonly></td>
+                                <td width="8%"><input class="parent_text text-center" type="text" id ="duration" readonly></td>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-12" id="divSchedule1">
+                            <table class="table" style=" margin-bottom:0px; background:#f1f1f1 !important; border:1px solid #ddd" >
+                                <tr>
+                                    <td width="12%" style="border-left:1px solid #ddd"><p class="text-right">Actual Qty</p></td>
+                                    <td width="10%"><input class="parent_text text-right" type="text" id ="actualQty" readonly></td>
+                                    <td width="12%"><p class="text-right">Schedule Qty</p></td>
+                                    <td width="10%"><input class="parent_text text-right" type="text" id ="shQty" onkeypress="return isDecimal(event,this)"></td>
+                                    <td width="5%">
+                                        <ul class="action_btns">
+                                            <li>
+                                                <a href="#" class="mainTrRefresh" onclick="refreshQty()">
+                                                    <span data-original-title="Refresh" data-placement="left" data-toggle="tooltip"><i class="fa fa-refresh"></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <td width="12%"><p class="text-right">Completed Qty</p></td>
+                                    <td width="10%"style="border-right:1px solid #ddd"><input class="parent_text text-right" type="text" id ="compQty" readonly></td>
+                                    <input type="hidden" id="projectIOWId" value="0"/>
+                                    <input type="hidden" id="wbsId" value="0"/>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divSchedule2" class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <table class="table table-fixed" style=" margin-top:10px;margin-bottom:0; border:1px solid #ddd" id="shqtytable">
+                                <thead>
+                                <tr>
+                                    <th width="30%">Date</th>
+                                    <th width="35%">Schedule Qty</th>
+                                    <th width="35%">Completed Qty</th>
+                                </tr>
+                                </thead>
+                                <tbody class="bodyqty">
+                                </tbody>
+                                <tbody>
+                                <tr>
+                                    <td width="30%" class="rate_pri text-right"><label>Total</label></td>
+                                    <td width="35%"><input type="text" class="parent_text total-clr text-right" id="totalshqty" readonly/></td>
+                                    <td width="35%"><input type="text" class="parent_text total-clr text-right" id="totalcomqty" readonly/></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background:#e6f2f9 ;min-height: auto !important; clear:both; padding-top:10px">
+                    <a href="#" class="md_cance" data-dismiss="modal">Cancel</a>
+                    <button type="button" class="md_ok" onclick="updateshDetails()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--footer-->
+
+<!--Modal-->
+<!--<div id="holidayform" class="modal fade" role="dialog">-->
+<!--    <div class="modal-dialog">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>-->
+<!--                <h1>List of Holidays</h1>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible;animation-delay: 0.2s;">-->
+<!--                    <table class="table" id="holidayTable" style="margin-bottom: 0">-->
+<!--                        <thead>-->
+<!--                        <tr>-->
+<!--                            <th class="th-modal">Name of Holiday</th>-->
+<!--                            <th class="th-modal">Date</th>-->
+<!--                        </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                        --><?php //foreach($hdaylist as $trans): ?>
+<!--                            <tr>-->
+<!--                                <td width="80%"><input type="text" name="hnote" id="hnote" value="--><?php //echo $trans['label']; ?><!--" readonly /></td>-->
+<!--                                <td width="20%"><input type="text" name="hdate" id="hdate" value="--><?php //echo date("d-m-Y", strtotime($trans['day'])); ?><!--" readonly /></td>-->
+<!--                            </tr>-->
+<!--                        --><?php //endforeach; ?>
+<!--                        </tbody>-->
+<!--                    </table>-->
+<!--                </div>-->
+<!--                <div class="clearfix"></div>-->
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" class="cancel_bt" data-dismiss="modal">Cancel</button>-->
+<!--                <button type="button" class="saves_ok" id="btnholiday" onclick="return holiday()" data-dismiss="modal">OK</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--Modal end-->
+<script id="dummy-row" type="text/template" class="hide">
+    <tr id="shRowid__1">
+        <td width="30%"><input class="parent_text" type="text" id ="shdate__1" readonly></td>
+        <td width="35%"><input class="parent_text text-right" type="text" id ="shqty__1" onkeypress="return isDecimal(event,this)" onchange="calculateShQtyTotal()" ></td>
+        <td width="35%"><input class="parent_text text-right" type="text" id ="compqty__1" onkeypress="return isDecimal(event,this)" onchange="calculateShQtyTotal()"></td>
+        <input type="hidden" id="holiday__1" value="0"/>
+    </tr>
+</script>
+
+<script type="text/javascript">
+//DATA SOURCE DECLARATION OF GANTT CONTROL
+var arr_shdetails = <?php echo (isset($shdetails)) ? json_encode($shdetails) : '[]';?>;
+var arrHoliday =  <?php echo (isset($tHoliday)) ? json_encode($tHoliday) : '[]';?>;
+var arrweekHoliday = <?php echo (isset($weekHoliday)) ? json_encode($weekHoliday) : '[]';?>;
+
+var arrshCompQty =   <?php echo (isset($shCompQty)) ? json_encode($shCompQty) : '[]';?>;
+var arrshCompTotQty =   <?php echo (isset($shCompTotQty)) ? json_encode($shCompTotQty) : '[]';?>;
+var arrshActualQty =   <?php echo (isset($shActualQty)) ? json_encode($shActualQty) : '[]';?>;
+var arrshQty =   <?php echo (isset($shQty)) ? json_encode($shQty) : '[]';?>;
+
+var argRowdata = [];
+var weektype = '<?php if(isset($weektype)) echo $weektype; else ""; ?>';
+var data =[ <?php if(isset($strText)) echo $strText; else '""'; ?> ];
+var hday = [ <?php if(isset($strHDay)) echo $strHDay; else '[]';?> ];
+var scheduleType="iow";
+
+var arrshdetails=[];
+var arrcompdetails=[];
+
+$(function () {
+    $('#arrshdetails').val(JSON.stringify(arrshdetails));
+    $('#arrcompdetails').val(JSON.stringify(arrcompdetails));
+    if (data.length==0) {
+        $('#liqty').hide();
+        $('#submit-btn').hide();
+        $('#nodataheader').show();
+        return;
+    }
+    $("#gantt").ejGantt({
+        dataSource: data,
+        allowColumnResize: true,
+        allowSorting: true,
+        allowSelection: true,
+        enableResize: true,
+        enableContextMenu: true,
+        taskIdMapping: "TaskID",
+        taskNameMapping: "TaskName",
+        startDateMapping: "StartDate",
+        progressMapping: "Progress",
+        durationMapping: "Duration",
+        endDateMapping: "EndDate",
+        childMapping: "Children", // "subtasks", //Children
+        enableVirtualization: false,
+        dateFormat: "dd/MM/yyyy",
+        highlightWeekEnds: true,
+        includeWeekend: false,
+        holidays: hday,
+
+        <?php
+        echo 'scheduleStartDate: "' .$stdate. '" ,';
+        echo 'scheduleEndDate: "' .$eddate. '" ,';
+        ?>
+
+        //scheduleStartDate: "12/01/2014",
+        //scheduleEndDate: "03/30/2015",
+
+        //Resources mapping
+        //resourceInfoMapping: "resourceId",
+        //resourceNameMapping: "resourceName",
+        //resourceIdMapping: "resourceId",
+        //resources: projectResources,
+
+        predecessorMapping: "Predecessor",
+
+        //beginEdit: beginEdit,
+
+        showResourceNames: true,
+        toolbarSettings: {
+            showToolbar: true,
+            toolbarItems: [
+                //ej.Gantt.ToolbarItems.Add,
+                ej.Gantt.ToolbarItems.Edit,
+                //ej.Gantt.ToolbarItems.Delete,
+                ej.Gantt.ToolbarItems.Update,
+                ej.Gantt.ToolbarItems.Cancel,
+                //ej.Gantt.ToolbarItems.Indent,
+                //ej.Gantt.ToolbarItems.Outdent,
+                ej.Gantt.ToolbarItems.ExpandAll,
+                ej.Gantt.ToolbarItems.CollapseAll,
+                ej.Gantt.ToolbarItems.Search
+            ]
+        },
+
+        editSettings: {
+            allowEditing: true,
+            allowAdding: false,
+            allowDeleting: false,
+            allowIndent: false,
+            allowOutdent: false,
+            editMode: "cellEditing"
+        },
+
+        showGridCellTooltip: true,
+        treeColumnIndex: 1,
+
+        //Adding column in Gantt
+        load: function () {
+            var columns = this.getColumns();
+            columns.splice(7, 0,
+                {
+                    field: "parent",
+                    visible: false
+                });
+            columns.splice(8, 0,
+                {
+                    field: "iowid",
+                    visible: false
+                });
+            columns.splice(9, 0,
+                {
+                    field: "wbsid",
+                    visible: false
+                });
+        }
+        //End Adding column in Gantt
+    });
+    $("#gantt").ejGantt({
+        endEdit: function (args) {
+            argRowdata = [];
+            argRowdata.push({
+                TaskID: args['data']['item']['TaskID'],
+                TaskName: args['data']['item']['TaskName'],
+                StartDate: args['data']['startDate'],
+                EndDate: args['data']['endDate'],
+                Duration: args['data']['duration'],
+                iowid: args['data']['item']['iowid'],
+                wbsid: args['data']['item']['wbsid']
+            });
+
+            populateQty();
+            refreshQty();
+            //qtyDistribute(dSDate,dEDate,iDuration);
+        }
+    });
+    $("#gantt").ejGantt({
+        rowSelected: function (args) {
+//            argRowdata = args['data']['item'];
+            argRowdata = [];
+            argRowdata.push({
+                TaskID: args['data']['item']['TaskID'],
+                TaskName: args['data']['item']['TaskName'],
+                StartDate: args['data']['startDate'],
+                EndDate: args['data']['endDate'],
+                Duration: args['data']['duration'],
+                iowid: args['data']['item']['iowid'],
+                wbsid: args['data']['item']['wbsid']
+            });
+            if (typeof  args['data']['item']['Children'] == 'undefined') {
+                $('#divSchedule1').show();
+                $('#divSchedule2').show();
+                $('.md_ok').show();
+            }
+            else {
+                $('#divSchedule1').hide();
+                $('#divSchedule2').hide();
+                $('.md_ok').hide();
+            }
+            populateQty();
+//            if ($('#showqty').is(':checked'))
+        }
+    });
+    $('#arrshdetails').val(JSON.stringify(arr_shdetails));
+});
+
+function calculateShQtyTotal() {
+    $trIOW = $('tr[id*=shRowid_]');
+    var dTotQty = 0;
+    var dCompQty = 0;
+    $.each($trIOW, function (j, obj) {
+        var name = $(this)[0].id,
+            arr_name = name.split('_'),
+            key = arr_name[1];
+        dTotQty =  dTotQty + parseFloat(isNullCheck($('#shqty_' + key).val(),'number'));
+        dCompQty =  dCompQty + parseFloat(isNullCheck($('#compqty_' + key).val(),'number'));
+    });
+    $('#totalshqty').val(sanitizeNumber(dTotQty,3));
+    $('#totalcomqty').val(sanitizeNumber(dCompQty,3));
+    $('#compQty').val(sanitizeNumber(dCompQty,3));
+}
+
+//Non Edit taskname Column
+//function beginEdit(args) {
+//	if (this.getColumns()[args.columnIndex].field === "parent") {
+//		args.cancel = true;
+//	}
+//}
+
+//function qtyDistribute(argStartDate,argEndDate,argDuration) {
+//    var dQty = 0,
+//        dTQty = 0,
+//        dSplitQty = 0;
+//
+//    if (argDuration != 0) dSplitQty = dQty / argDuration;
+//
+//    var sSDate = argStartDate.split('/'),
+//        sEDate = argEndDate.split('/');
+//
+//    var dSDate =   new Date(sSDate[1]+'/'+ sSDate[0]+'/'+sSDate[2]),
+//        dEDate = new Date(sEDate[1]+'/'+ sEDate[0]+'/'+sEDate[2]);
+//
+//
+//    while (dSDate < dEDate) {
+//        if (checkHoliday(dSDate) == false) {
+//
+//        }
+//       dSDate.setDate(dSDate.getDate()+1);
+//    }
+//}
+
+function refreshQty() {
+    var iowid =  $('#projectIOWId').val(),
+        wbsid = $('#wbsId').val(),
+        dshQty = parseFloat(isNullCheck($('#shQty').val(),'number')),
+        iDuration = parseInt(isNullCheck($('#duration').val(),'number')),
+        sStartDate =$('#startdate').val(),
+        sEndDate =$('#enddate').val();
+
+    var dSplitQty=0;
+    if (iDuration != 0) dSplitQty = dshQty / iDuration;
+
+    var sSDate = sStartDate.split('/'),
+        sEDate = sEndDate.split('/');
+
+    var dSDate =   new Date(sSDate[1]+'/'+ sSDate[0]+'/'+sSDate[2]),
+        dEDate = new Date(sEDate[1]+'/'+ sEDate[0]+'/'+sEDate[2]);
+
+    var key=0;
+    var dTotQty = 0;
+    $("#shqtytable > tbody.bodyqty").html("");
+    while (dSDate <= dEDate) {
+        key=key+1;
+        var sStr = $("#dummy-row").html();
+        sStr = sStr.replace(/__1/g, '_' + key);
+        $("#shqtytable tbody.bodyqty").append(sStr);
+
+        $('#shdate_' + key).val($.datepicker.formatDate('dd-mm-yy', dSDate));
+
+        if (checkHoliday(dSDate) == false) {
+            $('#shqty_' + key).val(sanitizeNumber(dSplitQty,3));
+            dTotQty =  dTotQty + parseFloat(isNullCheck($('#shqty_' + key).val(),'number'));
+            $('#holiday_' + key).val('0');
+        } else {
+            $('#shRowid_' + key).addClass('row_header');
+            $('#holiday_' + key).val('1');
+            $('#shqty_' + key).prop("readonly", true);
+        }
+        dSDate.setDate(dSDate.getDate()+1);
+    }
+    var diffQty = 0;
+    if (dshQty != dTotQty) diffQty = dshQty-dTotQty;
+    var dlQty =  dSplitQty + diffQty;
+    $('#shqty_' + key).val(sanitizeNumber(dlQty,3));
+    dTotQty= dTotQty+ diffQty;
+    $('#totalshqty').val(sanitizeNumber(dTotQty,3));
+
+}
+
+function updateshDetails() {
+
+    var iowid =  parseIntVal(isNullCheck($('#projectIOWId').val(),'number')),
+        wbsid = parseIntVal(isNullCheck($('#wbsId').val(),'number')),
+        dTotQty = parseFloatVal(isNullCheck($('#totalshqty').val(),'number')),
+        dTotCQty = parseFloatVal(isNullCheck($('#totalcomqty').val(),'number'));
+
+    var bFound=false;
+    for (var i in arrshQty) {
+        if (arrshQty[i].ProjectIOWId == iowid && arrshQty[i].WBSId == wbsid) {
+            arrshQty[i].Qty = dTotQty;
+            bFound = true;
+            break;
+        }
+    }
+    if (bFound ==false) {
+        arrshQty.push({
+            ProjectIOWId: iowid,
+            WBSId: wbsid,
+            Qty: dTotQty
+        });
+    }
+
+    bFound=false;
+    for (var i in arrshCompTotQty) {
+        if (arrshCompTotQty[i].ProjectIOWId == iowid && arrshCompTotQty[i].WBSId == wbsid) {
+            arrshCompTotQty[i].Qty = dTotCQty;
+            bFound = true;
+            break;
+        }
+    }
+    if (bFound ==false) {
+        arrshCompTotQty.push({
+            ProjectIOWId: iowid,
+            WBSId: wbsid,
+            Qty: dTotCQty
+        });
+    }
+
+    var objcom = $.grep(arrshCompQty, function (element, index) {
+        return element.ProjectIOWId != iowid || element.WBSId != wbsid ;});
+
+    var objsh = $.grep(arr_shdetails, function (element, index) {
+        return element.ProjectIOWId != iowid || element.WBSId != wbsid ;});
+
+    $trIOW = $('tr[id*=shRowid_]');
+    $.each($trIOW, function (j, obj) {
+        var name = $(this)[0].id,
+            arr_name = name.split('_'),
+            key1 = arr_name[1];
+
+        objsh.push({
+            ProjectIOWId: iowid,
+            WBSId: wbsid,
+            SDate: $('#shdate_' + key1).val(),
+            SQty: $('#shqty_' + key1).val(),
+            CQty: $('#compqty_' + key1).val(),
+            Holiday: $('#holiday_' + key1).val()
+        });
+
+        var dCQty =  parseFloatVal(isNullCheck($('#compqty_' + key1).val(),'number'));
+        if (dCQty !=0) {
+            objcom.push({
+                ProjectIOWId: iowid,
+                WBSId: wbsid,
+                SDate: $('#shdate_' + key1).val(),
+                Qty: dCQty
+            })
+        }
+    });
+    arr_shdetails = objsh;
+    arrshCompQty= objcom;
+    $('#arrshdetails').val(JSON.stringify(arr_shdetails));
+    $('#arrcompdetails').val(JSON.stringify(arrshCompQty));
+
+    $('#datamodal').modal('hide');
+}
+
+
+function checkHoliday(argDate) {
+    var bHoliday = false;
+
+    var iWeekDay = argDate.getDay()
+    sWeekDay = "";
+    if (iWeekDay == 0) sWeekDay ='Sunday';
+    else if (iWeekDay == 1) sWeekDay ='Monday';
+    else if (iWeekDay == 2) sWeekDay ='Tuesday';
+    else if (iWeekDay == 3) sWeekDay ='Wednessday';
+    else if (iWeekDay == 4) sWeekDay ='Thursday';
+    else if (iWeekDay == 5) sWeekDay ='Friday';
+    else if (iWeekDay == 6) sWeekDay ='Saturday';
+
+    var objWeek = $.grep(arrweekHoliday, function (element, index) {
+        return element.WeekDay == sWeekDay });
+
+    if (objWeek.length >0) {
+        bHoliday = true;
+        return bHoliday;
+    }
+
+    var sDate = $.datepicker.formatDate('yy-mm-dd', argDate);
+    var objHoliday = $.grep(arrHoliday, function (element, index) {
+        return element.HDate== sDate });
+
+    if (objHoliday.length >0) {
+        bHoliday = true;
+        return bHoliday;
+    }
+    return bHoliday;
+}
+
+function populateQty() {
+    if (argRowdata.length <0) return;
+//    $('#taskid').val(argRowdata['TaskID']);
+//    $('#taskname').val(argRowdata['TaskName']);
+//    $('#startdate').val(argRowdata['StartDate']);
+//    $('#enddate').val(argRowdata['EndDate']);
+//    $('#duration').val(argRowdata['Duration']);
+//
+//
+//    var iowid = argRowdata['iowid'],
+//        wbsid = argRowdata['wbsid'];
+
+    $('#taskid').val(argRowdata[0].TaskID);
+    $('#taskname').val(argRowdata[0].TaskName);
+    $('#startdate').val(argRowdata[0].StartDate);
+    $('#enddate').val(argRowdata[0].EndDate);
+    $('#duration').val(argRowdata[0].Duration);
+
+    var iowid = argRowdata[0].iowid,
+        wbsid = argRowdata[0].wbsid;
+
+    $('#projectIOWId').val(iowid);
+    $('#wbsId').val(wbsid);
+
+    var objA = $.grep(arrshActualQty, function (element, index) {
+        return element.ProjectIOWId == iowid && element.WBSId == wbsid ;});
+
+    $('#actualQty').val(sanitizeNumber(0,3));
+    if (objA.length >0) $('#actualQty').val(sanitizeNumber(objA[0]['Qty'],3));
+
+    var objC = $.grep(arrshCompTotQty, function (element, index) {
+        return element.ProjectIOWId == iowid && element.WBSId == wbsid ;});
+
+    $('#compQty').val(sanitizeNumber(0,3));
+    if (objC.length >0) $('#compQty').val(sanitizeNumber(objC[0]['Qty'],3));
+
+    var objS = $.grep(arrshQty, function (element, index) {
+        return element.ProjectIOWId == iowid && element.WBSId == wbsid ;});
+
+    $('#shQty').val(sanitizeNumber(0,3));
+    if (objS.length >0) $('#shQty').val(sanitizeNumber(objS[0]['Qty'],3));
+
+    var objR = $.grep(arr_shdetails, function (element, index) {
+        return element.ProjectIOWId == iowid && element.WBSId == wbsid ;});
+
+    var key=0;
+    $("#shqtytable > tbody.bodyqty").html("");
+    var dTotQty = 0;
+    for (var i = 0; i < objR.length; i++) {
+        key=key+1;
+        var sStr = $("#dummy-row").html();
+        sStr = sStr.replace(/__1/g, '_' + key);
+        $("#shqtytable tbody.bodyqty").append(sStr);
+
+        $('#shdate_' + key).val(objR[i]['SDate']);
+//        $('#compqty_' + key).val(sanitizeNumber(objR[i]['CQty'],3));
+        if (parseInt(isNullCheck(objR[i]['Holiday'],'number')) ==0) {
+            $('#shqty_' + key).val(sanitizeNumber(objR[i]['SQty'],3));
+            dTotQty =  dTotQty + parseFloat(isNullCheck($('#shqty_' + key).val(),'number'));
+            $('#holiday_' + key).val('0');
+        } else {
+            $('#shRowid_' + key).addClass('row_header');
+            $('#holiday_' + key).val('1');
+            $('#shqty_' + key).prop("readonly", true);
+        }
+    }
+    $('#totalshqty').val(sanitizeNumber(dTotQty,3));
+
+    var objComp = $.grep(arrshCompQty, function (element, index) {
+        return element.ProjectIOWId == iowid && element.WBSId == wbsid ;});
+
+    var dCTotQty = 0;
+    for (var i = 0; i < objComp.length; i++) {
+        var dQty = parseFloatVal(isNullCheck(objComp[i]['Qty'],'number'));
+        if (dQty !=0) {
+            var sDate = objComp[i]['SDate'];
+            var key1 = getShRow(sDate);
+            if (key1 != 0) {
+                $('#compqty_' + key1).val(sanitizeNumber(dQty, 3));
+            } else {
+                key=key+1;
+                var sStr = $("#dummy-row").html();
+                sStr = sStr.replace(/__1/g, '_' + key);
+                $("#shqtytable tbody.bodyqty").append(sStr);
+                $('#shdate_' + key).val(objComp[i]['SDate']);
+                $('#compqty_' + key1).val(sanitizeNumber(dQty, 3));
+            }
+            dCTotQty = dCTotQty + dQty;
+        }
+    }
+    $('#totalcomqty').val(sanitizeNumber(dCTotQty,3));
+}
+
+function getShRow(sDate) {
+    var key=0;
+    var $resnames = $('input[id*=shdate_]');
+    $.each($resnames, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1) return;
+        var key1 = name.split('_')[1];
+        if ($('#shdate_'+key1).val() == sDate) {
+            key=key1;
+            return key1;
+        }
+    });
+    return key;
+}
+function showQtyForm() {
+    $('#datamodal').modal('show');
+}
+
+//function showQtyDetails(x) {
+//    if ($('#'+ x).is(':checked')) {
+//        $('#divtable').show();
+//        populateQty();
+//    } else {
+//        $('#divtable').hide();
+//    }
+//}
+function ShowHoliday()
+{
+    $("#holidayform").modal('show');
+}
+</script>

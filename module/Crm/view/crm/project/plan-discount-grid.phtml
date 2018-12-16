@@ -1,0 +1,154 @@
+<style type="text/css">
+    #treeGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times"></i></button>
+                <h1>Why do you want to delete plan : <span id="planName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                                <form id="delete-stage-completion-form" class="form-horizontal">
+                                    <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+                                    <input type="hidden" name="planId" id="planId">
+                                    <div class="row">
+                                        <div class="form-group req_flds">
+                                            <textarea id="DeleteRemarks" name="DeleteRemarks" maxlength="250" class="form-control lbl_move" label="Remarks"/></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                    <a href="#" id="btnDeleteYes" class="md_ok">Delete</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Plan Based Discount Register 
+                <div class="stgedit_btn req_addbtn brad_50">
+                    <a href="<?php echo $this->basePath();?>/crm/project/plan-based-discount" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+            <div class="col-lg-12 padlr0 tmss commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $treeGrid = $('#treeGrid'),
+        $deleteModal = $('#DeleteModal');
+
+    $(document).ready(function () {
+        var source =
+        {
+            localdata:<?php echo (isset($result)) ? json_encode($result) : []; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'PlanName', type: 'string' },
+                { name: 'PlanId', type: 'number' },
+                { name: 'DiscountType', type: 'string' },
+                { name: 'LumpsumType', type: 'string' },
+                { name: 'ReceiptTypeName', type: 'string' },
+                { name: 'Discount', type: 'number' },
+                { name: 'CreatedDate', type: "date", format: 'DD-MM-yyyy'}
+            ],
+            id: 'PlanId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $("#treeGrid").jqxGrid(
+            {
+                width: '100%',
+                pageable: true,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight:true,
+                autorowheight: true,
+                filterable: true,
+                sortable: true,
+                columnsResize: true,
+                showfilterrow: true,
+                ready:function(){
+                    var localizationobj = {};
+                    localizationobj.emptydatastring = "No Data to Display";
+                    $("#treeGrid").jqxGrid('localizestrings', localizationobj);
+                },
+                source:dataAdapter,
+                columns: [
+                    { text: 'Plan Id', dataField: 'PlanId',hidden: true, filterable: false},
+                    { text: 'Plan Name', dataField: 'PlanName',width:'20%'},
+                    { text: 'Discount Type',width:'15%',dataField:'DiscountType'},
+                    { text: 'Lump sum Type',width:'15%',dataField:'LumpsumType'},
+                    { text: 'Receipt Type',width:'20%',dataField: 'ReceiptTypeName'},
+                    { text: 'Discount', dataField: 'Discount',width:'10%'},
+                    { text: 'Created Date', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'CreatedDate',width:'10%'},
+                    { text: 'Action', sortable: false, filterable: false,width:'10%',align: 'left',
+                        cellsrenderer: function (row) {
+                            var planId = $("#treeGrid").jqxGrid('getCellValue', row, 'PlanId'),
+                            // edit or delete
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/project/plan-based-discount/'+planId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>'
+                            + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: deleteDiscountPlan('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                            return editLink;
+                        }
+                    }
+                ]
+            });
+
+        bindDeleteStageCompletionYes_onClick();
+
+        function bindDeleteStageCompletionYes_onClick() {
+            $('#btnDeleteYes').on('click', function(ev) {
+                ev.preventDefault();
+
+                var $DeleteRemarks = $('#DeleteRemarks');
+                var deleteRemarks = $DeleteRemarks.val().trim();
+                if(deleteRemarks.length <= 0) {
+                    showError($DeleteRemarks, 'Remarks is required!');
+                    return;
+                }
+
+                var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'crm/project/plan-discount-grid',
+                    data: $('#delete-stage-completion-form').serialize(),
+                    type: 'POST',
+                    success: function(data, status, xhr) {
+                        $treeGrid.jqxGrid("deleterow", rowData.PlanId);
+                        $deleteModal.modal('hide');
+                    },
+                    error: function(xhr, status, error) {
+                        alert(xhr.responseText);
+                    }
+                });
+            });
+        }
+    });
+
+    function deleteDiscountPlan(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $('#planName').html(rowData.PlanName);
+        $('#planId').val(rowData.PlanId);
+        $("#DeleteRemarks").val('');
+        $deleteModal.data('row', row).modal('show');
+    }
+</script>

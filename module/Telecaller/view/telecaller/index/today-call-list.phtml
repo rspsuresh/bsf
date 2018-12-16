@@ -1,0 +1,393 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+
+<!-- INLINE CSS -->
+<style>
+    .fixed-action-btn ul			{top:5px;left: -140px !important;}
+    .bootstrap-select.btn-group .btn .filter-option	{ margin-top:-3px;}
+    #dataTable .jqx-grid-header 	{height:75px !important;}
+	.fixed-action-btn ul li {margin-left: 6px!important;}
+</style>
+<script id="excel_bind" type="text/template" class="hide">
+    <tr id="excelrowid__" >
+        <td><input class="parent_text" type="text" placeholder="Name" name="name__" value = "" id="name__"/></td>
+        <td><input class="parent_text" type="text" placeholder="Date" name="date__" value = "" id="date__" /></td>
+        <td><input class="parent_text" type="text" placeholder="Mobile" name="mobile__" value = "" id="mobile__" onkeypress="return isNumberKey(event);" /></td>
+        <td align="center">
+            <ul class="action_btns">
+                <li>
+                    <a href="#" id="excelTrDelete__" class="excelTrDelete" onclick="deleteRow(this);"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<!-- INLINE CSS -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Today Call List
+            </h1>
+            <div class="fixed-action-btn padtop0">
+                <a class="btn-floating btn-large"><i class="fa fa-paperclip"></i></a>
+                <ul>
+                    <li>
+                        <a class="btn-floating" href="javascript:void(0);" id="ImportFromPortal" download data-toggle="tooltip" data-placement="bottom" data-original-title="Import From Portal">
+                            <i class="fa fa-file-text-o"></i>
+                        </a>
+                    </li>
+					<li>
+                        <a class="btn-floating hide-input-file" data-toggle="tooltip" data-placement="bottom" data-original-title="Import From Excel">
+                            <i class="fa fa-file-excel-o"></i>
+                            <input type="file" name="myfile" id="myfile" class="input-large" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="getExcelField();">
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn-floating" href="javascript:void(0);" id="excelExport" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Sample">
+                            <i class="fa fa-download"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 padtop10 clear">
+            <div class="table-responsive m_btm30">
+                <div id="dataTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="excelfieldmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Call List Sheet - Assign Fields</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive popuptable">
+                    <table class="table" width="100%" style=" margin-bottom:0px;">
+                        <tbody>
+                        <tr id="excelfieldTable"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer"> <a href="#" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="md_ok" onclick="return fileupload()" >Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="excelmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document" style="width:75%;">
+        <form id="excel_model">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h1>Call List Sheet</h1>
+                </div>
+                <div class="modal-body">
+                    <div id="error_data"></div>
+                    <div class="table-responsive topsp">
+                        <table class="table" style=" margin-bottom:0px;" id="excelTable">
+                            <thead>
+                            <tr>
+                                <th width="15%" class="th-modal">Name</th>
+                                <th width="10%" class="th-modal excel-code-txt">Date</th>
+                                <th width="15%" class="th-modal">Mobile</th>
+                                <th width="2%" class="th-modal">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody id="table_bind">
+
+                            </tbody>
+                            <input type="hidden" name="rowCount" value="0" id="rowCount" />
+                            <input type="hidden" name="csrf" value="<?php echo (isset($csrf)) ? $csrf : "";?>" id="csrf" />
+                            <input type="hidden" name="mode" value="validate" id="mode" />
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer clear">
+                    <a href="#" id="can_button" class="md_cance" data-dismiss="modal" data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                    <button type="button" id="app_button" class="md_ok" onclick="return dataInsert()" >Apply</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- PAGE SCRIPTS -->
+<script>
+    $(document).ready(function() {
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        var data = <?php echo (isset($TeleContacts)) ? json_encode($TeleContacts) : '[]'?>;
+
+        var dataTable =  $("#dataTable");
+        var source =
+        {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ContactId', type: 'number' },
+                { name: 'Name', type: 'string' },
+                { name: 'Date',type: 'date'},
+                { name: 'Mobile', type: 'string' },
+                { name: 'CallSid', type: 'string' },
+                { name: 'AttendFlag', type: 'boolean' }
+            ],
+            id: 'ContactId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        dataTable.jqxGrid({
+            width: "100%",
+            autorowheight: true,
+            autoheight: true,
+            pageable:true,
+            sortable: true,
+            pagerButtonsCount: 6,
+            showfilterrow: true,
+            filterable: true,
+            rowDetails: true,
+            selectionmode: 'singlerow',
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            source: dataAdapter,
+            columns: [
+//					{ text: '', datafield: 'Image', width:70, cellsrenderer: photorenderer,	cellclassname: cellclassname, filterable: false },
+                { text: 'Name',dataField: 'Name',width:'30%'},
+                { text: 'Call Date', filtertype: 'date', dataField: 'Date',cellsformat: 'dd-MM-yyyy',width:'25%'},
+                { text: 'Contact No', dataField: 'Mobile' ,width:'25%'},
+                { text: 'ContactId', dataField: 'ContactId', hidden:true },
+                { text: 'CallSid', dataField: 'CallSid', hidden:true},
+                { text: 'Completed', dataField: 'AttendFlag', columntype: 'checkbox', align:'center',filterable: false,width:'20%'}
+
+            ]
+        });
+    });
+</script>
+<!-- PAGE SCRIPTS -->
+
+<script>
+    //new change
+    var arrayField =[];
+    arrayField = [{ data :1, value: 'Name' },
+        { data :2, value: 'Date' },
+        { data :3, value: 'Mobile' }
+    ];
+    var selectCol=[];
+    var arrayFieldR = arrayField;
+    function getExcelField(x) {
+        $('#rowCount').val(0);
+        $('#can_button').html('Cancel').attr('data-original-title','Cancel');
+        $('#app_button').html('Apply');
+        $('#error_data').html('');
+        formData = new FormData();
+        formData.append('file', $('#myfile').prop("files")[0]);
+        formData.append('mode','title');
+        formData.append('csrf', "<?php echo isset($csrf)?$csrf:''; ?>");
+
+        $.ajax({
+            url: getBaseURL() +"telecaller/index/today-call-list",
+            async: false,
+            dataType: 'script',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var obj = jQuery.parseJSON(data);
+                $("#excelfieldTable").find("th").remove();
+                $("#excelfieldTable").find("td").remove();
+
+                var sStr="Select Field";
+                var data = "<option value=''></option>";
+                for (var i = 0; i < obj.length; i++) {
+                    var fieldName = $.trim(obj[i]['Field']);
+                    if (fieldName != "") {
+                        data +="<option value='"+ parseInt(i+1) +"'>"+fieldName+"</option>";
+                    }
+                }
+
+                $.each(arrayFieldR,function(i,o) {
+                    $("#excelfieldTable").append('<tr><th width="20%"><input id="efield_' + i + '" class="text-reon text-right" type="text" value="'+ o.value+'" style="background: transparent;"/></th><td width="70"><select id="field_' + i + '" class="single_dropdown lbl_move data_bind" style="width:100%;" label="' + sStr + '"></select></td></tr>');
+                    $('#efield_' + i).prop('readonly', true);
+                    $('#field_' + i).html(data);
+                });
+                $(".single_dropdown").select2({
+                    placeholder: "",
+                    allowClear: true
+                });
+                //bindexcelFieldComplete();
+                $("#excelfieldmodal").modal('show');
+            },
+            error: function(xhr, status, errorThrown) {
+                if (xhr.status == 400)
+                    alert(xhr.responseText);
+                else
+                    alert(errorThrown);
+            }
+        });
+        clearInputFile($('#myfile'));
+    }
+
+    function clearInputFile(file){
+        var f = file[0];
+        if(f.value){
+            try{
+                f.value = '';
+            }catch(err){ }
+            if(f.value){
+                var form = document.createElement('form'),
+                    parentNode = f.parentNode, ref = f.nextSibling;
+                form.appendChild(f);
+                form.reset();
+                parentNode.insertBefore(f,ref);
+            }
+        }
+    }
+    function fileupload() {
+        var isValid=true;
+        $.each(arrayField,function(e,f){
+            if($.trim($('#field_'+e).val())=="") {
+                var check = parseInt(e)+1;
+                if(check==1 || check==3){
+                    alert('Map the '+f.value);
+                    isValid=false;
+                }
+            }
+
+        });
+        if (isValid==false) { return;}
+        $("body").removeClass('modal-open');
+        $("#excelfieldmodal").modal('hide');
+        var arrHeader =[];
+        for (var i = 0; i < $("#excelfieldTable").find("th").length; i++) {
+            if($('#field_'+i).val()!="") {
+                arrHeader.push({efield: $('#field_' + i +' option:selected').text(), field: $('#efield_' + i).val()});
+            }
+        }
+        arrHeader =  JSON.stringify(arrHeader);
+        formData.append('arrHeader', arrHeader);
+        formData.append('mode', 'body');
+        formData.append('csrf', "<?php echo isset($csrf)?$csrf:''; ?>");
+        $.ajax({
+            url: getBaseURL() +"telecaller/index/today-call-list",
+            async: false,
+            dataType: 'script',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data:  formData,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var obj = jQuery.parseJSON(data);
+                var template = $('#excel_bind').html();
+                $('#table_bind').html('');
+                if(obj.length>0) {
+                    for (var j = 0; j < obj.length; j++) {
+                        $('#table_bind').append(template.replace(/__/g, '_' + j));
+                        $('#rowCount').val(j);
+                        if (obj[j].Valid == true) {
+                            $("#name_" + j).val(isNullCheck(obj[j].Name, 'string'));
+                            $("#date_" + j).val(isNullCheck(obj[j].Date, 'string'));
+                            $("#mobile_" + j).val(isNullCheck(obj[j].Mobile, 'number'));
+                        }
+
+                    }
+                    $("#excelmodal").modal('show');
+                    setTimeout(function() { $("body").addClass('modal-open');}, 200);
+
+                } else {
+                    alert("Contains No Data");
+                }
+            },
+            error: function(xhr, status, errorThrown) {
+                if (xhr.status == 400) {
+                    alert(xhr.responseText);
+                }
+                else {
+                    alert('Invalid Excel allocation');
+                }
+            }
+        });
+        clearInputFile($('#myfile'));
+    }
+    $("#excelExport").click(function () {
+        $("#dataTable").jqxGrid('exportdata', 'xls', 'jqxGrid');
+    });
+
+    function dataInsert() {
+        //$("#excelmodal").modal('hide');
+        $("body").removeClass('modal-open');
+
+        $.ajax({
+            url: getBaseURL() + 'telecaller/index/today-call-list',
+            type: 'POST',
+            data: $('#excel_model').serialize(),
+            success: function (data, textStatus, jqXHR) {
+                var obj = jQuery.parseJSON(data);
+                var template = $('#excel_bind').html();
+                console.log(obj);
+                if(obj.length>0) {
+                    $('#table_bind').html('');
+                    $('#error_data').html('Error Data:');
+                    for (var j = 0; j < obj.length; j++) {
+                        $('#table_bind').append(template.replace(/__/g, '_' + j));
+                        removeError($("#name_" + j));
+                        removeError($("#date_" + j));
+                        removeError($("#mobile_" + j));
+
+                        $("#name_" + j).val(isNullCheck(obj[j].Name[0], 'string'));
+                        $("#date_" + j).val(isNullCheck(obj[j].Date[0], 'string'));
+                        $("#mobile_" + j).val(isNullCheck(obj[j].Mobile[0], 'string'));
+
+                        if(obj[j].Name[1]==1) {
+                            showError($("#name_" + j),'');
+                        }
+                        if(obj[j].Date[1]==1) {
+                            showError($("#date_" + j),'');
+                        }
+                        if(obj[j].Mobile[1]==1) {
+                            showError($("#mobile_" + j),'');
+                        }
+
+                    }
+                    $('#rowCount').val(parseInt(obj.length)-1);
+                    $('#can_button').html('Discard').attr('data-original-title','Discard');
+                    $('#app_button').html('Correct');
+                    $("#excelmodal").modal('show');
+                    setTimeout(function() { $("body").addClass('modal-open');}, 200);
+
+                } else {
+                    alert("Call List Import Successful");
+                    $('#table_bind').html('');
+                    $("#excelmodal").modal('hide');
+                    location.reload();
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 400)
+                    alert(jqXHR.responseText);
+                else
+                    alert("Request Failed");
+            }
+        });
+    }
+    function deleteRow(val){
+        var rId = $(val).attr('id');
+        rId = rId.split('_')[1];
+        if (confirm('Do you want to Delete')) {
+            $('#excelrowid_'+rId).remove();
+        }
+    }
+</script>

@@ -1,0 +1,173 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+.sel-type											{font-size:13px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <?php if ($projectId !=0) { ?>
+                <div class="col-lg-12 page_tittle" id="pagetittle">
+                    <h1 class="col-lg-4 col-sm-4">Revision Report</h1>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Project</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="project_id" id="project_id" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Project</option>
+                                    <?php if(isset($projectlists)):?>
+                                        <?php foreach ( $projectlists as $project ):?>
+                                            <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                                        <?php endforeach; ?>
+                                    <?php  endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Type</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="revtype" id="revtype" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Type</option>
+                                    <option value="B" <?php echo $revtype=='B' ? 'selected' : ''; ?>>Budget</option>
+                                    <option value="P" <?php echo $revtype=='P' ? 'selected' : ''; ?>>Plan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 clear" id="gridWrapper" >
+<!--                    <div class="table-responsive clear">-->
+<!--                        <table id='grid'>-->
+<!--                        </table>-->
+<!--                        <div id='pager'></div>-->
+<!--                    </div>-->
+                </div>
+            <?php } else { ?>
+             <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts" id="formWrapper">
+               
+                    <div class="col-lg-12 frmwrk_div" id="projects_list">
+                        <select name="newproject_id" id="newproject_id" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%;">
+                          
+                            <?php if(isset($projectlists)):?>
+                                <?php foreach ( $projectlists as $project ):?>
+                                    <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                                <?php endforeach; ?>
+                            <?php  endif; ?>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                        <select name="newrevtype" id="newrevtype" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%;">
+                       
+                            <option value="B">Budget</option>
+                            <option value="P">Plan</option>
+                        </select>
+                    </div>
+                    <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+                        <ul>
+                            <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+                        </ul>
+                    </div>
+               
+                </div></div>
+            <?php } ?>
+        </div>
+       
+    </div>
+</div>
+<div class="col-lg-12"><a data-text="Go to Report List" href="<?php echo $this->basePath(); ?>/project/report/reportlist" class="gobacklist"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i> Go to Report List</a></div>
+<script>
+
+//    var mydata = <?php //echo json_encode($iowlists); ?>//;
+
+    var $project = $('#project_select'),
+        $projectNew = $('#newproject_id'),
+        $type_list = $('#types_list');
+
+
+    $(function () {
+        $projectNew.on('change', function() {
+            var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+            if (nproj_id !=0) $type_list.show();
+            else $type_list.hide();
+        });
+    });
+
+//    $("#grid").jqGrid('jqPivot',
+//        mydata,
+//        {
+//            xDimension : [
+//                {dataName: 'SerialNo', label : 'SerialNo', width: 90},
+//                {dataName: 'Specification', label : 'Specification', width: 90}
+//            ],
+//            yDimension : [
+//                {dataName: 'RevisionName'}
+//            ],
+//            aggregates : [
+//                {member : 'Qty', aggregator : 'sum',width:50, label:'Qty',formatter: 'number',align:'right'},
+//                {member : 'Rate', aggregator : 'sum',width:50, label:'Rate',formatter: 'number',align:'right'},
+//                {member : 'Amount', aggregator : 'sum', width:50, label:'Amount',formatter: 'number',align:'right'}
+//            ],
+//            rowTotals: true,
+//            colTotals : true
+//        },
+//        {
+//            width: 700,
+//            rowNum : 10,
+//            pager: "#pager",
+//            caption: "Revision"
+//        }
+//    );
+//
+//    var createExcelFromGrid = function(gridID,filename) {
+//        var grid = $('#' + gridID);
+//        var rowIDList = grid.getDataIDs();
+//        var row = grid.getRowData(rowIDList[0]);
+//        var colNames = [];
+//        var i = 0;
+//        for(var cName in row) {
+//            colNames[i++] = cName; // Capture Column Names
+//        }
+//        var html = "";
+//        for(var j=0;j<rowIDList.length;j++) {
+//            row = grid.getRowData(rowIDList[j]); // Get Each Row
+//            for(var i = 0 ; i<colNames.length ; i++ ) {
+//                html += row[colNames[i]] + ';'; // Create a CSV delimited with ;
+//            }
+//            html += '\n';
+//        }
+//        html += '\n';
+//
+//        var a         = document.createElement('a');
+//        a.id = 'ExcelDL';
+//        a.href        = 'data:application/vnd.ms-excel,' + html;
+//        a.download    = filename ? filename + ".xls" : 'DataList.xls';
+//        document.body.appendChild(a);
+//        a.click(); // Downloads the excel document
+//        document.getElementById('ExcelDL').remove();
+//    }
+
+    function submitForm() {
+        var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+        var  nrevtype= isNullCheck($('#newrevtype').val(),'string');
+
+        if (nproj_id ==0) {
+            alert("select Project");
+            return;
+        }
+        if (nrevtype =="") {
+            alert("Select Type");
+            return;
+        }
+
+        window.location.href = getBaseURL() + "project/report/slippagereport/" + nproj_id + "/" + nrevtype;
+    }
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#project_id').val(),'number');
+        var sType= isNullCheck($('#revtype').val(),'string');
+        window.location.href = getBaseURL() + "project/report/slippagereport/" + iProjectId + "/" + sType;
+    }
+</script>

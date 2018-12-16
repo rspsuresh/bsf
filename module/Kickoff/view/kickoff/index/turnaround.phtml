@@ -1,0 +1,491 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<?php	echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<style type="text/css">
+    #chartdiv {
+        width		: 100%;
+        height		: 350px;
+        font-size	: 11px;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1>Project Kickoff</h1>
+        </div>
+        <form onsubmit="return entryValidate()" method="post" id="formWrapper">
+            <div class="col-lg-12 flwup_topcnt fmg_topcnt clear">
+                <div class="col-lg-3 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" value="<?php if ($kickoffRes['RefDate'] != NULL) { echo date("d-m-Y", strtotime($kickoffRes['RefDate'])); } else { echo date("d-m-Y"); } ?>" label="Ref Date" onkeypress="return isDate(event);" />
+                </div>
+                <div class="col-lg-3 form-group">
+                    <input type="text" name="refNo" id="refNo" class="form-control lbl_move" value="<?php if (trim($kickoffRes['RefNo']) != '') { echo $kickoffRes['RefNo']; } else { echo $svNo; } ?>" label="Ref No" />
+                </div>
+                <div class="col-lg-6 form-group">
+                    <input type="text" name="propertyName" id="propertyName" class="form-control lbl_move" value="<?php echo $kickoffRes['ProjectName']; ?>" label="Name of the Property"/>
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <ul class="breadcrumb_area">
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/conception/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Conception</a></li>
+                    <li><a href="<?php echo $this->basePath().$unitUrl; ?>">Unit</a></li>
+                    <!--					<li><a href="--><?php //echo $this->basePath(); ?><!--/kickoff/index/wbs/--><?php //if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?><!--">WBS</a></li>-->
+                    <li><a href="#" class="active">Turnaround Cost & Schedule</a></li>
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/team/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Team</a></li>
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/make-brand/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Make/Brand</a></li>
+                    <!--					<li><a href="--><?php //echo $this->basePath(); ?><!--/kickoff/index/documents/--><?php //if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?><!--">Documents</a></li>-->
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/setup/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Setup</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="col-lg-12 clear">
+                    <div class="kickoff_area col-lg-12 clear">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Cost Type</th>
+                                        <th>Amount</th>
+                                        <th>Duration (in Days)</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                    if(isset($kfTaSchedule) && count($kfTaSchedule) != 0) {
+                                        $i = 1;
+                                        foreach($kfTaSchedule as $taSchedule) { ?>
+                                            <tr>
+                                                <td width="10%"><input type="text" class="parent_text" name="description_<?php echo $i; ?>" id="description_<?php echo $i; ?>" value="<?php echo $taSchedule['Description']; ?>" onblur="addTAScheduleRow(this)" /></td>
+                                                <td width="10%">
+                                                    <input type="text" class="parent_text" name="costType_<?php echo $i; ?>" id="costType_<?php echo $i; ?>" value="<?php echo $taSchedule['CostTypeName']; ?>" />
+                                                    <input type="hidden" name="costTypeId_<?php echo $i; ?>" id="costTypeId_<?php echo $i; ?>" value="<?php echo $taSchedule['CostTypeId']; ?>" />
+                                                </td>
+                                                <td width="5%"><input type="text" class="parent_text txt_right" name="amount_<?php echo $i; ?>" id="amount_<?php echo $i; ?>" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addTAScheduleRow(this)" value="<?php echo $taSchedule['Amount']; ?>" onblur="return FormatNum(this, 2,true)"/></td>
+                                                <td width="3%"><input type="text" class="parent_text txt_right" name="duration_<?php echo $i; ?>" id="duration_<?php echo $i; ?>" value="<?php echo $taSchedule['Duration']; ?>" onkeypress="return isNumberKey(event,this)" onchange="return dateChange(this.id)" /></td>
+                                                <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="startDate_<?php echo $i; ?>" id="startDate_<?php echo $i; ?>" value="<?php echo date("d-m-Y", strtotime($taSchedule['StartDate'])); ?>" onchange="return dateChange(this.id)" readonly/></td>
+                                                <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="endDate_<?php echo $i; ?>" id="endDate_<?php echo $i; ?>" value="<?php echo date("d-m-Y", strtotime($taSchedule['EndDate'])); ?>" onchange="return dateChange(this.id)" readonly/></td>
+                                                <td width="2%">
+                                                    <ul class="action_btns">
+                                                        <li style="float:left;">
+                                                            <a href="javascript:void(0);" onclick="deleteTAScheduleDetail(this, event);">
+                                                                <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <?php $i++;
+                                        }
+                                    } else { ?>
+                                        <tr>
+                                            <td width="10%"><input type="text" class="parent_text" name="description_1" id="description_1" /></td>
+                                            <td width="10%">
+                                                <input type="text" class="parent_text" name="costType_1" id="costType_1" />
+                                                <input type="hidden" name="costTypeId_1" id="costTypeId_1" />
+                                            </td>
+                                            <td width="5%"><input type="text" class="parent_text txt_right" name="amount_1" id="amount_1" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addTAScheduleRow(this)" onblur="return FormatNum(this, 2,true)"/></td>
+                                            <td width="3%"><input type="text" class="parent_text txt_right" name="duration_1" id="duration_1" onkeypress="return isNumberKey(event,this)" onchange="return dateChange(this.id)"/></td>
+                                            <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="startDate_1" id="startDate_1" onchange="return dateChange(this.id)" readonly/></td>
+                                            <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="endDate_1" id="endDate_1" onchange="return dateChange(this.id)" readonly/></td>
+                                            <td width="2%">
+                                                <ul class="action_btns">
+                                                    <li style="float:left;">
+                                                        <a href="javascript:void(0);" onclick="deleteTAScheduleDetail(this, event);">
+                                                            <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                    <tr class="total">
+                                        <td width="10%" align="right" colspan="2">Total</td>
+                                        <td width="5%"><input class="total_input parent_text txt_right" type="text" id="totalTasAmount" value="" readonly /></td>
+                                        <td width="3%"><input class="total_input parent_text txt_right" type="text" id="totalDuration" value="" readonly /></td>
+                                        <td width="5%"><input class="total_input parent_text txt_center" type="text" id="totalStartDate" value="" readonly /></td>
+                                        <td width="5%"><input class="total_input parent_text txt_center" type="text" id="totalEndDate" value="" readonly /></td>
+                                        <td width="2%">&nbsp;</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="taScheduleRowId" id="taScheduleRowId" value="<?php echo (isset($kfTaSchedule) && count($kfTaSchedule) != 0) ? count($kfTaSchedule) : 1; ?>" />
+                                <input type="hidden" name="kickOffId" id="kickOffId" value="<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            <div class="col-lg-8 col-lg-offset-2 padlr0">
+                                <div class="col-lg-12 cht" id="chartdiv"></div>
+                            </div>
+                        </div>
+                        <div class="cont_bt-list">
+                            <ul>
+                                <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/turnaround/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" class="steps_btn"><i class="fa fa-chevron-circle-left"></i> Back</a></li>
+                                <li><a href="javascript:submitForm();" class="cbtn">Continue <i class="fa fa-check-circle"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table id="dummy-tas-details" style="display: none;">
+    <tbody>
+    <tr>
+        <td width="10%"><input type="text" class="parent_text" name="description__1" id="description__1" /></td>
+        <td width="10%">
+            <input type="text" class="parent_text" name="costType__1" id="costType__1" />
+            <input type="hidden" name="costTypeId__1" id="costTypeId__1" />
+        </td>
+        <td width="5%"><input type="text" class="parent_text txt_right" name="amount__1" id="amount__1" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addTAScheduleRow(this)" onblur="return FormatNum(this, 2,true)"/></td>
+        <td width="3%"><input type="text" class="parent_text txt_right" name="duration__1" id="duration__1" onkeypress="return isNumberKey(event,this)" onchange="return dateChange(this.id)"/></td>
+        <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="startDate__1" id="startDate__1" onchange="return dateChange(this.id)" readonly/></td>
+        <td width="5%"><input type="text" class="parent_text txt_center date_picker" name="endDate__1" id="endDate__1" onchange="return dateChange(this.id)" readonly/></td>
+        <td width="2%">
+            <ul class="action_btns">
+                <li style="float:left;">
+                    <a href="javascript:void(0);" onclick="deleteTAScheduleDetail(this, event);">
+                        <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                    </a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+var costTypeList = <?php echo (isset($costTypeList)) ? json_encode($costTypeList) : '[]'; ?>;
+var turnaroundList = <?php echo (isset($kfTurnaround)) ? json_encode($kfTurnaround) : '[]'; ?>;
+
+bindDatepicker();
+bindCostTypeAutoComplete();
+bindDescAutoComplete(1);
+
+function bindDatepicker() {
+    $('.date_picker').datepicker( {
+        'format': 'dd-mm-yyyy',
+        'autoclose': true
+    });
+}
+
+function addTAScheduleRow(x)
+{
+    calcTurnAroundSchedule();
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.total)').length != 0)
+        return;
+
+    var $rowid = $('#taScheduleRowId'),
+        count = parseInt($rowid.val()) + 1,
+        template = $('#dummy-tas-details tbody').html();
+
+    template = template.replace(/__1/g, '_' + count);
+    $tr.after(template);
+    $rowid.val(count);
+    bindDatepicker();
+    bindCostTypeAutoComplete();
+    bindDescAutoComplete(count);
+}
+
+function deleteTAScheduleDetail(x,e)
+{
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        $tbody = $tr.parent('tbody');
+
+    if ($tbody.find('> tr:not(.total)').length == 1) {
+        var template = $('#dummy-tas-details tbody').html();
+        template = template.replace(/__1/g, '_' + 1);
+        $tr.after(template);
+        $('#taScheduleRowId').val(1);
+    }
+
+    $tr.next('tr.subTr').remove();
+    $tr.remove();
+    calcTurnAroundSchedule();
+    dateChange('');
+    bindDatepicker();
+    return false;
+}
+
+function calcTurnAroundSchedule()
+{
+    var $amt = $('input[id^=amount_]');
+    totTasAmount = 0;
+    $.each($amt, function() {
+        var amt = parseFloat(isNullCheck($(this).val(),'number'));
+        totTasAmount += amt;
+    });
+    totTasAmount = totTasAmount;
+    $('#totalTasAmount').val(sanitizeNumber(totTasAmount,2,true));
+    updateTasChart();
+}
+
+function bindCostTypeAutoComplete() {
+    var $costType = $('input[id^=costType_]');
+    $costType.unbind('autocomplete');
+    $.each($costType, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+
+        $this.autocomplete({
+            lookup: costTypeList,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#costTypeId_'+ key1).val(suggestion.data);
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#costTypeId_'+key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+
+function bindDescAutoComplete(rowId)
+{
+    $('#description_' + rowId).autocomplete({
+        lookup: turnaroundList,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }
+    });
+}
+
+function updateTasChart()
+{
+    var $rate = $('input[id^=amount_]');
+    var chartData = [];
+    $.each($rate, function() {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1) return;
+
+        var key = name.split('_')[1],
+            name = $('#description_'+key).val(),
+            rate = parseFloat(isNullCheck($this.val(),'number'));
+
+        if (rate==0 || name == '')
+            return;
+
+        chartData.push({
+            'title': name,
+            'value': rate
+        });
+
+    });
+
+    if (chart != null) {
+        chart.dataProvider = chartData;
+        chart.validateData();
+        return;
+    }
+
+    var chart = AmCharts.makeChart("chartdiv", {
+        "theme": "dark",
+        "type": "serial",
+        "dataProvider": chartData,
+        "colors":["#b8ebf5 ", "#b4a4c0  "],
+        "valueAxes": [{
+            "position": "left",
+            "title": "Amount"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "balloonText": "<br><b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "submit",
+            "type": "column",
+            "valueField": "value"
+        }],
+        "plotAreaFillAlphas": 0.1,
+        "categoryField": "title",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "chartCursor": {
+            "categoryBalloonEnabled": true,
+            "cursorAlpha": 0,
+            "zoomable": false
+        },
+        "chartScrollbar": {
+            "oppositeAxis": false,
+            "offset": 30,
+            "scrollbarHeight": 30,
+            "backgroundAlpha": 0,
+            "selectedBackgroundAlpha": 0.1,
+            "selectedBackgroundColor": "#888888",
+            "graphFillAlpha": 0,
+            "graphLineAlpha": 0.5,
+            "selectedGraphFillAlpha": 0,
+            "selectedGraphLineAlpha": 1,
+            "color": "#AAAAAA"
+        }
+
+
+//		"type": "serial",
+//		"theme": "light",
+//		"dataProvider": chartData,
+//		"valueAxes": [{
+//            "gridColor": "#FFFFFF",
+//            "gridAlpha": 0.2,
+//            "dashLength": 0
+//		}],
+//        "gridAboveGraphs": true,
+//        "startDuration": 1,
+//		"graphs": [{
+//            "balloonText": "[[category]]: <b>[[value]]</b>",
+//            "fillAlphas": 0.8,
+//            "lineAlpha": 0.2,
+//            "type": "column",
+//			"valueField": "value"
+//		}],
+//        "chartCursor": {
+//            "categoryBalloonEnabled": false,
+//            "cursorAlpha": 0,
+//            "zoomable": false
+//        },
+//
+//		"categoryField": "title",
+//		"categoryAxis": {
+//            "gridPosition": "start",
+//            "gridAlpha": 0,
+//            "tickPosition": "start"
+//		},
+//		"export": {
+//			"enabled": true
+//		}
+    });
+
+    chart.addListener("rendered", zoomChart);
+    if(chart.zoomChart){
+        chart.zoomChart();
+    }
+
+    function zoomChart()
+    {
+        chart.zoomToIndexes(Math.round(chart.dataProvider.length * 0.4), Math.round(chart.dataProvider.length * 0.55));
+    }
+}
+
+function submitForm()
+{
+    $('#formWrapper').submit();
+}
+
+function entryValidate()
+{
+    return true;
+}
+
+function dateChange(val){
+    if(val != '') {
+        var key = val.split('_')[1],
+            name = val.split('_')[0];
+        if (name =='duration')
+        {
+            var iDuration  = parseInt(isNullCheck($('#duration_'+ key).val(),'number'));
+            if (iDuration !=0) {
+                if ($('#startDate_' + key).val().length==0) $('#startDate_' + key).datepicker().datepicker("setDate", new Date());
+                var date1 = new Date($('#startDate_' + key).datepicker('getDate'));
+                date1.setDate(date1.getDate()-1);
+                date1.setDate(date1.getDate()+iDuration);
+                $('#endDate_' + key).val($.datepicker.formatDate('dd-mm-yy', date1));
+            }
+        } else if (name == 'startDate') {
+            if ($('#startDate_' + key).val().length!=0) {
+                var iDuration  = parseInt(isNullCheck($('#duration_'+ key).val(),'number'));
+                if (iDuration ==0)  {
+                    $('#duration_'+ key).val(1);
+                    iDuration=1;
+                }
+                var date1 = new Date($('#startDate_' + key).datepicker('getDate'));
+                date1.setDate(date1.getDate()-1);
+                date1.setDate(date1.getDate()+iDuration);
+                $('#endDate_' + key).val($.datepicker.formatDate('dd-mm-yy', date1));
+            }
+        } else if (name == 'endDate') {
+            if ($('#endDate_' + key).val().length!=0) {
+                var istartDate =  new Date($('#startDate_' + key).datepicker('getDate'));
+                var iendDate =  new Date($('#endDate_' + key).datepicker('getDate'));
+                var days = ((iendDate - istartDate) / (1000 * 60 * 60 * 24))+1;
+                $('#duration_' + key).val(days);
+            }
+        }
+    }
+
+    var iCount = parseInt(isNullCheck($('#taScheduleRowId').val(),'number'));
+    var bAns=false;
+    var date1,date2,mindate,maxdate;
+    for (i = 1; i <= iCount; i++) {
+        if ($('#startDate_' + i).length > 0) {
+            if ($('#startDate_' + i).val().length!=0)
+            {
+                date1 = new Date($('#startDate_' + i).datepicker('getDate'));
+                var strDate = $('#endDate_' + i).val(),
+                    dateParts = strDate.split("-");
+                date2 = new Date(dateParts[2], (dateParts[1] - 1), dateParts[0]);
+                if (bAns==true) {
+                    if (date1 < mindate) mindate = date1;
+                    if (date2 > maxdate) maxdate = date2;
+                } else { mindate = date1; maxdate = date2; }
+                bAns=true;
+            }
+        }
+    }
+    if (bAns == true) {
+        var smindate = $.datepicker.formatDate('dd-mm-yy', mindate),
+            strDate = smindate,
+            dateParts = strDate.split("-"),
+            dmindate = new Date(dateParts[2], (dateParts[1] - 1), dateParts[0]);
+
+        $('#totalStartDate').val($.datepicker.formatDate('dd-mm-yy', dmindate));
+        $('#totalEndDate').val($.datepicker.formatDate('dd-mm-yy', maxdate));
+        var days = ((maxdate - dmindate) / (1000 * 60 * 60 * 24))+1;
+        $('#totalDuration').val(days);
+    } else {
+        $('#totalStartDate').val('');
+        $('#totalEndDate').val('');
+        $('#totalDuration').val('');
+    }
+}
+<?php if ($kickoffId != 0) { ?>
+calcTurnAroundSchedule();
+<?php } ?>
+</script>

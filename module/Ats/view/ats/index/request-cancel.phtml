@@ -1,0 +1,121 @@
+<style>
+.select-style select { padding-left: 8px ! important;}
+.mar_20{margin-top:20px;}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css';?>"/>
+<form action="" id="formWrapper" method="post" onsubmit="">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12 clear">
+                <h1 class="txt_center form_main_h1 mms_h1">Request Cancel</h1>
+            </div>
+		<div class="col-lg-12">
+            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                <div class="form-group col-lg-12 padtop10">
+                    <div class="polymer-form">
+                        <select name="type" id="type" name="type" class="single_dropdown lbl_move select2-hidden-accessible" style="width:100%;" label="Type" tabindex="-1" aria-hidden="true"  onchange="positionSelect($(this).val());">
+							<option value="0">None</option>
+							<?php if(isset($arr_req)):
+								foreach($arr_req as $reqno): ?>
+									<option value="<?php echo $reqno['RequestId'];?>"><?php echo $reqno['RequestNo'];?></option>
+							<?php endforeach;
+						endif; ?>
+                        </select>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-12 feed-bg commargin_top">
+				<div class="table-responsive mar_20">				
+					<table class="table table-hover clear" id="contactTable"> 
+						<thead>
+							<tr>
+								<th>Code</th>
+								<th>Resource</th>
+								<th>Req Qty</th>
+								<th>Indent Qty</th>
+								<th>Transfer Qty</th>
+								<th>Balance Qty</th>
+								<th>Cancel Qty</th>
+								<th>Unit</th>
+								<th>Cancel Remarks</th>
+							</tr>
+						</thead>
+						<tbody>	
+						</tbody>
+					</table>
+					<div class="div-overallscroll"></div>
+					<input type="hidden" class="parent_txts" name="RowCount" id="RowCount" value="1" ></input>
+				</div> 				
+			</div>				
+		</div>
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="submitdata" class="dropdown save_btn float_r">
+            <a href="javascript:void(0);" class="ripple" onclick="validateForm();" >Submit</a>
+        </li>
+    </ul>
+</div>
+</form>
+<script type="text/javascript">
+function validateForm() {
+    $('#formWrapper').submit();
+}
+</script>
+<script id="table" type="text/template" class="hide">
+	<tr id="tr__">
+		<td width="10%"><input disabled type="text" class="parent_txts " name="code__" id="code__"  /></td>
+		<td width="20%"><input disabled type="text" class="parent_txts " name="resource__" id="resource__" /></td>
+		<td width="10%"><input disabled type="text" class="parent_txts" name="reqQty__" id="reqQty__"/></td>
+		<td width="10%"><input disabled type="text" class="parent_txts" name="indentqty__" id="indentqty__"/></td>
+		<td width="10%"><input disabled type="text" class="parent_txts" name="transferqty__" id="transferqty__"/></td>
+		<td width="10%"><input disabled type="text" class="parent_txts" name="balanceqty__" id="balanceqty__"/></td>
+		<td width="10%"><input disabled type="text" class="parent_txts" name="cancelqty__" id="cancelqty__"/></td>
+		<td width="7%"><input disabled type="text" class="parent_txts" name="unit__" id="unit__"/></td>
+		<input type="hidden" name="requestid__" id="requestid__"></input>
+		<input type="hidden" name="requesttransid__" id="requesttransid__"></input>
+		<input type="hidden" name="unitid__" id="unitid__"></input>
+		<input type="hidden" name="resourceid__" id="resourceid__"></input>
+		<input type="hidden" name="hiddenqty__" id="hiddenqty__"></input>
+		<td width="13%"><input type="text" class="parent_txts" name="cancelremarks__" id="cancelremarks__"/></td>
+		
+	</tr>
+</script>
+<script>
+function positionSelect(data) {
+ var reqtype = data;
+    $.ajax({
+        type: 'post',
+        url: getBaseURL()+'ats/index/request-cancel',
+        data: {RequestId: reqtype,mode:'select'},
+        success: function (data) {
+		var BlockValues = JSON.parse(data);
+		var table = $('#table').html();
+		var bindPlace = $('#contactTable tbody');
+		bindPlace.html('<input type="hidden" id="blockrowid" name="blockrowid" value="0"/>');
+		var h=0;
+			$.each(BlockValues,function(j,p) { 
+				h++;
+				bindPlace.append(table.replace(/__/g, '_' + h));
+				$('#code_' + h).val(p.Code);
+				$('#resource_' + h).val(p.Resource);				
+				$('#reqQty_' + h).val(p.ReqQty);
+				$('#indentqty_' + h).val(p.IndentQty);
+				$('#transferqty_' + h).val(p.TransferQty);
+				$('#balanceqty_' + h).val(p.BalanceQty);
+				$('#cancelqty_' + h).val(p.CancelQty);
+				$('#unit_' + h).val(p.Unit);
+				$('#requestid_' + h).val(p.RequestId);
+				$('#requesttransid_' + h).val(p.RequestTransId);
+				$('#unitid_' + h).val(p.UnitId);
+				$('#resourceid_' + h).val(p.ResourceId);
+				$('#hiddenqty_' + h).val(p.HiddenQty);
+				$('#cancelremarks_' + h).val(p.CancelRemarks);
+				$('#blockrowid').val(h);
+				
+			});						
+		}
+    });
+}
+</script>

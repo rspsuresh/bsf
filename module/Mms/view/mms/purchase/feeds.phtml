@@ -1,0 +1,2477 @@
+<?php echo $this->headLink(array('rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/img/favicon.ico'))
+			->appendStylesheet($this->basePath() . '/css/New folder/style.css')
+			->appendStylesheet($this->basePath() . '/css/New folder/request.css')
+			->appendStylesheet($this->basePath() . '/css/New folder/modules.css');
+?>
+<style>
+.selected{
+	background-color:#6CEDC2;
+}
+#TermsPickList .jqx-grid-header 	{height:75px !important;}
+#contentServicePickList .jqx-grid-header 	{height:75px !important;}
+#contentLogisticsPickList .jqx-grid-header 	{height:75px !important;}
+.jqx-grid-column-header .jqx-checkbox-default{
+	display:none;
+}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="col-lg-12 clear">
+			<form class="form-horizontal" method="post" action="feeds-entry">
+				<div class="row showDiv" id="firstStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">New purchase order<?php echo ($vNo['genType']==true) ? '-' : ''; ?><?php echo $vNo['voucherNo']; ?></h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row" style="<?php echo ($vNo['genType']==true) ? 'display:none' : ''; ?>">
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" name="voucherNo" id="voucherNo" class="form-control lbl_move" label="Enter voucherNo" value="<?php echo $svNo; ?>" >
+									<!--<input type="text" id="autocomplete-ajax-x" disabled="disabled" class="form-control" style="color: #CCC; position: static; background: transparent; z-index: 1;">-->
+									<div class="error_message" style="display:none;"><p>Please enter VoucherNo...</p> </div> 
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<span class="date_icon"><i class="fa fa-calendar"></i></span>
+									<input type="text" name="purchase_date" id="purchase_date" class="form-control lbl_move datepickerinput" label="Purchase date" value='<?php echo Date('d-m-Y'); ?>' />
+									<div class="error_message"><p>Please enter purchase date...</p> </div> 
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row showDiv" id="secondStep">
+					<div class="col-lg-12" style="margin:10px;">
+						<div class="row">
+							<div class="col-lg-12">
+								<input type="hidden" name="sel_wbsId" id="sel_wbsId" value="none">
+								<div id="jqxWidget">
+									<div id="decision" style="width:100%;">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="margin-top:50px;">
+							<div class="col-lg-6">
+								<table class="table table-bordered" id="resourceTable">
+									<thead>
+										<tr>
+											<th>Resource Name</th>
+											<th width="4%">&nbsp;</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><input type="text" class="form-control auto-complete" res-id="" dec-id="" cost-id=""></td>
+											<td class="action_btns_td">
+												<ul class="action_btns">
+													<li class="float_r">
+														<a href="javascript:void(0);" class="removeResource" data-toggle="tooltip" data-placement="left" data-original-title="Delete">
+															<span><i class="fa fa-trash-o"></i></span>
+														</a>
+													</li>
+												</ul>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="col-lg-6">
+								<table class="table table-bordered" id="costTable">
+									<thead>
+										<tr>
+											<th>Project Name</th>
+											<th width="4%">&nbsp;</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><input type="text" class="form-control auto-complete" res-id="" dec-id="" cost-id=""></td>
+											<td class="action_btns_td">
+												<ul class="action_btns">
+													<li class="float_r">
+														<a href="javascript:void(0);" class="removeCost" data-toggle="tooltip" data-placement="left" data-original-title="Delete">
+															<span><i class="fa fa-trash-o"></i></span>
+														</a>
+													</li>
+												</ul>
+											</td>											
+										</tr>
+									</tbody>
+								</table>								
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row showDiv" id="thirdStep">
+					<div class="col-lg-12" style="margin:10px;">
+						<div class="row">
+							<div class="col-lg-12">				
+								<table id="decisionTable" class="table table-bordered" style="margin-top:20px;border-collapse: unset;">
+									<thead>
+										<tr>
+											<th>Code</th>
+											<th>Resource</th>
+											<th>Unit</th>
+											<th>Balance Quantity</th>
+											<th>Quantity</th>
+											<th>BaseRate</th>
+											<th>QualRate</th>
+											<th>Amount</th>
+											<th>Delivery date</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+								<table id="subTable" class="table table-bordered" style="margin-top:20px;border-collapse: unset;display:none;">
+									<thead>
+										<tr>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+								</table>
+								<table id="cloneTable" class="table table-bordered" style="margin-top:20px;border-collapse: unset;display:none;">
+									<thead>
+										<tr>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+								</table>								
+							</div>
+						</div>
+					</div>		
+				</div>
+				<!--first Entry-->
+				<div class="row showDiv" id="fourthStep">
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">						
+									<select name="vendorId" id="vendorId" class="form-control selectpicker showtick">
+									<option value='0'>Select Supply</option>
+									<?php
+										foreach($VendorList as $type){									
+											echo "<option value='".$type['VendorId']."'>".$type['VendorName']."</option>";
+										}
+									?>				
+									</select>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">	
+									<div id="distributorList"></div>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">						
+									<select id="currency" name="currency" class="form-control selectpicker showtick">
+										<option value='0'>Select Currency</option>
+										<?php
+										foreach($CurrencyList as $Curtype){									
+											echo "<option value='".$Curtype['CurrencyId']."'>".$Curtype['CurrencyName']."</option>";
+										}
+										?>				
+									</select>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">	
+									<ul class="list ui-sortable" data-sortable="true">
+										<li class="tile ui-sortable-handle">
+											<div class="checkbox checkbox-styled tile-text">
+												<label>
+													<input type="checkbox" class="includetax" name="includetax" id="all_resource">
+													<span>IncludeTax</span>
+												</label>
+											</div>
+										</li>
+										<li class="tile ui-sortable-handle">
+											<div class="checkbox checkbox-styled tile-text">
+												<label>
+													<input type="checkbox" class="Readyforapproval" name="Readyforapproval" id="all_resource">
+													<span>Ready for approval</span>
+												</label>
+											</div>
+										</li>
+									</ul>	
+								</div>
+							</div>		
+						</div>
+					</div>
+				</div>	
+				<!--Second Entry-->
+				<div class="row showDiv" id="firstStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Add additional details to this purchase order</h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Terms</h1>
+									<div class="radio_check">
+										<p>
+											<input type="radio" value="1" id="default" name="terms"/>
+											<label for="buyer">Default</label>
+										</p>
+										<p>
+											<input type="radio" value="2" id="Manual" name="terms" checked/>
+											<label for="investor">Manual</label>
+										</p>
+									</div>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Logistics</h1>
+									<div class="radio_check">
+										<p>
+											<input type="radio" value="1" id="default1" name="logistics"/>
+											<label for="buyer">Default</label>
+										</p>
+										<p>
+											<input type="radio" value="2" id="Manual1" name="logistics" checked/>
+											<label for="investor">Manual</label>
+										</p>
+									</div>
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Delivery Address</h1>
+									<div class="radio_check">
+										<p>
+											<input type="radio" value="1" id="default2" name="deliveryaddress"/>
+											<label for="buyer">Default</label>
+										</p>
+										<p>
+											<input type="radio" value="2" id="Manual2" name="deliveryaddress" checked/>
+											<label for="investor">Manual</label>
+										</p>
+									</div>
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">						
+									<select id="paymentmethod" name="paymentmethod" class="form-control selectpicker showtick">
+										<option value='0'>Select payment method</option>
+										<?php
+										foreach($CurrencyList as $Curtype){									
+											echo "<option value='".$Curtype['CurrencyId']."'>".$Curtype['CurrencyName']."</option>";
+										}
+										?>				
+									</select>
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+				<!--Third Entry-->
+				<div class="row showDiv" id="sixthStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Terms And Conditions</h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Terms Regarding Rate and Quantity</h1>								
+									<div id="TermsPickList"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-lg-12">
+							<table class="table" id="termTable">
+								<thead>		
+									<tr>
+										<th>SlNo</th>
+										<th>Terms</th>
+										<th>ValueFromNet</th>
+										<th>Per</th>
+										<th>Value</th>
+										<th>Period</th>
+										<th>Date</th>
+										<th>Str</th>
+									</tr>
+								</thead>
+								<tbody class="appendData">
+															
+								</tbody>
+							</table>
+						</div>	
+					</div>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Manual Term entry</h1>
+									<div id="appendDiv">
+										<div class="form-group" style="">
+											<input type="text" id="title" name="title_1" tagname="title" label="Enter Term Title" class="form-control lbl_move" />	
+										</div>
+										<div class="form-group" style="">				
+											<textarea id="termsdescription" name="termsdescription_1" tagname="termsdescription" label="Enter Your Description" class="form-control lbl_move"></textarea>
+										</div>
+										<div class="form-group">
+											<input type="file" id="termdocument" name="termdocument_1" tagname="termdocument" class="form-control" />
+										</div>
+									</div>	
+								</div>	
+								<div class="form-group">
+									<input type="button" id="addmore" value="Add more" class="btn btn-primary" />
+								</div>					
+							</div>
+						</div>
+					</div>
+				</div>		
+				<!--Fifth Entry-->
+				<div class="row showDiv" id="seventhStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Contact And Delivery Details</h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<h1 class="form_main_h1 frmwrk_h1">Contact Details</h1>
+							<div class="row">   
+								<div class="form-group col-lg-12">
+									<select name="Branch" id="Branch" class="form-control selectpicker showtick">										
+									</select>
+								</div>
+							</div>		
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" id="branchcontactno" name="branchcontactno" label="Branch Contact No" class="form-control lbl_move" />
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<select name="Branchcontactperson" id="Branchcontactperson" class="form-control selectpicker showtick">
+									</select>
+								</div>
+							</div>
+							<h1 class="form_main_h1 frmwrk_h1">Address Details</h1>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" id="addressline1" name="addressline1" label="Address line 1" class="form-control lbl_move" />	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">							
+									<input type="text" id="addressline2" name="addressline2" label="Address line 2" class="form-control lbl_move" />	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" id="addressline3" name="addressline3" label="Address line 3" class="form-control lbl_move" />	
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" id="city" name="city" label="city" class="form-control lbl_move" />	
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" id="pincode" name="pincode" label="pincode" class="form-control lbl_move" />	
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<span class="date_icon"><i class="fa fa-calendar"></i></span>
+									<input type="text" name="delivery_date" id="delivery_date" class="form-control lbl_move datepickerinput" label="Delivery date" value='<?php echo Date('d-m-Y'); ?>' />
+									<div class="error_message"><p>Please enter purchase date...</p> </div> 									
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+				<!--Sixth Entry-->
+				<div class="row showDiv" id="eightStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Logistics</h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">				
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<select name="serviceprovider" id="serviceprovider" class="form-control selectpicker show-tick">
+										<option value='0'>Select Service Provider</option>
+										<?php
+										foreach($ServiceProviderList as $type1){									
+											echo "<option value='".$type1['VendorId']."'>".$type1['VendorName']."</option>";
+										}
+										?>	
+									</select>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Select Type Of service</h1>
+									<div id="ServicePickList"></div>
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<select name="transportmode" id="transportmode" class="form-control selectpicker show-tick">
+										<option value='0'>Select Transport Mode</option>
+										<?php
+										foreach($TransportList as $type2){									
+											echo "<option value='".$type2['TransportId']."'>".$type2['TransportName']."</option>";
+										}
+										?>	
+									</select>
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<h1 class="form_main_h1 frmwrk_h1">Select Logistics Type</h1>
+									<div id="LogisticsPickList"></div>
+								</div>
+							</div>	
+						</div>	
+					</div>
+				</div>
+				<!--Seventh Entry-->
+				<div class="row showDiv" id="ninethStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Logistics</h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">				
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">				
+									<input type="button" class="btn btn-primary" value="po Entered By:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">											
+									<input type="button" class="btn btn-primary" value="Totel Item:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">											
+									<input type="button" class="btn btn-primary" value="Estimated Rate:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">											
+									<input type="button" class="btn btn-primary" value="Round Off:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">												
+									<input type="button" class="btn btn-primary" value="Net Amount:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">											
+									<input type="button" class="btn btn-primary" value="Po Date:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>	
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">											
+									<input type="button" class="btn btn-primary" value="Approved By:<?php echo "Name";?>" name="continue1" id="continue1"/>	
+								</div>
+							</div>	
+						</div>	
+					</div>
+				</div>
+				<input type="hidden" name="gridServiceId" id="gridServiceId">
+				<input type="hidden" name="gridLogisticstypeId" id="gridLogisticstypeId">
+				<input type="hidden" name="distributorListId" id="distributorListId">
+				<input type="hidden" name="gridtermListId" id="gridtermListId">				
+			</form>	
+		</div>
+	</div>
+</div>
+<div class="popover right" role="tooltip" style="top: 29px; left: 262px;display:none;">
+	<div class="arrow" style="top: 50%;">
+	</div>
+	<h3 class="popover-title">Resource</h3>
+	<div class="popover-content">
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r">
+            <a href="javascript:void(0);" class="ripple">Continue</a>
+        </li>
+        <li id="backButton" class="cancel_btn float_r" style="display:none;"><a href="javascript:void(0);" class="ripple">back</a></li>
+		 <li class="cancel_btn cancel_btn_bluecolor float_l"><a id="cancelbutton" class="ripple" onclick="alert confirm();">cancel</a></li>
+    </ul>
+</div>
+
+
+<script>
+$(".showDiv").hide();
+$("#backButton").hide();
+$("#firstStep").show();
+	
+$('.datepickerinput').datepicker({
+	format: "dd-mm-yyyy",
+	startDate: new Date(),
+	todayBtn: true,
+	orientation: "top auto",
+	autoclose: true
+}).on("changeDate", function(e){
+	$("#dateSpan").text($(this).val());
+});	
+$('.date_icon').click(function() {
+	var input = $(this).parent().find('input').datepicker('show');
+});
+	
+/*Decision picklist*/
+var decJson={};
+var resJson={};
+var costJson={};
+var oldJson = '';
+
+function unique(array) {
+    return $.grep(array, function(el, index) {
+        return index == $.inArray(el, array);
+    });
+}
+
+var decArr = <?php echo json_encode($feedResult); ?>;
+
+var resArr=<?php echo json_encode($resResult); ?>;
+var resArrCopy = <?php echo json_encode($resResult); ?>;
+
+var costArr=<?php echo json_encode($costResult); ?>;
+var costArrCopy = <?php echo json_encode($costResult); ?>;
+
+
+var decSource ={
+	localData: <?php echo json_encode(array_chunk($feedResult,3)); ?>,
+	dataType: "json",
+};
+
+var decDataAdapter = new $.jqx.dataAdapter(decSource);
+
+
+$("#decision").jqxDataTable({
+	width: '100%',
+	pageable: true,
+	pageSize: 1,
+	pagerButtonsCount: 5,
+	enableHover: false,
+	selectionMode: 'none',
+	rendered: function () {
+		
+	},
+	rendering: function () {
+		
+	},	
+	source: decDataAdapter,	
+	columns: [
+		  /* { text: 'Decision no', editable: false,datafield: 'RDecisionNo',hidden:true},
+		  { text: 'Decision date', editable: false,datafield: 'DecDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy',hidden:true},
+		  { text: 'Resource Id', editable: false,datafield: 'ResourceId', hidden:true},
+		  { text: 'CostCentre Id', editable: false,datafield: 'CostCentreId', hidden:true},
+		  { text: 'CostCentre Name', editable: false,datafield: 'CostCentreName', hidden:true}, */
+		  {
+			  text: 'Decision List', cellsAlign: 'centre', dataField: 'VendorName',  width:'100%', cellClassName:"sample",
+			  // row - row's index.
+			  // column - column's data field.
+			  // value - cell's value.
+			  // rowData - rendered row's object.
+			  cellsrenderer: function (row, column, value, rowData) {
+				  var container = '<div class="content_wrapper  padlr0">'+
+									'<div class="container-fluid">'+
+										'<ul class="ticket_box_area">';
+											$.each(rowData, function(i,v){
+												if(v.RDecisionNo){
+													container += '<li class="col-lg-4 col-md-4 col-sm-6" onClick=\'decisionSelect('+JSON.stringify(v)+', this);\' sel="0" id="decisonCell_'+v.DecisionId+'" onmouseover=\'resourceList('+v.DecisionId+', this);\'>'+
+																	'<div class="col-lg-12 ticket_box">'+
+																		'<div class="row fillrow '+((decJson[v.DecisionId])?"selected":"")+'">'+
+																			'<div class="col-lg-3 col-md-12 col-xs-12">'+
+																				'<div class="ticket_material">'+
+																					'<h1>M</h1>'+
+																				'</div>'+
+																				'<div class="ticket_date"></div>'+
+																				'<div class="ticket_txtdate">'+v.DecDate+'</div>'+
+																			'</div>'+   
+																			'<div class="col-lg-9 col-xs-12 ticket_right_space">'+
+																				'<div class="padlr0 col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Decision No<span class="colon_r">:</span></p></div>'+
+																				'<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">'+v.RDecisionNo+'</p></div>'+ 
+																				'<div class="padlr0 col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Cost<span class="colon_r">:</span></p></div>'+
+																				'<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">'+v.CostCentreId+'</p></div>'+ 
+																				'<div class="padlr0 col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Resource<span class="colon_r">:</span></p></div>'+
+																				'<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">'+v.ResourceId+'</p></div>'+
+																			'</div>'+
+																		'</div>'+
+																	'</div>'+   
+																'</li>';
+												}
+											});
+						container += '</ul>'+
+									'</div>'+
+								'</div>';
+				  return container;
+			  }
+		  }		  
+	]
+});
+var resourceList = function (decId, invoker){
+	if($('.popover').attr('id') == 'dec_'+decId)
+		return false;
+	else
+		$('.popover').attr('id', 'dec_'+decId);
+	
+	$('.popover-title').text('Resource');
+	if(!$('.popover').is(':visible'))
+		$('.popover').show();
+
+	$('.popover-content').html('');
+	
+	$.each(unique(decArr[decId].ResourceId.split(',')), function(i,v){
+		$('.popover-content').append('<div class="row">'+
+										'<div class="col-lg-3">'+
+											'<input type="checkbox" '+((decJson[decId] && $.inArray(v, decJson[decId].resource) != -1)?"checked":"")+' res-id="'+v+'" dec-id="'+decId+'" onclick=\'resSelect(this);\'>'+
+										'</div>'+
+										'<div class="col-lg-9">'+
+											'<span>'+resArr[v].value+'</span>'+
+										'</div>'+
+									'</div>');
+	});
+
+	$('.popover').animate({left: parseFloat($(invoker).offset().left) - 60, top:parseFloat($(invoker).offset().top) - parseFloat($('header').height())  - (parseFloat($('.popover .arrow').offset().top) - parseFloat($('.popover').offset().top))});
+}
+var resSelect = function(invoker){
+	var resId = $(invoker).attr('res-id');
+	var decId = $(invoker).attr('dec-id');
+	var cid = unique(decArr[decId].CostCentreId.split(','));
+	
+	var cost = unique(resArr[resId].costId.split(','));
+	var cid1 = $.grep(cost, function(element){
+					return $.inArray(element, cid) !== -1;
+				});	
+	
+	if($(invoker).is(':checked')){
+		if(!decJson[decId]){
+			decJson[decId] = {};
+			
+			var cost = unique(resArr[resId].costId.split(','));
+			var common = $.grep(cost, function(element){
+							return $.inArray(element, cid) !== -1;
+						});
+			decJson[decId].cost = common;
+			decJson[decId].resource = [];
+			decJson[decId].resource.push(resId);
+			$('#decisonCell_'+decId).find('.fillrow').addClass('selected');
+		}
+		else{
+			decJson[decId].resource.push(resId);
+			var cost = unique(resArr[resId].costId.split(','));
+			var common = $.grep(cost, function(element){
+							return $.inArray(element, cid) !== -1;
+						});
+			decJson[decId].cost = unique($.merge(decJson[decId].cost, common));
+		}
+		
+		if(!resJson[resId]){
+			$("#resourceTable tbody tr:last").find('input:text').val(resArr[resId].value);
+			$("#resourceTable tbody tr:last").find('input:text').attr('res-id', resId);
+			var table = $("#resourceTable tbody");
+			table.append(table.find("tr:first").clone());
+			table.find("tr:last").each(function(){
+				$(this).find("input:text").each(function(){
+					$(this).val('').attr('res-id', '');
+				});
+			});			
+			removeResourcetr();
+			bindAutoComplete();
+
+			resJson[resId]={};
+			var costId = unique(resArr[resId].costId.split(','));
+			var common = $.grep(costId, function(element) {
+							return $.inArray(element, cid) !== -1;
+						});
+						
+			resJson[resId].cost = common;
+			
+			resJson[resId].decision = [];
+			resJson[resId].decision.push(decId);
+			delete resArrCopy[resId];
+		}
+		else{
+			if($.inArray(decId, resJson[resId].decision) == -1)
+				resJson[resId].decision.push(decId);
+			
+			var costId = unique(resArr[resId].costId.split(','));
+			var common = $.grep(costId, function(element) {
+							return $.inArray(element, cid) !== -1;
+						});
+			resJson[resId].cost = unique($.merge(resJson[resId].cost, common));				
+		}
+
+		for(var c in cid1){
+			var v = cid1[c];
+			if(!costJson[v]){
+				$("#costTable tbody tr:last").find('input:text').val(costArr[v].value);
+				$("#costTable tbody tr:last").find('input:text').attr('cost-id', v);
+				var table = $("#costTable tbody");
+				table.append(table.find("tr:first").clone());
+				table.find("tr:last").each(function(){
+					$(this).find("input:text").each(function(){
+						$(this).val('').attr('cost-id', '');
+					});
+				});			
+				removeCosttr();
+				bindAutoCompleteCost();
+				costJson[v]={};
+				
+				costJson[v].resource = [];
+				
+				var resource = unique(costArr[v].resId.split(','));
+				
+				if($.inArray(resId, resource) != -1)
+					costJson[v].resource.push(resId);
+				
+				costJson[v].decision = [];
+				costJson[v].decision.push(decId);
+				delete costArrCopy[v];
+			}
+			else{
+				if($.inArray(decId, costJson[v].decision) == -1)
+					costJson[v].decision.push(decId);
+				
+				var resource = unique(costArr[v].resId.split(','));
+				if($.inArray(resId, resource) != -1 && $.inArray(resId, costJson[v].resource) == -1){
+					costJson[v].resource.push(resId);
+				}
+			}
+		}
+	}
+	else{
+		decJson[decId].resource.splice($.inArray(resId, decJson[decId].resource),1);
+		var cost = unique(resArr[resId].costId.split(','));
+		$.each(cost, function(i,v){
+			if($.inArray(v, decJson[decId].cost))
+				decJson[decId].cost.splice(v, $.inArray(v, decJson[decId].cost), 1);
+		});
+		
+		resJson[resId].decision.splice($.inArray(decId, resJson[resId].decision),1);
+		var cost1 = unique(decArr[decId].CostCentreId.split(','));
+		$.each(cost1, function(i,v){
+			if($.inArray(v, resJson[resId].cost))
+				resJson[resId].cost.splice(v, $.inArray(v, resJson[resId].cost), 1);
+		});
+		
+		if(resJson[resId].decision.length == 0){
+			$.each(resJson[resId].cost, function(i1,v1){
+				if(costJson[v1]){
+					costJson[v1].resource.splice($.inArray(resId, costJson[v1].resource),1);
+					if(costJson[v1].resource.length == 0){
+						$('#costTable input[cost-id='+v1+']').closest('tr').remove();
+						costArrCopy[v1] = costArr[v1];
+						delete costJson[v1];
+					}
+				}
+			});
+			$('#resourceTable input[res-id='+resId+']').closest('tr').remove();
+			resArrCopy[resId] = resArr[resId];
+			delete resJson[resId];
+		}
+		
+		if(decJson[decId].resource.length == 0){
+			$.each(decJson[decId].cost, function(i,v){
+				if(costJson[v]){
+					costJson[v].decision.splice($.inArray(decId, costJson[v].decision),1);
+					if(costJson[v].decision.length == 0){
+						$.each(costJson[v].resource, function(i1,v1){
+							if(resJson[v1]){
+								resJson[v1].cost.splice($.inArray(v, resJson[v1].cost),1);
+								if(resJson[v1].cost.length == 0){
+									$('#resourceTable input[res-id='+v1+']').closest('tr').remove();
+									resArrCopy[v1] = resArr[v1];
+									delete resJson[v1];
+								}
+							}
+						});
+						$('#costTable input[cost-id='+v+']').closest('tr').remove();
+						delete costJson[v];						
+						costArrCopy[v] = costArr[v];
+					}
+				}
+			});
+			delete decJson[decId];
+			$('#decisonCell_'+decId).find('.fillrow').removeClass('selected');
+		}
+	}
+}
+var decisionSelect = function (data, invoker){
+	var rowData = data; 
+	var uid = rowData.DecisionId;
+		
+	if(!$(invoker).find('.fillrow').hasClass('selected')){
+		var rid = unique(rowData.ResourceId.split(','));
+		var cid = unique(rowData.CostCentreId.split(','));
+
+	
+		decJson[uid] = {};
+		decJson[uid].cost = cid;
+		decJson[uid].resource = rid;
+		
+		$.each(rid, function(i,v){
+			if(!resJson[v]){
+				$("#resourceTable tbody tr:last").find('input:text').val(resArr[v].value);
+				$("#resourceTable tbody tr:last").find('input:text').attr('res-id', v);
+				var table = $("#resourceTable tbody");
+				table.append(table.find("tr:first").clone());
+				table.find("tr:last").each(function(){
+					$(this).find("input:text").each(function(){
+						$(this).val('').attr('res-id', '');
+					});
+				});			
+				removeResourcetr();
+				bindAutoComplete();
+				resJson[v]={};
+				
+				var costId = unique(resArr[v].costId.split(','));
+				var common = $.grep(costId, function(element) {
+								return $.inArray(element, cid) !== -1;
+							});
+				resJson[v].cost = common;
+				
+				resJson[v].decision = [];
+				resJson[v].decision.push(uid);
+				delete resArrCopy[v];
+			}
+			else{
+				resJson[v].decision.push(uid);
+				
+				var costId = unique(resArr[v].costId.split(','));
+				var common = $.grep(costId, function(element) {
+								return $.inArray(element, cid) !== -1;
+							});
+				
+				resJson[v].cost = unique($.merge(resJson[v].cost, common));
+			}
+		});
+		
+		/*Cost center*/
+		$.each(cid, function(i,v){
+			if(!costJson[v]){
+				$("#costTable tbody tr:last").find('input:text').val(costArr[v].value);
+				$("#costTable tbody tr:last").find('input:text').attr('cost-id', v);
+				var table = $("#costTable tbody");
+				table.append(table.find("tr:first").clone());
+				table.find("tr:last").each(function(){
+					$(this).find("input:text").each(function(){
+						$(this).val('').attr('cost-id', '');
+					});
+				});			
+				removeCosttr();
+				bindAutoCompleteCost();
+				costJson[v]={};
+				
+				var resId = unique(costArr[v].resId.split(','));
+				
+				var common = $.grep(resId, function(element) {
+								return $.inArray(element, rid) !== -1;
+							});
+							
+				costJson[v].resource = common;
+				
+				costJson[v].decision = [];
+				costJson[v].decision.push(uid);
+				delete costArrCopy[v];
+			}
+			else{
+				costJson[v].decision.push(uid);
+				
+				var resId = unique(costArr[v].resId.split(','));
+				
+				var common = $.grep(resId, function(element) {
+								return $.inArray(element, rid) !== -1;
+							});
+				
+				costJson[v].resource = unique($.merge(costJson[v].resource, common));
+			}
+		});
+		$(invoker).find('.fillrow').addClass('selected');
+	}
+	else{
+		$.each(decJson[uid].resource, function(i,v){
+			resJson[v].decision.splice($.inArray(uid, resJson[v].decision),1);
+			if(resJson[v].decision.length == 0){
+				$.each(resJson[v].cost, function(i1,v1){
+					if(costJson[v1]){
+						costJson[v1].resource.splice($.inArray(v, costJson[v1].resource),1);
+						if(costJson[v1].resource.length == 0){
+							$('#costTable input[cost-id='+v1+']').closest('tr').remove();
+							delete costJson[v1];
+							costArrCopy[v1] = costArr[v1];
+						}
+					}
+				});
+				$('#resourceTable input[res-id='+v+']').closest('tr').remove();
+				resArrCopy[v] = resArr[v];
+				delete resJson[v];
+			}
+		});
+		if(decJson[uid]){
+			$.each(decJson[uid].cost, function(i,v){
+				if(costJson[v]){
+					costJson[v].decision.splice($.inArray(uid, costJson[v].decision),1);
+					if(costJson[v].decision.length == 0){
+						$.each(costJson[v].resource, function(i1,v1){
+							if(resJson[v1]){
+								resJson[v1].cost.splice($.inArray(v, resJson[v1].cost),1);
+								if(resJson[v1].cost.length == 0){
+									$('#resourceTable input[res-id='+v1+']').closest('tr').remove();
+									resArrCopy[v1] = resArr[v1];
+									delete resJson[v1];
+								}
+							}
+						});
+						$('#costTable input[cost-id='+v+']').closest('tr').remove();
+						delete costJson[v];
+						costArrCopy[v] = costArr[v];
+					}
+				}
+			});
+		}
+		delete decJson[uid];
+		$(invoker).find('.fillrow').removeClass('selected');
+	}	
+}
+
+
+/*Resource autocomplete start*/
+bindAutoComplete();
+removeResourcetr();
+function deleteUnResource(){
+	$("#resourceTable tbody tr .error").each(function(){
+		if($(this).attr('res-id') != '')
+			fillResource('', this, 2);
+		
+		if($(this).closest('tr').index() == 0 && $("#resourceTable tbody tr").length == 1){
+			$(this).val('').attr('res-id', '');
+			$(this).removeClass('error');
+		}
+		else if($(this).closest('tr').index() == $("#resourceTable tbody tr:last").index()){
+			$(this).val('').attr('res-id', '');
+			$(this).removeClass('error');
+		}
+		else if($(this).closest('tr').index() != 0 && $(this).closest('tr').index() != $("#resourceTable tbody tr:last").index()){
+			$(this).closest('tr').remove();
+		}
+		else if($(this).closest('tr').index() == 0 && $("#resourceTable tbody tr").length > 1){
+			$(this).closest('tr').remove();
+		}		
+	});
+}
+
+function removeResourcetr(){
+	$(".removeResource").unbind();
+	$(".removeResource").bind("click", function(){
+		fillResource('', this, 2);
+	});
+}
+function addResourceTr(invoker){
+	var table = $("#resourceTable tbody");
+	if($(invoker).closest("tr").index() == table.find("tr:last").index()){
+		table.append(table.find("tr:first").clone());
+		table.find("tr:last").each(function(){
+			$(this).find("input:text").each(function(){
+				$(this).val('').attr('res-id', '');
+			});
+		});			
+		removeResourcetr();
+		bindAutoComplete();
+	}
+}
+function fillResource(json, invoker, mode){
+	var tr = $(invoker).closest("tr");
+	var res = tr.find("input:text").attr('res-id');
+	if(mode == 1){
+		if(res != json.data){
+			var rid=json.data;
+			tr.find("input:text").attr('res-id', rid);
+			var decId = unique(json.decId.split(','));
+			var cid = unique(json.costId.split(','));
+			resJson[rid] = {};
+			resJson[rid].decision = decId;
+			resJson[rid].cost = cid;
+			if(res != ''){
+				resArrCopy[res] = resArr[res];
+				$.each(resJson[res].decision, function(i,v){
+					decJson[v].resource.splice($.inArray(res, decJson[v].resource),1);
+					if(decJson[v].resource.length == 0){
+						$.each(decJson[v].cost, function(i1,v1){
+							if(costJson[v1]){
+								costJson[v1].decision.splice($.inArray(v, costJson[v1].decision),1);
+								if(costJson[v1].decision.length == 0){
+									$('#costTable input[cost-id='+v1+']').closest('tr').remove();
+									delete costJson[v1];
+									costArrCopy[v1] = costArr[v1];
+								}
+							}
+						});
+						$('#decisonCell_'+v).find('.fillrow').removeClass('selected');
+						delete decJson[v];
+					}
+				});	
+				
+				if(resJson[res]){
+					$.each(resJson[res].cost, function(i,v){
+						if(costJson[v]){
+							costJson[v].resource.splice($.inArray(res, costJson[v].resource),1);
+							if(costJson[v].resource.length == 0){
+								$.each(costJson[v].decision, function(i1,v1){
+									if(decJson[v1]){
+										decJson[v1].cost.splice($.inArray(v, decJson[v1].cost),1);
+										if(decJson[v1].cost.length == 0){
+											$('#decisonCell_'+v1).find('.fillrow').removeClass('selected');
+											delete decJson[v1];
+										}
+									}
+								});
+								$('#costTable input[cost-id='+v+']').closest('tr').remove();
+								delete costJson[v];
+								costArrCopy[v] = costArr[v];
+							}
+						}
+					});
+				}
+				delete resJson[res];				
+			}
+
+			
+			$.each(decId, function(i,v){
+				if(!decJson[v]){
+					decJson[v]={};
+					var costId = unique(decArr[v].CostCentreId.split(','));
+					var common = $.grep(costId, function(element) {
+									return $.inArray(element, cid) !== -1;
+								});
+					decJson[v].cost = common;
+					
+					decJson[v].resource = [];
+					decJson[v].resource.push(rid);
+					$('#decisonCell_'+v).find('.fillrow').addClass('selected');
+				}
+				else{
+					decJson[v].resource.push(rid);
+					
+					var costId = unique(decArr[v].CostCentreId.split(','));
+					var common = $.grep(costId, function(element) {
+									return $.inArray(element, cid) !== -1;
+								});
+					
+					decJson[v].cost = unique($.merge(decJson[v].cost, common));
+				}
+			});
+			
+			/*Cost center*/
+			$.each(cid, function(i,v){
+				if(!costJson[v]){
+					$("#costTable tbody tr:last").find('input:text').val(costArr[v].value);
+					$("#costTable tbody tr:last").find('input:text').attr('cost-id', v);
+					var table = $("#costTable tbody");
+					table.append(table.find("tr:first").clone());
+					table.find("tr:last").each(function(){
+						$(this).find("input:text").each(function(){
+							$(this).val('').attr('cost-id', '');
+						});
+					});			
+					removeCosttr();
+					bindAutoCompleteCost();
+					costJson[v]={};
+					
+					var decision = unique(costArr[v].decId.split(','));
+					var common = $.grep(decision, function(element) {
+									return $.inArray(element, decId) !== -1;
+								});
+					costJson[v].decision = common;
+					
+					costJson[v].resource = [];
+					costJson[v].resource.push(rid);
+					delete costArrCopy[v];
+				}
+				else{
+					costJson[v].resource.push(rid);
+					
+					var decision = unique(costArr[v].decId.split(','));
+					var common = $.grep(decision, function(element) {
+									return $.inArray(element, decId) !== -1;
+								});
+					
+					costJson[v].decision = unique($.merge(costJson[v].decision, common));
+				}
+			});
+			delete resArrCopy[json.data];
+		}
+	}
+	else{
+		if(res != ''){
+			resArrCopy[res] = resArr[res];
+			$.each(resJson[res].decision, function(i,v){
+				decJson[v].resource.splice($.inArray(res, decJson[v].resource),1);
+				if(decJson[v].resource.length == 0){
+					$.each(decJson[v].cost, function(i1,v1){
+						if(costJson[v1]){
+							costJson[v1].decision.splice($.inArray(v, costJson[v1].decision),1);
+							if(costJson[v1].decision.length == 0){
+								$('#costTable input[cost-id='+v1+']').closest('tr').remove();
+								delete costJson[v1];
+								costArrCopy[v1] = costArr[v1];
+							}
+						}
+					});
+					$('#decisonCell_'+v).find('.fillrow').removeClass('selected');
+					delete decJson[v];
+				}
+			});	
+			if(resJson[res]){
+				$.each(resJson[res].cost, function(i,v){
+					if(costJson[v]){
+						costJson[v].resource.splice($.inArray(res, costJson[v].resource),1);
+						if(costJson[v].resource.length == 0){
+							$.each(costJson[v].decision, function(i1,v1){
+								if(decJson[v1]){
+									decJson[v1].cost.splice($.inArray(v, decJson[v1].cost),1);
+									if(decJson[v1].cost.length == 0){
+										$('#decisonCell_'+v1).find('.fillrow').removeClass('selected');
+										delete decJson[v1];
+									}
+								}
+							});
+							$('#costTable input[cost-id='+v+']').closest('tr').remove();
+							delete costJson[v];
+							costArrCopy[v] = costArr[v];
+						}
+					}
+				});
+			}
+			delete resJson[res];
+			if($(invoker).closest('tbody').find('tr').length == 1){
+				tr.find("input:text").attr('res-id', '');
+				tr.find("input:text").val('');
+			}
+			else{
+				tr.remove();
+			}
+		}
+	}
+}
+var decSelect = function(invoker){
+	var resId = $(invoker).attr('res-id');
+	var decId = $(invoker).attr('dec-id');
+	var cid = unique(resArr[resId].costId.split(','));
+
+	var costId = unique(decArr[decId].CostCentreId.split(','));
+	var cid1 = $.grep(costId, function(element) {
+					return $.inArray(element, cid) !== -1;
+				});
+				
+	if($(invoker).is(':checked')){
+		resJson[resId].decision.push(decId);
+		
+		var cost = resArr[resId].costId.split(',');
+		var common = $.grep(cost, function(element){
+						return $.inArray(element, cid) !==-1;
+					});
+		resJson[resId].cost = unique($.merge(resJson[resId].cost, common));
+					
+		
+		if(!decJson[decId]){
+			decJson[decId]={};
+			var costId = unique(decArr[decId].CostCentreId.split(','));
+			var common = $.grep(costId, function(element) {
+							return $.inArray(element, cid) !== -1;
+						});
+			$('#decisonCell_'+decId).find('.fillrow').addClass('selected');
+				
+			decJson[decId].cost = common;
+			
+			decJson[decId].resource = [];
+			decJson[decId].resource.push(resId);
+		}
+		else{
+			if($.inArray(resId, decJson[decId].resource) == -1)
+				decJson[decId].resource.push(resId);
+			
+			var costId = unique(decArr[decId].CostCentreId.split(','));
+			var common = $.grep(costId, function(element) {
+							return $.inArray(element, cid) !== -1;
+						});
+			decJson[decId].cost = unique($.merge(decJson[decId].cost, common));				
+		}
+		
+		$.each(cid1, function(i,v){
+			if(!costJson[v]){
+				$("#costTable tbody tr:last").find('input:text').val(costArr[v].value);
+				$("#costTable tbody tr:last").find('input:text').attr('cost-id', v);
+				var table = $("#costTable tbody");
+				table.append(table.find("tr:first").clone());
+				table.find("tr:last").each(function(){
+					$(this).find("input:text").each(function(){
+						$(this).val('').attr('cost-id', '');
+					});
+				});			
+				removeCosttr();
+				bindAutoCompleteCost();
+				costJson[v]={};
+				
+				costJson[v].decision = [];
+				
+				var decision = unique(costArr[v].decId.split(','));
+				
+				if($.inArray(decId, decision) != -1)
+					costJson[v].decision.push(decId);
+				
+				costJson[v].resource = [];
+				costJson[v].resource.push(resId);
+				delete costArrCopy[v];
+			}
+			else{
+				if($.inArray(decId, costJson[v].decision) == -1)
+					costJson[v].decision.push(decId);
+				
+				var resource = unique(costArr[v].resId.split(','));
+				
+				if($.inArray(resId, resource) != -1 && $.inArray(resId, costJson[v].resource) == -1)
+					costJson[v].resource.push(resId);
+			}
+		});
+	}
+	else{
+		decJson[decId].resource.splice($.inArray(resId, decJson[decId].resource),1);
+		var cost = unique(resArr[resId].costId.split(','));
+		$.each(cost, function(i,v){
+			if($.inArray(v, decJson[decId].cost))
+				decJson[decId].cost.splice(v, $.inArray(v, decJson[decId].cost), 1);
+		});
+		
+		resJson[resId].decision.splice($.inArray(decId, resJson[resId].decision),1);
+		var cost1 = unique(decArr[decId].CostCentreId.split(','));
+		$.each(cost1, function(i,v){
+			if($.inArray(v, resJson[resId].cost))
+				resJson[resId].cost.splice(v, $.inArray(v, resJson[resId].cost), 1);
+		});
+		
+		if(decJson[decId].resource.length == 0){
+			$.each(decJson[decId].cost, function(i,v){
+				if(costJson[v]){
+					costJson[v].decision.splice($.inArray(decId, costJson[v].decision),1);
+					if(costJson[v].decision.length == 0){
+						$.each(costJson[v].resource, function(i1,v1){
+							if(resJson[v1]){
+								resJson[v1].cost.splice($.inArray(v, resJson[v1].cost),1);
+								if(resJson[v1].cost.length == 0){
+									$('#resourceTable input[res-id='+v1+']').closest('tr').remove();
+									resArrCopy[v1] = resArr[v1];
+									delete resJson[v1];
+								}
+							}
+						});
+						$('#costTable input[cost-id='+v+']').closest('tr').remove();
+						delete costJson[v];
+						costArrCopy[v] = costArr[v];
+					}
+				}
+			});
+			delete decJson[decId];
+			$('#decisonCell_'+decId).find('.fillrow').removeClass('selected');
+		}		
+		if(resJson[resId].decision.length == 0){
+			$.each(resJson[resId].cost, function(i1,v1){
+				costJson[v1].resource.splice($.inArray(resId, costJson[v1].resource),1);
+				if(costJson[v1].resource.length == 0){
+					$('#costTable input[cost-id='+v1+']').closest('tr').remove();
+					delete costJson[v1];
+					costArrCopy[v1] = costArr[v1];
+				}
+			});
+			$('#resourceTable input[res-id='+resId+']').closest('tr').remove();
+			resArrCopy[resId] = resArr[resId];
+			delete resJson[resId];
+		}
+	}
+}
+function bindAutoComplete(){
+	$('#resourceTable .auto-complete').unbind();
+	$('#resourceTable .auto-complete').autocomplete({
+		lookup: <?php echo json_encode(array_values($resResult)); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		},
+		onSelect: function(suggestion){
+			 if(suggestion){
+				 addResourceTr(this);
+				 fillResource(suggestion, this, 1);
+				 $(this).removeClass('error');
+			 }
+		},
+		onSearchStart: function(suggestion) {
+			
+		},
+		onSearchComplete: function (query, suggestion){
+			 if(!suggestion.length){
+				 //fillResource('', this, 2);
+				 //$(this).addClass('error');
+			 }
+			 else{
+				 //fillResource('', this, 2);
+				 $(this).removeClass('error');
+			 }
+		},
+	}).bind("blur", function(){
+		if($.inArray($(this).val(), <?php echo json_encode(array_column($resResult, 'value')); ?>) == -1){
+			//fillResource('', this, 2);
+			$(this).addClass("error");
+		}
+		setTimeout(function(){
+			deleteUnResource();
+		}, 200);
+	}).bind('mouseover', function(){
+		var resId = $(this).attr('res-id');
+		if($('.popover').attr('id') == 'res_'+resId || $(this).val() == '')
+			return false;
+		else
+			$('.popover').attr('id', 'res_'+resId);
+		
+		$('.popover-title').text('Decision');
+		
+		if(!$('.popover').is(':visible'))
+			$('.popover').show();
+			
+		
+		$('.popover-content').html('');
+		
+		$.each(unique(resArr[resId].decId.split(',')), function(i,v){
+			$('.popover-content').append('<div class="row">'+
+											'<div class="col-lg-3">'+
+												'<input type="checkbox" '+((resJson[resId] && $.inArray(v, resJson[resId].decision) != -1)?"checked":"")+' res-id="'+resId+'" dec-id="'+v+'" onclick=\'decSelect(this);\'>'+
+											'</div>'+
+											'<div class="col-lg-9">'+
+												'<span>'+decArr[v].RDecisionNo+'</span>'+
+											'</div>'+
+										'</div>');
+		});
+		
+		$('.popover').animate({left: parseFloat($(this).offset().left) - 60, top:parseFloat($(this).offset().top) - parseFloat($('header').height()) - ($('.popover .arrow').offset().top - $('.popover').offset().top)});
+	});
+	
+ 	$('#resourceTable .auto-complete').bind("focus", function(){
+		var arr = resArrCopy;
+		if($(this).attr('res-id') != '')
+			arr[$(this).attr('res-id')] = resArr[$(this).attr('res-id')];
+		
+		var res = $.map(arr, function(i,v){
+					return i;
+				  });
+				 
+		$(this).autocomplete().setOptions({
+			lookup: res
+		});			
+	});
+}
+/*Resource autocomplete end*/
+
+
+
+
+/*Project autocomplete start*/
+bindAutoCompleteCost();
+removeCosttr();
+function deleteUnCost(){
+	$("#costTable tbody tr .error").each(function(){
+		if($(this).attr('cost-id') != '')
+			fillCost('', this, 2);
+		
+		if($(this).closest('tr').index() == 0 && $("#costTable tbody tr").length == 1){
+			$(this).val('').attr('cost-id', '');
+			$(this).removeClass('error');
+		}
+		else if($(this).closest('tr').index() == $("#costTable tbody tr:last").index()){
+			$(this).val('').attr('cost-id', '');
+			$(this).removeClass('error');			
+		}
+		else if($(this).closest('tr').index() != 0 && $(this).closest('tr').index() != $("#costTable tbody tr:last").index()){
+			$(this).closest('tr').remove();
+		}
+		else if($(this).closest('tr').index() == 0 && $("#costTable tbody tr").length > 1){
+			$(this).closest('tr').remove();
+		}		
+	});
+}
+function removeCosttr(){
+	$(".removeCost").unbind();
+	$(".removeCost").bind("click", function(){
+		fillCost('', this, 2);
+	});
+}
+function addCostTr(invoker){
+	var table = $("#costTable tbody");
+	if($(invoker).closest("tr").index() == table.find("tr:last").index()){
+		table.append(table.find("tr:first").clone());
+		table.find("tr:last").each(function(){
+			$(this).find("input:text").each(function(){
+				$(this).val('').attr('cost-id', '');
+			});
+		});			
+		removeCosttr();
+		bindAutoCompleteCost();
+	}
+}
+function fillCost(json, invoker, mode){
+	var tr = $(invoker).closest("tr");
+	var cost = tr.find("input:text").attr('cost-id');
+	if(mode == 1){
+		if(cost != json.data){
+			var cid=json.data;
+			tr.find("input:text").attr('cost-id', cid);
+			var decId = unique(json.decId.split(','));
+			var rid = unique(json.resId.split(','));
+			
+			costJson[cid] = {};
+			costJson[cid].decision = decId;
+			costJson[cid].resource = rid;
+			
+			if(cost != ''){
+				costArrCopy[cost] = costArr[cost];
+				$.each(costJson[cost].decision, function(i,v){
+					decJson[v].cost.splice($.inArray(cost, decJson[v].cost),1);
+					if(decJson[v].cost.length == 0){
+						$.each(decJson[v].resource, function(i1,v1){
+							if(resJson[v1]){
+								resJson[v1].decision.splice($.inArray(v, resJson[v1].decision),1);
+								if(resJson[v1].decision.length == 0){
+									$('#resourceTable input[res-id='+v1+']').closest('tr').remove();
+									resArrCopy[v1] = resArr[v1];
+									delete resJson[v1];
+								}
+							}
+						});						
+						$('#decisonCell_'+v).find('.fillrow').removeClass('selected');
+						delete decJson[v];
+					}
+				});	
+				if(costJson[cost]){
+					$.each(costJson[cost].resource, function(i,v){
+						if(resJson[v]){
+							resJson[v].cost.splice($.inArray(cost, resJson[v].cost),1);
+							if(resJson[v].cost.length == 0){
+								$.each(resJson[v].decision, function(i1,v1){
+									if(decJson[v1]){
+										decJson[v1].resource.splice($.inArray(v, decJson[v1].resource),1);
+										if(decJson[v1].resource.length == 0){
+											$('#decisonCell_'+v1).find('.fillrow').removeClass('selected');
+											delete decJson[v1];
+										}
+									}
+								});
+								$('#resourceTable input[res-id='+v+']').closest('tr').remove();
+								resArrCopy[v] = resArr[v];
+								delete resJson[v];
+							}
+						}
+					});
+				}
+				delete costJson[cost];
+			}
+
+			
+			$.each(decId, function(i,v){
+				if(!decJson[v]){
+					decJson[v]={};
+					var resId = unique(decArr[v].ResourceId.split(','));
+					var common = $.grep(resId, function(element) {
+									return $.inArray(element, rid) !== -1;
+								});
+					decJson[v].resource = common;
+					
+					decJson[v].cost = [];
+					decJson[v].cost.push(cid);
+					$('#decisonCell_'+v).find('.fillrow').addClass('selected');
+				}
+				else{
+					decJson[v].cost.push(cid);
+					
+					var resId = unique(decArr[v].ResourceId.split(','));
+					var common = $.grep(resId, function(element) {
+									return $.inArray(element, rid) !== -1;
+								});
+					
+					decJson[v].resource = unique($.merge(decJson[v].resource, common));
+				}
+			});
+			
+			/*Cost center*/
+			$.each(rid, function(i,v){
+				if(!resJson[v]){
+					$("#resourceTable tbody tr:last").find('input:text').val(resArr[v].value);
+					$("#resourceTable tbody tr:last").find('input:text').attr('res-id', v);
+					var table = $("#resourceTable tbody");
+					table.append(table.find("tr:first").clone());
+					table.find("tr:last").each(function(){
+						$(this).find("input:text").each(function(){
+							$(this).val('').attr('res-id', '');
+						});
+					});			
+					removeResourcetr();
+					bindAutoComplete();
+					resJson[v]={};
+					
+					var decision = unique(resArr[v].decId.split(','));
+					var common = $.grep(decision, function(element) {
+									return $.inArray(element, decId) !== -1;
+								});
+					resJson[v].decision = common;
+					
+					resJson[v].cost = [];
+					resJson[v].cost.push(cid);
+				}
+				else{
+					resJson[v].cost.push(cid);
+					
+					var decision = unique(resArr[v].decId.split(','));
+					var common = $.grep(decision, function(element) {
+									return $.inArray(element, decId) !== -1;
+								});
+					
+					resJson[v].decision = unique($.merge(resJson[v].decision, common));
+				}
+			});
+			delete costArrCopy[json.data];
+		}
+	}
+	else{
+		if(cost != ''){
+			costArrCopy[cost] = costArr[cost];
+			$.each(costJson[cost].decision, function(i,v){
+				decJson[v].cost.splice($.inArray(cost, decJson[v].cost),1);
+				if(decJson[v].cost.length == 0){
+					$.each(decJson[v].resource, function(i1,v1){
+						if(resJson[v1]){
+							resJson[v1].decision.splice($.inArray(v, resJson[v1].decision),1);
+							if(resJson[v1].decision.length == 0){
+								$('#resourceTable input[res-id='+v1+']').closest('tr').remove();
+								resArrCopy[v1] = resArr[v1];
+								delete resJson[v1];
+							}
+						}
+					});						
+					$('#decisonCell_'+v).find('.fillrow').removeClass('selected');
+					delete decJson[v];
+				}
+			});	
+			if(costJson[cost]){
+				$.each(costJson[cost].resource, function(i,v){
+					if(resJson[v]){
+						resJson[v].cost.splice($.inArray(cost, resJson[v].cost),1);
+						if(resJson[v].cost.length == 0){
+							$.each(resJson[v].decision, function(i1,v1){
+								if(decJson[v1]){
+									decJson[v1].resource.splice($.inArray(v, decJson[v1].resource),1);
+									if(decJson[v1].resource.length == 0){
+										$('#decisonCell_'+v1).find('.fillrow').removeClass('selected');
+										delete decJson[v1];
+									}
+								}
+							});
+							$('#resourceTable input[res-id='+v+']').closest('tr').remove();
+							resArrCopy[v] = resArr[v];
+							delete resJson[v];
+						}
+					}
+				});
+			}
+			delete costJson[cost];
+			if($(invoker).closest('tbody').find('tr').length == 1){
+				tr.find("input:text").attr('cost-id', '');
+				tr.find("input:text").val('');
+			}
+			else{
+				tr.remove();
+			}			
+		}
+	}
+}
+function bindAutoCompleteCost(){
+	$('#costTable .auto-complete').unbind();
+	$('#costTable .auto-complete').autocomplete({
+		lookup: <?php echo json_encode(array_values($costResult)); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		},
+		onSelect: function(suggestion){
+			 if(suggestion){
+				 addCostTr(this);
+				 fillCost(suggestion, this, 1);
+				 $(this).removeClass('error');
+			 }
+		},
+		onSearchStart: function(suggestion) {
+			
+		},
+		onSearchComplete: function (query, suggestion){
+			 if(!suggestion.length){
+				 //fillResource('', this, 2);
+				 //$(this).addClass('error');
+			 }
+			 else{
+				 //fillResource('', this, 2);
+				 $(this).removeClass('error');
+			 }
+		},
+	}).bind("blur", function(){
+		if($.inArray($(this).val(), <?php echo json_encode(array_column($costResult, 'value')); ?>) == -1){
+			//fillCost('', this, 2);
+			$(this).addClass("error");
+		}
+		setTimeout(function(){
+			deleteUnCost();
+		}, 200);
+	});
+	
+	$('#costTable .auto-complete').bind("focus", function(){
+		var arr = costArrCopy;
+		if($(this).attr('cost-id') != '')
+			arr[$(this).attr('res-id')] = costArr[$(this).attr('res-id')];
+		
+		var cost = $.map(arr, function(i,v){
+					return i;
+				  });
+				  
+		$(this).autocomplete().setOptions({
+			lookup: cost
+		});			
+	});
+}
+/*Project autocomplete end*/
+/*End of feed*/
+function arrequal(arr1, arr2){
+	var is_equal = arr1.length==arr2.length && arr1.every(function(v,i) { return ($.inArray(v,arr2) != -1)});
+	return is_equal;
+}
+var comJson = {}
+$("#continueButton").click(function(){
+	//$("form").submit();		
+	var ele = $(".showDiv:visible");
+	bool=true;
+	if($("#firstStep").is(":visible")){
+		if($("#voucherNo").val().trim().length==0){
+			bool=false;
+			$("#voucherNo").focus();
+			alert("Please Enter Request Voucher No");		
+		}
+		else if($("#purchase_date").val().length == 0){
+			bool=false;
+			$("#purchase_date").focus();
+			alert("Please Select the valid date");
+		}
+	}
+	else if($('#secondStep').is(':visible')){
+		var jsonEqual = true;
+		if(oldJson != '')
+			var decOldJson = $.parseJSON(oldJson);
+		
+		 if(Object.keys(decJson).length != 0){
+			if(oldJson != '' && arrequal(Object.keys(decJson), Object.keys(decOldJson))){
+				for(var key in decJson){
+					if(!arrequal(decJson[key].cost, decOldJson[key].cost)){
+						jsonEqual = false;
+						break;
+					}
+					if(!arrequal(decJson[key].resource, decOldJson[key].resource)){
+						jsonEqual = false;
+						break;
+					}					
+				}
+			}
+			else{
+				jsonEqual = false;
+			}
+			
+			$('.popover').hide();
+			if(!jsonEqual){
+				oldJson = JSON.stringify(decJson);
+				oTable.fnClearTable();
+				$("#cloneTable").html($("#subTable").html());
+				$('#subTable tbody:first').html('');
+				var jsonVal = {};
+				$.ajax({
+					url:getBaseURL()+'mms/purchase/feeds-entry',
+					type:"post",
+					data:'mode=thirdStep&dec='+JSON.stringify(decJson)+'&res='+JSON.stringify(resJson)+'&cost='+JSON.stringify(costJson),
+					dataType:"json",
+					success:function(data, textStatus, jqXHR){
+						$.each(data, function(i,v){
+							jsonVal[v.ResourceId] = {};
+								var ai = oTable.fnAddData([v.Code,
+													v.ResourceName,
+													v.UnitName,
+													v.Quantity,
+													'<input type="text" tid="'+v.ResourceId+'" class="form-control quanTr" name="transQuantity_'+v.ResourceId+'" readonly value="0">',
+													'<input type="text" tid="'+v.ResourceId+'" class="form-control baseRate" eleName="transAmount_'+v.ResourceId+'" name="transBaserate_'+v.ResourceId+'" value="0">',
+													'',
+													'<input type="text" class="form-control" name="transAmount_'+v.ResourceId+'" readonly>',
+													'<input type="text" class="form-control" name="transDeliverydate_'+v.ResourceId+'">',
+												]);	
+								
+								var n = oTable.fnSettings().aoData[ai[0]].nTr;
+								n.setAttribute('id', v.ResourceId);
+								n.setAttribute('class', 'mainTr deleteTr_'+v.ResourceId);
+									
+							$('#subTable tbody:first').append('<tr class="subTr_'+v.ResourceId+' decSubTr">'+
+																'<td colspan=9>'+
+																	'<div class="subDiv">'+
+																		'<table class="table table-bordered" style="border-collapse: unset;">'+
+																			'<thead>'+
+																				'<tr>'+
+																					'<th>RDecisionNo</th>'+
+																					'<th>Balance Quantity</th>'+
+																					'<th>Quantity</th>'+
+																				'</tr>'+
+																			'</thead>'+
+																			'<tbody>');
+																			$.each(v['dec'], function(deci,decv){
+																				jsonVal[v.ResourceId][decv.DecisionId]=[];
+																				$('#subTable .subTr_'+v.ResourceId+' tbody:first').append(
+																				'<tr class="mainTr" sclass="costSubTr" sdiv="costSubDiv">'+
+																					'<td>'+decv.RDecisionNo+'</td>'+
+																					'<td>'+decv.Quantity+'</td>'+
+																					'<td><input type="text" readonly class="form-control decvalue" name="decisionQty_'+v.ResourceId+'_'+decv.DecisionId+'" value="0">'+
+																					'<input type="hidden" class="form-control" name="reqTransId_'+v.ResourceId+'_'+decv.DecisionId+'" value="'+decv.RequestTransId+'">'+
+																					'</td>'+
+																				'</tr>'+
+																				'<tr class="costSubTr">'+
+																					'<td colspan=9>'+
+																						'<div class="costSubDiv">'+
+																							'<table class="table table-bordered" style="border-collapse: unset;">'+
+																								'<thead>'+
+																									'<tr>'+
+																										'<th>CostCentreName</th>'+
+																										'<th>Balance Quantity</th>'+
+																										'<th>Quantity</th>'+
+																									'</tr>'+
+																								'</thead>'+
+																								'<tbody>');
+																								$.each(decv['cost'], function(costi,costv){
+																									jsonVal[v.ResourceId][decv.DecisionId].push(costv.CostcentreId);
+																									if(comJson[v.ResourceId] && comJson[v.ResourceId][decv.DecisionId] && $.inArray(costv.CostcentreId, comJson[v.ResourceId][decv.DecisionId]) != -1){
+																										$('#subTable .subTr_'+v.ResourceId+' tbody:last').append($('#cloneTable #project_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId).clone());
+																										$('#subTable .subTr_'+v.ResourceId+' tbody:last').append($('#cloneTable #project_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId).next('tr').clone());
+																										var decisionInput = $('#subTable #project_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId).closest('.decSubTr').find('input[name="decisionQty_'+v.ResourceId+'_'+decv.DecisionId+'"]');
+																										var decVal = parseFloat(decisionInput.val()) + parseFloat($('#cloneTable #project_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId).find('.costvalue').val());
+																										decisionInput.val(decVal.toFixed(6)).attr('value', decVal.toFixed(6));
+																										
+																										var resourceInput = oTable.$('input[name=transQuantity_'+v.ResourceId+']');
+																										var resVal = parseFloat(resourceInput.val()) + parseFloat(decVal);
+																										resourceInput.val(resVal.toFixed(6)).attr('value', resVal.toFixed(6));																										
+																										
+																									}
+																									else{
+																										$('#subTable .subTr_'+v.ResourceId+' tbody:last').append(
+																										'<tr class="mainTr" id="project_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId+'">'+
+																											'<td>'+costv.CostCentreName+'</td>'+
+																											'<td>'+costv.Quantity+'</td>'+
+																											'<td><input type="text" readonly name="costQuantity_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId+'" class="form-control costvalue" value="0"></td>'+
+																										'</tr>'+
+																										'<tr class="wbsSubTr">'+
+																											'<td colspan=9>'+
+																												'<div class="wbsSubDiv">'+
+																													'<table class="table table-bordered" style="border-collapse: unset;">'+
+																														'<thead>'+
+																															'<tr>'+
+																																'<th>Wbs name</th>'+
+																																'<th>Balance Quantity</th>'+
+																																'<th>Quantity</th>'+
+																															'</tr>'+
+																														'</thead>'+
+																														'<tbody>');
+																														$.each(costv['wbsname'], function(wbsi,wbsv){
+																															$('#subTable tbody:last').append(
+																															'<tr>'+
+																																'<td>'+wbsv.WBSName+'</td>'+
+																																'<td>'+wbsv.Quantity+'</td>'+
+																																'<td><input type="text" class-name="quantityVal" rid="'+v.ResourceId+'" class="form-control quantityVal" value="0" name="wbsQuantity_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId+'_'+wbsv.RequestAHTransId+'"'+
+																																	'costName="costQuantity_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId+'"'+
+																																	'transName="decisionQty_'+v.ResourceId+'_'+decv.DecisionId+'"'+
+																																	'resourceName="transQuantity_'+v.ResourceId+'">'+
+																																	'<input type="hidden" class="form-control" value="'+wbsv.AnalysisId+'" name="analysisId_'+v.ResourceId+'_'+decv.DecisionId+'_'+costv.CostcentreId+'_'+wbsv.RequestAHTransId+'">'+
+																																'</td>'+
+																															'</tr>');
+																														});
+																														$('#subTable tbody:last').append(
+																														'</tbody>'+
+																													'</table>'+
+																												'</div>'+
+																											'</td>'+
+																										'</tr>');
+																									}
+																								});
+																								$('#subTable tbody').append(
+																								'</tbody>'+
+																							'</table>'+
+																						'</div>'+
+																					'</td>'+
+																				'</tr>');	
+																			});
+																			$('#subTable tbody').append(
+																			'</tbody>'+
+																		'</table>'+
+																	'</div>'+
+																'</td>'+
+															'</tr>');
+						});	
+						trClick();
+					},
+					complete:function(data){
+						comJson = jsonVal;
+					},
+					error:function(jqXHR, textStatus, errorThrown){
+						//alert(textStatus+"-----"+errorThrown);
+					}
+				});
+			}
+		}
+		else{
+			bool=false;
+			alert('Please select atleast one decision');
+		}
+		//$("form").submit();
+	}
+	if(bool){
+		if($(".showDiv:visible").index() != $(".showDiv:last").index()){
+			$("#backButton").show();
+			$(".showDiv:visible").next(".showDiv").show();
+			ele.hide();
+			if($(".showDiv:visible").index() == $(".showDiv:last").index()){
+				$(this).val("Submit");
+			}
+		}
+		else{
+			var index = $('#ServicePickList').jqxGrid('getselectedrowindexes');
+			var data=[];
+			if (index.length > 0){
+				for(var i in index){
+				
+					var selectedRowData = $('#ServicePickList').jqxGrid('getrowdata', index[i]);
+					data.push(selectedRowData.uid);
+				}					
+			}			
+			$("#gridServiceId").val(data);
+			var index1 = $('#LogisticsPickList').jqxGrid('getselectedrowindexes');
+			var data1=[];
+			if (index1.length > 0){
+				for(var i in index1){
+					var selectedRowData = $('#LogisticsPickList').jqxGrid('getrowdata', index1[i]);
+					data1.push(selectedRowData.uid);
+				}					
+			}	
+			
+			$("#gridLogisticstypeId").val(data1);
+			
+			var checkedItems = [];
+			var index2 = $('#distributorList').jqxDropDownList('getCheckedItems');
+			$.each(index2, function(i,v){
+				checkedItems.push(v.value);
+			})
+			$("#distributorListId").val(checkedItems);
+			//TermPickListId
+			var index3 = $('#TermsPickList').jqxGrid('getselectedrowindexes');
+			//alert(JSON.stringify(index3))
+			var data3=[];
+			if (index3.length > 0){
+				for(var i in index3){
+				
+					var selectedRowData = $('#TermsPickList').jqxGrid('getrowdata', index3[i]);
+					data3.push(selectedRowData.uid);
+				}					
+			}	
+			$("#gridtermListId").val(data3);
+			//$('form').submit();
+		}
+	}
+});
+
+$("#backButton").click(function(){
+	$("#continueButton").val("Continue");
+	var ele = $(".showDiv:visible");
+	//alert($(".showDiv:visible").closest(".showDiv").prev(".showDiv").html())
+	if($(".showDiv:visible").closest(".showDiv").prev(".showDiv").index() == $(".showDiv:first").index())
+		$("#backButton").hide();
+		
+	$(".showDiv:visible").closest(".showDiv").prev(".showDiv").show();
+	ele.hide();
+});
+
+var oTable = $("#decisionTable").dataTable({"aLengthMenu": [[1, 5, 10], [1, 5, 10]], "order": [],
+	"initComplete": function(settings, json) {
+		$("select[name=decisionTable_length]").addClass("show-tick").selectpicker();
+	},	
+	"drawCallback": function( settings ){
+		//alert($(this).find(".datepickerinput").attr("class"))
+		$(this).find('tr.mainTr').find('td.quanTr').trigger('click');
+	}	
+});
+/*second Step end*/
+
+
+var decisionId=[];
+var resourceId=[];
+var termTable = $("#termTable").dataTable({"aLengthMenu": [[1, 5, 10], [1, 5, 10]], "order": [],
+	"initComplete": function(settings, json) {
+		$("select[name=termTable_length]").addClass("show-tick").selectpicker();
+	},	
+	"drawCallback": function( settings ){
+		//alert($(this).find(".datepickerinput").attr("class"))
+		//$(this).find("tr.mainTr .totQuantity").trigger('click');
+	}	
+});
+trClick();
+wbstrClick();
+rateChange();
+function trimNumber(s){
+	while (s.substr(0,1) == '0' && s.length>1){
+		s = s.substr(1,9999);
+	}
+	return s;
+}
+var orgVal = '';
+	
+function changePage(){
+	$(".quantityVal").unbind();
+	$(".quantityVal").bind('keypress keyup keydown', function(e){
+		var key = e.which || e.keyCode;
+		var name = $(this).attr("name");
+		var wbsclassname = $(this).attr('class-name');
+
+		if(key != 9){
+			if($(this).val().indexOf(' ') > -1){
+				$(this).val($(this).val().trim());
+			}				
+			if(isNaN($(this).val())){
+				this.value = this.value.replace(/[^0-9\.]/g,'');
+				if($(this).val().indexOf('.') > -1){
+					var index = $(this).val().indexOf( '.' );
+					this.value = this.value.substr( 0, index + 1 ) + this.value.slice( index ).replace( /\./g, '' );
+				}
+			}
+			var ex = /^\d*(\.\d{0,6})?$/;
+			if(!ex.test($(this).val())){
+				$(this).val($(this).val().substring(0,$(this).val().length-1));
+			}
+			
+			var costName = $(this).attr("costName");
+			var decName = $(this).attr("transName");
+			var resourceName = $(this).attr("resourceName");
+			
+			
+			/*Total value validation*/	
+			var totWbsVal = parseFloat($(this).closest("tr").find("td:nth-child(2)").text());
+			 if(totWbsVal < $(this).val()){
+				 $(this).val(orgVal);
+			 }
+			else{
+				var sum = 0;
+				orgVal = $(this).val();
+				$(this).closest('table').find("."+wbsclassname).each(function() {
+					//add only if the value is number
+					if (!isNaN(this.value) && this.value.length != 0) {
+						sum += parseFloat(this.value);
+					}
+				});
+				$("input[name="+costName+"]").val(sum.toFixed(6));
+				var costsum = 0;
+				$(this).closest('.costSubTr').find(".costvalue").each(function() {
+					//add only if the value is number
+					if (!isNaN(this.value) && this.value.length != 0) {
+						costsum += parseFloat(this.value);
+					}
+				});
+				$("input[name="+decName+"]").val(costsum.toFixed(6));
+				var decsum = 0;
+				$(this).closest('.decSubTr').find(".decvalue").each(function() {
+					//add only if the value is number
+					if (!isNaN(this.value) && this.value.length != 0) {
+						decsum += parseFloat(this.value);
+					}
+				});
+				oTable.$("tr.mainTr").find("input[name="+resourceName+"]").val(decsum.toFixed(6));
+			}
+			oTable.$(".baseRate").trigger("keyup");
+		}
+	});
+	$(".quantityVal").bind('blur', function(){
+		var name = $(this).attr("name");
+		var wbsclassname = $(this).attr('class-name');
+
+		if($(this).val().indexOf(' ') > -1){
+			$(this).val($(this).val().trim());
+		}				
+		if(isNaN($(this).val())){
+			this.value = this.value.replace(/[^0-9\.]/g,'');
+			if($(this).val().indexOf('.') > -1){
+				var index = $(this).val().indexOf( '.' );
+				this.value = this.value.substr( 0, index + 1 ) + this.value.slice( index ).replace( /\./g, '' );
+			}
+		}
+		var ex = /^\d*(\.\d{0,6})?$/;
+		if(!ex.test($(this).val())){
+			$(this).val($(this).val().substring(0,$(this).val().length-1));
+		}
+		
+		var costName = $(this).attr("costName");
+		var decName = $(this).attr("transName");
+		var resourceName = $(this).attr("resourceName");
+		
+		
+		/*Total value validation*/	
+		var totWbsVal = parseFloat($(this).closest("tr").find("td:nth-child(2)").text());
+		 if(totWbsVal < $(this).val()){
+			 $(this).val(orgVal);
+		 }
+		else{
+			var sum = 0;
+			orgVal = $(this).val();
+			$(this).closest('table').find("."+wbsclassname).each(function() {
+				//add only if the value is number
+				if (!isNaN(this.value) && this.value.length != 0) {
+					sum += parseFloat(this.value);
+				}
+			});
+			$("input[name="+costName+"]").val(sum.toFixed(6));
+			$("input[name="+costName+"]").attr('value', sum.toFixed(6));
+			var costsum = 0;
+			$(this).closest('.costSubTr').find(".costvalue").each(function() {
+				//add only if the value is number
+				if (!isNaN(this.value) && this.value.length != 0) {
+					costsum += parseFloat(this.value);
+				}
+			});
+			$("input[name="+decName+"]").val(costsum.toFixed(6));
+			$("input[name="+decName+"]").attr('value', costsum.toFixed(6));
+			var decsum = 0;
+			$(this).closest('.decSubTr').find(".decvalue").each(function() {
+				//add only if the value is number
+				if (!isNaN(this.value) && this.value.length != 0) {
+					decsum += parseFloat(this.value);
+				}
+			});
+			oTable.$("tr.mainTr").find("input[name="+resourceName+"]").val(decsum.toFixed(6));
+		}
+			
+			var val = 0;
+			if($(this).val() == '' || $(this).val() == 0){
+				val = val+'.000000';
+			}
+			else{
+				$(this).val(trimNumber($(this).val()));
+				val1 = $(this).val();
+				var str = '000000';
+				var splitVal = val1.split('.');
+				var len = 6;
+				if(splitVal[1]){
+					len -= splitVal[1].length;
+				}
+				if(len == 6)
+					val = val1+'.000000';
+				else if(len < 0)
+					val = splitVal[0]+'.'+splitVal[1].substring(0,6);
+				else
+					val = val1+str.substring(0,len);
+				
+				if(val.charAt(0) == '.')
+					val = '0' + val;
+			}
+
+			
+			$("input[name="+name+"]").attr("value", val);
+			$("input[name="+name+"]").val(val);				
+			
+		
+	});
+}
+
+function trClick(){
+	oTable.$(".quanTr").unbind();
+	oTable.$(".quanTr").bind('click', function(){
+		var tr = $(this).closest("tr");
+		if(!(tr.next("tr").hasClass("duplicateTr"))){
+			tr.after("<tr class='duplicateTr decSubTr'>"+$(".subTr_"+$(this).attr("tid")).html()+"</tr>");
+			tr.next(".subTr_"+$(this).attr("tid")).show();
+			tr.next("tr").find('.subDiv').slideDown("slow");
+			changePage();
+			wbstrClick();
+		}
+	});
+}
+function wbstrClick(){
+	$(".mainTr").unbind();
+	$(".mainTr").bind('click', function(){
+		var tr = $(this).closest("tr");
+		var nextTr = $(this).closest("tr").attr("sclass");
+		var nextDiv = $(this).closest("tr").attr("sdiv");
+		tr.next("."+nextTr).show();
+		tr.next("tr").find('.'+nextDiv).slideDown("slow");
+	});
+}
+function rateChange(){
+	oTable.$(".baseRate").unbind();
+	oTable.$(".baseRate").bind('keypress keyup keydown', function(e){
+		var key = e.which || e.keyCode;
+		var name = $(this).attr("name");
+		if(key != 9){
+			//alert($(this).val())
+			var currVal = $(this).val();
+				
+			var ex = /^\d+(\.\d{0,6})?$/;
+			if(ex.test(currVal)==false){
+				currVal = currVal.substring(0,currVal.length - 1);
+				//currVal = currVal.replace(/^\D*(\.\D{0,6})?$/,'');
+				//alert(currVal.split(".")[1])
+				/*if (typeof currVal.split(".")[1] != undefined) {
+					currVal.split(".")[1].subString(0,6);
+				}*/	
+				$(this).val(currVal);
+			}
+			$(this).val(trimNumber($(this).val()));
+			
+			var tr = $(this).closest("tr");
+			var quan = tr.find("td:nth-child(5) input:text").val();
+			var amount = tr.find("td:nth-child(8) input:text");
+			if(currVal == ''){
+				amount.val((parseFloat(quan) * parseFloat(0.0)).toFixed(6));
+			}
+			else{
+				amount.val((parseFloat(quan) * parseFloat(currVal)).toFixed(6));
+			}
+				
+		}
+	});
+}
+
+//Distributor
+var source =
+{
+	localdata:[],
+	datatype: "json",
+	datafields: [
+		{ name: 'VendorName' }
+	],
+	id:'VendorId',
+	async: false
+};
+var dataAdapter = new $.jqx.dataAdapter(source);
+
+// Create a jqxDropDownList
+$("#distributorList").jqxDropDownList({ checkboxes: true, source: dataAdapter, displayMember: "VendorName", valueMember: "VendorId", width: 400, height: 25});
+
+var serviceSource =
+	{
+		localData: <?php echo json_encode($service); ?>,
+		dataType: "json",
+		dataFields:
+		[			
+			{ name: 'ServiceName', type: 'ServiceName' }				
+		],
+		id:'ServiceId'
+	};
+
+var serviceDataAdapter = new $.jqx.dataAdapter(serviceSource);
+$("#ServicePickList").jqxGrid({
+	width: '100%',
+	pageable: true,
+	selectionMode: 'singleRow',
+	pagerButtonsCount: 6,
+	autoheight:true,
+	//rowsheight:60,
+	autorowheight: true,
+	filterable: true,
+	sortable: true,
+	//filtermode: 'advanced',				
+	columnsResize: true,
+	showfilterrow: true,
+	ready: function(){
+		var localizationobj = {};
+		localizationobj.emptydatastring = "No Service to display";
+		$("#ServicePickList").jqxGrid('localizestrings', localizationobj);								
+	},
+	selectionmode: 'checkbox',					
+	source: serviceDataAdapter,
+	columns: [		
+	  { text: 'ServiceName', editable: false,datafield: 'ServiceName'}			  
+	]
+});
+
+$('#ServicePickList').on('rowclick', function (event){
+	var args = event.args;
+	// row's bound index.
+	var boundIndex = args.rowindex;
+	var index = $('#ServicePickList').jqxGrid('selectedrowindexes'); 
+	//alert($.inArray(boundIndex, index))
+	if($.inArray(boundIndex, index) == -1)
+		$('#ServicePickList').jqxGrid('selectrow', boundIndex);
+	else
+		$('#ServicePickList').jqxGrid('unselectrow', boundIndex);
+});	
+
+//TermsPicklist
+var source1 =
+	{
+		localData: <?php echo json_encode($terms); ?>,
+		dataType: "json",
+		dataFields:
+		[			
+			{ name: 'Title', type: 'Title' }				
+		],
+		id:'TermsId'
+	};
+
+var dataAdapter1 = new $.jqx.dataAdapter(source1);
+$("#TermsPickList").jqxGrid({
+	width: '100%',
+	pageable: true,
+	selectionMode: 'singleRow',
+	pagerButtonsCount: 6,
+	autoheight:true,
+	//rowsheight:60,
+	autorowheight: true,
+	filterable: true,
+	sortable: true,
+	//filtermode: 'advanced',				
+	columnsResize: true,
+	showfilterrow: true,
+	ready: function(){
+		var localizationobj = {};
+		localizationobj.emptydatastring = "No Terms to display";
+		$("#TermsPickList").jqxGrid('localizestrings', localizationobj);								
+	},
+	selectionmode: 'checkbox',							
+	source: dataAdapter1,
+	columns: [		
+	  { text: 'Title', editable: false,datafield: 'Title'}			  
+	]
+});
+
+$("#TermsPickList").bind('rowselect', function (event){
+	// event arguments.
+	var args = event.args;
+	// row's bound index.
+	var rowBoundIndex = args.rowindex;
+	// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+	var rowData = args.row; 
+	var rid = rowData.uid;
+	checkClick(rid, '1');
+});	
+
+$('#TermsPickList').on('rowunselect', function (event){
+	// event arguments.
+	var args = event.args;
+	// row's bound index.
+	var rowBoundIndex = args.rowindex;
+	// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+	var rowData = args.row;
+	var rid = rowData.uid;
+	checkClick(rid, '2');
+});
+
+$('#TermsPickList').on('rowclick', function (event){
+	var args = event.args;
+	// row's bound index.
+	var boundIndex = args.rowindex;
+	var index = $('#TermsPickList').jqxGrid('selectedrowindexes'); 
+	//alert($.inArray(boundIndex, index))
+	if($.inArray(boundIndex, index) == -1)
+		$('#TermsPickList').jqxGrid('selectrow', boundIndex);
+	else
+		$('#TermsPickList').jqxGrid('unselectrow', boundIndex);
+});	
+
+
+//LogisticsPickList	
+var data =  [
+	{ "id": 1, "name": "Procurement" }, 
+	{ "id": 2, "name": "Inbound Traffic" }, 
+	{ "id": 3, "name": "Receiving" },
+	{ "id": 4, "name": "Storage" },	
+	{ "id": 5, "name": "Stock Control" },
+	{ "id": 6, "name": "Order pick up" },
+	{ "id": 7, "name": "Material Handling" },
+	{ "id": 8, "name": "Outbound Traffic" },
+	{ "id": 9, "name": "Physical Distribution" },
+	{ "id": 10, "name": "Recyling & Waste Disposal" },	
+	{ "id": 11, "name": "Location" },
+	{ "id": 12, "name": "Transportation Strategy" },
+	{ "id": 13, "name": "Information Flow" }	
+];
+	
+var source =
+{
+	localData: data,
+	dataType: "json",
+	dataFields:
+	[			
+		{ name: 'name', type: 'name' }				
+	],
+	id:'id'
+};
+
+var dataAdapter = new $.jqx.dataAdapter(source);
+$("#LogisticsPickList").jqxGrid({
+	width: '100%',
+	pageable: true,
+	selectionMode: 'singleRow',
+	pagerButtonsCount: 6,
+	autoheight:true,
+	//rowsheight:60,
+	autorowheight: true,
+	filterable: true,
+	sortable: true,
+	//filtermode: 'advanced',				
+	columnsResize: true,
+	showfilterrow: true,
+	ready: function(){
+		var localizationobj = {};
+		localizationobj.emptydatastring = "No Logistics to display";
+		$("#LogisticsPickList").jqxGrid('localizestrings', localizationobj);								
+	},
+	selectionmode: 'checkbox',						
+	source: dataAdapter,
+	columns: [			
+	  { text: 'Logistics', editable: false,datafield: 'name'}			  
+	]
+});
+
+$('#LogisticsPickList').on('rowclick', function (event){
+	var args = event.args;
+	// row's bound index.
+	var boundIndex = args.rowindex;
+	var index = $('#LogisticsPickList').jqxGrid('selectedrowindexes'); 
+	//alert($.inArray(boundIndex, index))
+	if($.inArray(boundIndex, index) == -1)
+		$('#LogisticsPickList').jqxGrid('selectrow', boundIndex);
+	else
+		$('#LogisticsPickList').jqxGrid('unselectrow', boundIndex);
+});	
+				
+$("#vendorId").change(function(){		
+	$.ajax({
+		url:getBaseURL()+'mms/purchase/feeds-entry',
+		type:"post",
+		data:"cid="+$(this).val()+"&mode=vendorSelect",
+		dataType:"json",
+		success:function(data, textStatus, jqXHR){
+			//alert(JSON.stringify(data))
+			$("#Branch").html('');
+			$("#Branch").append("<option value='0'>Select Branch</option>")
+			$.each(data['branch'], function(i,v){
+				$("#Branch").append("<option value='"+v.BranchId+"'>"+v.BranchName+"</option>")
+			});	
+			$("#transportmode").html('');
+			$("#transportmode").append("<option value='0'>Select Transport Mode</option>")
+			$.each(data['transport'], function(i,v){
+				$("#transportmode").append("<option value='"+v.TransportId+"'>"+v.TransportName+"</option>")
+			});	
+			$("#distributorList").jqxDropDownList('clear');
+			
+			/*Service picklist*/
+			$("#ServicePickList").jqxGrid("clear");
+			serviceSource.localdata = data['service'];
+			serviceDataAdapter.dataBind();
+			
+			var index1 = $('#ServicePickList').jqxGrid('selectedrowindexes'); 
+			if(index1.length > 0)
+				$('#ServicePickList').jqxGrid('clearselection'); 			
+			
+			$.each(data['distributor'], function(i,v){
+				$("#distributorList").jqxDropDownList('addItem', { label: v.VendorName, value: v.VendorId}); 
+			});
+		},
+		error:function(jqXHR, textStatus, errorThrown){
+			alert(textStatus+"-----"+errorThrown);
+		}
+	});		
+})
+	
+$("#Branch").change(function(){
+	$.ajax({
+		url:getBaseURL()+'mms/purchase/feeds-entry',
+		type:"post",
+		data:"cid="+$(this).val()+"&mode=branchSelect",
+		dataType:"json",
+		success:function(data, textStatus, jqXHR){
+			//alert(JSON.stringify(data['contact'][0].Phone))
+			$("#Branchcontactperson").html('');
+			$("#Branchcontactperson").append("<option value='0'>Select One</option>")
+			$.each(data['branch'], function(i,v){
+				$("#Branchcontactperson").append("<option value='"+v.BranchTransId+"'>"+v.ContactPerson+"</option>")
+			});
+			$('#branchcontactno').val(data['contact'][0].Phone);
+		},
+		error:function(jqXHR, textStatus, errorThrown){
+			alert(textStatus+"-----"+errorThrown);
+		}
+	});		
+});
+function remove(){
+	$(".remove").unbind();
+	$(".remove").bind('click', function(){
+		$(this).closest(".subDiv").remove();
+		var i=2;
+		$("#mainDiv").find(".subDiv").each(function(){
+			$(this).find("input:text, textarea, input:file").each(function(){
+				$(this).attr("name", $(this).attr("tagname")+"_"+i);
+			});
+			i++;
+		});			
+	});
+}
+$("#addmore").click(function(){
+	$("#mainDiv").append("<div class='subDiv'>"+$("#appendDiv").html()+"<div class='form-group'><input type='button' value='Remove' class='btn btn-primary remove'></div></div>");
+	remove();
+	var i=2;
+	$("#mainDiv").find(".subDiv").each(function(){
+		$(this).find("input:text, textarea, input:file").each(function(){
+			$(this).attr("name", $(this).attr("tagname")+"_"+i);
+		});
+		i++;
+	});
+});
+
+//TermsPickList
+function checkClick(rid, mode){
+	//alert(rid);
+	if(mode == 1){
+		$.ajax({
+			url:getBaseURL()+'mms/purchase/feeds-entry',
+			type:"post",
+			data:"rid="+rid+"&mode=fillTerms",
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				/*$(".datepicker").datetimepicker({
+					format: 'DD-MM-YYYY'
+				});appendData*/
+				$.each(data['result'], function(i,v){
+					var ai = termTable.fnAddData([v.SlNo,
+										v.Terms,
+										"<input type='text' class='form-control' oldVal='0' name='ValueFromNet_"+v.TermsId+"'>",
+										"<input type='text' "+((v.IsPer == 0)?'readonly':'')+" class='form-control' name='Per_"+v.TermsId+"'>",
+										"<input type='text' "+((v.IsValue == 0)?'readonly':'')+" class='form-control' name='Value_"+v.TermsId+"'>",
+										"<input type='text' "+((v.IsPeriod == 0)?'readonly':'')+" class='form-control' name='Period_"+v.TermsId+"'>",
+										"<input type='text' "+((v.IsDate == 0)?'readonly':'')+" class='form-control' name='Date_"+v.TermsId+"'>",
+										"<input type='text' "+((v.IsString == 0)?'readonly':'')+" class='form-control' name='Str_"+v.TermsId+"'>",
+									]);	
+					
+					var n = termTable.fnSettings().aoData[ai[0]].nTr;
+					n.setAttribute('id', v.TermsId);
+					n.setAttribute('class', "deleteTermTr_"+v.TermsId);
+				});
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"-----"+errorThrown);
+			}
+		});					
+	}
+	else{
+		termTable.$("tr.deleteTermTr_"+rid).each(function(){
+			var target_row = $(this).get(0); 
+			var aPos = termTable.fnGetPosition(target_row); 
+			termTable.fnDeleteRow(aPos);
+		});
+	}
+}	
+</script>

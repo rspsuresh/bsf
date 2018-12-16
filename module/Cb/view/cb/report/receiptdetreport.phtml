@@ -1,0 +1,238 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    /*border: 1px solid #333;*/
+/*DragResize*/
+
+/* Required CSS classes: must be included in all pages using this script */
+/* Apply the element you want to drag/resize */
+.drsElement 						{position:absolute;border:1px solid #333;}
+/*
+ The main mouse handle that moves the whole element.
+ You can apply to the same tag as drsElement if you want.
+*/
+.drsMoveHandle 						{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+/*
+ The DragResize object name is automatically applied to all generated
+ corner resize handles, as well as one of the individual classes below.
+*/
+.dragresize 						{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+/*
+ Individual corner classes - required for resize support.
+ These are based on the object name plus the handle ID.
+*/
+.dragresize-tl 						{top:-8px;left:-8px;cursor:nw-resize;}
+.dragresize-tm 						{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+.dragresize-tr 						{top:-8px;right:-8px;cursor:ne-resize;}
+.dragresize-ml 						{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+.dragresize-mr 						{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+.dragresize-bl 						{bottom:-8px;left:-8px;cursor:sw-resize;}
+.dragresize-bm						{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+.dragresize-br 						{bottom:-8px;right:-8px;cursor:se-resize;}
+/*DragResize End*/
+/*Main*/
+.text-bold, .text-bold * 			{font-weight: bold !important;}
+.text-italic, .text-italic * 		{font-style: italic !important;}
+.text-underline, .text-underline * 	{text-decoration: underline !important;}
+.style-left, .style-left * 			{text-align: left;}
+.style-center, .style-center * 		{text-align: center;}
+.style-right, .style-right * 		{text-align: right;}
+.style-justify, .style-justify *	{text-align: justify;}
+#styleOptions 						{display:none;}
+#ElementTemplate,.remScnt 			{display:none;}
+.remScnt							{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+.remScnt > .fa.fa-trash-o 			{text-decoration:none!important;font-style:normal!important;font-size:14px!important;font-weight:normal!important;color:#000!important;background:transparent !important;border:none !important;}
+</style>
+ <form method="post" action="<?php echo $this->basePath(); ?>/application/print" target="_blank">
+	<input type="hidden" name="htmlcontent" id="htmlcontent" />
+	<input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($receiptregister)) ? $receiptregister['ClientId'] : 0;?>"  />
+	<input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+<div style="width:700px; margin:auto; padding-top:20px; position:relative;">
+<div id="htmlwrapper">
+	<!--<div class="col-lg-12">
+		<style>
+		.thscss{font-size:15px;font-family:'Open Sans', sans-serif !important;font-weight:600 !important;background-color:#E2EBEF !important; border-bottom:2px solid #5D9BB6; padding:8px !important;}
+		.tdpds{font-size:14px;border-top: 1px solid #EFEFEF!important;line-height:1.42857!important;padding:8px!important;vertical-align:top!important;font-size:15px!important;font-family:'Open Sans', sans-serif !important;}
+		.bill-det{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:20px !important; display:block !important; padding-left:5px !important;}
+		.date-bills{font-size:14px; font-weight:nornal; font-family:'Open Sans', sans-serif !important; display:block; padding-left:5px !important; clear:both; }
+		.str-bill{ display:block !important; width:10px; padding-left:10px;}
+		.date-shw{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:25px !important; display:block !important; padding-left:12px !important; }
+
+		</style></div>-->
+		<?php echo (isset($template)) ? $template : '';?>
+	
+	<div style="margin-bottom:30px;">
+		<table class="table  bill-cum" id="EntryTable" style=" margin-bottom:0px; margin-top:10px;" cellpadding="0" cellspacing="0" width="1080">
+					<thead>
+					<tr>
+						<th class="thscss text-left" align="left">Bill Date</th>
+						<th class="thscss text-left" align="left">Bill No</th>
+						<th class="thscss text-right" align="right">Net Amount</th>
+						<th class="thscss text-right" align="right">Adjusted Amount</th>
+						<th class="thscss text-right" align="right">Balance Amount</th>
+						<th class="thscss text-right" align="right">Current Amount</th>
+					</tr>
+					</thead>
+					<tbody class="main">
+					<?php $CurAmtTotal = 0;
+						if(isset($billformats)):
+						$i=0;
+						foreach($billformats as $trans):
+						$i=$i+1;
+						
+						$netAmt = 0;
+						$curAmt = $trans['CurAmount'];
+						$adjAmt = $trans['AdjAmount'];
+						if($adjAmt<0)
+						{
+							$adjAmt=$adjAmt*(-1);
+						}
+						$sAmt = $trans['SubmitAmount'];
+						$cAmt = $trans['CertifyAmount'];
+						if($cAmt > 0)
+							$netAmt = $cAmt;
+						else if ($sAmt > 0)
+							$netAmt = $sAmt;
+						
+						$balAmt = $netAmt - $adjAmt;
+
+						$CurAmtTotal += $curAmt;
+						?>
+						<tr class="padi05">
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $trans['BillDate'];?></td>
+							<td width="8%" class="tdpds text-left" align="left"><?php echo $trans['BillNo'];?></td>
+							<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($netAmt, 2, true);?></td>
+							<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($adjAmt, 2, true);?></td>
+							<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($balAmt, 2, true);?></td>
+							<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($curAmt, 2, true);?></td>	
+						</tr>
+						<tr class="subTr">
+							<td colspan="9" style="padding:0px !important; ">
+								<div class="subDiv">
+									<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+									<div class="col-lg-12">
+										<div class="table-responsive topsp">
+											<table class="table abt-iowt2"  style="margin-bottom:0px;" id="absTable_<?php echo $i;?>" cellpadding="0" cellspacing="0" width="490">
+												<thead>
+												<tr>
+													<th class="thscss text-left" align="left">Description</th>
+													<th class="thscss text-right" align="right">Net Amount</th>
+													<th class="thscss text-right" align="right">Adjusted Amount</th>
+													<th class="thscss text-right" align="right">Balance Amount</th>
+													<th class="thscss text-right" align="right">Current Amount</th>
+												</tr>
+												</thead>
+												<tbody class="main">
+													<?php 
+													$j=0;
+													$CurAmttransTotal = 0;
+													foreach($trans['BillAbs'] as $billAbs):
+													$j=$j+1;
+													$CurAmttransTotal += $billAbs['CurrentAmount'];
+													?>
+													<!-- Start -->
+													<tr class="padi05">
+														<td width="15%" class="tdpds text-left" align="left"><?php echo $billAbs['TypeName'];?></td>
+														<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurAmount'], 2, true);?></td>
+														<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billAbs['AdjAmount'], 2, true);?></td>
+														<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber(($billAbs['CurAmount'] - $billAbs['AdjAmount']), 2, true);?></td>
+														<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurrentAmount'], 2, true);?></td>
+													</tr>
+													<!-- End -->			
+													<?php endforeach;?>
+												</tbody>
+												<tbody class="total">
+													<tr>
+													<td colspan="3"></td>
+														<td align="right" class="tdpds text-right">Total</td>
+														<td width="6%"  align="right" class="tdpds text-right"><?php echo $this->commonHelper()->sanitizeNumber($CurAmttransTotal, 2, true);?></td>
+													</tr>
+												</tbody>
+											</table>
+											
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+					<?php endforeach; endif;?>
+					</tbody>
+					<tbody class="total">
+						<tr>
+							<td colspan="4">&nbsp;</td>
+							<td align="right" class="tdpds text-right">Total</td>
+							<td width="10%" align="right" class="tdpds text-right"><?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal, 2, true);?></td>
+						</tr>
+					</tbody>
+				</table>                                       
+	</div>
+</div>
+</div>
+<div class="fixed-action-btn-ra active">
+       <!-- <a class="btn-floating-ra btn-large-ra">
+        <i class="fa fa-print"></i>
+        </a>-->
+        <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+       <!-- <ul>
+          <li>
+              <a exportName="pdf" class="exportAction btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+             
+          </li>
+          <li>
+              <a class="btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print preview "> <i class="fa fa-download"></i></a>
+          </li>
+        </ul>-->
+    </div>
+<!--<div class="fixed-action-btn-ra active">
+        <a class="btn-floating-ra btn-large-ra">
+        <i class="fa fa-print"></i>
+        </a>
+        <ul>
+          <li>
+              <a exportName="pdf" class="exportAction btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+             
+          </li>
+          <li>
+              <a class="btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print preview "> <i class="fa fa-download"></i></a>
+          </li>
+        </ul>
+    </div>-->
+<!--<a exportName="pdf" style="cursor:pointer" class="exportAction" ><i class="fa fa-print"></i> Print </a>-->
+<?php 
+$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/images/nolgo.jpg';
+	if(isset($receiptregister) && $receiptregister['Logo']!="") {
+		$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/uploads/cb/company/'.$receiptregister['SubscriberId'].'.'.$receiptregister['Logo'];
+	}				
+	//echo $imgUrl;
+?>
+<script type="text/javascript">
+
+$(function() {
+	var receiptregister = <?php echo (isset($receiptregister))?json_encode($receiptregister):'[]'; ?>;
+	var currentdate = '<?php echo date('d-m-Y'); ?>';
+	var woAmtinwords = '<?php echo $woAmtinwords; ?>';
+	var receiptAmtinwords = '<?php echo $receiptAmtinwords; ?>';
+	var imgUrl = '<?php echo $imgUrl; ?>';
+	var $p_scents = $('#p_scents');
+	//  remove buttons
+	$p_scents.find('.remScnt').remove();
+	
+	$.each(receiptregister, function(index, value) {
+		if(value != null && value != '') {
+			$p_scents.find('#receipt_' + index).text(value);
+		}
+		
+	});
+	//
+	$p_scents.find('#receipt_Amount').text(sanitizeNumber(receiptregister.Amount, 2, true));
+	$p_scents.find('#receipt_Amountinwords').text(receiptAmtinwords);
+	$p_scents.find('#receipt_Logo').attr('src', imgUrl);
+	$p_scents.find('#receipt_Date').text(currentdate);
+	
+	$(".exportAction").click(function(){
+		$('#htmlcontent').val($('#htmlwrapper').html());
+		$('form').submit();
+	});
+});
+
+</script>

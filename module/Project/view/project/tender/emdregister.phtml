@@ -1,0 +1,78 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    .feedback-panel				   {padding:20px;width:250px;background:#e3edf1;border:#0aa699 1px solid;position:absolute;top:200px;left:-250px;}
+    .feedback-panel a.feedback-tab {background: url('<?php echo $this->basePath(); ?>/images/feedback.png') no-repeat;border-width: 1px 1px 1px 0;display:block;
+        height:99px;left:248px;outline:medium none;position:absolute;text-indent: -9999px;width:39px;top:-1px;}
+    textarea 					   {width:90%;padding:5px;}
+    #response-message 			   {background:#fff;border:1px solid #ccc;padding:50px;margin-top:30px;}
+    .cbfedbckbutn 				   {padding:7px;text-align:center;background-color:#0aa699 !important;color:#fff;font-weight:600;}
+    #treeGrid .jqx-grid-header     {height:75px !important;}
+
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">EMD Register</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive clear">
+                <div id="treeGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var arr_emddetails = <?php echo (isset($emddetails)) ? json_encode($emddetails) : ''?>,
+    $treeGrid = $("#treeGrid");
+
+$(function () {
+//    console.log(arr_clients);
+    var source = {
+        localdata:arr_emddetails,
+        dataType: "json",
+        dataFields: [
+            { name: 'EMDId', type: 'number' },
+            { name: 'EMDNo', type: 'string' },
+            { name: 'EMDDate', type: 'date' },
+            { name: 'ClientName', type: 'string' },
+            { name: 'NameOfWork', type: 'string' },
+            { name: 'TenderNo', type: 'string' },
+            { name: 'EMDAmount', type: 'number' },
+            { name: 'ValidUpto', type: 'date' }
+        ],
+        id: 'EMDId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'EMDId', datafield: 'EMDId', hidden: true, filterable: false},
+            { text: 'EMD No', dataField: 'EMDNo', width:'10%'},
+            { text: 'EMD Date', filtertype: 'date', datafield: 'EMDDate', width: '10%', cellsformat: 'dd-MM-yyyy'},
+            { text: 'ClientName', dataField: 'ClientName', width:'20%'},
+            { text: 'NameOfWork', dataField: 'NameOfWork', width:'20%'},
+            { text: 'TenderNo', dataField: 'TenderNo', width:'15%'},
+            { text: 'EMD Amount', datafield: 'EMDAmount', cellsalign: 'right', width: '15%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'EMDAmount'),2,true) + '</div>';
+                }
+            },
+            { text: 'Valid Upto', filtertype: 'date', datafield: 'ValidUpto', width: '10%', cellsformat: 'dd-MM-yyyy'},
+        ]
+    });
+});
+</script>

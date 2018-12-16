@@ -1,0 +1,846 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+
+<style>
+    .label-list12{ background:#fff; padding-top:20px;padding-bottom:20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);}
+    .table tr{border-bottom:1px solid #ddd;}
+	.table-rd thead tr th{padding:2px 8px !important}
+	.table-rd tbody tr td,.table-rd thead tr th{font-family: 'roboto', sans-serif;}
+    .table-rd tbody tr td{padding:4px !important;color:#666;font-weight:400;border-top:0}
+	.table-rd tbody tr td label{font-weight:400}
+    .table tr td.label-list {
+        /*background: #f1f1f1 none repeat scroll 0 0;*/
+        border:none;
+        float: left;font-weight:400; color:#333;
+        line-height: 24px;
+        margin: 4px 0;
+        padding: 0 15px 0 0 !important;
+        text-align: right;
+        width: 97%;
+    }
+	.table tr td span.label-active:hover{background:#fff;}
+    .table tr td span.label-active{background:#d1e7ff;border:1px solid #67a6e5;padding:2px 6px; border-radius:10px; font-size:12px; color:#000; cursor:pointer; float:right;}
+    .expand-icon{position:absolute;  background: rgba(0, 0, 0, 0) linear-gradient(180deg, #E02459 0%, #F0500C 80%, #F0850C 100%) repeat scroll 0 0; display: inline-block;border:2px solid #E02459;padding-top:2px; width:25px; height:25px;      border-radius:50%; font-size: 12px;right:7px;top:0;text-align:center; color:#fff;}
+    .expand-icon:hover{background:#fff; border:2px solid #E02459; color:#E02459}
+    .autocomplete-group strong {
+        border-bottom: medium none;
+        color: #1a5a94;
+        font-family: "Open Sans",sans-serif !important;
+        font-size: 14px;
+        font-weight: bold;
+        padding-left: 3px !important;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 id="titleTag" class="text-center">Advance Recommendation</h1>
+            </div>
+            <form method="post" id="formWrapper">
+                <div id="stageOne" class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                    <div class="col-lg-4 col-lg-offset-8 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8">
+                        <div class="form-group col-lg-8 col-lg-offset-4">
+                            <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="areDate" id="areDate" class="date_picker parnt-text" value="<?php echo date("d-m-Y"); ?>" readonly />
+                            <input type="hidden" id="advRecId" name="advRecId" value="<?php echo $advRecId; ?>" />
+                            <input type="hidden" id="arTypeId" name="arTypeId" value="<?php echo $arTypeId; ?>" />
+                            <?php if(isset($arRegister)){?>
+                                <input type="hidden" id="costCentreId" name="costCentreId" value="<?php if(isset($arRegister) && trim($arRegister['CostCentreId']) != '') { echo $arRegister['CostCentreId']; } else { echo ''; } ?>" />
+                            <?php } ?>
+                            <?php if(isset($arRegister)){?>
+                                <input type="hidden" id="vendorId" name="vendorId" value="<?php if(isset($arRegister) && trim($arRegister['VendorId']) != '') { echo $arRegister['VendorId']; } else { echo ''; } ?>" />
+                                <input type="hidden" id="groupId" name="groupId" value="<?php if(isset($arRegister) && trim($arRegister['VendorId']) != '') { echo $arRegister['VendorId']; } else { echo ''; } ?>" />
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active">
+                                <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move" label="Select Cost Centre" value="<?php if(isset($arRegister) && trim($arRegister['CostCentreId']) != '') { echo $arRegister['CostCentreId']; } else { echo ''; } ?>" name="costCentreName" id="costCentreName" />
+                                        <input type="hidden"  value="" name="costCentreId" id="costCentreId" />
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move" label="Select Contractor" value="<?php if(isset($arRegister) && trim($arRegister['VendorId']) != '') { echo $arRegister['VendorId']; } else { echo ''; } ?>" name="vendorName" id="vendorName" />
+                                        <input type="hidden"  value="" name="vendorId" id="vendorId" />
+                                        <input type="hidden"  value="" name="groupId" id="groupId" />
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <?php if(isset($arRegister)){?>
+                                            <input type="hidden" id="orderType" name="orderType" value="" />
+                                        <?php } else {?>
+                                            <select class="form-control single_dropdown lbl_move" label="Select Order Type" style="width:100%;" name="orderType" id="orderType">
+                                                <option value=""></option>
+                                                <option value="W">Work</option>
+                                                <option value="H">Hire</option>
+                                                <option value="S">Service</option>
+                                            </select>
+                                        <?php } ?>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id="selRefDiv" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group" style="display: none;">
+                                        <select class="form-control single_dropdown lbl_move" label="Select Reference" style="width:100%;" name="eReference" id="eReference">
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move projName" label="Cost Centre" value=" " readonly />
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move conName" label="Contractor" value=" " readonly />
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move advAgtName" label="Advance Against" value=" " readonly />
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move referName" label="Reference" value=" " readonly />
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5 col-md-7 col-md-offset-5 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-3">
+                                <li id="backPrev"><a href="javascript:void(0);" onclick="return goBack();"><span><i class="fa fa-arrow-left"></i></span> Back</a></li>
+                                <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next <span><i class="fa fa-arrow-right"></i></span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="stageTwo" style="display:none;">
+                    <div class="col-lg-12">
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Cost Centre</label>
+                                        <span class="hprojName"><?php if(isset($arRegister) && $arRegister['CostCentreName'] != '') { echo $arRegister['CostCentreName']; } else { echo ''; } ?>
+                                        </span>
+                                        <input type="hidden" name="uCostCenterId" value="<?php if(isset($arRegister) && ($arRegister['CostCentreId'] != NULL)) { echo $arRegister['CostCentreId']; } else { echo '0'; } ?>">
+                                        <input type="hidden" name="uVendorId" value="<?php if(isset($arRegister) && ($arRegister['VendorId'] != NULL)) { echo $arRegister['VendorId']; } else { echo '0'; } ?>">
+                                        <input type="hidden" name="ref" value="<?php if(isset($arRegister) && ($arRegister['Reference'] != NULL)) { echo $arRegister['Reference']; } else { echo '0'; } ?>">
+                                    </li>
+                                    <li>
+                                        <label>Contractor</label>
+                                        <span class="hconName"><?php if(isset($arRegister) && $arRegister['VendorName'] != '') { echo $arRegister['VendorName']; } else { echo ''; } ?>
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <label style="position:relative">Reference<a href="#" class="expand-icon"><i class="fa fa-arrows-alt"></i></a></label>
+                                        <div class="select-style selected-mu">
+                                            <select name="reference" onchange="refChange(this);" id="reference" <?php if(isset($arRegister)) { ?>disabled<?php } ?>>
+                                            </select>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box2th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Adv Recom Date</label>
+                                        <span><input type="text" id="arDate" name="arDate" class="date_picker" value="<?php if(isset($arRegister) && ($arRegister['ARDate'] != NULL)) { echo date("d-m-Y", strtotime($arRegister['ARDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref Date</label>
+                                        <span><input type="text" id="refDate" name="refDate" class="date_picker" value="<?php if(isset($arRegister) && ($arRegister['RefDate'] != NULL)) { echo date("d-m-Y", strtotime($arRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Adv Recom No</label>
+                                        <span><input type="text" id="arNo" name="arNo" value="<?php if(isset($arRegister) && trim($arRegister['ARNo']) != '') { echo $arRegister['ARNo']; } else { echo ($genType) ? $arNo : ''; } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Order Type</label>
+                                        <span>
+                                            <input type="text" id="typeOfOrder" name="typeOfOrder" value="" />
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box3th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>CC No</label>
+                                        <span><input type="text" id="ccArNo" name="ccArNo" value="<?php if(isset($arRegister) && trim($arRegister['ARCCNo']) != '') { echo $arRegister['ARCCNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Comp No</label>
+                                        <span><input type="text" id="compArNo" name="compArNo" value="<?php if(isset($arRegister) && trim($arRegister['ARCompNo']) != '') { echo $arRegister['ARCompNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref No</label>
+                                        <span><input type="text" id="refNo" name="refNo" value="<?php if(isset($arRegister) && trim($arRegister['RefNo']) != '') { echo trim($arRegister['RefNo']); } else {echo ($genType) ? trim($arNo) : '';} ?>" /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slic">
+                        <ul>
+                            <li class="face"><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="col-md-12 label-list12"style="padding-top:3px; padding-bottom:0">
+                                <table class="table table-rd">
+                                    <tbody>
+                                    <tr>
+                                        <td style="border:none"> <label>Order Value</label></td> <td> <span id='woAmountId'  class="label-active" onclick="bindDetails(this.id)"></span></td></tr>
+                                    <tr>
+                                        <td><label>Bill Value</label> </td> <td> <span id="billedAmount" class="label-active" onclick="bindDetails(this.id)"></span></td></tr>
+                                    <tr>
+									<td colspan="2" >
+									<div class="col-md-12" style="background:#f2f3f7;border:1px solid #E1E1E6;padding:5px !important;">
+									<table class="table table-rd col-md-12" style="margin-bottom:0">
+                                    <thead>
+									 <tr>
+									     <th>Advance Type</th>
+									     <th style="text-align:right">Paid</th>
+									     <th style="text-align:right">Recovered</th>
+									     <th style="text-align:right">Balance</th>
+									 </tr>
+									</thead>
+                                     <tbody>
+									 <tr>
+                                        <td> <label>Mobilization</label></td>
+										<td align="right"></td>
+										<td align="right"></td>
+										<td align="right" id="mobAdvance" class="label-list label-active"></td>
+									</tr>
+                                    <tr>
+                                        <td> <label>Material</label></td>
+										<td align="right"></td>
+										<td align="right"></td>
+										<td align="right"  class="label-list"><span id="advancePaid" onclick="bindDetails(this.id)" class="label-active" style="display:none;"></span></td>
+									</tr>
+                                    <tr>
+                                        <td> <label>Adhoc</label></td>
+										<td align="right"><span id="paidamt"  class="label-active" ></span></td>
+										<td align="right"></td>
+										<td align="right"  class="label-list"><span id="totAdv" onclick="bindDetails(this.id)" class="label-active" ></span></td>
+									</tr>
+									 <tr>
+                                         <td style="text-align:center;font-weight:600">Total</td>
+                                         <td align="right" style="color:#333;font-weight:800">477</td>
+                                         <td align="right" style="color:#333;font-weight:800">477</td>
+                                         <td align="right" style="color:#333;font-weight:800">477</td>
+									</tr>
+									</tbody>
+									</table>
+									</div>
+									</td>
+									</tr>
+                                    <tr style="border:none">
+                                        <td> <label style="font-weight:bold">Advance Eligible</label></td> 
+										<td id="eligibleAmt" class="label-list" style="background:#EEFAE8; border:2px solid #4EB320; color:#38960E;font-size:17px;line-height:35px;"></td>
+									</tr>
+                                    </tbody>
+									</table>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class=" label-list12 col-md-12  form-group">
+                                <div class="col-md-12 form-group"><label>Advance Recommendation</label>
+                                    <input class="form-control parent_text" onblur="advVal(this);" onkeypress="return isNumberKey(event,this);" id="advid" name="advance" type="text" value="<?php if(isset($arRegister) && $arRegister['PaidAmount'] != '') { echo $arRegister['PaidAmount']; } else { echo ''; } ?>" ></div>
+                                <div class="col-md-12"><label>Narration</label>
+                                    <textarea style="height:80px" name="narration" class="parent_texts"><?php echo (isset($arRegister)) ? $arRegister['Narration'] : '';?></textarea></div>
+                            </div>
+
+                            <div id="submitDiv" class="col-lg-12 savebtn_area" style="">
+                                <ul>
+                                    <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Submit" onclick="return submitForm();">Submit</a></li>
+                                    <?php if(isset($arRegister)){?>
+                                        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/advance-register';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+                                    <?php }else{?>
+                                        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/advance';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+                                    <?php }?>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="datamodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="myModalLabel">Details</h1>
+            </div>
+            <div class="modal-body modal_body_min_h200 animated zoomInUp">
+                <div class="col-lg-12">
+                    <div class="table-responsive clear">
+                        <div id="dataGrid"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" data-dismiss="modal" class="ripple">Close</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var $arRegister=<?php echo (isset($arRegister)) ? json_encode($arRegister) : '[]';?>;
+    var opCostCentre=<?php echo (isset($opCostCentre)) ? json_encode($opCostCentre) : '[]';?>;
+    var vendorMasterdup=<?php echo (isset($vendorMaster)) ? json_encode($vendorMaster) : '[]';?>;
+    var groupMaster = <?php echo (isset($groupMaster)) ? json_encode($groupMaster) : '[]'; ?>;
+    var vendorMaster = <?php echo (isset($vendorMaster)) ? json_encode($vendorMaster) : '[]'; ?>;
+    var arrayList1 = $.map(groupMaster, function(obj) {
+        return {
+            value: obj.value,
+            id: obj.id,
+            type: obj.type,
+            data: {
+                category: 'Internal'
+            }
+        };
+    });
+    var arrayList2 = $.map(vendorMaster, function(obj) {
+        return {
+            value: obj.value,
+            id: obj.id,
+            type: obj.type,
+            data: {
+                category: 'Vendor'
+            }
+        };
+    });
+    var arrayList = arrayList1.concat(arrayList2);
+    $("#backPrev").hide();
+    $(function(){
+        $('.ripple').materialripple();
+        bindcostCentreAutoComplete();
+        bindContractorAutoComplete();
+    });
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    var arrWOTrans =[],
+        arrBillTrans = [],
+        arrAdvTrans = [],
+        arrAdvDTrans = [];
+
+
+    var $costCentreId = $('#costCentreId'),
+        $vendorId = $('#vendorId'),
+        $eAdvAgainst = $('#eAdvAgainst'),
+        $advAgainst = $('#advAgainst'),
+        $orderType = $('#orderType'),
+        $eReference = $('#eReference');
+
+    $costCentreId.on('change', function() {
+        getReference('','');
+    });
+
+    $vendorId.on('change', function() {
+        getReference('','');
+    });
+
+    $orderType.on('change', function() {
+        getReference('','');
+    });
+
+    $eReference.on('change', function() {
+        getReference($(this).val());
+    });
+
+    function getReference(chType)
+    {
+        if($('#groupId').val() !=0 )
+        {
+            var vid=  $('#groupId').val();
+        }
+        else if($('#vendorId').val() !=0)
+        {
+            var vid=  $('#vendorId').val();
+        }
+
+        if($costCentreId.val() != '' &&  vid!= '' && $orderType.val() != '') {
+            $('#selRefDiv').show();
+            $.post(getBaseURL()+'wpm/labourstrength/get-reference', {ccId: $costCentreId.val(), vId:vid,type:$orderType.val()},
+                function(data) {
+                    if(chType == '') {
+                        $('#eReference').empty();
+                        $('#eReference').append('<option value="">Select Reference</option>');
+                        var returnData = JSON.parse(data);
+                        $.each(returnData, function (key, value) {
+                            $('#eReference')
+                                .append($("<option></option>")
+                                    .attr("value", value.data)
+                                    .attr("data-value", value.value)
+                                    .attr("data-amount",value.Amount)
+                                    .text(value.value));
+                        });
+                    } else {
+                        $('#reference').empty();
+                        $('#reference').append('<option value="0">Select Reference</option>');
+                        var returnData = JSON.parse(data);
+                        $.each(returnData, function (key, value) {
+                            $('#reference')
+                                .append($("<option></option>")
+                                    .attr("value", value.data)
+                                    .attr("data-value", value.value)
+                                    .attr("data-amount",value.Amount)
+                                    .text(value.value));
+                        });
+                        if ($arRegister.length != 0){
+                            $("#reference option").each(function () {
+                                if ($.trim($(this).text()) == $arRegister.OrderNo) {
+                                    $(this).attr("selected", "selected").trigger('change');
+                                    return;
+                                }
+                            });
+                        }else{
+                            var aaaa = $('#eReference option:selected').text();
+                            $("#reference option").each(function () {
+                                if ($.trim($(this).text()) == $.trim(aaaa)) {
+                                    $(this).attr("selected", "selected").trigger('change');
+                                    return;
+                                }
+                            });
+                        }
+                    }
+                });
+        } else {
+            $('#selRefDiv').hide();
+        }
+    }
+    function advVal(){
+        var advVal=sanitizeNumber($('#advid').val(),2);
+        var eligible=isNullCheck($('#eligibleAmt').text(),'number');
+        if(parseFloat(eligible) < parseFloat(advVal)){
+            $('#advid').val(0);
+            alert("Advance Amount should not be greater than Eligible Amount");
+            return false;
+        }
+    }
+    function refChange(){
+        var ordval=$('#reference option:selected').attr('data-amount');
+        var refId=$("#reference option:selected").val();
+        var refVal=$("#reference option:selected").text();
+//        var rowVal = refVal.split('(')[1];
+//        var valref=rowVal.slice(0,-1);
+        var lVendorId = isNullCheck($vendorId.val(),'number');
+        var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+        var reference = isNullCheck($('#reference').val(),'number');
+        arrWOTrans = [];
+        arrBillTrans = [];
+        arrAdvTrans = [];
+        arrAdvDTrans = [];
+        $.ajax({
+            url: getBaseURL() + "wpm/labourstrength/bind-details",
+            type: "post",
+            data:"orderId="+refId+"&vendorId="+lVendorId+"&costCentreId="+lCostCentreId+"&reference="+reference+"&Type=woAmount",
+            success: function (data, textStatus, jqXHR) {
+                var obj = JSON.parse(data),
+                    bindDetails = obj['Details'];
+                arrWOTrans = obj['WOTrans'];
+                arrBillTrans = obj['BillTrans'];
+                arrAdvTrans = obj['AdvTrans'];
+                arrAdvDTrans = obj['AdvDTrans'];
+
+               //console.log(arrAdvTrans);
+                var paidamt=0;
+                $.each(arrAdvTrans, function (key, data) {
+                    paidamt=paidamt + parseFloat(data.Amount);
+                });
+                $("#paidamt").text(sanitizeNumber(paidamt,2,true));
+                //$('#woAmountId').text(bindDetails.Amount);
+                $('#woAmountId').text(ordval);
+                $('#billedAmount').text(sanitizeNumber(bindDetails.BilledAmount,2,true));
+                $('#mobAdvance').text(sanitizeNumber(bindDetails.mobAdvance,2,true));
+                $('#advancePaid').text(sanitizeNumber(bindDetails.PaidAmount,2,true));
+                $('#totAdv').text(sanitizeNumber(bindDetails.TotalAdvance,2,true));
+                $('#advDeduct').text(sanitizeNumber(bindDetails.deductAmount,2,true));
+                $('#balAmt').text(sanitizeNumber(bindDetails.balAmount,2,true));
+                $('#eligibleAmt').text(sanitizeNumber(bindDetails.eligible,2,true));
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(textStatus + "-----" + errorThrown);
+            }
+        });
+    }
+
+    function validateLabStg()
+    {
+        $('.error_message').hide();
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+        //alert(currentIndex);
+        if(currentIndex == 0) {
+            var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+            var lVendorId = isNullCheck($vendorId.val(),'number');
+//        var leAdvAgt = isNullCheck($eAdvAgainst.val(),'number');
+            var leReference = isNullCheck($eReference.val(),'number');
+
+            if (lCostCentreId == 0) {
+                $costCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var projName = $('#costCentreName').val();
+                $('.projName').val(projName);
+                $('.hprojName').html(projName);
+                $('#arDate').val($('#areDate').val());
+            }
+
+            if (lVendorId == 0) {
+                $vendorId.closest('.form-group').find(".error_message").show();
+                return;
+            } else if (leReference == 0) {
+                $eReference.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var conName = $('#vendorName').val();
+                var orderName = $('#orderType option:selected').text();
+                var advAgtName = $('#eAdvAgainst option:selected').text();
+                var referName = $('#eReference option:selected').text();
+                $('.conName').val(conName);
+                $('#typeOfOrder').val(orderName);
+                $('.hconName').html(conName);
+                $('.advAgtName').val(advAgtName);
+                $('.referName').val(referName);
+                showBack('e');
+                $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+                        typeId: $('#arTypeId').val(),
+                        ccId: $('#costCentreId').val()
+                    },
+                    function (data) {
+                        var vNo = data.split('###');
+                        $('#ccArNo').val($.trim(vNo[0]));
+                        $('#compArNo').val($.trim(vNo[1]));
+                        if($.trim(vNo[0]) != '')
+                            $('#ccArNo').prop('readonly', true);
+                        if($.trim(vNo[1]) != '')
+                            $('#compArNo').prop('readonly', true);
+                    });
+            }
+        }
+    }
+
+    function goBack()
+    {
+        $('#carousel-example-generic').carousel({
+            slide: "prev"
+        });
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function showBack(sbType)
+    {
+        if(sbType == 'a') {
+            $('#submitDiv').hide();
+            $('#stageTwo').hide();
+            $('#stageOne').show();
+            $('#titleTag').addClass('text-center');
+        } else {
+            $('#stageOne').hide();
+            $('#stageTwo').show();
+            $('#submitDiv').show();
+            //$('#titleTag').removeClass('text-center');
+        }
+    }
+
+    function calAmount()
+    {
+        var curAmt = $('#curPaidAmt').val();
+        var newAmt = parseFloat($('#totalAmt').val()) - parseFloat($('#prevPaidAmt').val());
+
+        if(newAmt < curAmt) {
+            alert("Amount shouldn't not exceed than Total Amount");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function submitForm()
+    {
+        var errFlag = 0;
+
+        $('.red_bdr').removeClass('red_bdr');
+
+        if($.trim($('#arNo').val()) == '') {
+            $('#arNo').addClass('red_bdr');
+            $('#arNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#ccArNo').val()) == '') {
+            $('#ccArNo').addClass('red_bdr');
+            $('#ccArNo').focus();
+            errFlag = 1;
+            return false;
+        }
+
+        if($.trim($('#advid').val()) == '' && $('#advid').val() <= 0) {
+            $('#advid').addClass('red_bdr');
+            $('#advid').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#compArNo').val()) == '') {
+            $('#compArNo').addClass('red_bdr');
+            $('#compArNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#refNo').val()) == '') {
+            $('#refNo').addClass('red_bdr');
+            $('#refNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if(calAmount() == false) {
+            errFlag = 1;
+            return false;
+        }
+
+        if(errFlag == 0) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    <?php if(isset($arRegister) && count($arRegister) != 0) { ?>
+
+    var typeId = '<?php echo $arRegister['TypeId']; ?>';
+    var referId = '<?php echo $arRegister['Reference']; ?>';
+    var OrderType = '<?php echo $arRegister['OrderType']; ?>';
+    $('#orderType').val(OrderType).trigger('change');
+
+    if(OrderType == 'W'){
+        $('#typeOfOrder').val('Work');
+    }else if(OrderType == 'H'){
+        $('#typeOfOrder').val('Hire');
+    }else if(OrderType == 'S'){
+        $('#typeOfOrder').val('Service');
+    }
+    showBack('e');
+    getReference(referId);
+    setTimeout(calculation,2000);
+    <?php } ?>
+
+    <?php if(isset($arRegister)){?>
+    <?php if($arRegister['Approve'] == 'Y'){?>
+    $('.save_btn').hide();
+    <?php }} ?>
+    <?php if(isset($arRegister)){?>
+    <?php if($arRegister['Approve'] == 'N' || $arRegister['Approve'] == '' ){?>
+    setTimeout(calculation,2000);
+
+    <?php }} ?>
+    var fimat=0;
+    function calculation(type)
+    {
+        var org=$("#paidamt").text();
+
+        var reamt=$("#advid").val();
+
+        var fimat=parseFloatVal(org)-parseFloatVal(reamt);
+
+        $("#paidamt").text(sanitizeNumber(fimat,2,true));
+        $("#totAdv").text(sanitizeNumber(fimat,2,true));
+    }
+    function bindDetails(id) {
+        var parent = $("#dataGrid").parent();
+        $("#dataGrid").remove();
+        $("<div id='dataGrid'></div>").appendTo(parent);
+
+        var arrDetails = [],
+            sDate = "",
+            sNo = "";
+        if (id == "woAmountId") {
+            arrDetails = arrWOTrans;
+            sDate = "WODate";
+            sNo = "WONo";
+        } else if (id == "billedAmount") {
+            arrDetails = arrBillTrans;
+            sDate = "BillDate";
+            sNo = "BillNo";
+        } else if (id == "advancePaid") {
+            arrDetails = arrAdvTrans;
+            sDate = "AdvDate";
+            sNo = "AdvNo";
+        } else  if (id=="advDeduct") {
+            arrDetails = arrAdvDTrans;
+            sDate = "BillDate";
+            sNo = "BillNo";
+        }
+
+        if (arrDetails.length ==0) return;
+
+        var rfcsource =
+        {
+            async: false,
+            dataType: "json",
+            localdata: arrDetails,
+            dataFields: [
+                {name: 'RefDate', type: 'date'},
+                {name: 'RefNo', type: 'string'},
+                {name: 'CostCentreName', type: 'string'},
+                {name: 'Amount', type: 'number'}
+            ]
+        };
+        var rfcdata = new $.jqx.dataAdapter(rfcsource);
+        var columnsrenderer = function (value) {
+            return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+        }
+
+        $("#dataGrid").jqxGrid({
+            width: "100%",
+            autoheight: false,
+            height: 200,
+            rowsheight: 30,
+            pagerButtonsCount: 6,
+            pagesize: 10,
+            source: rfcdata,
+            pageable: true,
+            sortable: true,
+            filterable: true,
+            showfilterrow: true,
+            altrows: true,
+            enabletooltips: true,
+            editable: false,
+            showstatusbar: true,
+            showaggregates: true,
+            selectionmode: 'singlerow',
+            columns: [
+                { text: sDate, filtertype: 'date', datafield: 'RefDate', width: '20%', cellsformat: 'dd-MM-yyyy'},
+                { text: sNo, datafield: 'RefNo', width: '20%'  },
+                { text: 'Cost Centre', datafield: 'CostCentreName', width: '30%'  },
+                {text: 'Amount', datafield: 'Amount', 'editable': false, width: '30%', cellsalign: 'right',renderer: columnsrenderer,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#dataGrid").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                    },aggregates: ['sum'],
+                    aggregatesrenderer: function (aggregates) {
+                        var renderstring = "";
+                        $.each(aggregates, function (key, value) {
+                            renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                        });
+                        return renderstring;
+                    }
+                }
+            ]
+        });
+        $('#datamodal').modal('show');
+
+    }
+    //costCentre AutoComplete
+    function bindcostCentreAutoComplete()
+    {
+        $('#costCentreName').autocomplete({
+            lookup:opCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#costCentreId').val(suggestion.data).trigger('change');
+                    $('#costCentreName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#costCentreId').val(0);
+//                $('#costCentreName').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#costCentreId').val(0);
+//                    $('#costCentreName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+    //Contractor AutoComplete
+    function bindContractorAutoComplete()
+    {
+        $('#vendorName').autocomplete({
+            lookup:arrayList,
+            groupBy: 'category',
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+
+                if(suggestion) {
+                   if(suggestion.type=='G')
+                   {
+                       $('#groupId').val(suggestion.id).trigger('change');
+                       $("#orderType").val("").trigger('change');
+                       $("#eReference").val("").trigger('change');
+                   }
+                    else if(suggestion.type=='V')
+                   {
+                       $('#vendorId').val(suggestion.id).trigger('change');
+                   }
+
+                    $('#vendorName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+
+                    $('#groupId').val(0);
+                    $('#vendorId').val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#vendorId').val(0);
+//                    $('#vendorName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+</script>

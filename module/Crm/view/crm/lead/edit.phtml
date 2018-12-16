@@ -1,0 +1,129 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			
+			<div class="col-lg-12 clear">
+                <h1 class="txt_center form_main_h1" data-bsfhead="Lead Edit">Lead Edit</h1>
+                <div class="form-group">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                        <form class="form-horizontal" method="post">
+                            <div id="lead" class="showDiv">
+							 <div class="row">
+                                    <div class="form-group padtop20 col-lg-12">
+                                        <select name="projectId" class="single_dropdown2 lbl_move" style="width:100%;" id="project_id" data-bsfshare="ProjectName" label="Project Name" data-size="5" title="Select project..." error="please select Project Name">
+                                            <option value="">Select Project</option>
+                                            <?php 
+                                            foreach($resultsproj as $type){ ?>
+                                                <option value="<?php echo $type['ProjectId'] ?>">
+                                                    <?php echo $type['ProjectName'] ?>
+                                                </option>
+                                                <?php } ?>
+                                        </select>
+                                        <div class="error_message">
+                                            <p>Please Enter ProjectName...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                               <div class="row" id="showd" style="display:none;">
+							 <div class="form-group col-lg-12">
+									<select name="leadId" id="LeadId" class="dropChange1 form-control single_dropdown2 lbl_move" data-bsfshare="LeadName" label="Select Lead" style="width:100%;" >
+
+									</select>
+									<div class="error_message">
+                                            <p>Please Enter LeadName...</p>
+                                        </div>
+								</div>
+							</div>
+                            </div>
+                        </form>
+                        <div class="col-lg-12 savebtn_area m_top10 no_border">
+                            <ul>
+                                <li class="save_btn m_auto"> <a href="javascript:void(0);" class="ripple continue">Proceed</a> </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--content_wrapper -->
+<!--PAGE SCRIPTS-->
+<script>
+$(document).ready(function() {
+	$(".multiple_dropdown").select2({
+		placeholder: "Select Project list"
+	});
+});
+$(".continue").click(function() {
+	$('.error_message').hide();
+	var ele = $(".showDiv");
+	$(".error").text("");
+	var bool = true;
+	ele.find("input,checkbox, select, textarea").each(function() {
+		var tagname = $(this).prop("tagName").toLowerCase();
+		if (tagname == 'select') {
+			if ($(this).val() == "" || $(this).val() == null) {
+				bool = false;
+				//console.log($(this).closest('.polymer-form').next(".error_message"))
+				$(this).closest('.form-group').find(".error_message").show();
+				$(this).focus();
+				return false;
+			}
+		} else {
+			$(".error").remove();
+		}
+	});
+	if (bool) {
+		//alert($(".showDiv:visible").index()+'-----------'+$(".showDiv:last").index())
+		if ($(".showDiv:visible").index() != $(".showDiv:last").index()) {
+			$(".showDiv:visible").next(".showDiv").show();
+			ele.hide();
+		} else {
+			$('form').submit();
+		}
+	}
+});
+
+
+
+//project onchange//
+$('#project_id').on('change',function(){
+		var formData = $("#project_id").val();
+		$.ajax({
+			url:getBaseURL()+"crm/lead/edit",
+			type:"post",
+			data:{'project':formData},
+			success:function(data,textStatus,jqXHR){
+		    $('#LeadId').html(' ');
+			var opHtml = '<option value=""></option>';
+			var valu = JSON.parse(data);
+			$.each(valu,function(i,o){
+              opHtml += '<option value="'+o.LeadId+'">' +o.LeadName+'</option>';
+          });
+
+         $('#LeadId').html(opHtml);
+		 $('#showd').show();
+		 
+		 
+			},
+				error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"-----"+errorThrown);
+			}
+		});
+});
+
+</script>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown2").select2({
+		placeholder: "",
+		allowClear: true
+	});
+	
+	
+});
+</script>
+<!--PAGE SCRIPTS-->

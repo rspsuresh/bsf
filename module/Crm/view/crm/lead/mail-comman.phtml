@@ -1,0 +1,163 @@
+<style type="text/css">
+    .box											{position:relative;border-radius:3px;background:#ffffff;border-top:3px solid #d2d6de;margin-bottom:20px;width:100%;box-shadow:0 1px 1px rgba(0,0,0,0.1)}
+    .box-header										{color:#444;display:block;padding:10px;position:relative}
+    .box-header .box-title							{font-size:16px;}
+    .box-header>.box-tools							{position:absolute;right:5px;top:5px;}
+    .box-tools .glyphicon-search					{top:5px;}
+    .btn-box-tool									{padding:5px;font-size:12px;background:transparent;color:#97a0b3;}
+    .open .btn-box-tool,.btn-box-tool:hover			{color:#606c84}
+    .box-body										{padding:5px;}
+    .box-footer										{border-top:1px solid #f4f4f4;padding:5px;background-color:#fff;}
+    .compose_btn:hover								{background-color:#51862d !important;}
+    .mailbox-subject span							{font-weight:600;}
+    .mailbox-messages .table						{margin:0px;}
+    .mailbox-controls								{padding:5px;}
+    .mailbox-name a									{color:#1e1e1e; font-weight:600;}
+    .compose_rightbox								{width:45.3%; background-color:#fff;}
+    .compose_rightbox .right_lbox_inner_cnt			{width:98%;}
+    .compose_rightbox .right_lbox_inner h2			{margin:0px; background-color:#e2f0f7; color:#000; font-size:16px;}
+    .box-body .nav-pills li a						{padding:10px 10px; color:#444444;}
+    .box-body .nav-pills li a i						{padding-right:5px;}
+    .box-body .nav-pills li a .label				{margin-top:2px;}
+    .box-body .nav-pills li.active a,
+    .box-body .nav-pills li.active a:focus,
+    .box-body .nav-pills li.active a:hover 			{background-color:#f4e388; color:#000;}
+</style>
+<div class="right_lightbox compose_rightbox">
+    <div class="right_lightbox_close">
+        <span class="right_lightbox_closeicon"><i class="fa fa-times"></i></span>
+    </div>
+    <div class="right_lbox_inner">
+        <h2>New Message</h2>
+        <div class="right_lbox_inner_cnt">
+            <div class="col-md-12">
+                <div class="box no_border">
+                    <form id="mailForm" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="type" id="type" value="mailRequest">
+                        <div class="box-body">
+                            <div class="padtop10 col-lg-12 padlr0 to_search">
+                                <label for="to" class="float_l">To :</label>
+                                <select class="multiple_dropdown float_l" name="to" id="to" multiple="multiple" label="" style="width:85%;" disabled>
+                                    <option selected><?php echo $responseLead; ?></option>
+                                </select>
+                                <div class="col-lg-12 padlr0 to_search">
+                                    <label for="Cc" class="float_l">Cc :</label>
+                                    <select class="multiple_dropdown float_l" name="Cc[]" id="Cc" multiple="multiple" label="" style="width:85%;">
+                                    </select>
+                                </div>
+                                <div class="col-lg-12 padlr0 to_search">
+                                    <label for="Bcc" class="float_l ">Bcc :</label>
+                                    <select class="multiple_dropdown float_l" id="Bcc" name="Bcc[]" multiple="multiple" label="" style="width:85%;">
+                                    </select>
+                                </div>
+                                <span><a href="#">Cc</a></span><span> <a href="#">Bcc</a></span>
+                            </div>
+                            <div class="form-group m_btm20">
+                                <input type="text" name="subject" id="subject" class="form-control padlr0 emptyMail" placeholder="Subject:">
+                            </div>
+                            <div class="form-group">
+                                	<textarea id="compose-textarea" name="compose-textarea" class="form-control emptyMailTextArea" style="height: 250px">
+
+                                    </textarea>
+                            </div>
+                            <div class="clearfix"></div>
+                            <!-- <div class="form-group col-md-12">
+                                <div id="example-1" class="page">
+                                  <div id="dropzone-0">
+                                    <input name="file[]" id="file" multiple="" class="RTU-hiddenFile" type="file" onchange="loader();">
+                                  </div>
+                                </div>
+                                 <p class="help-block">Max. 32MB</p>
+                             </div>-->
+                            <div class="form-group">
+                                <div class="btn btn-default btn-file">
+                                    <i class="fa fa-paperclip"></i> Attachment <input type="file" multiple name="file[]" id="file" onchange="loader();"/>
+                                </div>
+                                <p class="help-block">Max. 32MB</p>
+                            </div>
+                            <!-- <div class="loading-progress-3"></div>-->
+                        </div>
+                    </form><!-- /.box-body -->
+                    <div class="box-footer">
+                        <div class="pull-right">
+                            <button class="btn btn-default"><i class="fa fa-pencil"></i> Draft</button>
+                            <button type="button" class="btn btn-primary" onclick="sendMail();"><i class="fa fa-envelope-o"></i> Send</button>
+                        </div>
+                        <button class="btn btn-default compose_discard"><i class="fa fa-times"></i> Discard</button>
+                    </div><!-- /.box-footer -->
+                </div><!-- /. box -->
+            </div><!-- /.col -->
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({});
+    });
+
+
+    function loader() {
+        $('#loadingArea').text('Uploading Files...');
+        $('.uploading_area').show();
+        $('#type').val('ajaxloader');
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/mail-comman',
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            data: new FormData($('#mailForm')[0]),
+            success:function(data, textStatus, jqXHR){
+                data = JSON.parse(data);
+                $('.input-attachment-url').remove();
+                $.each(data['url'],function(i,o){
+                    $('#mailForm').append('<input type="hidden" name="fileattached[]" value="'+ o+'">');
+                });
+                $('.uploading_area').hide();
+
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('.uploading_area').hide();
+            }
+        });
+    }
+    function sendMail() {
+        $('#loadingArea').text('Sending Mail...');
+        $('.uploading_area').show();
+        $('#type').val('mailRequest');
+        var content =$.trim(tinymce.activeEditor.getContent());
+        var tovalue = $('#to option:selected').val();
+        $('#to').attr('disabled',false);
+        tinyMCE.triggerSave();
+//        var formData = new FormData();
+//        formData.append('file',$('#attachment').prop('files'));
+//        formData.append('data',$('#mailForm').serialize());
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/mail-comman',
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            data: new FormData($('#mailForm')[0]),
+            success:function(data, textStatus, jqXHR){
+                $('.uploading_area').hide();
+                $('.emptyMail').val('');
+                $('#Cc').select2("val",'');
+                $('#Bcc').select2("val",'');
+                $('.emptyMailTextArea').text('');
+                tinymce.get('compose-textarea').setContent('');
+                $('#to').attr('disabled',true);
+//                $('file').val('');
+                $('.right_lightbox').hide();
+                $('.left-panel').addClass('collapsed');
+                $('.l_menuicon_nav').addClass('cross');
+                $('#msgBoxSuccess').modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('.uploading_area').hide();
+                $('#to').attr('disabled',true);
+                $('#msgBoxError').modal('show');
+
+            }
+        });
+    }
+</script>

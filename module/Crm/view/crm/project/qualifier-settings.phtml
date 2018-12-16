@@ -1,0 +1,311 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<style type="text/css">
+    .tdinner_div   {background-color: #e7e9ec; border: 1px solid #ddd;margin-top: 10px;position: relative;float:left; width:100%;}
+    .taxable_input_area   				{padding-top:7px; margin-right:15px;}
+    .taxable_input_area label   		{font-weight:normal; padding-right:5px;}
+    .table-responsive table.table tr td .taxable_input_area input[type="text"]   		{width:110px ;padding:4px 5px; font-size:12px !important; }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 data-bsfhead="Qualifier Settings">Qualifier Settings</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="col-lg-12">
+                <div class="kickoff_area col-lg-12 clear cnt_sliders" style="min-height:400px;">
+                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                        <!-- Wrapper for slides -->
+                        <form class="form-horizontal" method="post" id="qualifierSettingsForm">
+                            <div class="carousel-inner" role="listbox">
+                                <div class="item active">
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive clear">
+                                            <h1 data-bsfhead="ReceiptType Qualifiers">Receipt Type Qualifiers</h1>
+                                            <table class="table table-hover m_btm0 clear" id="receiptTypeTable">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width:50px;">Sl. No.</th>
+                                                    <th>Name</th>
+                                                    <th style="width:30px;">&nbsp;</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="sorting">
+                                                <?php $i = 1;
+                                                foreach($receiptTypeMaster as $receiptType) { ?>
+                                                    <tr id="rtRowId_<?php echo $i; ?>">
+                                                        <input type="hidden" id="rtSortId_<?php echo $i; ?>" name="rtSortId_<?php echo $i; ?>" value="<?php echo $i; ?>" />
+                                                        <input type="hidden" id="rtTypeId_<?php echo $i; ?>" name="rtTypeId_<?php echo $i; ?>" value="<?php echo $receiptType['ReceiptTypeId']; ?>" />
+                                                        <td id="rtRowSlNo_<?php echo $i; ?>" style="width:50px;"><?php echo $i; ?></td>
+                                                        <td><?php echo $receiptType['ReceiptTypeName']; ?>
+                                                            <div class="tdinner_div m_btm20" id="rtDivQual_<?php echo $i; ?>" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <ul>
+                                                                        <?php
+                                                                        foreach($qualifierMaster as $qualifier) {
+                                                                            $rtChecked = '';
+                                                                            if(!empty($selQualSetRecTypes[$receiptType['ReceiptTypeId']])) {
+                                                                                if(in_array($qualifier['QualifierId'],$selQualSetRecTypes[$receiptType['ReceiptTypeId']])) {
+                                                                                    $rtChecked = 'checked';
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                            <li>
+                                                                                <div class="radio_check">
+                                                                                    <p>
+                                                                                        <input type="checkbox" class="tbl_input" id="rtQualSet_<?php echo $i; ?>_<?php echo $qualifier['QualifierId']; ?>" name="rtQualSet_<?php echo $i; ?>[]" onchange="qualChange(this.id)" value="<?php echo $qualifier['QualifierId']; ?>" <?php echo $rtChecked; ?> />
+                                                                                        <label class="ripple" for="rtQualSet_<?php echo $i; ?>_<?php echo $qualifier['QualifierId']; ?>" style="width:100%;"><?php echo $qualifier['QualifierName']; ?></label>
+                                                                                        <input type="hidden" name="rtQualTypeId_<?php echo $i; ?>_<?php echo $qualifier['QualifierId']; ?>" id="rtQualTypeId_<?php echo $i; ?>_<?php echo $qualifier['QualifierId']; ?>" value = "<?php echo $qualifier['QualifierTypeId']; ?>">
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="taxable_input_area float_l">
+                                                                                    <?php if ($qualifier['QualifierTypeId']==2) { ?>
+                                                                                        <label class="ripple" id="rtQualTax_<?php echo $i; ?>" style="<?php echo ($rtChecked == '') ? 'display: none' : ''; ?>;width:100%;">Taxable %</label>
+                                                                                        <input style="<?php echo ($rtChecked == '') ? 'display: none' : ''; ?>" class="parent_text text-right" type="text"  name="rtQualTaxPer_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($receiptType['TaxablePer'],2); ?>" onkeypress="return isDecimal(event,this)" onchange="validPer(this.id)" id="rtQualTaxPer_<?php echo $i; ?>" />
+                                                                                    <?php } ?>
+                                                                                </div>
+                                                                            </li>
+                                                                        <?php } ?>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td align="center" class="action_btns_td">
+                                                            <ul class="action_btns">
+                                                                <li>
+                                                                    <a href="javascript:void(0);" class="mainTr" rel="rt_<?php echo $i; ?>"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                    $i++;
+                                                } ?>
+                                                <input type="hidden" id="rtCount" name="rtCount" value="<?php echo count($receiptTypeMaster); ?>" />
+                                                </tbody>
+                                            </table>
+                                            <h1 class="m_top20" data-bsfhead="OtherCost Qualifiers">Other Cost Qualifiers</h1>
+                                            <table class="table table-hover m_btm0 clear" id="otherCostTable">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width:100px;">Sl. No.</th>
+                                                    <th>Name</th>
+                                                    <th style="width:30px;">&nbsp;</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="sorting">
+                                                <?php $j = 1;
+                                                foreach($otherCostMaster as $otherCost) { ?>
+                                                    <tr id="ocRowId_<?php echo $j; ?>">
+                                                        <input type="hidden" id="ocSortId_<?php echo $j; ?>" name="ocSortId_<?php echo $j; ?>" value="<?php echo $j; ?>" />
+                                                        <input type="hidden" id="ocTypeId_<?php echo $j; ?>" name="ocTypeId_<?php echo $j; ?>" value="<?php echo $otherCost['OtherCostId']; ?>" />
+                                                        <td id="ocRowSlNo_<?php echo $j; ?>" style="width:100px;"><?php echo $j; ?></td>
+                                                        <td><?php echo $otherCost['OtherCostName']; ?>
+                                                            <div class="tdinner_div m_btm20" id="ocDivQual_<?php echo $j; ?>" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <ul>
+                                                                        <?php
+                                                                        foreach($qualifierMaster as $qualifier) {
+                                                                            $ocChecked = '';
+                                                                            if(!empty($selQualSetOthCosts[$otherCost['OtherCostId']])) {
+                                                                                if(in_array($qualifier['QualifierId'],$selQualSetOthCosts[$otherCost['OtherCostId']])) {
+                                                                                    $ocChecked = 'checked';
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                            <li>
+                                                                                <div class="radio_check">
+                                                                                    <p>
+                                                                                        <input type="checkbox" class="tbl_input" id="ocQualSet_<?php echo $j; ?>_<?php echo $qualifier['QualifierId']; ?>" name="ocQualSet_<?php echo $j; ?>[]" onchange="qualChange(this.id)" value="<?php echo $qualifier['QualifierId']; ?>" <?php echo $ocChecked; ?> />
+                                                                                        <label class="ripple" for="ocQualSet_<?php echo $j; ?>_<?php echo $qualifier['QualifierId']; ?>" style="width:100%;"><?php echo $qualifier['QualifierName']; ?></label>
+                                                                                        <input type="hidden" name="ocQualTypeId_<?php echo $j; ?>_<?php echo $qualifier['QualifierId']; ?>" id="ocQualTypeId_<?php echo $j; ?>_<?php echo $qualifier['QualifierId']; ?>" value = "<?php echo $qualifier['QualifierTypeId']; ?>">
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="taxable_input_area float_l">
+                                                                                    <?php if ($qualifier['QualifierTypeId']==2) { ?>
+                                                                                        <label class="ripple" id="ocQualTax_<?php echo $j; ?>" style="<?php echo ($ocChecked == '') ? 'display: none' : ''; ?>;width:100%;">Taxable %</label>
+                                                                                        <input style="<?php echo ($ocChecked == '') ? 'display: none' : ''; ?>" class="parent_text text-right" type="text" name="ocQualTaxPer_<?php echo $j; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($otherCost['TaxablePer'],2); ?>" onkeypress="return isDecimal(event,this)" onchange="validPer(this.id)" id="ocQualTaxPer_<?php echo $j; ?>" />
+                                                                                    <?php } ?>
+                                                                                </div>
+                                                                            </li>
+                                                                        <?php } ?>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td align="center" class="action_btns_td">
+                                                            <ul class="action_btns">
+                                                                <li>
+                                                                    <a href="javascript:void(0);" class="mainTr" rel="oc_<?php echo $j; ?>"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                    $j++;
+                                                } ?>
+                                                <input type="hidden" id="ocCount" name="ocCount" value="<?php echo count($otherCostMaster); ?>" />
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                            <ul>
+                                                <li class="dropdown save_btn float_r">
+                                                    <a href="javascript:void(0);" onclick="return qualSetValidate();" data-toggle="tooltip" data-placement="left" class="ripple" title="Submit">Submit</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(".mainTr").click(function(){
+        var relDiv = $(this).attr('rel');
+        var relVal = relDiv.split("_");
+        if(relVal[0]=='rt') {
+            $("#rtDivQual_"+relVal[1]).slideToggle("slow");
+        } else {
+            $("#ocDivQual_"+relVal[1]).slideToggle("slow");
+        }
+
+        var rtCount = $('#rtCount').val();
+        var ocCount = $('#ocCount').val();
+        for(i=1;i<=rtCount;i++) {
+            if(relVal[0] == 'rt') {
+                if(relVal[1] != i) {
+                    $("#rtDivQual_"+i).slideUp("slow");
+                }
+            } else {
+                $("#rtDivQual_"+i).slideUp("slow");
+            }
+        }
+        for(i=1;i<=ocCount;i++) {
+            if(relVal[0] == 'oc') {
+                if(relVal[1] != i) {
+                    $("#ocDivQual_"+i).slideUp("slow");
+                }
+            } else {
+                $("#ocDivQual_"+i).slideUp("slow");
+            }
+        }
+    })
+</script>
+<script>
+    var $rtBody = $('table[id*=receiptTypeTable] tbody.sorting');
+    var $ocBody = $('table[id*=otherCostTable] tbody.sorting');
+
+    $rtBody.sortable({
+        helper: fixHelperModified,
+        stop: updateIndex,
+        axis: 'y',
+        distance: 40,
+        update: function( event, ui ) {
+            var ifrow = event.target.children[0].id.split("_")[1];
+            rtSortOrder();
+        }
+    });
+
+    function rtSortOrder()
+    {
+        var rows = $('tr[id*=rtRowId_]');
+        var irefid = 1;
+        $.each(rows, function() {
+            var id = $(this)[0].id;
+            var irow = id.split("_")[1];
+            $('#rtSortId_'+ irow).val(irefid);
+            $('#rtRowSlNo_'+ irow).html(irefid);
+            irefid = + irefid+1;
+        });
+    }
+
+    $ocBody.sortable({
+        helper: fixHelperModified,
+        stop: updateIndex,
+        axis: 'y',
+        distance: 40,
+        update: function( event, ui ) {
+            var ifrow = event.target.children[0].id.split("_")[1];
+            ocSortOrder();
+        }
+    });
+
+    function ocSortOrder()
+    {
+        var rows = $('tr[id*=ocRowId_]');
+        var irefid = 1;
+        $.each(rows, function() {
+            var id = $(this)[0].id;
+            var irow = id.split("_")[1];
+            $('#ocSortId_'+ irow).val(irefid);
+            $('#ocRowSlNo_'+ irow).html(irefid);
+            irefid = + irefid+1;
+        });
+    }
+
+    var fixHelperModified = function(e, tr) {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index) {
+                $(this).width($originals.eq(index).width())
+            });
+            return $helper;
+        },
+        updateIndex = function(e, ui) {
+            $('td.index', ui.item.parent()).each(function (i) {
+                $(this).html(i + 1);
+            });
+        };
+
+    function qualChange(x) {
+        var name = x.split('_')[0],
+            key1 = x.split('_')[1],
+            key2 = x.split('_')[2];
+
+        if (name == "rtQualSet") {
+            console.log($('#rtQualTypeId_' + key1 + '_' + key2).val());
+            if ($('#rtQualTypeId_' + key1 + '_' + key2).val() ==2) {
+                if ($('#' + x).is(":checked")) {
+                    $('#rtQualTaxPer_' + key1).show();
+                    $('#rtQualTax_' + key1).show();
+                } else {
+                    $('#rtQualTaxPer_' + key1).hide();
+                    $('#rtQualTax_' + key1).hide();
+                }
+            }
+        } else {
+            console.log($('#ocQualTypeId_' + key1 + '_' + key2).val());
+            if ($('#ocQualTypeId_' + key1 + '_' + key2).val() ==2) {
+                if ($('#' + x).is(":checked")) {
+                    $('#ocQualTaxPer_' + key1).show();
+                    $('#ocQualTax_' + key1).show();
+                } else {
+                    $('#ocQualTaxPer_' + key1).hide();
+                    $('#ocQualTax_' + key1).hide();
+                }
+            }
+        }
+    }
+    function validPer(x) {
+        var dVal = parseFloat(isNullCheck($('#' + x).val(),'number'));
+        if (dVal >100) {
+            $('#' + x).val(sanitizeNumber(100,2))
+        } else {
+            $('#' + x).val(sanitizeNumber(dVal,2))
+        }
+    }
+
+    function qualSetValidate()
+    {
+        $('.error_message').hide();
+        var errFlag = 0;
+        if(errFlag == 0) {
+            $("#qualifierSettingsForm").submit();
+        }
+    }
+</script>

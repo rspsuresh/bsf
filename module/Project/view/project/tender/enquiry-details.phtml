@@ -1,0 +1,2378 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&amp;key=AIzaSyDaNPyxJ7NKmZ4rC8awB-BlBh6ieH1Q9os"></script>
+<style>
+.ui-sortable li {background:#E9ECF0;box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #CAD6E3; 
+    float: left;
+    margin-bottom: 5px;
+    padding: 5px 15px;
+    width: 100%;
+}
+.panel {
+	border-radius:0px !important;
+}
+.panel-info {
+	border:none;
+	border-top:none;
+}
+.ios_checkbox + div span::before {
+color:#fff;
+content:"No";
+display:inline-block;
+font-size:11px;
+font-weight:600;
+padding-top:3px;
+position:absolute;
+right:8px;
+z-index:1;
+}
+.ios_checkbox:checked + div span::before {
+color:#fff;
+content:"Yes";
+display:inline-block;
+font-size:11px;
+font-weight:600;
+left:8px;
+padding-top:3px;
+position:absolute;
+ z-index: 1;
+}
+.btn.selectpicker {
+	padding: 13px 12px 32px !important;
+}
+.switch {
+  position: relative;
+
+  height: 26px;
+  width: 120px;
+  background:#DBEAF9;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+}
+ 
+.switch-label {
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 58px;
+  line-height:26px;
+  font-size: 11px;
+  color:#000;
+  text-align: center;
+
+  cursor: pointer;
+}
+ 
+.switch-label:active {
+  font-weight: bold;
+}
+ 
+.switch-label-off {
+  padding-left: 2px;
+}
+ 
+.switch-label-on {
+  padding-right: 2px;
+}
+ 
+.switch-input {
+  display: none;
+}
+ 
+.switch-input:checked + .switch-label {
+  font-weight: bold;
+  color:#fff;
+ 
+  -webkit-transition: 0.15s ease-out;
+  -moz-transition: 0.15s ease-out;
+  -o-transition: 0.15s ease-out;
+  transition: 0.15s ease-out;
+}
+ 
+.switch-input:checked + .switch-label-on ~ .switch-selection {
+
+  left: 60px;
+}
+ 
+.switch-selection {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 2px;
+  width: 58px;
+  height: 22px;
+  background: #65bd63;
+  border-radius: 3px;
+  -webkit-transition: left 0.15s ease-out;
+  -moz-transition: left 0.15s ease-out;
+  -o-transition: left 0.15s ease-out;
+  transition: left 0.15s ease-out;
+}
+.btn_newlist {width:50px; font-size:18px; height:50px; color:#000; background:#e3edf1; border: 2px solid #93cee5; border-radius:50%; margin-top:15px;float:left; line-height:47px; text-align:center;}
+.btn_newlist a i{ text-align:center; font-size:18px; color:#000; padding-left:16px; line-height:45px; transition:all 0.3s ease;}
+.btn_newlist a i:hover{-webkit-transform: scale(1.3);
+    -ms-transform: scale(1.3);
+    transform: scale(1.3); padding-left:14px}
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1>Tender Enquiry</h1>
+      </div>
+      <!--form start-->
+      <form id="formWrapper" method="post" role="form" enctype="multipart/form-data" onsubmit="return finalValidate();">
+        <div class="col-lg-12 top_ct">
+          <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+            <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+              <input type="text" readonly name="RefDate" id="RefDate" class="form-control date_picker lbl_move" label="Reference Date" value="<?php echo date('d-m-Y', strtotime($enquiryResult['RefDate'])); ?>" />
+              <input type="hidden" readonly name="Today" id="Today" value="<?php echo date("d-m-Y"); ?>" />
+              <div class="error_message">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+            <div class="form-group">
+              <input type="hidden" name="TenderEnquiryId" id="TenderEnquiryId" value="<?php echo $enquiryResult['TenderEnquiryId']; ?>" />
+              <input type="hidden" name="actionMode" id="actionMode" value="<?php echo $actionMode; ?>" />
+              <input type="text" maxlength="50" name="RefNo" id="RefNo" class="form-control lbl_move" label="Reference No" value="<?php echo $enquiryResult['RefNo']; ?>" readonly />
+              <div class="error_message">
+                <p>please enter reference no...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--accordion start-->
+        <div class="col-lg-12 clear">
+          <div id="accordion" class="panel-group"> 
+            <!--General-->
+            <div class="panel panel-info">
+              <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                <h4 class="panel-title accordion-toggle defa_panels">General</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                  <div class="deft_act">
+                    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0 clear">
+                      <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="form-group">
+                          <input type="text" name="NameOfWork" maxlength="255" id="NameOfWork" class="form-control lbl_move" label="Name Of Work" value="<?php echo $enquiryResult['NameOfWork']; ?>" />
+                          <div class="error_message">
+                            <p>please enter name of work...</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="120" name="SourceName" id="SourceName" class="form-control lbl_move" label="Source Name" value="<?php echo $enquiryResult['SourceName']; ?>" />
+                          <div class="error_message">
+                            <p>please enter source name...</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control lbl_move" maxlength="255" name="plocation" id="plocation" label="Project Location" value="<?php echo (isset($enquiryResult)) ? $enquiryResult['CityName'] : ''; ?>"/>
+                            <div class="error_message"><p>please select project location...</p></div>
+                            <input type="hidden" id="pcityid" name="pcityid" class="form-control" value="<?php echo (isset($enquiryResult)) ? $enquiryResult['CityId'] : ''; ?>"/>
+                        </div>
+                        <div class="col-lg-12 padlr0">
+                          <div class="form-group col-lg-9 col-md-9 col-sm-9 padlr0">
+                            <input type="text" maxlength="5" name="ProjectDuration" id="ProjectDuration" class="form-control lbl_move" label="Project Duration" onKeyPress="return isNumberKey(event);" value="<?php echo $enquiryResult['ProjectDuration']; ?>" />
+                            <div class="error_message">
+                              <p>please enter project duration...</p>
+                            </div>
+                          </div>
+                          <div class="form-group col-lg-3 col-md-3 col-sm-3 padlr0">
+                            <select name="Duration" id="Duration" class="form-control selectpicker show-tick">
+                              <option value="1" <?php echo (isset($enquiryResult) && $enquiryResult['Duration'] == '1') ? 'selected' : ''; ?>>Days</option>
+                              <option value="2" <?php echo (isset($enquiryResult) && $enquiryResult['Duration'] == '2') ? 'selected' : ''; ?>>Weeks</option>
+                              <option value="3" <?php echo (isset($enquiryResult) && $enquiryResult['Duration'] == '3') ? 'selected' : ''; ?>>Months</option>
+                              <option value="4" <?php echo (isset($enquiryResult) && $enquiryResult['Duration'] == '4') ? 'selected' : ''; ?>>Years</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div id="divNewsPageNo" class="form-group clear">
+                          <input type="text" maxlength="5" name="NewsPageNo" id="NewsPageNo" class="form-control lbl_move" label="News Page No" value="<?php echo $enquiryResult['NewsPageNo']; ?>" onKeyPress="return isNumberKey(event);" />
+                          <div class="error_message">
+                            <p>please enter news page no...</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="form-group">
+                          <select name="SourceType" id="SourceType" class="form-control single_dropdown lbl_move" data-size="5" onChange="return changeSourceType(this.value);" style="width:100%;">
+                            <option value="0">Select Source Type</option>
+                            <?php foreach($sourceType as $key => $value) { ?>
+                            <option value="<?php echo $key; ?>" <?php if($enquiryResult['SourceType']==$key) { ?>selected<?php } ?>><?php echo $value; ?></option>
+                            <?php } ?>
+                          </select>
+                          <div class="error_message">
+                            <p>please select source type...</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="150" name="ClientName" id="ClientName" class="form-control lbl_move" label="Client Name" value="<?php echo $enquiryResult['ClientName']; ?>" />
+                          <input type="hidden" name="ClientId" id="ClientId" value="<?php echo $enquiryResult['ClientId']; ?>" />
+                          <div class="error_message">
+                            <p>please enter client name...</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="15" name="ProposalCost" id="ProposalCost" class="form-control lbl_move text-right" label="Proposal Cost" value="<?php echo $enquiryResult['ProposalCost']; ?>" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)"/>
+                          <div class="error_message">
+                            <p>please enter proposal cost...</p>
+                          </div>
+                        </div>
+                        <div id="divContactNo" class="form-group">
+                          <input type="text" maxlength="20" name="ContactNo" id="ContactNo" class="form-control lbl_move" label="Contact No" maxlength="20" value="<?php echo $enquiryResult['ContactNo']; ?>" onKeyPress="return isNumberKey(event);" />
+                          <div class="error_message">
+                            <p>please enter contact no...</p>
+                          </div>
+                        </div>
+                        <div id="divNewsDate" class="form-group date-pt"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                          <input type="text" readonly name="NewsDate" id="NewsDate" class="form-control date_picker lbl_move" label="News Date" value="<?php if($enquiryResult['NewsDate']!=NULL) { echo date('d-m-Y', strtotime($enquiryResult['NewsDate'])); } ?>" />
+                          <div class="error_message">
+                            <p>please enter news date...</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                        <ul>
+                          <li><a href="javascript:nextAccordian(2)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <!--Modal-->
+                  <div id="clientmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                          <h1>Client</h1>
+                        </div>
+                        <div class="modal-body">
+                          <div class="col-lg-12">
+                            <div class="form-group">
+                              <label style="margin-bottom: 10px;">Client Name</label>
+                              <input type="text" class="parent_text tex-po" maxlength="150" name="MClientName" id="MClientName" />
+                            </div>
+                            <div class="form-group">
+                              <label style="margin-bottom: 10px;">Address</label>
+                              <input type="text" class="parent_text tex-po" maxlength="255" name="MClientAddress" id="MClientAddress" />
+                            </div>
+                            <div class="form-group">
+                              <label style="margin-bottom: 10px;">City</label>
+                              <input type="text" class="parent_text tex-po" name="MCityId" id="MCityId" data-name="locality" />
+                              <input type="hidden" id="state" name="state" class="form-control" data-name="administrative_area_level_1" />
+                              <input type="hidden" id="country" name="country" class="form-control" data-name="country" />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <div class="col-lg-12"> <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                            <button type="button" id="btn-newclient" class="md_ok" onclick="return ClientUpdate()">Create</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--Modal--> 
+                </div>
+              </div>
+            </div>
+            <!--General end--> 
+            <!--Tender Details-->
+            <div class="panel panel-info">
+              <div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+                <h4 class="panel-title accordion-toggle defa_panels">Tender Details</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapseTwo" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                  <div class="deft_act">
+                    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
+                      <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="form-group">
+                          <input type="text" maxlength="50" name="TenderNo" id="TenderNo" class="form-control lbl_move" label="Tender No" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['TenderNo'] : ''; ?>" />
+                        </div>
+                        <div class="form-group"> 
+                          <!--input type="text" name="TenderProcessType" id="TenderProcessType" class="form-control lbl_move" label="Tender Process Type" /-->
+                          <select name="TenderProcessType" id="TenderProcessType" class="form-control single_dropdown lbl_move" data-size="4" style="width:100%;">
+                            <option value="0">Select Tender Process Type</option>
+                            <?php foreach($tenderProcessType as $key => $value) { ?>
+                            <option value="<?php echo $key; ?>" <?php echo (isset($tenderDetail) && $tenderDetail['TenderProcessType'] == $key) ? 'selected' : ''; ?>><?php echo $value; ?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="255" name="ProjectAddress" id="ProjectAddress" class="form-control lbl_move" label="Project Address" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['ProjectAddress'] : ''; ?>" />
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="50" name="ContactPerson" id="ContactPerson" class="form-control lbl_move" label="Contact Person" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['ContactPerson'] : ''; ?>" />
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="20" name="ContactNo" id="ContactNo" class="form-control lbl_move" label="Contact No" onKeyPress="return isNumberKey(event);" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['ContactNo'] : ''; ?>" />
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="20" name="OfficeAddress" id="OfficeAddress" class="form-control lbl_move" label="Office Address" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['OfficeAddress'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                          <input type="text" readonly name="TenderDate" id="TenderDate" class="form-control date_picker lbl_move" label="Tender Date" value="<?php echo (isset($tenderDetail) && $tenderDetail['TenderDate'] != NULL ) ? date("d-m-Y", strtotime($tenderDetail['TenderDate'])) : date("d-m-Y"); ?>" />
+                        </div>
+                        <div class="form-group"> 
+                          <!--input type="text" name="TenderTypeId" id="TenderTypeId" class="form-control lbl_move" label="Tender Type" /-->
+                          <select name="TenderTypeId" id="TenderTypeId" class="form-control single_dropdown lbl_move" style="width:100%;">
+                            <option value="0">Select Tender Type</option>
+                            <?php foreach($tenderTypeResult as $tenderType) { ?>
+                            <option value="<?php echo $tenderType['TenderTypeId']; ?>" <?php echo (isset($tenderDetail) && $tenderDetail['TenderTypeId'] == $tenderType['TenderTypeId']) ? 'selected' : ''; ?>><?php echo $tenderType['TenderTypeName']; ?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control lbl_move" maxlength="255" name="projectTypeName" id="projectTypeName" label="Project Type" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProjectTypeName'] : ''; ?>" />
+                            <input type="hidden" id="ProjectTypeId" name="ProjectTypeId" class="form-control" value="<?php echo (isset($tenderEnquiry)) ? $tenderEnquiry['ProjectTypeId'] : ''; ?>"/>
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="120" name="Designation" id="Designation" class="form-control lbl_move" label="Designation of Contact Person" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['Designation'] : ''; ?>" />
+                        </div>
+                        <div class="form-group">
+                          <input type="text" maxlength="150" name="ContactEmail" id="ContactEmail" class="form-control lbl_move" label="E-Mail" value="<?php echo (isset($tenderDetail)) ? $tenderDetail['ContactEmail'] : ''; ?>" />
+                          <div class="error_message">
+                            <p>please enter valid contact email...</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                        <ul>
+                          <li><a href="javascript:nextAccordian(3)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--Tender Details end--> 
+            
+            <!--Cost Details-->
+            <div class="panel panel-info">
+              <div data-target="#collapsethree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-3">
+                <h4 class="panel-title accordion-toggle defa_panels">Cost Details</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapsethree" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                  <div class="eng-div clear">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0"> <b class="regs">Require any Cost for Documents ?</b>
+                      <label>
+                      <input type="checkbox" class="ios_checkbox" name="ReqAnyCostForDoc" id="ReqAnyCostForDoc" value="1" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['ReqAnyCostForDoc'] == '1') ? 'checked' : ''; ?> />
+                      <div class="ios_switch"><span></span></div>
+                      </label>
+                    </div>
+                    <div id="racfdDiv" class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 div-rgs" style="display:none;">
+                      <div class="col-sm-2">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move text-right" label="Cost" maxlength="15" name="AnyCostForDocCost" id="AnyCostForDocCost" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)"  value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['AnyCostForDocCost'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <select name="AnyCostForDocMOP" id="AnyCostForDocMOP" class="form-control single_dropdown lbl_move" style="width:100%;">
+                            <option value="0">Select Mode of Payment</option>
+                            <?php foreach($paymentMode as $payment) { ?>
+                            <option value="<?php echo $payment['TransId']; ?>" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['AnyCostForDocMOP'] == $payment['TransId']) ? 'selected' : ''; ?>><?php echo $payment['PaymentMode']; ?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move" label="In favour of" maxlength="150" name="AnyCostForDocIFO" id="AnyCostForDocIFO" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['AnyCostForDocIFO'] : ''; ?>" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="eng-div clear">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0"> <b class="regs">Require Earnest Money Deposit ?</b>
+                      <label>
+                      <input type="checkbox" class="ios_checkbox" name="ReqMoneyDeposit" id="ReqMoneyDeposit" value="1" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['ReqMoneyDeposit'] == '1') ? 'checked' : ''; ?> />
+                      <div class="ios_switch"><span></span></div>
+                      </label>
+                    </div>
+                    <div id="remdDiv" class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 div-rgs" style="display:none;">
+                      <div class="col-sm-2">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move text-right" label="Cost" maxlength="15" name="MoneyDepositCost" id="MoneyDepositCost" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['MoneyDepositCost'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <select name="MoneyDepositMOP" id="MoneyDepositMOP" class="form-control single_dropdown lbl_move" style="width:100%;">
+                            <option value="0">Select Mode of Payment</option>
+                            <?php foreach($paymentMode as $payment) { ?>
+                            <option value="<?php echo $payment['TransId']; ?>" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['MoneyDepositMOP'] == $payment['TransId']) ? 'selected' : ''; ?>><?php echo $payment['PaymentMode']; ?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move" label="In favour of" maxlength="150" name="MoneyDepositIFO" id="MoneyDepositIFO" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['MoneyDepositIFO'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                          <input type="text" readonly name="MoneyDepositValidUpto" id="MoneyDepositValidUpto" class="form-control date_picker lbl_move" label="Valid Upto" value="<?php echo (isset($tenderCostDetail) && $tenderCostDetail['MoneyDepositValidUpto']!=NULL) ? date('d-m-Y', strtotime($tenderCostDetail['MoneyDepositValidUpto'])) : date("d-m-Y"); ?>" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="eng-div clear">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0"> <b class="regs">Require Security Deposit ?</b>
+                      <label>
+                      <input type="checkbox" class="ios_checkbox" name="ReqSecurityDeposit" id="ReqSecurityDeposit" value="1" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['ReqSecurityDeposit'] == '1') ? 'checked' : ''; ?> />
+                      <div class="ios_switch"><span></span></div>
+                      </label>
+                    </div>
+                    <div id="rsdDiv" class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 div-rgs" style="display:none;">
+                      <div class="col-sm-2">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move text-right" label="Cost" maxlength="15" name="SecurityDepositCost" id="SecurityDepositCost" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['SecurityDepositCost'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <select name="SecurityDepositMOP" id="SecurityDepositMOP" class="form-control single_dropdown lbl_move" style="width:100%;">
+                            <option value="0">Select Mode of Payment</option>
+                            <?php foreach($paymentMode as $payment) { ?>
+                            <option value="<?php echo $payment['TransId']; ?>" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['SecurityDepositMOP'] == $payment['TransId']) ? 'selected' : ''; ?>><?php echo $payment['PaymentMode']; ?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move" label="In favour of" maxlength="150" name="SecurityDepositIFO" id="SecurityDepositIFO" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['SecurityDepositIFO'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                          <input type="text" readonly name="SecurityDepositValidUpto" id="SecurityDepositValidUpto" class="form-control date_picker lbl_move" label="Valid Upto" value="<?php echo (isset($tenderCostDetail) && $tenderCostDetail['SecurityDepositValidUpto']!=NULL) ? date('d-m-Y', strtotime($tenderCostDetail['SecurityDepositValidUpto'])) : date("d-m-Y"); ?>" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="eng-div clear">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0"> <b class="regs">Mobilisation Advance available ?</b>
+                      <label>
+                      <input type="checkbox" class="ios_checkbox" name="MobilisationAdvAvailable" id="MobilisationAdvAvailable" value="1" <?php echo (isset($tenderCostDetail) && $tenderCostDetail['MobilisationAdvAvailable'] == '1') ? 'checked' : ''; ?> />
+                      <div class="ios_switch"><span></span></div>
+                      </label>
+                    </div>
+                    <div id="maaDiv" class="ccol-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 div-rgs" style="display:none;">
+                      <div class="col-sm-2">
+                        <div class="form-group">
+                          <input type="text" class="form-control lbl_move" label="Percentage" maxlength="15" name="MobilisationAdvValue" id="MobilisationAdvValue" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" onchange="return isPercentage(this)" value="<?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['MobilisationAdvValue'] : ''; ?>" />
+                        </div>
+                      </div>
+                      <div class="col-sm-9">
+                        <div class="form-group">
+                          <textarea class="form-control lbl_move" maxlength="255" label="Remarks" name="MobilisationAdvRemarks" id="MobilisationAdvRemarks"><?php echo (isset($tenderCostDetail)) ? $tenderCostDetail['MobilisationAdvRemarks'] : ''; ?></textarea>
+                          <input type="hidden" name="OtherCostDetail" id="OtherCostDetail" value="" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                    <ul>
+                      <li><a href="javascript:nextAccordian(4)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--Cost Details end--> 
+            <!--Important Dates-->
+            <div class="panel panel-info">
+              <div data-target="#collapsefour" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-4">
+                <h4 class="panel-title accordion-toggle defa_panels">Important Dates</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapsefour" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                  <div class="deft_act">
+                    <div class="col-lg-12 col-lg-offset-0 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
+                      <div class="dept">
+                        <div class="table-responsive topsp">
+                          <input type="hidden" name="ImpDateCount" id="ImpDateCount" value="<?php echo (isset($tenderDates) && count($tenderDates) != 0) ? count($tenderDates) : 5; ?>" />
+                          <table class="table" style=" margin-bottom:0px;" id="ImpDateTable">
+                            <tbody>
+                              <?php
+															if(isset($tenderDates) && count($tenderDates) != 0) {
+																$i = 1;
+																foreach($tenderDates as $dates) {
+																	$class = '';
+																	if(count($tenderDates) == $i) {
+																		$class = 'ImpDate';
+																	}
+															?>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_<?php echo $i; ?>" id="TypeOfDate_<?php echo $i; ?>" value="<?php echo $dates['TypeOfDate']; ?>" />
+                                  <b class="sept"><?php echo $dates['TypeOfDate']; ?></b></th>
+                                <td><input type="text" readonly name="TDate_<?php echo $i; ?>" id="TDate_<?php echo $i; ?>" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" value="<?php if($dates['TDate'] != NULL) echo date("d-m-Y", strtotime($dates['TDate'])); ?>" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                  <td><input type="text" maxlength="255" name="PlaceOfAddress_<?php echo $i; ?>" id="PlaceOfAddress_<?php echo $i; ?>" class="parent_text" value="<?php echo $dates['PlaceOfAddress']; ?>" /></td>
+                              </tr>
+                              <?php $i++;
+																}
+															} else { ?>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_1" id="TypeOfDate_1" value="Last Date of Document Purchase" />
+                                  <b class="sept">Last Date of Document Purchase</b></th>
+                                <td><input type="text" readonly name="TDate_1" id="TDate_1" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                <td><input type="text" maxlength="255" name="PlaceOfAddress_1" id="PlaceOfAddress_1" class="parent_text"/></td>
+                              </tr>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_2" id="TypeOfDate_2" value="PreBid Meeting Date" />
+                                  <b class="sept">PreBid Meeting Date</b></th>
+                                <td><input type="text" readonly name="TDate_2" id="TDate_2" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                <td><input type="text" maxlength="255" name="PlaceOfAddress_2" id="PlaceOfAddress_2" class="parent_text"/></td>
+                              </tr>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_3" id="TypeOfDate_3" value="Last Date of Bid Submission" />
+                                  <b class="sept">Last Date of Bid Submission</b></th>
+                                <td><input type="text" readonly name="TDate_3" id="TDate_3" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                <td><input type="text" maxlength="255" name="PlaceOfAddress_3" id="PlaceOfAddress_3" class="parent_text"/></td>
+                              </tr>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_4" id="TypeOfDate_4" value="Bid Opening Date" />
+                                  <b class="sept">Bid Opening Date</b></th>
+                                <td><input type="text" readonly name="TDate_4" id="TDate_4" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                <td><input type="text" maxlength="255" name="PlaceOfAddress_4" id="PlaceOfAddress_4" class="parent_text"/></td>
+                              </tr>
+                              <tr>
+                                <th width="28%" class="bgstab"><input type="hidden" name="TypeOfDate_5" id="TypeOfDate_5" value="Last Date of Technical Bid Submission" />
+                                  <b class="sept">Last Date of Technical Bid Submission</b></th>
+                                <td><input type="text" readonly name="TDate_5" id="TDate_5" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>
+                                <th class="bgstab"><b class="sept">Address</b></th>
+                                 <td><input type="text" maxlength="255" name="PlaceOfAddress_5" id="PlaceOfAddress_5" class="ImpDate parent_text"/></td>
+                              </tr>
+                              <?php } ?>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                          <ul>
+                            <li><a href="javascript:nextAccordian(5)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--Important Dates end--> 
+            <!--Consultant Details-->
+            <div class="panel panel-info">
+              <div data-target="#collapsefive" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-5">
+                <h4 class="panel-title accordion-toggle defa_panels">Consultant Details</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapsefive" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                  <div class="deft_act">
+                    <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                      <div class="table-responsive topsp">
+                        <?php $conId = array(); ?>
+                        <input type="hidden" name="ConsultantCount" id="ConsultantCount" value="<?php echo (isset($tenderConsultant) && count($tenderConsultant) != 0) ? count($tenderConsultant) : 1; ?>" />
+                        <!--input class="parent_text" type="text" name="ConsultantType_1" id="ConsultantType_1" tagname="ConsultantType" /-->
+                        <table class="table tableWithFloatingHeader" style="margin-bottom:0px;" id="consultantTable">
+                          <thead>
+                            <tr>
+                              <th>Consultant Name</th>
+                              <th>Consultant Type</th>
+                              <th>Address of the Consultant</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                        </table>
+                        <input type="hidden" name="consultantrowid" id="consultantrowid" value="0"/>
+                      </div>
+                      <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                        <ul>
+                          <li><a href="javascript:nextAccordian(6)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--Consultant Details end-->
+              <div class="panel panel-info">
+                  <div data-target="#collapsesix" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-6">
+                      <h4 class="panel-title accordion-toggle defa_panels">Process Steps</h4>
+                  </div>
+                  <div class="panel-collapse collapse" id="collapsesix" style="height: 0px;">
+                      <div class="panel-body bgcolr">
+                          <div class="deft_act col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                              <div class="form-group col-lg-5 col-md-5 clear">
+                                  <p class="heading_checkbox">Select Activity</p>
+                                  <div class="card">
+                                      <div class="card-body" style="min-height:50px; max-height:310px;">
+                                          <ul class="sampleUI list ui-sortable" data-sortable="true">
+                                              <?php
+                                              foreach($processMaster as $ps) {
+                                                  $act = $ps['TenderProcessId'];
+                                                  ?>
+                                                  <li class="tile ui-sortable-handle" id="pro_stp_<?php echo $act; ?>">
+                                                      <div class="checkbox checkbox-styled tile-text vendor_checkboxborder_gray">
+                                                          <label>
+                                                              <input type="checkbox" name="proStep_<?php echo $act; ?>" id="proStep_<?php echo $act; ?>" value="<?php echo $act; ?>" onclick="return selectStep('<?php echo $act; ?>', 'sel');" />
+                                                              <span><?php echo $ps['ProcessName']; ?></span>
+                                                          </label>
+                                                      </div>
+                                                  </li>
+                                              <?php } ?>
+                                          </ul>
+                                      </div>
+<!--                                      <div class="pull-right">-->
+<!--                                          <div class="radio_check">-->
+<!--                                              <p>-->
+<!--                                                  <input type="checkbox" value="1" name="select_all_prostp" id="select_all_prostp" onclick="selectAllStep();" />-->
+<!--                                                  <label for="select_all_prostp" class="ripple">Select All</label>-->
+<!--                                              </p>-->
+<!--                                          </div>-->
+<!--                                      </div>-->
+                                  </div>
+                              </div>
+                              <div class="form-group col-lg-7 col-md-7">
+                                  <p class="heading_checkbox">Selected Activity</p>
+                                  <div class="card">
+                                      <div class="card-body" style="min-height:50px; max-height:310px;">
+                                          <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                              <table class="table" style=" margin-bottom:0px;" id="processTable">
+                                                  <thead>
+                                                  <tr>
+                                                      <th>Description</th>
+                                                      <th>Responsibility</th>
+                                                      <th>Target date</th>
+                                                      <!--th>Critical</th-->
+                                                      <th>Status</th>
+                                                      <th>&nbsp;</th>
+                                                  </tr>
+                                                  </thead>
+                                                  <tbody class="sorting">
+                                                  <?php
+                                                  $psArray = array();
+                                                  if(isset($proStepTrans)) {
+                                                      if(count($proStepTrans) > 0) {
+                                                          foreach ($proStepTrans as $pstrans) {
+                                                              $act = $pstrans['TenderProcessId'];
+                                                              $psArray[] = $pstrans['TenderProcessId'];
+                                                  ?>
+                                                              <tr id="proUnstp_<?php echo $act; ?>" style="display:none;">
+                                                                  <input type="hidden" id="sortId_<?php echo $act; ?>" name="sortId_<?php echo $act; ?>" value="" />
+                                                                  <td width="15%">
+                                                                      <input type="hidden" name="proStepId_<?php echo $act; ?>" id="proStepId_<?php echo $act; ?>" value="<?php echo $act; ?>" />
+                                                                      <input class="parent_text" type="text" name="proStepName_<?php echo $act; ?>" id="proStepName_<?php echo $act; ?>" value="<?php echo $pstrans['ProcessName']; ?>" />
+
+                                                                  </td>
+                                                                  <td width="5%">
+                                                                      <div class="select-style">
+                                                                          <select name="psUserId_<?php echo $act; ?>" id="psUserId_<?php echo $act; ?>">
+                                                                              <?php foreach($users as $usr) { ?>
+                                                                                  <option value="<?php echo $usr['UserId']; ?>"><?php echo $usr['UserName']; ?></option>
+                                                                              <?php } ?>
+                                                                          </select>
+                                                                      </div>
+                                                                  </td>
+                                                                  <td width="4%"><input class="parent_text date_picker" type="text" name="psTargetDate_<?php echo $act; ?>" id="psTargetDate_<?php echo $act; ?>" /></td>
+                                                                  <!--td width="10%">
+                                                                      <div class="switch">
+                                                                          <input type="radio" class="switch-input" name="psCritical_</?php echo $act; ?>" id="psyCritical_</?php echo $act; ?>" value="1" checked />
+                                                                          <label for="psyCritical_</?php echo $act; ?>" class="switch-label switch-label-off">Yes</label>
+                                                                          <input type="radio" class="switch-input" name="psCritical_</?php echo $act; ?>" id="psnCritical_</?php echo $act; ?>" value="0" />
+                                                                          <label for="psnCritical_</?php echo $act; ?>" class="switch-label switch-label-on">No</label>
+                                                                          <span class="switch-selection"></span>
+                                                                      </div>
+                                                                  </td-->
+                                                                  <td width="5%">
+                                                                      <div class="radio_check">
+                                                                          <p>
+                                                                              <input type="checkbox" value="1" name="psStatus_<?php echo $act; ?>" id="psStatus_<?php echo $act; ?>" class="clickStatus" />
+                                                                              <label for="psStatus_<?php echo $act; ?>" class="ripple">Done</label>
+                                                                          </p>
+                                                                      </div>
+                                                                  </td>
+                                                                  <td width="3%" align="center">
+                                                                      <ul class="action_btns" id="doneHide_<?php echo $act; ?>">
+                                                                          <li><a class="mainTr_1" href="javascript:void(0);" onclick="return selectStep('<?php echo $act; ?>', 'usel');"><i class="fa fa-times-circle" data-original-title="Close" data-placement="top" data-toggle="tooltip" aria-hidden="true"></i></a></li>
+                                                                      </ul>
+                                                                  </td>
+                                                              </tr>
+                                                  <?php
+                                                          }
+                                                      }
+                                                  } ?>
+                                                  <?php
+                                                  $so = 1;
+                                                  foreach($processMaster as $ps) {
+                                                      $act = $ps['TenderProcessId'];
+                                                      if(!in_array($act,$psArray)) {
+                                                      ?>
+                                                      <tr id="proUnstp_<?php echo $act; ?>" style="display:none;">
+                                                          <input type="hidden" id="sortId_<?php echo $act; ?>" name="sortId_<?php echo $act; ?>" value="<?php echo $so; ?>" />
+                                                          <td width="15%">
+                                                              <input type="hidden" name="proStepId_<?php echo $act; ?>" id="proStepId_<?php echo $act; ?>" value="<?php echo $act; ?>" />
+                                                              <input class="parent_text" type="text" name="proStepName_<?php echo $act; ?>" id="proStepName_<?php echo $act; ?>" value="<?php echo $ps['ProcessName']; ?>" />
+
+                                                          </td>
+                                                          <td width="5%">
+                                                              <div class="select-style">
+                                                                  <select name="psUserId_<?php echo $act; ?>" id="psUserId_<?php echo $act; ?>">
+                                                                      <?php foreach($users as $usr) { ?>
+                                                                          <option value="<?php echo $usr['UserId']; ?>"><?php echo $usr['UserName']; ?></option>
+                                                                      <?php } ?>
+                                                                  </select>
+                                                              </div>
+                                                          </td>
+                                                          <td width="4%"><input class="parent_text date_picker" type="text" name="psTargetDate_<?php echo $act; ?>" id="psTargetDate_<?php echo $act; ?>" /></td>
+                                                          <!--td width="10%">
+                                                              <div class="switch">
+                                                                  <input type="radio" class="switch-input" name="psCritical_</?php echo $act; ?>" id="psyCritical_</?php echo $act; ?>" value="1" checked />
+                                                                  <label for="psyCritical_</?php echo $act; ?>" class="switch-label switch-label-off">Yes</label>
+                                                                  <input type="radio" class="switch-input" name="psCritical_</?php echo $act; ?>" id="psnCritical_</?php echo $act; ?>" value="0" />
+                                                                  <label for="psnCritical_</?php echo $act; ?>" class="switch-label switch-label-on">No</label>
+                                                                  <span class="switch-selection"></span>
+                                                              </div>
+                                                          </td-->
+                                                          <td width="5%">
+                                                              <div class="radio_check">
+                                                                  <p>
+                                                                      <input type="checkbox" value="1" name="psStatus_<?php echo $act; ?>" id="psStatus_<?php echo $act; ?>" class="clickStatus"  />
+                                                                      <label for="psStatus_<?php echo $act; ?>" class="ripple">Done</label>
+                                                                  </p>
+                                                              </div>
+                                                          </td>
+                                                          <td width="3%" align="center">
+                                                              <ul class="action_btns" id="doneHide_<?php echo $act; ?>">
+                                                                  <li><a class="mainTr_1" href="javascript:void(0);" onclick="return selectStep('<?php echo $act; ?>', 'usel');"><i class="fa fa-times-circle" data-original-title="Close" data-placement="top" data-toggle="tooltip" aria-hidden="true"></i></a></li>
+                                                              </ul>
+                                                          </td>
+                                                      </tr>
+                                                  <?php $so++;
+                                                      }
+                                                  } ?>
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                                  <ul>
+                                      <li><a href="javascript:nextAccordian(7)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                  </ul>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            <div class="panel panel-info">
+                <div data-target="#collapseseven" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-7">
+                    <h4 class="panel-title accordion-toggle defa_panels">Check List</h4>
+                </div>
+                <div class="panel-collapse collapse" id="collapseseven" style="height: 0px;">
+                    <div class="panel-body bgcolr">
+                        <div class="deft_act col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                            <span data-toggle="modal" data-target="#AddCheckListModal">
+                                <a href="javascript:void(0);" data-toggle="tooltip" data-placement="right" title="Add New Checklist" class="btn_newlist"> <i class="fa fa-plus"></i>  </a>
+                            </span>
+                            <div class="form-group col-lg-5 col-md-5 clear">
+                                <p class="heading_checkbox">Select Activity</p>
+                                <div class="card">
+                                    <div class="card-body" style="min-height:50px; max-height:310px;">
+                                        <ul class="sampleUI list ui-sortable" data-sortable="true" id="ulChkList">
+                                            <?php
+                                            foreach($checkListMaster as $cl) {
+                                                $act = $cl['CheckListId'];
+                                            ?>
+                                            <li class="tile ui-sortable-handle" id="list_chk_<?php echo $act; ?>">
+                                                <div class="checkbox checkbox-styled tile-text vendor_checkboxborder_gray">
+                                                    <label>
+                                                        <input type="checkbox" name="chkList_<?php echo $act; ?>" id="chkList_<?php echo $act; ?>" value="<?php echo $act; ?>" onclick="return selectList('<?php echo $act; ?>', 'sel');" />
+                                                        <span><?php echo $cl['CheckListName']; ?></span>
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            <?php } ?>
+                                        </ul>
+                                    </div>
+                                    <div class="pull-right">
+                                        <div class="radio_check">
+                                            <p>
+                                                <input type="checkbox" value="1" name="select_all_chklst" id="select_all_chklst" onclick="selectAll();" />
+                                                <label for="select_all_chklst" class="ripple">Select All</label>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-lg-7 col-md-7">
+                                <p class="heading_checkbox">Selected Activity</p>
+                                <div class="card">
+                                    <div class="card-body" style="min-height:50px; max-height:310px;">
+                                        <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                            <table class="table" style=" margin-bottom:0px;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Description</th>
+                                                        <th>Responsibility</th>
+                                                        <th>Target date</th>
+                                                        <th>Critical</th>
+                                                        <th>&nbsp;</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="ulChkListSl">
+                                                    <?php
+                                                    foreach($checkListMaster as $cl) {
+                                                        $act = $cl['CheckListId'];
+                                                    ?>
+                                                    <tr id="list_unchk_<?php echo $act; ?>" style="display:none;">
+                                                        <td width="15%">
+                                                            <input type="hidden" name="chkListId_<?php echo $act; ?>" id="chkListId_<?php echo $act; ?>" value="<?php echo $act; ?>" />
+                                                            <input class="parent_text" type="text" name="chkListName_<?php echo $act; ?>" id="chkListName_<?php echo $act; ?>" value="<?php echo $cl['CheckListName']; ?>" />
+                                                        </td>
+                                                        <td width="5%">
+                                                            <div class="select-style">
+                                                                <select name="userId_<?php echo $act; ?>" id="userId_<?php echo $act; ?>">
+                                                                    <?php foreach($users as $usr) { ?>
+                                                                        <option value="<?php echo $usr['UserId']; ?>"><?php echo $usr['UserName']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                        </td>
+                                                        <td width="4%"><input class="parent_text date_picker" type="text" name="targetDate_<?php echo $act; ?>" id="targetDate_<?php echo $act; ?>" /></td>
+                                                        <td width="15%">
+                                                            <div class="switch">
+                                                                <input type="radio" class="switch-input" name="critical_<?php echo $act; ?>" id="ycritical_<?php echo $act; ?>" value="1" checked />
+                                                                <label for="ycritical_<?php echo $act; ?>" class="switch-label switch-label-off">Yes</label>
+                                                                <input type="radio" class="switch-input" name="critical_<?php echo $act; ?>" id="ncritical_<?php echo $act; ?>" value="0" />
+                                                                <label for="ncritical_<?php echo $act; ?>" class="switch-label switch-label-on">No</label>
+                                                                <span class="switch-selection"></span>
+                                                            </div>
+                                                        </td>
+                                                        <td width="3%" align="center">
+                                                            <ul class="action_btns" id="statusHide_<?php echo $act; ?>">
+                                                                <li><a class="mainTr_1" href="javascript:void(0);" onclick="return selectList('<?php echo $act; ?>', 'usel');"><i class="fa fa-times-circle" data-original-title="Close" data-placement="top" data-toggle="tooltip" aria-hidden="true"></i></a></li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <?php } ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                                <ul>
+                                    <li><a href="javascript:nextAccordian(8)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-info">
+              <div data-target="#collapseeight" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-8">
+                <h4 class="panel-title accordion-toggle defa_panels">Hints</h4>
+              </div>
+              <div class="panel-collapse collapse" id="collapseeight" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                    <div class="col-lg-12">
+                        <div class="table-responsive topsp" style="margin-top:20px;">
+                            <table class="table tableWithFloatingHeader highlightTable" style=" margin-bottom:0px;" id="otherTermsTable">
+                                <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php $i=1; if(isset($notetrans)):
+                                    foreach($notetrans as $ttrans): ?>
+                                        <tr>
+                                            <td width="5%"><input class="parent_text" type="text" maxlength="100" name="termTitle_<?php echo $i; ?>" id="termTitle_<?php echo $i; ?>" maxlength="100"  value="<?php echo $ttrans['NoteTitle']; ?>" onchange="addNewTermRow(this)"/></td>
+                                            <td width="15%"><textarea class="parent_texts" name="termDesc_<?php echo $i; ?>" id="termDesc_<?php echo $i; ?>"><?php echo $ttrans['NoteDescription']; ?></textarea></td>
+                                            <td width="2%" class="action_btns_td"><ul class="action_btns">
+                                                    <li style="float:left;"> <a href="#" class="deleteTermTr_<?php echo $i; ?>" onclick="deleteTerm(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Term Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                                                </ul></td>
+                                        </tr>
+                                        <?php $i=$i+1; endforeach; ?>
+                                <?php endif; ?>
+                                <tr>
+                                    <td width="5%"><input class="parent_text" type="text" maxlength="100" name="termTitle_<?php echo $i; ?>" id="termTitle_<?php echo $i; ?>" maxlength="100" onchange="addNewTermRow(this)"/></td>
+                                    <td width="15%"><textarea class="parent_texts" name="termDesc_<?php echo $i; ?>" id="termDesc_<?php echo $i; ?>"></textarea></td>
+                                    <td width="2%" class="action_btns_td"><ul class="action_btns">
+                                            <li style="float:left;"> <a href="#" class="deleteTermTr_<?php echo $i; ?>" onclick="deleteTerm(this, event);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Term Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                                        </ul></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="termrowid" id="termrowid" value="<?php echo $i; ?>"/>
+                        </div>
+                    </div>
+                    <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                        <ul>
+                            <li><a href="javascript:nextAccordian(9)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+              </div>
+            </div>
+		<!--General-->
+            <div class="panel panel-info">
+              <div data-target="#collapselast" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-9">
+                <h4 class="panel-title accordion-toggle defa_panels">Enclosure</h4>
+              </div>
+			    <div class="panel-collapse collapse" id="collapselast" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                 <div class="form-group col-lg-5 col-lg-offset-3 col-md-offset-2 col-md-5 clear">
+                   <p class="heading_checkbox">Enclosure require while submitting Tender</p>
+                 <div class="card">
+				  <div class="card-body" style="min-height:50px; max-height:350px;">
+                    <ul class="sampleUI list ui-sortable" data-sortable="true" id="ulEncList">
+                        <?php
+                        foreach($enclosureTrans as $cl) {
+                            $eid = $cl['EnclosureId'];
+                        ?>
+                        <li class="tile ui-sortable-handle" id="liencl_<?php echo $eid; ?>">
+                            <div class="radio_check col-md-1" style="padding:0 !important"><p style="padding-top:10px;">
+                            <input name="selectenc_<?php echo $eid; ?>" id="selectenc_<?php echo $eid; ?>" value="select" <?php echo ($cl['Sel']=='Yes') ? 'checked' : ''; ?> type="checkbox">
+                            <label for="gentypem_<?php echo $eid; ?>" onclick="checkEnclChecked(<?php echo $eid; ?>)" ></label></p></div>
+                            <div class="col-md-11"style="padding:0 !important"><input type="text" class="parent_text"  name="nameenc_<?php echo $eid; ?>" id="nameenc_<?php echo $eid; ?>" value="<?php echo $cl['EnclosureName'];?>" readonly/></div>
+                            <input type="hidden" id="checkenc_<?php echo $eid; ?>" name="checkenc_<?php echo $eid; ?>" value="<?php echo ($cl['Sel']=='Yes') ? '1' : '0'; ?>" />
+                            <input type="hidden" id="submitenc_<?php echo $eid; ?>" name="submitenc_<?php echo $eid; ?>" value="<?php echo $cl['Submitted'];?>" />
+                        </li>
+                        <?php }?>
+                    </ul>
+				  </div>
+                  </div>
+			      </div>
+					   <div class="col-md-3">
+				           <span data-toggle="modal" data-target="#AddenclosureModal">
+                            <a class="btn_newlist" align="right" href="javascript:void(0);" data-toggle="tooltip" data-placement="right" title="" data-original-title="Add New Enclosure">
+                           <i class="fa fa-plus"></i>
+                          </a>
+                          </span>
+				       </div>
+				</div>
+			 </div>
+		</div>
+        <!--accordion end-->
+      </div>
+   </div><!--accordion end-->
+      </form>
+      <!--form end--> 
+    </div>
+  </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+  <ul>
+    <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Save" id="submitData">Save</a> 
+      <!-- <li class="cancel_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>-->
+  </ul>
+</div>
+
+<div class="modal fade" id="AddCheckListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>New CheckList</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="POST" id="addCheckListForm" autocomplete="off">
+                        <div class="row">
+                            <div class="form-group req_flds padtop10 col-lg-12">
+                                <input type="text" id="ChecklistName" name="name" autocomplete="off" class="form-control lbl_move" maxlength="150" label="Name" />
+                                <input type="hidden" name="id" id="ChecklistId" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="hidden" name="type" id="ChecklistType" value="5" />
+                                <select name="checktype" id="checktype" autocomplete="off" class="single_dropdown lbl_move" label="Type" style="width:100%;" disabled>
+                                    <?php foreach($checkListType as $trow) { ?>
+                                        <option value="<?php echo $trow['TypeId']; ?>" <?php if($trow['TypeId'] == 5) { echo 'selected'; } ?>><?php echo $trow['CheckListTypeName']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addCheckListFn(); return false;" class="ripple">Create</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal-->
+
+<div class="modal fade" id="AddenclosureModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>New EnclosureList</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="POST" id="addEnclosureForm" autocomplete="off">
+                        <div class="row">
+                            <div class="form-group req_flds padtop10 col-lg-12">
+                                <input type="text" id="enclosureName" name="enclosureName" autocomplete="off" class="form-control lbl_move" maxlength="100" label="Name" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addEnclosureListFn(); return false;" class="ripple">Create</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal-->
+<div id="consultmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Add New Consultant</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <label style="margin-bottom: 10px;">Consultant Name</label>
+                        <input type="text" maxlength="50" class="parent_text tex-po" name="MConsultName" id="MConsultName" />
+                        <input type="hidden" class="parent_text tex-po" name="MConsultId" id="MConsultId" value="" />
+                    </div>
+                    <div class="form-group">
+                        <select name="MConsultType" id="MConsultType" class="single_dropdown lbl_move" label="Consultant Type" style="width:100%;">
+                            <?php foreach($consultantType as $key => $value) { ?>
+                                <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="margin-bottom: 10px;">Address</label>
+                        <input type="text" maxlength="255" class="parent_text tex-po" name="MConsultAddress" id="MConsultAddress" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12"> <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                    <button type="button" id="btn-newclient" class="md_ok" onclick="return ConsultUpdate()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal-->
+
+<table id="dummy-term" style="display: none;">
+    <tbody>
+    <tr>
+        <td width="5%"><input class="parent_text" type="text" maxlength="100" name="termTitle__1" id="termTitle__1" maxlength="100" onchange="addNewTermRow(this)"/></td>
+        <td width="15%"><textarea class="parent_texts" name="termDesc__1" id="termDesc__1"></textarea></td>
+        <td width="2%" class="action_btns_td"><ul class="action_btns">
+                <li style="float:left;"> <a href="#" class="deleteTermTr__1" onclick="deleteTerm(this, event);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Term Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+            </ul></td>
+    </tr>
+    </tbody>
+</table>
+<script id="consultant-template"  type="text/template" class="hide">
+    <tr>
+        <td width="5%">
+            <input class="auto-complete parent_text" maxlength="50" type="text" name="ConsultantName__" id="ConsultantName__" onfocus="return checkConsultantUsed(this)" onchange="addNewConsultantRow(this)" />
+            <input type="hidden" name="ConsultantId__" id="ConsultantId__" />
+        </td>
+        <td width="5%">
+            <div class="select-style">
+                <select name="ConsultantType__" id="ConsultantType__" >
+                    <option value="0">Select Consultant Type</option>
+                    <?php foreach($consultantType as $key => $value) { ?>
+                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </td>
+        <td width="15%"><textarea class="parent_texts" maxlength="255" name="ConsultantAddress__" id="ConsultantAddress__" onchange="addNewConsultantRow(this)" ></textarea></td>
+        <td width="1%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a class="consultantDeleteTr__" href="#"  onclick="deleteConsultant(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script> 
+<script>
+var arr_clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]'; ?>;
+var arr_consultant = <?php echo (isset($tenderConsultant)) ? json_encode($tenderConsultant) : '[]'; ?>;
+var arr_conAuto = <?php echo json_encode($conResult); ?>;
+var arr_projecttype = <?php echo (isset($projectTypeResult)) ? json_encode($projectTypeResult) : '[]'; ?>;
+var act = <?php echo json_encode($act); ?>;
+var temp_conAuto = arr_conAuto;
+
+
+var $ClientName = $('#ClientName'),
+	$ClientId = $('#ClientId');
+
+var $ModalClientName = $('#MClientName'),
+	$ModalClientAddress = $('#MClientAddress'),
+	$ModalClientCity = $('#MCityId'),
+	tmpClientData = null,
+	$btn_newclient = $('#btn-newclient'),
+    tmpConsultData = null,
+    $btn_newconsult = $('#btn-newconsult'),
+    $ModalConsultName = $('#MConsultName'),
+    $ModalConsultAddress = $('#MConsultAddress'),
+    $MConsultType = $('#MConsultType');
+
+function bindClientAutoComplete(noSuggestion)
+{
+	var showSuggestion = true;
+	if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+		showSuggestion = false;
+	}
+	
+	$ClientName.unbind('autocomplete');
+	$ClientName.autocomplete({
+		lookup: arr_clients,
+		showNoSuggestionNotice: showSuggestion,
+		noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" value="Client" onclick="return AddNewClient()">',
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		}, onSelect: function (suggestion) {
+			if (suggestion) {
+				$ClientId.val(suggestion.data);
+				$(this).removeClass('error');
+			}
+		}, onSearchStart: function (suggestion) {
+			$ClientId.val(0);
+		}, onSearchComplete: function (query, suggestions) {
+			if (!suggestions.length) {
+				$(this).addClass('error');
+				$ClientId.val(0);
+			} else $(this).removeClass('error');
+		}
+	});
+}
+
+function bindProjectTypeAutoComplete(noSuggestion)
+{
+    var showSuggestion = true;
+    if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+        showSuggestion = false;
+    }
+
+    $('#projectTypeName').unbind('autocomplete');
+    $('#projectTypeName').autocomplete({
+        lookup: arr_projecttype,
+        showNoSuggestionNotice:false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#projectTypeName').val(suggestion.value);
+                $('#ProjectTypeId').val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $('#ProjectTypeId').val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+//                $(this).addClass('error');
+                $('#ProjectTypeId').val(0);
+            } else $(this).removeClass('error');
+        }
+    });
+}
+function AddNewClient()
+{
+	if(tmpClientData != null)
+		$btn_newclient.html('Update');
+	
+	$('.autocomplete-suggestions').hide();
+	$ModalClientName.val($ClientName.val());
+	$("#clientmodal").modal('show');
+}
+
+function ClientUpdate()
+{
+	var clientName = $ModalClientName.val();
+	if(clientName.length == 0) {
+		alert('Client Name is required!');
+		return false;
+	}
+	
+	if($ModalClientAddress.val().length == 0) {
+		alert('Address is required!');
+		return false;
+	}
+	
+	var clientStatus = CheckClientName(clientName);
+	if(clientStatus == 'restricted') {
+		return false;
+	} else if (clientStatus === true) {
+		alert('Client Name already exists!');
+		return false;
+	}
+	
+	if(tmpClientData != null)
+		arr_clients.pop();
+	
+	tmpClientData = clientName;
+	arr_clients.push({data: 'new', value: clientName});
+	
+	bindClientAutoComplete(); // Rebind data
+	$ClientName.val(clientName);
+	$ClientName.trigger('focus');
+	$btn_editclient.show();
+	$("#clientmodal").modal('hide');
+}
+
+function CheckClientName(value)
+{
+	var isExists = false;
+	$('.loading_area').show();
+	$.ajax({
+		url: getBaseURL() + "project/tender/check-client",
+		data: {rtype:'clientname',search:value},
+		async: false,
+		type: 'post',
+		success: function(data, status, jqXHR){
+			if (data == "Y") {
+				isExists = true;
+			}
+			$('.loading_area').hide();
+		}, error:function(jqXHR, textStatus, errorThrown){
+			$('.loading_area').hide();
+			isExists = true;
+		}
+	});
+	return isExists;
+}
+
+function AddNewConsultant(id)
+{
+    if(tmpConsultData!= null)
+        $btn_newconsult.html('Update');
+
+    //$('.autocomplete-suggestions').hide();
+    $ModalConsultName.val($('#ConsultantName_'+id).val());
+    $('#MConsultId').val(id);
+    $("#consultmodal").modal('show');
+}
+
+function ConsultUpdate()
+{
+    var consultName = $ModalConsultName.val();
+    if(consultName.length == 0) {
+        alert('Consultant Name is required!');
+        return false;
+    }
+
+    if($MConsultType.val().length == 0) {
+        alert('Type is required!');
+        return false;
+    }
+
+    var consultStatus = CheckConsultName(consultName);
+    if(consultStatus == 'restricted') {
+        return false;
+    } else if (consultStatus === true) {
+        alert('Consultant Name already exists!');
+        return false;
+    }
+
+    if(tmpConsultData != null)
+        arr_conAuto.pop();
+
+    tmpConsultData = consultName;
+    arr_conAuto.push({data: 'new', value: consultName});
+
+    bindConsultantBaseAutoComplete(); // Rebind data
+    var mcid = $('#MConsultId').val()
+    $('#ConsultantName_'+mcid).val(consultName);
+    $('#ConsultantName_'+mcid).trigger('focus');
+    $('#ConsultantType_'+mcid).val($MConsultType.val());
+    $('#ConsultantType_'+mcid).trigger('change');
+    $('#ConsultantAddress_'+mcid).val($ModalConsultAddress.val());
+    $('#ConsultantAddress_'+mcid).trigger('change');
+    //$btn_editclient.show();
+    $("#consultmodal").modal('hide');
+}
+
+function CheckConsultName(value)
+{
+    var isExists = false;
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + "project/tender/check-consultant",
+        data: {rtype:'consultname',search:value},
+        async: false,
+        type: 'post',
+        success: function(data, status, jqXHR){
+            if (data == "Y") {
+                isExists = true;
+            }
+            $('.loading_area').hide();
+        }, error:function(jqXHR, textStatus, errorThrown){
+            $('.loading_area').hide();
+            isExists = true;
+        }
+    });
+    return isExists;
+}
+
+$(function () {
+	bindClientAutoComplete();
+    bindlocationAddress();
+    bindProjectTypeAutoComplete();
+
+    $('#plocation').geocomplete({
+        details: "#formWrapper",
+        types: ['(cities)']
+    });
+
+    $('.ImpDate').triggerHandler('keyup');
+    $('#ProposalCost').trigger('blur');
+    $('#AnyCostForDocCost').trigger('blur');
+    $('#MoneyDepositCost').trigger('blur');
+    $('#SecurityDepositCost').trigger('blur');
+
+    // Consultant
+    var $consultantrowid = $('#consultantrowid');
+    var template = $('#consultant-template').html();
+    var consultantrowid = 0;
+    var $tbody = $('#consultantTable').find('> tbody');
+    if(arr_consultant.length != 0) {
+        $.each(arr_consultant, function(i, o) {
+            consultantrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + consultantrowid));
+            $('#ConsultantName_' + consultantrowid).val(o.ConsultantName);
+            $('#ConsultantId_' + consultantrowid).val(o.ConsultantId);
+            $('#ConsultantType_' + consultantrowid).val(o.ConsultantType);
+            $('#ConsultantAddress_' + consultantrowid).val(o.ConsultantAddress);
+            $("#ConsultantName_" + consultantrowid).attr('readonly',true);
+            $('.consultantDeleteTr_' + consultantrowid).show();
+        });
+    }
+    consultantrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + consultantrowid));
+    $consultantrowid.val(consultantrowid);
+    bindConsultantBaseAutoComplete();
+
+    $('.impdate').datepicker({
+        format: "dd-mm-yyyy",
+        startDate: $('#TenderDate').val()
+    })
+
+});
+
+
+function checkConsultantUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=ConsultantId_]');
+    temp_conAuto = arr_conAuto;
+
+    temp_conAuto = $.grep(arr_conAuto, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindConsultantBaseAutoComplete();
+}
+
+function addNewConsultantRow(x) {
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = $x[0].id.split('_')[1];
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#ConsultantName_' + key).val().length == 0 || $('#ConsultantAddress_' + key).val().length == 0)
+        return;
+
+    var $rowid = $('#consultantrowid'),
+        rowid = parseInt($rowid.val());
+    $('.consultantDeleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#consultant-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+
+    $('.consultantDeleteTr_' + key).show();
+    bindConsultantBaseAutoComplete();
+}
+
+function deleteConsultant(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1],
+        consultantId = $('#ConsultantId_' + key).val();
+
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $x.closest('tr'),
+        $tbody = $tr.parent('tbody');
+
+    $tr.remove();
+    temp_conAuto = arr_conAuto;
+
+    bindConsultantBaseAutoComplete();
+    return false;
+}
+
+function bindConsultantBaseAutoComplete() {
+    var $consultantName = $('input[id^=ConsultantName_]');
+    $consultantName.unbind('autocomplete');
+    var addedMaterials = [];
+    $.each($consultantName, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+
+        $this.autocomplete({
+            lookup: temp_conAuto,
+            showNoSuggestionNotice:true,
+            //noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" id="matpricenew_' + key1+'" value="Material" onclick="return AddNewMaterial(this.id)">',
+            noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" value="Consultant" onclick="return AddNewConsultant('+key1+')">',
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $el = $("#ConsultantId_" + key1);
+                    $el.val(suggestion.data);
+                    removeError($(this));
+                    $("#ConsultantName_" + key1).attr('readonly',true);
+//                    $('.consultantDeleteTr_' + key1).show();
+                }
+            }, onSearchStart: function(suggestion) {
+                $("#ConsultantId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    //showError($(this), 'Required');
+                    $("#ConsultantId_" + key1).val(0);
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+
+function nextAccordian(id) {
+	if(id == 2) {
+		if(tenderValidate() == true) {
+			$('#panelheading-' + id).trigger('click');
+		}
+	} else if(id == 3) {
+		if(tenderValidate2() == true) {
+			$('#panelheading-' + id).trigger('click');
+		}
+	} else if(id == 5) {
+        if(tenderValidate5() == true) {
+            $('#panelheading-' + id).trigger('click');
+        }
+    } else {
+		$('#panelheading-' + id).trigger('click');
+	}
+}
+
+$('#divContactNo').hide();
+$('#divNewsDate').hide();
+$('#divNewsPageNo').hide();
+$('#divWorkOrderNo').hide();
+
+/*$(".date_picker").datepicker({
+	format: 'dd-mm-yyyy',
+	startDate: new Date(),
+});*/
+
+function changeSourceType(cst)
+{
+	if(cst==1) {
+		$('#ContactNo').val('');
+		$('#divContactNo').hide();
+		$('#divNewsDate').show();
+		$('#divNewsPageNo').show();
+	} else if(cst!=1 && cst!=2) {
+		$('#NewsDate').val('');
+		$('#NewsPageNo').val('');
+		$('#divNewsDate').hide();
+		$('#divNewsPageNo').hide();
+		$('#divContactNo').show();
+	} else {
+		$('#ContactNo').val('');
+		$('#NewsDate').val('');
+		$('#NewsPageNo').val('');
+		$('#divContactNo').hide();
+		$('#divNewsDate').hide();
+		$('#divNewsPageNo').hide();
+	}
+}
+
+function changeExistingContract(cec)
+{
+	if(cec=='1') {
+		$('#divWorkOrderNo').show();
+	} else if(cec=='0') {
+		$('#divWorkOrderNo').hide();
+	}
+}
+
+addImpDateRow();
+function addImpDateRow()
+{
+	$( ".ImpDate" ).unbind();
+	$( ".ImpDate" ).bind('keyup', function() {
+		if($(this).val().length>0 && $(this).closest("tr").index() == $("#ImpDateTable tbody tr:last").index()) {
+			var todc = $('#ImpDateCount').val();
+			var ntodc = (parseInt(todc) + parseInt(1)); 
+			$('#ImpDateCount').val(ntodc);
+			$('#ImpDateTable tbody').append('<tr>'+
+				'<th width="28%" class="bgstab"><input type="text" name="TypeOfDate_'+ntodc+'" id="TypeOfDate_'+ntodc+'" class="parent_text" /></th>'+
+				'<td><input type="text" readonly name="TDate_'+ntodc+'" id="TDate_'+ntodc+'" class="date_picker impdate parent_text" placeholder="dd-mm-yyyy" /></td>'+
+				'<th class="bgstab"><b class="sept">Address</b></th>'+
+                '<td><input type="text" maxlength="255" name="PlaceOfAddress_'+ntodc+'" id="PlaceOfAddress_'+ntodc+'" class="ImpDate parent_text"/></td>'+
+				'</tr>');
+			addImpDateRow();
+			bindDatePicker();
+            bindlocationAddress();
+		}
+	});
+}
+
+/*consultant autocomplete start*/
+var conArr= <?php echo json_encode($conResult); ?>;
+var conArrCopy = [];
+var conId = <?php echo json_encode($conId); ?>;
+
+bindAotoComplete();
+removeContr();
+function sliceJson(curVal)
+{
+	var consultant = [];
+	$("#consultantTable tbody tr").each(function(){
+		var val = $(this).find(".auto-complete").val().trim();
+		if(val != "")
+			consultant.push($(this).find(".auto-complete").val());
+	});
+	
+	conArrCopy = $.grep(conArr, function(element, index) {
+		if($.inArray(element.value, consultant) != -1 && element.value != curVal)
+			return false;
+		return true;
+	});
+}
+function removeContr()
+{
+	$(".removeCon").unbind();
+	$(".removeCon").bind("click", function(){
+		var table = $(this).closest("table");
+		if(table.find("tbody tr").length > 1) {
+			var rid = $(this).closest("tr").find("input:hidden").val();
+			$(this).closest("tr").remove();
+			if(rid != '')
+				conId.splice($.inArray(rid, conId),1);
+		}
+	});
+}
+function addConTr(invoker)
+{
+	var table = $("#consultantTable tbody");
+	if($(invoker).closest("tr").index() == table.find("tr:last").index()) {
+		table.append(table.find("tr:first").clone());
+		table.find("tr:last").each(function(){
+			//$(this).find("td:nth-child(2)").text('');
+			//$(this).find("td:nth-child(3)").text('');
+			$(this).find("select, textarea, input:text, input:hidden").each(function(){
+				if($(this).prop("tagName").toLowerCase() == 'input')
+					$(this).val("");
+
+				$(this).attr("name", $(this).attr("tagname"));
+				$(this).attr("id", $(this).attr("tagname"));
+			});
+		});
+		var todc = $('#ConsultantCount').val();
+		var ntodc = (parseInt(todc) + parseInt(1)); 
+		$('#ConsultantCount').val(ntodc);
+		removeContr();
+		bindAotoComplete();
+	}
+}
+function fillCon(json, invoker, mode)
+{
+	var tr = $(invoker).closest("tr");
+	if(mode == 1) {
+		if($.inArray(json.data, conId) == -1) {
+			conId.push(json.data);
+			tr.find("input:text, textarea, select, input:hidden").each(function(){
+				$(this).attr("name", $(this).attr("tagname")+'_'+json.data);
+				$(this).attr("id", $(this).attr("tagname")+'_'+json.data);
+			});
+		}
+		//tr.find("td:nth-child(2)").text(json.Code);
+		tr.find("input:hidden").val(json.data);
+		//tr.find("td:nth-child(3)").text(json.UnitName);
+	} else {
+		var hidVal = tr.find("input:hidden").val();
+		if(hidVal != '')
+			conId.splice($.inArray(hidVal, conId),1);
+		
+		/*tr.find("input:text, input:hidden").each(function(){
+			$(this).attr("name", $(this).attr("tagname"));
+			$(this).attr("id", $(this).attr("tagname"));
+		});*/
+		//tr.find("td:nth-child(2)").text('');
+		//tr.find("td:nth-child(3)").text('');
+		//tr.find("td:nth-child(4) input:text").val('');
+		tr.find("input:hidden").val('');
+	}
+}
+function bindAotoComplete()
+{
+	$('.auto-complete').unbind();
+	$('.auto-complete').autocomplete({
+		lookup: <?php echo json_encode($conResult); ?>,
+        showNoSuggestionNotice: false,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+		},
+		onSelect: function(suggestion){
+			if(suggestion) {
+				addConTr(this);
+				fillCon(suggestion, this, 1);
+				$(this).removeClass('error');
+			}
+		},
+		onSearchStart: function(suggestion) {
+
+		},
+		onSearchComplete: function (query, suggestion){
+			if(!suggestion.length) {
+				fillCon('', this, 2);
+				$(this).addClass('error');
+			} else {
+//				fillCon('', this, 2);
+				$(this).removeClass('error');
+			}
+		}
+	});
+	
+	$('.auto-complete').bind("focus", function(){
+		sliceJson($(this).val().trim());
+		$(this).autocomplete().setOptions({
+			lookup: conArrCopy
+		});
+	});
+	
+	$('.auto-complete').bind("blur", function(){
+		if($.inArray($(this).val(), conArr) == -1) {
+            fillCon('', this, 2);
+            //$(this).addClass("error");
+//                if ($('#' + this.id).val().length == 0) {
+//                    $(this).addClass("error");
+//                } else {
+//                    $(this).removeClass("error");
+//                }
+            }
+	});
+}
+/*consultant autocomplete end*/
+
+<?php if($enquiryResult['SourceType'] != '') { ?>
+changeSourceType(<?php echo $enquiryResult['SourceType']; ?>);
+<?php } ?>
+
+$("#submitData").click(function(){
+	$("#formWrapper").submit();
+});
+
+$('#ReqAnyCostForDoc').change(function(){
+	if($(this).is(':checked')) {
+		$('#racfdDiv').show();
+	} else {
+		$('#racfdDiv').hide();
+		$('#AnyCostForDocCost').val('');
+		$('#AnyCostForDocMOP').val('');
+		$('#AnyCostForDocIFO').val('');
+	}
+});
+$('#ReqMoneyDeposit').change(function(){
+	if($(this).is(':checked')) {
+		$('#remdDiv').show();
+	} else {
+		$('#remdDiv').hide();
+		$('#MoneyDepositCost').val('');
+		$('#MoneyDepositMOP').val('');
+		$('#MoneyDepositIFO').val('');
+		$('#MoneyDepositValidUpto').val('');
+	}
+});
+$('#ReqSecurityDeposit').change(function(){
+	if($(this).is(':checked')) {
+		$('#rsdDiv').show();
+	} else {
+		$('#rsdDiv').hide();
+		$('#SecurityDepositCost').val('');
+		$('#SecurityDepositMOP').val('');
+		$('#SecurityDepositIFO').val('');
+		$('#SecurityDepositValidUpto').val('');
+	}
+});
+$('#MobilisationAdvAvailable').change(function(){
+	if($(this).is(':checked')) {
+		$('#maaDiv').show();
+	} else {
+		$('#maaDiv').hide();
+		$('#MobilisationAdvValue').val('');
+		$('#MobilisationAdvRemarks').val('');
+	}
+});
+
+function bindDatePicker()
+{
+	$(".date_picker").datepicker({
+		format: 'dd-mm-yyyy',
+		//startDate: new Date(),
+	});
+}
+
+function tenderValidate()
+{
+	$('.error_message').hide();
+	if($.trim($('#RefDate').val()) == '') {
+		$('#RefDate').closest('.form-group').find(".error_message").show();
+        $('#RefDate').closest('.form-group').find(".error_message").html('<p>please enter reference date...</p>');
+		$('#RefDate').focus();
+		return false;
+	} else {
+        if (!compareDate($('#RefDate').val(), $('#Today').val())) {
+            $('#RefDate').closest('.form-group').find(".error_message").show();
+            $('#RefDate').closest('.form-group').find(".error_message").html('<p>reference date should not be greater than today...</p>');
+            $('#RefDate').focus();
+            return false;
+        }
+    }
+	if($.trim($('#RefNo').val()) == '') {
+		$('#RefNo').closest('.form-group').find(".error_message").show();
+		$('#RefNo').focus();
+		return false;
+	}
+	if($.trim($('#NameOfWork').val()) == '') {
+		$('#NameOfWork').closest('.form-group').find(".error_message").show();
+		$('#NameOfWork').focus();
+		return false;
+	}
+	if($.trim($('#SourceType').val()) == '0') {
+		$('#SourceType').closest('.form-group').find(".error_message").show();
+		$('#SourceType').focus();
+		return false;
+	} else {
+		if($.trim($('#SourceType').val()) == '1') {
+			if($.trim($('#NewsDate').val()) == '') {
+				$('#NewsDate').closest('.form-group').find(".error_message").show();
+				$('#NewsDate').focus();
+				return false;
+			}
+			if($.trim($('#NewsPageNo').val()) == '') {
+				$('#NewsPageNo').closest('.form-group').find(".error_message").show();
+				$('#NewsPageNo').focus();
+				return false;
+			}
+		} else if($.trim($('#SourceType').val()) != '1' && $.trim($('#SourceType').val()) != '2') {
+			if($.trim($('#ContactNo').val()) == '') {
+				$('#ContactNo').closest('.form-group').find(".error_message").show();
+				$('#ContactNo').focus();
+				return false;
+			}
+		}
+	}
+	if($.trim($('#SourceName').val()) == '') {
+		$('#SourceName').closest('.form-group').find(".error_message").show();
+		$('#SourceName').focus();
+		return false;
+	}
+	if($.trim($('#ClientName').val()) == '') {
+		$('#ClientName').closest('.form-group').find(".error_message").show();
+		$('#ClientName').focus();
+		return false;
+	}
+	if($.trim($('#CityId').val()) == '0') {
+		$('#CityId').closest('.form-group').find(".error_message").show();
+		$('#CityId').focus();
+		return false;
+	}
+	if($.trim($('#ProposalCost').val()) == '') {
+		$('#ProposalCost').closest('.form-group').find(".error_message").show();
+		$('#ProposalCost').focus();
+		return false;
+	}
+	if($.trim($('#ProjectDuration').val()) == '') {
+		$('#ProjectDuration').closest('.form-group').find(".error_message").show();
+		$('#ProjectDuration').focus();
+		return false;
+	}
+	return true;
+}
+
+function tenderValidate2()
+{
+	$('.error_message').hide();
+	if($.trim($('#ContactEmail').val()) != '' && validateEmail($('#ContactEmail').val())==false) {
+		$('#ContactEmail').closest('.form-group').find(".error_message").show();
+		$('#ContactEmail').focus();
+		return false;
+	}
+	return true;
+}
+
+function tenderValidate5()
+{
+    $('.error_message').hide();
+    $('.red_bdr').removeClass('red_bdr');
+    var tDate = $('#TenderDate').val();
+    var todc = $('#ImpDateCount').val();
+    for(i = 1; i <= todc; i++) {
+        if($.trim($('#TDate_'+i).val()) != '') {
+            if (!compareDate( tDate,$('#TDate_'+i).val())) {
+                $('#TDate_' + i).addClass('red_bdr');
+                $('#TDate_' + i).focus();
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function finalValidate()
+{
+	if(tenderValidate() == false) {
+		return false;
+	}
+	if(tenderValidate2() == false) {
+		return false;
+	}
+    if(tenderValidate5() == false) {
+        return false;
+    }
+
+    var $error = $('.error');
+    if($error.length != 0) {
+        alert('Kindly notice the error notifications!');
+        $error.parents('.collapse:not(.in)').siblings('.panel-heading').trigger('click');
+        return false;
+    }
+
+	return true;
+}
+
+<?php if (isset($tenderDetail)) { ?>
+changeExistingContract(<?php echo $tenderDetail['ExistingContract']; ?>);
+<?php } ?>
+<?php if (isset($tenderCostDetail)) { ?>
+	<?php if($tenderCostDetail['ReqAnyCostForDoc'] == '1') { ?>
+	$('#racfdDiv').show();
+	<?php } ?>
+	<?php if($tenderCostDetail['ReqMoneyDeposit'] == '1') { ?>
+	$('#remdDiv').show();
+	<?php } ?>
+	<?php if($tenderCostDetail['ReqSecurityDeposit'] == '1') { ?>
+	$('#rsdDiv').show();
+	<?php } ?>
+	<?php if($tenderCostDetail['MobilisationAdvAvailable'] == '1') { ?>
+	$('#maaDiv').show();
+	<?php } ?>
+<?php } ?>
+
+/*Mapping Address*/
+navigator.geolocation.getCurrentPosition(showPosition);
+$('#MClientAddress').geocomplete({
+	details: "#formWrapper",
+	types: ["geocode", "establishment"]
+});
+$('#ProjectAddress').geocomplete({
+    details: "#formWrapper",
+    types: ["geocode", "establishment"]
+});
+$('#OfficeAddress').geocomplete({
+    details: "#formWrapper",
+    types: ["geocode", "establishment"]
+});
+
+
+function showPosition(position) {
+	var coordinates = position.coords.latitude + "," + position.coords.longitude;
+	$('#MClientAddress').val(coordinates);
+	$('#MClientAddress').trigger("geocode");
+}
+function addNewTermRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr').length != 0)
+        return;
+
+    var $rowid = $('#termrowid'),
+        rowid = parseInt($rowid.val());
+    $('.deleteTermTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#dummy-term tbody').html();
+
+    template = template.replace(/__1/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+}
+function deleteTerm(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        $tbody = $tr.parent('tbody');
+
+    if ($tbody.find('> tr').length == 1) {
+        var template = $('#dummy-term tbody').html();
+        template = template.replace(/__1/g, '_' + 1);
+        $tbody.append(template);
+        $('#termrowid').val(1);
+    }
+
+    $tr.remove();
+    setPageChanges(true);
+    return false;
+}
+
+function selectAll() {
+    var cType = 'usel';
+    var selAll = $("input[name='select_all_chklst']:checked").val();
+    if(selAll == 1) {
+        cType = 'sel';
+    }
+    <?php foreach($checkListMaster as $cl) { ?>
+        selectList('<?php echo $cl['CheckListId']; ?>', cType);
+    <?php } ?>
+}
+
+function selectList(sId, cType) {
+    if(cType == 'sel') {
+        $('#list_chk_'+sId).hide();
+        $('#list_unchk_'+sId).show();
+    } else {
+        $("#chkList_"+sId).prop('checked',false);
+        $('#list_chk_'+sId).show();
+        $('#list_unchk_'+sId).hide();
+    }
+}
+
+function assignVals(sId, uId, tDate, cri, sta) {
+    $("#chkList_"+sId).prop('checked',true);
+    $('#userId_' + sId).val(uId).trigger('change');
+    $('#targetDate_' + sId).val(tDate).trigger('change');
+    if(cri == 1) {
+        $('#ycritical_' + sId).prop('checked', true);
+    } else {
+        $('#ncritical_' + sId).prop('checked', true);
+    }
+    if(sta == '') {
+        $('#statusHide_' + sId).hide();
+    }
+}
+
+function selectAllStep() {
+    var cType = 'usel';
+    var selAll = $("input[name='select_all_prostp']:checked").val();
+    if(selAll == 1) {
+        cType = 'sel';
+        $('input[id^=psStatus_]').attr('disabled',true);
+    }else {
+        $('input[id^=psStatus_]').attr('disabled',false);
+    }
+    <?php foreach($processMaster as $ps) { ?>
+        selectStep('<?php echo $ps['TenderProcessId']; ?>', cType);
+    <?php } ?>
+}
+
+function selectStep(sId, cType) {
+    if(cType == 'sel') {
+        $('#pro_stp_'+sId).hide();
+        $('#psStatus_'+sId).attr('disabled',true);
+        $('#proUnstp_'+sId).show();
+    } else {
+        $("#proStep_"+sId).prop('checked',false);
+        $('#pro_stp_'+sId).show();
+        $('#proUnstp_'+sId).hide();
+        $('#psStatus_'+sId).attr('disabled',false);
+    }
+}
+
+
+function assignStepVals(sId, uId, tDate, cri, soId, sta) {
+    $("#proStep_"+sId).prop('checked',true);
+    $('#psUserId_' + sId).val(uId).trigger('change');
+    $('#psTargetDate_' + sId).val(tDate).trigger('change');
+    $('#sortId_' + sId).val(soId).trigger('change');
+    /*if(cri == 1) {
+        $('#psyCritical_' + sId).prop('checked', true);
+    } else {
+        $('#psnCritical_' + sId).prop('checked', true);
+    }*/
+    if(sta == 1) {
+        $('#psStatus_' + sId).prop('checked', true);
+        $('#doneHide_' + sId).hide();
+    }
+}
+
+$(".clickStatus").on('click', function(e){
+    var dhid = $(this)[0].id;
+    var dhrow = dhid.split("_")[1];
+
+    if ($(this).is(':checked') == true) {
+        $('#doneHide_'+ dhrow).hide();
+    } else {
+        $('#doneHide_'+ dhrow).show();
+    }
+});
+
+//process steps sorting
+var $psBody = $('table[id*=processTable] tbody.sorting');
+
+$psBody.sortable({
+    helper: fixHelperModified,
+    stop: updateIndex,
+    axis: 'y',
+    distance: 40,
+    update: function( event, ui ) {
+        var ifrow = event.target.children[0].id.split("_")[1];
+        sortOrder();
+    }
+});
+
+function sortOrder()
+{
+    var rows = $('tr[id*=proUnstp_]');
+    var irefid = 1;
+    $.each(rows, function() {
+        var id = $(this)[0].id;
+        var irow = id.split("_")[1];
+        $('#sortId_'+ irow).val(irefid);
+        irefid = + irefid+1;
+    });
+}
+
+var fixHelperModified = function(e, tr) {
+    var $originals = tr.children();
+    var $helper = tr.clone();
+    $helper.children().each(function(index) {
+        $(this).width($originals.eq(index).width())
+    });
+    return $helper;
+},
+updateIndex = function(e, ui) {
+    $('td.index', ui.item.parent()).each(function (i) {
+        $(this).html(i + 1);
+    });
+};
+
+var $AddCheckListModal = $('#AddCheckListModal'),
+    $ChecklistName = $('#ChecklistName');
+
+function addCheckListFn() {
+    var ChecklistName = $ChecklistName.val();
+
+    validate(function(isSuccess) {
+        if(isSuccess === false) {
+            return false;
+        } else {
+            $AddCheckListModal.modal('hide');
+            $.ajax({
+                url: getBaseURL() + 'project/tender/addchecklistmaster',
+                type: 'POST',
+                data: $('#addCheckListForm').serialize(),
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200){
+                        //location.href = location.href;
+                        var chkListVal = JSON.parse(data);
+                        var chkListId = chkListVal.Id;
+                        var chkListName = chkListVal.Name;
+
+                        var chkListUpd = '';
+                        var chkListSlUpd = '';
+
+                        chkListUpd += '<li class="tile ui-sortable-handle" id="list_chk_'+chkListId+'">';
+                        chkListUpd += '<div class="checkbox checkbox-styled tile-text vendor_checkboxborder_gray">';
+                        chkListUpd += '<label>';
+                        chkListUpd += '<input type="checkbox" name="chkList_'+chkListId+'" id="chkList_'+chkListId+'" value="'+chkListId+'" onclick="return selectList(\''+chkListId+'\', \'sel\')" />';
+                        chkListUpd += '<span>'+chkListName+'</span>';
+                        chkListUpd += '</label>';
+                        chkListUpd += '</div>';
+                        chkListUpd += '</li>';
+
+                        chkListSlUpd += '<tr id="list_unchk_'+chkListId+'" style="display:none;">';
+                        chkListSlUpd += '<td width="15%">';
+                        chkListSlUpd += '<input type="hidden" name="chkListId_'+chkListId+'" id="chkListId_'+chkListId+'" value="'+chkListId+'" />';
+                        chkListSlUpd += '<input class="parent_text" type="text" name="chkListName_'+chkListId+'" id="chkListName_'+chkListId+'" value="'+chkListName+'" />';
+                        chkListSlUpd += '</td>';
+                        chkListSlUpd += '<td width="5%">';
+                        chkListSlUpd += '<div class="select-style">';
+                        chkListSlUpd += '<select name="userId_'+chkListId+'" id="userId_'+chkListId+'">';
+                                            <?php foreach($users as $usr) { ?>
+                                            chkListSlUpd += '<option value="<?php echo $usr['UserId']; ?>"><?php echo $usr['UserName']; ?></option>';
+                                            <?php } ?>
+                        chkListSlUpd += '</select>';
+                        chkListSlUpd += '</div>';
+                        chkListSlUpd += '</td>';
+                        chkListSlUpd += '<td width="4%"><input class="parent_text date_picker" type="text" name="targetDate_'+chkListId+'" id="targetDate_'+chkListId+'" /></td>';
+                        chkListSlUpd += '<td width="15%">';
+                        chkListSlUpd += '<div class="switch">';
+                        chkListSlUpd += '<input type="radio" class="switch-input" name="critical_'+chkListId+'" id="ycritical_'+chkListId+'" value="1" checked />';
+                        chkListSlUpd += '<label for="ycritical_'+chkListId+'" class="switch-label switch-label-off">Yes</label>';
+                        chkListSlUpd += '<input type="radio" class="switch-input" name="critical_'+chkListId+'" id="ncritical_'+chkListId+'" value="0" />';
+                        chkListSlUpd += '<label for="ncritical_'+chkListId+'" class="switch-label switch-label-on">No</label>';
+                        chkListSlUpd += '<span class="switch-selection"></span>';
+                        chkListSlUpd += '</div>';
+                        chkListSlUpd += '</td>';
+                        chkListSlUpd += '<td width="3%" align="center">';
+                        chkListSlUpd += '<ul class="action_btns" id="statusHide_'+chkListId+'">';
+                        chkListSlUpd += '<li><a class="mainTr_1" href="javascript:void(0);" onclick="return selectList(\''+chkListId+'\', \'usel\');"><i class="fa fa-times-circle" data-original-title="Close" data-placement="top" data-toggle="tooltip" aria-hidden="true"></i></a></li>';
+                        chkListSlUpd += '</ul>';
+                        chkListSlUpd += '</td>';
+                        chkListSlUpd += '</tr>';
+
+                        $('#ulChkList').append(chkListUpd);
+                        $('#ulChkListSl').append(chkListSlUpd);
+                    } else {
+                        alert('Failed to Add Checklist!');
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to Add Checklist!');
+                }
+            });
+        }
+    });
+
+    function validate(callback) {
+        if(ChecklistName.length == 0) {
+            showError($ChecklistName, 'Required!');
+            return;
+        } else {
+            removeError($ChecklistName);
+        }
+
+        //validate Checklist name already found
+        $.ajax({
+            url:getBaseURL()+ 'project/landbank/findchecklist',
+            type:"post",
+            data: $('#addCheckListForm').serialize(),
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200){
+                    showError($ChecklistName, 'Checklist Name already found!');
+                    callback(false);
+                    return false;
+                } else{
+                    removeError($ChecklistName);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+
+function addEnclosureListFn() {
+    validate(function (isSuccess) {
+        if (isSuccess === false) {
+            return false;
+        } else {
+            $('#AddenclosureModal').modal('hide');
+            $.ajax({
+                url: getBaseURL() + 'project/tender/addenclosuremaster',
+                type: 'POST',
+                data: $('#addEnclosureForm').serialize(),
+                success: function (data, textStatus, jqXHR) {
+                    if (jqXHR.status == 200) {
+                        var chkListVal = JSON.parse(data);
+                        var chkListId = chkListVal.Id;
+                        var chkListName = chkListVal.Name;
+
+                        var chkListUpd = '';
+
+                        chkListUpd += '<li class="tile ui-sortable-handle" id="liencl_' +  chkListId +'">';
+                        chkListUpd += '<div class="radio_check col-md-1" style="padding:0 !important"><p style="padding-top:10px;">';
+                        chkListUpd += '<input name="selectenc_' + chkListId + '" id="selectenc_' + chkListId + '" value="select" type="checkbox">';
+                        chkListUpd += '<label for="gentypem" onclick="checkEnclChecked(' + chkListId + ')" ></label></p></div>';
+                        chkListUpd += '<div class="col-md-11"style="padding:0 !important"><input type="text" class="parent_text"  name="nameenc_' + chkListId +'" id="nameenc_'+ chkListId + '" value="' + chkListName + '" readonly/></div>';
+                        chkListUpd += '<input type="hidden" id="checkenc_' + chkListId + '" name="checkenc_' + chkListId + '" value="0"/>';
+                        chkListUpd += '<input type="hidden" id="submitenc_' + chkListId + '" name="submitenc_' + chkListId + '" value="0"/></li>';
+                        $('#ulEncList').append(chkListUpd);
+                    } else {
+                        alert('Failed to Add Checklist!');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Failed to Add Checklist!');
+                }
+            });
+        }
+    });
+
+    function validate(callback) {
+        if($('#enclosureName').val().length == 0) {
+            showError($('#enclosureName'), 'Required!');
+            return;
+        } else {
+            removeError($('#enclosureName'));
+        }
+
+        //validate Checklist name already found
+        $.ajax({
+            url:getBaseURL()+ 'project/tender/findenclosure',
+            type:"post",
+            data: $('#addEnclosureForm').serialize(),
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200){
+                    showError($('#enclosureName'), 'Enclosure Name already found!');
+                    callback(false);
+                    return false;
+                } else{
+                    removeError($('#enclosureName'));
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+function bindlocationAddress( ) {
+    var reskeyid = $('input[id*=PlaceOfAddress_]');
+    $.each(reskeyid, function (i, obj) {
+        var key =this.id.split('_')[1];
+        $('#PlaceOfAddress_' + key).geocomplete({
+            details: "#formWrapper",
+            types: ["geocode", "establishment"]
+        });
+    });
+}
+function checkEnclChecked(id) {
+    var iSubmit = parseInt(isNullCheck( $('#submitenc_' + id).val(),'number'));
+    if (iSubmit ==1) return;
+    if ($('#selectenc_'+ id).is(':checked')) {
+        $('#selectenc_'+ id).prop("checked", false);
+        $('#checkenc_' + id).val(0);
+    } else {
+        $('#selectenc_'+ id).prop("checked", true);
+        $('#checkenc_' + id).val(1);
+    }
+}
+nextAccordian(1);
+
+<?php
+if(isset($chkListTrans)) {
+    foreach($chkListTrans as $cltrans) {
+    $tarDate = '';
+    if($cltrans['TargetDate'] != '') {
+        $tarDate = date('d-m-Y', strtotime($cltrans['TargetDate']));
+    }
+?>
+selectList('<?php echo $cltrans['CheckListId']; ?>', 'sel');
+assignVals('<?php echo $cltrans['CheckListId']; ?>', '<?php echo $cltrans['UserId']; ?>', '<?php echo $tarDate; ?>', '<?php echo $cltrans['Critical']; ?>', '<?php echo $cltrans['Status']; ?>');
+<?php }
+} ?>
+
+<?php
+if(isset($proStepTrans)) {
+foreach($proStepTrans as $pstrans) {
+$pstarDate = '';
+if($pstrans['TargetDate'] != '') {
+    $pstarDate = date('d-m-Y', strtotime($pstrans['TargetDate']));
+}
+?>
+selectStep('<?php echo $pstrans['TenderProcessId']; ?>', 'sel');
+assignStepVals('<?php echo $pstrans['TenderProcessId']; ?>', '<?php echo $pstrans['UserId']; ?>', '<?php echo $pstarDate; ?>', '<?php echo $pstrans['Critical']; ?>', '<?php echo $pstrans['SortId']; ?>', '<?php echo $pstrans['Flag']; ?>');
+<?php }
+} ?>
+</script>

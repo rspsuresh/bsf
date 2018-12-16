@@ -1,0 +1,270 @@
+<style>
+    .rfc_met {
+        margin-top:20px;
+        margin-bottom:10px;
+    }
+    .rfc_met ul li input[type="text"] {
+        width:130px !important;
+    }
+    .jqx-grid-content {
+        z-index:11!important;
+    }
+    .table-fixed thead {
+        width: 100%;
+    }
+    .table-fixed tbody {
+        height: 400px;
+        overflow-y: auto;
+        width: 100%;
+    }
+    .table-fixed thead,.table-fixed tfoot, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+        display: block;
+    }
+    .table-fixed tbody td,.table-fixed tfoot td, .table-fixed thead > tr> th {
+        float: left;
+        border-bottom-width: 0;
+    }
+    .parent_text,.parent_texts { font-size: 13px !important; }
+</style>
+<div class="content_wrapper padlr0">
+<form class='form-horizontal'>
+    <div id="edit-content">
+        <div class="table-responsive">
+            <table class="table table-fixed form-group" id="wbsTable">
+                <thead>
+                <tr>
+                    <th class="col-xs-1">SNo</th>
+                    <th class="col-xs-4">Description</th>
+                    <th class="col-xs-2">Unit</th>
+                    <th class="col-xs-1">Qty</th>
+                    <th class="col-xs-2">Rate</th>
+                    <th class="col-xs-2">Amount</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php  $i=1; $dTAmt=0; foreach($iowtrans as $trans) {
+                    $dAmt = $trans['Qty']*$trans['Rate']; $dTAmt = $dTAmt +$dAmt; ?>
+                    <tr class="col-xs-12" style="padding:0 !important">
+                        <td class="col-xs-1"><input type="text" class="parent_text" value="<?php echo $trans['RefSerialNo'];?>" readonly></td>
+                        <td class="col-xs-4"><textarea class="parent_texts" readonly><?php echo $trans['Specification'];?></textarea></td>
+                        <td class="col-xs-1"><input class="parent_text" type="text" value="<?php echo $trans['UnitName'];?>" readonly/></td>
+                        <td class="col-xs-2"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['Qty'],3);?>" readonly/></td>
+                        <td class="col-xs-2"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'],2,true);?>" readonly/></td>
+                        <td class="col-xs-2"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($dAmt,2,true);?>" readonly/></td>
+                        <td class="action_btns_td" style="display:none;" width="5%"><ul class="action_btns">
+                                <li> <a href="#" class="mainTr_<?php echo $i; ?>"> <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span> </a> </li>
+                            </ul></td-->
+                    <tr style="display:none;" class="subTr_<?php echo $i; ?> paintTr">
+                        <td colspan="4"><div class="subDiv">
+                                <div id='measurementsheet_<?php echo $i; ?>' class='tab-pane fade in active'>
+                                    
+                                    <div class="col-lg-12 HandsonWrapper">
+                                        <div class="md-popup">
+                                            <h1>Measurement Sheet</h1>
+                                            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                                                <div class="tabs-content" style="margin-top:20px;">
+                                                    <div id="HandsonTableWrapper_<?php echo $i; ?>" class="hot handsontable"></div>
+                                                    <input type="hidden" id="Measurement_<?php echo $i; ?>" value="<?php echo htmlentities( isset($details['Measurement']) ? $details['Measurement'] : '');?>"/>
+                                                    <input type="hidden" id="CellName_<?php echo $i; ?>" value="<?php echo isset($details['CellName']) ? $details['CellName'] : '';?>"/>
+                                                    <input type="hidden" id="SelectedColumns_<?php echo $i; ?>" value="<?php echo isset($details['SelectedColumns']) ? $details['SelectedColumns'] : '';?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                                                <div class="btn-group toal-disgr" data-toggle="buttons" id="summationColumnsWrapper_<?php echo $i; ?>"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div></td>
+                    </tr>
+                    </tr>
+                    <?php $i=$i+1;  } ?>
+                </tbody>
+				<tfoot>
+                <tr style="border-bottom:none;">
+                    <td width="10%">&nbsp;</td>
+					 <td width="38%">&nbsp;</td>
+					  <td width="12%">&nbsp;</td>
+					   <td width="11%">&nbsp;</td>
+                    <td width="10%" class="rate_pri text-right"><label>Total </label></td>
+                    <td width="17%"><input type="text" class="parent_text total-clr text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($dTAmt,2,true);?>" readonly/>&nbsp;</td>
+					 <td width="2%">&nbsp;</td>
+                </tr>
+				</tfoot>
+            </table>
+            <input type="hidden" name="rowid" id="rowid" value="0">
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript">
+    var $summationColumnsWrapper = $('#summationColumnsWrapper_1');
+    var $measurement = $('#Measurement_1');
+    var $CellName = $('#CellName_1');
+    var $SelectedColumns = $('#SelectedColumns_1');
+    <!--Handson Script-->
+    var handsonTableData =  [[]],
+        handsonTable = null,
+        $HandsonTableWrapper = document.getElementById('HandsonTableWrapper_1'),
+        HandsonTableSettings = {
+            colHeaders:true,
+            rowHeaders: true,
+            contextMenu: true,
+            minRows: 15,
+            minCols: 10,
+            minSpareRows: 1,
+            stretchH: 'all',
+            formulas: true,
+            manualColumnResize: true,
+            fixedRowsTop: 1,
+            fixedRowsBottom: 1,
+            manualRowResize: true,
+            fillHandle: true,
+            data: handsonTableData,
+            afterRender: function() {
+                summationColumns();
+            },
+            cells: function (row, col, prop) {
+                var cellProperties = {};
+                cellProperties.readOnly=true;
+                if (row === 0) {
+                    cellProperties.renderer = firstRowRenderer;
+                }
+                return cellProperties;
+            }
+        };
+
+    function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
+        td.style.fontWeight = 'bold';
+    }
+
+    var summationColumn = '',
+        selColumns = [],
+        tempSelectedCol = [];
+
+    $(function () {
+        handsonTable = new Handsontable($HandsonTableWrapper, HandsonTableSettings);
+
+        var measurement = $.trim($measurement.val());
+        if(measurement == '')
+            handsonTableData = [[]];
+        else
+            handsonTableData = $.parseJSON(measurement);
+
+        summationColumn = $.trim($CellName.val());
+        selColumns = ($.trim($SelectedColumns.val())).split(',');
+        tempSelectedCol = [];
+        expandTrFn();
+        renderHandsonTable();
+    });
+
+    function renderHandsonTable() {
+        if(typeof handsonTableData != 'object')
+            handsonTableData  = [[]];
+
+        handsonTable.loadData(handsonTableData);
+        handsonTable.render();
+
+        summationColumns();
+    }
+
+    function expandTrFn(reset) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+        $mainTRs.click(function(e){
+            e.preventDefault();
+            var name = $(this)[0].className,
+                key = name.split('_')[1];
+
+            if (validateRow(name) == false) return false;
+            var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                $i = $(this).find("i");
+            if(!$subTr.is(":visible")){
+                $subTr.show();
+                $subTr.find(".subDiv").slideDown("slow");
+                $i.removeClass("fa-chevron-circle-down");
+                $i.addClass("fa-chevron-circle-up");
+                // $('rateanal_'+ key +'_restable').show();
+                // iFocusRowId = key;
+                closedetails(key);
+            } else {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("fa-chevron-circle-up");
+                $i.addClass("fa-chevron-circle-down");
+            }
+            return false;
+        });
+    }
+
+    function closedetails(key) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this),
+                $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+            if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+            if($mainTr.length != 0) $mainTr.trigger('click');
+        });
+    }
+
+    function summationColumns(calcOnly) {
+        if(handsonTable == null)
+            return;
+
+        var rowCount = handsonTable.countRows();
+        var arr_columns = [];
+        if(typeof calcOnly == 'undefined') {
+            $.each(handsonTable.getDataAtRow (0), function (i, obj) {
+                var value = $.trim(obj),
+                    sel = '';
+                if (value.length == 0 || value == "" || value.indexOf('=') != -1)
+                    return;
+
+                var colName = handsonTable.getColHeader(i);
+                if($.inArray(colName, tempSelectedCol) != -1 || $.inArray(colName, selColumns) != -1)
+                    arr_columns.push({'col': colName, 'value':  value});
+            });
+        }
+
+        // calculate columns
+        if(arr_columns.length == 0) {
+            $summationColumnsWrapper.html('');
+            return;
+        }
+
+        // selected summation columns
+        tempSelectedCol = [];
+        var totalLabels = '';
+        $.each(arr_columns, function(i, obj) {
+            var col = obj.col,
+                columnData = handsonTable.plugin.helper.cellRangeValue(col+'1',col+ rowCount),
+                total = 0;
+
+            // push to temp sel col
+            tempSelectedCol.push(col);
+
+            // selected columns datas
+            $.each(columnData[0], function(j, val) {
+                if(/^[0-9\.]+$/.test(val) == false)
+                    return;
+
+                total += parseFloatVal(val);
+            });
+
+            if(total == '')
+                total = 0;
+
+            if(col == summationColumn) {
+                totalLabels += '<label class="btn btn-primary tot-dis active el_checked">'
+                + '<label>'+ obj.value +' </label><p>'+total+'</p>'
+                + '</label>';
+            } else {
+                totalLabels += '<label class="btn btn-primary tot-dis">'
+                + '<label>'+ obj.value +' </label><p>'+total+'</p>'
+                + '</label>';
+            }
+        });
+        $summationColumnsWrapper.html(totalLabels);
+    }
+</script>

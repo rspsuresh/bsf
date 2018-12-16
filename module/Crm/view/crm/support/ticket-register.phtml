@@ -1,0 +1,143 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+			<h1 class="float_l">Ticket Register<?php if(isset($status)) { ?> on <?php } ?>
+				<div class="btn-group proname_btn">
+					<a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php if(isset($status)) { echo ucfirst($projectDetail['Status']);  } ?><span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;Tickets"><i class="fa fa-caret-down"></i></span></a>
+					<div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+						<ul>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo 'Open'; ?>">Open</a></li>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo 'Pending'; ?>">Pending</a></li>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo 'Resolved'; ?>">Resolved</a></li>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo 'Closed'; ?>">Closed</a></li>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo 'Waiting for Customer'; ?>">Waiting for Customer</a></li>
+                           <li><a href="<?php echo $this->basePath(); ?>/crm/Support/<?php echo $this->currentRequest()->get('action'); ?>">All</a></li>
+						</ul>
+					</div>
+				</div>
+			</h1>
+			</h1>
+            <div class="edit_del commargin_top float_r">
+                <ul>
+                    <li> <a title="Edit" href="<?php echo $this->basePath(); ?>/crm/Support/ticket-entry" class="edit_al edit_al_nobg" href="javascript:void(0)"><i class="fa fa-plus"></i> New Ticket</a> </li>
+                </ul>
+            </div>
+           <div style="clear:both;"></div>
+		</div>
+		<?php $i=1;
+		foreach($ticket as $ticket){?>
+        <div class="col-lg-12 clear">
+            <div class="col-lg-12 clear bids_list forumticket_list brad_3 padlr0">
+                <div class="col-lg-8 padlr0">
+                    <div class="col-lg-9"  id="<?php echo $i; ?>" onclick = "return editticket('<?php echo $i;?>');">
+                    	<div class="bids_proimg brad_200 m_top10">
+                           <?php
+								if(count($ticket)>0  && $ticket['Photo'] != '') { 
+								$resultsMainPhoto = $ticket['Photo'];
+								?>
+									<img src="<?php echo $this->basePath(); ?>/<?php echo $resultsMainPhoto;?>" class="brad_200" alt="" title=""width="150" height="125"/>
+								<?php } 
+								else { ?>
+									<img src="<?php echo $this->basePath(); ?>/images/avatar.jpg" class="brad_200" alt="" title="" width="100" height="100"/>
+								<?php } ?>
+                        </div>
+                        <h1 style="font-size:18px;"><?php echo $ticket['Subject'];?></h1><input type="hidden" name="ticketId" id="ticketId_<?php echo $i;?>" value="<?php echo $ticket['TicketId'];?>" />
+                        <p id="req_<?php echo $i; ?>"><span>From : </span><span> <?php echo $ticket['Requester'];?></span> &nbsp; <span><i class="fa fa-clock-o"></i> </span> <span> Created : <?php echo date('d-m-Y', strtotime($ticket['CreatedDate']));?>, Due in 
+						<?php 
+						$datec =date('d-m-Y', strtotime($ticket['CreatedDate']));
+						$currdate=date('d-m-Y');
+						//Priority Low
+						if( $ticket['Priority']=='Low'){
+						if($currdate-$datec==1){echo '3 days';}
+						else if($currdate-$datec==2){echo '2 days';}
+						else if($currdate-$datec==3){echo 'Today';}
+						else if($currdate==$datec){echo '4 days';}
+						else if($currdate-$datec >= 4) { echo '0 days';}}
+						//priority Medium//
+						else if( $ticket['Priority']=='Medium'){
+						if($currdate-$datec==1){
+						echo '2 days';	
+						}else if($currdate-$datec==2){
+						echo 'Today';	}
+						else if($currdate==$datec){echo '3 days';}
+						else if($currdate-$datec >=3) { echo '0 days';}}
+						//Priority High//
+						else if( $ticket['Priority']=='High'){
+							if($currdate-$datec >= 1)
+						{echo '0 days' ;}else if($currdate==$datec){echo 'Today';}	
+						}	
+						//Priority Urgent//
+						else if( $ticket['Priority']=='Urgent'){
+						echo '0 days';	
+						}
+						?> </span></p>
+                    </div>
+                    <div class="col-lg-3">
+                    	<div class="col-lg-12 padlr0">
+                            <div class="entry-categories">
+                            	<p id="new_<?php echo $i; ?>">New</p>
+                            </div>
+                            <div class="forumtckt_social">
+                            	<p class="txt_center"><span><i class="fa fa-facebook-square"></i></span></p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 bidvendor_detail forumticket_detail">
+                    <p>
+                    	<span class="p_label">Executive <span class="colon_r">:</span></span> 
+                        <select class="single_dropdown" name="executiveId" id="ExecutiveId_<?php echo $i; ?>" style="width:70%;" onchange= "return exechange('<?php echo $i;?>');">
+                           <option value="">Choose Executive Name</option>
+								<?php
+									foreach($resultsExecutive as $type){
+										if(count($ticket)>0){
+											echo "<option ".($ticket['ExecutiveId']==$type['UserId']? 'selected':'')." value='".$type['UserId']."' >".$type['UserName']."</option>";
+										}
+										else{
+											echo "<option value='".$type['UserId']."' >".$type['UserName']."</option>";
+										}
+									} 
+								?>
+                        </select>
+                    </p>
+                    <p id="Stat_<?php echo $i; ?>"><span class="p_label">Status <span class="colon_r">:</span></span> <?php echo $ticket['Status']; ?></p>
+                    <p id="Prior_<?php echo $i; ?>"><span class="p_label">Priority <span class="colon_r">:</span></span><?php echo $ticket['Priority'];?> </p>
+                </div>
+            </div>
+          </div> <?php $i++; }?>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true,
+	});
+});
+function exechange(i){
+	var exeval = $('#ExecutiveId_'+i).val();
+	var tickId = $('#ticketId_'+i).val();
+	$.ajax({
+		url: getBaseURL() + 'crm/Support/ticket-register',
+		type: 'POST',
+		data: "executiveId="+exeval+"&ticketId="+tickId,
+		success:function(data, textStatus, jqXHR){
+			
+			},
+		error:function(jqXHR, textStatus, errorThrown){
+			if (jqXHR.status == 403)
+				alert(jqXHR.responseText);
+			else
+				alert(textStatus+"-----"+errorThrown);
+		}
+	});	
+}
+function editticket(i){
+	var tickId = $('#ticketId_'+i).val();
+	$(location).attr('href',"<?php echo $this->basePath(); ?>/crm/Support/ticket-entry/"+tickId);
+}
+</script>

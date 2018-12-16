@@ -1,0 +1,390 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+.sin-none{ padding-bottom:10px; float:left;}
+
+</style>
+<form id="formWrapper" method="post" enctype="multipart/form-data">
+  <div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+      <div class="col-lg-12">
+        <h1 class="float_l">Qualifier Setting</h1>
+      </div>
+      <div class="col-lg-12 fmg_topcnt clear" style="margin-bottom:10px; border-bottom:none;">
+        <div class="col-lg-4 form-group">
+          <select class="form-control single_dropdown lbl_move" label="Qualifier Type" style="width:100%;" name="qualType" id="qualType" onchange="return PopulateQualifier(this.value);" >
+            <option></option>
+            <option value="M">Supply</option>
+            <option value="W">Works</option>
+            <option value="S">Service</option>
+            <option value="C">Sale</option>
+            <option value="P">Project</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-lg-12 clear">
+        <div class="table-responsive animated fadeInUp">
+          <table class="table tbltop_bdr0" id="tabillformat" style="display: none" >
+            <thead>
+              <tr>
+                <th>&nbsp;</th>
+                <th>Ref No</th>
+                <th>Qualifer Name</th>
+                <th class="text-right">Expression</th>
+                <th class="text-right">Percentage</th>
+                <th>&nbsp; </th>
+              </tr>
+            </thead>
+            <tbody class="sorting">
+              <tr id="rowId_1">
+                <input type="hidden" name="qualTranId_1" id="qualTranId_1" value="" />
+                <td width="2%"><label>
+                  <input type="checkbox" class="ios_checkbox" name="incl_1" id="incl_1" checked>
+                  <div class="ios_switch"><span></span></div>
+                  </label></td>
+                <td width="3%"><label for ="refNo_1" ></label></td>
+                <td width="10%"><input class="parent_text" type="text" name="qualName_1" id="qualName_1" onfocus="return checkQualFocus(this.id)" ></td>
+                <input type="hidden" name="qualifierId_1" id="qualifierId_1" value="" />
+                <td width="9%"><input class="parent_text text-right" type="text" name="exp_1" id="exp_1" onkeypress="return isFormula(event);"></td>
+                <td width="2%"><input class="parent_text text-right" type="text" name="expper_1" id="expper_1" onkeypress="return isDecimal(event,this)" ></td>
+                <td width="2%" align="center" class="action_btns_td" style="position:relative;"><a href="#" class="plus-plus" title="Unlock this document" id = "qualsign_1" onclick="signChange(this)" ></a></td>
+                <input type="hidden" name="sign_1" id="sign_1" value="" />
+                <input type="hidden" name="sortId_1" id="sortId_1" value="" />
+                <input type="hidden" name="delflag_1" id="delflag_1" value="N"/>
+                  </td>
+              </tr>
+            </tbody>
+          </table>
+          <input type="hidden" name="qualrowid" id="qualrowid" value="1"/>
+        </div>
+      </div>
+      <!--button--> 
+    </div>
+  </div>
+  <div class="col-lg-12 savebtn_area clear">
+    <ul>
+      <li class="cb-cancel sin-none"><a href="<?php echo $this->basePath(); ?>/project/qualifier/qualifiermaster"><i class="fa fa-times-circle-o can-l"></i> Cancel</a></li>
+      <li class="dropdown save_btn float_r" id="submitform"  style="display: none" ><a onclick="submitForm(); return false;" data-toggle="tooltip" class="ripple" title="Save">Submit</a></li>
+    </ul>
+  </div>
+
+  <table id="dummy-qualifier" style="display: none;">
+    <tbody>
+      <tr id="rowId__1">
+        <input type="hidden" name="qualTranId__1" id="qualTranId__1" value="" />
+        <td width="2%"><label>
+          <input type="checkbox" class="ios_checkbox" name="incl__1" id="incl__1" checked>
+          <div class="ios_switch"><span></span></div>
+          </label></td>
+        <td width="3%"><label for ="refNo__1" ></label></td>
+        <td width="10%"><input class="parent_text" type="text" name="qualName__1" id="qualName__1" onfocus="return checkQualFocus(this.id)" ></td>
+        <input type="hidden" name="qualifierId__1" id="qualifierId__1" value="" />
+        <td width="9%"><input class="parent_text text-right" type="text" name="exp__1" id="exp__1" onkeypress="return isFormula(event);"></td>
+        <td width="2%"><input class="parent_text text-right" type="text" name="expper__1" id="expper__1" onkeypress="return isDecimal(event,this)" ></td>
+        <td width="2%" align="center" class="action_btns_td" style="position:relative;"><a href="#" class="plus-plus" title="Unlock this document" id = "qualsign__1" onclick="signChange(this)" ></a></td>
+        <input type="hidden" name="sign__1" id="sign__1" value="" />
+        <input type="hidden" name="sortId__1" id="sortId__1" value="" />
+        <input type="hidden" name="delflag__1" id="delflag__1" value="N"/>
+          </td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+<script>
+  var quallist = <?php echo (isset($qualifierlist)) ? json_encode($qualifierlist) : '[]';?>;
+  var qualListR = quallist;
+  $(document).ready(function() {
+	  $(".single_dropdown").select2({
+		  placeholder: "",
+		  allowClear: true
+	  });
+	  bindQualAutoComplete();
+	  bindMixSortablefn();
+	  $('form').on('submit', function() {
+		  if (!navigator.onLine) {
+			  alert("Connection temporarily OffLine, Do not Submit");
+			  return false;
+		  }
+	  });
+
+  });
+  function isFormula(evt){
+	  var charCode = (evt.which) ? evt.which : evt.keyCode;
+	  if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !=43 && charCode!=45 && charCode!=47 && charCode!=42 && charCode!=46 && charCode!=40 && charCode!=41 && charCode!=82 && charCode!=37 && charCode!=39 && charCode!=35 && charCode!=36) return false;
+	  return true;
+  }
+
+  function bindQualAutoComplete() {
+	  var $typename = $('input[id^=qualName_]');
+	  $.each($typename, function () {
+		  var $this = $(this),
+			  name = $this[0].id;
+		  if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+
+		  $this.unbind('autocomplete');
+		  var arrname = name.split('_');
+		  var key1 = arrname[1];
+		  checkQualUsed(key1);
+		  $this.autocomplete({
+			  lookup: qualListR,
+			  lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+				  if (queryLowerCase == '*') {
+					  return suggestion.value;
+				  } else {
+					  var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+					  return re.test(suggestion.value);
+				  }
+			  }, onSelect: function(suggestion) {
+				  if(suggestion) {
+					  var $el = $("#qualifierId_" + key1);
+					  $el.val(suggestion.data);
+					  $("label[for='refNo_" + key1 + "']").html(suggestion.refNo);
+					  removeError($(this));
+					  addNewQualRow($(this));
+				  }
+			  }, onSearchStart: function(suggestion) {
+				  $("#qualifierId_" + key1).val(0);
+			  }, onSearchComplete: function (query, suggestions) {
+				  if(!suggestions.length  && query.length > 1){
+					  showError($(this), 'Required');
+					  $("#qualifierId_" + key1).val(0);
+				  } else
+					  removeError($(this));
+			  }
+		  });
+	  });
+  }
+  function submitForm() {
+	  var $formWrapper = $('#formWrapper');
+	  $('.loading_area').show();
+	  $formWrapper.submit();
+  }
+
+  function addNewQualRow(x) {
+	  var $x = $(x),
+		  $tr = $x.closest('tr'),
+		  key = $x[0].id.split('_')[1];
+
+	  if ($tr.next('tr').length != 0)
+		  return;
+
+	  if (isNullCheck($('#qualifierId_' + key).val(),'number') == 0)
+		  return;
+
+	  var $rowid = $('#qualrowid'),
+		  rowid = parseInt($rowid.val());
+	  var count = rowid + 1,
+		  template = $('#dummy-qualifier tbody').html();
+	  template = template.replace(/__1/g, '_' + count);
+	  $tr.parent('tbody:not(.total)').append(template);
+	  $rowid.val(count);
+	  checkQualUsed(count);
+	  bindQualAutoComplete();
+	  bindMixSortablefn(true);
+  }
+
+  function checkQualFocus(x) {
+	  var arrname = x.split('_');
+	  var key1 = arrname[1];
+	  checkQualUsed(key1);
+  }
+
+  function checkQualUsed(id) {
+	  var reskeyid = $('input[id*=qualifierId_]');
+	  quallistR = quallist;
+	  qualListR = $.grep(quallist, function (element, index) {
+		  var is_selected = true;
+		  $.each(reskeyid, function (i, obj) {
+			  var $this = $(this),
+				  name = $this[0].id;
+			  var arrname = name.split('_');
+			  var key1 = arrname[1];
+			  if (key1 != id) {
+				  if (element.data == $this.val()) {
+					  is_selected = false;
+				  }
+			  }
+		  });
+		  return is_selected;
+	  });
+  }
+
+
+  function bindMixSortablefn(reset) {
+	  // ReadyMix sortable function
+	  var $rBody = $('table[id*=tabillformat] tbody.sorting');
+	  $.each($rBody, function(i, obj){
+		  if ($(this).parent('table')[0].id.indexOf('__') != -1) {
+			  $rBody.splice(i, 1);
+		  }
+	  });
+	  var $sRTable = $rBody.find('tr');
+
+	  if (typeof reset !== 'undefined' && reset === true) {
+		  $sRTable.unbind('click', 'dblclick', 'select', 'sortable');
+		  $rBody.unbind('sortable');
+	  }
+	  $sRTable.on( 'dblclick', function () {
+		  var $this = $(this);
+		  if ($this.hasClass('selected') == true) $this.toggleClass('selected', false);
+		  else $this.toggleClass('selected', true);
+	  });
+	  $rBody.sortable({
+		  helper: fixHelperModified,
+		  stop: updateIndex,
+		  axis: 'y',
+		  distance: 40,
+		  update: function( event, ui ) {
+			  var ifrow = event.target.children[0].id.split("_")[1];
+			  SortOrderQual(ifrow);
+		  }
+	  });
+  }
+
+  var fixHelperModified = function(e, tr) {
+	  var $originals = tr.children();
+	  var $helper = tr.clone();
+	  $helper.children().each(function(index) {
+		  $(this).width($originals.eq(index).width())
+	  });
+	  return $helper;
+  },
+  updateIndex = function(e, ui) {
+	  $('td.index', ui.item.parent()).each(function (i) {
+		  $(this).html(i + 1);
+	  });
+  };
+
+  function SortOrderQual(iRowid) {
+	  var rows = $('tr[id*=rowId_]');
+	  var irefid=1;
+	  $.each(rows, function() {
+		  var id = $(this)[0].id;
+		  var irow = id.split("_")[1];
+		  $('#sortId_'+ irow).val(irefid);
+		  irefid = + irefid+1;
+	  });
+  }
+
+  function signChange(x) {
+	  var $this = $(x);
+	  if ($this.hasClass( "plus-plus" )) {
+		  $this.removeClass('plus-plus');
+		  $this.addClass('minus-minus');
+		  var key1 = $this[0].id.split('_')[1]
+		  $('#sign_' + key1).val('-');
+	  } else {
+		  $this.removeClass('minus-minus');
+		  $this.addClass('plus-plus');
+		  var key1 = $this[0].id.split('_')[1]
+		  $('#sign_' + key1).val('+');
+	  }
+  }
+
+  function PopulateQualifier(val) {
+      if (val !="") {
+          $('#tabillformat').show();
+          $('#submitform').show();
+      } else {
+          $('#tabillformat').hide();
+          $('#submitform').hide();
+          return;
+      }
+
+      $.ajax({
+		  url: getBaseURL() + "project/qualifier/qualifiersetting/"+val,
+		  data: {rtype:'qualifierdetails', csrf: "<?php echo isset($csrf)? $csrf:''; ?>"},
+		  async: false,
+		  type: 'post',
+		  success: function(data,status, xhr) {
+			  var detail = JSON.parse(data),
+			  qualTrans = detail['qualTrans'];
+              console.log(qualTrans);
+			  var sRow = '#qualrowid';
+
+			  $('#tabillformat tr:gt(1)').remove();
+			  $tr = $("#tabillformat tr:last");
+
+			  var key1 = $tr[0].id.split('_')[1]
+
+			  $('#qualTranId_'+ key1).val('');
+			  $('#incl_'+key1).prop("checked", true);
+			  $("label[for='refNo_" + key1 + "']").html('');
+			  $('#qualName_'+key1).val('');
+			  $('#qualifierId_'+key1).val('');
+			  $('#exp_'+key1).val('');
+			  $('#expper_'+key1).val('');
+			  $('#sortId_'+key1).val(1);
+			  $(sRow).val(key1);
+			  var k=0;
+			  for (var j = 0; j < qualTrans.length; j++) {
+				  k = k + 1;
+				  if (k != key1) {
+					  var stabelrow = '#tabillformat';
+					  var template = $('#dummy-qualifier tbody').html();
+					  template = template.replace(/__1/g, '_' + k);
+					  $(stabelrow + " tbody tr:last").after(template);
+				  }
+				  $('#qualTranId_' + k).val(qualTrans[j]['QualTransId']);
+				  if (qualTrans[j]['YesNo'] == 1) {
+					  $('#incl_' + k).prop("checked", true);
+				  } else {
+					  $('#incl_' + k).prop("checked", false);
+				  }
+				  if (qualTrans[j]['Sign'] == "-") {
+					  $('#qualsign_' + k).removeClass('plus-plus');
+					  $('#qualsign_' + k).addClass('minus-minus');
+					  $('#sign_' + k).val('-');
+				  } else {
+					  $('#qualsign_' + k).removeClass('minus-minus');
+					  $('#qualsign_' + k).addClass('plus-plus');
+					  $('#sign_' + k).val('+');
+				  }
+				  $("label[for='refNo_" + k + "']").html(qualTrans[j]['RefNo']);
+				  $('#qualName_' + k).val(qualTrans[j]['QualifierName']);
+				  $('#qualifierId_' + k).val(qualTrans[j]['QualifierId']);
+				  $('#exp_' + k).val(qualTrans[j]['Expression']);
+				  $('#expper_' + k).val(qualTrans[j]['ExpPer']);
+				  $('#sortId_' + k).val(qualTrans[j]['SortId']);
+				  $(sRow).val(k);
+			  }
+
+			  $('.loading_area').hide();
+		  }, error:function(jqXHR, textStatus, errorThrown){
+			  $('.loading_area').hide();
+		  }
+	  });
+	  bindQualAutoComplete();
+	  bindMixSortablefn(true);
+  }
+  function DeleteRow(x, e) {
+	  e.preventDefault();
+	  var sStr = x.split("_"),
+		  iFocusRowId= sStr[1],
+		  key1 = iFocusRowId;
+		  $tr =  $('#rowId_' + iFocusRowId),
+		  $nextTr = $tr.next('tr');
+	  if (confirm('Do you want to Delete')) {
+		  if($nextTr.is(":visible")) {
+			  $tr .hide();
+		  } else {
+			  $('#qualTranId_'+ key1).val('');
+			  $('#incl_'+key1).prop("checked", true);
+			  $("label[for='refNo_" + key1 + "']").html('');
+			  $('#qualName_'+key1).val('');
+			  $('#qualifierId_'+key1).val('');
+			  $('#exp_'+key1).val('');
+			  $('#expper_'+key1).val('');
+			  $('#sortId_'+key1).val(1);
+			  $('#qualrowid').val(key1);
+		  }
+		  $('#delflag_' + key1).val('Y');
+		  bindQualAutoComplete();
+		  bindMixSortablefn(true);
+	  }
+	  return false;
+  }
+
+</script> 
+<!--table Add lines start--> 

@@ -1,0 +1,373 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+</style>
+<style>
+	#treeGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid ">
+    	<div class="row">
+			<div class="col-lg-12">
+            	<div class="col-lg-12">
+                	<div class="col-lg-6">
+                        <h1>WorkGroup Master</h1>
+                    </div>
+                    <div class="col-lg-6 commargin_top">
+                        <div class="edit_del float_r">
+                            <ul>
+                                <li>
+                                    <a title="Edit" href="javascript: workgroupAdd('add')" class="edit_al"><i class="fa fa-plus"></i> Add WorkGroup</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-12 tmss commargin_top">
+                	<div class="">
+                        <div class="table-responsive clear">
+                            <div id="treeGrid"> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            	
+                    <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times-circle-o clpot"></i></button>
+                    <h1>Why do you want to delete <span id="delWorkGroupName" class="bld-txt"></span>?</h1>
+              
+            </div>
+            <div class="modal-body">
+            	<div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                            	<div class="container-fluid">
+                                    <form class="form-horizontal">
+                                          <div class="row">
+                                                <div class="form-group req_flds">
+                                                  <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                                                </div>
+                                          </div>
+                                    </form>
+                                </div>	
+                            </div>
+                    	</div>
+                    </div>
+                </div> 
+            </div>
+            <div class="modal-footer">
+            	<div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+					<a href="#" id="btnDeleteYes" class="md_ok">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div id="EditModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>Edit WorkGroup</h1>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="commargin_top_20">
+                        <form id="editForm">
+                            <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                            <input type="hidden" id="workGroupId" name="WorkGroupId">
+                            <div class="form-group">
+                                <input type="text" id="workgroupName" name="workgroupName" class="form-control lbl_move" maxlength="100" label="WorkGroup Name"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                     <a href="#" id="btnEditYes" class="md_ok">Update</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Add Confirmation Modal-->
+<div id="AddModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button href="#" data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>New WorkGroup</h1>
+            </div>
+            <div class="modal-body">
+                <div class="commargin_top_20">
+                    <form method="post" id="addForm">
+                    <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input type="text" id="workgroupNamenew" name="workgroupNamenew" class="form-control lbl_move" maxlength="100" label="WorkGroup Name"/>
+                        </div></div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                     <a href="#" id="btnAddYes" class="md_ok">Create</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data = <?php echo (isset($workgroupReg)) ? json_encode($workgroupReg) : ''?>,
+        $treeGrid = $("#treeGrid"),
+        $deleteModal = $('#DeleteModal'),
+		$editModal = $('#EditModal'),
+		$addModal = $('#AddModal'),
+        $remarks = $('#remarks'),
+		$workgroupName = $('#workgroupName'),
+		$workgroupNamenew = $('#workgroupNamenew');
+    $(function () {
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'WorkGroupId', type: 'number' },
+                { name: 'WorkGroupName', type: 'string' }
+            ],
+            id: 'WorkGroupId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            filterable:true,
+            pageable:true,
+            rowDetails: true,
+            autoheight: true,
+            selectionmode: 'singlerow',
+            showfilterrow: true,
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+			showfilterrow: true,
+            columns: [
+                { text: 'WorkGroupId', datafield: 'WorkGroupId', hidden: true, filterable: false},
+                { text: 'WorkGroupName', dataField: 'WorkGroupName'},
+                { text: 'Action', sortable: false, filterable: false, align: 'left',
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Edit" href="javascript: workgroupEdit('+row+')" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: workgroupDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'cb/master/deleteworkgroup',
+                type: 'POST',
+                data: {"WorkGroupId": rowData.WorkGroupId, "Remarks": remarks},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the WorkGroup!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+            $remarks.val('');	
+        });
+		
+		$('#btnEditYes').on('click', function () {
+            var workgroupName = $workgroupName.val();
+            
+			validate(function(isSuccess) {
+                if(isSuccess) {
+                    $editModal.modal('hide');
+                    var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+                    $.ajax({
+                        url: getBaseURL() + 'cb/master/editworkgroup',
+                        type: 'POST',
+                        data: $('#editForm').serialize(),
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'WorkGroupName', workgroupName);
+                            } else {
+                                alert('Failed to Edit the WorkGroup!');
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            if (jqXHR.status == 403)
+                                alert(jqXHR.responseText);
+                            else
+                                alert(textStatus+"-----"+errorThrown);
+                        }
+                    });	
+                    $workgroupName.val('');
+                } else {
+                    return false;
+                }
+            });
+            
+            function validate(callback) {
+                if(workgroupName.length == 0) {
+                    showError($workgroupName, 'Required!');
+                    callback(false);
+                    return false;
+                } else {
+                    removeError($workgroupName);
+                }
+                
+                //validate vendor name already found for addMode
+                $.ajax({
+                    url:getBaseURL()+ 'cb/master/checkworkgroupFound',
+                    type:"post",
+                    data: $('#editForm').serialize(),
+                    dataType:"json",
+                    success:function(data, textStatus, jqXHR){
+                        //alert(data)
+                        if(data.results != false){
+                            showError($workgroupName, 'Work Group Name already found!');
+                            callback(false);
+                            return false;
+                        }
+                        else{
+                            removeError($workgroupName);
+                            callback(true);
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert(textStatus+"-----"+errorThrown);
+                        callback(false);
+                        return false;
+                    }
+                });
+            }
+		});
+        //bindJqxGridAutoResize();
+    });
+
+	$('#btnAddYes').on('click', function () {
+		var workgroupNamenew = $workgroupNamenew.val();
+			
+        validate(function(isSuccess) {
+            if(isSuccess) {
+                $addModal.modal('hide');	
+                $.ajax({
+                    url: getBaseURL() + 'cb/master/addworkgroup',
+                    type: 'POST',
+                    data: $('#addForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                        $treeGrid.jqxGrid('addrow',null,JSON.parse(data));
+                        } else {
+                            alert('Failed to Edit the WorkGroup!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        if (jqXHR.status == 403)
+                            alert(jqXHR.responseText);
+                        else
+                            alert(textStatus+"-----"+errorThrown);
+                    }
+                });	
+                $workgroupNamenew.val('');
+            } else {
+                return false;
+            }
+        });
+            
+        
+        function validate(callback) {
+            if(workgroupNamenew.length == 0) {
+                showError($workgroupNamenew, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($workgroupNamenew);
+            }
+
+            //validate vendor name already found for addMode
+            $.ajax({
+                url:getBaseURL()+ 'cb/master/checkworkgroupFound',
+                type:"post",
+                data: $('#addForm').serialize(),
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    //alert(data)
+                    if(data.results != false){
+                        showError($workgroupNamenew, 'Work Group Name already found!');
+                        callback(false);
+                        return false;
+                    }
+                    else{
+                        removeError($workgroupNamenew);
+                        callback(true);
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert(textStatus+"-----"+errorThrown);
+                    callback(false);
+                    return false;
+                }
+            });
+        }
+	});
+	
+    function workgroupDelete(row) {
+		var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $deleteModal.data('row', row).modal('show');
+		$('#delWorkGroupName').html(rowData.WorkGroupName);
+		$("#remarks").val('');
+    }
+	
+	function workgroupEdit(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $editModal.data('row', row).modal('show');
+		$("#workgroupName").val(rowData.WorkGroupName);
+		$("#workgroupName").trigger('change');
+        $('#workGroupId').val(rowData.WorkGroupId);
+    }
+	
+	function workgroupAdd() {
+        $addModal.modal('show');
+		$("#workgroupNamenew").val('');
+    }
+</script>

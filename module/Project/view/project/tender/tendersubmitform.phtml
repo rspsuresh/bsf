@@ -1,0 +1,251 @@
+<!-- Script Tags -->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<!-- Script Rags -->
+
+<!-- Style Tags -->
+<style>
+    .pad-top{line-height:30px; display:block}
+    .btn_newlist {width:50px; font-size:18px; height:50px; color:#000; background:#e3edf1; border: 2px solid #93cee5; border-radius:50%; margin-top:15px;float:left; line-height:47px; text-align:center;}
+    .btn_newlist a i{ text-align:center; font-size:18px; color:#000; padding-left:16px; line-height:45px; transition:all 0.3s ease;}
+    .btn_newlist a i:hover{-webkit-transform: scale(1.3);
+        -ms-transform: scale(1.3);
+        transform: scale(1.3); padding-left:14px}
+    .box-clr,.ui-sortable li {background:#E9ECF0;box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #CAD6E3;
+        float: left;
+        margin-bottom: 5px;
+        padding: 5px 15px;
+        width: 100%;
+    }
+    .top-move{margin-top:20px}
+    .date_icon, .time_icon{top:32px;}
+    .polymer-form input{height:37px !important}
+</style>
+<!-- Style Rags -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form id="form-wrapper" action="" method="post">
+            <input type="hidden" name="enquiryId" id="enquiryId" value="<?php echo $enquiryId;?>">
+            <input type="hidden" name="submitId" id="submitId" value="<?php echo $submitId;?>">
+            <div class="col-lg-12">
+                <h1 class="text-center">Tender Submit Form</h1>
+            </div>
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-12 top_ct" style="margin-bottom:10px">
+                    <div class="col-lg-3 col-lg-offset-2">
+                        <div class="countdown-box">
+                            <div class="countdown" id="lRefNo" style="color:#45a2c9;" onclick="showReceiptNoText()">
+                                <label id="lcno"><b style="color:#333">Ref No : </b><span style="font-size:15px;text-decoration: underline;"><?php  if ($submitId!=0) { echo (isset($submitReg)) ? $submitReg['RefNo'] : ''; } else {echo $svNo;}?></span></label>
+                            </div>
+                            <div id="tRefNo" style="display: none" >
+                                <input type="text" name="RefNo" data-bsfshare="RefNo" id="RefNo" class="form-control lbl_move" label="Ref No." value="<?php if ($submitId!=0) { echo (isset($submitReg)) ? $submitReg['RefNo'] : '';} else {echo $svNo; }?>" <?php if ($genType==true) { ?> readonly <?php } ?> maxlength="50" onblur="showReceiptNoLabel()"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-1">
+                        <div class="countdown-box">
+                            <div class="countdown" id="lRefDate" style="color:#45a2c9 ;" onclick="showReceiptDateText()">
+                                <label id="lcdate" style="float: right"><b style="color:#333">Ref Date : </b><span style="font-size:15px;text-decoration: underline;"><?php echo (isset($submitReg)) ? $submitReg['RefDate'] : date('d-m-Y');?></span> </label>
+                            </div>
+                            <div id="tRefDate" style="display: none" >
+                                <input type="text" name="RefDate" data-bsfshare="RefDate" id="RefDate" class="form-control date_picker lbl_move" readonly="readonly" label="Ref Date" onchange="validateDate(this)"  value="<?php echo (isset($submitReg)) ? $submitReg['RefDate'] : date('d-m-Y');?>"  onblur="showReceiptDateLabel()"/>
+                                <input type="hidden" readonly name="Today" id="Today" value="<?php echo date("d-m-Y"); ?>" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 form-group" style="margin-bottom:15px">
+                <div class="box-clr">
+                    <div class="col-md-4"><label class="pad-top">Enquiry Name</label>
+                        <input type="text" class="form-control lbl_move" value="<?php echo (isset($enquiryReg)) ? $enquiryReg['NameOfWork'] : '';?>" readonly/>
+                    </div>
+                    <div class="col-md-4"><label class="pad-top">Client Name</label>
+                        <input type="text" class="form-control lbl_move" value="<?php echo (isset($enquiryReg)) ? $enquiryReg['ClientName'] : '';?>" readonly/>
+                    </div>
+                    <div class="col-md-4"><label class="pad-top">Tendor No</label>
+                        <input type="text" class="form-control lbl_move" value="<?php echo (isset($enquiryReg)) ? $enquiryReg['TenderNo'] : '';?>" readonly/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <div id="accordion" class="panel-group">
+                    <!--General-->
+                    <div class="panel panel-info">
+                        <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                            <h4 class="panel-title accordion-toggle defa_panels">Enclosure</h4>
+                        </div>
+                        <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                            <div class="panel-body bgcolr">
+                                <div class="form-group col-lg-5 col-lg-offset-3 col-md-offset-3 col-md-5 clear">
+                                    <p class="heading_checkbox" style="text-align:center">Select Enclosure</p>
+                                    <div class="card">
+                                        <div class="card-body" style="min-height:50px; max-height:310px;">
+                                            <ul class="sampleUI list ui-sortable" data-sortable="true" id="ulEncList">
+                                                <?php
+                                                foreach($enclosureTrans as $cl) {
+                                                    $eid = $cl['EnclosureId'];
+                                                    ?>
+                                                    <li class="tile ui-sortable-handle" id="liencl_<?php echo $eid; ?>">
+                                                        <div class="radio_check col-md-1" style="padding:0 !important">
+                                                            <p style="padding-top:10px;">
+                                                                <input type="checkbox" name="selectenc[]" id="selectenc_<?php echo $eid; ?>" value="<?php echo $cl['EnclosureId']; ?>" <?php echo ($cl['Sel']=='Yes') ? 'checked' : ''; ?>>
+                                                                <label for="selectenc_<?php echo $eid; ?>"></label>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-11"style="padding:0 !important">
+                                                            <input type="text" class="parent_text" id="nameenc_<?php echo $eid; ?>" value="<?php echo $cl['EnclosureName'];?>" readonly/>
+                                                        </div>
+                                                    </li>
+                                                <?php }?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--General-->
+                    <div class="panel panel-info">
+                        <div data-target="#collapsetwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                            <h4 class="panel-title accordion-toggle defa_panels">Checklist</h4>
+                        </div>
+                        <div class="panel-collapse collapse" id="collapsetwo" style="height: 0px;">
+                            <div class="panel-body bgcolr">
+                                <div class="deft_act col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                                    <div class="col-lg-12 col-md-12 clear">
+                                        <div class="table-responsive">
+                                            <div id="grid"> </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--General-->
+                    <div class="panel panel-info" style="<?php echo ($emdRequired==0) ? 'display:none' : '';?>" >
+                        <div data-target="#collapsethree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                            <h4 class="panel-title accordion-toggle defa_panels">EMD Detail</h4>
+                        </div>
+                        <div class="panel-collapse collapse" id="collapsethree" style="height: 0px;">
+                            <div class="panel-body bgcolr">
+                                <input type="hidden" name="emdid" id="emdid" value="<?php echo (isset($emddetails)) ? $emddetails['EMDId'] : '0'?>"/>
+                                <div class="col-lg-12 col-md-12 box-clr clear">
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <input type="text" class="form-control lbl_move" name="emdno" id="emdno" label="EMD No." value="<?php echo (isset($emddetails)) ? $emddetails['EMDNo'] : '';?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" class="form-control lbl_move date_picker" name="emddate" id="emddate" label="EMD Date" value="<?php echo (isset($emddetails) && !is_null($emddetails['EMDDate'])) ? date('d-m-Y', strtotime($emddetails['EMDDate'])) : date('d-m-Y');?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <input type="text" class="form-control lbl_move text-right" name="emdcost" id="emdcost" label="Cost" value="<?php echo (isset($emddetails)) ? $this->commonHelper()->sanitizeNumber($emddetails['EMDAmount'],2,true) : '';?>" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <select name="emdmode" id="emdmode" class="form-control single_dropdown lbl_move" style="width:100%;" label="Mode of Payment">
+                                                <option value="0">Select Mode of Payment</option>
+                                                <?php foreach($paymentMode as $payment): ?>
+                                                    <option value="<?php echo $payment['TransId']; ?>" <?php echo (isset($emddetails) && $emddetails['EMDMode'] == $payment['TransId']) ? 'selected' : '';?>><?php echo $payment['PaymentMode']; ?></option>
+                                                <?php endforeach;?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <input type="text" class="form-control lbl_move" label="In favour of" name="emdfavour" id="emdfavour" value="<?php echo (isset($emddetails)) ? $emddetails['EMDInFavour'] : '';?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <input type="text" class="form-control lbl_move" label="Bank Name" name="emdbankname" id="emdbankname" value="<?php echo (isset($emddetails)) ? $emddetails['BankName'] : '';?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="top-move">
+                                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" class="form-control date_picker lbl_move" label="Valid Upto" name="emdvalidupto" id="emdvalidupto" value="<?php echo (isset($emddetails) && !is_null($emddetails['ValidUpto'])) ? date('d-m-Y', strtotime($emddetails['ValidUpto'])) : date('d-m-Y');?>"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" ><a onclick="submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_l"><a href="<?php echo $this->basePath() . '/project/followup/followup/'.$enquiryId;?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+
+<script>
+    var arrcheckList = <?php echo (isset($arrcheckList)) ? json_encode($arrcheckList) : '[]';?>;
+
+    $(function () {
+        var source = {
+            localdata: arrcheckList,
+            async: false,
+            dataType: "json",
+            dataFields: [
+                {name: 'CheckListId', type: 'number'},
+                {name: 'CheckListName', type: 'string'},
+                {name: 'UserName', type: 'string'},
+                {name: 'Status', type: 'string'}
+            ],
+            id: 'CheckListId'
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $('#grid').jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            autoheight: true,
+            filterable: true,
+            sortable: true,
+            pageable: true,
+            rowDetails: true,
+            columns: [
+                {text: 'CheckListId', datafield: 'CheckListId', hidden: true, filterable: false},
+                {text: 'CheckListName', dataField: 'CheckListName', width: '60%'},
+                {text: 'UserName', dataField: 'UserName', width: '20%'},
+                {text: 'Status', dataField: 'Status', width: '20%'}
+            ]
+        });
+    });
+
+    function showReceiptDateText() {
+        $('#lRefDate').hide();
+        $('#tRefDate').show();
+    }
+
+    function showReceiptDateLabel() {
+        $('#lcdate').html('Ref Date :' + $('#RefDate').val());
+        $('#tRefDate').hide();
+        $('#lRefDate').show();
+    }
+
+
+    function showReceiptNoText() {
+        $('#lRefNo').hide();
+        $('#tRefNo').show();
+    }
+
+    function showReceiptNoLabel() {
+        $('#lcno').html('Ref No :' + $('#RefNo').val());
+        $('#tRefNo').hide();
+        $('#lRefNo').show();
+    }
+
+    function submitForm() {
+        $('#form-wrapper').submit();
+    }
+</script>

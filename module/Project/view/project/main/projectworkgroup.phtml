@@ -1,0 +1,333 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid ">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1 class="col-lg-4">Project WorkGroup</h1>
+        <div class="col-lg-5" id="formWrapper">
+            <label class="col-sm-4 sel-type text-right">Select Project</label>
+            <div class="col-lg-8 form-group" id="projects_list">
+              <select name="projectId" id="projectId" class="form-control selectpicker show-tick" onchange="return ChangeProject()" data-size="6" title="Select Project...">
+                <option value="0">None</option>
+                <?php if(isset($projectlists)):?>
+                <?php foreach ( $projectlists as $project ):?>
+                <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+              </select>
+            </div>
+        </div>
+        <div class="col-sm-3"> <a title="Add Project WorkGroup" href="#" onclick="projectWGAddEdit('add'); return false;" class="edit_als" style=" display:block;"><i class="fa fa-plus"></i> Add Project WorkGroup</a> </div>
+      </div>
+      <div class="col-lg-12 col-lg-offset-0">
+        <div class="table-responsive clear">
+          <div id="grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <?php if (isset($projectId)) { if ($projectId !=0) { ?>
+        <div class="col-lg-12 savebtn_area">
+            <ul>
+                <li class="cancel_btn float_l goback-foll"><a href="<?php echo $this->basePath() . '/project/rfc/projboq/' . $projectId . '/' .$projectType ;?>" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i>Goto BOQ</a></li>
+            </ul>
+        </div>
+    <?php }} ?>
+</div>
+
+<!--Add Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h1 id="headerText">Edit WorkGroup</h1>
+      </div>
+      <div class="modal-body">
+        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+            <form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+                <div class="row commargin_top_20">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="workgroupslno" id="workgroupslno" class="form-control lbl_move" label="Serial No." >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="workgroupName" id="workgroupName" autocomplete="off" class="form-control lbl_move" label="Project Workgroup Name"/>
+                        <input type="hidden" name="PWorkGroupId" id="PWorkGroupId"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="workgroup" id ="workgroup" class="form-control lbl_move" label="Workgroup Name">
+                        <input type="hidden" name="workgroupid" id ="workgroupid" >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="worktype" id ="worktype" class="form-control lbl_move" label="Work Type">
+                        <input type="hidden" name="worktypeid" id ="worktypeid" >
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <input type="hidden" name="projectId" id="projectId" value="<?php echo (isset($projectId)) ? $projectId : 0;?>">
+            </form>
+        </div>
+      </div>
+      <div class="modal-footer clear">
+        <div class="col-lg-12 savebtn_area no_border">
+          <ul>
+            <li class="save_btn float_r"> <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a> </li>
+            <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+    var $grid = $("#grid"),
+        $project = $('#projectId'),
+        $editModal = $('#EditModal'),
+        $remarks = $('#remarks'),
+        $workgroupslno = $('#workgroupslno'),
+        $worktype = $('#worktype'),
+        $worktypeid = $('#worktypeid'),
+        $workgroupName = $('#workgroupName'),
+        $workGroupId = $('#workgroupid'),
+        $workGroup = $('#workgroup'),
+        $PWorkGroupId = $('#PWorkGroupId');
+
+    var arr_worktype = <?php echo (isset($arr_worktype)) ? json_encode($arr_worktype) : '[]';?>;
+    var arr_workgroup = <?php echo (isset($wgmaster)) ? json_encode($wgmaster) : '[]';?>;
+    $(function () {
+        var datasource =
+        {
+            dataType: "json",
+            dataFields: [
+                { name: 'PWorkGroupId', type: 'number' },
+                { name: 'WorkGroupId', type: 'number' },
+                { name: 'SerialNo', type: 'string' },
+                { name: 'ProjectWorkGroup', type: 'string' },
+                { name: 'WorkGroupName', type: 'string' },
+                { name: 'WorkType', type: 'string' },
+                { name: 'WorkTypeId', type: 'number' }
+//                { name: 'SortId', type: 'number' }
+            ],
+            id: 'PWorkGroupId',
+            localdata: <?php echo (isset($projectwg)) ? json_encode($projectwg): '[]';?>
+        };
+
+        var data = new $.jqx.dataAdapter(datasource);
+        $grid.jqxGrid( {
+            width: "100%",
+            source: data,
+            pageable: true,
+            autoheight: true,
+            sortable: true,
+            enabletooltips: true,
+            columns: [
+                { text: 'PWorkGroupId', datafield: 'PWorkGroupId', hidden: true},
+                { text: 'WorkGroupId', datafield: 'WorkGroupId', hidden: true},
+                { text: 'SerialNo', datafield: 'SerialNo',width:"10%"},
+                { text: 'ProjectWorkGroup', datafield: 'ProjectWorkGroup',width:"40%"},
+                { text: 'WorkGroupName', datafield: 'WorkGroupName',width:"40%"},
+//                { text: 'SortOrder', datafield: 'SortId',width:"10%"},
+                { text: 'Action',sortable: false, filterable: false, align: 'center',width:"10%",
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Edit" href="#" onclick="projectWGAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink;
+                    }
+                }
+            ]
+        });
+
+        $('#workgroup').autocomplete({
+            lookup: arr_workgroup,
+            multiselect:true,
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase =='*') {
+                    return suggestion.value;
+                }
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+
+            },
+            onSelect: function(suggestion) {
+                if(suggestion) {
+                    $("#workgroupid").val(suggestion.data);
+                    $("#worktypeid").val(suggestion.WorkTypeId);
+                    $("#worktype").val(suggestion.WorkType).trigger('change');
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function(suggestion) {
+                $("#workgroupid").val(0);
+                $("#worktypeid").val();
+                $("#worktype").val('');
+            },
+            onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length && query.length > 1){
+                    $(this).addClass('error');
+                    $("#workgroupid").val(0);
+                    $("#worktypeid").val(0);
+                    $("#worktype").val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+        $('#worktype').autocomplete({
+            lookup: arr_worktype,
+            multiselect:true,
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase =='*') {
+                    return suggestion.value;
+                }
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+
+            },
+            onSelect: function(suggestion) {
+                if(suggestion) {
+                    $("#worktypeid").val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function(suggestion) {
+                $("#worktypeid").val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length && query.length > 1){
+                    $(this).addClass('error');
+                    $("#worktypeid").val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+    });
+
+    function addUpdateFn() {
+        var workgroupslno = $workgroupslno.val();
+        var worktypeid = isNullCheck($worktypeid.val(), 'number');
+        var workgroupName = $workgroupName.val();
+        var PWorkGroupId = $PWorkGroupId.val();
+        var workGroupId = $workGroupId.val();
+
+        validate(function(isSuccess) {
+
+            if(isSuccess === false) {
+                return false;
+            } else {
+                var mode = $editModal.data('mode');
+                if(mode == 'edit') {
+                    var rowData = $grid.jqxGrid('getrowdata', $editModal.data('row'));
+                    $.ajax({
+                        url: getBaseURL() + 'project/main/editprojectworkgroup',
+                        type: 'POST',
+                        data: $('#addEditForm').serialize(),
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $grid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                                $editModal.modal('hide');
+                            } else {
+                                alert(data);
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            alert('Failed to Edit the Project!')
+                        }
+                    });
+                } else if(mode == 'add') {
+                    $.ajax({
+                        url: getBaseURL() + 'project/main/addprojectworkgroup',
+                        type: 'POST',
+                        data: $('#addEditForm').serialize(),
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $grid.jqxGrid('addrow',null,JSON.parse(data));
+                                $editModal.modal('hide');
+                            } else {
+                                alert(data);
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            alert('Failed to Add Project!');
+                        }
+                    });
+                }
+                $PWorkGroupId.val(0);
+                $workgroupName.val('');
+                $workGroupId.val('');
+            }
+        });
+
+
+        function validate(callback) {
+            if(workgroupslno.length == 0) {
+                showError($workgroupslno, 'Required!');
+                return;
+            } else {
+                removeError($workgroupslno);
+            }
+
+            if(workgroupName.length == 0) {
+                showError($workgroupName, 'Required!');
+                return;
+            } else {
+                removeError($workgroupName);
+            }
+
+            if(workGroupId.length == 0 && worktypeid == 0) {
+                showError($worktype, 'Required!');
+                return;
+            } else {
+                removeError($worktype);
+            }
+
+            callback(true);
+        }
+    }
+
+    function projectWGAddEdit(mode,row) {
+        if(mode== 'edit') {
+            var rowData = $grid.jqxGrid('getrowdata', row);
+            $editModal.data('row', row).data('mode', 'edit').modal('show');
+            $PWorkGroupId.val(rowData.PWorkGroupId);
+            $workgroupName.val(rowData.ProjectWorkGroup);
+            $workgroupslno.val(rowData.SerialNo);
+            $workGroup.val(rowData.WorkGroupName).trigger('change');
+            $worktype.val(rowData.WorkType);
+            $worktypeid.val(rowData.WorkTypeId);
+            $("#headerText").html("Edit Project WorkGroup");
+            $("#btnEditYes").html("Update");
+        } else if(mode== 'add'){
+            $editModal.data('mode', 'add').modal('show');
+            $PWorkGroupId.val(0);
+            $workgroupslno.val('');
+            $workgroupName.val('');
+            $workGroupId.val('');
+            $worktype.val('');
+            $worktypeid.val(0);
+            $("#headerText").html("New Project WorkGroup");
+            $("#btnEditYes").html("Create");
+        }
+    }
+
+    function showGrid() {
+        if ($project.val() == '') {
+            alert('Select a project!');
+            $project.addClass('error');
+            return;
+        }
+    }
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#projectId').val(),'number');
+        window.location.href = getBaseURL() + "project/main/projectworkgroup/" + iProjectId;
+    }
+
+</script>

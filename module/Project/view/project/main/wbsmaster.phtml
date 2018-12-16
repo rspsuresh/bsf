@@ -1,0 +1,396 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form class="form-horizontal" method="post" role="form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Work Breakdown Structure</h1>
+                    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="col-lg-9">
+                            <div class="form-group">
+                                <label class="col-sm-4 sel-type">Select Project</label>
+                                <div class="col-lg-8 form-group">
+                                    <select name="projectId" id="projectId" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%;" onchange="return changeProject();">
+                                        <option value="0">None</option>
+                                        <?php if(isset($projectlists)): ?>
+                                            <?php foreach ( $projectlists as $project ): ?>
+                                                <option value="<?php echo $project['ProjectId']; ?>"><?php echo $project['ProjectName']; ?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3" id="divupdate" style="display: none;">
+                            <button type="button" class="save-bt edit_als" onclick="return submitForm();">Save Changes <i class="fa fa-floppy-o"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id='jqxWidget' style="display: none">
+                            <div id='jqxTree'></div>
+                            <div id='jqxMenu'>
+                                <ul>
+                                    <li id="menu-newwbs">Add WBS</li>
+                                    <li>Edit WBS</li>
+                                    <li id="menu-removewbs">Remove WBS</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+var $jqxTree = $('#jqxTree'),
+    treePostData = [],
+    arr_wbslist = [];
+
+function bindJqxTreeGrid() {
+    treePostData = [];
+    getWBSMaster();
+    var $jqxMenu = $('#jqxMenu'),
+        source = {
+            async: false,
+            datatype: "json",
+            editable:true,
+            datafields: [
+                { name: 'id' },
+                { name: 'parentid' },
+                { name: 'text' }
+            ],
+            id: 'id',
+            localdata: arr_wbslist
+        };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    dataAdapter.dataBind();
+    var records = dataAdapter.getRecordsHierarchy('id', 'parentid', 'items', [{ name: 'text', map: 'label'}]);
+
+    $jqxTree.jqxTree({ source: records, height: 400, width: '100%',allowDrag: true, allowDrop: true, keyboardNavigation: true,
+        dragEnd: function (item, dropItem, args, dropPosition, tree) {
+            if ((item.level != dropItem.level && item.parentId != dropItem.parentId) || (item.level == dropItem.level && dropPosition=='inside'))
+                return false;
+        }
+    });
+    $jqxTree.css('visibility', 'visible');
+    var contextMenu = $jqxMenu.jqxMenu({ width: '150px',  height: '81px', autoOpenPopup: false, mode: 'popup' }),
+        clickedItem = null,
+        attachContextMenu = function () {
+            // open the context menu when the user presses the mouse right button.
+            $("#jqxTree li").on('mousedown', function (event) {
+                var target = $(event.target).parents('li:first')[0],
+                    rightClick = isRightClick(event),
+                    $menu_newbs = $('#menu-newwbs'),
+                    $menu_removewbs = $('#menu-removebs');
+
+                if (rightClick && target != null) {
+                    $jqxTree.jqxTree('selectItem', target);
+                    var selItem = $jqxTree.jqxTree('selectedItem'),
+                        $window = $(window);
+
+                    var hasValues = checkIOWFieldsHasValues(selItem.id);
+                    if (hasValues ==true) {
+                        $menu_removewbs.hide();
+                        $menu_newbs.hide();
+                        $jqxMenu.jqxMenu({height: '27px'});
+                    } else if (selItem.hasItems ==  true) {
+                        $menu_newbs.show();
+                        $menu_removewbs.hide();
+                        $jqxMenu.jqxMenu({height: '54px'});
+                    } else  {
+                        $menu_newbs.show();
+                        $menu_removewbs.show();
+                        $jqxMenu.jqxMenu({height: '81px'});
+                    }
+                    contextMenu.jqxMenu('open', parseInt(event.clientX) + 5 + $window.scrollLeft(), parseInt(event.clientY) + 5 + $window.scrollTop());
+                    return false;
+                }
+            });
+        };
+
+    attachContextMenu();
+    $jqxMenu.unbind('itemclick')
+    $jqxMenu.on('itemclick', function (event) {
+        var item = $.trim($(event.args).text()),
+            selectedItem = $jqxTree.jqxTree('selectedItem');
+
+        if (selectedItem == null)
+            return;
+
+        switch (item) {
+            case "Add WBS":
+                $jqxTree.jqxTree('addTo', {label: 'New WBS'}, selectedItem.element);
+                $jqxTree.jqxTree('expandItem', selectedItem.element);
+                makeEditableContent(selectedItem.element, true);
+                attachContextMenu();
+                $('#divupdate').show();
+                break;
+            case "Edit WBS":
+                makeEditableContent(selectedItem.element);
+                $('#divupdate').show();
+                break;
+            case "Remove WBS":
+                var id = selectedItem.id,
+                    hasValues = checkIOWFieldsHasValues(id);
+                if(hasValues==true) {
+                    alert('Sorry, This WBS cannot be deleted. Since you added a IOW for the same!');
+                    return;
+                }
+
+                if (confirm('Do you want to Delete')) {
+                    // remove other action
+                    if(treePostData.length != 0) {
+                        $.each(treePostData, function (i, o) {
+                            if (o.id == id) {
+                                treePostData.splice(i, 1);
+                                delete treePostData.length;
+                                return;
+                            }
+                        });
+                    }
+
+                    if(id.indexOf('jqxWidget') == -1) {
+                        // push data to array
+                        treePostData.push({
+                            'id': id,
+                            'parentid': selectedItem.parentId,
+                            'name': selectedItem.label,
+                            'action': 'delete'
+                        });
+                    }
+
+                    $jqxTree.jqxTree('removeItem', selectedItem.element);
+
+                    if(hasValues == false) {
+                        $("#newIOW_" + id).remove();
+                        //$iowContent.hide();
+                        //arrIOWData.splice(index,1);
+                    }
+                    attachContextMenu();
+                    $('#divupdate').show();
+                }
+                break;
+//            case "Add IOW":
+//                addNewIOW(selectedItem);
+//                break;
+//            case "Show IOW":
+//                showAddedIOW(selectedItem);
+//                break;
+        }
+    });
+
+    $(document).on('contextmenu', function (e) {
+        if ($(e.target).parents('.jqx-tree').length > 0)
+            return false;
+
+        return true;
+    });
+
+
+
+    $jqxTree.jqxTree('expandAll');
+    //renderIOWS();
+}
+
+function getWBSMaster() {
+    arr_wbslist = [];
+    if (arr_wbslist.length == 0) {
+        var iproject_id = parseInt(isNullCheck($('#projectId').val(), 'number'));
+        $.ajax({
+            url: getBaseURL() + "project/rfc/getwbsmaster",
+            async: false,
+            data: {'ProjectId': iproject_id},
+            type: 'post',
+            success: function (data, status) {
+                arr_wbslist = jQuery.parseJSON(data);
+            }
+        });
+    }
+}
+
+function getWBSMasterList() {
+    arraywbslist = [];
+    var iproject_id = parseInt(isNullCheck($('#projectId').val(), 'number'));
+    $.ajax({
+        url: getBaseURL() + "project/rfc/getwbsmasterlist",
+        async: false,
+        data: {'ProjectId': iproject_id},
+        type: 'post',
+        success: function (data, status) {
+            arraywbslist = jQuery.parseJSON(data);
+        }
+    });
+    arraywbs = arraywbslist;
+}
+
+jQuery.fn.selectText = function(){
+    var element = this[0];
+    if (document.body.createTextRange) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+    } else if (window.getSelection) {
+        var selection = window.getSelection();
+        var range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+};
+
+function getObjectKeyIndex(obj, value) {
+    var index = null;
+    $.each(obj, function(i, o) {
+        if (o.id == value) {
+            index = i;
+            return false;
+        }
+    });
+    return index;
+}
+function isRightClick(event) {
+    var rightclick;
+    if (!event) var event = window.event;
+    if (event.which) rightclick = (event.which == 3);
+    else if (event.button) rightclick = (event.button == 2);
+    return rightclick;
+}
+function makeEditableContent(item, isCreate) {
+    var $div = $(item).find('> div'),
+        oldValue = $div.html(),
+        action = 'update',
+        id = item.id,
+        parentId = item.parentId;
+
+    if (typeof isCreate != 'undefined' && isCreate  == true) {
+        $div = $(item).find('> ul li:last-child > div');
+        action = 'create';
+        id = $div.parent('li').attr('id');
+        parentId = item.id;
+        item = $(item).find('> ul li:last-child')[0];
+    }
+
+    // check and remove old data in array
+    var index = getObjectKeyIndex(treePostData, id);
+    if (index != null) {
+        treePostData.splice(index,1);
+    }
+
+    $('#' + $jqxTree.jqxTree('selectedItem').element.id).focusout(function () {
+        var newText =  $div.html();
+        newText = newText.replace(/(<br>)*/g, '');
+        $jqxTree.jqxTree('updateItem', item, { label:  newText });
+
+    });
+
+    $jqxTree.jqxTree({ keyboardNavigation: false});
+    $div.prop('contenteditable', true);
+    $div.focus();
+    $div.unbind('keydown');
+    $div.on('keydown', function(e) {
+        if (e.keyCode == 27) {
+            $div.html(oldValue);
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+        }
+
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+
+            var newText =  $div.html();
+            newText = newText.replace(/(<br>)*/g, '');
+            $jqxTree.jqxTree('updateItem', item, { label:  newText });
+
+//            newText = newText.replace(/(<br>)*/g, '');
+//            // push data to array
+//            treePostData.push({'id': id, 'parentid': parentId, 'name': newText, 'action': action});
+            return false;
+        }
+    });
+}
+
+function checkIOWFieldsHasValues(id) {
+    var isValid = false;
+
+    var objR = $.grep(arr_wbslist, function (element, index) {
+        return element.id == id;
+    });
+
+    if (objR.length >0) {
+        if (objR[0]['IOWUsed'] ==1) isValid=true;
+    }
+
+//        if (isValid==false) {
+//            var $resnames = $('input[id*=_wbsid_]');
+//            $.each($resnames, function (i, obj) {
+//                var $this = $(this),
+//                    name = $this[0].id;
+//                if (name.indexOf('__') != -1) return;
+//                var iwbsid = parseInt(isNullCheck($('#' + name).val(), 'number'));
+//                if (iwbsid == id) {
+//                    isValid = true;
+//                    return;
+//                }
+//            });
+//        }
+
+    return isValid;
+}
+
+function wbsUpdate() {
+    var items = $jqxTree.jqxTree('getItems');
+    var exportArray = new Array();
+    var j=0;
+    var iLastLevel=0;
+    for (var i = 0; i < items.length; i++) {
+        var currentItem = items[i];
+        var currentParentId = currentItem.parentId;
+        iLastLevel=0;
+        if (currentItem.hasItems==false) iLastLevel=1;
+        j = +j+1;
+        exportArray.push({ "id": currentItem.id, "name": currentItem.label, "parentid": currentParentId, "value": currentItem.value,"sortId" : j,'lastLevel' : iLastLevel});
+    };
+
+
+    arr_wbslist = [];
+    var iproject_id = parseInt(isNullCheck($('#projectId').val(),'number'));
+    $.ajax({
+        url: getBaseURL() + "project/rfc/updatewbsmaster",
+        async: false,
+        data:{'ProjectId': iproject_id,'treePostData':treePostData,'masterdata':exportArray},
+        type: 'post',
+        success: function(data,status) {
+            arr_wbslist = jQuery.parseJSON(data);
+        }
+    });
+    treePostData = [];
+    $('#wbsmodal').modal('toggle');
+    getWBSMasterList();
+}
+
+function changeProject()
+{
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    if (iProjectId == 0) {
+        alert('Select a Project');
+        return false;
+    }
+    bindJqxTreeGrid();
+    $('#jqxWidget').show();
+    $('#divupdate').hide();
+}
+
+function submitForm()
+{
+    wbsUpdate();
+    $('#divupdate').hide();
+}
+
+
+</script>

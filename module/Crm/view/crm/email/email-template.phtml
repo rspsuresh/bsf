@@ -1,0 +1,200 @@
+<?php $bsf = new \BuildsuperfastClass(); ?>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/cb.css" />
+<script src="<?php echo $this->basePath(); ?>/tinymce/tinymce.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/tinymce/jquery.tinymce.min.js"></script>
+<!--<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="txt_center">Create Email Template</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="liner"></div>
+        </div>
+        <form method="post" id="agreementTemplateForm">
+            <div class="col-lg-12 clear" style="background-color:#fff;">
+                <div class="col-lg-8 col-lg-offset-2 padlr0 m_top10">
+                    <div class="signup_onebyone_content">
+                        <div class="setup_form prop_mnmt_form">
+                            <ul class="onebyone_form">
+                                <li class="active focus">
+                                    <div class="onebyone_wrapper">
+                                        <div class="onebyone_question">
+                                            <span class="span_b">Name</span>
+                                        </div>
+                                        <div class="onebyone_content">
+                                            <div class="input">
+                                                <input type="text" id="templateName" name="templateName" value="<?php echo (isset($emailTempDetail)) ? $emailTempDetail['TemplateName'] : '';?>" placeholder="Name" class="inputSetup" autocomplete="off" />
+                                            </div>
+                                            <div class="col-lg-12 error_message"><p>Required</p></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="active focus">
+                                    <div class="onebyone_wrapper">
+                                        <div class="onebyone_question">
+                                            <span class="span_b">Type</span>
+                                        </div>
+                                        <div class="onebyone_content">
+                                            <div class="input">
+                                                <select style="width:100%;" id="templateType" name="templateType" onChange="templateTypeSelect($(this).val());" class="single_dropdown" <?php if(isset($emailTempDetail['TemplateTypeId'])) { echo 'disabled'; } ?>>
+                                                    <option></option>
+                                                    <?php if(isset($templateTypes)) { foreach($templateTypes as $type) { ?>
+                                                        <option <?php if(isset($emailTempDetail['TemplateTypeId']) && $emailTempDetail['TemplateTypeId']==$type['EmailTypeId']) { echo 'selected'; } ?> value="<?php echo $type['EmailTypeId']; ?>"><?php echo $type['EmailTypeName']; ?></option>
+                                                    <?php } }?>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-12 error_message"><p>Required</p></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li id="text_hide" style="display:none;" class="active focus">
+                                    <div class="onebyone_wrapper">
+                                        <div class="onebyone_question">
+                                            <span class="span_b">Content</span>
+                                        </div>
+                                        <div class="onebyone_content">
+                                            <div id="text_bind" class="input">
+                                            </div>
+                                            <div class="col-lg-12 error_message"><p>Required</p></div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="col-lg-6 col-lg-offset-6 col-md-6 col-md-offset-6 padlr0">
+                                <div class="col-lg-12">
+                                    <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Default Template</label>
+                                    <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                        <div class="radio_check">
+                                            <p>
+                                                <input type="checkbox" name="default_template" id="default_template" value="1" <?php if(isset($emailTempDetail)) { if($emailTempDetail['DefaultTemplate']==1) { echo "checked disabled"; } } else { echo "checked"; } ?> />
+                                                <label for="default_template"></label>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="mode" value="<?php echo $mode; ?>" />
+                            <div class="col-lg-12 savebtn_area m_btm20 no_border clear">
+                                <ul>
+                                    <li class="save_btn float_r">
+                                        <a class="ripple" href="javascript:void(0);" data-toggle="tooltip" data-placement="left" onclick="return agreementTemplateValidate();">Submit</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script id="temp_content" type="text/template"><?php echo (isset($emailTempDetail['TemplateContent'])) ? html_entity_decode($emailTempDetail['TemplateContent']) : ''; ?></script>
+<script>
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+    $(document).ready(function() {
+         mode = <?php echo $mode; ?>;
+
+        if(mode!=0){
+            var content = $('#temp_content').html();
+            var mTags = <?php echo (isset($mergeTags)) ? json_encode($mergeTags):'[]'; ?>;
+            $('#text_bind').html('<textarea id="templateContent" name="templateContent"></textarea>');
+            tinyEditor(mTags);
+            setTimeout(function() { tinyMCE.activeEditor.setContent(content);
+                $('#text_hide').show();}, 1000);
+
+        }
+    });
+    function agreementTemplateValidate()
+    {
+        $('.error_message').hide();
+        var sFlag = 0;
+        var templateName = $('#templateName');
+        var templateType = $('#templateType');
+        var templateContent = $('#templateContent');
+        if($.trim(templateName.val()) == '') {
+            templateName.closest('.onebyone_content').find(".error_message").show();
+            templateName.focus();
+            sFlag = 1;
+            return false;
+        }
+        if($.trim(templateType.val()) == '') {
+            templateType.closest('.onebyone_content').find(".error_message").show();
+            templateType.focus();
+            sFlag = 1;
+            return false;
+        }
+        if($.trim(tinymce.activeEditor.getContent()) == '') {
+            templateContent.closest('.onebyone_content').find(".error_message").show();
+            templateContent.focus();
+            sFlag = 1;
+            return false;
+        }
+        if(sFlag == 0) {
+            $.post(getBaseURL()+'crm/email/email-template', { tempName: templateName.val(),mode: "check",tempId: mode,tempTypeId:templateType.val() },
+                function(data) {
+                    var chkCount = JSON.parse(data);
+                    if(chkCount.Count != 0) {
+                        templateName.closest('.onebyone_content').find(".error_message").show();
+                        templateName.closest('.onebyone_content').find(".error_message").html('<p>this one already exists!</p>');
+                        templateName.focus();
+                    } else {
+                        $('#default_template').removeAttr("disabled");
+                        $('#templateType').removeAttr("disabled");
+                        $("#agreementTemplateForm").submit();
+                    }
+                });
+        }
+        return false;
+    }
+    function templateTypeSelect(type) {
+        $('#text_bind').html('');
+        $('#text_hide').hide();
+        if($.trim(type)=="") {
+            return false;
+        } else {
+            $.post(getBaseURL()+'crm/email/email-template', { tempTypeVal: type, mode: 'tempType' },
+                function(data) {
+                    $('#text_bind').html('<textarea id="templateContent" name="templateContent"></textarea>');
+                    tinyEditor(JSON.parse(data));
+                    $('#text_hide').show();
+                });
+        }
+    }
+    function tinyEditor(data) {
+        tinymce.init({
+            selector: "textarea",
+            plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table contextmenu paste code'
+            ],
+            toolbar: "mergetags | insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+            content_css: [
+                '//www.tinymce.com/css/codepen.min.css'
+            ],
+            forced_root_block: "",
+            setup: function (editor) {
+                var arr = [];
+                $.each(data, function (i,o) {
+                    arr.push({
+                        'text' : o,
+                        'onclick': function () {
+                            editor.insertContent(o);
+                        }
+                    });
+                });
+                editor.addButton('mergetags', {
+                    type: 'menubutton',
+                    text: 'Merge Tags',
+                    icon: false,
+                    menu: arr
+                });
+            }
+        });
+    }
+</script>

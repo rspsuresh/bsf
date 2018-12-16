@@ -1,0 +1,464 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<style>
+    .jqx-grid-header {height:75px !important;}
+    #dataTable .jqx-grid-cell{font-size:13px;font-family: 'roboto', sans-serif;}
+    #dataTable .jqx-grid-header{font-size:13px;font-family: 'roboto', sans-serif;}
+    .form-group1 {margin-bottom:5px; }
+    .fixed-action-btn{margin-top:84px !important;}
+	.jqx-enableselect{z-index:888 !important}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="col-lg-12">
+    	<h1 class="col-md-6">Labour Master</h1>
+            <div class="col-lg-4">
+                <div class="fixed-action-btn active">
+                    <a class="btn-floating btn-large">
+                        <i class="fa fa-print"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a data-original-title="Print Report" data-placement="top" data-toggle="tooltip" href="javascript:void(0);" id="print" class="btn-floating hide-input-file">
+                                <i class="fa fa-print"></i>
+
+                            </a>
+                        </li>
+                        <li>
+                            <a data-original-title="Download Excel" data-placement="top" data-toggle="tooltip" href="javascript:void(0);" id="excelExport" class="btn-floating">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a data-original-title="Export CSV" data-placement="top" data-toggle="tooltip" href="javascript:void(0);" id="csvExport" class="btn-floating">
+                                <i class="fa fa-file-archive-o"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6" style="padding:0 !important">
+                <div class="col-lg-12 savebtn_area"style="border-top:none">
+                    <ul>
+                        <li class="list-btn"><i class="fa fa-rocket"></i>Transfer
+                            <ul style="width:105px">
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labourtransfer">Entry</a></li>
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labourtransferregister">Register</a></li>
+                            </ul>
+                        </li>
+                        <li class="list-btn"><i class="fa fa-check"></i>Activate
+                            <ul style="width:105px">
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labour-activate"> Entry</a></li>
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labour-activate-register">Register</a></li>
+                            </ul></li>
+                        <li class="list-btn"><i class="fa fa-times"></i>In-Activate
+                            <ul style="width:105px">
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labour-deactivate"> Entry</a></li>
+                                <li><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labour-deactivate-register">Register</a></li>
+                            </ul>
+                        </li>
+                        <li class="list-btn"><a href="<?php echo $this->basePath(); ?>/wpm/labourstrength/labour-entry"><i class="fa fa-plus"></i>Add New</a></li>
+                    </ul>
+
+                </div>
+            </div>
+		<div class="clearfix"></div>
+		<div id="dataTable" style="border:none;"></div>
+	</div>
+    </div>
+</div>
+
+<script>
+
+var arrLabour =  <?php echo (isset($labourDetails)) ? json_encode($labourDetails) : '[]';?>;
+
+$(function () {
+    bindGrid();
+});
+
+function bindGrid() {
+    var source =
+    {
+        localdata: arrLabour,
+        dataType: "json",
+        dataFields: [
+            { name: 'LabourId', type: 'number' },
+            { name: 'Code', type: 'string' },
+            { name: 'LabourName', type: 'string' },
+            { name: 'TypeName', type: 'string' },
+            { name: 'Contractor', type: 'string' },
+            { name: 'GroupType', type: 'string' },
+            { name: 'CostCentre', type: 'string' },
+            { name: 'CityName', type: 'string' },
+            { name: 'Mobile', type: 'string' },
+            { name: 'Used', type: 'string' }
+        ],
+        id: 'LabourId'
+    };
+    var adapter = new $.jqx.dataAdapter(source);
+    var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+        var $tabsdiv = $($(parentElement).children()[0]);
+        $tabsdiv.append(renderRowDetail(datarecord.LabourId));
+    };
+    $("#dataTable").jqxGrid(
+        {
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight: true,
+            sortable: true,
+            source: adapter,
+            showfilterrow: true,
+            filterable: true,
+            statusbarheight:25,
+            altrows: true,
+            editable: true,
+            columnsResize: true,
+            rowdetails: true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:2px solid #5bc0de;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'LabourId', datafield: 'LabourId', hidden: true, filterable: false },
+                { text: 'Used', datafield: 'Used', hidden: true, filterable: false },
+                { text: 'ID No', dataField: 'Code', width: '10%', editable: false },
+                { text: 'Labour Name', dataField: 'LabourName', width: '15%', editable: false },
+                { text: 'Labour Type', dataField: 'TypeName', width: '10%', editable: false },
+                { text: 'Group Type', dataField: 'GroupType', width: '10%', editable: false },
+                { text: 'Contractor', dataField: 'Contractor', width: '15%', editable: false },
+                { text: 'City', dataField: 'CityName', width: '10%', editable: false },
+                { text: 'Mobile', dataField: 'Mobile', width: '10%', editable: false },
+                { text: 'Cost Centre', dataField: 'CostCentre', width: '10%', editable: false },
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                    cellsrenderer: function (row) {
+                        var labourId = $("#dataTable").jqxGrid('getCellValue', row, 'LabourId'),
+                            sUsed = $("#dataTable").jqxGrid('getCellValue', row, 'Used');
+                        var editLink = '<a title="Edit" href="'+ getBaseURL() + 'wpm/labourstrength/labour-entry/0/a/'+labourId + '" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        editLink = (sUsed=='No') ?  editLink + '&nbsp;&nbsp; <button style="background: transparent;" title="Delete" onclick="return deleteLabMaster(event, '+row+');"><i class="fa fa-trash-o reg-icon"></i></button>' : editLink;
+                        return editLink;
+                    }
+                }
+            ]
+        });
+
+    $('#dataTable').on('rowexpand', function (event) {
+        var prev_row = $('#dataTable').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#dataTable').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#dataTable').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#dataTable').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $("#print").click(function () {
+        var gridContent = $("#dataTable").jqxGrid('exportdata', 'html');
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title> Labour Register </title>\n' +
+                '<h1> Labour Register</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+        /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+    });
+    $('#dataTable').on('rowcollapse', function (event) {
+        $('#dataTable').jqxGrid('clearselection');
+    });
+
+ }
+//$(document).ready(function () {
+//	$('.show_hide1').click(function(){
+//		$('.error_message').hide();
+//		$('.slidingDiv1 input:text, select, textarea').each(function() {
+//            $(this).val('').trigger('change');
+//		});
+//		$('.slidingDiv2 input:text, select, textarea').each(function() {
+//            $(this).val('').trigger('change');
+//		});
+//        $(".slidingDiv2").hide();
+//        $(".slidingDiv1").slideToggle();
+//	});
+//
+//	$('.show_hide2').click(function(){
+//		$('.error_message').hide();
+//		$('.slidingDiv1 input:text, select, textarea').each(function() {
+//            $(this).val('').trigger('change');
+//		});
+//		$('.slidingDiv2 input:text, select, textarea').each(function() {
+//            $(this).val('').trigger('change');
+//		});
+//        $(".slidingDiv1").hide();
+//		$(".slidingDiv2").slideToggle();
+//	});
+//
+//	$('.lgvType').on('click', function(){
+//        $(".slidingDiv1").hide();
+//        $(".slidingDiv2").hide();
+//		var lgvType = $("input[name='lgvType']:checked").val();
+//		if(lgvType == 1) {
+//			$("#vrList").hide();
+//			$("#lgList").show();
+//            $("#adVrList").hide();
+//            $("#adLgList").show();
+//		} else {
+//			$("#lgList").hide();
+//			$("#vrList").show();
+//            $("#adLgList").hide();
+//            $("#adVrList").show();
+//		}
+//	});
+//
+//    /*$('#upFile').on('change', function(){
+//        if($(this).val() != '') {
+//            $('#upFormWrapper').submit();
+//        }
+//    });*/
+//});
+
+//$('#cityId').on('change', function() {
+//    $.post(getBaseURL()+'wpm/labourstrength/get-state-country', { cityId: $(this).val() },
+//        function(data) {
+//            var labMas = JSON.parse(data);
+//            $('#state').val(labMas.StateId).trigger('change');
+//            $('#country').val(labMas.CountryId).trigger('change');
+//        });
+//});
+
+//function submitForm(sType)
+//{
+//	$('.error_message').hide();
+//	var errFlag = 0;
+//	$('#subType').val(sType);
+//    var lgvType = $("input[name='lgvType']:checked").val();
+//    var chkId = 0;
+//
+//	if(sType == 'l') {
+//		if($.trim($('#labourName').val()) == '') {
+//			$('#labourName').closest('.form-group').find(".error_message").show();
+//			$('#labourName').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		if($.trim($('#idNo').val()) == '') {
+//			$('#idNo').closest('.form-group').find(".error_message").show();
+//            $('#idNo').closest('.form-group').find(".error_message").html('<p>please enter id no...</p>');
+//			$('#idNo').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		if($.trim($('#address').val()) == '') {
+//			$('#address').closest('.form-group').find(".error_message").show();
+//			$('#address').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		if($.trim($('#cityId').val()) == '') {
+//			$('#cityId').closest('.form-group').find(".error_message").show();
+//			$('#cityId').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		if($.trim($('#pinCode').val()) == '') {
+//			$('#pinCode').closest('.form-group').find(".error_message").show();
+//			$('#pinCode').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		/*if($.trim($('#mobile').val()) == '') {
+//			$('#mobile').closest('.form-group').find(".error_message").show();
+//			$('#mobile').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//		if($.trim($('#email').val()) == '') {
+//			$('#email').closest('.form-group').find(".error_message").show();
+//			$('#email').focus();
+//			errFlag = 1;
+//			return false;
+//		} else*/
+//        if($.trim($('#email').val()) != '') {
+//            if (validateEmail($('#email').val()) == false) {
+//                $('#email').closest('.form-group').find(".error_message").show();
+//                $('#email').focus();
+//                errFlag = 1;
+//                return false;
+//            }
+//        }
+//        if($.trim($('#labourTypeId').val()) == '') {
+//            $('#labourTypeId').closest('.form-group').find(".error_message").show();
+//            $('#labourTypeId').focus();
+//            errFlag = 1;
+//            return false;
+//        }
+//        if(lgvType == 1) {
+//            if ($.trim($('#labourGroupId').val()) == '') {
+//                $('#labourGroupId').closest('.form-group').find(".error_message").show();
+//                $('#labourGroupId').focus();
+//                errFlag = 1;
+//                return false;
+//            }
+//            var chkId = $('#labourGroupId').val();
+//        } else {
+//            if ($.trim($('#vendorId').val()) == '') {
+//                $('#vendorId').closest('.form-group').find(".error_message").show();
+//                $('#vendorId').focus();
+//                errFlag = 1;
+//                return false;
+//            }
+//            var chkId = $('#vendorId').val();
+//        }
+//	} else if(sType == 'g') {
+//		if($.trim($('#lgName').val()) == '') {
+//			$('#lgName').closest('.mar-35').find(".error_message").show();
+//			$('#lgName').focus();
+//			errFlag = 1;
+//			return false;
+//		}
+//	}
+//
+//	if(errFlag == 0) {
+//        if($('#editIdNo').val() != $('#idNo').val()) {
+//            $.post(getBaseURL() + 'wpm/labourstrength/check-labour', {
+//                code: $('#idNo').val(),
+//                id: chkId,
+//                lType: lgvType
+//            },
+//            function (data) {
+//                var chkCount = JSON.parse(data);
+//                if (chkCount.Count != 0) {
+//                    $('#idNo').closest('.form-group').find(".error_message").show();
+//                    $('#idNo').closest('.form-group').find(".error_message").html('<p>this one already exists!</p>');
+//                    $('#idNo').focus();
+//                } else {
+//                    $('#formWrapper').submit();
+//                }
+//            });
+//        } else {
+//            $('#formWrapper').submit();
+//        }
+//	}
+//    return false;
+//}
+
+function changeSelLabGrpVen(labGrpId, venId)
+{
+	if(labGrpId != '' || venId != '') {
+		$.ajax({
+			url: getBaseURL() +"wpm/labourstrength/get-labour-master",
+			data: { 'labGrpId':labGrpId, 'vendorId':venId },
+			type: 'post',
+			success: function(data, status, xhr) {
+				labMasterGrid(data);
+			},
+			error: function(xhr, status, errorThrown) {
+				if (xhr.status == 400)
+					alert(xhr.responseText);
+				else
+					alert(errorThrown);
+			}
+		});
+	}
+}
+
+function labMasterGrid(resData)
+{
+    $(".slidingDiv1").hide();
+    $("#dataTable").show();
+
+}
+
+function editLabMaster(labId)
+{
+    $('.error_message').hide();
+	if(labId != '') {
+		$.ajax({
+			url: getBaseURL() +"wpm/labourstrength/edit-delete-labour-master",
+			data: { 'labourId':labId, 'type':'e' },
+			type: 'post',
+			success: function(data, status, xhr) {
+				var labMas = JSON.parse(data);
+				$('#labourId').val(labMas.LabourId);
+				$('#labourName').val(labMas.LabourName);
+				$('#labourName').focus();
+				$('#idNo').val(labMas.Code);
+                $('#editIdNo').val(labMas.Code);
+				$('#address').val(labMas.Address);
+				$('#cityId').val(labMas.CityId).trigger('change');
+				$('#state').val(labMas.StateId).trigger('change');
+				$('#country').val(labMas.CountryId).trigger('change');
+				$('#pinCode').val(labMas.PinCode);
+				$('#mobile').val(labMas.Mobile);
+				$('#email').val(labMas.Email);
+				$('#pfNo').val(labMas.PFNo);
+				$('#esiNo').val(labMas.ESINo);
+				$('#labourTypeId').val(labMas.LabourTypeId).trigger('change');
+				$('#vendorId').val(labMas.VendorId).trigger('change');
+                $('#labourGroupId').val(labMas.LabourGroupId).trigger('change');
+				$(".slidingDiv1").slideToggle();
+			},
+			error: function(xhr, status, errorThrown) {
+				if (xhr.status == 400)
+					alert(xhr.responseText);
+				else
+					alert(errorThrown);
+			}
+		});
+        $('#dataTable').hide();
+	}
+}
+
+function deleteLabMaster(event, row)
+{
+	event.preventDefault();
+	var rowData = $("#dataTable").jqxGrid('getrowdata', row);
+	if (confirm("Do you want to delete?")) {
+		$.ajax({
+			url: getBaseURL() + 'wpm/labourstrength/edit-delete-labour-master',
+			type: 'POST',
+			data: { 'labourId':rowData.LabourId, 'type':'d' },
+			success:function(data, textStatus, jqXHR){
+				if (jqXHR.status == 200)
+					$("#dataTable").jqxGrid("deleterow", rowData.uid);
+				else
+					alert('Failed to delete the request!');
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+				if (jqXHR.status == 403)
+					alert(jqXHR.responseText);
+				else
+					alert(textStatus+"-----"+errorThrown);
+			}
+		});
+	}
+}
+function renderRowDetail(id) {
+
+    $.ajax({
+        url: getBaseURL()+'wpm/template/labourmasterview',
+        type: 'POST',
+        data: {LabourId: id},
+        async: false,
+        success: function(data,status, xhr) {
+            if(xhr.status == 200)
+                dataValue = data;
+        }, error: function(xhr, status, errorThrown) {
+        }
+    });
+    return dataValue;
+}
+</script>

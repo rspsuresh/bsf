@@ -1,0 +1,518 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<!--<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+</style>-->
+<style>
+#treeGrid .jqx-grid-header {height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+            	<h1 class="float_l">Vendor Master</h1>
+                <div class="edit_del commargin_top float_r">
+                    <ul>
+                        <li> <a title="Add Vendor" href="javascript: vendorAdd()" class="edit_al"><i class="fa fa-plus"></i> Add Vendor</a> </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div id="DeleteModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delVendorName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                    <div class="row m_tb40">
+                        <div class="form-group req_flds col-lg-12">
+                            <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div id="EditModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Edit Vendor</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" id="editForm">
+                    <div class="row padtop20">
+                        <div class="col-lg-12 form-group req_flds">
+                            <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                            <input type="hidden" name="vendorId" id="vendorId"/>
+                            <input type="text" id="vendorName" name="vendorName" class="form-control lbl_move" label="Name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" id="address" name="address" class="form-control lbl_move geo" label="Address"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" id="city" name="city" class="form-control lbl_move" label="City" data-name="locality" placeholder=""/>
+                            <input type="hidden" id="state" name="state" class="form-control" data-name="administrative_area_level_1"/>
+                            <input type="hidden" id="country" name="country" class="form-control" data-name="country"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" id="email" class="form-control lbl_move" name="email" label="Email" onchange="validateEmailInput(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" id="mobile" class="form-control lbl_move" name="mobile" label="Mobile" onchange="validateMobileInput(this)" onkeypress="return isNumberKey(event,this)"/>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Add Confirmation Modal-->
+<div id="AddModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Create Vendor</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form method="post" id="addForm" autocomplete="off">
+                        <div class="row padtop20">
+                            <div class="form-group col-lg-12">
+                                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                                <input type="text" id="vendorNamenew" name="vendorNamenew" autocomplete="off" class="form-control lbl_move" label="Name"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <input type="text" id="addressnew" name="addressnew" autocomplete="off" class="form-control lbl_move geo" label="Address" placeholder=""/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <input type="text" id="citynew" name="citynew" autocomplete="off" class="form-control lbl_move" label="City" data-name="locality" placeholder=""/>
+                                <input type="hidden" id="statenew" name="statenew" class="form-control" data-name="administrative_area_level_1"/>
+                                <input type="hidden" id="countrynew" name="countrynew" class="form-control" data-name="country"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <input type="text" id="emailnew" name="emailnew" autocomplete="off" class="form-control lbl_move" label="Email" onchange="validateEmailInput(this)" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <input type="text" id="mobilenew" name="mobilenew" autocomplete="off" class="form-control lbl_move" label="Mobile" onchange="validateMobileInput(this)" onkeypress="return isNumberKey(event,this)" />
+                            </div>
+                        </div>
+                    </form>
+            	</div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" id="btnAddYes" class="ripple">Create</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+var data = <?php echo (isset($vendorReg)) ? json_encode($vendorReg) : ''?>,
+    $treeGrid = $("#treeGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $editModal = $('#EditModal'),
+    $editForm = $('#editForm'),
+    $addModal = $('#AddModal'),
+    $remarks = $('#remarks'),
+    $vendorId = $('#vendorId'),
+    $vendorName = $('#vendorName'),
+    $address = $('#address'),
+    $city = $('#city'),
+    $email = $('#email'),
+    $mobile = $('#mobile'),
+    $vendorNamenew = $('#vendorNamenew'),
+    $addressnew = $('#addressnew'),
+    $cityNew = $('#citynew'),
+    $emailnew = $('#emailnew'),
+    $mobilenew = $('#mobilenew');
+
+$(function () {
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'VendorId', type: 'number' },
+            { name: 'VendorName', type: 'string' },
+            { name: 'Address', type: 'string' },
+            { name: 'CityName', type: 'string' },
+            { name: 'Email', type: 'string' },
+            { name: 'Mobile', type: 'string' }
+        ],
+        id: 'VendorId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'VendorId', datafield: 'VendorId', hidden: true, filterable: false},
+            { text: 'Name', dataField: 'VendorName', width: "15%"},
+            { text: 'Address', dataField: 'Address', width: "24%"},
+            { text: 'City', dataField: 'CityName', width: "15%"},
+            { text: 'Email', dataField: 'Email', width: "25%"},
+            { text: 'Mobile', dataField: 'Mobile', width: "15%"},
+            { text: 'Action', sortable: false, filterable: false, align: 'left', width: "6%",
+                cellsrenderer: function (row) {
+                    var editLink = '<a title="Edit" onclick="vendorEdit('+row+');return false;" style="padding-left:40;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink + "&nbsp;&nbsp;" + '<a title="Delete" onclick="vendorDelete('+row+'); return false;"><i class="fa fa-trash-o reg-icon"></i></a>';
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function (e) {
+        e.preventDefault();
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else {
+            removeError($remarks);
+        }
+
+        $deleteModal.modal('hide');
+        var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'cb/master/deletevendor',
+            type: 'POST',
+            data: {"VendorId": rowData.VendorId, "Remarks": remarks},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $treeGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Cannot delete this vendor, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the Vendor!');
+            }
+        });
+        $remarks.val('');
+    });
+
+    $('#btnEditYes').on('click', function (e) {
+        e.preventDefault();
+        var vendorName = $vendorName.val();
+        var address = $address.val();
+        var city = $city.val();
+        var email = $email.val();
+        var mobile = $mobile.val();
+
+        validate(function(isSuccess) {
+            if(isSuccess) {
+                $editModal.modal('hide');
+                var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+
+                $vendorId.val(rowData.VendorId);
+                $.ajax({
+                    url: getBaseURL() + 'cb/master/editvendor',
+                    type: 'POST',
+                    async: false,
+                    data: $editForm.serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'VendorName', vendorName);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'Address', address);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'CityName', city);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'Email', email);
+                            $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'Mobile', mobile);
+                        } else {
+                            alert('Failed to Edit the Vendor!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the Vendor!');
+                    }
+                });
+                $vendorName.val('');
+                $address.val('');
+                $email.val('');
+                $mobile.val('');
+            } else {
+                return true;
+            }
+        });
+
+        function validate(callback) {
+            if(vendorName.length == 0) {
+                showError($vendorName, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($vendorName);
+            }
+
+            if(address.length == 0) {
+                showError($address, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($address);
+            }
+
+            if(city.length == 0) {
+                showError($city, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($city);
+            }
+
+            if($email.hasClass('error')) {
+                callback(false);
+                return false;
+            }
+            if($mobile.hasClass('error')) {
+                callback(false);
+                return false;
+            }
+
+            //validate vendor name already found for editMode
+            $.ajax({
+                url:getBaseURL()+ 'cb/master/checkvendorfound',
+                type:"post",
+                data: $('#editForm').serialize(),
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    //alert(data)
+                    if(data.results != false){
+                        showError($vendorName, 'Vendor Name already found!');
+                        callback(false);
+                        return false;
+                    }
+                    else{
+                        removeError($vendorName);
+                        callback(true);
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    callback(false);
+                    return false;
+                }
+            });
+        }
+    });
+    //bindJqxGridAutoResize();
+});
+
+$('#btnAddYes').on('click', function (e) {
+    e.preventDefault();
+    var vendorNamenew = $vendorNamenew.val();
+    var addressnew = $addressnew.val();
+    var citynew = $cityNew.val();
+    var emailnew = $emailnew.val();
+    var mobilenew = $mobilenew.val();
+
+    validate(function(isSuccess) {
+
+        if(isSuccess) {
+            $addModal.modal('hide');
+            $.ajax({
+                url: getBaseURL() + 'cb/master/addvendor',
+                type: 'POST',
+                data: $('#addForm').serialize(),
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200){
+                        $treeGrid.jqxGrid('addrow',null,JSON.parse(data));
+                    } else {
+                        alert('Failed to Add Client!');
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to Add Client!');
+                }
+            });
+
+            $('#addForm').trigger('reset');
+        } else {
+            return false;
+        }
+
+    });
+
+    function validate(callback) {
+
+        if(vendorNamenew.length == 0) {
+            showError($vendorNamenew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($vendorNamenew);
+        }
+
+        if(addressnew.length == 0) {
+            showError($addressnew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($addressnew);
+        }
+
+        if(citynew.length == 0) {
+            showError($cityNew, 'Required!');
+            callback(false);
+            return false;
+        } else {
+            removeError($cityNew);
+        }
+
+        if($emailnew.hasClass('error')) {
+            callback(false);
+            return false;
+        }
+        if($mobilenew.hasClass('error')) {
+            callback(false);
+            return false;
+        }
+
+        //validate vendor name already found for addMode
+        $.ajax({
+            url:getBaseURL()+ 'cb/master/checkvendorFound',
+            type:"post",
+            data: $('#addForm').serialize(),
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(data)
+                if(data.results != false){
+                    showError($vendorNamenew, 'Vendor Name already found!');
+                    callback(false);
+                    return false;
+                } else {
+                    removeError($vendorNamenew);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+
+
+    }
+});
+
+function vendorDelete(row) {
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    $deleteModal.data('row', row).modal('show');
+    $('#delVendorName').html(rowData.VendorName);
+    $("#remarks").val('');
+}
+
+function vendorEdit(row) {
+    var rowData = $treeGrid.jqxGrid('getrowdata', row);
+    $editModal.data('row', row).modal('show');
+    $vendorId.val(rowData.VendorId);
+    $vendorName.val(rowData.VendorName).trigger('change');
+    $address.val(rowData.Address);
+    $address.trigger('change');
+    $city.val(rowData.CityName);
+    $city.trigger('change');
+    $email.val(rowData.Email);
+    $email.trigger('change');
+    $mobile.val(rowData.Mobile);
+    $mobile.trigger('change');
+}
+
+function vendorAdd() {
+    $addModal.modal('show');
+    $('#addForm').trigger('reset');
+}
+</script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&amp;key=AIzaSyDaNPyxJ7NKmZ4rC8awB-BlBh6ieH1Q9os"></script>
+<script>
+    /*Mapping Address*/
+    navigator.geolocation.getCurrentPosition(showPosition);
+    $addressnew.geocomplete({
+        details: "#addForm",
+        types: ["geocode", "establishment"]
+    });
+
+    $address.geocomplete({
+        details: "#EditModal",
+        types: ["geocode", "establishment"]
+    });
+
+    function showPosition(position) {
+        var coordinates = position.coords.latitude + "," + position.coords.longitude;
+        $addressnew.val(coordinates);
+        $addressnew.trigger("geocode");
+    }
+
+</script>
+

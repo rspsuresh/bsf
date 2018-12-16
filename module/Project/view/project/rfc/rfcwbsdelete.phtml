@@ -1,0 +1,133 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    .subDiv{ margin-bottom:5px;}
+    .rfc_met {float: left;padding-bottom: 10px;padding-left: 10px;padding-top: 10px; width: 100%;}
+    .popuptable table tr th{background:#E2EBEF!important;padding:5px;border-right:2px solid #5D9BB6;}
+    .popuptable table tr th input[type=text]{ font-size:14px; font-weight:600; color:#333}
+    .popuptable table tr tr{border-bottom:1px solid #dcdbdb; width:100%;}
+    .popuptable table{border:1px solid #c2c2c2;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="formWrapper" method="post" >
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+                <input type="hidden" name="rfcmode" id="rfcmode" value="<?php echo $mode;?>">
+                <input type="hidden" name="editid" id="editid" value="<?php echo $editid;?>">
+                <?php if (isset($rfctrans) && $editid != 0):?>
+                    <input type="hidden" name="rfcregisterid" id="rfcregisterid" value="<?php echo $rfctrans[0]['RFCRegisterId'];?>">
+                <?php endif; ?>
+
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - WBS Delete</h1>
+                </div>
+
+                <div class="col-lg-12 top_ct" >
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" class="form-control date_picker lbl_move" label="Reference Date" readonly name="refdate" value = "<?php if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>"  id="refdate"/>
+                        </div>s
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move" label="Reference No." name="refno" value = "<?php if ($rfcid !=0) { echo $rfcregister['RefNo'];} else { echo $svNo; } ?>" <?php if ($genType==true) { ?> readonly <?php } ?> id="refno" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0">
+                    <!-- Tree Structure -->
+                    <div id="treeWrapper" style="">
+                        <div class="bread_crumb first_step" id="tree-structure">
+                            <!--                            <a data-id="2">Block1</a>-->
+                            <!--                            <a class="active" data-id="5">Earth Work</a>-->
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="col-lg-12 col-lg-offset-0" style="<?php echo ($mode!='edit' || $editid !=0 || $rfcid !=0) ? '': 'display: none';?>" id="edit-content">
+                    <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                        <table class="table" style=" margin-bottom:0px;" id="wbsTable">
+                            <thead>
+                            <tr>
+                                <th width="10%">Serial No</th>
+                                <th width="50%">Description</th>
+                                <th width="10%">Unit</th>
+                                <th width="10%">Quantity</th>
+                                <th width="10%">Rate</th>
+                                <th width="10%">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody>
+                            <tr>
+                                <td colspan="10">
+                                    <textarea class="remrk element"  name="narration" id="narration" placeholder="Why do you delete this?"><?php if(isset($rfcregister['Narration'])) echo $rfcregister['Narration']; else echo ''; ?></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="0">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" style="<?php echo ($mode!='edit' || $editid !=0 || $rfcid !=0) ? '' : 'display: none;';?>">
+            <a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit">Submit</a>
+        </li>
+        <li class="cancel_btn float_r" id="back-btn" style="<?php echo ($mode=='edit' && ( $editid !=0 || $rfcid !=0)) ? '' : 'display: none;';?>"><a href="<?php echo $this->basePath();?>/project/rfc/rfcregister" name="backbut" id="backbut">Cancel</a></li>
+    </ul>
+</div>
+<script type="text/template" id="dummy-wbs">
+    <tr id="rowid__">
+        <td><input class="parent_text" type="text" id="serialno__" readonly/></td>
+        <td><input class="parent_text" type="text" id="spec__" readonly/></td>
+        <td><input class="parent_text" type="text" id="unitname__" readonly/></td>
+        <td><input class="parent_text" type="text" id="qty__" readonly/></td>
+        <td><input class="parent_text" type="text" id="rate__" readonly/></td>
+        <td><input class="parent_text" type="text" id="amount__" readonly/></td>
+        <input type="hidden" name="TransId__" id="TransId__">
+        <input type="hidden" name="WBSId__" id="WBSId__">
+        <input type="hidden" name="ProjectIOWId__" id="ProjectIOWId__">
+    </tr>
+</script>
+<script type="text/javascript">
+    var wbsTrans = <?php echo (isset($wbsTrans)) ? json_encode($wbsTrans) : '[]';?>;
+    $(function(){
+        var $rowid = $('#rowid');
+        var template = $('#dummy-wbs').html();
+        var rowid = 0;
+        var $tbody = $('#wbsTable').find('tbody.main');
+        if(wbsTrans.length != 0) {
+//            $.each(wbsTrans, function(i, o) {
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+
+            $('#ProjectIOWId_' + rowid).val(wbsTrans.ProjectIOWId);
+            $('#WBSId_' + rowid).val(wbsTrans.WBSId);
+            $('#TransId_' + rowid).val(wbsTrans.TransId);
+            $('#serialno_' + rowid).val(wbsTrans.SerialNo);
+            $('#spec_' + rowid).val(wbsTrans.Specification);
+            $('#unitname_' + rowid).val(wbsTrans.UnitName);
+            $('#rate_' + rowid).val(sanitizeNumber(wbsTrans.Rate,2,true,true));
+            $('#qty_' + rowid).val(sanitizeNumber(wbsTrans.Qty,2,true,true));
+            $('#amount_' + rowid).val(sanitizeNumber(wbsTrans.Amount,2,true,true));
+
+            var parents = wbsTrans.ParentText.split('->');
+            $.each(parents, function (i,val) {
+                $('#tree-structure').append('<a>'+val+'</a>');
+            });
+            $('#tree-structure').append('<a class="active">'+wbsTrans.WBSName+'</a>');
+//            });
+        }
+        $rowid.val(rowid);
+    });
+
+    function submitForm() {
+        $('#formWrapper').submit();
+    }
+</script>

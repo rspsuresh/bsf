@@ -1,0 +1,336 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap-ui.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.fmatter.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.jqGrid.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/i18n/grid.locale-en.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxcore.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqx-all.js"></script>
+<style>
+    .color-green {
+        background-color: lightgreen;
+    }
+    .color-red{
+        background-color: rosybrown;
+    }
+	.sel-type {font-size:13px;}
+
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <?php if ($projectId !=0) { ?>
+                <div class="col-lg-12 page_tittle" id="pagetittle">
+                    <h1 class="col-lg-4 col-sm-4">Revision Report</h1>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Project</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="project_id" id="project_id" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Project</option>
+                                    <?php if(isset($projectlists)):?>
+                                        <?php foreach ( $projectlists as $project ):?>
+                                            <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                                        <?php endforeach; ?>
+                                    <?php  endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Type</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="revtype" id="revtype" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Type</option>
+                                    <option value="B" <?php echo $revtype=='B' ? 'selected' : ''; ?>>Budget</option>
+                                    <option value="P" <?php echo $revtype=='P' ? 'selected' : ''; ?>>Plan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" data-visibility="hide">
+                    <div class="col-lg-9 col-lg-offset-3 col-sm-9 col-sm-offset-3 edit_del">
+                        <div class="col-lg-12">
+                            <ul>
+                                <li><button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button></li>
+                                <li><button type="button" class="edit-btn form-group edit_al" id="expand-all">Expand All</button></li>
+                                <li><button type="button" class="edit-btn form-group edit_al" id="collapse-all">Collapse All</button></li>
+                            </ul></div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-lg-12 clear" id="gridWrapper" >
+                    <div class="table-responsive clear">
+                        <div id="grid"></div>
+                        <div id='pager'></div>
+                    </div>
+                </div>
+            <?php } else { ?>
+            <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts" id="formWrapper">
+                    <div class="col-lg-12 frmwrk_div" id="projects_list">
+                        <select name="newproject_id" id="newproject_id" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%;">
+                           
+                            <?php if(isset($projectlists)):?>
+                                <?php foreach ( $projectlists as $project ):?>
+                                    <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                                <?php endforeach; ?>
+                            <?php  endif; ?>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                        <select name="newrevtype" id="newrevtype" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Type" style="width:100%;">
+                           
+                            <option value="B">Budget</option>
+                            <option value="P">Plan</option>
+                        </select>
+                    </div>
+                    <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+                        <ul>
+                            <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+                        </ul>
+                    </div>
+             
+                </div></div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<script>
+
+    var $project = $('#project_select'),
+        $projectNew = $('#newproject_id'),
+        $type_list = $('#types_list'),
+        $type = $('#type_select');
+
+    $(function () {
+        $projectNew.on('change', function() {
+            var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+            if (nproj_id !=0) $type_list.show();
+            else $type_list.hide();
+        });
+    });
+
+
+    var $treeGrid = $("#grid");
+    $(function () {
+        /*$("#grid").jqxTreeGrid('expandAll');*/
+        var data = <?php echo (isset($tmpwbs)) ? json_encode($tmpwbs) : '[]'?>;
+        var projectId = <?php if(isset($projectId)) echo json_encode($projectId); else echo '""';?>;
+        var revtype = <?php if(isset($revtype)) echo json_encode($revtype); else echo '""'?>;
+        var revmaster = <?php if(isset($revmaster)) echo json_encode($revmaster); else echo '""';?>;
+
+
+//        $sQty = $revmaster['RevisionName'] . '-Qty';
+//        $sRate = $revmaster['RevisionName'] . '-Rate';
+//        $sAmount = $revmaster['RevisionName'] . '-Amount';
+
+        //ParentId','WBSId','ProjectIOWId','Qty','Rate','Amount','SerialNo','Description','UnitName'
+
+        var sStr= "";
+        var sFStr ="";
+
+        for (i = 0; i < revmaster.length; i++) {
+            sStr = sStr +  "{ name:" + "'" + revmaster[i]["RevisionName"] + "-Qty' },";
+            sStr = sStr +  "{ name:" +  "'" + revmaster[i]["RevisionName"] + "-Rate' },";
+            sStr = sStr +  "{ name:" +  "'" + revmaster[i]["RevisionName"] + "-Amount' },";
+
+            sFStr = sFStr +  "{ text: " +  "'" + revmaster[i]["RevisionName"] + "-Qty', dataField:" + "'" + revmaster[i]["RevisionName"] + "-Qty'},";
+            sFStr = sFStr +  "{ text: " +  "'" + revmaster[i]["RevisionName"] + "-Rate', dataField:" + "'" +revmaster[i]["RevisionName"] + "-Rate'},";
+            sFStr = sFStr +  "{ text: " +  "'" + revmaster[i]["RevisionName"] + "-Amount', dataField:" + "'" + revmaster[i]["RevisionName"] + "-Amount'},";
+
+        }
+
+        if (sStr !="") sStr= sStr.slice(0,-1);
+        if (sFStr !="") sFStr= sFStr.slice(0,-1);
+
+        if(projectId != 0) {
+
+            var cellsRenderer = function (row, column, value, rowData)
+            {
+                if (value ==0) value ='';
+
+                if (rowData.records !== undefined)
+                {
+                    return '<span style="font-weight: bold;">' + value + '</span>';
+                } else
+                {
+                    return '<span>' + value + '</span>';
+                }
+
+
+
+            };
+            var aggregatesRenderer = function (aggregatesText, column, element, aggregates, type) {
+                if (type == "aggregates") {
+                    var renderString = "<div style='margin: 4px; float: right;  height: 100%;'>";
+                }
+                else {
+                    var renderString = "<div style='float: right;  height: 100%;'>";
+                }
+                var Total = sanitizeNumber(aggregates.Total, 2,true);
+                renderString += "<table><tr><td rowspan='2'></td><td align='right'><strong>" + Total+ "</strong></td><tr><td align='right'> </td></tr></table>";
+                return renderString;
+            }
+
+            var arr_fields = [
+                { name: 'Id',type:'number'},
+                { name: 'TmpId',type:'number'},
+                { name: 'ParentId',type:'number'},
+                { name: 'WBSId',type:'number'},
+                { name: 'ProjectIOWId',type:'number'},
+                { name: 'SerialNo',type:'number'},
+                { name: 'Description',type:'number'},
+                { name: 'UnitName',type:'number'},
+                { name: 'Qty',type:'number'},
+                { name: 'Rate',type:'number'},
+                { name: 'Amount' , type:'number'},
+            ];
+
+
+            var sCurret = "Current";
+
+            var arr_columns = [
+                { text: 'SerialNo', dataField: 'SerialNo', cellsRenderer: cellsRenderer},
+                { text: 'Description', dataField: 'Description',cellsRenderer: cellsRenderer},
+                { text: 'UnitName', dataField: 'UnitName',cellsRenderer: cellsRenderer},
+                { text: 'Qty', columnGroup: "Current",dataField: 'Qty',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                    }
+                },
+                { text: 'Rate', columnGroup: "Current",dataField: 'Rate',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Rate'),2, true) + '</div>';
+                    }
+                },
+                { text: 'Amount', columnGroup: "Current",dataField: 'Amount',aggregatesRenderer:aggregatesRenderer,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Amount'),2, true) + '</div>';
+                    },
+                    aggregates: [{
+                        'Total':
+                            function (aggregatedValue, currentValue, column, record, aggregateLevel) {
+                                return aggregatedValue+ currentValue;
+                            }
+                    }]
+                },
+            ];
+
+            var arr_columnsgroup = [
+                { text: "Current.", name: "Current", align: "center" }
+            ];
+
+            for (i = 0; i < revmaster.length; i++) {
+
+                var sRevName = revmaster[i]["RevisionName"];
+                var sQty = revmaster[i]["RevisionName"]+'-Qty';
+                var sRate = revmaster[i]["RevisionName"]+'-Rate';
+                var sAmount = revmaster[i]["RevisionName"]+'-Amount';
+
+                arr_fields.push({name : sQty,type:'number'});
+                arr_fields.push({name : sRate,type:'number'});
+                arr_fields.push({name : sAmount,type:'number'});
+
+                arr_columns.push({text: sQty, columnGroup: sRevName, dataField: sQty,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, sQty),2, true) + '</div>';
+                    }});
+                arr_columns.push({text: sRate, columnGroup: sRevName, dataField: sRate,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, sRate),2, true) + '</div>';
+                    }});
+                arr_columns.push({text: sAmount, columnGroup: sRevName, dataField: sAmount,aggregatesRenderer:aggregatesRenderer,
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, sAmount),2, true) + '</div>';
+                    },
+                    aggregates: [{
+                        'Total':
+                            function (aggregatedValue, currentValue, column, record, aggregateLevel) {
+                                return aggregatedValue+ currentValue;
+                            }
+                    }]
+                });
+
+                arr_columnsgroup.push({text: sRevName,name:sRevName,align:"center"});
+            }
+
+
+//            columns: [
+//                { text: "Name", columnGroup: "JSTCorp", align: "center", dataField: "name", width: 300 },
+//                { text: "Budget", columnGroup: "JSTCorp", cellsAlign: "center", align: "center", dataField: "budget", cellsFormat: "c2", width: 250 },
+//                { text: "Location", columnGroup: "JSTCorp", dataField: "location", cellsAlign: "center", align: "center", width: 250 }
+//            ],
+//                columnGroups:
+//            [
+//                { text: "JST Corp.", name: "JSTCorp", align: "center" }
+//            ]
+
+
+            var source = {
+                localdata:data,
+                dataType: "json",
+                dataFields: arr_fields,
+                hierarchy:
+                {
+                    keyDataField: { name: 'TmpId' },
+                    parentDataField: { name: 'ParentId' }
+                },
+                id: 'Id'
+            };
+
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+
+            $treeGrid.jqxTreeGrid({
+                source: dataAdapter,
+                width:"100%",
+                height:"490",
+//                columnsHeight: "30",
+                filterable: true,
+                showSubAggregates: true,
+                showAggregates: true,
+                aggregatesHeight: 55,
+                sortable: true,
+                pageable:true,
+                columns: arr_columns,
+                columnGroups: arr_columnsgroup
+            });
+        }
+    });
+
+    function submitForm() {
+        var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+        var  nrevtype= isNullCheck($('#newrevtype').val(),'string');
+
+        if (nproj_id ==0) {
+            alert("select Project");
+            return;
+        }
+        if (nrevtype =="") {
+            alert("Select Type");
+            return;
+        }
+
+        window.location.href = getBaseURL() + "project/report/wbsrevision/" + nproj_id + "/" + nrevtype;
+    }
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#project_id').val(),'number');
+        var sType= isNullCheck($('#revtype').val(),'string');
+        window.location.href = getBaseURL() + "project/report/wbsrevision/" + iProjectId + "/" + sType;
+    }
+
+    $('#expand-all').click(function () {
+        $("#grid").jqxTreeGrid('expandAll');
+    });
+
+    $('#collapse-all').click(function () {
+        $("#grid").jqxTreeGrid('collapseAll');
+    });
+
+</script>

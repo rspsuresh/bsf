@@ -1,0 +1,160 @@
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+	/*--------------Jqx Grid jqx All-------------------*/
+/*--------------Jqx Grid jqx All-------------------*/
+#jqxgrid									{min-height:200px !important;}
+#jqxgrid .jqx-grid-header 					{height:60px !important;}
+.jqx-grid-groups-row						{padding-left:5px !important;}
+.jqx-grid-pager-input						{padding: 2px; text-align: center !important; width: 35px;}
+.jqx-dropdownlist-state-normal				{display: block;  float: right;height: 16px !important;margin-right: 7px;margin-top: 0;  padding-bottom: 2px !important;padding-top: 2px !important; width: 40px;}
+.jqx-button									{cursor: pointer;float: right;margin-right: 3px !important;margin-top: 0 !important;padding: 0 !important;width: 20px !important;}
+.jqx-button > .jqx-icon-arrow-left,
+.jqx-button >.jqx-icon-arrow-right			{height: 21px !important;margin-left: 0 !important;width: 20px !important;}
+.jqx-listitem-element						{height: 25px !important;}
+.jqx-input									{height: 25px !important; margin:2px 4px !important;}
+.jqx-grid-pager .jqx-grid-pager-input		{height:20px !important; margin:0px 4px !important;}
+#jqxgrid .jqx-grid-cell-right-align 		{text-align:right !important; padding-right:8px;}
+#jqxgrid .jqx-grid-cell-left-align 			{padding-left:8px;}
+.jqx-grid-column-menubutton::after			{left:4px;top:10px;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script> 
+<div class="content_wrapper  padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+            	<div class="col-lg-12 padlr0">
+					<h1 class="col-lg-6 col-md-6 col-sm-6 padlr0">Daily Campaign Analysis</h1> 
+					<div class="col-lg-6 col-md-6 col-sm-6">
+						<ul>
+							<li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple"  id="print" data-original-title="ExportPrint" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-394.png" /></a></li>
+							<li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="excelExport" data-original-title="ExportExcel" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-393.png" /></a></li>
+							<li class="float_r" style="padding: 0px 5px;"><a href="javascript:void(0);" class="ripple" id="csvExport" data-original-title="ExportCSV" data-placement="left" data-toggle="tooltip"><img src="<?php echo $this->basePath(); ?>/images/icons-392.png" /></a></li>
+							<!--<li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn4  ripple" id="htmlExport">Export to HTML</a></li>-->
+						</ul>
+					</div>
+                </div>
+				<div class="col-lg-6 col-lg-offset-6 col-md-8 col-md-offset-4 col-sm-8 col-sm-offset-4 padlr0 clear commargin_ttop_20 commargin_bottom">
+					<div class="col-lg-6 col-lg-push-6 col-md-6 col-md-push-6 col-sm-6 col-sm-push-6 commargin_top padlr0">
+						<span class="date_icon"><i class="fa fa-calendar"></i></span>
+						<input type="text" name="asonDate" id="asonDate" class="form-control date_picker lbl_move" readonly="readonly" label="Date" onchange="PopulateData(this.value)"  value="<?php echo (isset($dat) && $dat != "") ? $dat : Date('d-m-Y'); ?>" />											
+					</div>
+				</div> 
+			</div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+					<div style='margin-top: 10px;' id="jqxgrid">
+					</div>
+				</div>
+             </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+var arr_Lists = <?php echo (isset($arrUnitLists)) ? json_encode($arrUnitLists) : '[]';?>;
+$(document).ready(function () {
+	// Load Grid
+	var source = {
+		localdata: arr_Lists,
+		datatype: "json",
+		pagesize: 15,
+		datafields:
+		[	
+			{ name: "ProjectId", type: "number" },
+			{ name: "ProjectName", type: "string" },			
+			{ name: "CampaignName", type: "string" },
+			<?php foreach($arropportunityList as $arropportunityLists) { ?>
+			{ name: "<?php echo $arropportunityLists['OpportunityName']."_".$arropportunityLists['OpportunityId']; ?>", type: "number" },
+			<?php } ?>
+			{ name: "CampaignId", type: "number" }
+		]
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source);
+	$("#jqxgrid").jqxGrid(
+	{
+		width: "100%",
+		source: dataAdapter,
+		pageable: true,
+		pagerMode: 'advanced',
+    	pagerHeight: 40,
+		rowsheight:40,
+		columnsresize: true,
+		autoheight: true,
+		sortable: true,
+		altrows: true,
+		enabletooltips: true,
+		showfilterrow: true,
+		filterable: true,
+		groupable: true,
+		showstatusbar: true,
+		statusbarheight: 35,
+		showaggregates: true,
+		autorowheight: true,
+		columns: [	
+			{ text: 'ProjectId', dataField: 'ProjectId', align: 'center' , pinned: true, hidden:true },
+			{ text: 'ProjectName', dataField: 'ProjectName', align: 'center', pinned: true ,width:"25%" },
+			{ text: 'CampaignName', dataField: 'CampaignName', align: 'center', pinned: true ,width:"25%" },
+			<?php foreach($arropportunityList as $arropportunityLists) { ?>
+			{ text: '<?php echo $arropportunityLists['OpportunityName'];?>', dataField: '<?php echo $arropportunityLists['OpportunityName']."_".$arropportunityLists['OpportunityId']; ?>', align: 'right', cellsalign: 'right',width:"20%", cellsformat: "d" },			
+			<?php } ?>
+			{ text: 'CampaignId', dataField: 'CampaignId', align: 'center' , pinned: true, hidden:true }
+		],
+		groups: ['ProjectName']
+	});
+	//$("#jqxgrid").jqxGrid('showgroupsheader', false);
+	//$("#jqxgrid").jqxGrid('expandallgroups');
+	//Print option
+	$("#excelExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+	});
+	$("#csvExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+	});
+	$("#htmlExport").click(function () {
+		$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid');
+	});
+
+	$("#print").click(function () {
+		var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html');
+		//var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+		var newWindow = window.open('', '', 'width=800, height=500'),
+		document = newWindow.document.open(),
+		pageContent =
+			'<!DOCTYPE html>\n' +
+			'<html>\n' +
+			'<head>\n' +
+			'<meta charset="utf-8" />\n' +
+			'<title>Daily Campaign Analysis</title>\n' +				
+			'<h1>Daily Campaign Analysis</h1>\n' +
+			'</head>\n' +
+			'<body>\n' + gridContent + '\n</body>\n</html>';
+		document.write(pageContent);
+		document.close();
+		newWindow.print();
+		
+		/*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+	});
+	
+	$("#jqxgrid").bind('rowselect', function (event) {
+		var row = event.args.rowindex;
+		var datarow = $("#jqxgrid").jqxGrid('getrowdata', row);
+	});
+	//bindJqxGridAutoResize();
+});
+
+function PopulateData(value) {
+	//console.log(value);
+	//bindLoadGrid(value);
+	if(value !=  '') {
+	window.location.replace(getBaseURL() + "crm/report/dailycampaignanalysis/" + value);
+	} /*else{
+		window.location.replace(getBaseURL() + "crm/report/executiveanalysisrpt");
+	}*/
+}
+
+</script>

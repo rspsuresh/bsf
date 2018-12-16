@@ -1,0 +1,214 @@
+<style>
+    .jqx-grid-header {height:75px !important;}
+	.dropdown-toggle{position:relative}
+	.proname_btn a{font-size:25px; margin-left:2px;line-height:30px}
+	.jqx-grid-groups-header{color:#B0B0B0}
+	.jqx-grid-group-column a:link{color:#333}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <h1 style="float:left; color: #333;font-size: 2em;padding-bottom:0">Resource Library<span class="colon_r">:</span></h1>
+                    <div class="btn-group proname_btn" style="float:left"> <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><label style="font-size:18px" for ="restype">All</label><span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Change&nbsp;Resource&nbsp;Type"><i class="fa fa-caret-down "></i></span></a>
+                        <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                            <ul>
+                                <li><a href="javascript:void(0);" class="followupId" data-index="0">All</a></li>
+                                <li><a href="javascript:void(0);" class="followupId" data-index="1">Labour</a></li>
+                                <li><a href="javascript:void(0);" class="followupId" data-index="2">Material</a></li>
+                                <li><a href="javascript:void(0);" class="followupId" data-index="3">Asset</a></li>
+                                <li><a href="javascript:void(0);" class="followupId" data-index="4">Activity</a></li>
+                            </ul>
+                        </div>
+                    </div>
+			    </div>
+                <div class="col-lg-5 edit_del" >
+                    <ul>
+                        <li>
+                            <a href="<?php echo $this->basePath(); ?>/project/rfc/rfcresource" class="edit-btn edit_al"><i class="fa fa-plus-circle"></i> Add Resource</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="dropdown nav-list"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print print-icon-img" aria-hidden="true"></i></a>
+                    <ul class="dropdown-menu drp-list arrow-right">
+                        <li><a href="<?php echo $this->basePath(); ?>/project/report/resourcelist">Resource List</a></li>
+                        <li><a href="<?php echo $this->basePath(); ?>/project/report/resourcelistwithgroup">Resource List With Group</a></li>
+                    </ul>
+                </div>
+            </div>            
+            <div class="col-lg-12 col-lg-offset-0 tmss">
+                <div class="table-responsive clear">
+                    <div id="grid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var arrResMaster = <?php echo json_encode($ressourcemaster); ?>;
+    var arrRes = arrResMaster;
+
+    $(function () {
+        bindData();
+    });
+
+    $('.followupId').on('click',function(){
+        var iTypeId = $(this).attr('data-index'),
+            ccName = $(this).text();
+        $("label[for='restype']").html(ccName);
+
+        var parent = $("#grid").parent();
+        $("#grid").remove();
+        $("<div id='grid'></div>").appendTo(parent);
+
+        arrRes=[];
+        if (iTypeId ==0) arrRes = arrResMaster;
+        else {
+            arrRes = $.grep(arrResMaster, function (element, index) {
+                return element.TypeId == iTypeId;
+            });
+        }
+
+
+        bindData();
+    });
+
+
+    function bindData() {
+
+
+//        var url1 = getBaseURL() + "project/main/getresourcemaster";
+        var $grid = $("#grid");
+        var ressource =
+        {
+            dataType: "json",
+            async: false,
+            localdata: arrRes,
+            dataFields: [
+                { name: 'ResourceId', type: 'number' },
+                { name: 'Code', type: 'string' },
+                { name: 'ResourceName', type: 'string' },
+                { name: 'TypeName', type: 'string' },
+                { name: 'ResourceGroupName', type: 'string' },
+                { name: 'UnitName', type: 'string' },
+                { name: 'Rate', type: 'number' }
+            ],
+            id: 'ResourceId'
+        };
+
+        var resdata = new $.jqx.dataAdapter(ressource);
+        var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.ResourceId));
+        };
+        $grid.jqxGrid( {
+            width: "100%",
+            source: resdata,
+            pageable: true,
+            sortable: true,
+            enabletooltips: true,
+            rowdetails: true,
+            filterable:true,
+            showfilterrow: true,
+            autoheight: true,
+            groupable:true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'ResourceId', datafield: 'ResourceId', hidden: true},
+                { text: 'Code', datafield: 'Code',width:'10%'},
+                { text: 'ResourceName', datafield: 'ResourceName',width:'20%'},
+                { text: 'ResourceGroupName', datafield: 'ResourceGroupName',width:'20%'},
+                { text: 'TypeName', datafield: 'TypeName',width:'20%'},
+                { text: 'Unit', datafield: 'UnitName',width:'8%'},
+                { text: 'Rate', dataField: 'Rate',width:'12%', cellsalign: 'right',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($grid.jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                    }},
+                { text: 'Action',sortable: false, filterable: false, width:'10%',align: 'center',
+                    cellsrenderer: function (row) {
+                        var ResourceId = $grid.jqxGrid('getCellValue', row, 'ResourceId'),
+                            editLink = '<a href="'+ getBaseURL() + 'project/rfc/rfcresource/0/edit/'+ResourceId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>',
+                            deleteLink = '<a href="javascript: checkRFCDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+
+                        return '<div class="text-center" style="vertical-align: middle;">' + editLink + "&nbsp;&nbsp;" + deleteLink + "</div>";
+                    }
+                }
+            ],
+            groups: ['TypeName','ResourceGroupName'],
+            groupsrenderer: function (defaultText, group, state, params) {
+                return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+            },
+            ready: function () {
+                $("#grid").jqxGrid('expandallgroups');
+            }
+        });
+
+
+        $grid.on('rowexpand', function (event) {
+            var prev_row = $grid.jqxGrid('selectedrowindexes');
+            if (prev_row != '') {
+                for (var i = 0; i < prev_row.length; i++) {
+                    $grid.jqxGrid('hiderowdetails', prev_row[i]);
+                }
+            };
+            var index = $grid.jqxGrid('getrowboundindex', event.args.rowindex);
+            $grid.jqxGrid({selectedrowindexes: [index]});
+        });
+
+        $grid.on('rowcollapse', function (event) {
+            $grid.jqxGrid('clearselection');
+        });
+
+
+    }
+
+    function checkRFCDelete(row) {
+        var $grid = $("#grid");
+        var id = $grid.jqxGrid('getCellValue', row, 'ResourceId');
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/checkResourceUsed',
+            type: 'POST',
+            async: false,
+            data: {'id': id},
+            success: function (data) {
+                if (data=='Y') {
+                    alert('This Resource is already Used, Do Not Delete');
+                    return;
+                } else if (data=='U') {
+                    alert('Request to delete this Resource is already pending');
+                    return;
+                }
+                window.location = getBaseURL() + 'project/rfc/rfcresourcedelete/0/' + id;
+            },
+            error: function(xhr,status, error) {
+            }
+        });
+    }
+
+    function renderRowDetail(id) {
+        var dataValue = '';
+        $.ajax({
+            url: getBaseURL() + 'project/main/getresourcedetails',
+            type: 'POST',
+            data: {resId: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+</script>
+<!--hover open list--> 
+<script>$('.nav-list').hover(function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500);
+}, function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500);
+});</script>

@@ -1,0 +1,283 @@
+<style>
+.rfc_met {
+	margin-top:20px;
+	margin-bottom:10px;
+}
+.rfc_met ul li input[type="text"] {
+	width:130px !important;
+}
+.jqx-grid-content {
+	z-index:11!important;
+}
+</style>
+<div class='col-lg-12'>
+  <form class='form-horizontal'>
+    <div class='table-responsive'>
+      <table class='table' style=' margin-bottom:0px;  background:#DAEAFF !important; border:1px solid hsl(214, 60%, 84%) !important;''>
+        <tbody>
+          <tr>
+            <td colspan='9' style='padding:0px !important; border:none;'><div class='col-lg-12' style=' margin-top:10px;'>
+                <ul class='nav nav-tabs navs-tabs'>
+                  <li class='active'><a data-toggle='tab' href='#general-<?php echo $details['ResourceId'];?>'>General</a></li>
+                  <?php if($details['TypeId'] != '1'): ?>
+                  <li><a data-toggle='tab' href='#analysis-<?php echo $details['ResourceId'];?>'>Analysis</a></li>
+                  <?php endif;?>
+                </ul>
+              </div>
+              <div class='tab-content'>
+                <div id='general-<?php echo $details['ResourceId'];?>' class='tab-pane fade in active'>
+                  <div class='col-lg-12 tag_tit'>
+                    <div class='form-group col-lg-5'>
+                      <label class='lbss'>Resource Group</label>
+                      <input type='text' class='ptexts col-lg-4' value="<?php echo $details['ResourceGroupName'];?>" readonly>
+                    </div>
+                    <div class='form-group col-lg-4'>
+                      <label class='lbss'>Type Name</label>
+                      <input type='text' class='ptexts col-lg-4' value="<?php echo $details['TypeName'];?>" readonly>
+                    </div>
+                    <div class='form-group col-lg-1'>
+                      <label class='lbss'>Unit</label>
+                      <input type='text' class='ptexts col-lg-4' value="<?php echo $details['UnitName'];?>" readonly>
+                    </div>
+                    <div class='form-group col-lg-2'>
+                      <label class='lbss'>Rate</label>
+                      <input type='text' class='ptexts col-lg-4 text-right' value="<?php echo $this->commonHelper()->sanitizeNumber($details['Rate'],2,true);?>" readonly>
+                    </div>
+                  </div>
+                </div>
+                <?php if($details['TypeId'] != '1'): ?>
+                <div id='analysis-<?php echo $details['ResourceId'];?>' class='tab-pane fade'>
+                  <?php if($details['TypeId'] == '4'): ?>
+                  <div class="col-lg-12">
+                  <div class="subDiv">
+                    <div class="darkmenu">
+                      <ul>
+                        <li class="active"><a data-toggle='tab' href="#manual-tab-<?php echo $details['ResourceId'];?>"><i class="fa fa-caret-right"></i> Manual</a></li>
+                        <li><a data-toggle='tab' href="#machinery-tab-<?php echo $details['ResourceId'];?>"><i class="fa fa-caret-right"></i> Machinery</a></li>
+                      </ul>
+                      <div class="lstate manual_mac">
+                        <ul>
+                          <li>
+                            <label >LS Rate</label>
+                            <input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['LRate'],2,true);?>" readonly/>
+                          </li>
+                          <li>
+                            <label>Manual Rate</label>
+                            <input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['MRate'],2,true);?>" readonly/>
+                          </li>
+                          <li>
+                            <label>Machinery Rate</label>
+                            <input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['ARate'],2,true);?>" readonly/>
+                          </li>
+                          <li>
+                            <label>Rate Type</label>
+                            <div class="select-style select-inline">
+                              <select disabled>
+                                <option <?php echo ($details['RateType'] == 'L') ? 'selected' : '';?>>LS</option>
+                                <option <?php echo ($details['RateType'] == 'M') ? 'selected' : '';?>>Manual</option>
+                                <option <?php echo ($details['RateType'] == 'A') ? 'selected' : '';?>>Machinery</option>
+                              </select>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class='tab-content col-lg-12 clear'>
+                      <div id="manual-tab-<?php echo $details['ResourceId'];?>" class='tab-pane fade in active'>
+                        <div>
+                          <label class="lbl_style">Working Qty</label>
+                          <input type="text" class="parent_texters work_qt text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['AnalysisMQty'],3);?>" readonly />
+                        </div>
+                        <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;"> 
+                          <!-- Manual tabs -->
+                          <table class="table" style="margin-bottom:0px;">
+                            <thead>
+                              <tr>
+                                <th class="bg_clo_subTr">Resource name</th>
+                                <th class="bg_clo_subTr">Unit</th>
+                                <th class="bg_clo_subTr">Qty</th>
+                                <th class="bg_clo_subTr">Rate</th>
+                                <th class="bg_clo_subTr">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody class="sorting">
+                              <?php   $aTotal = 0;
+                                                            foreach($analysis as $anal):
+                                                            if($anal['ActivityType'] == 'A')
+                                                                continue;
+                                                            ?>
+                              <tr>
+                                <td width="25%"><input class="parent_text" type="text" value="<?php echo $anal['Code'] .' '.$anal['ResourceName'];?>" readonly></td>
+                                <td width="5%"><label><?php echo $anal['UnitName'];?></label></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Qty'],3);?>" readonly></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Rate'],2,true);?>" readonly></td>
+                                <td width="8%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Amount'],2,true);?>" readonly></td>
+                              </tr>
+                              <?php $aTotal += $anal['Amount'];
+                                                            endforeach;?>
+                            </tbody>
+                            <tbody class="total">
+                              <tr style="border-bottom:none;">
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;  color:#1d99d4; vertical-align: middle; " align="right">Total</td>
+                                <td style="border-right:none;"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($aTotal,2,true);?>" readonly></td>
+                              </tr>
+                              <tr style="border-bottom:none;">
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none; color:#1d99d4; vertical-align: middle; " align="right">Rate Per Unit</td>
+                                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($details['MRate'],2,true);?>" readonly></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div id="machinery-tab-<?php echo $details['ResourceId'];?>" class='tab-pane fade'>
+                        <div>
+                          <label class="lbl_style">Working Qty</label>
+                          <input type="text" class="parent_texters work_qt text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['AnalysisAQty'],3);?>" readonly>
+                        </div>
+                        <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;"> 
+                          <!-- Machinery tabs -->
+                          <table class="table" style="margin-bottom:0px;">
+                            <thead>
+                              <tr>
+                                <th class="bg_clo_subTr">Resource name</th>
+                                <th class="bg_clo_subTr">Unit</th>
+                                <th class="bg_clo_subTr">Qty</th>
+                                <th class="bg_clo_subTr">Rate</th>
+                                <th class="bg_clo_subTr">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody class="sorting">
+                              <?php $mTotal = 0;
+                                                            foreach($analysis as $anal):
+                                                            if($anal['ActivityType'] == 'M')
+                                                                continue;
+                                                        ?>
+                              <tr>
+                                <td width="25%"><input class="parent_text" type="text"  value="<?php echo $anal['Code'] .' '.$anal['ResourceName'];?>" readonly></td>
+                                <td width="5%"><label><?php echo $anal['UnitName'];?></label></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Qty'],3);?>" readonly></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Rate'],2,true);?>" readonly></td>
+                                <td width="8%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($anal['Amount'],2,true);?>" readonly></td>
+                              </tr>
+                              <?php $mTotal += $anal['Amount'];
+                                                            endforeach; ?>
+                            </tbody>
+                            <tbody class="total">
+                              <tr style="border-bottom:none;">
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;"></td>
+                                <td style="border-right:none;  color:#1d99d4; vertical-align: middle; " align="right">Total</td>
+                                <td style="border-right:none;"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($mTotal,2,true);?>" readonly></td>
+                              </tr>
+                              <tr style="border-bottom:none;">
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none;"></td>
+                                <td style="border-right:none;border-top:none; color:#1d99d4; vertical-align: middle; " align="right">Rate Per Unit</td>
+                                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" value="<?php echo $this->commonHelper()->sanitizeNumber($details['ARate'],2,true);?>" readonly></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                  <?php elseif($details['TypeId'] == '2'): ?>
+                  <div class="col-lg-12">
+                    <div class="subDiv">
+                      <?php if($details['MaterialType'] == 'S'): ?>
+                      <div id="navbar" class="darkmenu" style="margin-top:10px; margin-bottom:8px;">
+                        <ul role="tablist">
+                          <li class="active"><a href="#general-material-<?php echo $details['ResourceId'];?>" role="tab" data-toggle="tab" class="ripple has-ripple" style="position: relative; overflow: hidden;"><i class="fa fa-caret-right"></i> General info<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a></li>
+                          <li><a href="#steel-material-<?php echo $details['ResourceId'];?>" role="tab" data-toggle="tab" class="ripple has-ripple" style="position: relative; overflow: hidden;"><i class="fa fa-caret-right"></i> Steel directory<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a></li>
+                        </ul>
+                      </div>
+                      <?php endif; ?>
+                      <div class="tab-content">
+                        <div class="tab-pane fade active in" id="general-material-<?php echo $details['ResourceId'];?>">
+                          <div class="rfc_met">
+                            <ul>
+                              <li>
+                                <label>Material Type</label>
+                                <div class="select-style rfc_meoption">
+                                  <select disabled>
+                                    <option value="">Select Material Type</option>
+                                    <option <?php echo ($details['MaterialType'] == 'F') ? 'selected' : '';?>>Fuel</option>
+                                    <option <?php echo ($details['MaterialType'] == 'S') ? 'selected' : '';?>>Steel</option>
+                                    <option <?php echo ($details['MaterialType'] == 'P') ? 'selected' : '';?>>Production</option>
+                                  </select>
+                                </div>
+                              </li>
+                              <li>
+                                <label>Lead Time (in Days)</label>
+                                <input type="text" class="parent_text text-right" value="<?php echo $details['LeadDays'];?>" readonly>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <?php if($details['MaterialType'] == 'S'): ?>
+                        <div class="tab-pane fade table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;overflow: visible;" id="steel-material-<?php echo $details['ResourceId'];?>">
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th class="bg_clo">Steel Description</th>
+                                <th class="bg_clo">Diameter</th>
+                                <th class="bg_clo">Factor/Unit</th>
+                                <th class="bg_clo">Wastage %</th>
+                              </tr>
+                            </thead>
+                            <tbody >
+                              <?php foreach($steelTrans as $steel): ?>
+                              <tr>
+                                <td width="11%"><input type="text" class="parent_text" value="<?php echo $steel['SteelDescription'];?>" readonly></td>
+                                <td width="5%"><input type="text" class="parent_text" value="<?php echo $steel['SteelDia'];?>" readonly></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($steel['Factor'],5);?>" readonly></td>
+                                <td width="5%"><input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($steel['Wastage'],3);?>" readonly></td>
+                              </tr>
+                              <?php endforeach; ?>
+                            </tbody>
+                          </table>
+                        </div>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
+                  <?php elseif($details['TypeId'] == '3'): ?>
+                  <div class="col-lg-12">
+                  <div class="subDiv">
+                    <div class="rfc_met">
+                      <ul>
+                        <li>
+                          <label>Working Unit</label>
+                          <input type="text" class="parent_text" value="<?php //echo $details['WorkUnitName'];?>" readonly>
+                        </li>
+                        <li>
+                          <label>Lead Time (in Days)</label>
+                          <input type="text" class="parent_text text-right" value="<?php echo $details['LeadDays'];?>" readonly>
+                        </li>
+                        <li>
+                          <label>Working Rate</label>
+                          <input type="text" class="parent_text text-right" value="<?php echo $this->commonHelper()->sanitizeNumber($details['WorkRate'],2,true);?>" readonly>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  </div>
+                  <?php endif; ?>
+                </div>
+                <?php endif; ?>
+              </div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>

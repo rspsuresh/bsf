@@ -1,0 +1,303 @@
+<!Doctype html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <title>jQueryUI MultiSearch - Entering Recipients Demo</title>
+   <!--<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+   <script src="http://code.jquery.com/jquery.js"></script>
+   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>-->
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.1.0/lodash.underscore.min.js"></script>
+   <script src="http://bseth99.github.io/jquery-ui-multisearch/src/jqueryui-multisearch.js"></script>
+
+</head>
+<body>
+
+<style>
+textarea {
+   resize: none;
+   font-size: 12px !important;
+}
+input[data-role="input"] {
+   outline: none;
+   border: none;
+   font-size: 12px;
+   color: #555;
+   vertical-align: middle;
+   padding: 3px 4px;
+   margin: 3px;
+}
+input.error {
+   color: #f00;
+}
+[data-role="picker"] {
+   z-index: 1080;
+}
+a:focus {
+   outline: none;
+}
+a.list-group-item.hover {
+    background-color: #F5F5F5;
+    text-decoration: none;
+}
+a.label-default {
+   cursor: pointer;
+   font-size: 12px;
+   margin: 3px;
+   color: #555;
+   background-color: #F7F7F7;
+   text-decoration: none;
+}
+a.label-default.hover {
+   background-color: #DFDFDF;
+   text-decoration: none;
+}
+a.label-default.active {
+   text-decoration: none;
+}
+.panel {
+   margin: 0;
+   transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+}
+.panel.focus {
+   border-color: #66AFE9;
+   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
+   outline: 0 none;
+}
+.panel-body {
+    padding: 3px 6px;
+}
+.popover {
+   max-width: 347px;
+   min-width: 276px;
+}
+.popover-content {
+   overflow: hidden;
+   font-size: 90%;
+}
+.popover-content .col-lg-4, .popover-content .col-lg-8 {
+   padding: 0 5px
+}
+</style>
+
+<div class="container">
+
+   <div class="row">
+      <div class="col-lg-3">
+      </div>
+
+      <div class="col-lg-6 form-horizontal">
+         <br/><br/>
+         <div>
+            <a href="../index.html">&lt; Back to home</a> |
+            <a href="https://github.com/bseth99/jquery-ui-multisearch/blob/master/examples/contact.html">View Source</a>
+         </div>
+
+         <br/>
+         <p>
+         This is example demonstrates using MultiSearch to create a message entry form where multiple recipients
+         can be entered.  It includes additional logic to show a popover box with data about a previously entered
+         contact.  The search performs a lookup against a fictional local address box and accepts only valid email addresses
+         when you want to enter someone not in the address book.  There are some extra embellishments for Bootstrap styling to
+         match the widget container to other input controls.  Here is a
+         <a href="http://www.benknowscode.com/2013/10/entering-recipients-from-address-book-jqueryui-multisearch.html" target="blog">detailed write up on this example</a> and
+         more information about how the <a href="http://www.benknowscode.com/2013/10/simulate-bootstrap-focus-effect-on-nonform-controls.html" target="blog">Bootstrap focus effect was simulated</a>
+         on the control.
+         </p>
+
+         <br/>
+
+         <div class="form-group">
+            <label class="col-lg-2 control-label">
+              To
+            </label>
+
+            <div class="col-lg-10" data-control="multisearch">
+            </div>
+         </div>
+
+         <div class="form-group">
+            <label class="col-lg-2 control-label">
+              Cc
+            </label>
+
+            <div class="col-lg-10" data-control="multisearch">
+            </div>
+         </div>
+
+         <div class="form-group">
+            <label class="col-lg-2 control-label">
+              Bcc
+            </label>
+
+            <div class="col-lg-10" data-control="multisearch">
+            </div>
+         </div>
+
+         <div class="form-group">
+            <label class="col-lg-2 control-label">
+              Message
+            </label>
+            <div class="col-lg-10">
+               <textarea class="form-control" style="height: 300px"></textarea>
+            </div>
+         </div>
+
+      </div>
+
+      <div class="col-lg-3">
+      </div>
+   </div>
+</div>
+
+
+<script id="multisearch" type="text/template">
+   <div>
+
+      <div class="panel panel-default">
+         <div data-role="selected-list" class="panel-body">
+            <input class="pull-left" data-role="input" type="text" placeholder=""/>
+         </div>
+      </div>
+
+      <div data-role="picker" class="panel panel-default">
+         <div class="list-group" data-role="picker-list">
+         </div>
+      </div>
+
+   </div>
+</script>
+
+<script id="contact-item" type="text/template">
+   <a class="list-group-item" href="#">
+      <small><%= display_name %> (<%= primary_email %>)</small>
+   </a>
+</script>
+
+<script id="selected-item" type="text/template">
+   <a class="label label-default pull-left"><%= display_name %>&nbsp;<span class="glyphicon glyphicon-remove" data-action="remove" aria-hidden="true"></span></a>
+</script>
+
+<script id="contact-info" type="text/template">
+   <div class="popover bottom fade">
+     <div class="arrow"></div>
+     <h3 class="popover-title"><%= display_name %></h3>
+     <div class="popover-content">
+
+         <div class="row">
+           <div class="col-lg-4 text-right"><strong>Company</strong></div>
+           <div class="col-lg-8"><%= organization %></div>
+         </div>
+
+         <div class="row">
+           <div class="col-lg-4 text-right"><strong>Email</strong></div>
+           <div class="col-lg-8"><%= primary_email %></div>
+         </div>
+
+         <div class="row">
+           <div class="col-lg-4 text-right"><strong>Phone</strong></div>
+           <div class="col-lg-8"><%= primary_phone %></div>
+         </div>
+
+     </div>
+   </div>
+</script>
+
+<script>
+$(function() {
+   var multiSearch = _.template( $('#multisearch').html() ),
+       infoBox = _.template( $('#contact-info').html() );
+   // Since you can tab through fields, redirect the focus
+   // event to click just in case.
+   $( document.body ).on( 'focusin', 'input, textarea', function( event ) {
+      $( event.target ).trigger( 'click' );
+   });
+   $( '[data-control="multisearch"]' ).append( multiSearch() )
+      .children()
+      .on( 'click', function simulateFocus( event ) {
+            /*
+            *  Simulate the nice input focus effect for
+            *  Bootstrap form-controls.  Since there's one
+            *  on the page, it looks wierd if these boxes
+            *  don't match.
+            */
+            var $me = $( this ),
+                $panel = $me.find( '.panel' );
+            if ( !$panel.is( '.focus' ) ) {
+               $panel.addClass( 'focus' );
+               _.defer( function() {
+                  $( document.body ).on( 'click.focus', function( e ) {
+                     if ( $me.has( e.target ).length === 0 ) {
+                        $panel.removeClass( 'focus' );
+                        $( document.body ).off( 'click.focus' );
+                     }
+                  });
+               });
+            }
+         })
+      .multisearch( {
+         source: localData,
+         keyAttrs: [ 'id' ],
+         searchAttrs: [ 'display_name', 'primary_email' ],
+         formatPickerItem: _.template( $('#contact-item').html() ),
+         formatSelectedItem: _.template( $('#selected-item').html() ),
+         buildNewItem: function( text ) {
+            return { id: null, display_name: text, organization: '', primary_phone: '', primary_email: text };
+         },
+         adding: function( event, ui ) {
+            var validater = new RegExp('^(?:[^,]+@[^,/]+\.[^,/]+|)$');
+            $( this ).find( 'input' ).removeClass( 'error' );
+            if ( ui.notfound ) {
+               if ( !validater.test( ui.data.primary_email ) ) {
+                  $( this ).find( 'input' ).addClass( 'error' );
+                  return false;
+               }
+            }
+         },
+         itemselect: function( event, ui ) {
+            // Generate from template and add to DOM
+            var $info = $( infoBox( ui.data ) ).insertAfter( $( this ) ).show();
+            // Use jQueryUI Position utility to move it to the right spot
+            $info.position({
+               my: 'center top+10',
+               at: 'center bottom',
+               of: ui.element
+            });
+            // Trigger the Bootstrap fade transition
+            $info.addClass( 'in' );
+            // Several things are happening here:
+            //  1) This click event is still bubbling, listen to
+            //     click now, and it will be caught before the popover
+            //     ever appears.  Deferring it pushes the execution outside
+            //     of the current call stack
+            //  2) Clicks inside the popover are fine.  Use the $.has() function
+            //     to see if any part of the target is or is inside the popover
+            //     element.  Only remove if that is not true.  Remember, has()
+            //     returns a set of elements unlike is() which returns true/false.
+            //  3) It makes sense to animate the box out.  Leave some time for that
+            //     to happen before toasting the element from the DOM.
+            _.defer( function() {
+               $( document ).on( 'click.info', function( e ) {
+                  if ( $info.has( e.target ).length === 0 ) {
+                     $info.removeClass( 'in' );
+                     _.delay( function() { $info.remove(); }, 500 );
+                     $( document ).off( 'click.info' );
+                  }
+               });
+            });
+         },
+      });
+});
+localData = [ {display_name:'test', primary_email: 'test#@micromen.com'},
+{display_name:'test4343', primary_email: 'test4343#@micromen.com'},
+{display_name:'irfan', primary_email: 'irfan#@micromen.com'} ];
+// Need an id ... auto-generate it
+for (var i=1;i<localData.length;i++)
+   localData[i].id = i;
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<style>
+    .autocomplete-suggestions {z-index: 999999 !important;}
+    .rt_bx-clr{color:#07549b;font-size:16px;padding-bottom:6px;}
+</style>
+<form id="formWrapper" method="post">
+    <h2 class="vendordetail_change">New Journal Type</h2>
+    <div class="right_lbox_inner_cnt">
+        <div class="col-lg-12" style="margin-top:10px;">
+            <div class="form-horizontal">
+                <div class="row">
+                    <input type="hidden" name="journalId" id="journalId" value="<?php echo (isset($journalId)) ? $journalId : '0';?>">
+                    <input type="hidden" name="type" id="type" value="">
+                        <div class="form-group ">
+                            <div class="col-lg-12">
+                                <label class="rt_bx-clr">Journal Name</label>
+                                <input type="text" name="journalName" id="journalName" value="<?php echo (isset($journalentryList)) ? $journalentryList['JournalName'] : '';?>" class="form-control lbl_move" label="Journal Type" />
+                                <span class="error" id="errorjournalName"></span>
+                            </div>
+                        </div>
+                        <div class="form-group ">
+                            <div class="col-lg-12">
+                                <label class="rt_bx-clr">Journal Type</label>
+                                <select style="width:100%;" class="form-control single_dropdown lbl_box lbl_move sortoption tbl_input changeVal" label="Journal Type" name="journalType" id="journalType" disabled>
+                                    <?php if(isset($journaltypeList) && count($journaltypeList) !=0){
+                                        foreach($journaltypeList as $journaltypeLists) : ?>
+                                            <option value="<?php echo $journaltypeLists['JournalType']; ?>" <?php if($journaltypeLists['JournalType']== $journaltype) { echo 'selected';}  ?> ><?php echo $journaltypeLists['JournalName']; ?></option>
+                                        <?php endforeach;} ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group ">
+                            <div class="col-lg-12">
+                                <label class="rt_bx-clr">Short Name</label>
+                                <input type="text" name="shortName" id="shortName" class="form-control lbl_move" label="Short Name"  value="<?php echo (isset($journalentryList)) ? $journalentryList['ShortName'] : '';?>" maxlength="2" />
+                                <span class="error" id="errorshortName"></span>
+                            </div>
+                        </div>
+                </div
+            </div>
+        </div>
+    </div>
+    <p>
+    <p class="rightlbox_btn rightlbox_btnchng">
+        <?php if($sysUpdateYes == 1) { ?>
+        <a href="javascript:void(0);" onclick="submitForm();" id="submitFId" data-toggle="tooltip" class="ripple" title="Submit">Submit</a>
+        <?php } ?>
+        <a href="javascript:void(0)" onclick="closeRightBox();" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a>
+    <div id="submit-loaderF" class="post_loader ask_post_loader brad_50">
+        <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+    </div>
+    </p>
+    </div>
+</form>
+
+<script type="text/javascript">
+$(".single_dropdown2").select2({
+    placeholder: ""
+});
+$(document).ready(function() {
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+});
+
+$(function () {
+    $('.right_lightbox').attr('pageRefresh','0');
+});
+
+function closeRightBox(){
+    $('.right_lightbox').hide();
+}
+function submitForm(){
+
+    var errorFlag = 0;
+    if($('#journalName').val().length == 0) {
+        $('#journalName').focus();
+        $('#errorjournalName').html('Journal Name is Required!');
+        errorFlag = 1;
+        return false;
+    }else{
+        errorFlag = 0;
+        $('#errorjournalName').text('');
+    }
+    if($('#shortName').val().length == 0) {
+        $('#shortName').focus();
+        $('#errorshortName').html('Short Name is Required!');
+        errorFlag = 1;
+        return false;
+    }else if($('#shortName').val().length > 2) {
+        $('#shortName').focus();
+        $('#errorshortName').html('Short Name lenght should be less than 2 character!');
+        errorFlag = 1;
+        return false;
+    }else
+    {
+        errorFlag = 0;
+        $('#errorshortName').text('');
+    }
+    if(errorFlag == 0){
+        $("#journalType").attr('disabled',false);
+    }
+    $('#type').val('addEditDetails');
+    $.ajax({
+        url:"<?php echo $this->basePath(); ?>/fa/index/journaltypeentry",
+        type:"post",
+        //async:false,
+        data:$('#formWrapper').serialize(),
+        success:function(data, textStatus, jqXHR){
+            $('.right_lightbox').hide().attr('pageRefresh','1').trigger('change');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+        }
+    });
+}
+
+
+</script>

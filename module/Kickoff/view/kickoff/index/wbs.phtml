@@ -1,0 +1,297 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<style type="text/css">
+.table-responsive table.table tr td.td_prnt_text	{padding:4px 0px !important; border-top:0px !important;}
+.td_prnt_text .action_btns li a						{padding-top:3px;}
+body{ background:#F1F4F9;}
+.jqx-widget-content{background:#fff;border:1px solid #c2c2c2; color:#333 !important;}
+.jqx-widget-content ul{ width:250px !important; }
+.jqx-widget-content ul li.jqx-tree-item-li{border:1px solid rgba(128, 123, 23, 0.59)!important; width:252px!important; margin-bottom:5px;}
+.jqx-widget{  margin-bottom:10px !important; }
+.jqx-tree-item{ border:none !important; overflow:unset !important; width:220px !important; padding:5px;}
+.jqx-tree-item-arrow-expand jqx-icon-arrow-down{ background:#06F !important;}
+.jqx-tree-item-hover{ background:none !important;}
+.jqx-tree-dropdown-root{ margin-top:20px !important;}
+.jqx-rc-all{ border:none !important; border-radius:none !important;}
+.jqx-tree-item-arrow-expand{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important; margin-right:3px;}
+.jqx-icon-arrow-right{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important;margin-right:3px; }
+.jqx-fill-state-pressed{ background:rgba(226, 241, 171, 0.41) !important; padding-left:3px !important;border-radius:0px !important; padding:5px !important;}
+.jqx-tree-item:hover{ color:#999;}
+.jqx-popup{ background:#F3F9DC !important;   border: 1px solid hsla(57, 70%, 30%, 0.59) !important;}
+.jqx-menu-item-top{ float:left; margin:0px; padding:5px;}
+.jqx-fill-state-hover{ background:none !important; color:#999; }
+.jqx-menu-iteam-top-hover{ background:none !important;border-bottom:1px thick #066;}
+#treeWrapper {width: 100%;}
+#treeWrapper, #treeWrapper > div {float: left;}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid padlr0">
+		<div class="col-lg-12">
+			<h1>Project Kickoff</h1>
+		</div>
+		<form onsubmit="return entryValidate()" method="post" id="form">
+			<div class="col-lg-12 flwup_topcnt fmg_topcnt clear">
+				<div class="col-lg-3 form-group">
+					<span class="date_icon"><i class="fa fa-calendar"></i></span>
+					<input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" value="<?php if ($kickoffRes['RefDate'] != NULL) { echo date("d-m-Y", strtotime($kickoffRes['RefDate'])); } else { echo date("d-m-Y"); } ?>" label="Ref Date" onkeypress="return isDate(event);" />
+				</div>
+				<div class="col-lg-3 form-group">
+					<input type="text" name="refNo" id="refNo" class="form-control lbl_move" value="<?php if (trim($kickoffRes['RefNo']) != '') { echo $kickoffRes['RefNo']; } else { echo $svNo; } ?>" label="Ref No" />
+				</div>
+				<div class="col-lg-6 form-group">
+					<input type="text" name="propertyName" id="propertyName" class="form-control lbl_move" value="<?php echo $kickoffRes['ProjectName']; ?>" label="Name of the Property" />
+				</div>
+			</div>
+			<div class="col-lg-12 clear">
+				<ul class="breadcrumb_area">
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/conception/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Conception</a></li>
+					<li><a href="<?php echo $this->basePath().$unitUrl; ?>">Unit</a></li>
+					<li><a href="#" class="active">WBS</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/turnaround/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Turnaround Cost & Schedule</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/team/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Team</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/make-brand/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Make/Brand</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/documents/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Documents</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/setup/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Setup</a></li>
+				</ul>
+			</div>
+			<div class="col-lg-12 clear">
+				<div class="col-lg-12 clear">
+					<div class="kickoff_area col-lg-12 clear">
+						<div class="col-lg-12 padlr0">
+							<!--table Jq Grid start-->
+							<div class="col-lg-12 col-md-12 col-sm-12" id="iow-list">
+								<!-- Tree Structure -->
+								<div id="treeWrapper" style="display: none;">
+									<div class="bread_crumb first_step" id="tree-structure"></div>
+								</div>
+								<div class="clearfix"></div>
+								<div class="table-responsive clear" style="overflow: visible;" id="grid-wrapper">
+									<div id='jqxWidget'>
+										<div id='jqxTree'></div>
+										<div id='jqxMenu'>
+											<ul>
+												<li id="menu-newwbs">Add WBS</li>
+												<li>Edit WBS</li>
+												<li>Remove WBS</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+							<input type="hidden" name="kickOffId" id="kickOffId" value="<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" />
+						</div>
+						<div class="cont_bt-list">
+							<ul>
+								<li><a href="<?php echo $this->basePath().$unitUrl; ?>" class="steps_btn"><i class="fa fa-chevron-circle-left"></i> Back</a></li>
+								<li><a href="javascript:submitForm();" class="cbtn">Continue <i class="fa fa-check-circle"></i></a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script type="text/javascript">
+// jqxTree script
+var $jqxTree = $('#jqxTree'),
+	dummyTableHeadHTML = $('#dummytableheader').html(),
+	dummyTableHTML = $('#dummytable > tbody').html(),
+	dummyid = 0,
+	treePostData = [];
+
+$(function () {
+	var $jqxMenu = $('#jqxMenu'),
+		url1 = getBaseURL() + 'kickoff/index/wbs/'+$('#kickOffId').val(),
+		source =
+        {
+			async: false,
+			datatype: "json",
+			editable:true,
+			datafields: [
+				{ name: 'id' },
+				{ name: 'parentid' },
+				{ name: 'text' }
+			],
+			id: 'id',
+			url: url1
+		};
+	
+	var dataAdapter = new $.jqx.dataAdapter(source);
+	dataAdapter.dataBind();
+	var records = dataAdapter.getRecordsHierarchy('id', 'parentid', 'items', [{ name: 'text', map: 'label'}]);
+	
+	$jqxTree.jqxTree({ source: records, height: 400, width: '100%', allowDrag: false, keyboardNavigation: true});
+	$jqxTree.css('visibility', 'visible');
+	
+	var contextMenu = $jqxMenu.jqxMenu({ width: '150px',  height: '110px', autoOpenPopup: false, mode: 'popup' }),
+        clickedItem = null,
+        attachContextMenu = function () {
+            // open the context menu when the user presses the mouse right button.
+            $("#jqxTree li").on('mousedown', function (event) {
+                var target = $(event.target).parents('li:first')[0],
+                    rightClick = isRightClick(event),
+                    $menu_newbs = $('#menu-newwbs');
+
+                if (rightClick && target != null) {
+                    $jqxTree.jqxTree('selectItem', target);
+                    var selItem = $jqxTree.jqxTree('selectedItem'),
+                        $window = $(window);
+
+                    // check if is parent and hide add iow
+                    if ($(selItem.element).find('ul').length > 0) {
+                        $menu_newbs.show();
+                        $jqxMenu.jqxMenu({height: '83px'});
+                    } else {
+                        $menu_newbs.show();
+                        $jqxMenu.jqxMenu({height: '110px'});
+                    }
+					
+                    contextMenu.jqxMenu('open', parseInt(event.clientX) + 5 + $window.scrollLeft(), parseInt(event.clientY) + 5 + $window.scrollTop());
+                    return false;
+                }
+            });
+        };
+
+    attachContextMenu();
+    $jqxMenu.on('itemclick', function (event) {
+        var item = $.trim($(event.args).text()),
+            selectedItem = $jqxTree.jqxTree('selectedItem');
+        if (selectedItem == null)
+            return;
+
+        switch (item) {
+            case "Add WBS":
+                $jqxTree.jqxTree('addTo', {label: 'Item'}, selectedItem.element);
+                $jqxTree.jqxTree('expandItem', selectedItem.element);
+                makeEditableContent(selectedItem.element, true);
+                attachContextMenu();
+                break;
+            case "Edit WBS":
+                makeEditableContent(selectedItem.element);
+                break;
+            case "Remove WBS":
+                // check if has iow and with values
+                var id = selectedItem.id;
+                
+                if (confirm('Do you want to Delete')) {
+                    // push data to array
+                    treePostData.push({'id': id, 'parentid': selectedItem.parentId, 'name': selectedItem.label, 'action': 'delete', 'newval': '', 'kfId': $('#kickOffId').val()});
+                    $jqxTree.jqxTree('removeItem', selectedItem.element);
+                    
+                    attachContextMenu();
+                }
+                break;
+        }
+    });
+
+    $(document).on('contextmenu', function (e) {
+        if ($(e.target).parents('.jqx-tree').length > 0)
+            return false;
+
+        return true;
+    });
+	
+    $jqxTree.jqxTree('expandAll');
+});
+
+function makeEditableContent(item, isCreate)
+{
+    var $div = $(item).find('> div'),
+        oldValue = $div.html(),
+        action = 'update',
+        id = item.id,
+        parentId = item.parentId,
+		newVal = oldValue;
+		console.log(item, $div)
+    if (typeof isCreate != 'undefined' && isCreate  == true) {
+        dummyid++;
+
+        $div = $(item).find('> ul li:last-child > div');
+        action = 'create';
+        id = 'N' + dummyid;
+        parentId = item.id;
+		$newDiv = $(item).find('> div');
+		newVal = $newDiv.html();
+        item = $(item).find('> ul li:last-child')[0];
+    }
+
+    // check and remove old data in array
+    var index = getObjectKeyIndex(treePostData, id);
+    if (index != null) {
+        treePostData.splice(index,1);
+    }
+
+    $jqxTree.jqxTree({ keyboardNavigation: false});
+    $div.prop('contenteditable', true);
+    $div.focus();
+    $div.unbind('keydown');
+    $div.on('keydown', function(e) {
+        if (e.keyCode == 27) {
+            $div.html(oldValue);
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+        }
+
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+
+            var newText =  $div.html();
+            $jqxTree.jqxTree('updateItem', item, { label:  newText });
+
+            // push data to array
+            treePostData.push({'id': id, 'parentid': parentId, 'name': newText, 'action': action, 'newval': newVal, 'kfId': $('#kickOffId').val()});
+            return false;
+        }
+    });
+}
+
+function getObjectKeyIndex(obj, value)
+{
+    var index = null;
+    $.each(obj, function(i, o) {
+        if (o.id == value) {
+            index = i;
+            return false;
+        }
+    });
+    return index;
+}
+
+function isRightClick(event) {
+    var rightclick;
+    if (!event) var event = window.event;
+    if (event.which) rightclick = (event.which == 3);
+    else if (event.button) rightclick = (event.button == 2);
+    return rightclick;
+}
+
+function submitForm()
+{
+	//alert(treePostData.length);
+	/*for(i=0;i<treePostData.length;i++){
+		alert(treePostData[i]['id'] + ' - ' +treePostData[i]['parentid']+' - '+treePostData[i]['name'] + ' - ' +treePostData[i]['action'] + ' - ' +treePostData[i]['newval']);
+	}*/
+	$.ajax({
+        url: getBaseURL() + "kickoff/index/wbs-insert",
+        async: false,
+        type: 'post',
+		data:  {result:JSON.stringify(treePostData)},
+        success: function(data,status) {
+			//console.log(data);
+			//alert(data);
+			if(data=='success') {
+				window.location.href = getBaseURL() + "kickoff/index/turnaround/"+$('#kickOffId').val();
+			}
+        }
+    });
+	//$('#form').submit();
+}
+
+function entryValidate()
+{
+	return true;
+}
+</script>

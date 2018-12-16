@@ -1,0 +1,158 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>" />
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important;padding:5px 15px !important;}
+#treeGrid .jqx-grid-header 							{height:75px !important;}
+.text-right 										{color:#666;font-size: 15px;}
+
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Security Deposit Register</h1>
+                <div class="col-lg-12">
+                    <div class="col-lg-12 col-lg-offset-0">
+                        <div class="table-responsive clear animated fadeInUp">
+                            <div id="treeGrid"> </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $treeGrid = $("#treeGrid");
+
+    $(document).ready(function () {
+        var data = <?php echo (isset($sdRegister)) ? json_encode($sdRegister) : ''; ?>;
+        var source =
+        {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                { name: 'SDRegisterId', type: 'number' },
+                { name: 'TransNo', type: 'string' },
+                { name: 'TransDate', type: 'date' },
+                { name: 'CostCentreName', type: 'string' },
+                { name: 'VendorName', type: 'string' },
+                { name: 'PaymentMode', type: 'string' },
+                { name: 'OrderNo', type: 'string' },
+                { name: 'OrderType', type: 'string' },
+                { name: 'Amount', type: 'number' },
+                { name: 'Approve', type: 'string' },
+            ],
+            id: 'SDRegisterId'
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.SDRegisterId));
+        };
+        $treeGrid.jqxGrid(
+            {
+                width: '100%',
+                theme: 'bootstrap',
+                pagerButtonsCount: 6,
+                source: dataAdapter,
+                pageable: true,
+                sortable: true,
+                filterable:true,
+                altrows: true,
+                enabletooltips: true,
+                autoheight: true,
+                editable: false,
+                selectionmode: 'singlerow',
+                showfilterrow: true,
+                rowdetails: true,
+                initrowdetails: initrowdetails,
+                rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; background:#E8E6F0;border:2px solid #D3CEED;padding-top:20px;'></div>", rowdetailsheight:270},
+                columns: [
+                    { text: 'SDRegisterId', datafield: 'SDRegisterId', hidden: true, filterable: false},
+                    { text: 'SD Date', datafield: 'TransDate',filtertype:'date', width: '8%', editable: false , cellsformat: 'dd-MM-yyyy'},
+                    { text: 'SD No', datafield: 'TransNo', width: '8%', editable: false },
+                    { text: 'Cost Centre', datafield: 'CostCentreName', width: '12%', editable: false },
+                    { text: 'Vendor', datafield: 'VendorName', width: '12%', editable: false },
+                    { text: 'Payment Mode', datafield: 'PaymentMode', width: '10%', editable: false },
+                    { text: 'Order Type', datafield: 'OrderType', width: '10%', editable: false },
+                    { text: 'Order No', datafield: 'OrderNo', width: '10%', editable: false },
+                    { text: 'Amount', datafield: 'Amount', width: '10%', editable: false, align:'right',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin: 6px 10px 0 0;">' +sanitizeNumber($('#treeGrid').jqxGrid('getCellValue', row, 'Amount'),2, true) + '</div>';
+                        }
+                    },
+                    { text: 'Approve', datafield: 'Approve', width: '10%', editable: false, align:'center',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-center" style="margin: 6px 10px 0 0;">' +$('#treeGrid').jqxGrid('getCellValue', row, 'Approve') + '</div>';
+                        }
+                    },
+                    { text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                        cellsrenderer: function (row) {
+                            var sdRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'SDRegisterId'),
+                                approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve'),
+                                editLink = '<a title="Edit" href="'+ getBaseURL() + 'wpm/labourstrength/security-deposit/'+sdRegisterId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            if(approve == 'No') {
+                                editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="deleteSD(event,' + row + ')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                            }
+                            return editLink;
+                        }
+                    }
+                ]
+            });
+    });
+    $('#treeGrid').on('rowexpand', function (event) {
+        var prev_row = $('#treeGrid').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#treeGrid').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#treeGrid').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#treeGrid').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $('#treeGrid').on('rowcollapse', function (event) {
+        $('#treeGrid').jqxGrid('clearselection');
+    });
+
+    function deleteSD(event, row)
+    {
+        event.preventDefault();
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        if (confirm("Do you want to delete?")) {
+            $.ajax({
+                url: getBaseURL() + 'wpm/labourstrength/delete-sec-dep',
+                type: 'POST',
+                data: "sdRegId="+ rowData.SDRegisterId,
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the request!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        }
+    }
+    function renderRowDetail(id) {
+        $.ajax({
+            url: getBaseURL()+'wpm/template/get-security-deposit',
+            type: 'POST',
+            data: {SDId: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+</script>

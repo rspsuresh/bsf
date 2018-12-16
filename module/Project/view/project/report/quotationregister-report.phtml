@@ -1,0 +1,82 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important;	padding:5px 15px !important;}
+#grid .jqx-grid-header 								{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12 top-btm">
+        <h1 class="col-lg-6">Quotation Register - Report</h1>
+        <div class="col-lg-6">
+          <div class="col-lg-12 edit_del" data-visibility="hide">
+            <ul>
+              <li>
+                <button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-12 col-lg-offset-0">
+        <div id="grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+    var data = <?php echo (isset($orders)) ? json_encode($orders) : ''?>,
+        $grid = $("#grid");
+    $(function () {
+        var source = {
+            localdata:data,
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'RefNo',type:'string'},
+                { name: 'RefDate'},
+                { name: 'ClientName', type: 'string' },
+                { name: 'ProjectName', type: 'string' }
+            ]
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $grid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            autoheight: true,
+            filterable: true,
+            showfilterrow: true,
+            statusbarheight: 50,
+            sortable: true,
+            pageable:true,
+            rowDetails: true,
+            columns: [
+                { text: 'RefNo', datafield: 'RefNo', width:'20%'},
+                { text: 'Date', dataField: 'RefDate', width:'15%'},
+                { text: 'Project Name', dataField: 'ProjectName', width:'35%'},
+                { text: 'Client Name', dataField: 'ClientName', width:'30%'}
+            ]
+        });
+    });
+    $('#print-btn').click(function () {
+        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>Quotation Register - Report</title>\n' +
+                '<h1>Quotation Register - Report</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+    });
+</script> 

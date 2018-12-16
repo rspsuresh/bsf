@@ -1,0 +1,989 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+
+ <form method="post" action="<?php echo $this->basePath(); ?>/application/print" target="_blank">
+	<input type="hidden" name="htmlcontent" id="htmlcontent" />
+	<input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($billregister)) ? $billregister['ClientId'] : 0;?>"  />
+	<input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+<div id="htmlwrapper" style="width:700px; margin:auto; padding-top:20px;">
+
+<style type="text/css">
+    /*border: 1px solid #333;*/
+/*DragResize*/
+
+/* Required CSS classes: must be included in all pages using this script */
+/* Apply the element you want to drag/resize */
+.drsElement 						{position:absolute;border: 1px solid #333;}
+/*
+ The main mouse handle that moves the whole element.
+ You can apply to the same tag as drsElement if you want.
+*/
+.drsMoveHandle 						{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+/*
+ The DragResize object name is automatically applied to all generated
+ corner resize handles, as well as one of the individual classes below.
+*/
+.dragresize 						{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+/*
+ Individual corner classes - required for resize support.
+ These are based on the object name plus the handle ID.
+*/
+.dragresize-tl						{top:-8px;left:-8px;cursor:nw-resize;}
+.dragresize-tm 						{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+.dragresize-tr 						{top:-8px;right:-8px;cursor:ne-resize;}
+.dragresize-ml 						{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+.dragresize-mr 						{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+.dragresize-bl 						{bottom:-8px;left:-8px;cursor:sw-resize;}
+.dragresize-bm 						{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+.dragresize-br 						{bottom: -8px;right: -8px;cursor: se-resize;}
+/*DragResize End*/
+/*Main*/
+.text-bold, .text-bold * 			{font-weight: bold !important;}
+.text-italic, .text-italic * 		{font-style: italic !important;}
+.text-underline, .text-underline * 	{text-decoration: underline !important;}
+.style-left, .style-left * 			{text-align: left;}
+.style-center, .style-center * 		{text-align: center;}
+.style-right, .style-right * 		{text-align: right;}
+.style-justify, .style-justify * 	{text-align: justify;}
+#styleOptions 						{display:  none;}
+#ElementTemplate,.remScnt 			{display:none;}
+.remScnt							{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+.remScnt > .fa.fa-trash-o 			{text-decoration: none !important;font-style: normal !important;font-size: 14px !important;font-weight: normal !important;color: #000 !important;background: transparent !important;border: none !important;}
+</style>
+
+
+	<?php echo (isset($template)) ? $template : '';?>
+	<div style="margin-bottom:30px; margin-top:10px;">
+		<?php if($entryfrom =="abstractCum") { ?>
+			<table class="table bill-cum" cellpadding="0" cellspacing="0" width="520">
+				<thead>
+					<tr>
+						  <!--<th align="right" class="thscss">S.No</th>-->
+						  <th class="thscss" align="left">Ref</th>
+						  <th class="thscss" align="left">Description</th>
+						  <th class="thscss" style="text-align:right">Cum Amount</th>
+						  <th class="thscss" style="text-align:right">Pre Amount</th>
+						  <th class="thscss" style="text-align:right">Cur Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($billsAbsts as $billsAbst) { ?>
+					<tr style="<?php echo ($billsAbst['Bold']) ? 'font-weight: bold;': '';echo ($billsAbst['Italic']) ? ' font-style: italic;' : '';echo ($billsAbst['Underline']) ? ' text-decoration: underline;' : '';?>" >
+					  <td width="5%" class="tdpds"><?php echo $billsAbst['RowName'];?></td>
+					  <td width="8%" class="tdpds"><?php echo $billsAbst['TypeName'];?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CumAmount'], 2 , true);?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['PrevAmount'], 2, true);?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CurAmount'], 2, true);?></td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table> 
+		<?php } else if($entryfrom =="abstractwithIOW") { ?>
+			<table class="table abt-iow" cellpadding="0" cellspacing="0" width="1380">
+				<thead>
+					<tr>
+						<!--<th>S.No</th>-->
+						<th class="thscss" align="left">Ref</th>
+						  <th class="thscss" align="left">Description</th>
+						  <th class="thscss text-right" align="right">Cumulative Amount</th>
+						  <th class="thscss text-right" align="right">Previous Amount</th>
+						  <th class="thscss text-right" align="right">Current Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach($billsAbsts as $billsAbst) { 
+				$absId=$billsAbst['BillAbsId'];
+				$billFormatId=$billsAbst['BillFormatId'];
+				?>
+					<tr>
+					  <td width="5%" class="tdpds text-left"><?php echo $billsAbst['RowName'];?></td>
+					  <td width="8%" class="tdpds text-left"><?php echo $billsAbst['TypeName'];?></td>
+					  <td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CumAmount'], 2, true);?></td>
+					  <td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['PrevAmount'], 2, true);?></td>
+					  <td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CurAmount'], 2, true);?></td>
+					</tr>
+					 <?php if($billFormatId==1 || $billFormatId==2) { ?>
+					<!-- start  -->
+					<tr style="display: table-row;" class="subTr">
+						<td colspan="9" style="padding:0px !important; ">
+						<div class="subDiv" style="display: block;">
+							<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+							<div class="col-lg-12">
+							  <div class="table-responsive topsp">
+								<table class="table abt-iowt2" style="margin-bottom:0px; " cellpadding="0" cellspacing="0"width="500">
+								  <thead>
+									<tr>
+										<th class="thscss" align="left">S.No</th>
+										<th class="thscss" align="left">AgtNo</th>
+										<th class="thscss" align="left">Description</th>
+										<th align="right" class="thscss">Cumulative Amount</th>
+										<th align="right" class="thscss">Previous Amount</th>
+										<th align="right" class="thscss">Current Amount</th>
+									</tr>
+								  </thead>
+								  <tbody>
+								  
+								  <?php foreach($billsAbstIOws as $billsAbstIOw) { 
+									$absIdIOW=$billsAbstIOw['BillAbsId'];
+									$billFormatIdIOW=$billsAbstIOw['BillFormatId'];
+									if($absId == $absIdIOW && $billFormatId == $billFormatIdIOW) {
+									?>
+									<tr>
+										<td width="5%" class="tdpds" align="left"><?php echo $billsAbstIOw['SNo'];?></td>
+										<td width="5%" class="tdpds" align="left"><?php echo $billsAbstIOw['AgtNo'];?></td>
+										<td width="20%" class="tdpds" align="left"><?php echo $billsAbstIOw['Specification'];?></td>
+										<td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbstIOw['CumAmount'], 2, true);?></td>
+										<td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbstIOw['PrevAmount'], 2, true);?></td>
+										<td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbstIOw['CurAmount'], 2, true);?></td>
+									</tr>
+									<?php } } ?>
+									<tr>
+										<td class="tdpds">&nbsp;</td>
+										<td class="tdpds">&nbsp;</td>
+										<td class="tdpds">&nbsp;</td>
+										<td class="tdpds">&nbsp;</td>
+										<td align="right" class="rate_pri tdpds">Total</td>
+										<td class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CurAmount'], 2, true);?></td>
+									</tr>
+								  </tbody>
+								</table>
+							  </div>
+							</div>
+						  </div>
+						</td>
+					</tr>
+					<!-- End  -->
+					<?php } ?>
+				<?php } ?>
+				</tbody>
+			</table>
+		<?php } else if($entryfrom =="abstractOverall") { ?>
+			<table class="table abt-all" style=" margin-bottom:0px;" id="EntryTable" cellpadding="0" cellspacing="0" width="1180">
+				<thead>
+					<tr>
+					  <th class="thscss">&nbsp;</th>
+					  <th class="thscss" align="left">Description</th>
+					  <th class="thscss text-right" align="right">Cumulative</th>
+					  <th class="thscss text-right" align="right">Previous</th>
+					  <th class="thscss text-right" align="right">Current</th>
+					</tr>
+				</thead>
+				<tbody class="main">
+					<?php $i=1;
+				$TotalCumAmount=0;
+				$TotalPrevAmount=0;
+				$TotalCurAmount=0;
+				$AdvanceFormats=array('1','2','3','5','7','8','18','19','6','21');
+				if(isset($BillFormat)):
+				foreach($BillFormat as $Format):
+					$TotalCumAmount += $Format['CumAmount'];
+					$TotalPrevAmount += $Format['PrevAmount'];
+					$TotalCurAmount += $Format['CurAmount']; ?>
+					<tr class="padi05" style="<?php echo ($Format['Bold']) ? 'font-weight: bold;': '';echo ($Format['Italic']) ? ' font-style: italic;' : '';echo ($Format['Underline']) ? ' text-decoration: underline;' : '';?>" >
+					  <td width="3%" class="tdpds" align="left"><?php echo $Format['RowName'];?></td>
+					  <td width="10%" class="tdpds" align="left"><?php echo $Format['TypeName'];?></td>
+					  <td width="10%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Format['CumAmount'], 2, true);?></td>
+					  <td width="10%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Format['PrevAmount'], 2, true);?></td>
+					  <td width="10%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Format['CurAmount'], 2, true);?></td>                  
+					</tr>
+					<?php switch($Format['BillFormatId']):
+			case '1': ;?>
+					<!--Agreement-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" id="boqTable" cellpadding="0" cellspacing="0" width="490"> 
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Specification</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1; $boqtotal=0;
+											foreach($Format['AddRow'] as $BOQ):
+												$boqtotal += $BOQ['CurAmount'];?>
+								  <tr class="padi05">
+
+									<td width="15%" class="tdpds" align="left"><?php echo $BOQ['AgtNo'] .' '.$BOQ['Specification'];?></td>
+									<td width="5%" class="tdpds" align="left"><?php echo $BOQ['UnitName'];?></td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['CurQty'],3);?></td>
+									<td width="6%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['Rate'], 2, true);?></td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['CurAmount'], 2, true);?></td>
+									
+								  </tr>
+								  <?php $j=$j+1; endforeach; ?>
+								
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="3" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds">Total</td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($boqtotal, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '2': ?>
+					<!--Non-Agreement-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">                    
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" id="boqTable-2" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Specification</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1; $boqtotal=0;
+										foreach($Format['AddRow'] as $BOQ):
+											$boqtotal += $BOQ['CurAmount'];?>
+								  <tr class="padi05">
+									<td width="15%" class="tdpds" align="left"><?php echo $BOQ['SlNo'] .' '. $BOQ['Specification'];?></td>
+									<td width="5%" class="tdpds" align="left"><?php echo $BOQ['UnitName'];?></td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['CurQty'],3);?></td>
+									<td width="6%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['Rate'], 2, true);?></td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($BOQ['CurAmount'], 2, true);?></td>
+									
+								  </tr>
+								  <?php $j=$j+1; endforeach; ?>
+								  
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="3" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds">Total</td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($boqtotal, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							  
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '3': ?>
+					<!--Material Advance-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Material Name</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+									<th class="thscss text-right" align="right">Advance %</th>
+									<th class="thscss text-right" align="right">Adv. Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										foreach($Format['AddRow'] as $MAdvance):?>
+								  <tr class="padi05">
+									<td width="13%" class="tdpds text-left" align="left"><?php echo $MAdvance['MaterialName'];?></td>
+									<td width="5%" class="tdpds text-left" align="left"><?php echo $MAdvance['UnitName'];?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Qty'],3);?></td>
+									<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Rate'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Amount'], 2, true);?></td>
+									<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['AdvPercent'], 2);?></td>
+									<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['AdvAmount'], 2, true);?></td>
+									
+								  </tr>
+						 
+								  <?php  $j=$j+1; endforeach; ?> 
+								</tbody>
+							  </table>
+						   
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '18': ?>
+					<!--Price Escalation-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp" cellpadding="0" cellspacing="0">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr> 
+									<th class="thscss text-left" align="left">Material Name</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Base Rate</th>
+									<th class="thscss text-right" align="right">Escalation %</th>
+									<th class="thscss text-right" align="right">Actual Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										foreach($Format['AddRow'] as $PEscalation):?>
+								  <tr class="padi05">
+									<td width="13%" class="tdpds text-left" align="left"><?php echo $PEscalation['MaterialName'];?></td>
+									<td width="5%" class="tdpds text-left" align="left"><?php echo $PEscalation['UnitName'];?></td>
+									<td width="5%" class="tdpds text-left" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['Qty'],3);?></td>
+									<td width="6%" class="tdpds text-left" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['BaseRate'], 2, true);?></td>
+									<td width="5%" class="tdpds text-left" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['EscalationPer'], 2);?></td>
+									<td width="10%" class="tdpds text-left" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['ActualRate'], 2, true);?></td>
+									<td width="10%" class="tdpds text-left" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['Amount'], 2, true);?></td>                           
+								  </tr>                            
+								  <?php $j=$j+1; endforeach; ?> 
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '5': ?>
+					<!--MobAdvance Recovery-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp" cellpadding="0" cellspacing="0">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" id="AbsSubTable-<?php echo $i; ?>" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Ref No.</th>
+									<th class="thscss text-left" align="left">Date</th>
+									<th class="thscss text-left" align="left">Description</th>
+									<th class="thscss text-right" align="right">Total Advance</th>
+									<th class="thscss text-right" align="right">Recovered</th>
+									<th class="thscss text-right" align="right">Balance</th>
+									<th class="thscss text-right" align="right">Current</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										$total = 0;
+										foreach($Format['Receipt'] as $ARReceipt):
+											$total += $ARReceipt['CurAmount'];?>
+								  <tr class="padi05">           
+									<td width="3%" class="tdpds text-left" align="left"><?php echo $ARReceipt['ReceiptNo'];?></td>
+									<td width="3%" class="tdpds text-left" align="left"><?php echo $ARReceipt['ReceiptDate'];?></td>
+									<td width="8%" class="tdpds text-left" align="left">Receipt</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['Amount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['PreAmount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['Balance'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['CurAmount'], 2, true);?></td>
+								  </tr>
+								  <?php $j+=1; endforeach; ?>
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="5" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds text-right">Total</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '6': ?>
+					<!--Advance Recovery-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv" >
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" id="AbsSubTable-<?php echo $i; ?>" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Ref No.</th>
+									<th class="thscss text-left" align="left">Date</th>
+									<th class="thscss text-left" align="left">Description</th>
+									<th class="thscss text-right" align="right">Total Advance</th>
+									<th class="thscss text-right" align="right">Recovered</th>
+									<th class="thscss text-right" align="right">Balance</th>
+									<th class="thscss text-right" align="right">Current</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										$total = 0;
+										foreach($Format['Receipt'] as $ARReceipt):
+											$total += $ARReceipt['CurAmount'];?>
+								  <tr class="padi05">
+									
+									<td width="3%" class="tdpds text-left" align="left"><?php echo $ARReceipt['ReceiptNo'];?></td>
+									<td width="3%" class="tdpds text-left" align="left"><?php echo $ARReceipt['ReceiptDate'];?></td>
+									<td width="8%" class="tdpds text-left" align="left">Receipt</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['Amount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['PreAmount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['Balance'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARReceipt['CurAmount'], 2, true);?></td>
+
+								  </tr>
+								  <?php $j+=1; endforeach; ?>								 
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="5" class="tdpds text-right" align="right"></td>
+									<td class="rate_pri tdpds text-right" align="right">Total</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '21': ?>
+					<!--Material Advance Recovery-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" id="MAbsSubTable-<?php echo $i; ?>" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Ref No.</th>
+									<th class="thscss text-left" align="left">Date</th>
+									<th class="thscss text-left" align="left">Description</th>
+									<th class="text-right thscss" align="right">Total Advance</th>
+									<th class="text-right thscss" align="right">Recovered</th>
+									<th class="text-right thscss" align="right">Balance</th>
+									<th class="text-right thscss" align="right">Current</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										$total = 0; ?>
+								  <?php foreach($Format['BillAbstract'] as $ARBillAbstract):
+											$total += $ARBillAbstract['CurAmount'];?>
+								  <tr class="padi05">
+									<td width="5%" class="tdpds text-left" align="left"><?php echo $ARBillAbstract['BillNo'];?></td>
+									<td width="7%" class="tdpds text-left" align="left"><?php echo $ARBillAbstract['BillDate'];?></td>
+									<td width="8%" class="tdpds text-left" align="left">Bill</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARBillAbstract['Amount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARBillAbstract['PreAmount'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARBillAbstract['Balance'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($ARBillAbstract['CurAmount'], 2, true);?></td>
+								  </tr>
+								  <?php $j+=1; endforeach; ?>
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="5" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds">Total</td>
+									<td width="5%" class="tdpds"align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>				
+					<?php break;
+			case '8': ?>
+					<!--Material Recovery-->
+					<tr  class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv" >
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Material Name</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										$total = 0;
+										foreach($Format['AddRow'] as $MRecovery):
+											$total += $MRecovery['Amount'];?>
+								  <tr class="padi05">
+									<td width="13%" class="tdpds text-left" align="left"><?php echo $MRecovery['MaterialName'];?></td>
+									<td width="5%" class="tdpds text-left" align="left"><?php echo $MRecovery['UnitName'];?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MRecovery['Qty'],3);?></td>
+									<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MRecovery['Rate'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MRecovery['Amount'], 2, true);?></td>
+							
+								  </tr>
+								  <?php $j+=1; endforeach; ?>
+								 
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="3" class="tdpds"></td>
+									<td class="rate_pri tdpds" align="right">Total</td>
+									<td width="5%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '7': ?>
+					<!--Bill Deduction-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Bill Date</th>
+									<th class="thscss text-left" align="left">Bill No.</th>
+									<th class="thscss text-left" align="left">Vendor Name</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+											$total = 0;
+										foreach($Format['AddRow'] as $VBill):
+											$total += $VBill['Amount'];?>
+								  <tr>
+									
+									<td width="4%" class="tdpds text-left" align="left"><?php echo $VBill['BillDate'];?></td>
+									<td width="4%" class="tdpds text-left" align="left"><?php echo $VBill['BillNo'];?></td>
+									<td width="13%" class="tdpds text-left" align="left"><?php echo $VBill['VendorName'];?></td>
+									<td width="12%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($VBill['Amount'], 2, true);?></td>
+									
+								  </tr>
+								  <?php $j+=1; endforeach; ?>
+								  
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="2" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds">Total</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			case '19': ?>
+					<!--Free Supply Material-->
+					<tr class="subTr">
+					  <td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						  <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						  <div class="col-lg-12">
+							<div class="table-responsive topsp">
+							  <table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+								<thead>
+								  <tr>
+									<th class="thscss text-left" align="left">Material Name</th>
+									<th class="thscss text-left" align="left">Unit</th>
+									<th class="thscss text-right" align="right">Qty</th>
+									<th class="thscss text-right" align="right">Rate</th>
+									<th class="thscss text-right" align="right">Amount</th>
+								  </tr>
+								</thead>
+								<tbody class="main" data-rowid="<?php echo $i; ?>">
+								  <?php $j=1;
+										$total = 0;
+										foreach($Format['AddRow'] as $FSMaterial):
+											$total += $FSMaterial['Amount'];?>
+								  <tr class="padi05">
+									<td width="13%" class="tdpds text-left" align="left"><?php echo $FSMaterial['MaterialName'];?></td>
+									<td width="5%" class="tdpds text-left" align="left"><?php echo $FSMaterial['UnitName'];?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($FSMaterial['Qty'],3);?></td>
+									<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($FSMaterial['Rate'], 2, true);?></td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($FSMaterial['Amount'], 2, true);?></td>
+									
+								  </tr>
+								  <?php $j+=1; endforeach; ?>
+								  
+								</tbody>
+								<tbody class="total">
+								  <tr class="padi05">
+									<td colspan="3" class="tdpds"></td>
+									<td align="right" class="rate_pri tdpds" > Total</td>
+									<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($total, 2, true);?></td>
+								  </tr>
+								</tbody>
+							  </table>
+							</div>
+						  </div>
+						</div></td>
+					</tr>
+					<?php break;
+			endswitch; ?>
+					<?php $i=$i+1; endforeach; endif; ?>
+				</tbody>
+				<tbody class="total">
+					<tr class="padi05">
+					  <td class="tdpds">&nbsp;</td>
+					  <td width="10%" align="right text-right" class="nt-am tdpds"><b>Net Amount</b></td>
+					  <td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($TotalCumAmount, 2, true);?></td>
+					  <td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($TotalPrevAmount, 2, true);?></td>
+					  <td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($TotalCurAmount, 2, true);?></td>
+					</tr>
+				</tbody>
+			</table>
+				
+		<?php } else if($entryfrom =="materialadvdet") { ?>
+			<?php $i=1;
+			$AdvanceFormats=array('18');
+			?>
+			<table class="table abt-iow" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="830">
+				<thead>
+				  <tr>
+					<th class="thscss text-left" align="left">Material Name</th>
+					<th class="thscss text-left" align="left">Unit</th>
+					<th class="thscss text-right" align="right">Qty</th>
+					<th class="thscss text-right" align="right">Rate</th>
+					<th class="thscss text-right" align="right">Amount</th>
+					<th class="thscss text-right" align="right">Advance %</th>
+					<th class="thscss text-right" align="right">Adv. Amount</th>
+                    <th></th>
+				  </tr>
+				</thead>
+				<tbody class="main" data-rowid="<?php echo $i; ?>">
+				  <?php if(isset($BillFormat)):
+						foreach($BillFormat as $Format):
+						$j=1;
+						foreach($Format['AddRow'] as $MAdvance):?>
+				  <tr class="padi05">
+					<td width="13%" class="tdpds text-left"><?php echo $MAdvance['MaterialName'];?></td>
+					<td width="5%" class="tdpds text-left"><?php echo $MAdvance['UnitName'];?></td>
+					<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Qty'],3);?></td>
+					<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Rate'], 2, true);?></td>
+					<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['Amount'], 2, true);?></td>
+					<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['AdvPercent'], 2);?></td>
+					<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['AdvAmount'], 2, true);?></td>
+					
+				  </tr>
+					<tr class="subTr">
+					<td colspan="9" style="padding:0px !important; ">
+                    <div class="subDiv su-t">
+					<div class="col-lg-12">
+						  <div class="table-responsive topsp">
+							<table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="480">
+							  <thead>
+								<tr>
+								  <th class="thscss text-left" align="left">Bill Date</th>
+								  <th class="thscss text-left" align="left">Bill No</th>
+								  <th class="thscss text-left" align="left">Vendor Name</th>
+								  <th class="thscss text-right" align="right">Qty</th>
+								  <th class="thscss text-right" align="right">Rate</th>
+								  <th class="thscss text-right" align="right">Amount</th>
+								</tr>
+							  </thead>
+							  <tbody class="submain">
+								<?php $k=1;
+									$qtyTotal = 0;
+									$rateTotal = 0;
+									$amtTotal = 0;
+								foreach($MAdvance['BillTrans'] as $Bill):
+									$qtyTotal += $Bill['Qty'];
+									$rateTotal += $Bill['Rate'];
+									$amtTotal += $Bill['Amount'];?>
+								<tr>
+								  <td width="5%" class="tdpds text-left" align="left"><?php echo $Bill['BillDate'];?></td>
+								  <td width="5%" class="tdpds text-left" align="left"><?php echo $Bill['BillNo'];?></td>
+								  <td width="10%" class="tdpds text-left" align="left"><?php echo $Bill['VendorName'];?></td>
+								  <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Qty'],3);?></td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Rate'], 2, true);?></td>
+								  <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Amount'], 2, true);?></td>
+								 
+								</tr>
+								<?php $k+=1; endforeach; ?>
+							   
+							  </tbody>
+							  <tbody class="subtotal">
+								<tr class="padi05">
+								  <td width="5%" class="tdpds">&nbsp;</td>
+								  <td width="5%" class="tdpds">&nbsp;</td>
+								  <td width="6%" class="tdpds" align="right">Total</td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($qtyTotal,3);?></td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($rateTotal, 2, true);?></td>
+								  <td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($amtTotal, 2, true);?></td>
+								</tr>
+							  </tbody>
+							</table>
+						   </div>
+						</div>
+					  </div></td>
+				  </tr>
+				  <tr class="total padi05">
+					<td width="13%" class="tdpds text-right">&nbsp;</td>
+					<td class="tdpds text-right" align="right" width="5%"><span>Total Purchased Qty</span></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['PurchaseQty'],3);?></td>
+					<td class="tdpds text-right" align="right" width="3%"><span>Total Consumed Qty</span></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['ConsumeQty'],3);?></td>
+					<td class="tdpds text-right" align="right" width="5%"><span>Stock @ Site</span></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($MAdvance['PurchaseQty']-$MAdvance['ConsumeQty'],3);?></td>
+					<td width="4%" class="tdpds text-right" align="right">&nbsp;</td>
+				  </tr>
+				  <?php  $j=$j+1; endforeach; ?>
+				 <?php endforeach; endif; ?>
+				</tbody>
+			</table>		
+		<?php } else if($entryfrom =="priceesclationdet") { ?>
+			<?php $i=1;
+			$AdvanceFormats=array('18');
+			?>
+			<table class="table abt-iow" style="margin-bottom:0px;" cellpadding="0" cellspacing="0"  width="810">
+				<thead>
+				  <tr>
+					<th class="thscss text-left" align="left">Material Name</th>
+					<th class="thscss text-left" align="left">Unit</th>
+					<th class="thscss text-right" align="right">Qty</th>
+					<th class="thscss text-right" align="right">Base Rate</th>
+					<th class="thscss text-right" align="right">Escalation%</th>
+					<th class="thscss text-right" align="right">Actual Rate</th>
+					<th class="thscss text-right" align="right">Amount</th>
+               
+				  </tr>
+				</thead>
+				<tbody class="main" data-rowid="<?php echo $i; ?>">
+				  <?php 
+				   if(isset($BillFormat)):
+					foreach($BillFormat as $Format):	
+						$j=1;
+						foreach($Format['AddRow'] as $PEscalation):?>
+				  <tr class="padi05">
+					<td width="13%" class="tdpds text-left" align="left"><?php echo $PEscalation['MaterialName'];?></td>
+					<td width="5%" class="tdpds text-left" align="left"><?php echo $PEscalation['UnitName'];?></td>
+					<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['Qty'],3);?></td>
+					<td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['BaseRate'], 2, true);?></td>
+					<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['EscalationPer'], 2);?></td>
+					<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['ActualRate'], 2, true);?></td>
+					<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['Amount'], 2, true);?></td>    
+                                       
+				  </tr>
+					<tr class="subTr">
+					<td colspan="9" style="padding:0px !important; "><div class="subDiv">
+						<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+						<div class="col-lg-12">
+						  <div class="table-responsive topsp">
+							<table class="table abt-iowt2" style="margin-bottom:0px;" cellpadding="0" cellspacing="0" width="490">
+							  <thead>
+								<tr>
+								  <th class="thscss text-left" align="left">Bill Date</th>
+								  <th class="thscss text-left" align="left">Bill No</th>
+								  <th class="thscss text-left" align="left">Vendor Name</th>
+								  <th class="thscss text-right" align="right">Qty</th>
+								  <th class="thscss text-right" align="right">Rate</th>
+								  <th class="thscss text-right" align="right">Amount</th>
+                                 
+								</tr>
+							  </thead>
+							  <tbody class="submain">
+								<?php $k=1;
+													$qtyTotal = 0;
+													$rateTotal = 0;
+													$amtTotal = 0;
+													foreach($PEscalation['BillTrans'] as $Bill):
+														$qtyTotal += $Bill['Qty'];
+														$rateTotal += $Bill['Rate'];
+														$amtTotal += $Bill['Amount'];?>
+								<tr class="padi05">
+								  <td width="5%" class="tdpds text-left" align="left"><?php echo $Bill['BillDate'];?></td>
+								  <td width="5%" class="tdpds text-left" align="left"><?php echo $Bill['BillNo'];?></td>
+								  <td width="10%" class="tdpds text-left" align="left"><?php echo $Bill['VendorName'];?></td>
+								  <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Qty'],3);?></td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Rate'], 2, true);?></td>
+								  <td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($Bill['Amount'], 2, true);?></td>
+								 
+								</tr>
+								<?php $k+=1; endforeach; ?>
+							   
+							  </tbody>
+							  <tbody class="subtotal">
+								<tr class="padi05">
+								  <td width="5%">&nbsp;</td>
+								  <td width="5%">&nbsp;</td>
+								  <td width="10%" class="tdpds text-right" align="right">Total</td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($qtyTotal,3);?></td>
+								  <td width="6%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($rateTotal, 2, true);?></td>
+								  <td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($amtTotal, 2, true);?></td>
+                                
+								</tr>
+							  </tbody>
+							</table>
+							
+						  </div>
+						</div>
+					  </div></td>
+				  </tr>
+				  <tr class="total padi05">
+					<td class="tdpds" align="left" width="6%">Purchase Rate</td>
+					
+					<td class="tdpds" align="left" width="6%">Base Rate</td>
+					<td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['BaseRate'], 2, true);?></td>
+					<td class="tdpds" align="left" width="6%">Escalation%</td>
+					<td width="8%" class="tdpds"></td>
+					<td class="tdpds" align="left" width="6%">Actual Rate</td>
+					<td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($PEscalation['ActualRate'], 2, true);?></td>
+                 	
+				  </tr>
+				  
+				  <?php $j=$j+1; endforeach; ?> 
+				  <?php endforeach; endif; ?> 
+				</tbody>
+			</table>	
+		<?php } else if($entryfrom =="abstractCurrent") { ?>
+        <div class="tab-fnts">
+			<table class="table abst-curt" width="500" cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+					  <!--<th align="right" class="thscss">S.No</th>-->
+					  <th class="thscss" align="left">Ref</th>
+					  <th class="thscss" align="left">Description</th>
+					  <th class="thscss" style="text-align:right">Current Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($billsAbsts as $billsAbst) { ?>
+					<tr style="<?php echo ($billsAbst['Bold']) ? 'font-weight: bold;': '';echo ($billsAbst['Italic']) ? ' font-style: italic;' : '';echo ($billsAbst['Underline']) ? ' text-decoration: underline;' : '';?>" >
+					  <td width="5%" class="tdpds"><?php echo $billsAbst['RowName'];?></td>
+					  <td width="20%" class="tdpds"><?php echo $billsAbst['TypeName'];?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CurAmount'], 2, true);?></td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table>	
+            </div>
+		<?php } else if($entryfrom =="abstractSubvsCer") { ?>
+			<table class="table table-hover" cellpadding="0" cellspacing="0" width="520">
+				<thead>
+					<tr>
+					  <!--<th align="right" class="thscss">S.No</th>-->
+					  <th class="thscss" align="left">Ref</th>
+					  <th class="thscss" align="left">Description</th>
+					  <th class="thscss" style="text-align:right">Submit Amount</th>
+					  <th class="thscss" style="text-align:right">Certify Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($billsAbsts as $billsAbst) { ?>
+					<tr style="<?php echo ($billsAbst['Bold']) ? 'font-weight: bold;': '';echo ($billsAbst['Italic']) ? ' font-style: italic;' : '';echo ($billsAbst['Underline']) ? ' text-decoration: underline;' : '';?>" >
+					  <td width="5%" class="tdpds"><?php echo $billsAbst['RowName'];?></td>
+					  <td width="20%" class="tdpds"><?php echo $billsAbst['TypeName'];?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CurAmount'], 2, true);?></td>
+					  <td width="8%" class="tdpds" align="right"><?php echo $this->commonHelper()->sanitizeNumber($billsAbst['CerCurAmount'], 2, true);?></td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table>	
+		<?php } ?>
+		
+		
+	</div>
+</div>
+  <div class="fixed-action-btn-ra active">
+        <!--<a class="btn-floating-ra btn-large-ra">
+        <i class="fa fa-print"></i>
+        </a>-->
+         <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+       <!--<ul>
+          <li>
+       
+              <a exportName="pdf" class="exportAction btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+             
+          </li>
+          <li>
+              <a class="btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print preview "> <i class="fa fa-download"></i></a>
+          </li>
+        </ul>-->
+    </div>
+    
+      <!--<div class="fixed-action-btn-ra active">
+        <a class="btn-floating-ra btn-large-ra">
+        <i class="fa fa-print"></i>
+        </a>
+        <ul>
+          <li>
+       
+              <a exportName="pdf" class="exportAction btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+             
+          </li>
+          <li>
+              <a class="btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print preview "> <i class="fa fa-download"></i></a>
+          </li>
+        </ul>
+    </div>-->
+<!--<div class="col-lg-12">
+<a exportName="pdf" style="cursor:pointer" class="exportAction" ><i class="fa fa-print"></i> Print </a>
+</div>-->
+<?php 
+$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/images/nolgo.jpg';
+	if(isset($billregister) && $billregister['Logo']!="") {
+		$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/uploads/cb/company/'.$billregister['SubscriberId'].'.'.$billregister['Logo'];
+	}				
+	//echo $imgUrl;
+?>
+<script type="text/javascript">
+
+$(function() {
+	var billregister = <?php echo (isset($billregister))?json_encode($billregister):'[]'; ?>;
+	var currentdate = '<?php echo date('d-m-Y'); ?>';
+	var sTypeEntry = '<?php echo $typeEntry; ?>';
+	var imgUrl = '<?php echo $imgUrl; ?>';
+	var woAmtinwords = '<?php echo $woAmtinwords; ?>';
+	var billAmtinwords = '<?php echo $billAmtinwords; ?>';
+	
+	var $p_scents = $('#p_scents');
+	
+	//  remove buttons
+	$p_scents.find('.remScnt').remove();
+	
+	$.each(billregister, function(index, value) {
+		if(value != null && value != '') {
+			$p_scents.find('#bill_' + index).text(value);
+		}
+		
+	});
+	
+	$p_scents.find('#bill_Logo').attr('src', imgUrl);
+	$p_scents.find('#bill_Date').text(currentdate);
+	$p_scents.find('#bill_TypeEntry').text(sTypeEntry);
+	$p_scents.find('#bill_OrderAmountinwords').text(woAmtinwords);
+	$p_scents.find('#bill_Amountinwords').text(billAmtinwords);
+	$p_scents.find('#bill_Amount').text(sanitizeNumber(billregister.Amount, 2, true));
+	$p_scents.find('#bill_OrderAmount').text(sanitizeNumber(billregister.OrderAmount, 2, true));
+	
+	$(".exportAction").click(function(){
+		$('#htmlcontent').val($('#htmlwrapper').html());
+		$('form').submit();
+	});
+});
+
+</script>

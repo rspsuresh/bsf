@@ -1,0 +1,193 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/project.css"/>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
+<script src="//cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
+<style>
+    .gallery					{display: inline-block;background:#fff;padding:15px 10px;;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.24);height:400px; overflow-y:scroll;}
+    ul.liste-photo 				{float:left;width:100%;margin-bottom:15px;height:400px; overflow-y:scroll;background:#fff;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.24); padding:10px 10px 10px 65px;}
+    /*ul.liste-photo li 			{float:left;width:100%;border-bottom:1px solid #e9eae2;position:relative;}
+    ul.liste-photo li a 		{font-size:14px;font-weight:600;color:#3580C4;padding:5px;line-height:30px;width:100%;float:left;margin-left:3px;}
+    ul.liste-photo li span 		{color:#333;background:#dee6b5;left:37%;top:10px;display:block;position:absolute;text-align:center;width:15px;height:15px;line-height:15px;font-size:8px;border-radius:50%;font-weight:600;}*/
+    ul.liste-photo li a:hover 	{background:#f5ebeb;color:#000;}
+    ul.liste-photo li a{margin-top:10px;position:relative;}
+    ul.liste-photo li a{width:inherit;height:inherit;}
+    ul.liste-photo li:after{content:'';position:absolute;display:block;width:35px;height:5px;background:#333;top:55%;left:-17%;}
+    ul.liste-photo li:before{content:"";position:absolute;width:3px;height:150%;display:block;border-radius:0px;border:3px solid skyblue;background: skyblue;left:-19%;}
+    ul.liste-photo li a:before{border-left:9px solid #333;  border-top:9px solid transparent; border-bottom:9px solid transparent;
+        content: "";display: block;height: 10px;left: -7%;position: absolute;top: 28%;width: 10px;}
+</style>
+<?php $projectOptions = '';
+if(isset($projectlists)) {
+    foreach ( $projectlists as $project ) {
+        $projectOptions .= '<option value="' . $project[ 'ProjectId' ] . '">' . $project[ 'ProjectName' ] . '</option>';
+    }
+}
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 padlr0">Project Photo Progress view
+                <div class="stgedit_btn req_addbtn brad_50"> <a href="javascript:void(0);" class="ripple addnew_reminder" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Photos"><i class="fa fa-plus"></i></a> </div>
+            </h1>
+            <form class="form-horizontal" method="post" id="frm-photoprog" enctype="multipart/form-data">
+            <div class="col-md-4 form-group" style="margin-top:25px;">
+                <select class="form-control single_dropdown lbl_move" name="Project" id="Project" onchange="showDate();" label="Select project" style="width:100%;">
+                    <option>Select Project Name</option>
+                    <?php foreach($ProjectName as $Project) {?>
+                        <option value="<?php echo $Project['ProjectId'];?>" <?php echo ($Project['ProjectId'] == $iProjectId) ? 'selected' : '';?>  > <?php echo $Project['ProjectName'];?> </option>
+                    <?php } ?>
+                </select>
+            </div>
+<!--            <form class="form-horizontal" action="--><?php //echo $this->basePath() . '/project/rfc/photoprogress'; ?><!--" method="post" id="frm-photoprog" enctype="multipart/form-data">-->
+                <div class="col-lg-12 padlr0 adddprtmnt_box animated fadeInUp" id="adddprtmnt_boxAdd" style="display:none;">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                        <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input readonly type="text" name="date" id="photoprog_date" class="form-control date_picker lbl_move" label="Date" value="<?php echo date('d-m-Y'); ?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                        <div class="form-group col-lg-12">
+                            <input type="file" name="attachedfiles[]" multiple id="photoprog_files">
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 padlr0">
+                        <div class="form-group col-lg-12">
+                            <button type="button" class="save adddprtmnt_box_ok float_r brad_200 ripple" onclick="return submitPhotoProgress();" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-12">
+            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                <ul class="liste-photo" id="ulDate" style="display: none;">
+                    <?php foreach($Datebox as $trans) {?>
+                        <li><a href="javascript:void(0)" onclick="loadPhoto(this,<?php echo $trans['TransId'];?>);"><?php echo date('d, M, Y',strtotime($trans['Date'])); ?></a> <span>
+            <?php
+            foreach ($DateCount as $count) {
+                if($count['TransId'] == $trans['TransId'])
+                    echo $count['Count'];
+            } ?>
+            </span></li>
+                    <?php } ?>
+                </ul>
+            </div>
+            <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0">
+                <div class='list-group gallery' id="divimg" style="display: none;">
+                    <div class='col-sm-4 col-xs-6 col-md-3 col-lg-3'> <a class="thumbnail fancybox image" rel="ligthbox" href=""> <img class="img-responsive" alt="" src="" /> </a> </div>
+                </div>
+                <!-- list-group / end -->
+
+            </div>
+        </div>
+    </div>
+</div>
+<script id="dummy-photo"  type="text/template" class="hide">
+    <div class='col-sm-4 col-xs-6 col-md-3 col-lg-3' id="img__">
+        <a class="thumbnail fancybox image__" rel="ligthbox" href="">
+            <img class="img-responsive" alt="" src="" />
+        </a>
+    </div>
+</script>
+<script>
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({
+        });
+    });
+    $(document).ready(function(){
+        $(".fancybox").fancybox({
+            openEffect: "none",
+            closeEffect: "none"
+        });
+    });
+    $('.addnew_reminder').click(function (){
+        if (parseInt(isNullCheck($('#Project').val(),'number')) ==0) {
+            alert ("Select Project");
+            return;
+        }
+
+        $('#adddprtmnt_boxAdd').fadeIn();
+        $('#adddprtmnt_boxEdit').fadeOut();
+    });
+    $('.close').click(function(){
+        $('#adddprtmnt_boxAdd').fadeOut();
+        $('#adddprtmnt_boxEdit').fadeOut();
+    });
+
+    $(function () {
+      if (parseInt(isNullCheck($('#Project').val(),'number')) !=0) showDate();
+    });
+
+    function showDate() {
+        $('#ulDate').fadeIn();
+        $('#ulDate').html("");
+        $('#divimg').html("");
+        var Project = $('#Project').val();
+        $.ajax({
+            url: getBaseURL() + "project/main/photo-progress",
+            async: false,
+            data: {'ProjectId': Project,'type':'date'},
+            type: 'post',
+            success: function (data, status) {
+                var arr = JSON.parse(data);
+                $.each(arr, function (index, value) {
+                    $('#ulDate').append('<li><a href="javascript:void(0)" onclick="loadPhoto(this,'+value.TransId+');">'+value.DateFormat+'</a></li>');
+                });
+
+                if(!data)
+                    return;
+            },
+            error:function(xhr,data,status) {
+                console.log(xhr,data,status);
+            }
+        });
+    }
+
+    function loadPhoto(x,id) {
+        $('#divimg').fadeIn();
+        var dateTransid = id;
+        var template = $('#dummy-photo').html();
+        var $tdiv = $('#divimg');
+        $.ajax({
+            url: getBaseURL() + "project/main/photo-progress",
+            async: false,
+            data: {'TransId': dateTransid,'type':'photo'},
+            type: 'post',
+            success: function (data, status) {
+                if(!data)
+                    return;
+                var arr = JSON.parse(data);
+                $('#divimg').html("");
+                for(var i = 0;i<arr.length;i++) {
+                    $tdiv.append(template.replace(/__/g, '_' + i));
+                    $('.image_'+i).append('<img src="http://localhost/bsf_v1.1/public'+arr[i]['URL']+'">').attr('href',"http://localhost/bsf_v1.1/public"+arr[i]['URL']);
+                }
+            },
+            error:function(xhr,data,status) {
+                console.log(xhr,data,status);
+            }
+        });
+    }
+
+    function submitPhotoProgress() {
+        var $photoprog_form = $('#frm-photoprog');
+        if ($('#Project').val() == "") {
+            alert('Select a Project');
+            return false;
+        }
+
+        if ($('#photoprog_date').val() == "") {
+            alert('Date is required');
+            return false;
+        }
+        if(!(/^[0-9]{2}\-(1[0-2]|0[1-9])\-[0-9]{4}$/.test($('#photoprog_date').val()))) {
+            alert('Date format is invalid');
+            return false;
+        }
+        if($('#photoprog_files')[0].files.length == 0) {
+            alert('Please choose photos or videos to upload');
+            return false;
+        }
+        $photoprog_form.submit();
+    }
+</script>

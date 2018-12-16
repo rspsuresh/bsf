@@ -1,0 +1,146 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!-- INLINE CSS -->
+<style>
+    .tr_hot 						{background:#f9eaea;}
+    .tr_warm 						{background:#f8f1e4;}
+    .tr_cold 						{background:#e8f0f6;}
+    .flwup_proimg					{margin-top:12px;}
+    #dataTable .jqx-grid-header 	{height:75px !important;}
+</style>
+<!-- INLINE CSS -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1>Land Bank Followup Register</h1>
+        </div>
+        <div class="col-lg-12 edit_del" >
+            <ul>
+                <li>
+                    <a href="<?php echo $this->basePath(); ?>/project/landbank/followup" class="edit-btn edit_al"><i class="fa fa-plus"></i> Add Follow Up</a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="col-lg-12 clear  commargin_ttop_20">
+            <div id="dataTable"></div>
+        </div>
+    </div>
+</div>
+<!-- PAGE SCRIPTS-->
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: getBaseURL() + "project/landbank/followup-register",
+            type:"post",
+            data: {type:'Load'},
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                // prepare the data
+                var source =
+                {
+                    localdata:data,
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'FollowUpId', type: 'number' },
+                        { name: 'EnquiryId', type: "number"},
+                        { name: 'PropertyName', type: 'string' },
+                        { name: 'CallNatureName', type: 'string' },
+                        { name: 'CallTypeId', type: 'number' },
+                        { name: 'CallTypeName', type: 'number' },
+                        { name: 'EnquiryCallType', type: 'string' },
+                        { name: 'Remarks', type: 'string' },
+                        { name: 'NextCallDate', type: "date", format: 'MM/dd/yyyy' },
+                    ],
+                    id: 'FollowUpId'
+                };
+
+                var dataAdapter = new $.jqx.dataAdapter(source);
+
+                $("#dataTable").jqxGrid({
+                    width: '100%',
+                    source: dataAdapter,
+                    pageable: true,
+                    selectionMode: 'singleRow',
+                    pagerButtonsCount: 6,
+                    autoheight:true,
+                    rowsheight:40,
+                    autorowheight: true,
+                    filterable: true,
+                    sortable: true,
+                    //filtermode: 'advanced',
+                    columnsResize: true,
+                    showfilterrow: true,
+                    ready:function(){
+                    },
+                    rendered: function () {
+                    },
+                    columns: [
+                        { text: 'FollowUpId', dataField: 'FollowUpId',hidden : true },
+                        { text: 'EnquiryId', dataField: 'EnquiryId',hidden : true },
+                        { text: 'Property Name', dataField: 'PropertyName'},
+                        { text: 'Call Nature', dataField: 'CallNatureName'},
+                        { text: 'Call Type', dataField: 'CallTypeName'},
+                        { text: 'Remarks', dataField: 'Remarks'},
+                        { text: 'Next Followup Call Date', filtertype: 'date', dataField: 'NextCallDate', cellsformat: 'd'},
+                        { text: 'Action',sortable: false, filterable: false, align: 'center',
+                            cellsrenderer: function (row) {
+                                var FollowUpId= $('#dataTable').jqxGrid('getCellValue', row, 'FollowUpId')
+                                var EnquiryId= $('#dataTable').jqxGrid('getCellValue', row, 'EnquiryId'),
+                                    editLink = '<a href="'+ getBaseURL() + 'project/landbank/followup/'+EnquiryId+'/'+FollowUpId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>',
+                                    deleteLink = '<a href="javascript:checkFollowUpDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+
+                                return '<div class="text-center" style="vertical-align: middle; margin-top:10px;">'+editLink +"&nbsp;&nbsp;"+ deleteLink + "</div>";
+                            }
+                        }
+                    ]
+                });
+
+                $('#dataTable').on('celldoubleclick', function (event){
+                    // event arguments.
+                    var args = event.args;
+                    // row's bound index.
+                    var rowBoundIndex = args.rowindex;
+                    // row's visible index.
+                    var rowVisibleIndex = args.visibleindex;
+                    // right click.
+                    var rightclick = args.rightclick;
+                    // original event.
+                    var ev = args.originalEvent;
+                    // column index.
+                    var columnindex = args.columnindex;
+                    // column data field.
+                    var dataField = args.datafield;
+                    // cell value
+                    var value = args.value;
+                    var data = $("#dataTable").jqxGrid("getrowdata", rowBoundIndex);
+                    if(dataField != '')
+                        location.replace(getBaseURL() + "project/landbank/followup/"+data.uid);
+                });
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    });
+
+    function checkFollowUpDelete(row) {
+        var id = $('#dataTable').jqxGrid('getCellValue', row, 'FollowUpId');
+        if(confirm("Do You Want to Delete this FollowUp ?")) {
+            $.ajax({
+                url: getBaseURL() + 'project/landbank/followup-register',
+                type: 'POST',
+                data: {'id': id,type:'Delete'},
+                success: function (data, status, xhr) {
+                    if (xhr.status == 200) {
+                        // Remove Grid Row
+                        $('#dataTable').jqxGrid('deleterow',id);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr, status, error);
+                }
+            });
+        }
+    }
+</script>
+<!-- PAGE SCRIPTS-->

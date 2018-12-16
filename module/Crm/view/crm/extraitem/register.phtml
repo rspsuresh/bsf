@@ -1,0 +1,441 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {
+	font-size:15px !important;
+	padding:5px 15px !important;
+}
+#treeGrid .jqx-grid-header {height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+			<h1 class="float_l" data-bsfhead="ExtraItem Master">ExtraItem Master <?php if(isset($projectId)) { ?> of  <?php } ?>
+				<div class="btn-group proname_btn">
+					<a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php if(isset($projectId)) { echo ucfirst($projectDetail['ProjectName']);  } ?> <span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;project"><i class="fa fa-caret-down "></i></span></a>
+					<div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+						<ul>
+							<?php foreach($projects as $project){?>
+								<li><a href="<?php echo $this->basePath(); ?>/crm/extraitem/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo $project['ProjectId']; ?>"><?php echo ucfirst($project['ProjectName']);?></a></li>
+							<?php }	?>
+						</ul>
+					</div>
+				</div>
+			</h1>
+			<div class="edit_del commargin_top float_r">
+				<ul>
+				<?php if((isset($projectId))){?>
+					<li> <a title="Add ExtraItem" href="<?php echo $this->basePath(); ?>/crm/extraitem/master/<?php echo (isset($projectId)) ? $projectId : ""; ?>" class="edit_al"><i class="fa fa-plus"></i>Add ExtraItems</a> </li>
+				<?php }
+				else{?>
+				<li> <a title="Add ExtraItem" href="<?php echo $this->basePath(); ?>/crm/extraitem/master" class="edit_al"><i class="fa fa-plus"></i>Add ExtraItems</a> </li>
+				<?php }?>
+				</ul>
+			</div>
+			
+        </div>
+        <div class="col-lg-12 commargin_top clear">
+            <div class="table-responsive clear">
+            	<div id="treeGrid"></div>
+        	</div>
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header"> 
+            	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            	<h1 data-bsfhead="Want To Delete">Why do you want to delete <span id="delMaterialName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                    <div class="row m_tb40">
+                        <div class="form-group col-lg-12 req_flds">
+                            <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                        </div>
+                    </div>
+                    </form>
+            	</div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header"> 
+            	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            	<h1 data-bsfhead="Edit ExtraItem">Edit ExtraItem</h1>
+            </div>
+            <div class="modal-body">
+            	<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" id="editForm">
+                    <div class="row padtop20">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="hidden" id="ExtraItemId" name="ExtraItemId"/>
+                            <input type="text" id="ExtraItemName" data-bsfshare="ExtraItemName" name="ExtraItemName" class="form-control lbl_move" label="Name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" name="unitName" data-bsfshare="unitName" id="autocomplete-unitName" class="form-control lbl_move" label="Unit"/>
+                            <input type="hidden" name="unitId" id="unitId"  class="form-control" />
+                            <div class="error_message">
+                                <p>Please enter unit name...</p>
+                            </div>
+                        </div>
+                    </div>
+					<div class="row">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" name="rate" data-bsfshare="Rate" id="rate"  class="form-control lbl_move" label="Rate" />
+                            <div class="error_message">
+                                <p>Please enter Rate ...</p>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+            	</div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+			</div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	    var data = <?php echo (isset($ExtraItemReg)) ? json_encode($ExtraItemReg) : '' ?>,
+        $treeGrid = $("#treeGrid"),
+        $deleteModal = $('#DeleteModal'),
+		$editModal = $('#EditModal'),
+		$addModal = $('#AddModal'),
+        $remarks = $('#remarks'),
+		$ExtraItemName = $('#ExtraItemName'),
+		$unit = $('#unitId'),
+		$rate = $('#rate'),
+		$unitNew = $('#unitNew');
+	
+    $(function () {
+        var source = {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ExtraItemId', type: 'number' },
+                { name: 'ItemDescription', type: 'string' },
+				{ name: 'UnitId', type: 'number' },
+				{ name: 'UnitName', type: 'string' },
+				{ name: 'Rate', type: 'number' }
+            ],
+            id: 'ExtraItemId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            filterable:true,
+            pageable:true,
+            rowDetails: true,
+            autoheight: true,
+            selectionmode: 'singlerow',
+            showfilterrow: true,
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+			showfilterrow: true,
+            columns: [
+                { text: 'ExtraItemId', datafield: 'ExtraItemId', hidden: true, filterable: false},
+                { text: 'Name', dataField: 'ItemDescription', width:'60%'},
+				{ text: 'UnitId', datafield: 'UnitId', hidden: true, filterable: false},
+                { text: 'Unit', dataField: 'UnitName', width:'10%'},
+				{ text: 'Rate', dataField: 'Rate', width:'20%', cellsalign: 'right',
+                   cellsrenderer: function (row) {
+                    return '<div class="text-right">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                   }},
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width:'10%',
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Edit" href="javascript: materialEdit('+row+')" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="materialDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';                    }
+                }
+            ]
+        });
+
+        $('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'crm/extraitem/deleteExtraitem',
+                type: 'POST',
+                data: {"ExtraItemId": rowData.ExtraItemId, "Remarks": remarks, "Type": 'update'},
+                async: false,
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Cannot delete this material, it is already in use!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete the Material!');
+                }
+            });
+            $remarks.val('');	
+        });
+		
+		$('#btnEditYes').on('click', function () {
+            var ExtraItemName = $ExtraItemName.val().trim();
+			var unitId = $unit.val();
+			var unitName = $('#autocomplete-unitName').val().trim();
+			var rate = $('#rate').val().trim();
+			
+			validate(function(isSuccess) {
+                
+                if(isSuccess === false) {
+                    return false;
+                } else {
+                    $editModal.modal('hide');
+                    var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+                    $.ajax({
+                        url: getBaseURL() + 'crm/extraitem/editExtraitem',
+                        type: 'POST',
+                        data: $('#editForm').serialize(),
+                        success:function(data, textStatus, jqXHR){
+                            if (jqXHR.status == 200){
+                                $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'ItemDescription', ExtraItemName);
+                                $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'UnitId', unitId);
+                                $treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'UnitName', unitName);
+								$treeGrid.jqxGrid("setcellvalue", $editModal.data('row'), 'Rate', rate);
+                            } else {
+                                alert('Failed to Edit the Material!');
+                            }
+                        },
+                        error:function(jqXHR, textStatus, errorThrown){
+                            alert('Failed to Edit the Material!');
+                        }
+                    });	
+                    $ExtraItemName.val('');
+                    $unit.val('');
+                }
+                
+            });
+
+            function validate(callback) {
+                
+                // validate material name
+                if(ExtraItemName.length == 0) {
+                    showError($ExtraItemName, 'Required!');
+                    callback(false);
+                    return false;
+                } else {
+                    removeError($ExtraItemName);
+                }
+
+                // validate unitId
+				if($('#unitId').val().length == 0 || $('#unitId').val() == 0 || $('#autocomplete-unitName').val().length == 0 ) {
+					showError($('#autocomplete-unitName'), 'Required!');
+					callback(false);
+					return false;
+				} else {
+					removeError($('#autocomplete-unitName'));
+				}
+				
+				// validate material name
+                if(rate.length == 0) {
+                    showError($rate, 'Required!');
+                    callback(false);
+                    return false;
+                } else {
+                    removeError($rate);
+                }
+
+                //validate material name already found for editMode
+				$.ajax({
+					url:getBaseURL()+ 'crm/extraitem/checkExtraitemFound',
+					type:"post",
+					data: $('#editForm').serialize(),
+					dataType:"json",
+					success:function(data, textStatus, jqXHR){
+						//alert(data)
+						if(data.results != false){
+							showError($ExtraItemName, 'ExtraItem Name already found!');
+							callback(false);
+							return false;
+						}
+						else{
+							removeError($ExtraItemName);
+							callback(true);
+						}
+					},
+					error:function(jqXHR, textStatus, errorThrown){
+						callback(false);
+						return false;
+					}
+				});
+                
+               
+            }
+		});
+       // bindJqxGridAutoResize();
+    });
+
+        
+        function validate(callback) {
+            
+            if(materialNamenew.length == 0) {
+                showError($materialNamenew, 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($materialNamenew);
+            }
+
+			if($('#unitNew').val().length == 0 || $('#unitNew').val() == 0 || $('#autocomplete-unitNameNew').val().length == 0) {
+                showError($('#autocomplete-unitNameNew'), 'Required!');
+                callback(false);
+                return false;
+            } else {
+                removeError($('#autocomplete-unitNameNew'));
+            }
+					
+            //validate material name already found for addMode
+           /* $.ajax({
+                url:getBaseURL()+ 'crm/extraitem/checkExtraitemFound',
+                type:"post",
+                data: $('#addForm').serialize(),
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    //alert(data)
+                    if(data.results != false){
+                        showError($materialNamenew, 'Material Name already found!');
+                        callback(false);
+                        return false;
+                    }
+                    else{
+                        removeError($materialNamenew);
+                        callback(true);
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    callback(false);
+                    return false;
+                }
+            });*/
+            
+           
+        }
+		
+	
+	$('#autocomplete-unitNameNew').autocomplete({
+        lookup: <?php echo json_encode($units); ?>,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+				$("#unitNew").val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+				$("#unitNew").val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+				$("#unitNew").val(0);
+                $(this).addClass('error');
+            } else $(this).removeClass('error');
+        }
+    });
+	
+	$('#autocomplete-unitName').autocomplete({
+        lookup: <?php echo json_encode($units); ?>,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+				$("#unitId").val(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+				$("#unitId").val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+				$("#unitId").val(0);
+                $(this).addClass('error');
+            } else $(this).removeClass('error');
+        }
+    });
+	
+	
+    function materialDelete(x, row) {
+        $(x).prop('disabled', true);
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $.ajax({
+            url: getBaseURL() + 'crm/extraitem/deleteExtraitem',
+            type: 'POST',
+            data: {"ExtraItemId": rowData.ExtraItemId, "Type": 'check'},
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                $(x).prop('disabled', false);
+                if (jqXHR.status == 200){
+                    $deleteModal.data('row', row).modal('show');
+                    $('#delMaterialName').html(rowData.ExtraItemName);
+                    $("#remarks").val('');
+                } else
+                    alert('Cannot delete this material, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $(x).prop('disabled', false);
+                alert('Cannot delete delete the Material!');
+            }
+        });
+    }
+	
+	function materialEdit(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $editModal.data('row', row).modal('show');
+		$ExtraItemName.val(rowData.ItemDescription);
+		$ExtraItemName.trigger('change');
+		$unit.val(rowData.UnitId);
+		$unit.trigger('change');
+		$('#autocomplete-unitName').val(rowData.UnitName);
+        $('#ExtraItemId').val(rowData.ExtraItemId);
+        $('#rate').val(rowData.Rate);
+    }
+</script> 

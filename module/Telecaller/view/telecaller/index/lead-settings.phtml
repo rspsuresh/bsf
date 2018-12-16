@@ -1,0 +1,69 @@
+<style type="text/css">
+    .red { color: #f4021a;}
+</style>
+<form action="" method="post" enctype="multipart/form-data">
+	<div class="content_wrapper padlr0">
+		<div class="container-fluid padlr0">
+			<div class="col-lg-12">
+				<h1 style="text-align:center;">Lead Settings</h1>
+				<table class="table table-hover clear" id="percentTable">
+					<thead>
+						<tr>
+							<th width="20%">Sno</th>
+							<th width="70%">Fields</th>
+							<th id="per" width="10%">Require</th>
+							<th></th>	
+						</tr>
+					</thead>
+					<tbody>
+					<?php if(isset($result) && count($result)>0) {
+						$a=0;
+						foreach($result as $rt) { $a++; ?>
+							<tr>
+								<td align="left"><?php echo $a; ?></td>
+								<td><?php echo $rt['Fields']; if($rt['Fields']=="LeadName" || $rt['Fields']=="Mobile" || $rt['Fields']=='NextFollowupType' || $rt['Fields']=='NextFollowupDate') { echo "<span class='red'> *</span>"; } ?></td>
+								<td>
+									<label>
+									<input type="checkbox" name="<?php echo $rt['TransId']; ?>" id="<?php echo $rt['TransId']; ?>" <?php if($rt['Fields']=="LeadName" || $rt['Fields']=="Mobile" || $rt['Fields']=="NextFollowupType" || $rt['Fields']=="NextFollowupDate") { echo "disabled"; } ?> class="ios_checkbox" <?php echo ($rt['Required']==1) ? 'checked' : ''; ?>/>
+									<div class="ios_switch"><span></span></div>
+									</label>
+								</td>
+							</tr>
+						<?php }
+					}?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</form>
+
+<script>
+$(document).ready(function(){
+$("input:checkbox").on("change",function(){ 
+		var id = $(this).attr("id"); 
+		var checkr=0;
+		if(this.checked){	
+			checkr=1;
+		} 
+		
+		$.ajax({
+			url:getBaseURL()+"telecaller/index/lead-settings",
+			type:"post",
+			data:"Column="+checkr+"&Id="+id,
+			success:function(data,textStatus,jqXHR){
+				if(jqXHR.status != 200 || data!="success") {
+					if( checkr==1) {
+						$('#'+id).attr("checked",false);
+					} else {
+						$('#'+id).attr("checked",true);
+					}
+					alert("request Failed");
+				}
+			}
+		});
+	});
+});
+
+</script>
+							

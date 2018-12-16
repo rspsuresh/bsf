@@ -1,0 +1,2043 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/amazonmenu.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/category.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.geocomplete.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/js/slimscroll.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+<style>
+    .error + .tooltip > .tooltip-inner          {background: #E74C3C; width:150% !important;font-size:12px !important; position:relative; left:-20% !important; padding:4px 3px !important;  }
+    .error + .tooltip > .tooltip-arrow              {border-top-color: #E74C3C;  }
+    .parent_text.error {background: #ffebeb none repeat scroll 0 0 !important;border: 1px solid #d64541 !important;color: #333333 !important;}
+    .parent_text{position:relative}
+    .content_wrapper {overflow:visible !important;}
+    .entry-icon {top:44%;}
+    .en-font {margin:12px 0 0 13px}
+    label{position:relative}
+    .star{ position:absolute; color:#ff0000; top:0; right:0; font-size:15px;}
+    .dcm_atch, .brkn {-moz-user-select: none;cursor: pointer;display: inline-block;font-size: 13px !important;font-weight: 400;color: #0b78ce;line-height: 1.42857;margin-bottom: 0;   padding: 6px 4px;text-align: center;vertical-align: middle;white-space: nowrap;}
+    .btn-file, .fileList, .fileList li {display:inline-block}
+    .hvr-shutter-in-horizontal{margin:0}
+    .select2 {width:100% !important;}
+    .margin-space{padding-top:18px !important;}
+    .error-msg{color:#ff0000;font-size:12px;position:absolute;bottom:-20px;right:0}
+    .input-bottom{position:relative}
+    .table-fixed tbody td,.table-fixed thead>tr>th{overflow:visible;}
+    .panel {border-radius:0px !important;}
+    .panel-info {border:none;border-top:none;}
+    /*.tooltip{margin:8px;padding:8px;border:1px solid blue;background-color:yellow;position: absolute;z-index: 2;}*/
+    .top-addtip{width: 168px;left: -80px;top: -58px;height: 74px;z-index: 1000001 !important;visibility: visible;}
+    .top-addtip:after{content: ""; display: block; width: 0; height: 0; border-left: 6px solid #7d73b3; border-top: 6px solid transparent; border-bottom: 6px solid transparent; position: absolute; top:32px; left:104%;z-index:1}
+    .action_btns li {float: left !important;padding-top: 7px;}
+	.table-fixed tbody{max-height:250px;min-height:20px; overflow-y:auto;width:100%}
+    .table-fixed thead,.table-fixed tbody,.table-fixed tr,.table-fixed td,.table-fixed th{display:block}
+    .table-fixed tbody td,.table-fixed thead>tr>th{float:left; border-bottom:0;position:relative;text-overflow:ellipsis;visible;display:inline-block;white-space:nowrap}
+	.select2-container .select2-selection--single{border:1px solid #ccc;min-height:37px !important;height:37px}
+	.parent_text{height:37px !important}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 id="titleTag" class="text-center">Service Order</h1>
+            </div>
+            <form method="post" id="formWrapper">
+                <div id="stageTwo" style="">
+                    <div class="col-lg-12">
+                        <input type="hidden" id="costCentreId" name="costCentreId" value="<?php if(isset($ccId)){echo $ccId;}elseif(isset($soRegister)){echo $soRegister['CostCentreId'];}else{echo '';} ?>" />
+                        <input type="hidden" id="vendorId" name="vendorId" value="<?php if(isset($venId)){echo $venId;}elseif(isset($soRegister)){echo $soRegister['VendorId'];}else{echo '';} ?>" />
+                        <input type="hidden" id="serviceTypeId" name="serviceTypeId" value="<?php if(isset($serTypeId)){echo $serTypeId;}elseif(isset($soRegister)){echo $soRegister['ServiceTypeId'];}else{echo '';} ?>" />
+                        <input type="hidden" id="SORegisterId" name="SORegisterId" value="<?php if(isset($soRegister)){echo $serOrdId;}else{echo 0;} ?>" />
+                        <input type="hidden" name="companyId" id="companyId" value="<?php echo (isset($costCentre)) ? $costCentre['CompanyId'] : ''; ?>">
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Cost Centre</label>
+                                        <span class="sprojName"><?php if(isset($costCentre)) { echo $costCentre['CostCentreName']; } else { echo $soRegister['CostCentreName']; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Contractor</label>
+                                        <span class="sconName"><?php if(isset($vendor)) { echo $vendor['VendorName']; } else { echo  $soRegister['VendorName']; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Service Type</label>
+                                        <input type="hidden" id="setServiceType" name="setServiceType" />
+                                        <div class="select-style selected-mu">
+                                            <select name="serviceType" id="serviceType"  onchange="ServiceTypeSet(this);" >
+                                                <?php if(isset($service_Types)){
+                                                    foreach($service_Types as $service_Type){
+                                                        ?>
+                                                        <option value="<?php echo $service_Type['ServiceTypeId'];?>"<?php echo ( (isset($service_Type) && $service_Type['ServiceTypeId'] == $serTypeId) ) ? 'selected' : ''; ?>><?php echo $service_Type['ServiceTypeName'];?></option>
+                                                    <?php
+                                                    }
+                                                } ?>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <!--li>
+                                        <label>Contract</label>
+                                        <span><input type="checkbox" id="isContract" name="isContract" value="1" <?php if(isset($soRegister) && $soRegister['Contract'] ==1 ) {?> checked <?php } ?> /></span>
+                                    </li-->
+                                    <li>
+                                        <label>Type</label>
+                                        <input type="hidden" id="updatework" name="updatework" />
+                                        <div class="select-style selected-mu">
+                                            <select name="workOrPeriod" id="workOrPeriod" onchange="workPeriod(this);" <?php if(isset($soRegister)) { ?>disabled<?php } ?> >
+                                                <!--                                                <option value=""></option>-->
+                                                <option value="work">Work</option>
+                                                <option value="period">Period</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box2th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Service Order Date</label>
+                                        <span><input type="text" id="soDate" name="soDate" class="date_picker" value="<?php if(isset($soRegister) && ($soRegister['SODate'] != NULL)) { echo date("d-m-Y", strtotime($soRegister['SODate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref Date</label>
+                                        <span><input type="text" id="refDate" name="refDate" class="date_picker" value="<?php if(isset($soRegister) && ($soRegister['RefDate'] != NULL)) { echo date("d-m-Y", strtotime($soRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li class="datePeriod">
+                                        <label>From Date</label>
+                                        <span><input type="text" id="fromDate" name="fromDate" class="date_picker" value="<?php if(isset($soRegister) && ($soRegister['FromDate'] != NULL)) { echo date("d-m-Y", strtotime($soRegister['FromDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li class="datePeriod">
+                                        <label>To Date</label>
+                                        <span><input type="text" id="toDate" name="toDate" class="date_picker" value="<?php if(isset($soRegister) && ($soRegister['ToDate'] != NULL)) { echo date("d-m-Y", strtotime($soRegister['ToDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box3th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Service Order No</label>
+                                        <span><input type="text" id="soNo" name="soNo" value="<?php if(isset($soRegister) && trim($soRegister['SONo']) != '') { echo trim($soRegister['SONo']); } else { echo ($genType) ? trim($soNo) : ''; } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>CC Service Order No</label>
+                                        <span><input type="text" id="ccSoNo" name="ccSoNo" value="<?php if(isset($soRegister) && trim($soRegister['SOCCNo']) != '') { echo $soRegister['SOCCNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Comp Service Order No</label>
+                                        <span><input type="text" id="compSoNo" name="compSoNo" value="<?php if(isset($soRegister) && trim($soRegister['SOCompNo']) != '') { echo $soRegister['SOCompNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref No</label>
+                                        <span><input type="text" id="refNo" name="refNo" value="<?php if(isset($soNo)) { echo $soNo; } else { echo $soRegister['RefNo']; } ?>" /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slic">
+                        <ul>
+                            <li class="face"><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12 clear top-20">
+                        <div id="accordion" class="panel-group">
+                            <div class="panel panel-info">
+                                <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                                    <h4 class="panel-title accordion-toggle defa_panels">Service Entry</h4>
+                                </div>
+                                <div class="error_message selOne" style="padding-right: 20px;"><p>please enter atleast one entry...</p></div>
+                                <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                                    <div class="panel-body bgcolr">
+                                        <div class="col-lg-12 animated fadeInUp">
+                                            <div class="table-responsive top-30">
+                                                <table class="table" style="margin-bottom:0px;" id="serviceTable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Description</th>
+                                                        <th>Unit</th>
+                                                        <th class="text-right">Qty</th>
+                                                        <th class="hideColumns text-right">Period</th>
+                                                        <th class="text-right">Rate</th>
+                                                        <th class="text-right">Amount</th>
+                                                        <th>&nbsp;</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr class="total">
+                                                        <td class="colspanId" colspan="3">&nbsp;</td>
+                                                        <td align="right" class="rate_pri">Base Amount</td>
+                                                        <td width="20%"><input class="parent_text bold-text-clr text-right" type="text" name="totalAmount" id="totalAmount" onblur="return FormatNum(this, 2)" onchange="myfunc($(this).val())" readonly />
+                                                            <div style="position: relative; display:none;" id="first">
+                                                                <div class="top-tip top-addtip"style="background-color:#cc0000 ! important;margin-left:76px ! important;top:-72px !important;width:68px !important;height:29px !important; ">
+                                                                    <span style="color:white">required</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td width="5%">&nbsp;</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="border-top:none !important" class="colspanId" colspan="3">&nbsp;</td>
+                                                        <td style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Amount</label></td>
+                                                        <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="qualAmt" id="qualAmt" onblur="return FormatNum(this, 2, true)" value="<?php echo (isset($soRegister)) ? $soRegister['QualifiedAmount'] : '';?>" readonly/></td>
+                                                        <td style="border-right:none;border-top:none;">
+                                                            <ul class="action_btns">
+                                                                <li>
+                                                                    <a href="#" class="qualTr">
+                                                                        <span data-original-title="Expand" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <tr style="display:none;" class="qualmainTr">
+                                                        <td colspan="10" style="padding:0px !important; ">
+                                                            <div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                                                                <?php echo $qualRHtml;?>
+                                                        </td>
+                                            </div>
+                                            </tr>
+                                            <tr>
+                                                <td  style="border-top:none !important" class="colspanId" colspan="3">&nbsp;</td>
+                                                <td style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanal__1_lbltotrate">Net Amount</label></td>
+                                                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="totAmount" id="totAmount" onblur="return FormatNum(this, 2, true)" value="" readonly/></td>
+                                                <td style="border-right:none;border-top:none;">&nbsp;</td>
+                                            </tr>
+                                            </tbody>
+                                            </table>
+                                            <input type="hidden" name="serviceRows" id="serviceRows" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-info">
+                            <div data-target="#collapseThree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-3">
+                                <h4 class="panel-title accordion-toggle defa_panels">Other Details</h4>
+                            </div>
+                            <div class="panel-collapse collapse" id="collapseThree" style="height: 0px;">
+                                <div class="panel-body bgcolr">
+                                    <div class="clearfix"></div>
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a href="#condition"  aria-controls="condition" onclick="showotherstabs('terms')" role="tab" data-toggle="tab">Terms and Condition</a></li>
+                                                <li class=""><a href="#payment" id="paymentTabLink" onclick="showotherstabs('pay')" aria-controls="payment" role="tab" data-toggle="tab">Payment Schedule</a></li>
+                                                <li class=""><a href="#scopework"  aria-controls="scopework" onclick="showotherstabs('scope')" role="tab" data-toggle="tab">Scope of Work </a></li>
+                                                <li class=""><a href="#nar" id="narrationTabLink" onclick="showotherstabs('narration')" aria-controls="naration" role="tab" data-toggle="tab">Narration</a></li>
+                                            </ul>
+                                                <div class="tab-pane active" id="condition" >
+                                                    <div class="col-lg-12">
+                                                        <div class="col-lg-3" style="margin-top:10px;">
+                                                            <select name="valuefrom" id="valuefrom" class="form-control single_dropdown" data-placeholder="Amount" style="width:100%;" onchange="termsAmount(this.value);" >
+                                                                <option></option>
+                                                                <option value="BaseAmount" <?php if($valuefrom == 0) echo "selected";  ?>>Base Amount</option>
+                                                                <option value="NetAmount" <?php if($valuefrom == 1) echo "selected";  ?>>Net Amount</option>
+                                                                <option value="GrossAmount" <?php if($valuefrom == 2) echo "selected";  ?>>Gross Amount</option>
+                                                            </select>
+
+                                                            <script>
+                                                                $(document).ready(function(){
+                                                                    var tCount = <?php echo $valuefrom;?>;
+                                                                    if(tCount != 0){
+                                                                        $('#valuefrom').attr("disabled", true);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        $('#valuefrom').attr("disabled", false);
+                                                                    }
+                                                                });
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12">
+                                                        <div class="table-responsive top-30 bot-20" style=" box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);">
+                                                            <table class="table table-fixed" id="gTermsTable" style=" margin-bottom:0px;"> <!--id="gTermsTable" -->
+															<thead>
+                                                            <tr>
+                                                                <th class="col-xs-1" width="5%">Select</th>
+                                                                <th class="col-xs-3" width="20%">Term Details</th>
+                                                                <th class="col-xs-3" width="25%">Input Type</th>
+                                                                <th class="col-xs-3" width="25%">Enter value</th>
+                                                                <th class="col-xs-2" width="15%">Include value</th>
+                                                            </tr>
+															</thead>
+                                                                <tbody class="main" id="termsWrapper">
+																</tbody>
+                                                            </table>
+                                                            <input type="hidden" name="trowid" id="trowid" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                </div><!-------------1st tab----------->
+                                            <!--div class="panel panel-info">
+                            <div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+                                <h4 class="panel-title accordion-toggle defa_panels">Terms and Conditions</h4>
+                            </div>
+                            <div class="panel-collapse collapse" id="collapseTwo" style="height: 0px;">
+                                <div class="panel-body bgcolr">
+                                    <div class="col-lg-12">
+                                        <div class="col-lg-3" style="margin-top:10px;">
+                                            <select name="valuefrom" id="valuefrom" class="form-control single_dropdown lbl_move" data-placeholder="Amount" style="width:100%;" onchange="termsAmount(this.value);" >
+                                                <option></option>
+                                                <option value="BaseAmount" <?php if($valuefrom == 0) echo "selected";  ?>>Base Amount</option>
+                                                <option value="NetAmount" <?php if($valuefrom == 1) echo "selected";  ?>>Net Amount</option>
+                                                <option value="GrossAmount" <?php if($valuefrom == 2) echo "selected";  ?>>Gross Amount</option>
+                                            </select>
+
+                                            <script>
+                                                $(document).ready(function(){
+
+                                                    var tCount =  $('#gTermsTable tbody tr').length;
+                                                    if(tCount > 1){
+                                                        $('#valuefrom').attr("disabled", true);
+                                                    }
+                                                    else
+                                                    {
+                                                        $('#valuefrom').attr("disabled", false);
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive top-30 bot-20">
+                                            <table class="table" style=" margin-bottom:0px;" id="gTermsTable" >
+                                                <thead>
+                                                <tr>
+                                                    <th>Sl.No</th>
+                                                    <th>Terms</th>
+                                                    <th>Per</th>
+                                                    <th>Value</th>
+                                                    <th>Period</th>
+                                                    <th>Date</th>
+                                                    <th>Description</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="main"></tbody>
+                                            </table>
+                                            <input type="hidden" name="trowid" id="trowid" value="0"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div-->
+                                                <div class="tab-pane" id="payment">
+                                                    <div class="table-responsive top-30 bot-20">
+                                                        <table class="table table-bordered tableView dataTable no-footer" style=" margin-bottom:0px;" id="pScheduleTable" >
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Description</th>
+<!--                                                                <th>Type</th>-->
+                                                                <th>Schedule %</th>
+                                                                <th>Schedule Base Advance %</th>
+                                                                <th>&nbsp;</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody class="main">
+
+                                                            </tbody>
+                                                            <tbody>
+                                                            <tr id="totalId">
+                                                                <!--                                                                <td></td>-->
+                                                                <td style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanal__1_lbltotrate">Total</label></td>
+                                                                <td style="border-right:none;border-top:none;">
+                                                                    <input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="scheduleTotal" id="scheduleTotal" onblur="return FormatNum(this, 2, true)" value="" readonly/>
+                                                                </td>
+                                                                <td style="border-right:none;border-top:none;">&nbsp;</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <input type="hidden" name="pRowId" id="pRowId" value="0"/>
+                                                    </div>
+                                                </div><!-------------2st tab----------->
+
+
+                                                <div class="tab-pane" id="scopework" style="display:none;">
+                                                    <p>
+                                                    <div class="col-lg-12">
+                                                        <?php
+                                                        if(isset($scope)){
+                                                            ?>
+                                                            <textarea class="exp-tex" name="scopework" id="scopeOfWork"><?php echo (isset($scope)) ? $scope : '';?></textarea>
+                                                        <?php }else{ ?>
+                                                            <textarea class="exp-tex" name="scopework" id="scopeOfWork" placeholder="Enter your Notes..."></textarea>
+                                                        <?php } ?>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <!-------------3st tab----------->
+                                            <div class="tab-pane" id="narration" style="display:none;">
+                                                    <p>
+                                                    <div class="col-lg-12">
+                                                        <?php
+                                                        if(isset($narration)){
+                                                            ?>
+                                                            <textarea class="exp-tex" name="Narration" id="Narration"><?php echo (isset($narration)) ? $narration : '';?></textarea>
+                                                        <?php }else{ ?>
+                                                            <textarea class="exp-tex" name="Narration" id="Narration" placeholder="Enter your Notes..."></textarea>
+                                                        <?php } ?>
+                                                    </div>
+                                                    </p>
+                                                </div><!-------------4st tab----------->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+</div>
+<script id="pTerms-template"  type="text/template" class="hide">
+    <tr>
+        <td width="25%">
+            <input class="parent_text text-left" type="text" name="sDesc__" id="sDesc__" onchange="paymentRow(this);" />
+        </td>
+<!--        <td width="25%">-->
+<!--            <select class="parent_text" name="sType__" id="sType__">-->
+<!--                <option value=""></option>-->
+<!--                <option value="Work">Work</option>-->
+<!--                <option value="Advance">Advance</option>-->
+<!--            </select>-->
+<!--        </td>-->
+        <td width="24%">
+            <input class="parent_text text-right" type="text" name="wPer__" id="wPer__" onblur="payPercent(this,'work')" onkeypress="return isDecimal(event,this)"/>
+        </td>
+        <td width="23%">
+            <input class="parent_text text-right" type="text" name="aPer__" id="aPer__"  onblur="payPercent(this,'advance')" onkeypress="return isDecimal(event,this)"/>
+        </td>
+        <td width="3%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deletePaymentRow(this, event);"  id="pTermsDeleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="terms-template"  type="text/template" class="hide">
+    <tr class="col-xs-12">
+        <td class="col-xs-1"> <div class="col-md-12"><input type="hidden" name="termsId__" id="termsId__" value="{{TermsId}}" />
+                <div align="right" class="checkbox">
+                    <label class="padd-left">
+                        <input type="checkbox" name="sel__" id="sel__" value="1" >
+                        <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                    </label>
+                </div>
+            </div>
+        </td>
+        <td class="col-xs-3"><div class="col-md-12 input-bottom" style="padding:0 !important">
+                <!--                <div class="col-3 input-effect">-->
+                <input class="effect-20" type="text" name="description__" id="description__" {{readonly}} value="{{TermsDescription}}" onchange="addNewTermsRow(this)"  placeholder="Enter Description"/>
+                <!--                    <span class="focus-border"> <i></i> </span> </div>-->
+            </div>
+        </td>
+        <td class="col-xs-3"><div class="col-md-12">
+                <select class="form-control single_dropdown" name="type__" id="type__" onchange="fillSelect(this)" {{disabled}}>
+                    <option value="1" >Value</option>
+                    <option value="2" >Percentage</option>
+                    <option value="3" >Cheque</option>
+                    <option value="4" >String</option>
+                    <option value="5" >Date</option>
+                    <option value="6" >Cash</option>
+                    <option value="7" >NEFT</option>
+                    <option value="8" >Period</option>
+                    <option value="9" >please enter paymode</option>
+                </select>
+            </div>
+        </td>
+        <td class="col-xs-3"><div class="col-md-12 input-bottom" style="padding:0 !important">
+                <div class="col-3 input-effect req_flds">
+                    <input class="effect-20 parent_text" type="text" name="value__" id="value__" value="0.00" onchange="addNewTermsRow(this)" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" />
+                    <span class="focus-border"> <i></i> </span>
+                    <span class="error-msg"></span>
+                </div>
+            </div>
+        </td>
+        <td class="col-xs-2"><div class="col-md-12" style="padding:0 !important"><div class="checkbox">
+                    <label class="padd-left">
+                        <input type="checkbox"  name="inc__" id="inc__" {{incChecked}} {{disabled}} value="{{incValue}}" >
+                        <span class="cr"><i class="cr-icon fa fa-check"></i></span> <a href="#" class="hint--left term" aria-label="Include this value to vendors quotation amount">Include Value</a> </label>
+                </div>
+            </div>
+        </td>
+    </tr>
+<!--    <tr class="col-xs-12" style="padding:0 !important">-->
+<!--        <td class="col-xs-1" width="10%">-->
+<!--            <input class="parent_text border-none" type="text" name="slno__" id="slno__" />-->
+<!--        </td>-->
+<!--        <td class="col-xs-2" width="26%">-->
+<!--            <input class="parent_text resourceSuggest" type="text" name="terms__" id="terms__" value="" onfocus="checkTermsUsed(this);" />-->
+<!--            <input type="hidden" name="termsid__" id="termsid__"/>-->
+<!--            <input type="hidden"  name="isper__" id="isper__"/>-->
+<!--            <input type="hidden"  name="isvalue__" id="isvalue__"/>-->
+<!--            <input type="hidden"  name="isperiod__" id="isperiod__"/>-->
+<!--            <input type="hidden"  name="istdate__" id="istdate__"/>-->
+<!--            <input type="hidden"  name="iststring__" id="iststring__"/>-->
+<!--            <input type="hidden"  name="includegross__" id="includegross__"/>-->
+<!--        </td>-->
+<!--        <td class="col-xs-1" width="10%">-->
+<!--            <input class="parent_text border-none " type="text" name="per__" id="per__" s style="text-align:right;" onkeypress="return isDecimal(event,this)" onchange="TermsCalculation(this.id);" max="100"/>-->
+<!--        </td>-->
+<!--        <td class="col-xs-1" width="15%"><input class="parent_text border-none" type="text" name="value__" style="text-align:right;" id="value__" onkeypress="return isDecimal(event,this)" onchange="TermsCalculation(this.id);"/></td>-->
+<!--        <td class="col-xs-2" width="10%"><input class="parent_text border-none" type="text" name="period__" style="text-align:right;" onkeypress="return isDecimal(event,this)" id="period__"/></td>-->
+<!--        <td class="col-xs-2" width="14%">-->
+<!--            <div class="col-lg-12 padlr0"><!--4231-->-->
+<!--                <input type="text" name="date__" id="date__" class="tbl_input date_picker" style="cursor:pointer;" value='--><?php //echo Date('d/m/Y'); ?><!--' />-->
+<!--                <span class="date_icon"><i class="fa fa-calendar"></i></span>-->
+<!--            </div>-->
+<!--        </td>-->
+<!--        <td class="col-xs-2" width="15%"><input class="parent_text border-none" type="text" name="string__" id="string__"/></td>-->
+<!--        <td class="col-xs-1" width="15%" align="center" class="action_btns_td">-->
+<!--           <div class="col-xs-6" style="padding:0 !important"> <ul class="action_btns">-->
+<!--                <li> <a onclick="deleteRow(this, event);"  id="termsdeleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>-->
+<!--            </ul>-->
+<!--           </div>-->
+<!--		   <div class="col-xs-6" style="padding:0 !important">-->
+<!--            <input type="hidden" id ="tooltip-1" title = "Enter You name"></div>-->
+<!--        </td>-->
+<!--    </tr>-->
+</script>
+<script id="II-template"  type="text/template" class="hide">
+    <tr>
+        <td width="15%">
+            <input type="hidden"  name="req___id_0" id="req___id_0" readonly/>
+            <input type="hidden"  name="req___transid_0" id="req___transid_0" readonly/>
+            <input class="parent_text border-none" type="text" name="req___no_0" id="req___no_0" readonly/>
+            <input class="parent_text border-none" type="hidden" name="req___serviceId_0" id="req___serviceId_0" readonly/>
+        </td>
+        <td width="17%">
+            <input class="parent_text mainTr" type="text" name="req___date_0" id="req___date_0"  style="text-align:right;"  readonly/>
+        </td>
+        <td width="17%">
+            <input class="parent_text mainTr" type="text" name="req___qty_0" id="req___qty_0"  style="text-align:right;" onblur="return FormatNum(this, 3)"  readonly/>
+        </td>
+        <td width="17%">
+            <input class="parent_text mainTr" type="text" name="req___orderqty_0" id="req___orderqty_0"  style="text-align:right;" onblur="return FormatNum(this, 3)"  readonly/>
+        </td>
+        <td width="17%">
+            <input class="parent_text mainTr" type="text" name="req___balqty_0" id="req___balqty_0"  style="text-align:right;" onblur="return FormatNum(this, 3)" readonly/>
+        </td>
+        <td width="17%">
+            <input class="parent_text mainTr" type="text" name="req___curqty_0" id="req___curqty_0"  style="text-align:right;" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this);" onchange="CalcurQty(this)" />
+            <input type="hidden" name="req___hiddenQty_0" id="req___hiddenQty_0" readonly/>
+        </td>
+    </tr>
+</script>
+<div id="submitDiv" class="col-lg-12 savebtn_area" style="">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Submit" onclick="return submitForm();">Submit</a>
+            <?php if(isset($soRegister)){?>
+        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/workorder/register';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+        <?php }else{?>
+            <li class="cancel_btn float_r"><a href="<?php echo $this->basePath(); ?>/wpm/workorder/index" class="ripple" title="Go back!" onclick="return showBack('a');">Back</a></li>
+        <?php }?>    </ul>
+</div>
+<script id="I-template"  type="text/template" class="hide">
+    <tr>
+        <td width="30%">
+            <input class="parent_text serSuggest" type="text" name="serviceName__" id="serviceName__" onfocus="return checkSOUsed(this);" />
+            <input type="hidden" name="serviceId__" id="serviceId__" />
+            <input type="hidden" name="requestId__" id="requestId__" />
+            <input type="hidden" name="costcentreid__" id="costcentreid__" />
+        </td>
+        <td width="15%"><input type="hidden" name="unitId__" id="unitId__" /><input class="parent_text" type="text" name="unitName__" id="unitName__" readonly /></td>
+        <td width="15%">
+            <input class="parent_text text-right" type="text" name="qty__" id="qty__"  onblur="return FormatNum(this, 3),checkqty(this)" onclick="qtyClick(this)"  onkeypress="return isDecimal(event,this);" onchange="return calAmount('__','d');" />
+            <div style="position: relative; display:none;" id="wfirst__">
+                <div class="top-tip top-addtip"style="">
+                    <span style="color:white;">EstimateQty:<i id='estimateQty__' style="color:white"></i></span>
+                    <span style="color:white;">OrderQty:<i id='orderQty__' style="color:white"></i></span>
+                    <span style="color:white;">BilledQty:<i id='billedQty__' style="color:white"></i></span>
+                </div>
+            </div>
+
+        </td>
+        <td class="hideColumns" style="display:none;width: 12% !important;" >
+            <div class="select-style">
+                <select class="parent_text" name="workingUnitId__" id="workingUnitId__">
+                    <option value="0"></option>
+                    <?php foreach($workingUnits as $wou) { ?>
+                        <option value="<?php echo $wou['UnitId']; ?>" <?php if(isset($hoTrans) && $hoTrans['WorkingUnitId']==$wou['UnitId']) { ?>selected<?php } ?>><?php echo $wou['UnitName']; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </td>
+        <td width="15%"><input class="parent_text text-right" type="text" name="rate__" id="rate__"  onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this);" onchange="return calAmount('__','d');" readonly/></td>
+        <td width="20%">
+            <input class="parent_text text-right" type="text" name="amount__" id="amount__" onblur="return FormatNum(this, 2)" readonly />
+            <input type="hidden" name="eAmount__" id="eAmount__" />
+        </td>
+        <td width="5%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li>
+                    <a href="javascript:void(0);" class="serviceDelete__"  id="serviceDelete__" onclick="deleteServiceRow(this, event);" id="" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                </li>
+                <li>
+                    <a  class="mainTr" id="expandTr__" style="display:none;"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a>
+                </li>
+
+            </ul>
+        </td>
+    </tr>
+    <tr id="subTr__" style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12">
+                    <div class="scrl">
+                        <div class="table-responsive topsp">
+                            <table class="table" style="margin-bottom:0px;" id="reqServiceTable__">
+                                <thead>
+                                <tr>
+                                    <th>ReqNo</th>
+                                    <th>ReqDate</th>
+                                    <th>ReqQty</th>
+                                    <th>OrderQty</th>
+                                    <th>BalQty</th>
+                                    <th>CurrentQty</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main">
+                                </tbody>
+                                <input type="hidden" name="req___rowid" id="req___rowid" value="0"/>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script>
+    if($('#costCentreId').val()=='' || $('#vendorId').val()=='' || $('serviceTypeId').val()==''){
+        window.location.href =  getBaseURL() + 'wpm/workorder/index';
+    }
+
+    $("#backPrev").hide();
+
+    var serviceList = '[]';
+    var tmp_serviceList = serviceList;
+
+    var qualRHtml = <?php echo (isset($qualRHtml)) ? json_encode($qualRHtml) : '[]';?>;
+    var arr_edit_terms=<?php echo (isset($arr_edit_terms)) ? json_encode($arr_edit_terms) : '[]';?>;
+    var arr_requestResources=<?php echo (isset($arr_requestResources)) ? json_encode($arr_requestResources) : '[]';?>;
+    var arr_resources=<?php echo (isset($arr_resources)) ? json_encode($arr_resources) : '[]';?>;
+    var arr_terms=<?php echo (isset($arr_terms)) ? json_encode($arr_terms) : '[]';?>;
+    var arr_payTerms=<?php echo (isset($arr_payTerms)) ? json_encode($arr_payTerms) : '[]';?>;
+    var tmp_arr_terms=arr_terms;
+    var termRowcount=0;
+
+
+    $(function(){
+        $('.ripple').materialripple();
+        $('#valuefrom').trigger('change');
+        $('#serviceType').trigger('change');
+        nextAccordian(1);
+        expandQualTrFn();
+        bindQualExpandTr();
+        bindPopOver();
+        getServices();
+        console.log(arr_terms)
+        getterms(arr_terms);
+//        termRowcount=termRowcount+1;
+//        var templateterm = $('#terms-template').html();
+//        templateterm = templateterm.replace(/__/g, '_' + termRowcount);
+//        templateterm = templateterm.replace(/\{\{TermsDescription\}\}/g,'');
+//        templateterm = templateterm.replace(/\{\{TermsId\}\}/g,'0');
+//        templateterm = templateterm.replace(/\{\{readonly\}\}/g,'');
+//        //templateterm = templateterm.replace(/\{\{rowTId\}\}/g,termRowcount);
+//        templateterm = templateterm.replace(/\{\{disabled\}\}/g,'');
+//        templateterm = templateterm.replace(/\{\{incChecked\}\}/g,'checked');
+//        templateterm = templateterm.replace(/\{\{incValue\}\}/g,'1');
+//        //{{TermsDescription}}
+//        $('#gTermsTable tbody').append(templateterm);
+        /*  $(".single_dropdown").select2({
+         });*/
+        $('#trowid').val(termRowcount);
+        $('#serviceType').on('change',function(){
+            getServices();
+        });
+        if($('#workOrPeriod').val() == ''){
+            $('.hideColumns').hide();
+        }
+        if($('#workOrPeriod').val() == 'work'){
+            $('.datePeriod').hide();
+        }
+        //payment Terms
+        var $pRowId = $('#pRowId');
+        var pTemplate = $('#pTerms-template').html();
+        var pRowId = 0;
+        var $tbody = $('#pScheduleTable').find('.main');
+        if(arr_payTerms.length != 0){
+            $.each(arr_payTerms, function(i, o) {
+                pRowId++;
+                $tbody.append(pTemplate.replace(/__/g, '_' + pRowId));
+                $('#sDesc_' + pRowId).val(o.ScheduleName);
+                $('#sType_' + pRowId).val(o.ScheduleType);
+                $('#wPer_' + pRowId).val(o.WorkPer);
+                $('#aPer_' + pRowId).val(o.AdvancePer);
+                $('#pTermsDeleteTr_' + pRowId).show();
+            });
+        }
+        pRowId++;
+        $tbody.append(pTemplate.replace(/__/g, '_' + pRowId));
+        $pRowId.val(pRowId);
+        //general terms &condition
+//        var $trowid = $('#trowid');
+//        var template = $('#terms-template').html();
+//        var trowid = 0;
+//        var $tbody = $('#gTermsTable').find('> tbody');
+//
+//        if(arr_edit_terms.length != 0) {
+//
+//            $.each(arr_edit_terms, function(i, o) {
+//                trowid += 1;
+//                $tbody.append(template.replace(/__/g, '_' + trowid));
+//
+//                $('#slno_' + trowid).val(o.SlNo).addClass('border-none').prop('disabled', true);
+//                $('#termsid_' + trowid).val(o.data);
+//                $('#terms_' + trowid).val(o.value);
+//                $('#per_' + trowid).val(o.Per);
+//                $('#value_' + trowid).val(o.Val);
+//                $('#period_' + trowid).val(o.Period);
+//                $('#date_' + trowid).val(o.Dte);
+//                $('#string_' + trowid).val(o.Strg);
+//                $('#isper_' + trowid).val(o.IsPer);
+//                $('#isvalue_' + trowid).val(o.IsValue);
+//                $('#isperiod_' + trowid).val(o.IsPeriod);
+//                $('#istdate_' + trowid).val(o.IsTDate);
+//                $('#iststring_' + trowid).val(o.IsTString);
+//                $('#includegross_' + trowid).val(o.IncludeGross);
+//                $('#termsdeleteTr_' + trowid).show();
+//            });
+//        }
+//        trowid += 1;
+//        $tbody.append(template.replace(/__/g, '_' + trowid));
+//        $trowid.val(trowid);
+
+        var $serRowId = $('#serviceRows');
+        var iTemplate = $('#I-template').html();
+        var iiTemplate = $('#II-template').html();
+        var srowid = 0;
+//        var $tbody1 = $('#serviceTable').find('> tbody');
+//       $('#serviceTable tbody').find('.total').before(iTemplate);
+
+        if(arr_requestResources.length != 0) {
+            $.each(arr_requestResources, function(i, o) {
+                srowid += 1;
+                $('#serviceTable tbody').find('.total').before(iTemplate.replace(/__/g, '_' + srowid));
+//                $tbody1.append(iTemplate.replace(/__/g, '_' + srowid));
+                $('#unitName_' + srowid).val(o.UnitName);
+                $('#unitId_' + srowid).val(o.UnitId);
+                if(o.WorkUnitId != 0) {
+                    $('#workingUnitId_' + srowid).val(o.WorkUnitId).trigger('change');
+                }
+                $('#serviceName_' + srowid).val(o.Desc);
+                $('#requestId' + srowid).val(o.RequestId);
+                $('#serviceId_' + srowid).val(o.ServiceId);
+                $('#costcentreid_' + srowid).val(o.CostCentreId);
+                $('#estimateQty_' + srowid).text(sanitizeNumber(o.eQty,3));
+                $('#qty_' + srowid).val(o.Qty).trigger('change').trigger('blur');
+                $('#rate_' + srowid).val(o.Rate).trigger('change').trigger('blur');
+                $('#amount_' + srowid).val(o.Amount).trigger('change').trigger('blur');
+                $('#serviceDelete_' + srowid).show();
+                $("#workOrPeriod").prop('disabled', true);
+                $("#serviceType").prop('disabled', true);
+                var oQty = 0;
+                var bQty = 0;
+                var eAmt = 0;
+                $.ajax({
+                    url: getBaseURL() + 'wpm/labourstrength/get-order-qty',
+                    type: "post",
+                    data: {'ccId': $('#costCentreId').val(),soId:$('#SORegisterId').val(),'Type': 'getorderqty',serviceId:o.ServiceId},
+                    async: false,
+                    success: function (data, textStatus, jqXHR) {
+                        if(jqXHR.status == 200) {
+                            data = JSON.parse(data);
+                            oQty = data.OQty;
+                            if (oQty == null) {
+                                oQty = 0;
+                            }
+                            bQty = data.bQty;
+                            if (bQty == null) {
+                                bQty = 0;
+                            }
+                            eAmt = data.eAmt;
+                            if (eAmt == null) {
+                                eAmt = 0;
+                            }
+                            $('#orderQty_'+ srowid).html(sanitizeNumber(parseFloatVal(oQty),3));
+                            $('#billedQty_'+ srowid).html(sanitizeNumber(parseFloatVal(bQty),3));
+                            $('#eAmount_'+ srowid).val(eAmt);
+                        }
+                    }, error: function (jqXHR, textStatus, errorThrown) {
+                    }
+                });
+                var reqCount = 0;
+
+                if(arr_resources.length != 0) {
+                    $('#qty_' + srowid).attr('readonly',true);
+                    $('#expandTr_' + srowid).show();
+                    $.each(arr_resources, function (m, n) {
+                        if (o.ServiceId != n.ServiceId || o.CostCentreId != n.CostCentreId) {
+                            return;
+                        }
+//                            if(n.BalQty<0) {
+                        reqCount = reqCount + 1;
+                        var reqrowid = parseInt($('#req_' + srowid + '_rowid').val()) + 1;
+                        $('#reqServiceTable_' + srowid).find('tbody.main').append(iiTemplate.replace(/__/g, '_' + srowid).replace(/_0/g, '_' + reqrowid));
+                        $('#req_' + srowid + '_rowid').val(reqrowid);
+                        $('#req_' + srowid + '_serviceId_' + reqrowid).val(n.ServiceId);
+                        $('#req_' + srowid + '_transid_' + reqrowid).val(n.RequestTransId);
+                        $('#req_' + srowid + '_no_' + reqrowid).val(n.RequestNo);
+                        $('#req_' + srowid + '_date_' + reqrowid).val(n.RequestDate);
+                        $('#req_' + srowid + '_qty_' + reqrowid).val(n.Quantity).trigger('blur');
+                        $('#req_' + srowid + '_orderqty_' + reqrowid).val(n.SOQty).trigger('blur');
+                        $('#req_' + srowid + '_balqty_' + reqrowid).val(n.BalQty).trigger('blur');
+                        $('#req_' + srowid + '_curqty_' + reqrowid).val(n.CurQty).trigger('blur').trigger('change');
+                        $('#req_' + srowid + '_hiddenQty_' + reqrowid).val(n.HiddenQty);
+//                            }
+                    });
+                }
+            });
+        }
+        addServiceRow(srowid);
+
+        $('.content_wrapper').on('click', '.mainTr', function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                $(this).find("i").addClass("tform");
+            }
+            else {
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+                $(this).find("i").removeClass("tform");
+            }
+        });
+        nextAccordian(1);
+    });
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+    function getterms(data) {
+        //console.log(data);
+        var $termsWrapper = $('#termsWrapper');
+        if(data.length == 0) {
+            $termsWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            var template = $('#terms-template').html();
+            $termsWrapper.html('');
+            $.each(data, function (i,o) {
+                termRowcount=termRowcount+1;
+                var includeGross="";
+                var readonly="", disabled="disabled";
+                var includeValue=0;
+                if(o.IncludeGross==1) {
+                    includeGross="checked";
+                    includeValue=1;
+                }
+
+                if(o.SysDefault==1){
+                    readonly="readonly";
+                }
+
+                $termsWrapper.append(template.replace(/\{\{TermsId\}\}/g,o.data)
+                    .replace(/__/g, '_' + termRowcount)
+                    .replace(/\{\{TermsDescription\}\}/g,o.value)
+                    .replace(/\{\{readonly\}\}/g,readonly)
+                    //.replace(/\{\{rowTId\}\}/g,termRowcount)
+                    .replace(/\{\{disabled\}\}/g,disabled)
+                    .replace(/\{\{incChecked\}\}/g,includeGross)
+                    .replace(/\{\{incValue\}\}/g,includeValue));
+                //incValue
+                var $value = $("#value_"+termRowcount);
+                $value.removeAttr('onblur');
+                $value.removeAttr('onkeypress');
+                $value.removeAttr('maxlength');
+                $value.removeAttr('onchange');
+                $value.attr('readonly', false);
+                var optVal=0;
+                if(o.IsValue==1){
+                    $("#type_"+termRowcount).find('option[value=1]').prop("selected", true);
+                    $value.attr('onblur', 'return FormatNum(this, 2)');
+                    $value.attr('onkeypress', 'return isDecimal(event,this)');
+                    optVal=1;
+                } else if(o.IsPer==1){
+                    $("#type_"+termRowcount).find('option[value=2]').prop("selected", true);
+                    $value.attr('onblur', 'return FormatNum(this, 2)');
+                    $value.attr('onkeypress', 'return isDecimal(event,this)');//isPercentage
+                    $value.attr('onchange', 'return isPercentage(this)');
+                    optVal=2;
+                } else if(o.Cheque==1){
+                    $("#type_"+termRowcount).find('option[value=3]').prop("selected", true);
+                    $value.removeAttr('onblur');
+                    $value.removeAttr('onkeypress');
+                    optVal=3;
+                } else if(o.IsTString==1){
+                    $("#type_"+termRowcount).find('option[value=4]').prop("selected", true);
+                    $value.removeAttr('onblur');
+                    $value.removeAttr('onkeypress');
+                    optVal=4;
+                } else if(o.IsTDate==1){
+                    $("#type_"+termRowcount).find('option[value=5]').prop("selected", true);
+                    $value.attr('readonly', true);
+                    $value.attr('placeholder', 'dd-mm-yyyy');
+                    $value.datepicker({
+                        'format': 'dd-mm-yyyy'
+                    }).on('changeDate', function() {
+                        $('.datepicker').hide();
+                    });
+                    optVal=5;
+                } else if(o.Cash==1){
+                    $("#type_"+termRowcount).find('option[value=6]').prop("selected", true);
+                    $value.attr('onblur', 'return FormatNum(this, 2)');
+                    $value.attr('onkeypress', 'return isDecimal(event,this)');
+                    optVal=6;
+                } else if(o.NEFT==1){
+                    $("#type_"+termRowcount).find('option[value=7]').prop("selected", true);
+                    $value.removeAttr('onblur');
+                    $value.removeAttr('onkeypress');
+                    optVal=7;
+                }  else if(o.IsPeriod==1){
+                    $("#type_"+termRowcount).find('option[value=8]').prop("selected", true);
+                    $value.attr('onkeypress', 'return isNumberKey(event)');
+                    $value.attr('maxlength', '3');
+                    optVal=8;
+                } else if(o.PayAll==1){
+                    $("#type_"+termRowcount).find('option[value=9]').prop("selected", true);
+                    $("#value_"+termRowcount).closest(".req_flds").find(".error-msg").html('Cash/Cheque/NEFT');
+                    $value.removeAttr('onblur');
+                    $value.removeAttr('onkeypress');
+                    optVal=9;
+                }
+
+                $('#type_'+termRowcount).removeAttr('name').removeAttr('id').after('<input type="hidden" id="type_'+ termRowcount+'" name="type_'+ termRowcount+'" value="'+optVal+'"/>');
+                //$("#type_"+termRowcount).("selected", true);
+
+            });
+
+            /* $(".single_dropdown").select2({
+
+             });*/
+        }
+    }
+    function addServiceRow(x){
+        var srowid=x;
+        var iTemplate = $('#I-template').html();
+        var $serRowId = $('#serviceRows');
+        srowid ++;
+        $('#serviceTable tbody').find('.total').before(iTemplate.replace(/__/g, '_' + srowid));
+        $serRowId.val(srowid);
+        workPeriod();
+    }
+
+    function nextAccordian(id)
+    {
+        $('#panelheading-' + id).trigger('click');
+    }
+
+    var $costCentreId = $('#costCentreId'),
+        $vendorId = $('#vendorId'),
+        $serviceTypeId = $('#serviceTypeId');
+
+    function validateLabStg()
+    {
+        $('.error_message').hide();
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+        if(currentIndex == 0) {
+            var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+            var lVendorId = isNullCheck($vendorId.val(),'number');
+            var lServiceType = isNullCheck($serviceTypeId.val(),'number');
+
+            if (lCostCentreId == 0) {
+                $costCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var projName = $('#costCentreId option:selected').text();
+                $('.projName').val(projName);
+                $('.sprojName').html(projName);
+                $('#soDate').val($('#soeDate').val());
+            }
+
+            if (lVendorId == 0) {
+                $vendorId.closest('.form-group').find(".error_message").show();
+                return;
+            } else if (lServiceType == 0) {
+                $serviceTypeId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var conName = $('#vendorId option:selected').text();
+                var stName = $('#serviceTypeId option:selected').text();
+                $('.conName').val(conName);
+                $('.stName').val(stName);
+                $('.sconName').html(conName);
+                $('.sstName').html(stName);
+                getValueOfSlider('next');
+                $('#carousel-example-generic').carousel({
+                    slide: "next"
+                });
+            }
+        }  else {
+            $.post(getBaseURL()+'wpm/labourstrength/get-services', {
+                    sTypeId: $serviceTypeId.val()
+                },
+                function(data) {
+                    serviceList = JSON.parse(data);
+                    tmp_serviceList = serviceList;
+//                    getCompCCNo();
+//                    showBack('e');
+                    bindServiceAutoComplete();
+                });
+        }
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function workPeriod(){
+        if($('#workOrPeriod').val() == 'work'){
+            var ass=$('#workOrPeriod').val();
+            $('#updatework').val(ass);
+            $('.hideColumns').hide();
+            $('.datePeriod').hide();
+            $('.colspanId').attr("colspan", 3);
+        }else if($('#workOrPeriod').val() == 'period'){
+            var ass=$('#workOrPeriod').val();
+            $('#updatework').val(ass);
+            $('.hideColumns').show();
+            $('.datePeriod').show();
+            $('.colspanId').attr("colspan", 4);
+        }
+    }
+    function ServiceTypeSet(){
+        var setVal=$('#serviceType').val();
+        $('#setServiceType').val(setVal);
+    }
+
+    function submitForm()
+    {
+        var errFlag = 0;
+        var soRows = $('#serviceRows').val();
+        var soCnt = 0;
+        $('.error_message').hide();
+        $('.red_bdr').removeClass('red_bdr');
+        var typeOfWork=$('#workOrPeriod').val();
+        if(typeOfWork = 'period') {
+            if ($.trim($('#fromDate').val()) != '' && $.trim($('#toDate').val()) != '') {
+                if (!compareDate($('#fromDate').val(), $('#toDate').val())) {
+                    $('#toDate').addClass('red_bdr');
+                    $('#toDate').focus();
+                    errFlag = 1;
+                    return false;
+                }
+            }
+        }
+        if($.trim($('#soNo').val()) == '') {
+            $('#soNo').addClass('red_bdr');
+            $('#soNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#ccSoNo').val()) == '') {
+            $('#ccSoNo').addClass('red_bdr');
+            $('#ccSoNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#compSoNo').val()) == '') {
+            $('#compSoNo').addClass('red_bdr');
+            $('#compSoNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#refNo').val()) == '') {
+            $('#refNo').addClass('red_bdr');
+            $('#refNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        for (var i = 1; i <= soRows; i++) {
+            if($('#serviceId_'+i).val() == '') {
+                soCnt = soCnt + 1;
+            }
+        }
+        if(soRows == soCnt) {
+            $(".selOne").show();
+            errFlag = 1;
+            return false;
+        }
+
+        if(errFlag == 0) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    function deleteServiceRow(x,e)
+    {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid =ids[1];
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr:not(.total)').length == 1) {
+//            var iTemplate = $('#I-template').html();
+//            $('#serviceTable tbody').find('.total').before(iTemplate.replace(/__/g, '_' + rowid));
+            var template = $('#serviceTable tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#serviceRows').val(1);
+        }
+
+        var mqty=parseFloat($('#totalAmount').val())-parseFloat($('#amount_'+rowid).val());
+        $('#totalAmount').val(mqty).trigger('blur');
+
+        var c=0;
+        $.each($('input[id^=serviceId_'), function(i,o){
+            if($('#serviceId_'+rowid).val() !=0){
+                c+=1;
+            }
+        });
+        if(c == 2){
+            $('#workOrPeriod').prop('disabled', false);
+            $('#serviceType').prop('disabled', false);
+        }
+        $tr.remove();
+        return false;
+    }
+
+    function bindServiceAutoComplete()
+    {
+        $('#serviceTable .serSuggest').autocomplete({
+            lookup: tmp_serviceList,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $this = $(this);
+                    var key1 = $this[0].id.split('_')[1];
+                    $this.prop('readonly', true).addClass('border-none');
+                    $('#serviceId_'+ key1).val(suggestion.data);
+                    $('#unitId_'+ key1).val(suggestion.UnitId);
+                    $('#unitName_'+ key1).val(suggestion.UnitName);
+                    $('#costcentreid_'+ key1).val(suggestion.ProjectId);
+                    $('#estimateQty_'+ key1).text(sanitizeNumber(suggestion.Qty,3));
+                    $('#orderQty_'+ key1).text(sanitizeNumber(suggestion.OQty,3));
+                    $('#billedQty_'+ key1).text(sanitizeNumber(suggestion.BQty,3));
+                    $('#eAmount_'+ key1).val(suggestion.Amount);
+//                    $('#workingUnitId_'+ key1).val(suggestion.WorkUnitId).trigger('change');
+                    $('#rate_'+ key1).val(suggestion.Rate).trigger('blur').trigger('change');
+                    $('#serviceDelete_' + key1).show();
+                    if($('#serviceId_'+ key1).val() != 0 || $('#serviceId_'+ key1).val() !=''){
+                        $("#workOrPeriod").prop('disabled', true);
+                        $("#serviceType").prop('disabled', true);
+                    }
+                    addServiceRow(key1);
+                    bindreqdetails($this);
+                    removeError($(this));
+                    workPeriod();
+                }
+            }, onSearchStart: function(suggestion) {
+                var $this = $(this);
+                var key1 = $this[0].id.split('_')[1];
+
+                $('#serviceId_'+key1).val('');
+                $('#unitId_'+ key1).val('');
+                $('#unitName_'+ key1).val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    }
+
+    function bindreqdetails(x){
+        var rowid = $(x)[0].id.split('_')[1];
+        var CostCenterId = $('#costcentreid_'+rowid).val();
+        var serviceid = $('#serviceId_'+rowid).val();
+        var requestId = $('#requestId_'+rowid).val();
+        $('.loading_area').show();
+        $.ajax({
+            url: getBaseURL() + 'wpm/labourstrength/service-order',
+            type: "post",
+            data: {'CostCenterId': CostCenterId,'serviceid': serviceid},
+            async: false,
+            success: function (data, textStatus, jqXHR) {
+                if (jqXHR.status == 200) {
+                    var data = JSON.parse(data);
+                    var iiTemplate = $('#II-template').html();
+                    $.each(data, function (i, n) {
+
+//                        var findRes = arr_resources.filter(function(obj) {
+//                            return (obj.CostCentreId === CostCentreId && obj.ServiceId === l.ServiceId);
+//                        });
+                        if (CostCenterId == n.CostCentreId) {
+                            $('#expandTr_' + rowid).show();
+                            var reqrowid = parseInt($('#req_'+ rowid+'_rowid').val()) + 1;
+                            $('#reqServiceTable_' + rowid).find('tbody.main').append(iiTemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + reqrowid));
+                            $('#req_' + rowid + '_rowid').val(reqrowid);
+                            $('#qty_'+ rowid).trigger('change').attr('readonly',true);
+                            $('#req_' + rowid + '_id_' + reqrowid).val(n.RequestId);
+                            $('#req_' + rowid + '_serviceId_' + reqrowid).val(n.ServiceId);
+                            $('#req_' + rowid + '_transid_' + reqrowid).val(n.RequestTransId);
+                            $('#req_' + rowid + '_no_' + reqrowid).val(n.RequestNo);
+                            $('#req_' + rowid + '_date_' + reqrowid).val(n.RequestDate);
+                            $('#req_' + rowid + '_qty_' + reqrowid).val(n.Quantity).trigger('blur');
+                            $('#req_' + rowid + '_orderqty_' + reqrowid).val(n.SOQty).trigger('blur');
+                            $('#req_' + rowid + '_balqty_' + reqrowid).val(n.BalQty).trigger('blur');
+                            $('#req_' + rowid + '_hiddenQty_' + reqrowid).val(n.HiddenQty);
+                            $('#req_' + rowid + '_curqty_' + reqrowid).val(n.CurQty).trigger('blur').trigger('change');
+                        }
+                    });
+                }
+                $('.loading_area').hide();
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                $('.loading_area').hide();
+            }
+        });
+
+    }
+
+    function CalcurQty(x){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[1];
+        var reqrowid = ids[3];
+        var curQtyId = $('input[id*=req_'+rowid+'_curqty_]');
+        var curQty = 0;
+        $.each(curQtyId, function() {
+            var cQty = parseInt($(this).val());
+            var hiddenQty=$('#req_'+rowid+'_hiddenQty_'+reqrowid).val();
+            var balQty=$('#req_'+rowid+'_balqty_'+reqrowid).val();
+            var valQty=parseInt(hiddenQty)+parseInt(balQty);
+
+            if(parseFloat(cQty)>parseFloat(valQty)){
+                alert("Current Qty should not be grater than Balance Qty");
+                function closeQualTr() {
+                    var $mainTr = $(".qualmainExp");
+                    $.each($mainTr, function () {
+                        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                        $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+                    });
+                }
+                $('#req_'+rowid+'_curqty_'+reqrowid).val(0);
+                $('#qty_'+rowid).val(0).trigger('change').trigger('blur');
+                return false;
+            }
+            if (isNaN(cQty))
+                return;
+
+            curQty += cQty;
+        });
+        $('#qty_'+rowid).val(curQty).trigger('blur').trigger('change');
+    }
+
+    function checkSOUsed(x) {
+        var id = $(x)[0].id.split('_')[1];
+        var reskeyid = $('input[id^=serviceId_]');
+        tmp_serviceList = serviceList;
+        tmp_serviceList = $.grep(serviceList, function (element, index) {
+            var is_selected = true;
+            $.each(reskeyid, function (i, obj) {
+                var $this = $(this),
+                    name = $this[0].id;
+                var arrname = name.split('_');
+                var key1 = arrname[1];
+                if (key1 != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                        return false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+        bindServiceAutoComplete();
+    }
+
+    function getServices()
+    {
+        $.post(getBaseURL()+'wpm/labourstrength/get-services', { sTypeId: $('#serviceType').val(),ccId: $('#costCentreId').val() },
+            function(data) {
+                serviceList = JSON.parse(data);
+                tmp_serviceList = serviceList;
+            });
+    }
+
+    function calAmount(roId,roType)
+    {
+        var amt = 0;
+        if(roType == 'r') {
+            var  rId = roId;
+        } else {
+            var roIdSp = roId.split('_'),
+                rId = roIdSp[1];
+//            rrId = roIdSp[3];
+        }
+        if($('#qty_' + rId).val() != '' && $('#rate_' + rId).val() != '') {
+            var amt = parseFloat($('#qty_' + rId).val()) * parseFloat($('#rate_' + rId).val());
+        }
+        $('#amount_'+rId).val(amt).trigger('blur').trigger('change');
+        sumAmount();
+    }
+
+    function sumAmount()
+    {
+        var $samt = $('input[id^=amount_]');
+        var sumAmt = 0;
+        $.each($samt, function() {
+            var seAmt = parseFloat($(this).val());
+
+            if (isNaN(seAmt))
+                return;
+
+            sumAmt += seAmt;
+        });
+        $('#totalAmount').val(sanitizeNumber(sumAmt,2)).trigger('change');
+    }
+
+    function getCompCCNo()
+    {
+        $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+                typeId: $('#soTypeId').val(),
+                ccId: $('#costCentreId').val()
+            },
+            function (data) {
+                var vNo = data.split('###');
+                $('#ccSoNo').val($.trim(vNo[0]));
+                $('#compSoNo').val($.trim(vNo[1]));
+                if($.trim(vNo[0]) != '')
+                    $('#ccSoNo').prop('readonly', true);
+                if($.trim(vNo[1]) != '')
+                    $('#compSoNo').prop('readonly', true);
+            });
+    }
+
+    <?php if(isset($soRegister) && count($soRegister) != 0) { ?>
+    //    showBack('e');
+    //    $('.cancel_btn').hide();
+
+    getServices();
+    $('#workOrPeriod').val('<?php echo $soRegister['ServiceType']?>').trigger('change');
+    $('#updatework').val('<?php echo $soRegister['ServiceType']?>');
+
+    <?php }else{ ?>
+    getCompCCNo();
+    <?php  } ?>
+    <?php if(isset($soServiceTrans) && count($soServiceTrans) != 0) { ?>
+    //    insertServiceRow();
+    sumAmount();
+    <?php } ?>
+    <?php if(isset($soRegister)){?>
+    <?php if($soRegister['Approve'] == 'Y') { ?>
+    $('.save_btn').hide();
+    <?php }} ?>
+
+    <?php
+    if(isset($soServiceTrans) && count($soServiceTrans) != 0) {
+        $i = 1;
+        foreach($soServiceTrans as $soTrans) {
+            ?>
+    $('#qty_<?php echo $i; ?>').trigger('blur');
+    $('#rate_<?php echo $i; ?>').trigger('blur');
+    $('#amount_<?php echo $i; ?>').trigger('blur');
+    <?php $i++;}?>
+    <?php }?>
+
+    <?php
+    if(isset($arr_payTerms) && count($arr_payTerms) != 0) {
+        $i = 1;
+        foreach($arr_payTerms as $arr_payTerm) {
+            ?>
+    $('#wPer_<?php echo $i; ?>').trigger('blur');
+    <?php $i++;}?>
+    <?php }?>
+
+
+    function showotherstabs(type) {
+        if (type=="narration") {
+            $('#narration').show();
+            $('#payment').hide();
+            $('#condition').hide();
+            $('#scopework').hide();
+        }
+        else if(type == "pay"){
+            $('#narration').hide();
+            $('#payment').show();
+            $('#condition').hide();
+            $('#scopework').hide();
+        }
+        else if(type == "terms"){
+            $('#narration').hide();
+            $('#payment').hide();
+            $('#condition').show();
+            $('#scopework').hide();
+        }
+        else if(type == "scope"){
+            $('#narration').hide();
+            $('#payment').hide();
+            $('#condition').hide();
+            $('#scopework').show();
+        }
+    }
+
+    function paymentRow(x){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[1];
+        $('#pTermsDeleteTr_'+rowid).show();
+        rowid++;
+        var $pRowId = $('#pRowId');
+        var pTemplate = $('#pTerms-template').html();
+        var $tbody = $('#pScheduleTable').find('.main');
+        $tbody.append(pTemplate.replace(/__/g, '_' + rowid));
+        $pRowId.val(rowid);
+    }
+    function payPercent(x,per){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[1];
+        if(per == 'work'){
+            var wper = parseInt($('#wPer_'+rowid).val());
+            if(wper > 100){
+                $('#wPer_'+rowid).addClass('red_bdr');
+                alert("Enter Valid Percentage");
+                $('#wPer_'+rowid).val(0);
+            }else{
+                $('#wPer_'+rowid).removeClass('red_bdr');
+            }
+            var $samt = $('input[id^=wPer_]');
+            var sumAmt = 0;
+            $.each($samt, function() {
+                var seAmt = parseFloat($(this).val());
+
+                if (isNaN(seAmt))
+                    return;
+
+                sumAmt += seAmt;
+            });
+            $('#scheduleTotal').val(sanitizeNumber(sumAmt,2));
+            var schedule = parseInt($('#scheduleTotal').val());
+            if(schedule > 100){
+                $('#scheduleTotal').addClass('red_bdr');
+                alert("Enter Valid Percentage");
+            }else{
+                $('#scheduleTotal').removeClass('red_bdr');
+            }
+        }
+        else if(per == 'advance'){
+            var aper = parseInt($('#aPer_'+rowid).val());
+            if(aper > 100){
+                $('#aPer_'+rowid).addClass('red_bdr');
+                alert("Enter Valid Percentage");
+            }else{
+                $('#aPer_'+rowid).removeClass('red_bdr');
+            }
+        }
+    }
+
+    function deletePaymentRow(x,e) {
+        e.preventDefault();
+        var $x = $(x),
+            key = $x[0].id.split('_')[1];
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr');
+        $tr.next('.subTr').remove();
+        $tr.next('.subTr').remove();
+        $tr.remove();
+        return false;
+    }
+    //Qualifier start
+    function expandQualTrFn(reset) {
+        var $mainTRs = $("a[class*=qualTr]");
+        if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+        $mainTRs.click(function(e){
+            e.preventDefault();
+            var name = $(this)[0].className;
+//            key = name.split('_')[1];
+//        if (validateRow(name) == false) return false;
+            var $subTr = $(this).closest("tr").nextAll(".qualmainTr"),
+                $i = $(this).find("i");
+            if(!$subTr.is(":visible")){
+                $subTr.show();
+                $subTr.find(".subDiv").slideDown("slow");
+                $i.removeClass("fa-chevron-circle-down");
+                $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+                closeQualdetails();
+            } else {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("fa-chevron-circle-up");
+                $i.addClass("fa-chevron-circle-down");
+            }
+            return false;
+        });
+    }
+
+    function closeQualdetails(key) {
+        var $mainTRs = $("a[class*=qualTr]");
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this),
+                $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+            if($mainTr.length != 0) $mainTr.trigger('click');
+        });
+    }
+
+    function bindQualExpandTr() {
+        var $mainTr = $(".qualmainExp");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr();
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+            }
+        });
+    }
+
+    function closeQualTr() {
+        var $mainTr = $(".qualmainExp");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        });
+    }
+
+    function bindPopOver() {
+        var $inputs =  $('input[data-toggle="popover"]');
+        $inputs.unbind('popover');
+        $inputs.popover({
+            placement : 'auto left',
+            trigger : 'hover'
+        });
+    }
+
+    function myfunc(x){
+        $(".base").val(x);
+        CalcQualifier();
+        var $mainTr = $(".qualChange");
+        $mainTr.change(function (e) {
+            CalcQualifier();
+        });
+//        var val=$('#valuefrom').val();
+//        if(val=="BaseAmount"){
+//            var base=$("#totalAmount").val();
+//        }else if(val == "NetAmount"){
+//            var net=$("#totAmount").val();
+//        }
+
+    }
+
+    function CalcQualifier() {
+        $.each($(".base"), function () {
+            var qId = $(this).attr('id').split('_')[4];
+            var iId = $(this).attr('id').split('_')[2];
+            var sFormula = isNullCheck($('#QualR__' + iId + '_Exp_' + qId).val(), 'string');
+            var dbaseAmt = isNullCheck($('#QualR__' + iId + '_ExpValue_' + qId).val(), 'string');
+            var dPer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_ExpPer_' + qId).val(), 'number'));
+            var sbaseRef = 'R0';
+            if (parseFloatVal(dPer) == 0) dPer = 100;
+            var sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+            var fvaule = computeEval(sFormula);
+            var iQualTypeid = $('#QualR__' + iId + '_TypeId_' + qId).val();
+
+            var dAmt=0;
+            if (iQualTypeid==1 || iQualTypeid==2) {
+                var dTaxablePer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_TaxablePer_' + qId).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_TaxPer_' + qId).val(),'number'));
+                var dCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_CessPer_' + qId).val(),'number'));
+                var dEDCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_EduCessPer_' + qId).val(),'number'));
+                var dHEDCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_HEduCessPer_' + qId).val(),'number'));
+                var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+                $('#QualR__' + iId + '_NetPer_' + qId).val(dNetPer);
+
+                $('#QualR__' + iId + '_NetPer_' + qId).val(numberFormat(dNetPer,'C'));
+                $('#QualR__' + iId + '_ExpPer_'+ qId).val(numberFormat(dNetPer,'C'));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dCessAmt =  dTaxAmt* (dCess/100);
+
+                var dEDAmt =  dTaxAmt* (dEDCess/100);
+                var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+                var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+                $('#QualR__' + iId + '_TaxableAmt_'+ qId).val(numberFormat(dTaxableAmt,'C'));
+                $('#QualR__' + iId +  '_TaxPerAmt_'+ qId).val(numberFormat(dTaxAmt,'C'));
+                $('#QualR__' + iId + '_CessAmt_'+ qId).val(numberFormat(dCessAmt,'C'));
+                $('#QualR__' + iId + '_EduCessAmt_'+ qId).val(numberFormat(dEDAmt,'C'));
+                $('#QualR__' + iId + '_HEduCessAmt_'+ qId).val(numberFormat(dHEDAmt,'C'));
+                $('#QualR__' + iId + '_NetAmt_'+ qId).val(numberFormat(dNetAmt,'C'));
+
+                dAmt = dNetAmt;
+            }else{
+                dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+            }
+//            var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+            $('#QualR__' + iId + '_Amount_' + qId).val(numberFormat(dAmt,'C'));
+        });
+        sign();
+
+    }
+
+    function sign(){
+        var tot=0;
+        $.each($(".signCh"), function () {
+            var qId = $(this).attr('id').split('_')[4];
+            var iId = $(this).attr('id').split('_')[2];
+            var cAmt=parseFloatVal($('#QualR__' + iId + '_Amount_' + qId).val());
+            var yesNo=$('#QualR__' + iId +'_YesNo_'+ qId).is(':checked');
+            var sSign='-';
+            if ($('#QualR__' + iId +'_SignC_' + qId).hasClass("fa-plus")) {
+                sSign='+';
+            }
+
+            if(yesNo== true){
+                if (sSign =="-") {
+                    tot = tot - parseFloatVal(cAmt);
+                } else {
+                    tot = tot + parseFloatVal(cAmt);
+                }
+            }
+        });
+        $('#QualRTotalAmt__1').val(numberFormat(tot,'C'));
+        $('#qualAmt').val(numberFormat(tot,'C'));
+        var bAmt = $('#qualAmt').val();
+        var qAmt = $('#totalAmount').val();
+        $('#totAmount').val(numberFormat((parseFloatVal(bAmt)+parseFloatVal(qAmt)),'C'));
+    }
+
+    function signChange(x) {
+        var $this = $(x);
+        if ($this.hasClass( "fa-plus" )) {
+            $this.removeClass('fa-plus clr-gre');
+            $this.addClass('fa-minus clr-red');
+            var sname= $this[0].id.split('_')[0],
+                key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('-');
+        } else {
+            $this.removeClass('fa-minus clr-red');
+            $this.addClass('fa-plus clr-gre');
+            var sname= $this[0].id.split('_')[0],
+                key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('+');
+        }
+        sign();
+    }
+    function validPercent(){
+        CalcQualifier();
+    }
+    function yesNo(){
+        CalcQualifier();
+    }
+    function checkTermsUsed(x) {
+        var id = $(x)[0].id.split('_')[1];
+        var termkeyid = $('input[id*=termsid_]');
+        tmp_arr_terms = arr_terms;
+        tmp_arr_terms = $.grep(arr_terms, function (element, index) {
+            var is_selected = true;
+            $.each(termkeyid, function (i, obj) {
+                var $this = $(this),
+                    name = $this[0].id;
+                var arrname = name.split('_');
+                var key1 = arrname[1];
+                if (key1 != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                        return false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+        bindTermsAutocomplete();
+    }
+    function bindTermsAutocomplete() {
+        // bind resource autocomplete
+        $('#gTermsTable .resourceSuggest').autocomplete({
+            lookup: tmp_arr_terms,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+
+                    var $this = $(this);
+                    var rowid = $this[0].id.split('_')[1];
+                    $this.prop('readonly', true).addClass('border-none');
+                    $('#termsid_' + rowid).val(suggestion.data);
+                    $('#slno_' + rowid).val(suggestion.SlNo).attr("readonly",true);
+                    $('#terms_' + rowid).val(suggestion.value);
+                    $('#per_' + rowid).val(suggestion.Per);
+                    $('#value_' + rowid).val(suggestion.Val);
+                    $('#period_' + rowid).val(suggestion.Period);
+                    $('#date_' + rowid).val(suggestion.Dte);
+                    $('#string_' + rowid).val(suggestion.Strg);
+                    $('#isper_' + rowid).val(suggestion.IsPer);
+                    $('#isvalue_' + rowid).val(suggestion.IsValue);
+                    $('#isperiod_' + rowid).val(suggestion.IsPeriod);
+                    $('#istdate_' + rowid).val(suggestion.IsTDate);
+                    $('#iststring_' + rowid).val(suggestion.IsTString);
+                    $('#includegross_' + rowid).val(suggestion.IncludeGross);
+                    $('#termsdeleteTr_' + rowid).show();
+                    if(parseInt($('#isper_' + rowid).val())==0){$('#per_' + rowid).attr("readonly",true);}
+                    if(parseInt($('#isvalue_' + rowid).val())==0) {$('#value_' + rowid).attr("readonly",true);}
+                    if(parseInt($('#isperiod_' + rowid).val())==0) {$('#period_' + rowid).attr("readonly",true);}
+                    if(parseInt($('#istdate_' + rowid).val())==0) {$('#date_' + rowid).attr("readonly",true);}
+                    if(parseInt($('#iststring_' + rowid).val())==0) {$('#string_' + rowid).attr("readonly",true);}
+                    addNewTermsRow($this);
+                }
+            }, onSearchStart: function (suggestion) {
+                //var rowid = $(this)[0].id.split('_')[1];
+                ////$('#terms_' + rowid).val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length) {
+                    // var rowid = $(this)[0].id.split('_')[1];
+                    // $('#terms_' + rowid).val('');
+                }
+            }
+        });
+    }
+    function addNewTermsRow(x) {
+        var $tr = $(x).closest('tr');
+        if ($tr.next('tr:not(.subTr)').length != 0)
+            return;
+
+        var $trowid = $('#trowid'),
+            trowid = parseInt($trowid.val()),
+            $tbody = $('#gTermsTable').find('> tbody.main');
+
+        $('#deleteTr_' + trowid).show();
+        var count = trowid + 1,
+            template = $('#terms-template').html();
+
+        template = template.replace(/__/g, '_' + count);
+        $tbody.append(template);
+
+        $trowid.val(count);
+        var tCount =  $('#gTermsTable tbody tr').length;
+        if(tCount > 1){
+            $('#valuefrom').attr("disabled", true);
+        }
+        else
+        {
+            $('#valuefrom').attr("disabled", false);
+        }
+        bindTermsAutocomplete();
+    }
+
+    function deleteRow(x,e) {
+        e.preventDefault();
+        var $x = $(x),
+            key = $x[0].className.split('_')[1];
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr');
+        $tr.next('.subTr').remove();
+        $tr.next('.subTr').remove();
+        $tr.remove();
+//    calcTotal();
+        var tCount =  $('#gTermsTable tbody tr').length;
+        if(tCount > 1){
+            $('#valuefrom').attr("disabled", true);
+        }
+        else
+        {
+            $('#valuefrom').attr("disabled", false);
+        }
+        bindTermsAutocomplete();
+//    TermsAutoRefresh();
+        return false;
+    }
+
+    function TermsCalculation(x)
+    {
+        var valueFrom=$('#valuefrom').val();
+        var sname= x.split('_')[0],
+            key= x.split('_')[1];
+        var perVal = $('#per_'+key).val();
+        if(perVal > 100){
+            $('#per_'+key).addClass('error');
+        }else{
+            $('#per_'+key).removeClass('error');
+        }
+        var netAmt=0.0;
+        if(valueFrom == 'BaseAmount'){
+            netAmt = parseFloat(isNullCheck($('#totalAmount').val(),'number'));
+        }
+        else if(valueFrom == 'NetAmount'){
+            netAmt=parseFloat(isNullCheck($('#totAmount').val(),'number'));
+        }
+        else
+        {
+            netAmt=parseFloat(isNullCheck($('#totalAmount').val(),'number'));
+        }
+
+        var sTerms=$('#terms_'+key).val();
+
+        var eTerms="";
+        var dAdvPer,dADelPer,dAWorkPer,dABillPer,dACerPer,dCurPer=0.0;
+        var dAdvVal,dADelVal,dAWorkVal,dABillVal,dACerVal=0.0;
+        var iKey=0;
+        $.each($('input[id^=terms_]'), function (i,o) {
+            $this=$(this);
+            //iKey = iKey + 1;
+            iKey = $this[0].id.split('_')[1];
+            eTerms = $(this).val();
+
+            //iKey = $this[0].id.split('_')[1];
+            if(eTerms == 'Advance'){
+                dAdvPer=parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+                dAdvVal=parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+            }
+            if(eTerms == 'Against Delivery'){
+                dADelPer=parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+                dADelVal=parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+            }
+            if(eTerms == 'Against Work'){
+                dAWorkPer=parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+                dAWorkVal=parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+            }
+            if(eTerms == 'Against Bill'){
+                dABillPer=parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+                dABillVal=parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+            }
+            if(eTerms == 'Against Certification'){
+                dACerPer=parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+                dACerVal=parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+            }
+        });
+        if(sTerms == 'Advance' && sname == 'per' || sTerms == 'Against Delivery' && sname == 'per' || sTerms == "Against Work" && sname == 'per' || sTerms == "Against Bill" && sname == 'per' || sTerms == "Against Certification" && sname == 'per')
+        {
+            if(sTerms == 'Advance' && sname == 'per')
+            {
+                dCurPer = dAdvPer;
+            }
+            else if(sTerms == 'Against Delivery' && sname == 'per')
+            {
+                dCurPer = dADelPer;
+            }
+            else if(sTerms == 'Against Work' && sname == 'per')
+            {
+                dCurPer = dAWorkPer;
+            }
+            else if(sTerms == 'Against Bill' && sname == 'per')
+            {
+                dCurPer = dABillPer;
+            }
+            else if(sTerms == 'Against Certification' && sname == 'per')
+            {
+                dCurPer = dACerPer;
+            }
+
+            if(TotAmtValidation(dAdvPer,dADelPer,dAWorkPer,dABillPer,dACerPer) == false)
+            {
+                PerCalc(dAdvPer,dADelPer,dAWorkPer,dABillPer,dACerPer,dCurPer,netAmt,key)
+            }
+            else
+            {
+                alert("Enter Valid Amount!");
+                $('#per_'+key).val(0);
+                $('#value_'+key).val(0);
+                return;
+            }
+        }
+        else if(sTerms == 'Advance' && sname == 'value' || sTerms == 'Against Delivery' && sname == 'value' || sTerms == "Against Work" && sname == 'value' || sTerms == "Against Bill" && sname == 'value' || sTerms == "Against Certification" && sname == 'value')
+        {
+            if(sTerms == 'Advance' && sname == 'value')
+            {
+                dCurPer = dAdvVal;
+            }
+            else if(sTerms == 'Against Delivery' && sname == 'value')
+            {
+                dCurPer = dADelVal;
+            }
+            else if(sTerms == 'Against Work' && sname == 'value')
+            {
+                dCurPer = dADelval;
+            }
+            else if(sTerms == 'Against Bill' && sname == 'value')
+            {
+                dCurPer = dABillVal;
+            }
+            else if(sTerms == 'Against Certification' && sname == 'value')
+            {
+                dCurPer = dACerVal;
+            }
+            AmtCalc(dAdvPer,dADelPer,dAWorkPer,dABillPer,dACerPer,dCurPer,netAmt,key);
+            dCurPer = parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+
+            $.each($('input[id^=terms_]'), function (i,o) {
+                eTerms = $(this).val();
+                if(eTerms == 'Advance'){
+                    dAdvPer=parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+                    dAdvVal=parseFloat(isNullCheck($('#value_'+key).val(),'number'));
+                }
+                if(eTerms == 'Against Delivery'){
+                    dADelPer=parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+                    dADelVal=parseFloat(isNullCheck($('#value_'+key).val(),'number'));
+                }
+                if(eTerms = 'Against Work'){
+                    dAWorkPer=parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+                    dAWorkVal=parseFloat(isNullCheck($('#value_'+key).val(),'number'));
+                }
+                if(eTerms == 'Against Bill'){
+                    dABillPer=parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+                    dABillVal=parseFloat(isNullCheck($('#value_'+key).val(),'number'));
+                }
+                if(eTerms == 'Against Certification'){
+                    dACerPer=parseFloat(isNullCheck($('#per_'+key).val(),'number'));
+                    dACerVal=parseFloat(isNullCheck($('#value_'+key).val(),'number'));
+                }
+            });
+
+            if(TotAmtValidation(dAdvPer,dADelPer,dAWorkPer,dABillPer,dACerPer) == true)
+            {
+                alert("Enter Valid Amount!");
+                $('#per_'+key).val(0);
+                $('#value_'+key).val(0);
+            }
+        }
+//    calcTotal();
+    }
+
+
+    function TotAmtValidation(argAdv,argADel,argAWork,argABill,argACer)
+    {
+        var bRet=false;
+        var dTot=parseFloat(isNullCheck(argAdv,'number')) + parseFloat(isNullCheck(argADel,'number')) + parseFloat(isNullCheck(argABill,'number')) + parseFloat(isNullCheck(argACer,'number')) + parseFloat(isNullCheck(argAWork,'number'));
+        if(dTot > 100)
+        {
+            bRet = true;
+        }
+        return bRet;
+    }
+    function AmtCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+    {
+        var Val,TotPer = 0.0;
+        TotPer = parseFloat(isNullCheck(argAgaDel,'number')) + parseFloat(isNullCheck(argAgaBill,'number')) + parseFloat(isNullCheck(argAgaCer,'number')) + parseFloat(isNullCheck(argAgaWork,'number'));
+        Val = AmountToPer(parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(TotPer,'number')));
+        $('#per_'+key).val(sanitizeNumber(Val,3,true));
+    }
+    function PerCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+    {
+        var Val,TotPer=0.0;
+        TotPer = parseFloat(isNullCheck(argAgaDel,'number'))+parseFloat(isNullCheck(argAgaBill,'number'))+parseFloat(isNullCheck(argAgaCer,'number'))+parseFloat(isNullCheck(argAgaWork,'number'));
+        Val = PerToAmount(parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(TotPer,'number')));
+        $('#value_'+key).val(sanitizeNumber(Val,3,true));
+    }
+    function PerToAmount(argPer,argAmt,argTotPer)
+    {
+        if(parseFloat(isNullCheck(argAmt,'number'))>0 && parseFloat(isNullCheck(argPer,'number')) > 0)
+        {
+            argPer = (parseFloat(isNullCheck(argPer,'number')) / 100) * parseFloat(isNullCheck(argAmt,'number'));
+        }
+        return argPer;
+    }
+    function AmountToPer(argAmt,argPer,argTotPer)
+    {
+        if(parseFloat(isNullCheck(argAmt,'number')) > 0 && parseFloat(isNullCheck(argPer,'number')) >0)
+        {
+            argAmt = ((parseFloat(isNullCheck(argPer,'number')) / parseFloat(isNullCheck(argAmt,'number'))) * 100)
+        }
+        return argAmt;
+    }
+    // qty validate
+    function qtyClick(x){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid =ids[1];
+        $('#wfirst_' + rowid).show();
+    }
+    function checkqty(x,y){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid =ids[1];
+        var eAmt=parseInt($('#eAmount_'+rowid).val());
+        var cAmt=parseInt($('#amount_'+rowid).val());
+        $('#wfirst_' + rowid).hide();
+        if (parseFloat(eAmt) < parseFloat(cAmt)) {
+            $('#amount_' + rowid).addClass('red_bdr');
+            return false;
+        } else {
+            $('#amount_' + rowid).removeClass('red_bdr');
+        }
+//        var etVal=parseInt($('#workingSet_'+rowid).text());
+//        var rateVal=parseInt($('#rateSet_'+rowid).text());
+//        var cQty=parseInt($('#qty_'+rowid).val());
+//        var wQty=parseInt($('#workingQty_'+rowid).val());
+//        var wRate=parseInt($('#rate_'+rowid).val());
+//        var hId=$('#hireTypeId').val();
+//        if(wQty == '' || isNaN(wQty)) wQty=0;
+//        if(cQty == '') cQty=0;
+//        if(wRate == '') wRate=0;
+//        if(eVal == '') eVal=0;
+//        if(etVal == '') etVal=0;
+//        if(rateVal == '' || isNaN(rateVal)) rateVal=0;
+    }
+    function termsAmount(x){
+        var selectAmt=x;
+        if(selectAmt == "BaseAmount"){
+            var base=$('#totalAmount').val();
+        }
+    }
+</script>

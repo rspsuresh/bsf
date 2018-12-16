@@ -1,0 +1,186 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<!--<script type="text/javascript" src="--><?php //echo $this->basePath(); ?><!--/js/jquery.scrollbox.js"></script>-->
+<style>
+    .parent_text.error                 				{border:1px solid #D64541!important;color:#333!important;background:#FFEBEB !important;}
+    .error + .tooltip > .tooltip-inner				{background: #E74C3C;}
+    .error + .tooltip > .tooltip-arrow 				{border-top-color: #E74C3C;}
+	.date_icon 										{top: 10px!important;right: 22px !important;}
+	.exp-tex										{height:35px !important;}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post" id="multiGroupTransfer">
+            <div class="col-lg-12">
+                <h1 class="txt_center">Cheque No details</h1>
+                <input type="hidden" name="ChequeId" id="ChequeId" value="<?php echo (isset($chequeId)) ? $chequeId:'0';?>" />
+                <input type="hidden" name="accountId" id="accountId" value="<?php echo (isset($accountId)) ? $accountId:'0';?>" />
+            </div>
+            <div id="firstStep">
+
+                <div class="col-lg-12 feed-bg clear top-20">
+                    <div class="table-responsive top-30">
+                        <table class="table" style=" margin-bottom:0px;" id="wkTable">
+                            <thead>
+                            <tr>
+                                <th>ChequeNo</th>
+                                <th>Used</th>
+                                <th>Cancel</th>
+                                <th>Cancel date</th>
+                                <th>Remarks</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main" id="billWrapper">
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowSize" id="rowSize" value="0"/>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="add" class="dropdown save_btn float_r"><a href="javascript:void(0);" class="ripple">Add</a></li>
+        <li class="cancel_btn cancel_btn_bluecolor float_r">
+            <a class="ripple has-ripple" style="cursor:pointer;"  href="<?php echo $this->basePath(); ?>/fa/index/chequedetail/<?php echo (isset($accountId)) ? $accountId:'0';?>" id="cancelBtn" class="ripple">Cancel<span class="ripple-wrapper"></span></a></li>
+       </li>
+    </ul>
+</div>
+
+<script type="text/template" id="dummy-bill">
+    <tr>
+        <td width="19%">{{ChequeNo}}
+            <input type="hidden" name="ChequeTransId_{{sno}}" id="ChequeTransId_{{sno}}" value="{{ChequeTransId}}" />
+            <input type="hidden" name="ChequeId_{{sno}}" id="ChequeId_{{sno}}" value="{{ChequeId}}" />
+        </td>
+        <td class="tbl_input_td" width="10%" id="">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="checkUsed_{{sno}}" name="checkUsed_{{sno}}" value="1"  {{checkUsedValue}} {{disabledAll}} />
+                    <label for="checkUsed_{{sno}}"></label>
+                </p>
+            </div>
+        </td>
+        <td class="tbl_input_td" width="10%" id="">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="checkCancel_{{sno}}" name="checkCancel_{{sno}}" value="1"  {{checkCancelValue}} {{disabled}}/>
+                    <label for="checkCancel_{{sno}}"></label>
+                </p>
+            </div>
+        </td>
+        <td width="16%">
+			<div class="col-lg-12">
+                <input type="text" name="date_{{sno}}" id="date_{{sno}}" class="tbl_input date_picker" value="{{dateFill}}" {{disabled}}  readonly>
+                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            </div>
+        </td>
+        <td width="45%">
+            <textarea style="margin-top:3px;" class="exp-tex" type="text" id="Remarks_{{sno}}" name="Remarks_{{sno}}"{{readonly}}>{{Remarks}}</textarea>
+        </td>
+
+    </tr>
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+
+var loadEditTabData=<?php echo (isset($cheqTransList)) ? json_encode($cheqTransList) : '[]';?>;
+var chequeId = <?php echo isset($chequeId)? $chequeId:0; ?>;
+$(".datepickerinput").datepicker({
+    format: "dd-mm-yyyy",
+    autoclose: true
+});
+$(function(){
+    //bindDatePicker();
+        renderRequests(loadEditTabData);
+});
+
+function bindDatePicker() {
+    $('.dateicons').click(function() {
+        var input = $(this).parent().find('input').datepicker('show');
+    });
+    $('.date-picker').datepicker({
+        'format': 'dd-mm-yyyy'
+    }).on('changeDate', function() {
+        $('.datepicker').hide();
+    }).data('datepicker');
+}
+
+function renderRequests(data) {
+    var $billWrapper = $('#billWrapper');
+    if(data.length == 0) {
+        $billWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+    } else {
+        var sno = 0;
+        var template = $('#dummy-bill').html();
+        $billWrapper.html('');
+        $.each(data, function (i,o) {
+            sno++;
+            var rowEntryId = 0,
+                selectUsed = '',
+                readonly='',
+                disabled='',
+                disabledAll='disabled',
+                selectCancel='',
+                CancelDate='';
+
+            if(o.Used !=0){
+                selectUsed = 'checked';
+                readonly='readonly';
+                disabled='disabled';
+            }
+            if(o.Cancel !=0){
+                selectCancel = 'checked';
+            }
+
+           if(o.CancelDate!=null){
+               CancelDate=o.CancelDate;
+           }
+            /*$("#date_"+sno).attr('readonly', false);
+            $("#date_"+sno).attr('placeholder', 'dd-mm-yyyy');
+            $("#date_"+sno).datepicker({
+                'format': 'dd-mm-yyyy'
+            }).on('changeDate', function() {
+                $('.datepicker').hide();
+            });
+*/
+            $billWrapper.append(template
+                .replace(/\{\{sno\}\}/g,sno)
+                .replace(/\{\{checkUsedValue\}\}/g,selectUsed)
+                .replace(/\{\{checkCancelValue\}\}/g,selectCancel)
+                .replace(/\{\{ChequeId\}\}/g, o.ChequeId)
+                .replace(/\{\{ChequeTransId\}\}/g, o.ChequeTransId)
+                .replace(/\{\{dateFill\}\}/g,CancelDate)
+                .replace(/\{\{Remarks\}\}/g, o.Remarks)
+                .replace(/\{\{readonly\}\}/g, readonly)
+                .replace(/\{\{disabled\}\}/g, disabled)
+                .replace(/\{\{disabledAll\}\}/g, disabledAll)
+                .replace(/\{\{ChequeNo\}\}/g, o.ChequeNo));
+        });
+        $("#rowSize").val(sno);
+    }
+
+    $(".datepickerinput").datepicker({
+        format: "dd-mm-yyyy",
+        autoclose: true
+    });
+}
+
+
+$('#add').click(function () {
+    for(var i=1;i<=$("#rowSize").val(); i++){
+        $("#checkUsed_" + i).attr('disabled',false);
+        $("#checkCancel_" + i).attr('disabled',false);
+        $("#date_" + i).attr('disabled',false);
+       // $("#Remarks_" + i).attr('readonly',false);
+    }
+    $("#multiGroupTransfer").submit();
+
+});
+
+</script>
+

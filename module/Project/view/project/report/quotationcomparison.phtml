@@ -1,0 +1,189 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!--Start-->
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap-ui.css"/>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.fmatter.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.jqGrid.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/i18n/grid.locale-en.js"></script>
+<!--End-->
+<style></style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <?php if ($EnquiryId !=0) { ?>
+      <div class="col-lg-12 page_tittle" id="pagetittle">
+        <h1 class="col-lg-6 col-sm-6">Quotation Report</h1>
+        <div class="col-lg-6 col-sm-6">
+          <div class="form-group">
+            <label class="col-sm-8 sel-type">Select Enquiry</label>
+            <div class="col-lg-12  form-group">
+              <select name="Enquiry_id" id="Enquiry_id" onChange="ChangeEnquiry();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                <option value="">Select Enquiry</option>
+                <?php if(isset($Enquirylists)):?>
+                <?php foreach ( $Enquirylists as $Enquiry ):?>
+                <option value="<?php echo $Enquiry['TenderEnquiryId'];?>"<?php echo ($Enquiry['TenderEnquiryId'] == $EnquiryId) ? 'selected' : '';?>><?php echo $Enquiry[ 'NameOfWork' ];?></option>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-visibility="hide">
+        <div class="col-lg-9 col-lg-offset-3 col-sm-9 col-sm-offset-3 edit_del">
+          <div class="col-lg-12">
+            <ul>
+              <li>
+                <button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button>
+              </li>
+            </ul>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+      <div class="col-lg-12 clear" id="gridWrapper" >
+        <div class="table-responsive clear">
+          <table id='grid'>
+          </table>
+          <div id='pager'></div>
+        </div>
+      </div>
+      <?php } else { ?>
+      <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts"  id="formWrapper">
+          <div class="col-lg-12 frmwrk_div" id="Enquiry_list">
+            <select name="newEnquiry_id" id="newEnquiry_id" class="form-control multiple_dropdown lbl_move" data-size="6" title="Select Enquiry..." style="width:100%;">
+           
+              <?php if(isset($Enquirylists)):?>
+              <?php foreach ( $Enquirylists as $Enquiry):?>
+              <option value="<?php echo $Enquiry[ 'TenderEnquiryId' ];?>"><?php echo $Enquiry[ 'NameOfWork' ];?></option>
+              <?php endforeach; ?>
+              <?php  endif; ?>
+            </select>
+          </div>
+          <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+            <ul>
+              <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <?php } ?>
+    </div>
+  </div>
+</div>
+<div class="col-lg-12">
+<a  data-text="Go to Report List" href="<?php echo $this->basePath(); ?>/project/report/reportlist" class="gobacklist"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i> Go to Report List</a></div> 
+<script>
+    var $Enquiry = $('#Enquiry_select'),
+        $EnquiryNew = $('#newEnquiry_id');
+    $(function () {
+        var data = <?php echo (isset($Quotationlist)) ? json_encode($Quotationlist) : '[]'?>;
+        var EnquiryId = <?php if(isset($EnquiryId)) echo json_encode($EnquiryId); else echo '""';?>;
+        if(EnquiryId != 0) {
+            $("#grid").jqGrid('jqPivot',
+                data,
+                {
+                    xDimension : [
+                        {dataName: 'RefSerialNo', label : 'SerialNo', width: 90},
+                        {dataName: 'Specification', label : 'Specification', width: 90},
+                        {dataName: 'UnitName', label : 'Unit', width: 90}
+                    ],
+                    yDimension : [
+                        {dataName: 'RefNo',align:'center'}
+                    ],
+                    aggregates : [
+                        {member : 'Qty', aggregator : 'sum',width:50, label:'Qty',formatter: 'number',align:'right'},
+                        {member : 'Rate', aggregator : 'sum',width:50, label:'Rate',formatter: 'number',align:'right'},
+                        {member : 'Amount', aggregator : 'sum', width:50, label:'Amount',formatter: 'number',align:'right'}
+                    ],
+                    rowTotals: true,
+                    colTotals : true
+                },
+                {
+                    width: 500,
+                    rowNum : 10,
+                    pager: "#pager",
+                    caption: "Revision"
+                }
+            );
+        }
+    });
+
+    function exportGrid(){
+        mya = $("#grid").getDataIDs(); // Get All IDs
+        var data = $("#grid").getRowData(mya[0]); // Get First row to get the
+        // labels
+
+        console.log(mya);
+        console.log(data);
+
+        var colNames = new Array();
+        var ii = 0;
+        for ( var i in data) {
+            colNames[ii++] = i;
+        } // capture col names
+
+        var html = "<html><head>"
+            + "<style script=&quot;css/text&quot;>"
+            /*+ "table.tableList_1 th {border:1px solid black; text-align:center; "
+            + "vertical-align: middle; padding:5px;}"
+            + "table.tableList_1 td {border:1px solid black; text-align: left; vertical-align: top; padding:5px;}"*/
+            + "</style>"
+            + "</head>"
+            + "<body style=&quot;page:land;&quot;>";
+
+
+        for ( var k = 0; k < colNames.length; k++) {
+            html = html + "<th>" + colNames[k] + "</th>";
+        }
+        html = html + "</tr>"; // Output header with end of line
+        for (i = 0; i < mya.length; i++) {
+            html = html + "<tr>";
+            data = $("#grid").getRowData(mya[i]); // get each row
+            for ( var j = 0; j < colNames.length; j++) {
+                html = html + "<td>" + data[colNames[j]] + "</td>"; // output each Row as
+                // tab delimited
+            }
+            html = html + "</tr>"; // output each row with end of line
+        }
+        html = html + "</table></body></html>"; // end of line at the end
+//        alert(html);
+        html = html.replace(/'/g, '&apos;');
+
+//          var form = "<form name='pdfexportform' action='generategrid' method='post'>";
+          var form = "<form name='pdfexportform' action='' method='post'>";
+          form = form + "<input type='hidden' name='pdfBuffer' value='" + html + "'>";
+//          form = form + "</form><script>document.pdfexportform.submit();</sc"+ "ript>";
+          form = form + "</form><script>document.pdfexportform</sc"+ "ript>";
+
+          OpenWindow = window.open('data:application/vnd.ms-excel,' + form);
+//        window.open('data:application/vnd.ms-excel,' + form);
+//        window.open('data:application/vnd.xls,' + form);
+//          OpenWindow.document.write('data:application/vnd.ms-excel,' + form);
+          OpenWindow.document.close();
+    }
+
+    function submitForm() {
+        var  nEnq_id= parseInt(isNullCheck($('#newEnquiry_id').val(),'number'));
+
+        if (nEnq_id ==0) {
+            alert("select Enquiry");
+            return;
+        }
+        window.location.href = getBaseURL() + "project/report/quotationcomparison/" + nEnq_id;
+    }
+
+    function ChangeEnquiry() {
+        var iEnquiryId = isNullCheck($('#Enquiry_id').val(),'number');
+        window.location.href = getBaseURL() + "project/report/quotationcomparison/" + iEnquiryId ;
+    }
+
+     $('#print-btn').click(function () {
+        //Print Not Done For Jq-Grid
+         exportGrid();
+
+    });
+
+</script> 

@@ -1,0 +1,274 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    /*border: 1px solid #333;*/
+    /*DragResize*/
+
+    /* Required CSS classes: must be included in all pages using this script */
+    /* Apply the element you want to drag/resize */
+    .drsElement{position: absolute;border: 1px solid #333;}
+    /*
+     The main mouse handle that moves the whole element.
+     You can apply to the same tag as drsElement if you want.
+    */
+    .drsMoveHandle{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+    /*
+     The DragResize object name is automatically applied to all generated
+     corner resize handles, as well as one of the individual classes below.
+    */
+    .dragresize{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+    /*
+     Individual corner classes - required for resize support.
+     These are based on the object name plus the handle ID.
+    */
+    .dragresize-tl{top:-8px;left:-8px;cursor:nw-resize;}
+    .dragresize-tm{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+    .dragresize-tr{top:-8px;right:-8px;cursor:ne-resize;}
+    .dragresize-ml{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+    .dragresize-mr{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+    .dragresize-bl{bottom:-8px;left:-8px;cursor:sw-resize;}
+    .dragresize-bm{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+    .dragresize-br{bottom:-8px;right:-8px;cursor:se-resize;}
+    /*DragResize End*/
+    /*Main*/
+    .text-bold, .text-bold * {ont-weight: bold !important;}
+    .text-italic, .text-italic * {font-style: italic !important;}
+    .text-underline, .text-underline * {text-decoration: underline !important;}
+    .style-left, .style-left * {text-align: left;}
+    .style-center, .style-center * {text-align: center;}
+    .style-right, .style-right * {text-align: right;}
+    .style-justify, .style-justify * {text-align: justify;}
+    #styleOptions {display:  none;}
+    #ElementTemplate,
+    .remScnt {
+        display:none;
+    }
+    .remScnt{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+    .remScnt > .fa.fa-trash-o {
+        text-decoration: none !important;
+        font-style: normal !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        color: #000 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    .up-buttm-10					{margin-top:8px; margin-bottom:8px;}
+    /*------ scroll top
+    .navbar-fixed-top + .content-container {
+        margin-top: 70px;
+    }
+    .content-container {
+        margin: 0 130px;
+    }
+
+
+
+    #top-link-block.affix-top {
+        position: absolute;
+        bottom: -82px;
+        right: 10px;
+    }
+    #top-link-block.affix {
+        position: fixed;
+        bottom:60px;
+        right: 10px;
+    }
+    scroll top ------*/
+</style>
+
+
+
+<form method="post" action="<?php echo $this->basePath(); ?>/application/printpreview/preview" target="_blank">
+    <input type="hidden" name="htmlcontent" id="htmlcontent" />
+    <input type="hidden" name="RequestId" id="RequestId" value="<?php echo (isset($reqregister)) ? $reqregister['RequestId'] : 0;?>"  />
+    <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+
+<div style="width:738px; margin:auto; padding-top:20px; position:relative;">
+    <div id="htmlwrapper">
+        <?php echo (isset($template)) ? $template : '';?>
+		<!--Main-->
+        <div style="margin-bottom:30px; margin-top:20px; display:block">
+            <table class="table bill-cum" style=" margin-bottom:0px; margin-top:10px;" id="EntryTable" cellpadding="0" cellspacing="0" width="520">
+                <thead>
+					<tr>
+						<th class="thscss text-left" align="left">S.No</th>
+						<th class="thscss text-left" align="left">Code</th>
+						<th class="thscss text-left" align="left">Resource Name</th>
+						<th class="thscss text-left" align="left">Unit Name</th>
+						<th class="thscss text-left" align="left">Po Qty</th>
+						<th class="thscss text-left" align="left">Rate</th>
+						<th class="thscss text-left" align="left">QRate</th>
+						<th class="thscss text-left" align="left">Amount</th>
+						<th class="thscss text-left" align="left">QAmount</th>
+					</tr>
+                </thead>			
+                <tbody class="main">    
+					<?php
+						$CurAmtTotal = 0;
+						if(isset($register)):
+						foreach($register as $reg):
+						$CurAmtTotal += $reg['Amount'];;
+						$NetAmount = $reg['NetAmount'];;
+					?>
+                        <tr class="padi05">
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['SNo'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['Code'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['ResourceName'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['UnitName'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['POQty'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['Rate'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['QRate'];?></td>
+							<td width="5%" class="tdpds text-left" align="left"><?php echo $reg['Amount'];?></td>
+							<td width="5%" class="tdpds text-right" align="right"><?php echo $reg['QAmount'];?></td>
+							<?php if($reg['QCount']> 0){ ?>
+								<div class="row" id="termsTable">					
+									
+									<tbody class="main">  
+										<?php
+											if(isset($register1)):
+											foreach($register1 as $reg1):
+											if($reg['PoTransId']==$reg1['PoTransId']){
+										?>
+										<tr class="padi05">
+											<td class="tdpds text-right" colspan="8" align="right"><?php echo $reg1['QualifierName'];?></td>
+											<td class="tdpds text-right" colspan="" align="right"><?php echo $reg1['NetAmt'];?></td>
+
+										</tr>
+										<?php } endforeach; endif;?>
+									</tbody>
+								
+								</div>
+							<?php } ?>
+                        </tr>
+				<?php endforeach; endif;?>
+                </tbody>   
+				<tbody class="total">
+					<tr>
+						<td width="5" class="tdpds">&nbsp;</td>
+						<td colspan="7" align="right" class="tdpds text-right">Total</td>
+						<td width="5%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal, 2, true);?></td>
+					</tr>
+				</tbody>
+				<tbody class="total">
+					<tr>
+						<td width="5" class="tdpds">&nbsp;</td>
+						<td colspan="7" align="right" class="tdpds text-right">Net Amount</td>
+						<td width="5%" class="tdpds text-right" align="right"><?php echo $NetAmount ;?></td>
+					</tr>
+				</tbody>
+            </table>
+        </div>
+		<!--End-->
+		
+		<!--Description-->
+		<div class="panel panel-info row1">
+			<div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+				<h4 class="panel-title accordion-toggle defa_panels">Description</h4>
+			</div>
+			<div style="margin-bottom:30px; margin-top:20px; display:block">
+				<table id="termsTable1" class="table bill-cum" style=" margin-bottom:10px; margin-top:10px;" cellpadding="0" cellspacing="0" width="520">
+					<thead>
+						<tr>
+							<th class="thscss text-left" align="left">S.No</th>
+							<th class="thscss text-left" align="left">Terms</th>
+							<th class="thscss text-left" align="left">Per</th>
+							<th class="thscss text-left" align="left">Value</th>
+							<th class="thscss text-left" align="left">Period</th>
+							<th class="thscss text-left" align="left">String</th>
+						</tr>
+					</thead>			
+					<tbody class="main">    
+						<?php
+							if(isset($register2)):
+							foreach($register2 as $reg2):
+						?>
+							<tr class="padi05">
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['SNo'];?></td>
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['Title'];?></td>
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['Per'];?></td>
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['Value'];?></td>
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['Period'];?></td>
+								<td width="5%" class="tdpds text-left" align="left"><?php echo $reg2['TString'];?></td>
+							</tr>
+						<?php endforeach; endif;?>
+					</tbody>           
+				</table>
+			</div>
+		</div>
+		<!--End-->
+		<?php echo (isset($footertemplate)) ? $footertemplate : '';?>
+    </div>
+    <div class="fixed-action-btn-ra active">
+        <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+    </div>
+</div>
+<?php 
+$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/images/nolgo.jpg';
+	if(isset($reqregister) && $reqregister['LogoPath']!="") {
+		$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/'.$reqregister['LogoPath'];
+	}				
+	//echo $imgUrl;
+?>
+<script type="text/javascript">
+    $(function() {
+		$('#browse_1').attr('onclick',false);
+		$('#browse_1').find("div").removeClass("ovrly").removeClass("buttons");
+        var reqregister = <?php echo (isset($reqregister))?json_encode($reqregister):'[]'; ?>;
+        var reqDist = <?php echo (isset($reqDist))?json_encode($reqDist):'[]'; ?>;
+        var warehouse = <?php echo (isset($warehouse))?json_encode($warehouse):'[]'; ?>;
+        var ccaddress = <?php echo (isset($ccaddress))?json_encode($ccaddress):'[]'; ?>;
+        var vaddress = <?php echo (isset($vaddress))?json_encode($vaddress):'[]'; ?>;
+        var currentdate = '<?php echo date('d-m-Y'); ?>';
+		var imgUrl = '<?php echo $imgUrl; ?>';
+        var $p_scents = $('#p_scents');
+        var $g_scents = $('#g_scents');
+		
+        $p_scents.find('.remScnt').remove();
+        $g_scents.find('.remScnt').remove();
+		
+        $p_scents.find('#req_distName').text(reqDist);
+		if(warehouse==''|| warehouse==null){
+			$p_scents.find('#req_ccname').text(ccaddress['CostCentreName']);
+			$p_scents.find('#req_ccaddress').text(ccaddress['costcentreAddress']);
+		}else{
+			$p_scents.find('#req_Name').text(warehouse);
+		}
+       // $p_scents.find('#req_CostCentreAddress').text(ccaddress);
+        // $p_scents.find('#req_vendoraddress').text(vaddress);
+        // $p_scents.find('#req_PANNo').text(vaddress);
+        // $p_scents.find('#req_TANNo').text(vaddress);
+        // $p_scents.find('#req_CSTNo').text(vaddress);
+        // $p_scents.find('#req_TINNo').text(vaddress);
+		$.each(reqregister, function(index, value) { 
+            if(value != null && value != '') {
+                $p_scents.find('#req_' + index).text(value);
+                $g_scents.find('#req_' + index).text(value);
+            }
+        });
+		$.each(ccaddress, function(index, value) {
+            if(value != null && value != '') {
+                $p_scents.find('#req_' + index).text(value);
+            }
+        });
+		
+		$.each(vaddress, function(index, value) {
+            if(value != null && value != '') {
+                $p_scents.find('#req_' + index).text(value);
+            }
+        });
+		$p_scents.find('#req_LogoPath').attr('src', imgUrl);
+        $p_scents.find('#req_Date').text(currentdate);
+
+        $(".exportAction").click(function(){
+            $('#htmlcontent').val($('#htmlwrapper').html());
+            $('form').submit();
+        });
+    });
+</script>
+<script>
+var tCount1 =  $('#termsTable1 tbody tr').length;
+if(tCount1 ==0){
+	$('.row1').hide();
+}
+</script>

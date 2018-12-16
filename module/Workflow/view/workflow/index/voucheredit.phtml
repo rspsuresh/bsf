@@ -1,0 +1,416 @@
+<tr id="rtDivDept_1" style="display:none;" class="close_tr">
+    <td colspan="3">
+        <form method="post" action="<?php echo $this->basePath();?>/workflow/index/voucheredit" id="editform">
+            <input type="hidden" name="entryFrom" value="Voucher" />
+            <input type="hidden" name="typeId" id="typeId" value="<?php echo $typeId; ?>" />
+            <input type="hidden" name="compId" id="compId" value="<?php echo $compId; ?>" />
+            <input type="hidden" name="ccId" id="ccId" value="<?php echo $ccId; ?>" />
+            <div class="adddprtmnt_box col-lg-12 pad0 animated fadeInUp" style="background:#EDEFF2">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span><i class="fa fa-times"></i></span></button>
+                <div class="form-horizontal stginner_cnt col-md-12" style="padding:20px">
+                    <div class="col-lg-12 col-md-12 padlr0 not_autoVoucherNo">
+                        <div class="col-lg-6 col-md-6">
+                            <div class="col-lg-12 form-group1" style="background:#fff;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);padding:20px">
+                                <div class="col-lg-12 form-group1">
+                                    <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Generation Type</label>
+                                    <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                        <select class="single_dropdown" id="gentype" name="gentype" style="width:100%;border:2px solid #ddd !important" onchange="onchangeType(this.value);" >
+                                            <option value="1" <?php if(!isset($voucherTrans) || $voucherTrans['GenType'] == 1) { echo 'selected' ; } ?>>Auto</option>
+                                            <option value="0" <?php if(isset($voucherTrans) && $voucherTrans['GenType'] == 0) { echo 'selected' ; } ?>>Manual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12  form-group1">
+                                    <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Period Wise Required</label>
+                                    <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                        <select class="single_dropdown" id="periodwise" name="periodwise" style="width:100%;border:2px solid #ddd !important" onchange="onchangePeriod(this.value);" >
+                                            <option value="0" <?php if(!isset($voucherTrans) || $voucherTrans['PeriodWise'] == 0) { echo 'selected' ; } ?>>No</option>
+                                            <option value="1" <?php if(isset($voucherTrans) && $voucherTrans['PeriodWise'] == 1) { echo 'selected' ; } ?>>Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-------------------left-side-------------------->
+                        <div class="col-lg-6 col-md-6" style="<?php echo (($compId !=0) || ($ccId !=0)) ? 'display:none' : ''; ?>" >
+                            <div class="col-lg-12 form-group1" style="background:#fff;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);padding:20px">
+                                <div class="col-lg-12 form-group1">
+                                    <label class="col-lg-4 padlr0 col-md-4 col-sm-5 txt_left control-label">Required For</label>
+                                    <div class="col-lg-8 col-md-8 col-sm-7 padlr0">
+                                        <div class="radio_check padtop5 col-md-12" style="padding:0 !important">
+                                            <p class="col-md-6" style="padding:6px 0 !important;">
+                                                <input type="checkbox" value="1" id="comprequired" name="comprequired" <?php echo (isset($voucherMaster) && $voucherMaster['CompanyRequired']==1) ? 'checked' : '';?> disabled/>
+                                                <label class="ripple">Company wise</label>
+                                            </p>
+                                            <p class="col-md-6" style="padding:6px 0 !important;" >
+                                                <input type="checkbox" value="1" id="ccrequired" name="ccrequired" <?php echo (isset($voucherMaster) && $voucherMaster['CCRequired']==1) ? 'checked' : '';?> disabled/>
+                                                <label class="ripple">CostCentre wise</label>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12  form-group1">
+                                    <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Default Type</label>
+                                    <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                        <select class="single_dropdown" id="basetype" name="basetype" style="width:100%;border:2px solid #ddd !important" >
+                                            <option value="GE" <?php if(isset($voucherMaster) && $voucherMaster['BaseType'] == 'GE') { echo 'selected' ; } ?>>General</option>
+                                            <option value="CO" <?php if(isset($voucherMaster) && $voucherMaster['BaseType'] == 'CO') { echo 'selected' ; } ?>>Company</option>
+                                            <option value="CC" <?php if(isset($voucherMaster) && $voucherMaster['BaseType'] == 'CC') { echo 'selected' ; } ?>>CostCentre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-------------------left-side-------------------->
+                    </div>
+                    <div class="col-md-12 form-group1" id="divMainSetup" style="display: none;  background:#fff; padding:10px; box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);">
+                        <div class="col-md-12 col-sm-12" >
+                            <div class="table-responsive">
+                                <table class="table table-clr table-fixed" style=" margin-bottom:0px;" >
+                                    <thead>
+                                    <tr class="col-xs-12" style="padding:0 !important">
+                                        <th class="col-xs-3">Prefix</th>
+                                        <th class="col-xs-3">Suffix</th>
+                                        <th class="col-xs-3">StartNo</th>
+                                        <th class="col-xs-3">Width</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="col-xs-12" style="padding:0 !important">
+                                        <td class="col-xs-3"><input type="text" class="parent_text" maxlength="5" id="mprefix" name="mprefix" value="<?php echo (isset($voucherTrans)) ? $voucherTrans['PreFix'] : '';?>"></td>
+                                        <td class="col-xs-3"><input type="text" class="parent_text" maxlength="5" id="msuffix" name="msuffix" value="<?php echo (isset($voucherTrans)) ? $voucherTrans['Suffix'] : '';?>"></td>
+                                        <td class="col-xs-3"><input type="text" class="parent_text" maxlength="10" id="mstartno" name="mstartno" value="<?php echo (isset($voucherTrans)) ? $voucherTrans['StartNo'] : '';?>" onkeypress="return isNumberKey(event);"></td>
+                                        <td class="col-xs-3"><input type="text" class="parent_text" maxlength="1" id="mwidth" name="mwidth" value="<?php echo (isset($voucherTrans)) ? $voucherTrans['Width'] : '';?>" onkeypress="return isNumberKey(event);"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div><!----------table-a------------>
+                    <div class="col-md-12" id="divPeriodSetup" style="display: none; background:#fff; padding:10px; box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);margin-top:5px;">
+                        <div class="col-md-4 col-sm-4 form-group1">
+                            <ul class="list-head col-md-12"style="background:#F7F9FC">
+                                <?php foreach($periodLists as $trans) { ?>
+                                    <li id="periodid_<?php echo $trans['PeriodId']; ?>" ><a href="javascript:showPeriodDetails(<?php echo $trans['PeriodId']; ?>);"><?php echo $trans['PeriodDescription']; ?></a></li>
+                                <?php } ?>
+                            </ul>
+                            <input type="hidden" name="periodId" id="periodId" value="" />
+                        </div>
+                        <div class="col-md-8 col-sm-8 form-group1" style="background:#F0F1F5;padding:15px;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);">
+                            <div class="col-md-12">
+                                <div class="col-md-4 form-group1"><label>From Date</label><input class="form-control parent_text date_picker" id="fromdate" type="text"><span class="date_icon">
+                       <i class="fa fa-calendar"></i>
+                      </span></div>
+                                <div class="col-md-4 form-group1"><label>To Date</label><input class="form-control parent_text date_picker" id="todate" type="text"><span class="date_icon">
+                      <i class="fa fa-calendar"></i>
+                      </span></div>
+                                <div class="col-md-4 form-group1"><label style="display:block">Monthwise Required</label>
+                                    <select class="single_dropdown" id="monthwise" name="monthwise" style="width:100%;border:2px solid #ddd !important" onchange="onchangeMonth(this.value)">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select></div>
+                            </div>
+                            <div class="col-md-12 form-group1" id="divperiodwise" style="display: none">
+                                <div class="table-responsive">
+                                    <table class="table table-clr table-fixed" style=" margin-bottom:0px;" >
+                                        <thead>
+                                        <tr class="col-xs-12" style="padding:0 !important">
+                                            <th class="col-xs-3">Prefix</th>
+                                            <th class="col-xs-3">Suffix</th>
+                                            <th class="col-xs-3">StartNo</th>
+                                            <th class="col-xs-3">Width</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr class="col-xs-12" style="padding:0 !important">
+                                            <td class="col-xs-3"><input type="text" class="parent_text" maxlength="10" id="pprefix" name="pprefix" value="" onchange="updatePeriod();" ></td>
+                                            <td class="col-xs-3"><input type="text" class="parent_text" maxlength="10" id="psuffix" name="psuffix" value="" onchange="updatePeriod();"></td>
+                                            <td class="col-xs-3"><input type="text" class="parent_text" maxlength="10" id="pstartno" name="pstartno" value="" onkeypress="return isNumberKey(event);" onchange="updatePeriod();"></td>
+                                            <td class="col-xs-3"><input type="text" class="parent_text" maxlength="1" id="pwidth" name="pwidth" value="" onkeypress="return isNumberKey(event);" onchange="updatePeriod();"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group1" id="divperiodmonthwise" style="display: none">
+                                <div class="table-responsive">
+                                    <table class="table table-sub table-fixed" id="monthperiod" style=" margin-bottom:0px;" >
+                                        <thead>
+                                        <tr class="col-xs-12" style="padding:0 !important">
+                                            <th class="col-xs-4">Month</th>
+                                            <th class="col-xs-2">Prefix</th>
+                                            <th class="col-xs-2">Suffix</th>
+                                            <th class="col-xs-2">StartNo</th>
+                                            <th class="col-xs-2">Width</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <!--                                        <tr class="col-xs-12" style="padding:0 !important">-->
+                                        <!--                                            <td class="col-xs-4"><input type="text" class="form-control parent_text date_picker" maxlength="5" id="pmmonth" name="pmmonth" value="" disabled></td>-->
+                                        <!--                                            <td class="col-xs-2"><input type="text" class="parent_text" maxlength="5" id="pprefix" name="pmprefix" value=""></td>-->
+                                        <!--                                            <td class="col-xs-2"><input type="text" class="parent_text" maxlength="5" id="psuffix" name="pmsuffix" value=""></td>-->
+                                        <!--                                            <td class="col-xs-2"><input type="text" class="parent_text" maxlength="10" id="pstartno" name="pmstartno" value="" onkeypress="return isNumberKey(event);"></td>-->
+                                        <!--                                            <td class="col-xs-2"><input type="text" class="parent_text" maxlength="1" id="pwidth" name="pmwidth" value="" onkeypress="return isNumberKey(event);"></td>-->
+                                        <!--                                            <input type="hidden" name="month" value="" />-->
+                                        <!--                                            <input type="hidden" name="year" value="" />-->
+                                        <!--                                        </tr>-->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <button type="button" data-slide="next" data-stepno="4" data-toggle="tooltip" data-placement="left" onclick="submitForm();" class="ripple editSubmitBtn" title="Update">Update</button>
+                            <div id="dept-update-loader" class="post_loader ask_post_loader brad_50"> <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif"> </div>
+                        </li>
+                    </ul>
+                </div>
+                <input type="hidden" name="arrPeriod" id="arrPeriod" value="" />
+                <input type="hidden" name="arrPeriodTrans" id="arrPeriodTrans" value="" />
+            </div>
+        </form>
+    </td>
+</tr>
+<script>
+var arrPeriodLists = <?php echo (isset($periodLists)) ? json_encode($periodLists) : '[]';?>,
+    arrPeriod = <?php echo (isset($period)) ? json_encode($period) : '[]';?>,
+    arrPeriodTrans = <?php echo (isset($periodTrans)) ? json_encode($periodTrans) : '[]';?>;
+
+$(document).ready(function() {
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+    $('ul.list-head li a').click(function(){
+        $('li a').removeClass("active");
+        $(this).addClass("active");
+    });
+    if ($('#gentype').val()==0) {
+        $('#periodwise').val(0).prop('selected', true).trigger('change');
+        $('#periodwise').prop('disabled',true);
+        $('#divMainSetup').hide();
+        $('#divPeriodSetup').hide();
+    } else {
+        $('#divMainSetup').show();
+        $('#periodwise').prop('disabled', false);
+    }
+    if ($('#periodwise').val()==0) {
+        $('#divPeriodSetup').hide();
+        $('#divMainSetup').show();
+    } else {
+        $('#divMainSetup').hide();
+        $('#divPeriodSetup').show();
+        clickPeriod();
+    }
+    if ($('#monthwise').val()==0) {
+        $('#divperiodmonthwise').hide();
+        $('#divperiodwise').show();
+    } else {
+        $('#divperiodwise').hide();
+        $('#divperiodmonthwise').show();
+        showmonthlyDetails();
+    }
+});
+
+function onchangeType(val) {
+    if (val==1) {
+        $('#divMainSetup').show();
+        $('#periodwise').prop('disabled', false);
+    } else {
+        $('#periodwise').val(0).prop('selected', true).trigger('change');
+        $('#periodwise').prop('disabled',true);
+        $('#divMainSetup').hide();
+        $('#divPeriodSetup').hide();
+    }
+}
+function onchangePeriod(val) {
+    if (val == 0) {
+        $('#divPeriodSetup').hide();
+        $('#divMainSetup').show();
+    } else {
+        $('#divMainSetup').hide();
+        $('#divPeriodSetup').show();
+        clickPeriod();
+    }
+}
+
+function onchangeMonth(val) {
+    if (val == 0) {
+        $('#divperiodmonthwise').hide();
+        $('#divperiodwise').show();
+    } else {
+        $('#divperiodwise').hide();
+        $('#divperiodmonthwise').show();
+        showmonthlyDetails();
+    }
+    updatePeriod();
+}
+
+function showPeriodDetails(id) {
+    var iPeriodId = id;
+    $('#periodId').val(iPeriodId);
+
+    var arrL = $.grep(arrPeriodLists, function (element, index) {
+        return element.PeriodId == iPeriodId});
+
+    if (arrL.length >0) {
+        $('#fromdate').datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', arrL[0].FromDate);
+        $('#todate').datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', arrL[0].ToDate);
+    }
+
+    var arr = $.grep(arrPeriod, function (element, index) {
+        return element.PeriodId == iPeriodId});
+
+    if (arr.length >0) {
+        $('#monthwise').val(arr[0].Monthwise).prop('selected', true).trigger('change');
+        $('#pprefix').val(arr[0].Prefix);
+        $('#psuffix').val(arr[0].Suffix);
+        $('#pstartno').val(arr[0].StartNo);
+        $('#pwidth').val(arr[0].Width);
+    } else {
+        $('#monthwise').val(0).prop('selected', true).trigger('change');
+        $('#pprefix').val('');
+        $('#psuffix').val('');
+        $('#pstartno').val(1);
+        $('#pwidth').val(5);
+    }
+
+    if ($('#monthwise').val() == 0) {
+        $('#divperiodmonthwise').hide();
+        $('#divperiodwise').show();
+    } else {
+        $('#divperiodwise').hide();
+        $('#divperiodmonthwise').show();
+        showmonthlyDetails();
+    }
+}
+
+function clickPeriod() {
+    var $resnames = $('li[id*=periodid_]');
+    $.each($resnames, function (i, obj) {
+        var name = $(this)[0].id,
+            ccid = name.split('_')[1];
+        $("#" + name + " > a").addClass("active");
+        showPeriodDetails(ccid);
+        return false;
+    });
+}
+
+function showmonthlyDetails() {
+    var iPeriodId = $('#periodId').val();
+    var dFDate= new Date($("#fromdate").datepicker('getDate'));
+    var dTDate= new Date($("#todate").datepicker('getDate'));
+
+    var iFMonth= parseInt(dFDate.getMonth())+1;
+    var iFYear= parseInt(dFDate.getFullYear());
+
+    var iTMonth= parseInt(dTDate.getMonth())+1;
+    var iTYear= parseInt(dTDate.getFullYear());
+    var iMonth = iTMonth;
+    var iYear = iFYear;
+
+    if (iTYear > iFYear)  iMonth = 12;
+    var sHtml="",i=0;
+    $('#monthperiod > tbody').html('');
+    for (var n = iFMonth; n <= iMonth; n++) {
+        i=i+1;
+        var year = iYear, month = n, day = 1;
+        var sstr = year + "/" + month + "/" + day;
+        var date2 = new Date(sstr);
+
+        console.log(arrPeriodTrans);
+
+        var sPrefix="",sSuffix="",iStartNo= 1,iWidth=5;
+        var arr = $.grep(arrPeriodTrans, function (element, index) {
+            return element.PeriodId == iPeriodId && element.Month==month && element.Year==year});
+        if (arr.length !=0) {
+            sPrefix = arr[0]['Prefix'];
+            sSuffix = arr[0]['Suffix'];
+            iStartNo = arr[0]['StartNo'];
+            iWidth = arr[0]['Width'];
+        }
+        sHtml = sHtml + '<tr class="col-xs-12" style="padding:0 !important">'+
+        '<td class="col-xs-4"><input type="text" class="form-control parent_text date_picker" maxlength="5" id="pmmonth_'+ i + '" value="'+  $.datepicker.formatDate('M-yy', date2)  +'"  disabled  onchange="updatePeriodTrans(this);"></td>'+
+        '<td class="col-xs-2"><input type="text" class="parent_text" maxlength="5" id="pmprefix_'+ i + '" value="'+ sPrefix +'" onchange="updatePeriodTrans(this);"></td>'+
+        '<td class="col-xs-2"><input type="text" class="parent_text" maxlength="5" id="pmsuffix_'+ i + '" value="'+ sSuffix +'" onchange="updatePeriodTrans(this);"></td>'+
+        '<td class="col-xs-2"><input type="text" class="parent_text" maxlength="10" id="pmstartno_'+ i + '" value="'+ iStartNo +'" onkeypress="return isNumberKey(event);" onchange="updatePeriodTrans(this);"></td>'+
+        '<td class="col-xs-2"><input type="text" class="parent_text" maxlength="1" id="pmwidth_'+ i + '" value="'+ iWidth +'" onkeypress="return isNumberKey(event);" onchange="updatePeriodTrans(this);"></td>'+
+        '<input type="hidden" id="month_'+ i + '" value="'+ month +'" />'+
+        '<input type="hidden" id="year_'+ i + '" value="'+ year +'" />'+
+        '</tr>';
+
+
+        if (n == 12) {
+            if (iYear < iTYear) {
+                iYear = iYear + 1;
+                if (iYear < iTYear) {
+                    iMonth = 12;
+                    n = 1;
+                } else {
+                    n = 1;
+                    iMonth = iTMonth;
+                }
+            }
+        }
+    }
+    $('#monthperiod > tbody').html(sHtml);
+}
+
+
+function updatePeriod() {
+    var iPeriodId = $('#periodId').val(),
+        iMonthwise = $('#monthwise').val(),
+        sPrefix = $('#pprefix').val(),
+        sSuffix = $('#psuffix').val(),
+        iStartNo = $('#pstartno').val(),
+        iWidth = $('#pwidth').val();
+
+    var arr = $.grep(arrPeriod, function (element, index) {
+        return element.PeriodId != iPeriodId});
+    arrPeriod=[];
+    arrPeriod = arr;
+    arrPeriod.push({
+        PeriodId: iPeriodId,
+        Monthwise: iMonthwise,
+        Prefix: sPrefix,
+        Suffix: sSuffix,
+        StartNo: iStartNo,
+        Width: iWidth
+    });
+}
+
+function updatePeriodTrans(x) {
+    var $x = $(x),
+        key = $x[0].id.split('_')[1],
+        iPeriodId = $('#periodId').val(),
+        iMonth= $('#month_' + key).val(),
+        iYear= $('#year_' + key).val(),
+        sPrefix = $('#pmprefix_' + key).val(),
+        sSuffix = $('#pmsuffix_' + key).val(),
+        iStartNo = $('#pmstartno_' + key).val(),
+        iWidth = $('#pmwidth_' + key).val();
+
+    var arr = $.grep(arrPeriodTrans, function (element, index) {
+        return element.PeriodId != iPeriodId || element.Month !=iMonth || element.Year != iYear});
+    arrPeriodTrans=[];
+    arrPeriodTrans = arr;
+    arrPeriodTrans.push({
+        PeriodId: iPeriodId,
+        Month: iMonth,
+        Year: iYear,
+        Prefix: sPrefix,
+        Suffix: sSuffix,
+        StartNo: iStartNo,
+        Width: iWidth
+    });
+}
+
+function submitForm() {
+    $('#periodwise').prop('disabled',false);
+    $('#arrPeriod').val(JSON.stringify(arrPeriod));
+    $('#arrPeriodTrans').val(JSON.stringify(arrPeriodTrans));
+    $("#editform").submit();
+}
+</script>

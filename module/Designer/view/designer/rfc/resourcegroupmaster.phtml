@@ -1,0 +1,161 @@
+<!--style-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!--style end-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var url1 = getBaseURL() + "project/main/getresourcegroup";
+        var source =
+        {
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'ResourceGroupId'},
+                { name: 'ParentId'},
+                { name: 'ResourceGroupName'},
+            ],
+            hierarchy:
+            {
+                keyDataField: { name: 'ResourceGroupId' },
+                parentDataField: { name: 'ParentId' }
+            },
+            id: 'ResourceGroupId',
+            url: url1
+        };
+
+        // create data adapter.
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $("#treeGrid").jqxTreeGrid(
+            {
+                width: "100%",
+                source: dataAdapter,
+                sortable: true,
+				pageable:true,
+                rowDetails: true,
+                ready: function()
+                {
+                    $("#treeGrid").jqxTreeGrid('expandRow', '2');
+                },
+                columns: [
+                    { text: 'Parent', dataField: 'ResourceGroupName',},
+					 { text: 'Type', dataField: 'Type',},
+					 { text: 'Code', dataField: 'Code',},
+					 { text: 'Resource Group', dataField: 'Resource Group',},
+					
+                ]
+            });
+        $('#treeGrid').on('rowSelect',
+            function (event)
+            {
+                // event args.
+                var args = event.args;
+                // row data.
+                var row = args.row.rowindex;
+                // row key.
+                var key = args.key;
+
+                $.post( getBaseURL() + 'project/main/GetResourceGroupDetails', {resId:key}, function( data )
+                {
+                    var obj = jQuery.parseJSON(data);
+                    $('#edit-link').attr('href', getBaseURL() + 'project/rfc/rfcresourcegroup/0/edit/' + key);
+                    $('#delete-link').attr('data-id', key);
+                    $('#code').val(obj.Code);
+                    $('#groupname').val(obj.ResourceGroupName);
+                    $('#typename').val(obj.TypeName);
+                });
+                //var spec = $("#treeGrid").jqxTreeGrid('getCellValue', key, 'ResourceGroupName');
+                $('#dummy').show();
+            });
+
+        $('#delete-link').on('click', function(e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            $.ajax({
+                url: getBaseURL() + 'project/rfc/CheckRFCDelete',
+                type: 'POST',
+                data: {'id': id, 'type': 'ResourceGroup'},
+                success: function (data, status, xhr) {
+                    if (xhr.status == 204) {
+                        alert('Request to delete this resource group is already pending');
+                        return;
+                    }
+                    window.location = getBaseURL() + 'project/rfc/rfcresgroupdelete/0/' + id;
+                },
+                error: function(xhr,status, error) {
+                }
+            });
+
+        });
+    });
+</script>
+
+<!--container-->
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1>Resource Group Library</h1>
+      </div>
+      <div class="col-lg-12 tmss">
+        <div class="col-lg-5">
+          <div id="custom-search-input">
+            <div class="input-group col-md-12"> <span class="input-group-btn">
+              <button class="btn btn-primary ripple has-ripple" type="button"> <i class="fa fa-search"></i> </button>
+              </span>
+              <input type="text" class="parent_search" placeholder="Search" />
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5" > <a href="<?php echo $this->basePath(); ?>/project/rfc/rfcresourcegroup" class="btn btn-success btn-small active ripple has-ripple"><i class="fa fa-plus"></i>Add Resource Group</a> </div>
+      </div>
+      <!--table Jq Gride start-->
+      <div class="col-lg-12 col-lg-offset-0 tmss">
+        <div class="table-responsive clear">
+          <div id="treeGrid"> </div>
+        </div>
+      </div>
+      <!--table Jq Gride end--> 
+
+    </div>
+  </div>
+</div>
+
+<!--container end--> 
+
+<!--<a href="<?php echo $this->basePath(); ?>/project/rfc/rfcresourcegroup" style="margin-bottom: 10px;" class="btn btn-info pull-right">Add Resource Group</a>
+<div class="clearfix"></div>
+<div id='content'>
+    <div id='treeGrid'>
+    </div>
+</div>
+
+<div style="display: inline-block"></div>
+
+<div id="dummy">
+    <table  style="width:100%">
+        <tr >
+            <td style="width:30px"></td>
+            <h3 class="page-header">Resource Group Details</h3>
+        </tr>
+        <tr>
+            <td colspan="1">
+                <table style="width=50%">
+                    <tr>
+                        <td style="width:50%"> Code <input type="text" class="form-control" size="10%" maxlength="100" name="code" value = "" id="code" readonly></td>
+                    </tr>
+                        <td style="width:50%"> GroupName <input type="text" class="form-control" size="100%" maxlength="100" name="groupname" value = "" id="groupname" readonly></td>
+                    <tr>
+                        <td style="width:50%"> Type Name <input type="text" class="form-control" size="100%" maxlength="100" name="typeName" value = "" id="typename" readonly></td>
+                        </tr>
+                    <tr>
+                        <td align="right" style="width:85%">
+                            <a class="btn btn-info btn-xs" href="" id="edit-link">Edit</a>
+                            <a style="margin-left: 10px;" class="btn btn-info btn-xs" href="#" id="delete-link">Delete</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>--> 

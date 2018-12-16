@@ -1,0 +1,335 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    #jqxGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Checklist Master</h1>
+            <div class="edit_del float_r">
+                <ul>
+                    <li>
+                        <a title="Add Checklist" href="#" onclick="checklistAddEdit('add'); return false;" class="edit-btn edit_al" style=" display:block;"><i class="fa fa-plus"></i> Add Checklist</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive clear" style="margin-top:10px;">
+                <div id="jqxGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delChecklistName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Add/Edit Confirmation Modal-->
+<div class="modal fade" id="AddEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="headerText">Edit Checklist</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+                        <div class="row">
+                            <div class="form-group req_flds padtop10 col-lg-12">
+                                <input type="text" id="ChecklistName" name="name" autocomplete="off" class="form-control lbl_move" maxlength="150" label="Name"/>
+                                <input type="hidden" name="id" id="ChecklistId"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select name="type" id="ChecklistType" autocomplete="off" class="single_dropdown lbl_move" label="Type" style="width:100%;">
+                                    <?php foreach($checklisttype as $trow) { ?>
+                                        <option value="<?php echo $trow['TypeId']; ?>"><?php echo $trow['CheckListTypeName']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    //bindJqxGridAutoResize();
+});
+
+var $jqxGrid = $("#jqxGrid"),
+    $deleteModal = $('#DeleteModal'),
+    $AddEditModal = $('#AddEditModal'),
+    $remarks = $('#remarks'),
+    $ChecklistId = $('#ChecklistId'),
+    $ChecklistName = $('#ChecklistName'),
+    $ChecklistType = $('#ChecklistType');
+
+$(function () {
+    var source = {
+        localdata: <?php echo (isset($checklists)) ? json_encode($checklists) : '[]';?>,
+        dataType: "json",
+        dataFields: [
+            { name: 'CheckListId', type: 'number' },
+            { name: 'CheckListName', type: 'string' },
+            { name: 'CheckListTypeName', type: 'string' },
+            { name: 'TypeId', type: 'number' }
+        ],
+        id: 'CheckListId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $jqxGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        editable: false,
+        altrows: true,
+        groupable:true,
+        showgroupsheader:false,
+        enabletooltips: true,
+        showfilterrow: true,
+        columns: [
+            { text: 'CheckListId', datafield: 'CheckListId', hidden: true, filterable: false},
+            { text: 'TypeId', datafield: 'TypeId', hidden: true, filterable: false},
+            { text: 'Name', dataField: 'CheckListName', width:'60%'},
+            { text: 'Type', dataField: 'CheckListTypeName', width:'20%'},
+//            { text: 'Type', dataField: 'CheckListTypeName', width:'45%'},
+            { text: 'Action', sortable: false, filterable: false, align: 'left', width:'10%',
+                cellsrenderer: function (row) {
+                    var editLink = '<a title="Edit" href="#" onclick="checklistAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="checklistDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                }
+            }
+        ],
+        groups: ['CheckListTypeName'],
+        groupsrenderer: function (defaultText, group, state, params) {
+            return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+        },
+        ready: function () {
+            $("#jqxGrid").jqxGrid('expandallgroups');
+        }
+    });
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        $deleteModal.modal('hide');
+        var rowData = $jqxGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'project/landbank/deletechecklistmaster',
+            type: 'POST',
+            async: false,
+            data: {"CheckListId": rowData.CheckListId, "Remarks": remarks, "Type": 'update'},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $jqxGrid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Cannot delete this Checklist, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the Checklist!');
+            }
+        });
+        $remarks.val('');
+    });
+});
+
+function addUpdateFn() {
+    var ChecklistName = $ChecklistName.val();
+    var ChecklistType = $ChecklistType.find('option:selected').val();
+
+    validate(function(isSuccess) {
+
+        if(isSuccess === false) {
+            return false;
+        } else {
+            $AddEditModal.modal('hide');
+            var mode = $AddEditModal.data('mode');
+            if(mode == 'edit') {
+                var rowData = $jqxGrid.jqxGrid('getrowdata', $AddEditModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'project/landbank/addchecklistmaster',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $jqxGrid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                            $jqxGrid.jqxGrid('expandallgroups');
+                        } else {
+                            alert('Failed to Edit the Checklist!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the Checklist!')
+                    }
+                });
+            } else if(mode == 'add') {
+                $.ajax({
+                    url: getBaseURL() + 'project/landbank/addchecklistmaster',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $jqxGrid.jqxGrid('addrow',null,JSON.parse(data));
+                            $jqxGrid.jqxGrid('expandallgroups');
+                        } else {
+                            alert('Failed to Add Checklist!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Add Checklist!');
+                    }
+                });
+            }
+            $ChecklistName.val('');
+            $("#ChecklistType").find('option:first-child').prop('selected');
+        }
+    });
+
+
+    function validate(callback) {
+        if(ChecklistName.length == 0) {
+            showError($ChecklistName, 'Required!');
+            return;
+        } else {
+            removeError($ChecklistName);
+        }
+
+        if(typeof ChecklistType == 'undefined' || ChecklistType.length == 0) {
+            showError($ChecklistType, 'Required!');
+            return;
+        } else {
+            removeError($ChecklistType);
+        }
+
+
+        //validate Checklist name already found
+        $.ajax({
+            url:getBaseURL()+ 'project/landbank/findchecklist',
+            type:"post",
+            data: $('#addEditForm').serialize(),
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200){
+                    showError($ChecklistName, 'Checklist Name already found!');
+                    callback(false);
+                    return false;
+                } else{
+                    removeError($ChecklistName);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+
+function checklistDelete(x, row) {
+    $(x).prop('disabled', true);
+    var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+    $.ajax({
+        url: getBaseURL() + 'project/landbank/deletechecklistmaster',
+        type: 'POST',
+        async: false,
+        data: {"CheckListId": rowData.CheckListId, "Type": 'check'},
+        success:function(data, textStatus, jqXHR){
+            $(x).prop('disabled', false);
+            if (jqXHR.status == 200){
+                $deleteModal.data('row', row).modal('show');
+                $('#delChecklistName').html(rowData.ChecklistName);
+                $("#remarks").val('');
+            } else
+                alert('Cannot delete this Checklist, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            $(x).prop('disabled', false);
+            alert('Cannot delete this Checklist!');
+        }
+    });
+}
+
+function checklistAddEdit(mode,row) {
+    removeError($("#ChecklistName"));
+    if(mode== 'edit') {
+        var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+        $AddEditModal.data('row', row).data('mode', 'edit').modal('show');
+        $ChecklistId.val(rowData.CheckListId);
+        $ChecklistName.val(rowData.CheckListName);
+        $ChecklistName.trigger('change');
+        $ChecklistType.find('option[value=' + rowData.TypeId + ']').prop('selected', true);
+        $ChecklistType.trigger('change');
+        $("#headerText").html("Edit Checklist");
+        $("#btnEditYes").html("Update");
+    } else if(mode== 'add'){
+        $AddEditModal.data('mode', 'add').modal('show');
+        $ChecklistId.val(0);
+        $AddEditModal.data('mode', 'add').modal('show');
+        $ChecklistName.val('');
+        $ChecklistType.val('');
+        $ChecklistType.trigger('change');
+        $("#headerText").html("New Checklist");
+        $("#btnEditYes").html("Create");
+    }
+}
+</script>

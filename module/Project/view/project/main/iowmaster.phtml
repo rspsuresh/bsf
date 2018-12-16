@@ -1,0 +1,141 @@
+<!--style-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!--style end-->
+
+<!--container start-->
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1>IOW Library</h1>
+          <div class="col-md-5"></div>
+
+              <div class="dropdown nav-list"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print print-icon-img" aria-hidden="true"></i></a>
+                  <ul class="dropdown-menu drp-list arrow-right">
+                      <li><a href="<?php echo $this->basePath(); ?>/project/report/iowlist">IOW List</a></li>
+                  </ul>
+              </div>
+         
+      </div>
+          <div class="col-lg-12 edit_del">
+              <ul>
+                  <li>
+                    <a href="<?php echo $this->basePath(); ?>/project/rfc/rfciow" class="edit-btn edit_al"><i class="fa fa-plus"></i> Add IOW</a>
+                  </li>
+<!--                  <li>-->
+<!--                    <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfciow/0/edit/0" class="edit_tl"><i class="fa fa-pencil"></i> Edit IOW</a>-->
+<!--                  </li>-->
+<!--                  <li>-->
+<!--                    <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfciowdelete" class="edit_dl"><i class="fa fa-trash"></i> Delete IOW</a>-->
+<!--                  </li>-->
+              </ul>
+              <div class="clearfix"></div>
+          </div>
+          <div class="col-lg-12 col-lg-offset-0 tmss">
+            <div class="table-responsive clear">
+              <div id="treeGrid"> </div>
+            </div>
+          </div>
+    </div>
+  </div>
+</div>
+<!--container end--> 
+<!--script start--> 
+<script type="text/javascript">
+var $treeGrid = $("#treeGrid");
+$(function () {
+    var source = {
+        dataType: "json",
+        dataFields: [
+            { name: 'IOWId'},
+            { name: 'ParentId'},
+            { name: 'Specification'},
+            { name: 'SerialNo'},
+            { name: 'WorkGroupName'},
+            { name: 'UnitId'}
+        ],
+        hierarchy: {
+            keyDataField: { name: 'IOWId' },
+            parentDataField: { name: 'ParentId' }
+        },
+        id: 'IOWId',
+        url: getBaseURL() + "project/main/getiowmaster"
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxTreeGrid({
+        width: "100%",
+        source: dataAdapter,
+        height:"490",
+	    filterable: true,
+        sortable: true,
+        pageable:true,
+        rowDetails: true,
+        rowDetailsRenderer: function (rowKey, row) {
+            if(row.ParentId == 0)
+                return '';
+            return renderRowDetail(row.IOWId);
+        },
+        columns: [
+            { text: 'IOWId', datafield: 'IOWId', hidden: true, filterable: false},
+            { text: 'ParentId', datafield: 'ParentId', hidden: true, filterable: false},
+            { text: 'Serial No.', dataField: 'SerialNo'},
+            { text: 'Workgroup Name', dataField: 'WorkGroupName'},
+            { text: 'Specification', dataField: 'Specification'},
+            { text: 'Action', sortable: false, filterable: false, align: 'left',
+                cellsrenderer: function (row) {
+                    var iowId = $treeGrid.jqxTreeGrid('getCellValue', row, 'IOWId'),
+                        parentId = $treeGrid.jqxTreeGrid('getCellValue', row, 'ParentId'),
+                        editLink = '<a title="Edit" href="'+ getBaseURL() + 'project/rfc/rfciow/0/edit/'+iowId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+
+                    if ($treeGrid.jqxTreeGrid('getRow', row).leaf != true)
+                     return editLink;
+
+                    return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: checkRFCDelete(event,'+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                }
+            }
+        ]
+    });
+});
+
+function checkRFCDelete(event, row) {
+    var id = $treeGrid.jqxTreeGrid('getCellValue', row, 'IOWId');
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/checkrfcdelete',
+        type: 'POST',
+        data: {'id': id, 'type': 'IOW'},
+        success: function (data, status, xhr) {
+            if (xhr.status == 204) {
+                alert('Request to delete this iow is already pending');
+                return false;
+            }
+            window.location = getBaseURL() + 'project/rfc/rfciowdelete/0/' + id;
+        },
+        error: function(xhr,status, error) {
+        }
+    });
+}
+
+function renderRowDetail(id) {
+    var dataValue = '';
+    $.ajax({
+        url: getBaseURL() + 'project/main/getiowdetails',
+        type: 'POST',
+        data: {resId: id},
+        async: false,
+        success: function(data,status, xhr) {
+            if(xhr.status == 200)
+                dataValue = data;
+        }, error: function(xhr, status, errorThrown) {
+        }
+    });
+    return dataValue;
+}
+</script>
+<!--script end-->
+<!--hover open list--> 
+<script>$('.nav-list').hover(function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500);
+}, function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500);
+});</script>

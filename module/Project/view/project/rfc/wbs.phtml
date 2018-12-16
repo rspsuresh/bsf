@@ -1,0 +1,1027 @@
+<!--Handson Table plugin-->
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/handsontable/css/handsontable.full.min.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/lodash.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/underscore.string.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeral.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeric.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/formula.js"></script>
+<script type="text/javascript"src="<?php echo $this->basePath(); ?>/library/handsontable/js/parser.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.formula.js"></script>
+<!--Handson Table Plugin-->
+
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    body{ background:#F1F4F9;}
+    .jqx-widget-content{background:#fff;border:1px solid #c2c2c2; color:#333 !important;}
+    .jqx-widget-content ul{ width:250px !important; }
+    .jqx-widget-content ul li.jqx-tree-item-li{border:1px solid rgba(128, 123, 23, 0.59)!important; width:252px!important; margin-bottom:5px;}
+    .jqx-widget{  margin-bottom:10px !important; }
+    .jqx-tree-item{ border:none !important; overflow:unset !important; width:220px !important; padding:5px;}
+    .jqx-tree-item-arrow-expand jqx-icon-arrow-down{ background:#06F !important;}
+    .jqx-tree-item-hover{ background:none !important;}
+    .jqx-tree-dropdown-root{ margin-top:20px !important;}
+    .jqx-rc-all{ border:none !important; border-radius:none !important;}
+    .jqx-tree-item-arrow-expand{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important; margin-right:3px;}
+    .jqx-icon-arrow-right{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important;margin-right:3px; }
+    .jqx-fill-state-pressed{ background:rgba(226, 241, 171, 0.41) !important; padding-left:3px !important;border-radius:0px !important; padding:5px !important;}
+    .jqx-tree-item:hover{ color:#999;}
+    .jqx-popup{ background:#F3F9DC !important;   border: 1px solid hsla(57, 70%, 30%, 0.59) !important;}
+    .jqx-menu-item-top{ float:left; margin:0px; padding:5px;}
+    .jqx-fill-state-hover{ background:none !important; color:#999; }
+    .jqx-menu-iteam-top-hover{ background:none !important;border-bottom:1px thick #066;}
+    #treeWrapper {width: 100%;}
+    #treeWrapper, #treeWrapper > div {float: left;}
+    #HandsonTableWrapper {height: 100%; width: 100%; overflow: hidden; }
+    #HandsonWrapper {display: none;}
+    .HandsonModalBtns { float: right; margin: 20px 0;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="formWrapper"  method="post">
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+                <input type="hidden" name="rfcmode" id="rfcmode" value="<?php echo $mode;?>">
+                <input type="hidden" name="editid" id="editid" value="<?php echo $editid;?>">
+
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - WBS Add</h1>
+                </div>
+
+                <div class="col-lg-12 top_ct" >
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" label="Reference Date"  value="<?php  if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>" readonly/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcid !=0 ) ? $rfcregister['RefNo'] : $svNo; ?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName'];?>" readonly/>
+                            <input type="hidden" name="project_id" id="project_id"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId'];?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName'];?>" readonly/>
+                            <input type="hidden" name="project_type" id="project_type" value="<?php if(isset($projecttype)) echo $projecttype; else if(isset($rfcregister['ProjectType'])) echo $rfcregister['ProjectType'];?>"/>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!--table Jq Grid start-->
+                <div class="col-lg-12 col-lg-offset-0" id="iow-list">
+                    <!-- Tree Structure -->
+                    <div id="treeWrapper" style="display: none;">
+                        <div class="bread_crumb first_step" id="tree-structure"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="table-responsive clear" style="overflow: visible;" id="grid-wrapper">
+                        <div id='jqxWidget'>
+                            <div id='jqxTree'></div>
+                            <div id='jqxMenu'>
+                                <ul>
+                                    <li id="menu-newwbs">Add WBS</li>
+                                    <li>Edit WBS</li>
+                                    <li>Remove WBS</li>
+                                    <li id="menu-addiow">Add IOW</li>
+                                    <li id="menu-showiow">Show IOW</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Project IOW Table Start-->
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive topsp" id="iow-content" style="display: none;"></div>
+                    <input type="hidden" name="newIOWRowId" id="newIOWRowId" value="[]"/>
+                </div>
+            </form>
+
+            <!--Handson Table-->
+            <div class="col-lg-12" id="HandsonWrapper">
+                <div class="md-popup">
+                    <div id="HandsonTableModal">
+                        <h1>Measurement Sheet</h1>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 excel-tbs" style="padding-left:0px !important;">
+                            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                <div class="form-group">
+                                    <select id="ExcelTemplate" onChange="getExcelTemplate(this);"  style="width:100%;" class="form-control single_dropdown lbl_move hei-43" data-size="5" label="Chooose a Template">
+                                        <option></option>
+                                        <?php if(isset($exceltemplates)):
+                                            foreach($exceltemplates as $template):?>
+                                                <option value="<?php echo $template['TemplateId']; ?>"><?php echo $template['TemplateName']; ?></option>
+                                            <?php endforeach; endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                <div class="form-group">
+                                    <select name="columns[]" id="totalcolumns"  style="width:100%;" class="form-control single_dropdown lbl_move sel-mul" data-size="5" label="Choose Column(s)" multiple onchange="summationColumns(true);">
+                                        <option></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                <div class="form-group  remove-bt">
+
+                                    <a onClick="removeMSheet(); return false;">Remove Measurement Sheet</a>
+                                </div></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                            <div class="tabs-content" style="margin-top:20px;">
+                                <div id="HandsonTableWrapper" class="hot handsontable"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                        <div class="btn-group toal-disgr" data-toggle="buttons" id="summationColumnsWrapper"></div>
+                    </div>
+                    <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                        <div class="HandsonModalBtns">
+                            <button type="button" class="md_cance" onClick="return hideHandsonWrapper()">Cancel</button>
+                            <button type="button" class="md_ok" onClick="return updateMSheet()">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li><div id="back-btn" class="back-bts" style="display:none;"><a href="javascript:showTreeGrid();" data-toggle="tooltip" data-placement="right" title="Go Back"> <i class="fa fa-chevron-circle-left"></i> Back</a></div></li>
+        <li class="dropdown save_btn float_r" id="submit-btn"><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="cancel-btn"><a href="<?php echo $this->basePath() . '/project/rfc/rfcwbs';?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+
+<div id="dummytableheader" style="display: none">
+    <table class="table newIOWs" style=" margin-bottom:0px; display: none;" id="newIOW__1">
+        <thead>
+        <tr>
+            <input type="hidden" name="newiow__1_rowid" id="newiow__1_rowid" value="1">
+            <input type="hidden" name="newiow__1_deleteids" id="newiow__1_deleteids" value="0">
+            <th>IOW</th>
+            <th>Unit</th>
+            <th>Rate</th>
+            <th>Qty</th>
+            <th>Amount</th>
+            <th class="text-center">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<div id="dummy" style="display: none">
+<table id="dummytable">
+<tbody>
+<tr id="newiow__0_irowid__1">
+    <td width="11%"><input type="text" class="parent_text" id="newiow__0_parent__1"></td>
+    <td width="5%"><input type="text" class="parent_text" id="newiow__0_unit__1" readonly ></td>
+    <td width="5%"><input class="parent_text text-right" type="text" name="newiow__0_rate__1" id="newiow__0_rate__1" align="right" readonly></td>
+    <td width="5%">
+        <input class="parent_text text-right" type="text" name="newiow__0_qty__1" id="newiow__0_qty__1" align="right" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onchange="return rateUpdate(this.id)" onfocus="showHandsonTableModal(this);">
+        <input type="hidden" name="newiow__0_Measurement__1" id="newiow__0_Measurement__1"/>
+        <input type="hidden" name="newiow__0_CellName__1" id="newiow__0_CellName__1"/>
+        <input type="hidden" name="newiow__0_SelectedColumns__1" id="newiow__0_SelectedColumns__1"/>
+    </td>
+    <td width="5%"><input class="parent_text text-right" type="text" name="newiow__0_amt__1" id="newiow__0_amt__1" align="right" readonly></td>
+    <input type="hidden" name="newiow__0_parentid__1" id="newiow__0_parentid__1">
+    <input type="hidden" name="newiow__0_transid__1" id="newiow__0_transid__1" value="0">
+    <input type="hidden" name="newiow__0_updaterow__1" id="newiow__0_updaterow__1" value="0">
+    <td width="4%" align="center">
+        <ul class="action_btns">
+            <li>
+                <a style="display: none;" onclick="DeleteTRFn('#newiow__0_mainTrDelete__1');" id="newiow__0_mainTrDelete__1"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a>
+            </li>
+        </ul>
+    </td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    $('body').tooltip({
+        selector: '.error'
+    });
+});
+
+// jqxTree script
+var $jqxTree = $('#jqxTree'),
+    $iowContent = $('#iow-content'),
+    $newIOWRowId = $('#newIOWRowId'),
+    dummyTableHeadHTML = $('#dummytableheader').html(),
+    dummyTableHTML = $('#dummytable > tbody').html(),
+    treePostData = [],
+    arrIOWData = [],
+    $form = $('#formWrapper');
+
+var arr_projectiows = <?php echo (isset($projectiows)) ? json_encode($projectiows) : '[]';?>;
+var tmp_arr_projectiows = [];
+
+var arr_wbsiowlist = <?php echo (isset($arr_wbsiowlist)) ? json_encode($arr_wbsiowlist) : '[]';?>;
+$(function () {
+    bindJqxTreeGrid();
+});
+
+function bindJqxTreeGrid() {
+    var $jqxMenu = $('#jqxMenu'),
+        source = {
+            async: false,
+            datatype: "json",
+            editable:true,
+            datafields: [
+                { name: 'id' },
+                { name: 'parentid' },
+                { name: 'text' }
+            ],
+            id: 'id',
+            localdata: <?php echo (isset($arr_wbslist)) ? $arr_wbslist :  '[]';?>
+        };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    dataAdapter.dataBind();
+    var records = dataAdapter.getRecordsHierarchy('id', 'parentid', 'items', [{ name: 'text', map: 'label'}]);
+
+    $jqxTree.jqxTree({ source: records, height: 400, width: '100%', allowDrag: false, keyboardNavigation: true});
+    $jqxTree.css('visibility', 'visible');
+    var contextMenu = $jqxMenu.jqxMenu({ width: '150px',  height: '110px', autoOpenPopup: false, mode: 'popup' }),
+        clickedItem = null,
+        attachContextMenu = function () {
+            // open the context menu when the user presses the mouse right button.
+            $("#jqxTree li").on('mousedown', function (event) {
+                var target = $(event.target).parents('li:first')[0],
+                    rightClick = isRightClick(event),
+                    $menu_newbs = $('#menu-newwbs'),
+                    $menu_showiow = $('#menu-showiow'),
+                    $menu_addiow = $('#menu-addiow');
+
+                if (rightClick && target != null) {
+                    $jqxTree.jqxTree('selectItem', target);
+                    var selItem = $jqxTree.jqxTree('selectedItem'),
+                        $window = $(window);
+
+                    // check if is parent and hide add iow
+                    if ($(selItem.element).find('ul').length > 0 || arrIOWData.indexOf(selItem.id) >= 0) {
+                        $menu_newbs.show();
+                        $menu_showiow.hide();
+                        $menu_addiow.hide();
+                        $jqxMenu.jqxMenu({height: '83px'});
+                    } else {
+                        $menu_newbs.show();
+                        $menu_addiow.show();
+                        $jqxMenu.jqxMenu({height: '110px'});
+                    }
+
+                    // check if has added iow and remove new wbs option
+                    if (arrIOWData.indexOf(selItem.id) >= 0 || selItem.IOW == 1) {
+                        $menu_newbs.hide();
+                        $menu_showiow.show();
+                        $menu_addiow.hide();
+                    }
+
+                    contextMenu.jqxMenu('open', parseInt(event.clientX) + 5 + $window.scrollLeft(), parseInt(event.clientY) + 5 + $window.scrollTop());
+                    return false;
+                }
+            });
+        };
+
+    attachContextMenu();
+    $jqxMenu.on('itemclick', function (event) {
+        var item = $.trim($(event.args).text()),
+            selectedItem = $jqxTree.jqxTree('selectedItem');
+
+        if (selectedItem == null)
+            return;
+
+        switch (item) {
+            case "Add WBS":
+                $jqxTree.jqxTree('addTo', {label: 'Item'}, selectedItem.element);
+                $jqxTree.jqxTree('expandItem', selectedItem.element);
+                makeEditableContent(selectedItem.element, true);
+                attachContextMenu();
+                break;
+            case "Edit WBS":
+                makeEditableContent(selectedItem.element);
+                break;
+            case "Remove WBS":
+                // check if has iow and with values
+//                console.log(dataAdapter.records[selectedItem.id - 1]); return;
+                var id = selectedItem.id,
+                    index = arrIOWData.indexOf(id),
+                    hasValues = checkIOWFieldsHasValues(id);
+                if(index  != -1 && hasValues) {
+                    alert('Sorry, This WBS cannot be deleted. Since you added a IOW for the same!');
+                    return;
+                }
+
+                if (confirm('Do you want to Delete')) {
+                    // remove other action
+                    if(treePostData.length != 0) {
+                        $.each(treePostData, function (i, o) {
+                            if (o.id == id) {
+                                treePostData.splice(i, 1);
+                                delete treePostData.length;
+                                return;
+                            }
+                        });
+                    }
+
+                    if(id.indexOf('jqxWidget') == -1) {
+                        // push data to array
+                        treePostData.push({
+                            'id': id,
+                            'parentid': selectedItem.parentId,
+                            'name': selectedItem.label,
+                            'action': 'delete'
+                        });
+                    }
+
+                    $jqxTree.jqxTree('removeItem', selectedItem.element);
+
+                    if(index  != -1 && hasValues == false) {
+                        $("#newIOW_" + id).remove();
+                        $iowContent.hide();
+                        arrIOWData.splice(index,1);
+                    }
+                    attachContextMenu();
+                }
+                break;
+            case "Add IOW":
+                addNewIOW(selectedItem);
+                break;
+            case "Show IOW":
+                showAddedIOW(selectedItem);
+                break;
+        }
+    });
+
+    $(document).on('contextmenu', function (e) {
+        if ($(e.target).parents('.jqx-tree').length > 0)
+            return false;
+
+        return true;
+    });
+
+    $jqxTree.jqxTree('expandAll');
+    renderIOWS();
+}
+
+function renderIOWS() {
+    if(arr_wbsiowlist.length == 0)
+        return;
+    arr_wbsiowlist = JSON.parse(arr_wbsiowlist);
+    var rowid= 1,
+        tempiowid = 0;
+    $.each(arr_wbsiowlist, function (i,o) {
+        var id = o.WBSId;
+
+        if(tempiowid != id) {
+            rowid = 1;
+            tempiowid = id;
+        }
+
+        if($('#newIOW_' + id).length == 0) {
+            $iowContent.append(dummyTableHeadHTML.replace(/__1/g, '_' + id));
+            $('#newIOW_' + id + ' > tbody').html(dummyTableHTML.replace(/__0/g, '_' + id).replace(/__1/g, '_1').replace(/__9/g, '_1'));
+            arrIOWData.push(id);
+        } else {
+            rowid++;
+        }
+
+        $('#newiow_' + id + '_transid_' + rowid).val(o.RFCTransId);
+        $('#newiow_' + id + '_parent_' + rowid).val(o.ParentName).prop('readonly',  true);
+        $('#newiow_' + id + '_parentid_' + rowid).val(o.ParentId);
+        $('#newiow_' + id + '_unit_' + rowid).val(o.UnitName);
+        $('#newiow_' + id + '_rate_' + rowid).val(sanitizeNumber(o.Rate));
+        var amt = parseFloatVal(o.Rate) * parseFloatVal(o.Qty);
+        $('#newiow_' + id + '_amt_' + rowid).val(sanitizeNumber(amt));
+        $('#newiow_' + id + '_qty_' + rowid).val(sanitizeNumber(o.Qty, 3)).attr('onchange', 'return rateUpdate(this.id, true)').trigger('change');
+        $('#newiow_'+id+'_mainTrDelete_'+rowid).attr('onclick', "DeleteTRFn('#newiow_"+id+"_mainTrDelete_"+rowid+"', true)");
+        $('#newiow_' + id + '_Measurement_' + rowid).val(o.Measurement);
+        $('#newiow_' + id + '_CellName_' + rowid).val(o.CellName);
+        $('#newiow_' + id + '_SelectedColumns_' + rowid).val(o.SelectedColumns);
+    });
+
+    bindAutoComplete();
+}
+
+// jqxgrid functions start
+function checkIOWFieldsHasValues(id) {
+    var rowlength = $('#newiow_'+ id +'_rowid').val(),
+        isValid = false;
+
+    for (var i=1; i <= rowlength; i++) {
+        if ($.trim($('tr#newiow_'+ id +'_irowid_'+ i +' input[type=text]').val()).length >= 1) {
+            isValid = true;
+            break;
+        }
+    }
+
+    return isValid;
+}
+
+function makeEditableContent(item, isCreate) {
+    var $div = $(item).find('> div'),
+        oldValue = $div.html(),
+        action = 'update',
+        id = item.id,
+        parentId = item.parentId;
+
+    if (typeof isCreate != 'undefined' && isCreate  == true) {
+        $div = $(item).find('> ul li:last-child > div');
+        action = 'create';
+        id = $div.parent('li').attr('id');
+        parentId = item.id;
+        item = $(item).find('> ul li:last-child')[0];
+    }
+
+    // check and remove old data in array
+    var index = getObjectKeyIndex(treePostData, id);
+    if (index != null) {
+        treePostData.splice(index,1);
+    }
+
+    $jqxTree.jqxTree({ keyboardNavigation: false});
+    $div.prop('contenteditable', true);
+    $div.focus();
+    $div.unbind('keydown');
+    $div.on('keydown', function(e) {
+        if (e.keyCode == 27) {
+            $div.html(oldValue);
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+        }
+
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            $div.prop('contenteditable', false);
+            $jqxTree.jqxTree({ keyboardNavigation: true});
+
+            var newText =  $div.html();
+            $jqxTree.jqxTree('updateItem', item, { label:  newText });
+
+            // push data to array
+            treePostData.push({'id': id, 'parentid': parentId, 'name': newText, 'action': action});
+            return false;
+        }
+    });
+}
+
+function showTreeGrid() {
+    $('#treeWrapper').hide();
+    $('#iow-content').hide();
+    $('#back-btn').hide();
+
+    $jqxTree.jqxTree('selectItem', null);
+    $('#grid-wrapper').show();
+    $('#submit-btn').show();
+    $('#cancel-btn').show();
+}
+
+function addNewIOW(item) {
+    var id = item.element.id;
+    bindTreeStructure(item);
+    // show iow table
+    $iowContent.append(dummyTableHeadHTML.replace(/__1/g, '_' + id));
+    $('#newIOW_' + id + ' > tbody').html(dummyTableHTML.replace(/__0/g,'_' + id).replace(/__1/g, '_1').replace(/__9/g,'_1'));
+
+    $('.newIOWs').hide();
+    $iowContent.show();
+    $('#newIOW_' + id).show();
+
+    arrIOWData.push(id);
+
+    bindAutoComplete();
+}
+
+function showAddedIOW(item) {
+    bindTreeStructure(item);
+    $iowContent.hide();
+    $('.newIOWs').hide();
+
+    if(arrIOWData.indexOf(item.id)  == -1)
+        return;
+
+    $iowContent.show();
+    $('#newIOW_' + item.id).show();
+}
+
+function bindTreeStructure(item, displayIOW) {
+    // get element parents
+    var parentId = null,
+        $element = $jqxTree.jqxTree('getItem', item.parentElement),
+        treeli = '';
+
+    while(parentId != 0) {
+        if ($element == null)
+            break;
+
+        treeli = '<a data-id="'+$element.id+'">'+$element.label+'</a>' + treeli;
+        parentId = $element.parentId;
+        $element = $jqxTree.jqxTree('getItem', $element.parentElement);
+    }
+    treeli += '<a class="active" data-id="'+item.id+'">'+item.label+'</a>';
+
+    // hide treeGrid and show IOW Table
+    $('#tree-structure').html(treeli);
+
+    if(typeof displayIOW != 'undefined' && !displayIOW)
+        return
+
+    $('#treeWrapper').show();
+    $('#back-btn').show();
+
+    $('#grid-wrapper').hide();
+    $('#submit-btn').hide();
+    $('#cancel-btn').hide();
+}
+
+// editablecontent text select fn
+jQuery.fn.selectText = function(){
+    var element = this[0];
+    if (document.body.createTextRange) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+    } else if (window.getSelection) {
+        var selection = window.getSelection();
+        var range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+};
+
+function getObjectKeyIndex(obj, value) {
+    var index = null;
+    $.each(obj, function(i, o) {
+        if (o.id == value) {
+            index = i;
+            return false;
+        }
+    });
+    return index;
+}
+
+function isRightClick(event) {
+    var rightclick;
+    if (!event) var event = window.event;
+    if (event.which) rightclick = (event.which == 3);
+    else if (event.button) rightclick = (event.button == 2);
+    return rightclick;
+}
+
+// jqxgrid functions end
+function submitForm() {
+    $('.loading_area').show();
+    $form.append("<input type='hidden' name='wbs' value='" + JSON.stringify(treePostData) + "'/>");
+    $newIOWRowId.val(JSON.stringify(arrIOWData));
+
+    $form.submit();
+}
+
+// iow functions
+function bindAutoComplete() {
+    var $parents = $('input[id*=_parent_]');
+    // unbind previous autocomplete functionality
+
+    $.each($parents, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1)
+            return;
+
+        $this.unbind('autocomplete');
+        var keys = name.split('_'),
+            rowId = keys[1],
+            key1 =  keys[3];
+
+        if(tmp_arr_projectiows.length == 0 || typeof tmp_arr_projectiows[rowId]  == 'undefined')
+            tmp_arr_projectiows[rowId] =  arr_projectiows;
+
+        $this.autocomplete({
+            lookup: tmp_arr_projectiows[rowId],
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase =='*') {
+                    return suggestion.value;
+                }
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function(suggestion) {
+                if(suggestion) {
+                    $("#newiow_"+rowId+"_parent_"+ key1).prop('readonly', true);
+                    $("#newiow_"+rowId+"_parentid_"+ key1).val(suggestion.data);
+                    $("#newiow_"+rowId+"_unit_"+ key1).val(suggestion.UnitName);
+                    $("#newiow_"+rowId+"_rate_"+ key1).val(sanitizeNumber(suggestion.Rate));
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function(suggestion) {
+                $("#newiow_"+rowId+"_parentkeyid_"+ key1).val(0);
+                $("#newiow_"+rowId+"_unit_"+ key1).val('');
+                $("#newiow_"+rowId+"_rate_"+ key1).val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length && query.length > 1){
+                    $(this).addClass('error');
+                    $("#newiow_"+rowId+"_parentid_"+ key1).val(0);
+                    $("#newiow_"+rowId+"_unit_"+ key1).val('');
+                    $("#newiow_"+rowId+"_rate_"+ key1).val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+    });
+}
+
+function rateUpdate(x, updateFlag){
+    var keys = x.split("_"),
+        iowId = keys[1],
+        key1 = keys[3];
+    var qty = parseFloatVal($('#newiow_'+ iowId +'_qty_' + key1).val()),
+        rate = parseFloatVal($('#newiow_'+ iowId +'_rate_' + key1).val()),
+        $amount = $('#newiow_'+ iowId +'_amt_' + key1);
+
+    $amount.val(sanitizeNumber(rate*qty));
+    AddNewRowA(x,updateFlag);
+}
+
+function AddNewRowA(id, updateFlag) {
+    var keys =  id.split('_'),
+        key1= keys[1],
+        key2 = keys[3],
+        $newIOWRowId = $('#newiow_'+ key1 +'_rowid'),
+        iRowId = $newIOWRowId.val();
+
+    if(typeof updateFlag != 'undefined' && updateFlag) {
+        $('#newiow_'+ key1 +'_updaterow_' + key2).val(1);
+    }
+
+    if($('#newiow_'+ key1 +'_irowid_' + key2).nextAll('tr[id*=newiow_'+ key1 +'_irowid_]').length == 1)
+        return;
+
+    if ($('#newiow_'+ key1 +'_parentid_' + key2).val().length == 0)
+        return;
+
+    if ($('#newiow_'+ key1 +'_qty_' + key2).val().length == 0 || $('#newiow_'+ key1 +'_qty_' + key2).val() ==0)
+        return;
+
+    var ioRowId =  iRowId,
+        iRowId = +iRowId + 1,
+        sStr = dummyTableHTML.replace(/__1/g,'_'+ iRowId).replace(/__9/g,'_1').replace(/__0/g,'_' + key1);
+
+    $('#newiow_'+ key1  +'_mainTrDelete_' + ioRowId).show();
+    $('#newIOW_'+ key1  +' > tbody').append(sStr);
+    $newIOWRowId.val(iRowId);
+
+    checkIOWUnique(key1);
+    bindAutoComplete();
+}
+
+function DeleteTRFn(id, deleteFlag) {
+    if (confirm('Do you want to Delete')) {
+        var keys =  id.split('_'),
+        key1= keys[1],
+        key2 = keys[3];
+        if(typeof deleteFlag != 'undefined' && deleteFlag) {
+            var $ids = $('#newiow_'+key1+'_deleteids');
+            $ids.val($ids.val() + ',' + $('#newiow_'+ key1 +'_transid_' + key2).val());
+        }
+
+        $(id).closest('tr').remove();
+    }
+}
+
+function checkIOWUnique(id) {
+    var ids = $('input[name^=newiow_'+id+'_parentid_]');
+    tmp_arr_projectiows[id] = arr_projectiows;
+    tmp_arr_projectiows[id] = $.grep(arr_projectiows, function (element, index) {
+        var is_selected = true;
+        $.each(ids, function (i, obj) {
+            var $this = $(this);
+            if (element.data == $this.val()) {
+                is_selected = false;
+            }
+        });
+        return is_selected;
+    });
+
+    bindAutoComplete();
+}
+
+// handsontable start
+var $mSheetConfirmToolTipTemplate = '<div class="on-focus clearfix" style="position:relative;" id="MSheetConfirmationToolTip">'
+    + '<div class="top-tip">'
+    + '<span>Do You Need Measurement Sheet?</span>'
+    + '<a href="#" onclick="setMSheet(); return false;" class="colgreen"><i class="fa fa-check"></i> Yes</a>'
+    + '<a href="#" onclick="removeTooltip(); return false;" class="colred"><i class="fa fa-times"></i> No</a>'
+    + '</div>'
+    +'</div>';
+var $HandsonWrapper = $('#HandsonWrapper'),
+    $formWrapper = $('#formWrapper'),
+    $back_btn = $('#back-btn');
+
+function removeTooltip() {
+    $('#MSheetConfirmationToolTip').remove();
+}
+
+<!--Handson Script-->
+var handsonTableData =  [[]],
+    handsonTable = null,
+    $HandsonTableWrapper = document.getElementById('HandsonTableWrapper'),
+    HandsonTableSettings = {
+        colHeaders:true,
+        rowHeaders: true,
+        contextMenu: true,
+        minRows: 25,
+        minCols: 10,
+        minSpareRows: 1,
+        stretchH: 'all',
+        formulas: true,
+        manualColumnResize: true,
+        fixedRowsTop: 1,
+        fixedRowsBottom: 1,
+        manualRowResize: true,
+        fillHandle: true,
+        data: handsonTableData,
+        beforeChange: function(changes, source) {
+            if(source == 'paste') {
+                var changesJSON = JSON.parse(JSON.stringify(changes));
+                for(var i=0; i<changesJSON.length; i++) {
+                    var row = changesJSON[i][0],
+                        value = changesJSON[i][3];
+
+                    if(value.indexOf('=') == -1)
+                        return;
+
+                    changes[i][3] = value.replace(/\d+/g, function(n){return  parseInt(row + 1, 10); });
+                }
+            }
+        },
+        afterRender: function() {
+            summationColumns();
+        },
+        cells: function (row, col, prop) {
+            var cellProperties = {};
+
+            if (row === 0) {
+                cellProperties.renderer = firstRowRenderer;
+            }
+
+            return cellProperties;
+        }
+    };
+function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.fontWeight = 'bold';
+}
+var summationColumn = '',
+    selColumns = [],
+    tempSelectedCol = [];
+function showHandsonTableModal(x, forceShowTable) {
+    var $x = $(x),
+        spilts = $x[0].id.split('_'),
+        iowid = spilts[1],
+        key = spilts[3];
+
+    var measurement = $.trim($('#newiow_' + iowid + '_Measurement_' + key).val());
+
+    if(typeof forceShowTable == 'undefined' && measurement == '') {
+        $x.prop('readonly', false);
+        var $qty = $('#newiow_' + iowid + '_qty_'+key);
+        // show prompt
+        removeTooltip();
+        $qty.prop('readonly', false);
+        $qty.after($mSheetConfirmToolTipTemplate);
+        $('#MSheetConfirmationToolTip').data('iowid', iowid).data('id', key);
+    } else {
+        $x.prop('readonly', true);
+        if(measurement == '')
+            handsonTableData = [[]];
+        else
+            handsonTableData = $.parseJSON(measurement);
+
+        summationColumn = $.trim($('#newiow_' + iowid + '_CellName_' + key).val());
+        selColumns = ($.trim($('#newiow_' + iowid + '_SelectedColumns_' + key).val())).split(',');
+        tempSelectedCol = [];
+        renderHandsonTable();
+
+        $('#ExcelTemplate').find('option:first-child').prop('selected', true).siblings('option').removeAttr('selected');
+        $formWrapper.hide();
+        $back_btn.hide();
+
+        $HandsonWrapper.data('iowid', iowid).data('rowid', key).fadeIn();
+    }
+}
+// Measurement Sheet toptip
+function setMSheet() {
+    var $tooltip = $('#MSheetConfirmationToolTip'),
+        key = $tooltip.data('id'),
+        iowid = $tooltip.data('iowid'),
+        id = '#newiow_' + iowid + '_Measurement_' + key;
+    showHandsonTableModal(id, true);
+    removeTooltip();
+    handsonTableData  = [[]];
+    renderHandsonTable();
+}
+function removeMSheet() {
+    var key = $HandsonWrapper.data('rowid'),
+        iowid = $HandsonWrapper.data('iowid'),
+        $qty = $('#newiow_' + iowid + '_qty_' + key);
+    $qty.val('');
+    $('#newiow_' + iowid + '_Measurement_' + key).val('');
+    $HandsonWrapper.hide();
+    $formWrapper.fadeIn();
+    $back_btn.show();
+    $qty.focus();
+}
+document.addEventListener("DOMContentLoaded", function() {
+    handsonTable = new Handsontable($HandsonTableWrapper, HandsonTableSettings);
+});
+
+function updateMSheet() {
+    var $totalcolumns = $('#totalcolumns'),
+        columns = $totalcolumns.val();
+
+    if(columns == null) {
+        alert('Choose aleast one Column!');
+        return false;
+    }
+
+    var $checkedColumn = $('input[type=radio][name=summationColumns]:checked');
+    if($checkedColumn.length == 0) {
+        alert('Summation Column is Required!');
+        return false;
+    }
+
+    var selColumn = $checkedColumn.val(),
+        total = $checkedColumn.data('total');
+
+
+    var key = $HandsonWrapper.data('rowid'),
+        iowid = $HandsonWrapper.data('iowid'),
+        data = filterArray(handsonTable.getData()),
+        jsonData = JSON.stringify(data);
+    if(jsonData == '[]')
+        jsonData = '[[]]';
+
+    $('#newiow_' + iowid + '_Measurement_' + key).val(jsonData);
+    $('#newiow_' + iowid + '_qty_' + key).val(total).trigger('change');
+    $('#newiow_' + iowid + '_CellName_' + key).val(selColumn);
+    $('#newiow_' + iowid + '_SelectedColumns_' + key).val(columns.join());
+    $HandsonWrapper.hide();
+    $formWrapper.fadeIn();
+    $back_btn.show();
+}
+
+function hideHandsonWrapper(){
+    $HandsonWrapper.hide();
+    $formWrapper.fadeIn();
+    $back_btn.show();
+}
+// Filter all empty rows
+function filterArray(arr) {
+    var checkNull = true;
+    arr =  $.grep($(arr).toArray().reverse(), function (n,i) {
+        var isValid = false;
+
+        if(!checkNull)
+            return true;
+
+        $.each(n, function(j,obj) {
+            if(obj != null) {
+                isValid = true;
+                checkNull = false;
+                return false;
+            }
+        });
+
+        return isValid;
+    });
+    return arr.reverse();
+}
+
+function getExcelTemplate(x) {
+    var templateId = $(x).val();
+    $.ajax({
+        url:getBaseURL()+ 'project/main/getmeasurementtemplate',
+        type:"post",
+        data: {'TemplateId': templateId, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if(data != '') {
+                var json_data = $.parseJSON(data);
+                handsonTableData = $.parseJSON(json_data.Description);
+                selColumns = ($.trim(json_data.SelectedColumns)).split(',');
+                summationColumn = json_data.CellName;
+            } else {
+                handsonTableData = [[]];
+                selColumns = [];
+                summationColumn = '';
+            }
+
+            renderHandsonTable();
+        }, error:function(jqXHR, textStatus, errorThrown){
+            return false;
+        }
+    });
+}
+
+function renderHandsonTable() {
+    if(typeof handsonTableData != 'object')
+        handsonTableData  = [[]];
+
+    handsonTable.loadData(handsonTableData);
+    handsonTable.render();
+
+    summationColumns();
+}
+
+function summationColumns(calcOnly) {
+    if(handsonTable == null)
+        return;
+
+    var $totalColumns = $('#totalcolumns'),
+        rowCount = handsonTable.countRows();
+
+    if(typeof calcOnly == 'undefined') {
+        //set columns header
+        var options = '';
+        $.each(handsonTable.getDataAtRow (0), function (i, obj) {
+            var value = $.trim(obj),
+                sel = '';
+            if (value.length == 0 || value == "" || value.indexOf('=') != -1)
+                return;
+
+            var colName = handsonTable.getColHeader(i);
+            if($.inArray(colName, tempSelectedCol) != -1 || $.inArray(colName, selColumns) != -1)
+                sel = 'selected';
+
+            options += '<option value="' + colName + '" '+sel +'>' + value + '</option>';
+        });
+        $totalColumns.html(options).triggerHandler('change');
+    }
+
+    // calculate columns
+    var arr_columns = $totalColumns.find(':selected');
+    if(arr_columns.length == 0) {
+        $('#summationColumnsWrapper').html('');
+        return;
+    }
+
+    // selected summation columns
+    tempSelectedCol = [];
+    var totalLabels = '';
+    $.each(arr_columns, function(i, obj) {
+        var $this = $(this),
+            col = $this.val(),
+            columnData = handsonTable.plugin.helper.cellRangeValue(col+'1',col+ rowCount),
+            total = 0;
+
+        // push to temp sel col
+        tempSelectedCol.push(col);
+
+        // selected columns datas
+        $.each(columnData[0], function(j, val) {
+            if(/^[0-9\.]+$/.test(val) == false)
+                return;
+
+            total += parseFloatVal(val);
+        });
+
+        if(total == '')
+            total = 0;
+
+        if(col == summationColumn) {
+            totalLabels += '<label class="btn btn-primary tot-dis active">'
+            + '<input type="radio" name="summationColumns" autocomplete="off" value="'+col+'" data-total="'+total+'" checked><label>'+ $this.html() +' </label><p>'+total+'</p>'
+            + '</label>';
+        } else {
+            totalLabels += '<label class="btn btn-primary tot-dis">'
+            + '<input type="radio" name="summationColumns" autocomplete="off" value="'+col+'" data-total="'+total+'"><label>'+ $this.html() +' </label><p>'+total+'</p>'
+            + '</label>';
+        }
+    });
+    $('#summationColumnsWrapper').html(totalLabels);
+}
+// handsontable end
+</script>

@@ -1,0 +1,537 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap-ui.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.fmatter.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.jqGrid.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/i18n/grid.locale-en.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+
+<style>
+    .filter-1{background:#fff; box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.24);overflow:hidden}
+    .circle-icon {background:none;box-sizing: content-box;color: #ffffff;height: 70px;margin-left: -24px;width: 100%;}
+    .circle-icon1::before { border-color: #526D85  rgba(0, 0, 0, 0) #526D85  #526D85 !important;}
+    .circle-icon2::before { border-color: #845285  rgba(0, 0, 0, 0) #845285  #845285 !important;}
+    .circle-icon3::before { border-color: #538552  rgba(0, 0, 0, 0) #538552  #538552 !important;}
+    .circle-icon::before {-moz-border-bottom-colors: none;-moz-border-left-colors: none;-moz-border-right-colors: none; -moz-border-top-colors: none; border-color: #856B52 rgba(0, 0, 0, 0) #856B52 #856B52; border-image: none; border-style: solid; border-width: 35px 35px 35px 80px; bottom: 0;content: "";position: absolute;right: -36px;width: 0.2em;opacity:0.3;}
+    .fa-5x {color: #ffffff;font-size: 36px;line-height: 35px; position: absolute;right: 17px;text-align: center;top: 17px;text-shadow: 2px 1px 1px #000; z-index: 999;}
+    .filter-1 h6{font-size:18px; color:#7A0F2D;line-height:35px; text-align:right}
+    .filter-1 p{font:700 13px/30px "roboto"; color:#666; text-align:right}
+    .form-group { margin-bottom: 15px;}
+    .head-4{font-size:21px; color:#0C407A;line-height:35px; text-align:left}
+    label{width:100%; padding:5px 0}
+    .butclr-ns1{margin:0 25px 10px 0}
+    .lbl_move{height:40px !important}
+    #datagrid .jqx-grid-header 	{ height:75px !important;}
+    #chart1 {width:100%;height:300px;font-size:10px;overflow:hidden!important;}
+    #chart2 {width:100%;height:300px;font-size:10px;overflow:hidden!important;}
+    #chart3 {width:100%;height:300px;font-size:10px;overflow:hidden!important;}
+    .ui-jqgrid .ui-jqgrid-htable thead th div { text-align: center !important}
+	.ui-jqgrid tr.ui-row-ltr td{height:50px !important; padding:8px !important}
+	.ui-jqgrid .ui-jqgrid-bdiv{width:100% !important} 
+	.ui-jqgrid tr.footrow td,.ui-jqgrid tr.ui-row-ltr td{border-right:1px solid #ddd !important}
+	.ui-jqgrid tr.footrow td{border-bottom:1px solid #ddd !important;height:50px !important; padding:8px !important}
+	.ui-jqgrid .ui-jqgrid-pager, .ui-jqgrid .ui-jqgrid-toppager{border:none}
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="col-md-12">
+        <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Resource Requirement</h1>
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="margin-bottom:10px; padding-right:0px !important;">
+            <label class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 control-label text-right">Select Project</label>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="padding-right:0px !important;">
+                <select name="projectId" id="projectId" onchange="changeProject();" class="form-control single_dropdown lbl_move sortoption" style="width:100%;">
+                    <option value="0">None</option>
+                    <?php if(isset($projectlists)):?>
+                        <?php foreach ($projectlists as $project):?>
+                            <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                        <?php endforeach; ?>
+                    <?php  endif; ?>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <!--three feild start-->
+        <div class="col-md-12" style="background:-webkit-linear-gradient(linear, left top, left bottom, color-stop(0%,#F7FEFF), color-stop(100%,#D3DBDB)); 
+background:-webkit-linear-gradient(top, #F7FEFF 0%,#D3DBDB 100%); 
+background: -o-linear-gradient(top, #F7FEFF 0%,#D3DBDB 100%);
+background:  -moz-linear-gradient(top, #F7FEFF 0%,#D3DBDB 100%);
+background: linear-gradient(top, #F7FEFF 0%,#D3DBDB 100%); border:1px solid #D4D7D9;margin-bottom:10px;">
+            <div class="form-group col-md-2" style="padding:0 !important">
+                <label>From</label>
+                <input type="text"  id="fromDate" class="form-control date_picker lbl_move" value="<?php echo (isset($arrDate) && !is_null($arrDate['FDate'])) ? date("d-m-Y", strtotime($arrDate['FDate'])) : date('d-m-Y');?>" onchange="changeReport();"/>
+                <span class="date_icon" style="top:inherit;bottom:17px"><i class="fa fa-calendar"></i></span>
+            </div>
+            <div class="form-group col-md-2" style="padding-right:0 !important">
+                <label>To</label>
+                <input type="text"  id="toDate" class="form-control date_picker lbl_move" value="<?php echo (isset($arrDate) && !is_null($arrDate['EDate'])) ? date("d-m-Y", strtotime($arrDate['EDate'])) : date('d-m-Y');?>" onchange="changeReport();"/>
+                <span class="date_icon"style="top:inherit;bottom:17px"><i class="fa fa-calendar"></i></span>
+            </div>
+            <div class="form-group col-md-2"style="padding-right:0 !important">
+                <label>Resource Type</label>
+                <select class="form-control single_dropdown lbl_move" id="typeId" style="width:100%;" onchange="changeReport();">
+                    <option value="0">All</option>
+                    <?php foreach($typelists as $trans) { ?>
+                        <option value="<?php echo $trans['TypeId']; ?>"><?php echo $trans['TypeName']; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+            <div class="form-group col-md-2" style="padding-right:0 !important">
+                <label>ReportType</label>
+                <select class="form-control single_dropdown lbl_move" id="reporttypeid" style="width:100%;" onchange="changeReport();">
+                    <option value="1" selected>Abstract</option>
+                    <option value="2">Details</option>
+                </select>
+            </div>
+            <div id="divdetails" class="form-group col-md-4" style="display: none; padding-right:0 !important">
+                <label></label>
+                <div class="radio_check radio-btn col-lg-12">
+                    <p style="padding-top:10px;">
+                        <input  id="month" type="radio" checked value="1" name="periodtype" onchange="changeReport();">
+                        <label for="month">Monthly</label>
+                    </p>
+                    <p style="padding-top:10px;">
+                        <input  id="week" type="radio" value="2" name="periodtype" onchange="changeReport();">
+                        <label for="week">Weekly</label>
+                    </p>
+                    <p style="padding-top:10px; padding-left:40px">
+                        <input id="day" type="radio" value="3" name="periodtype" onchange="changeReport();">
+                        <label for="day">Daily</label>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12" style="padding:0 !important">
+            <div class="col-md-12" style="padding:0 !important">
+                <div id="datagrid"></div>
+                <div style="display: none;" id="divgrid">
+                    <table id='pgrid'></table>
+                    <div id='pager'></div>
+                </div>
+            </div>
+        </div>
+        <div id="divch1" class="col-md-12" style="padding:0 !important">
+            <div class="col-md-6" style="padding:0 !important">
+                <div id="chart1"></div>
+            </div>
+            <div class="col-md-6" style="padding:0 !important">
+                <div id="chart2"></div>
+            </div>
+        </div>
+        <div id="divch2" class="col-md-12" style="display: none; padding:0 !important">
+            <div id="chart3"></div>
+        </div>
+        <div class="clear clearfix"></div>
+    </div>
+</div>
+<div class="col-lg-12">
+    <a  data-text="Go Back" href="<?php echo $this->basePath(); ?>/project/report/reportlist" class="gobacklist"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i>Go Back</a>
+</div>
+
+<script>
+
+var bLoad= false;
+
+function changeProject() {
+    iProjectId = isNullCheck($('#projectId').val(),'number');
+    bLoad=true;
+    $("#fromDate").datepicker().datepicker("setDate", new Date());
+    $("#toDate").datepicker().datepicker("setDate", new Date());
+    bLoad=false;
+    $.ajax({
+        url: getBaseURL() + "project/report/getprojectShDate",
+        async: false,
+        type: 'post',
+        data: {'projectId' : iProjectId},
+        success: function(data,status) {
+            var obj = JSON.parse(data);
+            if (obj.FDate !=null && obj.EDate !=null) {
+                var parts = obj.FDate.split("/");
+                var dFDate = new Date(parseInt(parts[2], 10),
+                            parseInt(parts[1], 10) - 1,
+                            parseInt(parts[0], 10));
+
+                parts = obj.EDate.split("/");
+                var dEDate = new Date(parseInt(parts[2], 10),
+                    parseInt(parts[1], 10) - 1,
+                    parseInt(parts[0], 10));
+                bLoad=true;
+                $("#fromDate").datepicker().datepicker("setDate", dFDate);
+                $("#toDate").datepicker().datepicker("setDate", dEDate);
+                bLoad=false;
+            }
+        }
+    });
+    changeReport();
+}
+
+function changeReport() {
+    if (bLoad==true) return;
+    var irtypeid = isNullCheck($('#reporttypeid').val(),'number')
+    if (irtypeid ==2) bindPData();
+    else bindData();
+}
+var arrData=[];
+$(function () {
+    bindData();
+});
+
+function bindData() {
+    $('#divdetails').hide(); $('#divgrid').hide(); $('#datagrid').show();
+
+    var fromDate = isNullCheck($('#fromDate').val(),'date'),
+        toDate = isNullCheck($('#toDate').val(),'date'),
+        typeId = isNullCheck($('#typeId').val(),'number'),
+        iProjectId = isNullCheck($('#projectId').val(),'number'),
+        irtypeid = isNullCheck($('#reporttypeid').val(),'number'),
+        iPeriod = 1;
+
+    if (typeId==0) { $('#divch2').hide(); $('#divch1').show(); }
+    else { $('#divch1').hide(); $('#divch2').show(); }
+
+    arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getresourcerequirement",
+        async: false,
+        type: 'post',
+        data: {'fromDate': fromDate,'toDate' :toDate,'typeId' : typeId,'projectId' : iProjectId,'repTypeId': irtypeid,'periodType':iPeriod},
+        success: function(data,status) {
+            var obj = JSON.parse(data);
+            arrData = obj['details'];
+            var typeData = obj['typetotal'];
+            var groupData = obj['grouptotal'];
+            bindGrid();
+            if (typeId==0) {
+                populateChart1(typeData);
+                populateChart2(groupData);
+            } else populateChart3(groupData);
+        }
+    });
+}
+
+function bindPData() {
+    $('#divdetails').show(); $('#datagrid').hide(); $('#divgrid').show();
+    $('#divch1').hide(); $('#divch2').show();
+
+    var fromDate = isNullCheck($('#fromDate').val(),'date'),
+        toDate = isNullCheck($('#toDate').val(),'date'),
+        typeId = isNullCheck($('#typeId').val(),'number'),
+        iProjectId = isNullCheck($('#projectId').val(),'number'),
+        irtypeid = isNullCheck($('#reporttypeid').val(),'number'),
+        iPeriod = $("input[name='periodtype']:checked").val();
+
+    arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getresourcerequirement",
+        async: false,
+        type: 'post',
+        data: {'fromDate': fromDate,'toDate' :toDate,'typeId' : typeId,'projectId' : iProjectId,'repTypeId': irtypeid,'periodType':iPeriod},
+        success: function(data,status) {
+            var obj = JSON.parse(data);
+            arrData = obj['details'];
+            var groupData = obj['grouptotal'];
+
+            console.log(obj);
+
+//            if (iPeriod==3) {
+                bindPGrid();
+                populateChart4(groupData);
+//            } else if (iPeriod==1) {
+//            }
+        }
+    });
+}
+
+
+function bindGrid() {
+    var parent = $("#datagrid").parent();
+    $("#datagrid").remove();
+    $("<div id='datagrid'></div>").appendTo(parent);
+
+    var arrRes =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'ResourceId', type: 'ResourceId'},
+            {name: 'Code', type: 'string'},
+            {name: 'ResourceName', type: 'string'},
+            {name: 'Unit', type: 'string'},
+            {name: 'Qty', type: 'number'},
+            {name: 'Rate', type: 'number'},
+            {name: 'Amount', type: 'number'}
+        ],
+        id: 'ResourceId'
+    };
+    var arrResDetails = new $.jqx.dataAdapter(arrRes);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#datagrid").jqxGrid({
+        width: '100%',
+        theme: 'bootstrap',
+        pagerButtonsCount: 6,
+        source: arrResDetails,
+        pageable: true,
+        sortable: true,
+        filterable:true,
+        altrows: true,
+        enabletooltips: true,
+        autoheight: true,
+        editable: false,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        columns: [
+            { text: 'ResourceId', datafield: 'ResourceId', hidden: true},
+            { text: 'Code', datafield: 'Code', width: '10%'  },
+            { text: 'ResourceName', datafield: 'ResourceName', width: '40%'  },
+            { text: 'Unit', datafield: 'Unit', width: '5%'  },
+            { text: 'Qty', datafield: 'Qty', width: '15%',cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                }
+            },
+            { text: 'Rate', datafield: 'Rate', width: '15%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }
+            },
+            { text: 'Amount', datafield: 'Amount', width: '15%',cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+}
+
+function bindPGrid() {
+    var parent = $("#divgrid").parent();
+    $("#divgrid").remove();
+    $("<div id='divgrid'><table id='pgrid'></table><div id='pager'></div></div>").appendTo(parent);
+
+    $("#pgrid").jqGrid('jqPivot',
+        arrData,
+        {
+            xDimension : [
+                {dataName: 'ResourceName', label : 'Resource', width: 300}
+            ],
+            yDimension : [
+                {dataName: 'SDate',align:'center'}
+            ],
+            aggregates : [
+                {member : 'Qty', aggregator : 'sum',width:100, label:'Qty',formatter: 'number',align:'right'},
+                {member : 'Amount', aggregator : 'sum', width:100, label:'Amount',formatter: 'number',align:'right'}
+            ],
+            rowTotals: true,
+            colTotals : true
+        },
+        {
+            width:1000,
+            height: 300,
+            shrinkToFit: false,
+            rowNum : 10,
+            pager: "#pager",
+            caption: "Resource"
+        }
+    );
+}
+function populateChart1(data) {
+   if (data.length <=0) {$('#chart1').hide(); return;}
+   else $('#chart1').show();
+
+    var chart = AmCharts.makeChart("chart1", {
+        "type": "pie",
+        "titles": [{
+                "text": "Resource Type",
+                "size": 15}],
+        "theme": "light",
+        "dataProvider": data,
+        "valueField": "Amount",
+        "titleField": "TypeName",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+
+function populateChart2(data) {
+    if (data.length <=0) {$('#chart2').hide(); return;}
+    else $('#chart2').show();
+
+    var chart = AmCharts.makeChart("chart2", {
+        "type": "pie",
+        "titles": [{
+            "text": "Resource Group",
+            "size": 15}],
+        "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+        "theme": "light",
+        "dataProvider": data,
+        "valueField": "Amount",
+        "titleField": "ResourceGroupName",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+
+function populateChart3(data) {
+    if (data.length <=0) {$('#chart3').hide(); return;}
+    else $('#chart3').show();
+
+    var chart = AmCharts.makeChart("chart3", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": data,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+            "balloonText": "Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Cost",
+            "type": "column",
+            "valueField": "Amount"
+        }],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "ResourceGroupName",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+
+function populateChart4(data) {
+    if (data.length <=0) {$('#chart3').hide(); return;}
+    else $('#chart3').show();
+
+    var chart = AmCharts.makeChart("chart3", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": data,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+            "balloonText": "Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Cost",
+            "type": "column",
+            "valueField": "Amount"
+        }],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "SDate",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+
+
+//
+//    $("#print").click(function () {
+//        var repName ='Task Details';
+//        var gridContent = $("#datagrid").jqxGrid('exportdata', 'html');
+//        var newWindow = window.open('', '', 'width=800, height=500'),
+//            document = newWindow.document.open(),
+//            pageContent =
+//                '<!DOCTYPE html>\n' +
+//                '<html>\n' +
+//                '<head>\n' +
+//                '<meta charset="utf-8" />\n' +
+//                '<title>'+repName+'</title>\n' +
+//                '<h1>'+repName+'</h1>\n' +
+//                '</head>\n' +
+//                '<body>\n' + gridContent + '\n</body>\n</html>';
+//        document.write(pageContent);
+//        document.close();
+//        newWindow.print();
+//
+//        /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+//    });
+
+</script>

@@ -1,0 +1,775 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/cb.css" />
+<style type="text/css">
+.agreement_detail_area				{background-color:#e4ebf2;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); padding:10px 10px;}
+.agree_detail_namespan				{min-width:200px; font-weight:600; display:inline-block;}
+.agreement_paper_area				{background-color:#e5f2e9; border:1px solid #bee5d3; padding:10px 10px; font-family:Georgia, "Times New Roman", Times, serif; }
+.agrment_duplicate_img				{margin:auto !important; display:block; padding:10px 0px;}
+.agreement_paper_area h2			{font-family:Georgia, "Times New Roman", Times, serif; font-size:15px; color:#343434; font-weight:600; padding-bottom:15px;}
+.agreement_paper_area p				{font-size:12px;}
+.agreement_paper_area ul			{padding-top:15px;}
+.agreement_paper_area li 			{list-style: none; line-height:25px; counter-increment: foo; display: table-row;}
+.agreement_paper_area li .agree_title_span		{font-weight:600; display:block; font-size:11px;}
+.agreement_paper_area li::before 				{content: counter(foo) ".";display: table-cell;text-align: right; padding-right: .3em;}
+.clrbg_select2dropdown .select2-container		{border:1px dashed #4d0c45;}
+</style>
+<script id="otherdummy-row"  type="text/template" class="hide">
+    <div class="empty-other">
+        <div class="input">
+            <div class="col-lg-12 m_btm10 padlr0">
+                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                    <input type="text" class="inputSetup" name="other_name__" id="other_name__" value="" placeholder="Other" autocomplete="off" onkeypress="return addNewRow(this);"/>
+                    <input type="hidden" class="inputSetup" name="other_id__" id="other_id__" value="" />
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                    <input type="text" class="inputSetup" name="other_amount__" id="other_amount__" value="" placeholder="Amount" autocomplete="off" onkeypress="return isDecimal(event,this);" onblur="totalPayable();"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="deductiondummy-row"  type="text/template" class="hide">
+    <div class="empty-deduction">
+        <div class="input">
+            <div class="col-lg-12 m_btm10 padlr0">
+                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                    <input type="text" class="inputSetup" name="deduction_name__" id="deduction_name__" value="" placeholder="Deduction" autocomplete="off" onkeypress="return addNewRow(this);"/>
+                    <input type="hidden" class="inputSetup" name="deduction_id__" id="deduction_id__" value=""  />
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                    <input type="text" class="inputSetup" name="deduction_amount__" id="deduction_amount__" value="" placeholder="Amount" autocomplete="off" onkeypress="return isDecimal(event,this);" onblur="totalPayable();"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<div class="content_wrapper padlr0">
+<form method="post" id="theform" enctype="multipart/form-data">
+<div class="container-fluid padlr0">
+<div class="col-lg-12">
+    <h1 data-bsfhead="Agreement Cancellation" class="txt_center">Agreement Cancellation</h1>
+</div>
+<div class="col-lg-12 clear padlr0">
+    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <div class="col-lg-offset-3">
+            <label for="refno" class="bk_lbl bk_lbl_inpt">Ref No <span class="colon_r">:</span></label>
+            <input data-bsfshare="RefNo" type="text" class="bk_lbl_inpt inputbg_ef bk_inpt1" name="refno" id="refno" onchange="agreementBind('ref_no',$(this).val());" value="<?php echo (isset($ownerDetail)) ? $ownerDetail['RefNo'] : '';?>" />
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+        <div class="col-lg-offset-6">
+            <label for="refdate" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Ref Date <span class="colon_r">:</span></label>
+            <?php
+            $referDate = null;
+            if(isset($ownerDetail['RefDate'])){
+                $referDate = date('d-m-Y', strtotime($ownerDetail['RefDate']));
+            }?>
+            <input data-bsfshare="RefDate" type="text" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="refdate" onchange="agreementBind('ref_date',$(this).val());" id="refdate" value="<?php echo $referDate; ?>" />
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 clear">
+    <div class="liner"></div>
+</div>
+
+<div class="col-lg-12 clear" style="background-color:#fff;">
+<!-- Agreement Details -->
+<div id="rentalAgree_1" class="col-lg-6 padlr0 m_top10">
+    <div class="signup_onebyone_content">
+        <div class="setup_form prop_mnmt_form">
+            <ul class="onebyone_form">
+                <li id="q1" class="active focus">
+                    <div class="onebyone_wrapper">
+                        <div class="li_number">
+                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                            <div class="arrow">
+                                <span><i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                        <div class="onebyone_question">
+                            <span class="span_b">What the Agreement No?</span>
+                        </div>
+                        <div class="onebyone_content">
+                            <div class="input">
+                                <div class="col-lg-12 m_btm10 padlr0">
+                                    <div class="col-lg-9 col-md-9 col-sm-9 padlr0"><input data-bsfshare="AgreementNo" type="text" id="agreeno" name="agreeno" autocomplete="off" placeholder="Agreement No" onchange="agreementBind('agreement_no',$(this).val());" value="<?php echo (isset($rentalRegisterId)) ? $rentalRegisterId : '';?>" class="inputSetup" /></div>
+                                </div>
+                                <input type="hidden" id="rentaltype" name="rentaltype" value="<?php echo (isset($ownerDetail)) ? $ownerDetail['RentalType'] : ""; ?>" />
+                                <input type="hidden" id="modetype" name="modetype" value="<?php echo (isset($modeType)) ? $modeType : ""; ?>" />
+                                <input type="hidden" id="rentalcancelid" name="rentalcancelid" value="<?php echo (isset($rentalCancelId)) ? $rentalCancelId : ""; ?>" />
+                            </div>
+                            <div class="col-lg-12 error_message position_rel"><p>Required</p></div>
+                        </div>
+                    </div>
+                </li>
+                <li id="q2" class="">
+                    <div class="onebyone_wrapper">
+                        <div class="li_number">
+                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                            <div class="arrow">
+                                <span><i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                        <div class="onebyone_question">
+                            <span class="span_b">Type of Cancellation</span>
+                        </div>
+                        <div class="onebyone_content">
+
+                            <div class="radio_check">
+                                <p>
+                                    <input type="radio" <?php if(isset($cancelRegDetail) && strcmp(trim($cancelRegDetail['CancellationType']),"M") == 0) { echo 'selected' ;}?> value="M" id="mutual" name="cancellation" checked />
+                                    <label for="mutual" class="ripple">Mutual Cancellation</label>
+                                </p>
+                                <p>
+                                    <input type="radio" <?php if(isset($cancelRegDetail) && strcmp(trim($cancelRegDetail['CancellationType']),"T") == 0) { echo 'selected' ;}?> value="T" id="terminate" name="cancellation" />
+                                    <label for="terminate" class="ripple">Termination</label>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li id="q3" class="">
+                    <div class="onebyone_wrapper">
+                        <div class="li_number">
+                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                            <div class="arrow">
+                                <span><i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                        <div class="onebyone_question">
+                            <span class="span_b">What the reason for Cancellation?</span>
+                        </div>
+                        <div class="onebyone_content">
+                            <div class="input">
+                                <div class="col-lg-12 m_btm10 padlr0">
+                                	<div class="col-lg-12 col-md-12 col-sm-12 padlr0"><input data-bsfshare="Reason" type="text" id="reason" name="reason" autocomplete="off" placeholder="Reason" onchange="agreementBind('cancel_reason',$(this).val());" value="<?php echo (isset($cancelRegDetail)) ? $cancelRegDetail['Reason'] : ""; ?>" class="inputSetup" /></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 error_message position_rel"><p>Required</p></div>
+                        </div>
+                    </div>
+                </li>
+                <li id="q4" class="">
+                    <div class="onebyone_wrapper">
+                        <div class="li_number">
+                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                            <div class="arrow">
+                                <span><i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                        <div class="onebyone_question">
+                            <span class="span_b">When will vacate from this Property?</span>
+                        </div>
+                        <div class="onebyone_content">
+                            <div class="input col-lg-12 padlr0">
+                                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                <?php
+                                $vacateDate = null;
+                                if(isset($cancelRegDetail['EffectFrom'])){
+                                    $vacateDate = date('d-m-Y', strtotime($cancelRegDetail['EffectFrom']));
+                                }?>
+                                <input data-bsfshare="Vacate Date" type="text" id="vacatedate" name="vacatedate" autocomplete="off" placeholder="Date" onchange="agreementBind('property_vacate_date',$(this).val());" value="<?php echo (isset($vacateDate)) ? $vacateDate : ""; ?>" class="inputSetup date_picker" readonly />
+                            </div>
+                            <div class="col-lg-12 error_message position_rel"><p>Required</p></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="col-lg-12 savebtn_area m_btm20 no_border clear">
+                <ul>
+                    <li class="save_btn float_r">
+                        <a class="ripple" id="changesubmit" href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="to&nbsp;fill&nbsp;Agreement&nbsp;Info" onclick="validateAgreement();">Continue</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<div id="rentalAgree_2" class="col-lg-6 padlr0 m_top10" style="display:none;">
+    <div class="signup_onebyone_content">
+        <div class="setup_form prop_mnmt_form">
+            <div class="flwup_rightcnt"><h2>House Hold Item Verfication</h2></div>
+            <ul class="onebyone_form">
+                <li id="q1" class="active focus">
+                    <div class="onebyone_wrapper">
+                        <div class="li_number">
+                            <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                            <div class="arrow">
+                                <span><i class="fa fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="household_count" id="household_count" value="<?php echo (isset($furnitureDetail)) ? $holdCount : '0';?>" />
+                        <div class="onebyone_question">
+                            <span class="span_b">What are House hold item in the property?</span>
+                        </div>
+                        <div class="onebyone_content household">
+                            <?php
+                            if(isset($rentalRegisterId) && $rentalRegisterId!=0 ) {
+                                $count=0; ?>
+                                <?php
+                                foreach($furnitureDetail as $data):
+                                    $count++;?>
+                                    <div class="input">
+                                        <div class="col-lg-12 m_btm10 padlr0">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                <input type="text" class="inputSetup" name="household_name_<?php echo $count; ?>" id="household_name_<?php echo $count; ?>" placeholder="Item" value="<?php echo (isset($data)) ? $data['FurnitureName'] : '';?>" autocomplete="off" readonly />
+                                                <input type="hidden" class="inputSetup" name="household_id_<?php echo $count; ?>" id="household_id_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['FurnitureId'] : '';?>"  />
+                                                <input type="hidden" class="inputSetup" name="household_transid_<?php echo $count; ?>" id="household_transid_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['TransId'] : '';?>"  />
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                                                <input type="text" class="inputSetup" name="household_value_<?php echo $count; ?>" autocomplete="off" id="household_value_<?php echo $count; ?>" placeholder="Nos" value="<?php echo (isset($data)) ? $data['Qty'] : '';?>"  onkeypress="return isDecimal(event,this);" />
+                                                <input type="hidden" name="household_actualvalue_<?php echo $count; ?>" id="household_actualvalue_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['Qty'] : '';?>" />
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 padlr0">
+                                                <div class="radio_check prop_rdocheck">
+                                                    <p>
+                                                       <input type="checkbox" <?php if(isset($data['Verified']) && $data['Verified']==1 ) { echo 'checked'; }?> name="household_Checkbox_<?php echo $count;?>" id="household_Checkbox_<?php echo $count;?>" style="display:none;" value="1"/>
+                                                       <label for="household_Checkbox_<?php echo $count;?>" class="ripple"> &nbsp;</label>
+                                                   </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <div>
+                                <?php
+                                endforeach;?>
+                            <?php
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="signup_onebyone_content">
+        <div class="setup_form prop_mnmt_form">
+            <div class="flwup_rightcnt"><h2>Verfication Check List</h2></div>
+            <ul class="onebyone_form">
+                <li id="q2" class="active focus">
+                <div class="onebyone_wrapper">
+                    <div class="li_number">
+                        <span><i class="fa fa-flag-checkered" aria-hidden="true"></i></span>
+                        <div class="arrow">
+                            <span><i class="fa fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="checklist_count" id="checklist_count"  value="<?php echo (isset($checklistDetail)) ? $checklistCount : '0';?>" />
+                    <div class="onebyone_question">
+                        <span class="span_b">What are checklist are checked before the agreements?</span>
+                    </div>
+                    <div class="onebyone_content checklist">
+                        <?php
+                        if(isset($rentalRegisterId) && $rentalRegisterId!=0) {
+                        $count=0; ?>
+                        <?php
+                        foreach($checklistDetail as $data):
+                        $count++;?>
+                        <div class="input">
+                            <div class="col-lg-12 m_btm10 padlr0">
+                                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                    <input type="text" class="inputSetup" name="checklist_name_<?php echo $count; ?>" id="checklist_name_<?php echo $count; ?>" autocomplete="off" value="<?php echo (isset($data)) ? $data['CheckListName'] : '';?>" placeholder="Check List" readonly/>
+                                    <input type="hidden" class="inputSetup" name="checklist_id_<?php echo $count; ?>" id="checklist_id_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['ChecklistId'] : '';?>"  />
+                                    <input type="hidden" class="inputSetup" name="checklist_transid_<?php echo $count; ?>" id="checklist_transid_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['TransId'] : '';?>"  />
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                    <?php
+                                    $submitDate = null;
+                                    if(isset($data['SubmitOn'])){
+                                        $submitDate = date('d-m-Y', strtotime($data['SubmitOn']));
+                                    }?>
+                                    <input type="text" id="submiton_<?php echo $count; ?>" name="submiton_<?php echo $count; ?>" autocomplete="off" placeholder="Date" value="<?php echo (isset($submitDate)) ? $submitDate : '';?>" class="inputSetup date_picker" readonly/>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-2 padlr0">
+                                    <div class="radio_check prop_rdocheck">
+                                        <p>
+                                           <input type="checkbox" <?php if(isset($data['Status']) && strcmp(trim($data['Status']),"Y") == 0 ) { echo 'checked'; }?> name="checklist_Checkbox_<?php echo $count;?>" id="checklist_Checkbox_<?php echo $count;?>" value="1" style="display:none;"/>
+                                           <label for="checklist_Checkbox_<?php echo $count;?>" class="ripple"> &nbsp;</label>
+                                       </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <?php
+                                endforeach;?>
+                            </div>
+                            <?php
+                            }
+                            ?>
+                        </div>
+                </li>
+            </ul>
+            <div class="col-lg-12 savebtn_area m_btm20 no_border clear">
+                <ul>
+                    <li class="save_btn float_l">
+                        <a class="ripple" href="javascript:void(0);" data-toggle="tooltip" data-placement="right" title="back" onclick="return showHideDiv('1');">Back</a>
+                    </li>
+                    <li class="save_btn float_r">
+                        <a class="ripple" href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="to&nbsp;verify&nbsp;Household and&nbsp;Checklist" onclick="validateFacilities();">Continue</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<!-- Payable Addition and Deduction -->
+<div id="rentalAgree_3" class="col-lg-6 padlr0 m_top10" style="display:none;">
+    <div class="signup_onebyone_content">
+        <div class="setup_form prop_mnmt_form">
+            <div class="flwup_rightcnt"><h2>Payable Addition</h2></div>
+            <ul class="onebyone_form">
+                <li id="q1" class="active focus">
+                    <div class="onebyone_wrapper">
+                        <input type="hidden" name="other_count" id="other_count" value="<?php echo (isset($additionCount)) ? $additionCount : '0';?>" />
+                        <div class="onebyone_content other">
+                            <div class="input">
+                                <div class="col-lg-12 m_btm10 padlr0">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <input data-bsfshare="Security Name" type="text" class="inputSetup" name="security_name" id="security_name" value="Security Deposit" autocomplete="off" readonly/>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <input data-bsfshare="Security Deposit" type="text" class="inputSetup" name="securitydeposit" id="securitydeposit" placeholder="Amount" value="<?php if(isset($securityDeposit)) {echo $securityDeposit['Amount'];} else if(isset($sDepositAmt)) {echo $sDepositAmt['SDAmount'];}?>" autocomplete="off" onkeypress="return isDecimal(event,this);" onblur="totalPayable();" />
+                                        <input type="hidden" class="inputSetup" name="securityid" id="securityid" value="<?php echo (isset($securityDeposit)) ? $securityDeposit['TransId'] : '';?>"/>
+                                    </div>
+                                </div>
+                                <?php
+                                if(isset($rentalRegisterId) && $rentalRegisterId!=0 && strcmp(trim($modeType),"edit") == 0) {
+                                    $count=0; ?>
+                                    <?php
+                                    foreach($additionDetail as $data):
+                                        $count++;?>
+                                        <div class="col-lg-12 m_btm10 padlr0">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                <input type="text" class="inputSetup" name="other_name_<?php echo $count; ?>" id="other_name_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['Description'] : '';?>" placeholder="Other" autocomplete="off" />
+                                                <input type="hidden" class="inputSetup" name="other_id_<?php echo $count; ?>" id="other_id_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['TransId'] : '';?>"  />
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                <input type="text" class="inputSetup" name="other_amount_<?php echo $count; ?>" id="other_amount_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['Amount'] : '';?>" placeholder="Amount" autocomplete="off" onblur="totalPayable();"/>
+                                            </div>
+                                        </div>
+                                    <?php
+                                    endforeach;?>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li id="q2" class="active focus">
+                    <div class="onebyone_wrapper">
+                        <div class="flwup_rightcnt"><h2>Deductions</h2></div>
+                        <input type="hidden" name="deduction_count" id="deduction_count" value="<?php echo (isset($deductionCount)) ? $deductionCount : '0';?>" />
+                        <div class="onebyone_content deduction">
+                            <div class="input">
+                                <?php
+                                if(isset($rentalRegisterId) && $rentalRegisterId!=0 && strcmp(trim($modeType),"edit") == 0) {
+                                    $count=0; ?>
+                                    <?php
+                                    foreach($deductionDetail as $data):
+                                        $count++;?>
+                                        <div class="col-lg-12 m_btm10 padlr0">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                <input type="text" class="inputSetup" name="deduction_name_<?php echo $count; ?>" id="deduction_name_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['Description'] : '';?>" placeholder="Other" autocomplete="off" />
+                                                <input type="hidden" class="inputSetup" name="deduction_id_<?php echo $count; ?>" id="deduction_id_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['TransId'] : '';?>"  />
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                <input type="text" class="inputSetup" name="deduction_amount_<?php echo $count; ?>" id="deduction_amount_<?php echo $count; ?>" value="<?php echo (isset($data)) ? $data['Amount'] : '';?>" placeholder="Amount" autocomplete="off" onblur="totalPayable();" />
+                                            </div>
+                                        </div>
+                                    <?php
+                                    endforeach;?>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                        </div>
+                        <div class="onebyone_content">
+                            <div class="input">
+                                <div class="col-lg-12 m_btm10 padlr0">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <label for="totalpayable"><h2>Total Payable</h2></label>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <input data-bsfshare="Total Payable" type="text" id="totalpayable" name="totalpayable" value="0" class="inputSetup" onchange="agreementBind('total_payable',$(this).val());" readonly/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="col-lg-12 savebtn_area m_btm20 no_border clear">
+                <ul>
+                    <li class="save_btn float_l">
+                        <a class="ripple" href="javascript:void(0);" data-toggle="tooltip" data-placement="right" title="back" onclick="return showHideDiv('2');">Back</a>
+                    </li>
+                    <li class="save_btn float_r">
+                        <a class="ripple" href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="to&nbsp;fill&nbsp;Payable Addiction&nbsp;and&nbsp;Deduction" onclick="validatePayableAddiction();">Submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<!-- Agreement Part -->
+<div class="col-lg-6">
+    <div class="col-lg-6 col-lg-offset-6 col-md-6 col-md-offset-6 col-sm-6 col-sm-offset-6 col-xs-10 col-xs-offset-1 clrbg_select2dropdown padlr0 m_top10">
+        <select style="width:100%;"  name="changeTemplate" class="single_dropdown changeTemplate">
+            <option value="0">Select Template</option>
+            <?php foreach($agreementTemplates as $template) { ?>
+                <option <?php if(isset($cancelRegDetail)) { if($cancelRegDetail['TemplateId']==$template['TemplateId']) { echo 'selected'; } } ?> value="<?php echo $template['TemplateId']; ?>"><?php echo $template['TemplateName']; ?></option>
+            <?php } ?>
+        </select>
+    </div>
+    <div class="clear"></div>
+    <div class="agreement_detail_area m_top10">
+    	<p><span class="agree_detail_namespan">Unit No <span class="colon_r">:</span></span> <span id="unitno"><?php echo(isset($ownerName)) ? $ownerName['UnitNo'] : ''; ?></span></p>
+        <p><span class="agree_detail_namespan">Owner Name <span class="colon_r">:</span></span> <span id="ownername"><?php echo(isset($ownerName)) ? $ownerName['LeadName'] : ''; ?></p>
+        <p><span class="agree_detail_namespan">Tenant Name <span class="colon_r">:</span></span> <span id="tenantname"><?php echo(isset($tenantDetail)) ? $tenantDetail['LeaserName'] : ''; ?></p>
+        <p><span class="agree_detail_namespan">Rent Rate <span class="colon_r">:</span></span> <span id="rentrate"><?php echo(isset($sDepositAmt)) ? $sDepositAmt['RentAmount'] : ''; ?></p>
+        <p><span class="agree_detail_namespan">Security Deposit <span class="colon_r">:</span></span> <span id="renewalsecuritydeposit"><?php echo(isset($sDepositAmt)) ? $sDepositAmt['SDAmount'] : ''; ?></p>
+        <?php $endDate = null;
+        if(isset($agreeDetail)){
+            $endDate = date('d-m-Y', strtotime($agreeDetail['EndDate']));
+        }?>
+        <p><span class="agree_detail_namespan">Expired On <span class="colon_r">:</span></span> <span id="expiredon"><?php echo(isset($endDate)) ? $endDate : ''; ?></span></p>
+    </div>
+    <div class="agreement_paper_area m_top10">
+        <img src="<?php echo $this->basePath(); ?>/images/agreement_duplicate.jpg" class="agrment_duplicate_img clear" alt="" title=""/>
+        <div id="templateContent"><?php echo (isset($cancelRegDetail['TemplateContent'])) ? html_entity_decode($cancelRegDetail['TemplateContent']) : ''; ?></div>
+        <input type="hidden" id="templateContentHide" name="templateContentHide"/>
+    </div>
+</div>
+</div>
+</div>
+</form>
+</div>
+<script>
+$('input[type=radio][name=cancellation]').on('change', function() {
+    if (this.value == 'M') {
+        agreementBind('type_of_cancellation','Mutual Cancellation')
+    }
+    else if (this.value == 'T') {
+        agreementBind('type_of_cancellation','Termination')
+    }
+});
+Date.isLeapYear = function (year) {
+    return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+};
+
+Date.getDaysInMonth = function (year, month) {
+    return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+};
+
+Date.prototype.isLeapYear = function () {
+    return Date.isLeapYear(this.getFullYear());
+};
+
+Date.prototype.getDaysInMonth = function () {
+    return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+};
+
+Date.prototype.addMonths = function (value) {
+    var n = this.getDate();
+    this.setDate(1);
+    this.setMonth(this.getMonth() + value);
+    this.setDate(Math.min(n, this.getDaysInMonth()));
+    return this;
+};
+
+var merTags = <?php echo json_encode($mergeTags); ?>;
+$(document).ready(function()
+{
+    var sysHeight = $(window).height();
+    $('.agreement_paper_area').css('min-height',sysHeight - 240);
+
+    addNewRow($('<div id="other_name__"></div>'));
+    addNewRow($('<div id="deduction_name__"></div>'));
+
+
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+
+    $(".changeTemplate").change(function() {
+        $.post(getBaseURL()+'crm/property/get-template-content', { tempId: $(this).val() },
+            function(data) {
+                var chkCount = JSON.parse(data);
+                if(chkCount.TemplateContent != '') {
+                    $('#templateContent').html(chkCount.TemplateContent);
+                    $.each( merTags, function( key, value ) {
+                        var newVal = value.slice(2,-2);
+                        var tempVal = newVal.toLowerCase();
+                        $('#templateContent').html($('#templateContent').html().replace(value,'<span id="ra'+tempVal+'">________</span>'));
+                    });
+                }
+            });
+    });
+
+    totalPayable();
+});
+
+$("li").hover(
+    function () {
+        $(this).addClass("active focus").parent().next().addClass("active focus");
+    },
+    function () {
+        $(this).removeClass("active focus").parent().next().removeClass("active focus");
+    }
+);
+
+$(".inputSetup").focus(function(){
+    $('.focus').removeClass('active focus');
+    $(this).closest('li').addClass('active focus');
+    $('body,html').animate({
+        scrollTop: scrollPoint
+    }, 600);
+});
+
+function showHideDiv(divId)
+{
+    for(i = 1; i <= 9; i++) {
+        if(i == divId) {
+            $('#rentalAgree_'+i).show();
+        } else {
+            $('#rentalAgree_'+i).hide();
+        }
+    }
+    window.scrollTo(0,0);
+}
+
+function validateAgreement() {
+    $agreeNo = $('#agreeno');
+    $agreeCancelReason = $('#reason');
+    $agreeVal = $('#vacatedate');
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    if($agreeNo.val() == "" || $agreeNo.val()==null || !/^\d+$/.test($agreeNo.val())){
+        showErrorMsgNew($agreeNo, "Required");
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $agreeNo.focus();
+        }
+    } else {
+        removeErrorMsgNew($agreeNo);
+    }
+    if($agreeCancelReason.val() == "" ){
+        showErrorMsgNew($agreeCancelReason, "Required");
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $agreeCancelReason.focus();
+        }
+    } else {
+        removeErrorMsgNew($agreeCancelReason);
+    }
+    if($agreeVal.val() == "" || !/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/.test($agreeVal.val())){
+        showErrorMsgNew($agreeVal, "Invalid Date");
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $agreeVal.focus();
+        }
+    } else {
+        removeErrorMsgNew($agreeVal);
+    }
+    if($('.changeTemplate').val()=="" || $('.changeTemplate').val()==0) {
+        alert(' Select a Agreement Template...');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('.changeTemplate').focus();
+        }
+    }
+    if(errorFlag == 0) {
+        agreementBind('agreement_no',$('#agreeno').val());
+        agreementBind('cancel_reason',$('#reason').val());
+        agreementBind('property_vacate_date',$('#vacatedate').val());
+        if ($('input[name="cancellation"]:checked').val() == 'M') {
+            agreementBind('type_of_cancellation','Mutual Cancellation')
+        }
+        else if ($('input[name="cancellation"]:checked').val() == 'T') {
+            agreementBind('type_of_cancellation','Termination')
+        }
+        showHideDiv('2');
+    }
+}
+
+function showErrorMsg($tarIp, msg) {
+    var $tarErrorMsg = $tarIp.closest('div').next('.error_message');
+    $tarErrorMsg.find('p').text(msg);
+    $tarErrorMsg.show();
+}
+
+function removeErrorMsg($tarIp) {
+    var $tarErrorMsg = $tarIp.closest('div').next('.error_message');
+    $tarErrorMsg.hide();
+}
+
+function showErrorMsgNew($tarIp, msg) {
+    var $tarErrorMsg = $tarIp.closest('.input').next('.error_message');
+    $tarErrorMsg.find('p').text(msg);
+    $tarErrorMsg.show();
+}
+
+function removeErrorMsgNew($tarIp) {
+    var $tarErrorMsg = $tarIp.closest('.input').next('.error_message');
+    $tarErrorMsg.hide();
+}
+
+function addNewRow(x) {
+    var strClass = $(x).attr('id');
+    var arr = strClass.split('_');
+    if($(x).val() != ""){
+        $(x).closest('.empty-'+arr[0]).removeClass('empty-'+arr[0]);
+    }
+
+    if($('.onebyone_content.'+arr[0]).find('.empty-'+arr[0]).length > 0) {
+        return;
+    }
+
+    var newCount = parseInt($('#'+arr[0]+'_count').val());
+    var template = $('#'+arr[0]+'dummy-row').html();
+    newCount++;
+    template = template.replace(/__/g, '_' + newCount);
+    $('.onebyone_content.'+arr[0]).append(template);
+    $('#'+arr[0]+'_count').val(newCount);
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+}
+
+function validateFacilities() {
+    var rowCountAmt= $('#household_count').val();
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    for(i=1;i<=rowCountAmt;i++){
+        if($('#household_name_'+i).val() != "" && $('#household_value_'+i).val() == "" ){
+            $('#household_value_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#household_value_'+i).focus();
+            }
+        } else {
+            $('#household_value_'+i).removeClass('red_bdr');
+        }
+        if($('#household_name_'+i).val() == "" && $('#household_value_'+i).val() != "" ){
+            $('#household_name_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#household_name_'+i).focus();
+            }
+        } else {
+            $('#household_name_'+i).removeClass('red_bdr');
+        }
+
+    }
+    if(errorFlag == 0) {
+        showHideDiv('3');
+    }
+}
+
+function validatePayableAddiction() {
+    var rowCountDeduct= $('#deduction_count').val();
+    var rowCountOther= $('#other_count').val();
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    for(i=1;i<=rowCountOther;i++){
+        if($('#other_name_'+i).val() != "" && $('#other_amount_'+i).val() == "" ){
+            $('#other_amount_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#other_amount_'+i).focus();
+            }
+        } else {
+            $('#charge_value_'+i).removeClass('red_bdr');
+        }
+        if($('#other_name_'+i).val() == "" && $('#other_amount_'+i).val() != "" ){
+            $('#other_name_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#other_name_'+i).focus();
+            }
+        } else {
+            $('#other_name_'+i).removeClass('red_bdr');
+        }
+
+    }
+    for(i=1;i<=rowCountDeduct;i++){
+        if($('#deduction_name_'+i).val() != "" && $('#deduction_amount_'+i).val() == "" ){
+            $('#deduction_amount_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#deduction_amount_'+i).focus();
+            }
+        } else {
+            $('#deduction_amount_'+i).removeClass('red_bdr');
+        }
+        if($('#deduction_name_'+i).val() == "" && $('#deduction_amount_'+i).val() != "" ){
+            $('#deduction_name_'+i).addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#deduction_name_'+i).focus();
+            }
+        } else {
+            $('#deduction_name_'+i).removeClass('red_bdr');
+        }
+
+    }
+    if(errorFlag == 0) {
+        totalPayable();
+        agreementBind('ref_no',$('#refno').val());
+        agreementBind('ref_date',$('#refdate').val());
+        if($('#totalpayable').val() > 0) {
+            agreementBind('total_payable',$('#totalpayable').val());
+            if($('#templateContent').html()!="") {
+                $('#templateContentHide').val($('#templateContent').html());
+                $('#theform').submit();
+            }
+        }
+    }
+}
+function totalPayable(){
+    var rowCountDeduct = $('#deduction_count').val();
+    var rowCountOther = $('#other_count').val();
+    var totalOtherAmt = 0;
+    var totalDeductAmt = 0;
+    var totalPayable = 0;
+    for(i=1;i<=rowCountOther;i++){
+        if($('#other_amount_'+i).val() !=0 && $('#other_amount_'+i).val() !=null)
+            totalOtherAmt += parseInt($('#other_amount_'+i).val());
+    }
+    totalOtherAmt += parseInt($('#securitydeposit').val());
+    for(i=1;i<=rowCountDeduct;i++){
+        if($('#deduction_amount_'+i).val() !=0 && $('#deduction_amount_'+i).val() !=null)
+            totalDeductAmt += parseInt($('#deduction_amount_'+i).val());
+    }
+    totalPayable=(totalOtherAmt-totalDeductAmt).toFixed(2);
+    if(totalPayable < 0) {
+        $('#totalpayable').addClass('red_bdr');
+    } else{
+        $('#totalpayable').removeClass('red_bdr');
+    }
+    $('#totalpayable').val(totalPayable);
+
+}
+
+function agreementBind(tagName,tagVal) {
+    $('#ra'+tagName).html(tagVal);
+}
+</script>

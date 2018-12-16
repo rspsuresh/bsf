@@ -1,0 +1,227 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<form id="unit-reserve-form" method="post">
+    <input type="hidden" name="reserveId" id="reserveId" value="<?php echo (isset($reserveId))?$reserveId:''; ?>">
+<div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 data-bsfhead="Unit Reserve">Unit Reserve</h1>
+        </div>
+
+        <div class="col-lg-6 col-lg-offset-3 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+            <div class="row">
+                <div class="form-group col-lg-8">
+            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            <input name="reserveDate" type="text" id="reserveDate" class="form-control lbl_move date_picker"  value="<?php echo (isset($reserve['ReserveDate'])) ? date("d-m-Y",strtotime($reserve['ReserveDate'])) : '';?>" readonly label="Reserve Date" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-lg-8">
+                    <?php if(isset($reserve)): ?>
+                        <input type="text" class="form-control lbl_move" label="Project Name" disabled  value="<?php echo $reserve['ProjectName']; ?>"/>
+                        <input type="hidden" id="projectId" name="projectId" value="<?php echo $reserve['ProjectId']; ?>"/>
+                    <?php else: ?>
+                        <select id="projectId" name="projectId" data-bsfshare="ProjectName"  class="form-control single_dropdown lbl_move"
+                                label="select project..." style="width:100%;">
+                            <option value=""></option>
+                            <?php foreach($proj as $pro): ?>
+                                <option value="<?php echo $pro['ProjectId']; ?>"><?php echo $pro['ProjectName']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="form-group col-lg-8">
+                    <?php if(isset($reserve)): ?>
+                        <input type="text" class="form-control lbl_move" label="Unit Name" disabled  value="<?php echo $reserve['UnitNo']; ?>"/>
+                    <?php else: ?>
+                        <select id="unitdet" name="unitdet[]" data-bsfshare="UnitName" multiple="multiple" class="form-control multiple_dropdown lbl_move"
+                                label="select unit for reserve..." style="width:100%;">
+                        </select>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-lg-8">
+                   <select id="reserve_for" name="reserve_for" data-bsfshare="ReservedFor" class="form-control single_dropdown lbl_move"
+                            label="Reserve for..." style="width:100%;" onchange="requestOwner();">
+                        <option value=""></option>
+                            <option <?php echo ((isset($reserve)  &&  $reserve['ReservedBy'] == "LandOwner") ? 'selected':''); ?> value="LandOwner" >Land Owner</option>
+                            <option <?php echo ((isset($reserve)  &&  $reserve['ReservedBy'] == "Builder") ? 'selected':''); ?> value="Builder" >Builder</option>
+                    </select>
+
+                </div>
+             </div>
+            <div id="hide_owner" class="row hide">
+                <div class="form-group col-lg-8">
+                    <select id="owner" name="owner[]" data-bsfshare="Owner" class="form-control multiple_dropdown_1 lbl_move"
+                            label="Owner Name..." style="width:100%;" multiple>
+
+                    </select>
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                <ul>
+                    <li class="save_btn ">
+                        <a id="save-btn" href="javascript:void(0);"  class="ripple">submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+     </div>
+ </div>
+</form>
+<script>
+    $(document).ready(function(){
+        $(".multiple_dropdown_1").select2({
+            tags: true
+        });
+        if(parseInt($.trim($('#reserveId').val()))!=0) {
+            $('#reserve_for').trigger('change');
+        }
+
+    });
+function requestOwner() {
+    var pId = $.trim($('#projectId').val());
+    var rFor = $.trim($('#reserve_for').val());
+    if(pId!="" && pId!=0 && rFor=="LandOwner") {
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/reserve',
+            type: 'POST',
+            data: {'projectId': pId, 'reserveFor': rFor,'mode':'owner','reserveId': $.trim($('#reserveId').val())},
+            async:false,
+            success: function (data, textStatus, jqXHR) {
+                var ownerDetails = JSON.parse(data);
+                var opHtml = '';
+                    if((ownerDetails.owner).length>0) {
+                        $.each(ownerDetails.owner, function (i, o) {
+                            opHtml += '<option value="' + o.OwnerId + '">' + o.OwnerName + '</option>';
+                        });
+                    }
+
+                if((ownerDetails.sOwner).length>0) {
+                    $.each(ownerDetails.sOwner, function (k, l) {
+                        if(l.OwnerId!=0) {
+                            opHtml += '<option value="' + l.OwnerId + '">' + l.OwnerName + '</option>';
+
+                        } else {
+                            opHtml += '<option value="' + l.OwnerName + '" selected >' + l.OwnerName + '</option>';
+
+                        }
+                    });
+                }
+                $('#owner').html(opHtml);
+                $('#owner').trigger('change');
+                $('#hide_owner').removeClass('hide');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus + "-----" + errorThrown);
+            }
+        });
+    } else {
+        $('#hide_owner').addClass('hide');
+        $('#owner').val(null).trigger('change');
+    }
+}
+    $("#projectId").on('change', function() {
+
+        var projId=$("#projectId").val();
+        $.ajax({
+            type: 'POST',
+            url: getBaseURL() + 'crm/lead/reserve',
+            data: {'projId':projId},
+            async:false,
+            success: function(data, status, xhr) {
+                var valu = JSON.parse(data);
+
+                if(valu.length > 0) {
+                    $('#unitdet').html(' ');
+                    var opHtml = '<option value=""></option>';
+
+                    $.each(valu, function (i, o) {
+                        opHtml += '<option value="' + o.UnitId + '">' + o.UnitNo + '</option>';
+                    });
+
+                    $('#unitdet').html(opHtml);
+                    $('#unitdet').show();
+                    requestOwner();
+                }
+                else{
+                    alert("no units found in this project for reservation");
+                    $('#unitdet').hide();
+                }
+
+            },
+            error: function(xhr, status, errorThrown) {
+                $('.loading_area').hide();
+                if (xhr.status == 400)
+                    alert(xhr.responseText);
+                else
+                    alert(errorThrown);
+            }
+        });
+
+    });
+    $("#save-btn").on('click', function() {
+        var
+            reserve=$("#reserve_for").val(),
+            proj=$("#projectId").val(),
+            unitId=$("#unitdet").val(),
+            reservId=$("#reserveId").val(),
+            reservDate=$("#reserveDate").val();
+        var ownerSelect = $('#owner');
+            removeError(ownerSelect);
+            if(reservDate==0 || reservDate==null ||reservDate==''){
+                showError($("#reserveDate"), 'ReservedDate is required!');
+                return false;
+            }
+            else{
+                removeError($("#reserveDate"));
+            }
+        if(reservId==0){
+            if(proj==0 || proj==null ||proj==''){
+                showError($("#projectId"), 'projectName is required!');
+                return false;
+            }
+            else{
+                removeError($("#projectId"));
+            }
+            if(unitId ==0 || unitId==null ||unitId==''){
+                showError($("#unitdet"), 'UnitName is required!');
+                return false;
+            }
+            else {
+                removeError($("#unitdet"));
+
+            }
+        }
+
+        if(reserve==0 || reserve==null ||reserve==''){
+            showError($("#reserve_for"), 'ReservedName is required!');
+            return false;
+        }
+        else{
+            removeError($("#reserve_for"));
+            if(reserve=="LandOwner") {
+                if(ownerSelect.val()==null) {
+                    showError(ownerSelect, 'Owner Name is required!');
+                    return false;
+                } else {
+                    removeError(ownerSelect);
+                }
+            }
+        }
+
+        $('#unit-reserve-form').submit();
+    });
+
+</script>

@@ -1,0 +1,238 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="formWrapper" method="post">
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+                <div class="col-lg-12">
+                    <h1 class="text-center" data-bsfhead="Payment Voucher">Payment Voucher</h1>
+                </div>
+                <div class="col-lg-12">
+                    <?php if(isset($payVoucherDetails)){ $rOnly = "disabled"; } else { $rOnly = "";} ?>
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                        <div id="level-1" class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                            <div class="form-horizontal">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="ref_no" data-bsfshare="refno" id="ref_no" class="form-control lbl_move" label="Ref No" value="<?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['PaymentVoucherNo']:$svNo; ?>" <?php echo ($genType) ? 'readonly' : '';?> />
+                                            <input type="hidden" name="voucherId" id="voucherId" value="<?php echo (isset($voucherId)) ? $voucherId:0;?>" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <?php $voucherDate="";
+                                            $disableDate="";
+                                            if(isset($payVoucherDetails['VoucherDate'])) {
+                                                $voucherDate=date('d-m-Y',strtotime($payVoucherDetails['VoucherDate']));
+                                                $disableDate="disabled";
+                                            }?>
+                                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" name="date" data-bsfshare="date" id="date"
+                                                   class="form-control datepickerinput lbl_move" value="<?php echo $voucherDate; ?>" label="Date" <?php echo $disableDate; ?> />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="project_unit_buyer" data-bsfshare="Project Unit Buyer" id="project_unit_buyer"
+                                                   class="form-control lbl_move" label="Project/Unit/Buyer" value="<?php echo (isset($ownerName)) ? $ownerName['value'] : ""; ?>" <?php echo $rOnly; ?> />
+                                            <input type="hidden" name="unitId" id="unitId" value="<?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['UnitId']:0;?>" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <select name="PaymentMode" data-bsfshare="Payment Mode" id="PaymentMode" class="single_dropdown2 lbl_move" style="width:100%;" label="Payment Mode" onchange="PaymentModeCheck()" >
+                                                <option value=""></option>
+                                                <option value="Cash" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'Cash') ? 'selected' : '';?>>Cash</option>
+                                                <option value="Cheque" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'Cheque') ? 'selected' : '';?>>Cheque</option>
+                                                <option value="Demand Draft" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'Demand Draft') ? 'selected' : '';?>>Demand Draft</option>
+                                                <option value="NEFT" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'NEFT') ? 'selected' : '';?>>NEFT</option>
+                                                <option value="RTGS" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'RTGS') ? 'selected' : '';?>>RTGS</option>
+                                                <option value="Credit Card" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'Credit Card') ? 'selected' : '';?>>Credit Card</option>
+                                                <option value="Fund Transfer" <?php echo (isset($payVoucherDetails) && $payVoucherDetails['PaymentMode'] == 'Fund Transfer') ? 'selected' : '';?>>Fund Transfer</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" <?php if(isset($payVoucherDetails)&& $payVoucherDetails['PaymentMode']!="Cash") { echo "style='display:block;'"; } else { echo "style='display:none;'"; } ?> id="TNoD" >
+                                        <div class="col-lg-12">
+                                            <input type="text" name="TNo" data-bsfshare="TNo" id="TNo" class="form-control lbl_move" label="Trasaction No" maxlength="50" value="<?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['TransNo'] : '';?>" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group" <?php if(isset($payVoucherDetails)&& $payVoucherDetails['PaymentMode']!="Cash") { echo "style='display:block;'"; } else { echo "style='display:none;'"; } ?> id="TDateD">
+                                        <?php $tDate="";
+                                        if(isset($payVoucherDetails['TransDate'])) {
+                                            $tDate=date('d-m-Y',strtotime($payVoucherDetails['TransDate']));
+                                        }?>
+                                        <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" name="TDate" data-bsfshare="TDate" id="TDate" class="form-control datepickerinput lbl_move" label="Trasaction Date"  value="<?php echo $tDate; ?>" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group" <?php if(isset($payVoucherDetails)&& $payVoucherDetails['PaymentMode']!="Cash") { echo "style='display:block;'"; } else { echo "style='display:none;'"; } ?> id="BankNameD">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="BankName" data-bsfshare="BankName" id="BankName" class="form-control lbl_move" label="Bank Name" maxlength="100" value="<?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['BankName'] : '';?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="excess_amount" data-bsfshare="Excess Amount" id="excess_amount"
+                                                   class="form-control lbl_move" label="Excess Amount" value="<?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['ExcessAmount']:'';?>" data-val="<?php echo (isset($excessAmt)) ? $excessAmt : '0'; ?>" onkeypress="return isDecimal(event,this);" <?php if($rOnly==""){ echo "readonly"; } ?> />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <textarea class="form-control lbl_move" label="Remarks" name="Remarks" data-bsfshare="Remarks"  maxlength="255" id="Remarks"><?php echo (isset($payVoucherDetails)) ? $payVoucherDetails['TransRemarks'] : '';?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="next-bt"><a href="#" id="show-next-level" onclick="validateVoucher();" class="pull-right">Submit <i class="fa fa-chevron-circle-right"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        refNo = $('#ref_no');
+        vDate = $('#date');
+        projUnitBuyer = $('#project_unit_buyer');
+        unitId = $('#unitId');
+        excessAmount = $('#excess_amount');
+        PaymentMode = $('#PaymentMode');
+        TNo = $('#TNo');
+        TDate = $('#TDate');
+        BankName = $('#BankName');
+        $('.datepickerinput').datepicker({
+            format: "dd-mm-yyyy",
+            todayBtn: true,
+            orientation: "top auto",
+            autoclose: true
+        });
+        $(".single_dropdown2").select2({
+            placeholder: ""
+            // minimumResultsForSearch: -1
+        });
+        $('.date_icon').click(function() {
+            var input = $(this).parent().find('input').datepicker('show');
+        });
+
+        var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+        projUnitBuyer.autocomplete({
+            lookup: arr_Units,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $('#unitId').val(suggestion.data);
+                    excessAmountCalc(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $('#unitId').val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $('#unitId').val(0);
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    });
+    function PaymentModeCheck() {
+        if ($('#PaymentMode').val() =="" || $('#PaymentMode').val() =="Cash") {
+            $('#TNoD').hide();
+            $('#TDateD').hide();
+            $('#BankNameD').hide();
+            $('#Amount').show();
+            $('#Amount').focus();
+        } else {
+            $('#TNoD').show();
+            $('#TDateD').show();
+            $('#BankNameD').show();
+            $('#TNoD').focus();
+        }
+    }
+    function excessAmountCalc(uId){
+        if(parseInt(uId)!=0) {
+            $.ajax({
+                url: getBaseURL() + 'crm/bill/payment-voucher',
+                data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", unitId: uId},
+                type: 'POST',
+                success: function (data, status, xhr) {
+                    var tot = parseFloat(data);
+                    if(tot=='NaN' || tot<0) {
+                        tot = 0;
+                    }
+                    excessAmount.attr('data-val',tot).val(sanitizeNumber(tot,2,false)).trigger('change');
+                    excessAmount.attr('readonly',false);
+
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+    }
+    function validateVoucher(){
+        removeError(refNo);
+        removeError(vDate);
+        removeError(projUnitBuyer);
+        removeError(excessAmount);
+        removeError(TNo);
+        removeError(TDate);
+        removeError(BankName);
+        removeError(PaymentMode);
+        if(refNo.val()==""){
+            showError(refNo,'Ref No is Empty');
+            return false;
+        }
+        if(vDate.val() == "" || !/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/.test(vDate.val())) {
+            showError(vDate,'Invalid Date');
+            return false;
+        }
+        if(unitId.val() == "" || unitId.val()==0) {
+            showError(projUnitBuyer,'Invalid Project/Unit/Buyer');
+            return false;
+        }
+        if(excessAmount.val()=="" || excessAmount.val()==0.00) {
+            alert("No Excess Amount for this unit");
+            return false;
+        }
+        if(parseFloat(excessAmount.val())>parseFloat(excessAmount.attr('data-val'))){
+            showError(excessAmount,'Excess Amount is Greater Than Balance');
+            return false;
+        }
+        if(PaymentMode.val()=="") {
+            showError(PaymentMode,'Select Payment Mode');
+            return false;
+        }
+        if(PaymentMode.val()!="Cash"){
+            if(TNo.val()==""){
+                showError(TNo,'Transaction No is Empty');
+                return false;
+            }
+            if(TDate.val() == "" || !/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/.test(TDate.val())) {
+                showError(TDate,'Transaction Date Invalid');
+                return false;
+            }
+            if(BankName.val()=="") {
+                showError(BankName,'Bank Name is Empty');
+                return false;
+            }
+        }
+
+        $('#formWrapper').submit();
+    }
+</script>

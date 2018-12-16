@@ -1,0 +1,140 @@
+<div class="content_wrapper  padlr0">
+	<div class="container-fluid">
+	<form action="" method="post" role="form" enctype="multipart/form-data">
+		 <div class="row">
+			<div class="col-lg-12">
+				<h1 class="padbtm0">Grade Master</h1> 
+			</div>
+			<div class="col-lg-12 clear">
+				<div class="table-responsive clear">
+				<input type="hidden" name="hidGradeId" id="hidGradeId" value="1" >
+					<table class="table table-hover vendar_bottom clear" id="techTable">
+						<thead>
+						  <tr>
+							<th>Grade name</th>
+							<th>Greater Than</th>
+							<th>Less Than Or EqualTo</th>
+							<th></th>
+						  </tr>
+						</thead>
+						<tbody>
+						<?php 
+							$count=0;
+							foreach($gradeResult as $gradeData){
+								$count=$count+1;												
+						?>
+								<tr>
+									<td width="15%"> <input type="text" class="parent_txts newRow" name="grade_name_<?php echo $count;?>" id="grade_name_<?php echo $count;?>" tagname="grade_name" value="<?php echo $gradeData['GradeName'];?>"/></td>
+									<td width="11%"> <input type="text" style="text-align: right;" class="parent_txts" name="first_value_<?php echo $count;?>" id="first_value_<?php echo $count;?>" tagname="first_value" value="<?php echo number_format((float)$gradeData['FValue'], 2, '.', '');?>" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" /> </td>
+									<td width="11%"> <input type="text" style="text-align: right;" class="parent_txts" name="second_value_<?php echo $count;?>" id="second_value_<?php echo $count;?>" tagname="second_value" value="<?php echo number_format((float)$gradeData['TValue'], 2, '.', '');?>" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)"/></td>
+									
+									<td width="4%"><a href="#" class="removeTech vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>									
+								</tr>
+							<?php
+							}
+							if($count==0){
+							?>
+								<tr>
+									<td width="15%"><input type="text" class="parent_txts newRow" name="grade_name_1" id="grade_name_1" tagname="grade_name" /></td>
+									<td width="11%"><input type="text" style="text-align: right;" class="parent_txts" name="first_value_1" id="first_value_1" tagname="first_value" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" /></td>
+									<td width="11%"><input type="text" style="text-align: right;" class="parent_txts" name="second_value_1" id="second_value_1" tagname="second_value" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" /></td>
+									
+									<td width="4%"><a href="#" class="removeTech vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>									
+								</tr>
+							<?php
+							}
+							else{
+								$count=$count+1;
+							?>
+								<tr>
+									<td width="15%"> <input type="text" class="parent_txts newRow" name="grade_name_<?php echo $count;?>" id="grade_name_<?php echo $count;?>" tagname="grade_name" /></td>
+									<td width="11%"> <input type="text" style="text-align: right;" class="parent_txts" name="first_value_<?php echo $count;?>" id="first_value_<?php echo $count;?>" tagname="first_value" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)"/></td>
+									<td width="11%"> <input type="text" style="text-align: right;" class="parent_txts" name="second_value_<?php echo $count;?>" id="second_value_<?php echo $count;?>" tagname="second_value" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)"/></td>
+									
+									<td width="4%"><a href="#" class="removeTech vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>									
+								</tr>
+							<?php
+							}
+							?>		  
+						</tbody>
+					</table>
+				</div>                         
+			 </div> 
+		</div>
+		</form>
+	 </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="submitData" class="dropdown save_btn float_r">
+            <a href="javascript:void(0);" class="ripple" >Save</a>
+        </li>
+    </ul>
+</div>
+<script>
+removeTechtr();
+$(".addTech").bind("click", function(){
+	var table = $("#techTable tbody");
+	table.append("<tr>"+table.find("tr:first").html()+"</tr>");
+	table.find("tr:last td:last").append("<input type='button' class='btn btn-primary removeTech' value='Remove'>");	
+	var len = table.find("tr").length;
+	table.find("tr").each(function(){
+		var index=$(this).index() + 1;
+		$(this).find("select, input:text").each(function(){
+			$(this).attr("name", $(this).attr("tagname")+'_'+index);
+			$(this).attr("id", $(this).attr("tagname")+'_'+index);
+			if(len == index)
+				$(this).val('');
+		});
+	});	
+	removeTechtr();
+});
+function removeTechtr(){
+	$(".removeTech").unbind("click");
+	$(".removeTech").bind("click", function(){
+		if($(this).closest("tr").index() != 0){
+			var table = $(this).closest("table");
+			$(this).closest("tr").remove();
+			var len = table.find("tbody:first tr").length;
+			table.find("tbody tr").each(function(){
+				var index=$(this).index() + 1;
+				$(this).find("select, input:text").each(function(){
+					$(this).attr("name", $(this).attr("tagname")+'_'+index);
+					$(this).attr("id", $(this).attr("tagname")+'_'+index);	
+				});
+			});		
+		}
+	});
+}
+
+addRow();
+function addRow(){
+	$( ".newRow" ).unbind();
+	$( ".newRow" ).bind('keyup', function() {
+	//alert($(this).closest("tr").index()+"------------"+$("#contactTable tbody tr:last").index())
+		if($(this).val().length>0 && $(this).closest("tr").index() == $("#techTable tbody tr:last").index()){
+			$("#techTable tbody").append("<tr>"+$("#techTable tbody tr:first").html()+"</tr>");
+				$("#techTable tbody tr").each(function(){
+				var index=$(this).index() + 1;
+				var lastIndex=$("#techTable tbody tr:last").index() + 1;
+				$(this).find("select, input:text").each(function(){
+					if(index==lastIndex){
+						if($(this).prop("tagName").toLowerCase() == 'input')
+							$(this).val("");
+						else
+							$(this).val("1");
+					}
+					$(this).attr("name", $(this).attr("tagname")+'_'+index);
+					$(this).attr("id", $(this).attr("tagname")+'_'+index);		
+				})
+			});	
+			removeTechtr();
+			addRow();
+		}
+	});
+}
+$("#submitData").click(function(){
+	$("#hidGradeId").val($("#techTable tbody tr").length);
+	$("form").submit();
+})
+</script>

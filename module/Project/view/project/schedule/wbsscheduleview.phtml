@@ -1,0 +1,271 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.all.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.theme.min.css" rel="stylesheet" />
+<link href="<?php echo $this->basePath(); ?>/library/gantt/css/ej.widgets.core.min.css" rel="stylesheet" />
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.globalize.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jquery.easing-1.3.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/jsrender.min.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/gantt/js/ej.web.all.min.js"></script>
+<style>.area-nodata{ float:left;
+        animation:blur .75s ease-out infinite;
+        text-shadow:10px 10px 10px #fff,10px 10px 10px :#9C0;
+    }
+    .area-nodata p{ font-size:18px; color:#F00; font-weight:400; text-align:center; text-shadow::10px 10px 10px #ccc; }
+    @keyframes blur{
+        from{
+            text-shadow:10px 10px 10px #A3BFA6,
+            0px 0px 10px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 25px #A6ADB4,
+            0px 0px 50px #A6ADB4,
+            0px 0px 50px #A6ADB4,
+            0px 0px 50px #fff,
+            0px 0px 150px #fff,
+            0px 10px 100px #fff,
+            0px 10px 100px #fff,
+            0px 10px 100px #fff,
+            0px 10px 100px #fff,
+            0px -10px 100px #fff,
+            0px -10px 100px #fff;}
+    }
+</style>
+<!--STYLE-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12" id="title-newpage">
+                <h1 class="text-center">WBS Schedule View</h1>
+            </div>
+            <div class="col-lg-12 page_tittle" id="page-tittle" style="display: none">
+                <h1 class="col-lg-4">WBS Schedule View</h1>
+                <div class="col-lg-4 col-sm-4 ">
+                    <div class="form-group">
+                        <label class="col-sm-4 text-right sel-type">Project</label>
+                        <div class="col-lg-8 form-group">
+                            <select name="Project_Id" id="Project_Id" onchange="refreshContent();" class="form-control single_dropdown lbl_move" style="width:100%;">
+                                <option value="">Select Project</option>
+                                <?php foreach($projectLists as $project) { ?>
+                                    <option value="<?php echo $project['ProjectId']; ?>" <?php if($project['ProjectId']==$projectId) { ?>selected<?php } ?>><?php echo $project[ 'ProjectName' ]; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-4">
+                    <div class="form-group">
+                        <label class="col-sm-4 text-right sel-type">Type</label>
+                        <div class="col-lg-8 form-group">
+                            <select name="type_name" id="type_name" onchange="refreshContent();" class="form-control single_dropdown lbl_move" style="width:100%;">
+                                <option value="">Select Type</option>
+                                <option value="B" <?php if($typeName=='B') { ?>selected<?php } ?>>Budget</option>
+                                <option value="P" <?php if($typeName=='P') { ?>selected<?php } ?>>Plan</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next zoomIn animated" id="idback">
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                    <div class="col-lg-12 col-md-12 col-sm-12" id="new-page">
+                        <form class="form-horizontal" method="post" id="scheduleviewForm">
+                            <div class="col-lg-12 frmwrk_div">
+                                <select name="projectId" id="projectId" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%;">
+                                    <option value="">Select Project</option>
+                                    <?php foreach($projectLists as $project) { ?>
+                                        <option value="<?php echo $project['ProjectId']; ?>" <?php if($project['ProjectId']==$projectId) { ?>selected<?php } ?>><?php echo $project[ 'ProjectName' ]; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-12 frmwrk_div" id="scheduleTypes" <?php if($typeName == '') { ?>style="display:none;"<?php } ?>>
+                                <select name="typeName" id="typeName" class="form-control single_dropdown lbl_move" data-size="6" title="Select Type..." style="width:100%;">
+                                    <option value="">Select Type</option>
+                                    <option value="B" <?php if($typeName=='B') { ?>selected<?php } ?>>Budget</option>
+                                    <option value="P" <?php if($typeName=='P') { ?>selected<?php } ?>>Plan</option>
+                                </select>
+                            </div>
+                            <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+                                <ul>
+                                    <li class="subs"><a href="javascript:void(0);" onclick="submitForm();" id="continue">Submit</a></li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 col-lg-offset-0" id="divnoSchedule" style="display: none;">
+                <div class="table-responsive clear">
+                    <div id="noSchedule"  class="animated fadeInUp"style="position: height: 100%; width: 100%;"> </div>
+                    <div class="col-lg-12 area-nodata"><p>No Schedule Available</p></div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0">
+                <div id ="dprint" style="display: none" >
+                    <ul class="print_bt">
+                        <li id="print"><a href="<?php echo $this->basePath() . '/project/report/schedulereport/' . $projectId.'/'.$typeName?>" id="print" data-toggle="tooltip" class="ripple" title="Print"><i class="fa fa-print"></i> Print</a></li>
+                    </ul>
+                </div>
+                <div class="table-responsive clear">
+                    <div id="gantt" style="position: height: 100%; width: 100%;"> </div>
+                </div>
+            </div>
+        </div>
+    </div></div>
+<script type="text/javascript">
+    function refreshContent() {
+        var Projid = $('#Project_Id').val();
+        var Projtype = $('#type_name').val();
+        $('#projectId').val(Projid);
+        $('#typeName').val(Projtype);
+        $('#scheduleviewForm').submit();
+    }
+
+    function submitForm()
+    {
+        if ($('#projectId').val() == "") {
+            alert('Select a Project');
+            return false;
+        }
+        if ($('#typeName').val() == "") {
+            alert('Select a Type');
+            return false;
+        }
+        $('#scheduleviewForm').submit();
+    }
+
+    $('#projectId').on('change', function() {
+        var value = $(this).val(),
+            $scheduleTypes = $('#scheduleTypes');
+        if (value == '') {
+            $scheduleTypes.hide();
+            return;
+        }
+        $scheduleTypes.show();
+    });
+
+    //DATA SOURCE DECLARATION OF GANTT CONTROL
+    var weektype = '<?php if(isset($weektype)) echo $weektype; else ""; ?>';
+    var data =[ <?php if(isset($strText)) echo $strText; else '""'; ?> ];
+    var hday = [ <?php if(isset($strHDay)) echo $strHDay; else '[]';?> ];
+    $(function () {
+        var projectId = <?php if(isset($projectId)) echo json_encode($projectId); else echo '""';?>;
+        var proj_type = <?php if(isset($typeName)) echo json_encode($typeName); else echo '""'?>;
+        if(projectId != '') {
+            $('#page-tittle').show();
+            $('#new-page').hide();
+            $('#title-newpage').hide();
+            $('#idback').hide();
+            $('#dprint').show();
+            /*$('#Project_Id').val(projectId).change();
+             $('#type_name').val(proj_type).change();*/
+            if(data == "") {
+                //Show No Schedule available
+                $('#divnoSchedule').fadeIn();
+            } else{
+                $('#divnoSchedule').fadeOut();
+            }
+        }
+
+
+
+        //ganttobj.option("holidays", newHoliday, true);
+
+        $("#gantt").ejGantt({
+            dataSource: data,
+            allowColumnResize: true,
+            allowSorting: true,
+            allowSelection: true,
+            enableResize: true,
+            enableContextMenu: true,
+            taskIdMapping: "TaskID",
+            taskNameMapping: "TaskName",
+            startDateMapping: "StartDate",
+            progressMapping: "Progress",
+            durationMapping: "Duration",
+            endDateMapping: "EndDate",
+            childMapping: "Children", // "subtasks", //Children
+            enableVirtualization: false,
+            dateFormat: "dd/MM/yyyy",
+            highlightWeekEnds: false,
+            includeWeekend: true,
+            //holidays: hday,
+            holidays:[{day:"2016/Jun/10",background:"cyan",label:"local holiday" }],
+            <?php
+            if(isset($stdate)) echo 'scheduleStartDate: "' .$stdate. '" ,'; else '';
+            if(isset($eddate)) echo 'scheduleEndDate: "' .$eddate. '" ,';else '';
+            ?>
+
+            //scheduleStartDate: "12/01/2014",
+            //scheduleEndDate: "03/30/2015",
+
+            //Resources mapping
+            //resourceInfoMapping: "resourceId",
+            //resourceNameMapping: "resourceName",
+            //resourceIdMapping: "resourceId",
+            //resources: projectResources,
+
+            predecessorMapping: "Predecessor",
+            //beginEdit: beginEdit,
+            showResourceNames: true,
+
+            toolbarSettings: {
+                showToolbar: true,
+                toolbarItems: [
+                    //ej.Gantt.ToolbarItems.Add,
+                    //ej.Gantt.ToolbarItems.Edit,
+                    //ej.Gantt.ToolbarItems.Delete,
+                    //ej.Gantt.ToolbarItems.Update,
+                    //ej.Gantt.ToolbarItems.Cancel,
+                    //ej.Gantt.ToolbarItems.Indent,
+                    //ej.Gantt.ToolbarItems.Outdent,
+                    ej.Gantt.ToolbarItems.ExpandAll,
+                    ej.Gantt.ToolbarItems.CollapseAll,
+                    ej.Gantt.ToolbarItems.Search
+                ]
+            },
+            editSettings: {
+                allowEditing: false,
+                allowAdding: false,
+                allowDeleting: false,
+                allowIndent: false,
+                allowOutdent: false,
+                editMode: "cellEditing"
+            },
+            showGridCellTooltip: true,
+            treeColumnIndex: 1,
+            //Adding column in Gantt
+            load: function () {
+                var columns = this.getColumns();
+                columns.splice(7, 0,
+                    {
+                        field: "parent",
+                        visible: false
+                    });
+                columns.splice(8, 0,
+                    {
+                        field: "iowid",
+                        visible: false
+                    });
+                columns.splice(9, 0,
+                    {
+                        field: "wbsid",
+                        visible: false
+                    });
+            }
+            //End Adding column in Gantt
+        });
+    });
+    //Non Edit taskname Column
+    //function beginEdit(args) {
+    //	if (this.getColumns()[args.columnIndex].field === "parent") {
+    //		args.cancel = true;
+    //	}
+    //}
+    <?php //} ?>
+
+</script>

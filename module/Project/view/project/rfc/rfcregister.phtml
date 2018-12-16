@@ -1,0 +1,608 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+<style>
+    .jqx-grid-header {
+        height:75px !important;
+    }
+    .action_btns {
+        font-size:19px;
+        margin-top:10px; margin-left:10px;
+    }
+    .fa-trash-o {
+        margin-left: 15px;
+    }
+    .rf-fixed										{margin-top:-10px;}
+	.select2-container .select2-selection--single{height:35px;min-height:35px;}
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/pie.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 page_tittle">
+                <div class="col-lg-12">
+                    <div class="col-lg-4"style="padding:0 !important">
+                        <h1 style="font-size:24px;padding:6px 0 0 0">Request for Creation - Register</h1>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="col-lg-12"style="padding:0 !important">
+                            <div class="col-lg-4 padtop10" style="padding:10px 0 0 0 !important" align="right">
+                                <label for="fromdate" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o" style="margin-right:4px"></i></span>From Date<span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt no_bg bk_inpt inputbg_ef" name="fromdate" data-bsfshare="fromdate" readonly id="fromdate" onchange="return changeProject();" value="<?php if (isset($minDate))  { echo date("d-m-Y", strtotime($minDate));} else { echo date('d-m-Y');}?>" />
+                            </div>
+                            <div class="col-lg-4 padtop10"style="padding:10px 0 0 0 !important" align="right">
+                                <label for="todate" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o" style="margin-right:4px"></i></span>To Date<span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt no_bg bk_inpt inputbg_ef" name="todate" data-bsfshare="todate" readonly id="todate" onchange="return changeProject();" value="<?php if (isset($maxDate))  { echo date("d-m-Y", strtotime($maxDate));} else { echo date('d-m-Y');}?>" />
+                            </div>
+                            <div class="col-lg-3"style="padding:0 !important">
+                                <select name="projectid" id="projectid" class="form-control single_dropdown lbl_move" style="width:100%; height:35px !important" onchange="return changeProject();">
+                                    <option value="0">All Request</option>
+                                    <option value="-1">Library Request</option>
+                                    <option value="-2">All Projects Request</option>
+                                    <?php foreach($projectlists as $project) { ?>
+                                        <option value="<?php echo $project['ProjectId']; ?>"><?php echo $project[ 'ProjectName' ]; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="fixed-action-btn active rf-fixed">
+                        <a class="btn-floating btn-large">
+                            <i class="fa fa-print"></i>
+                        </a>
+                        <ul>
+                            <li>
+                                <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="bottom" data-original-title="Print Report">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="bottom" data-original-title="Download Excel">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="csvExport" href="javascript:void(0);" download data-toggle="tooltip" data-placement="bottom" data-original-title="Export CSV">
+                                    <i class="fa fa-file-archive-o"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear">
+                <div class="col-lg-12 clear padlr0" style="margin-top:6px;">
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                        <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status3">
+                            <div class="padding-none">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-line-chart fa-5x cbpln-status-icon"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div id="divtotal" class="cbhuge comnelips fntwt600"><?php if (!empty($rfctotal)) { echo $rfctotal['RFCCount']; } else { echo '0';}?></div>
+                                        <div class="cbhuge comnelips">Total Request</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                        <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status1">
+                            <div class="padding-none">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-check-square-o fa-5x cbpln-status-icon"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div id="divprogress" class="cbhuge comnelips fntwt600"><?php if (!empty($rfcprogress)) { echo $rfcprogress['RFCCount']; } else { echo '0';}?></div>
+                                        <div class="cbhuge comnelips">Progress</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                        <div class="cbpln cbpln-default bx-wte cbpln-status cbpln-status4">
+                            <div class="padding-none">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-thumbs-up fa-5x cbpln-status-icon"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div id="divapprove" class="cbhuge comnelips fntwt600"><?php if (!empty($rfcapprove)) { echo $rfcapprove['RFCCount']; } else { echo '0';}?></div>
+                                        <div class="cbhuge comnelips">Approved</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                        <div class="cbpln cbpln-default  bx-wte cbpln-status cbpln-status2">
+                            <div class="padding-none">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-retweet fa-5x cbpln-status-icon"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div id="divpending" class="cbhuge comnelips fntwt600"><?php if (!empty($rfcpending)) { echo $rfcpending['RFCCount']; } else { echo '0';}?></div>
+                                        <div class="cbhuge comnelips">Pending</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+                    <div id="grid"></div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12" style="margin-bottom:10px; margin-top:10px;">
+                <!--chat-->
+                <div class="col-lg-12" style="margin-bottom:10px; margin-top:10px; background:#fff; border:1px solid #E4F1FE;">
+                    <!--chat left-->
+                    <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                        <div id="chart-1" style="height:250px;"></div>
+                    </div>
+                </div>
+            </div>
+            <!--chat-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+var rfcregister = [],
+    rfcregisterrfctypecount = [],
+    rfctotal =0,
+    rfcprogress = 0,
+    rfcprogress =0,
+    rfcapprove =0,
+    rfcpending =0;
+
+
+$(function () {
+
+    rfcregister =  <?php echo (isset($rfcregister)) ? json_encode($rfcregister) : '[]';?>;
+    rfcregisterrfctypecount =  <?php echo (isset($rfcregisterrfctypecount)) ? json_encode($rfcregisterrfctypecount) : '[]';?>;
+    bindGrid();
+    bindchart();
+});
+
+function changeProject() {
+    var iProjectId = isNullCheck($('#projectid').val(),'number'),
+        dFromDate= isNullCheck($("#fromdate").val(),'date'),
+        dToDate= isNullCheck($("#todate").val(),'date');
+
+    $.ajax({
+        url: getBaseURL() + "project/rfc/getrfcregisterdetails",
+        async: false,
+        data: {'ProjectId': iProjectId,'FromDate' : dFromDate,'ToDate' : dToDate},
+        type: 'post',
+        success: function (data, status) {
+            var obj = jQuery.parseJSON(data);
+            rfcregister = obj['rfcregister'];
+            rfcregisterrfctypecount = obj['rfcregisterrfctypecount'];
+            rfctotal = obj['rfctotal'];
+            rfcprogress = obj['rfcprogress'];
+            rfcapprove= obj['rfcapprove'];
+            rfcpending= obj['rfcpending'];
+
+            $('#divtotal').html(rfctotal['RFCCount']);
+            $('#divprogress').html(rfcprogress['RFCCount']);
+            $('#divapprove').html(rfcapprove['RFCCount']);
+            $('#divpending').html(rfcpending['RFCCount']);
+
+            bindGrid();
+            collapseGrid();
+            bindchart();
+        }
+    });
+}
+
+function bindGrid() {
+
+    var rfcsource = {
+        localdata:rfcregister,
+        async: false,
+        dataType: "json",
+        dataFields: [
+            { name: 'RFCRegisterId', type: 'number' },
+            { name: 'RefDate', type: 'date' },
+            { name: 'RFCType', type: 'string' },
+            { name: 'RFCFrom', type: 'string'},
+            { name: 'RefNo', type: 'string'},
+            { name: 'Type', type: 'string'},
+            { name: 'ProjectName', type: 'string'},
+            { name: 'Approve', type: 'string'}
+        ],
+        id: 'RFCRegisterId'
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+
+    var resdata = new $.jqx.dataAdapter(rfcsource);var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+        var $tabsdiv = $($(parentElement).children()[0]);
+        $tabsdiv.append(renderRowDetail(datarecord.RFCRegisterId,datarecord.RFCType));
+    };
+
+    var cellsrenderer = function (row, column, value) {
+        return '<div style="text-align: center; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#grid").jqxGrid({
+        width: '100%',
+        theme: 'bootstrap',
+        pagerButtonsCount: 6,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable:true,
+        altrows: true,
+        enabletooltips: true,
+        autoheight: true,
+        editable: false,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        rowdetails: true,
+        initrowdetails: initrowdetails,
+        rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:2px solid #5bc0de;'></div>", rowdetailsheight:400},
+        columns: [
+            { text: 'RFCRegisterId', datafield: 'RFCRegisterId', hidden: true},
+            { text: 'Date', filtertype: 'date', datafield: 'RefDate', width: '16%', cellsformat: 'dd-MM-yyyy'},
+            { text: 'Ref No', datafield: 'RefNo', width: '15%'  },
+            { text: 'From Where', datafield: 'RFCFrom', width: '22%' },
+            { text: 'Type', datafield: 'RFCType', width: '22%' },
+            { text: 'Approve', datafield: 'Approve', width: '15%',align:'center', cellsrenderer: cellsrenderer},
+            { text: 'Action', width: '10%', sortable: false, filterable: false, align:'left', cellsalign:'left',
+                cellsrenderer: function (row) {
+                    var id = $("#grid").jqxGrid('getcellvalue', row, "RFCRegisterId"),
+                        stype = $.trim($("#grid").jqxGrid('getcellvalue', row, "RFCType")),
+                        approve = $.trim($("#grid").jqxGrid('getcellvalue', row, "Approve")),
+                        divWrapper = '<div class="ed-dl">',
+                        deleteLink = (approve === 'N') ? ' <a onclick="deleteRFCResource(event,'+row+')" href="#"><i class="fa fa-trash-o reg-icon"></i></a>' : '';
+                    switch (stype) {
+                        case "Resource-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresource/'+id+'/add/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Resource-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresource/'+id+'/edit/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Resource-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresourcedelete/'+id+ '"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "IOW-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfciow/'+id+'/add/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "IOW-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfciow/'+id+'/edit/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "IOW-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfciowdelete/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Resource-Group-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresourcegroup/'+id+'/add/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Resource-Group-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresourcegroup/'+id+'/edit/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Resource-Group-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresgroupdelete/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "WorkGroup-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcworkgroup/'+id+'/add/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "WorkGroup-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcworkgroup/'+id+'/edit/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "WorkGroup-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcworkgroupdelete/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "WorkType-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcworktype/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "ProjectIOW-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcprojectiow/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "ProjectIOW-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcprojectiow/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>' + deleteLink;
+                            break;
+                        case "Schedule-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/schedule/rfcschedule/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "Schedule-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/schedule/rfcschedule/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "WBS-Schedule-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/schedule/wbs-schedule/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "WBS-Schedule-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/schedule/wbs-schedule/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "WBS-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/wbs/'+id+'/add/0"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "OtherCost-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcothercost/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "OtherCost-Edit":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcothercost/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "Project-IOW-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcprojectiowdelete/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "IOWPlan-Add":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfciowplan/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "WBS-Delete":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcwbsdelete/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "Project-Resource":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcresourcerate/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                        case "ProjectIOW-Qty":
+                            divWrapper += '<a href="'+ getBaseURL() + 'project/rfc/rfcboqqty/'+id+'"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            break;
+                    }
+                    return divWrapper + '</div>';
+                }
+            }
+        ]
+    });
+
+    $('#grid').on('rowexpand', function (event) {
+        var prev_row = $('#grid').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#grid').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#grid').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#grid').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $('#grid').on('rowcollapse', function (event) {
+        $('#grid').jqxGrid('clearselection');
+    });
+}
+
+function collapseGrid() {
+    var rows = $('#grid').jqxGrid('getdisplayrows');
+    var mode = 'hiderowdetails';
+//    if( $('div[role="rowgroup"]:first').css('display') != 'block')
+//        mode = 'showrowdetails';
+    $("#grid").jqxGrid('beginupdate');
+    for( i=0; i<rows.length; i++)
+    {
+        $('#grid').jqxGrid(mode, i);
+    }
+    $("#grid").jqxGrid('endupdate');
+}
+
+function bindchart() {
+    var chart = AmCharts.makeChart("chart-1", {
+        "theme": "light",
+        "type": "serial",
+        "allLabels" : [{
+            "text": "Request Type",
+            "align": "center",
+            "bold":true,
+            "size":12
+        }],
+        "dataProvider": rfcregisterrfctypecount,
+//        "rotate": true,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Nos"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+//            "lineColor": "#5bc0de",
+            "lineColor": "#00bfff",
+            "fillColors": "#00bfff",
+
+            "balloonText": "Total: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Total",
+            "type": "column",
+            "valueField": "RFCCount"
+        },{
+            "id": "g4",
+            "valueAxis": "v1",
+            "balloonText": "Approve : <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "lineColor": "#800080",
+            "fillColors": "#800080",
+            "title": "Approve",
+            "type": "column",
+            "clustered":false,
+            "columnWidth":0.5,
+            "valueField": "ApproveCount"
+        }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "RFCType",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function deleteRFCResource(event, row) {
+    event.preventDefault();
+    var rowData = $("#grid").jqxGrid('getrowdata', row);
+    if (confirm("Do you want to delete?")) {
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/deleterfcregister',
+            type: 'POST',
+            data: "rfcId="+ rowData.RFCRegisterId,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $("#grid").jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Failed to delete the request!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+}
+
+function renderRowDetail(id,type) {
+
+    var dataValue = '';
+    var sUrl= "";
+    switch (type) {
+        case "WorkType-Edit":
+            sUrl =  'project/template/getrfcworktype';
+            break;
+        case "WorkGroup-Add":
+            sUrl =  'project/template/getrfcworkgroup';
+            break;
+        case "WorkGroup-Edit":
+            sUrl =  'project/template/getrfcworkgroup';
+            break;
+        case "WorkGroup-Delete":
+            sUrl =  'project/template/getrfcworkgroupdelete';
+            break;
+        case "Resource-Group-Add":
+            sUrl =  'project/template/getrfcresgroup';
+            break;
+        case "Resource-Group-Edit":
+            sUrl =  'project/template/getrfcresgroup';
+            break;
+        case "Resource-Group-Delete":
+            sUrl =  'project/template/getrfcresgroupdelete';
+            break;
+        case "Resource-Add":
+            sUrl =  'project/template/getrfcresource';
+            break;
+        case "Resource-Edit":
+            sUrl =  'project/template/getrfcresource';
+            break;
+        case "Resource-Delete":
+            sUrl =  'project/template/getrfcresourcedelete';
+            break;
+        case "IOW-Add":
+            sUrl =  'project/template/getrfciow';
+            break;
+        case "IOW-Edit":
+            sUrl =  'project/template/getrfciow';
+            break;
+        case "IOW-Delete":
+            sUrl =  'project/template/getrfciowdelete';
+            break;
+        case "ProjectIOW-Add":
+            sUrl =  'project/template/getrfcprojectiow';
+            break;
+        case "ProjectIOW-Edit":
+            sUrl =  'project/template/getrfcprojectiow';
+            break;
+        case "Project-IOW-Delete":
+            sUrl =  'project/template/getrfcprojectiowdelete';
+            break;
+        case "IOWPlan-Add":
+            sUrl =  'project/template/getrfciowplan';
+            break;
+        case "OtherCost-Add":
+            sUrl =  'project/template/getrfcothercost';
+            break;
+        case "OtherCost-Edit":
+            sUrl =  'project/template/getrfcothercost';
+            break;
+    }
+
+    if (sUrl =="")  return;
+    $.ajax({
+        url: getBaseURL() + sUrl,
+        type: 'POST',
+        data: {rfcid: id},
+        async: false,
+        success: function(data,status, xhr) {
+            if(xhr.status == 200)
+                dataValue = data;
+        }, error: function(xhr, status, errorThrown) {
+        }
+    });
+    return dataValue;
+}
+
+
+//Print option
+$("#excelExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+});
+$("#csvExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+});
+$("#htmlExport").click(function () {
+    $("#grid").jqxGrid('exportdata', 'html', 'jqxGrid');
+});
+
+$("#print").click(function () {
+    var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+    var newWindow = window.open('', '', 'width=800, height=500'),
+        document = newWindow.document.open(),
+        pageContent =
+            '<!DOCTYPE html>\n' +
+            '<html>\n' +
+            '<head>\n' +
+            '<meta charset="utf-8" />\n' +
+            '<title>RFC Register</title>\n' +
+            '<h1>RFC Register</h1>\n' +
+            '</head>\n' +
+            '<body>\n' + gridContent + '\n</body>\n</html>';
+    document.write(pageContent);
+    document.close();
+    newWindow.print();
+});
+
+//    function printGrid(){
+//        $("#grid").jqxGrid('exportdata', 'pdf', 'RFCRegister');
+//    }
+
+</script>

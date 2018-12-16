@@ -1,0 +1,417 @@
+<style type="text/css">
+    .newlead_notifi									{color:#1f1f20; border:1px solid #f6e39e; background-color:#f7eecb; margin-top:3px; margin-bottom:15px;font-size:14px; padding:2px 10px 2px 4px !important;}
+    .newlead_notifi span 							{padding:2px 8px; margin-right:5px; color:#fff; display:inline-block; background-color:#58a756;}
+    .table-responsive {box-shadow: 0 0 0 rgba(0, 0, 0, 0.12), 0 0 0 rgba(0, 0, 0, 0.24) !important;}
+    .lbl_mtb {margin-top: 3px!important;margin-bottom: 3px !important;}
+    .blubg{background-color: #add8e6;margin-bottom:20px;padding-top:20px;}
+    .mar_30{margin-top:30px;}
+    .checkbox-styled{top: 10px !important;}
+    .lbl_move{height:40px !important;}
+    .nx-btn                        {margin-top:11px !important;margin-right:50px !important;}
+    .nx-btn a:hover                {border:1px solid #23bfee !important; background:#fff !important; color:#23bfee !important;}
+    .nx-btn a                      {background:#23bfee!important;border:1px solid #23bfee !important; font-weight:600;color:#fff!important; font-size:14px; padding: 5px 10px; text-align: center; transition: all 0.4s ease 0s;}
+	.bootstrap-select.btn-group .btn .filter-option {margin-top: -5px !important;}
+	.bs-searchbox input.form-control {border: 1px solid #ddd !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <form method="post" id="submit_filter" enctype="multipart/form-data">
+            <div  class="col-lg-12">
+                <h1 class="flowptxt" style="float:left !important;">Telecaller</h1>
+                <h1 class="flowptxt" style="float:right!important;">Filter
+                    <label class="checkbox-styled">
+                        <input type="checkbox" name="filterCheck" value="1" onchange="filterHide(this);" <?php if(isset($filterCheck) && $filterCheck==1) { echo 'checked'; } ?> />
+                        <span></span>
+                    </label>
+                </h1>
+            </div>
+            <div class="clearfix"></div>
+            <div id="filter-container" class="col-lg-12" <?php if(isset($filterCheck) && $filterCheck==1) { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; } ?>>
+                <div class="col-lg-12 blubg">
+                    <div class="col-lg-2 form-group mar_30">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="fromDate" id="fromDate" class="form-control lbl_move" readonly="readonly" label="From Date" value="<?php echo (isset($fromDate) && $fromDate != "") ? $fromDate : Date('d-m-Y'); ?>" />
+                    </div>
+                    <div class="col-lg-2 form-group mar_30">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="toDate" id="toDate" class="form-control date_pickers lbl_move" readonly="readonly" label="To Date" value="<?php echo (isset($toDate) && $toDate != "") ? $toDate : Date('d-m-Y'); ?>" />
+                    </div>
+                    <div class="col-lg-2 form-group mar_30">
+                        <select name="campaign[]" id="campaign" data-selected-text-format="count > 0" data-tag="" onchange="bothCP(this);" style="width:100%;" class="form-control selectpicker sortoption" data-live-search="true" data-size="4" multiple title="Campaign Wise">
+                            <?php if(isset($campaign)) {
+                                foreach($campaign as $cam){
+                                    if(isset($campaignArr) && count($campaignArr)>0) {
+                                        echo "<option ".(((in_array($cam['Id'], $campaignArr)))? 'selected':'')." value='".$cam['Id']."' >".$cam['Name']."</option>";
+                                    } else {
+                                        echo "<option value='".$cam['Id']."' >".$cam['Name']."</option>";
+                                    }
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 form-group mar_30">
+                        <select name="project[]" id="project" data-selected-text-format="count > 0" data-tag="" onchange="bothCP(this);" style="width:100%;" class="form-control selectpicker sortoption" data-live-search="true" data-size="4" multiple title="Project Wise">
+                            <?php if(isset($resultsLeadProjects)) {
+                                foreach($resultsLeadProjects as $proj){
+                                    if(isset($projectArr) && count($projectArr)>0) {
+                                        echo "<option ".(((in_array($proj['ProjectId'], $projectArr)))? 'selected':'')." value='".$proj['ProjectId']."' >".$proj['ProjectName']."</option>";
+
+                                    } else {
+                                        echo "<option value='".$proj['ProjectId']."' >".$proj['ProjectName']."</option>";
+                                    }
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 form-group mar_30">
+                        <select class="form-control single_dropdown lbl_move" id="executive" name="executive" label="Executive Wise" style="width:100%;">
+                            <option value=""></option>
+                            <?php if(isset($executiveList)) {
+                                foreach($executiveList as $exe){
+                                    if(isset($executive)) {
+                                        echo "<option ".($executive==$exe['UserId']? 'selected':'')." value='".$exe['UserId']."' >".$exe['EmployeeName']."</option>";
+
+                                    } else {
+                                        echo "<option value='".$exe['UserId']."' >".$exe['EmployeeName']."</option>";
+                                    }
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 form-group mar_30">
+                        <ul>
+                            <li class="nx-btn" style="display:block !important;"><a href="javascript:void(0);" onclick="$('#submit_filter').submit();">Submit</a></li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="javascript:void(0);" class="scroller" data-index="">
+                    <div class="pnl1 tet-cllr1" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <div class="value" style="width: 65%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($tCallDone)) ? $tCallDone : '0';?></h1>
+                            <p>Total No of Calls Done</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="javascript:void(0);" class="scroller gotoLead" data-ltype="1">
+                    <div class="pnl1 tet-cllr2" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-thumb-tack"></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($tQualifiedLeads)) ? $tQualifiedLeads : '0';?></h1>
+                            <p>Qualified Leads</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="javascript:void(0);" class="scroller gotoLead" data-ltype="0">
+                    <div class="pnl1 tet-cllr3" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-hourglass-end"></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($tPendingLeads)) ? $tPendingLeads : '0';?></h1>
+                            <p>Pending Leads</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                <a href="javascript:void(0);" class="scroller gotoLead" data-ltype="2">
+                    <div class="pnl1 tet-cllr4" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-anchor"></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($tdropLeads)) ? $tdropLeads : '0';?></h1>
+                            <p>Dropped Leads</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+			<div class="clearfix"></div>
+            <?php if($data['UnFollowedLeadCnt']!=0 && $data['UnFollowedLeadCnt'] != ''): ?>
+                <div class="col-lg-12 commargin_ttop_20">
+                    <div class="col-lg-12">
+                        <section class="pnnal">
+                            <header class="pnnal-heading"><i class="fa fa-phone" style="margin-right:10px;"></i>Pending Call List</header>
+                            <div class="pnnal-body">
+                                <div class="table-responsive clear">
+                                    <table id="EditTable" class="table table-hover clear" style="border:1px solid #ccc;">
+                                        <thead>
+                                        <tr>
+                                            <th>Previous Call Date</th>
+                                            <th>Previous Call Type</th>
+                                            <th>Nature</th>
+                                            <th>Lead Name</th>
+                                            <th>Executive Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php if(isset($pendingFollowup)) { foreach($pendingFollowup as $leadFollowup): ?>
+                                            <tr style="cursor:pointer;" data-url="<?php  echo $this->basePath() . '/telecaller/index/followup/' . $leadFollowup['LeadId'];  ?>">
+                                                <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowupDate'])); ?></td>
+                                                <td><?php if(!empty($leadFollowup['CallTypeId'])){ if($leadFollowup['CallTypeId']==1) { echo 'Followup'; } else if($leadFollowup['CallTypeId']==2) { echo 'Transfer'; }  else if($leadFollowup['CallTypeId']==3) { echo 'Drop'; } else { echo 'Fresh'; } } else { echo"-"; }?></td>
+                                                <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                                <td><?php echo $leadFollowup['LeadName']; ?></td>
+                                                <td><?php echo $leadFollowup['ExecuName']; ?></td>
+                                                <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                            </tr>
+                                        <?php endforeach;  }?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </form>
+    </div>
+</div>
+<div id="back-top" data-toggle="tooltip" data-placement="left" title="Lift Top"><a href="#top"><i class="fa fa fa-arrow-up"></i></a></div>
+
+<script>
+    $(document).on("click",".gotoLead",function(){
+        var fDate=$("#fromDate").val();
+        var tDate=$("#toDate").val();
+        var leadStatus = $(this).attr('data-ltype');
+        window.location.replace(getBaseURL() + "telecaller/index/lead-register/0/" + fDate + "/" + tDate + "/" + leadStatus);
+    });
+    function bothCP(ch) {
+        if(($("#project").val()==null || $("#project").val().length==0) && ($('#campaign').val()!=null && $('#campaign').val().length>0 )) {
+            if( $('#project').attr("data-tag")=="first") {
+
+                $('#campaign').val(null).trigger('change');
+                var campaign = <?php echo (isset($campaign)) ? json_encode($campaign) : ''?>;
+                var bindData='';
+                $.each(campaign,function(i,o) {
+                    bindData+='<option value="'+ o.Id+'">'+o.Name+'</option>'
+                });
+                $('#campaign').html(bindData);
+                $('.selectpicker').selectpicker('refresh');
+            }
+            $('#campaign').attr("data-tag","first");
+            $('#project').attr("data-tag","");
+        } else if(($("#campaign").val()==null || $("#campaign").val().length==0) && ($('#project').val()!=null && $('#project').val().length>0 )) {
+            if($('#campaign').attr("data-tag")=="first") {
+                $('#project').val(null).trigger('change');
+                var resultsLeadProjects = <?php echo (isset($resultsLeadProjects)) ? json_encode($resultsLeadProjects) : ''?>;
+                var bindData='';
+                $.each(resultsLeadProjects,function(i,o) {
+                    bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+                });
+                $('#project').html(bindData);
+                $('.selectpicker').selectpicker('refresh');
+
+            }
+            $('#campaign').attr("data-tag","");
+            $('#project').attr("data-tag","first");
+        }  else if(($("#project").val()==null || $("#project").val().length==0) && ($("#campaign").val()==null || $("#campaign").val().length==0)) {
+            if($('#campaign').attr("data-tag")=="first") {
+
+                var resultsLeadProjects = <?php echo (isset($resultsLeadProjects)) ? json_encode($resultsLeadProjects) : ''?>;
+                var bindData='';
+                $.each(resultsLeadProjects,function(i,o) {
+                    bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+                });
+                $('#project').html(bindData);
+                $('.selectpicker').selectpicker('refresh');
+
+            } else if( $('#project').attr("data-tag")=="first") {
+
+                //$('#campaign').select2("val", "");
+                var campaign = <?php echo (isset($campaign)) ? json_encode($campaign) : ''?>;
+                var bindData='';
+                $.each(campaign,function(i,o) {
+                    bindData+='<option value="'+ o.Id+'">'+o.Name+'</option>'
+                });
+                $('#campaign').html(bindData);
+                $('.selectpicker').selectpicker('refresh');
+
+            }
+            $('#campaign').attr("data-tag","");
+            $('#project').attr("data-tag","");
+        }
+
+        if($('#campaign').attr("data-tag")=="first") {
+            if($(ch).attr('id')=="campaign") {
+                getProjects($('#campaign').val());
+            }
+
+        } else if($('#project').attr("data-tag")=="first") {
+
+            if($(ch).attr('id')=="project") {
+                getCampaign($('#project').val());
+            }
+
+        }
+    }
+
+    function getProjects(cval) {
+        if(cval!=null && cval.length>0) {
+            $.ajax({
+                url: getBaseURL() + "telecaller/index/index",
+                type: "post",
+                data: {'mode': 'project', 'CampaignVal': JSON.stringify(cval)},
+                success: function (data, textStatus, jqXHR) {
+                    var dataLs = JSON.parse(data);
+                    $('#project').val(null).trigger('change');
+
+                    $('#project').html('');
+                    if (dataLs.length>0) {
+                        var bindData='';
+                        $.each(dataLs,function(i,o) {
+                            bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+                        });
+                        $('#project').html(bindData);
+
+                    }
+                    $('.selectpicker').selectpicker('refresh');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    callback(false);
+                    alert(textStatus + "-----" + errorThrown);
+                }
+            });
+        } else {
+            $('#project').val(null).trigger('change');
+            var resultsLeadProjects = <?php echo (isset($resultsLeadProjects)) ? json_encode($resultsLeadProjects) : ''?>;
+            var bindData='';
+            $.each(resultsLeadProjects,function(i,o) {
+                bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+            });
+            $('#project').html(bindData);
+            $('.selectpicker').selectpicker('refresh');
+
+        }
+    }
+
+    function getCampaign(pval) {
+
+
+        if(pval!=null && pval.length>0) {
+            $.ajax({
+                url: getBaseURL() + "telecaller/index/index",
+                type: "post",
+                data: {'mode': 'campaign', 'ProjectVal': JSON.stringify(pval)},
+                success: function (data, textStatus, jqXHR) {
+                    var dataLs = JSON.parse(data);
+                    $('#campaign').val(null).trigger('change');
+                    $('#campaign').html('');
+                    if (dataLs.length>0) {
+                        var bindData='';
+                        $.each(dataLs,function(i,o) {
+                            bindData+='<option value="'+ o.Id+'">'+o.Name+'</option>'
+                        });
+                        $('#campaign').html(bindData);
+                    }
+                    $('.selectpicker').selectpicker('refresh');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + "-----" + errorThrown);
+                }
+            });
+        } else {
+
+        }
+
+    }
+    function filterHide(cl) {
+
+        if(cl.checked) {
+            $('#filter-container').show();
+        } else {
+            $('#filter-container').hide();
+        }
+    }
+    $(document).ready(function() {
+        var fdt=$('#fromDate').val();
+        $('.date_pickers').datepicker({
+            format: "dd-mm-yyyy",
+            startDate: fdt,
+            todayBtn: false,
+            orientation: "top auto",
+            autoclose: true
+        });
+        $('#fromDate').datepicker({
+            format: "dd-mm-yyyy",
+            todayBtn: false,
+            orientation: "top auto",
+            autoclose: true
+        }).on('changeDate', function (selected) {
+            var minDate = selected.date;
+
+            var to = $('.date_pickers').val().split('-');
+            var tDate = new Date(to[1]+'/'+to[0]+'/'+to[2]);
+            if(minDate>tDate) {
+                $('.date_pickers').val( minDate.getDate() + '-' + (minDate.getMonth() + 1)+ '-' +  minDate.getFullYear());
+            }
+            $('.date_pickers').datepicker('setStartDate', minDate);
+        });
+
+        $("#back-top").fadeOut();
+        $(window).scroll(function(){
+            if ($(this).scrollTop() > 100) {
+                $("#back-top").fadeIn();
+            } else {
+                $("#back-top").fadeOut();
+            }
+        });
+        $("#back-top").click(function(){
+            $("html, body").animate({ scrollTop: 0 }, 1000);
+            return false;
+        });
+    });
+    $(document).on("change",".dFliter",function(){
+        var fDate=$("#fromDate").val();
+        var tDate=$("#toDate").val();
+        window.location.replace(getBaseURL() + "telecaller/index/lead-register/0/" + fDate + "/" + tDate + "/" + $('#ConvertLead').val());
+    });
+    $(function () {
+        var $backTop = $("#back-top");
+        bindBackToTopBtn();
+        bindFollowUpLink();
+
+        function bindFollowUpLink() {
+            $('#EditTable > tbody > tr').on('click', function () {
+
+                var url = $(this).attr('data-url');
+                if (typeof url === 'undefined' || url.length <= 0) {
+                    return;
+                }
+
+                window.location.href = url;
+            });
+        }
+
+        function bindBackToTopBtn() {
+
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 100) {
+                    $backTop.fadeIn();
+                } else {
+                    $backTop.fadeOut();
+                }
+            });
+
+            $backTop.click(function () {
+                $("html body").animate({scrollTop: 0}, 1000);
+                return false;
+            });
+        }
+    });
+</script>

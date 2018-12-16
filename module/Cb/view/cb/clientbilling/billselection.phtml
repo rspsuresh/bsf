@@ -1,0 +1,515 @@
+<?php if(isset($showPlanUpgradeMsg) && $showPlanUpgradeMsg):?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+	            <h2 class="txt_center m_tb40">
+                    <img class="m_btm20" src="<?php echo $this->basePath(); ?>/images/mail_icon.png"/><br />
+                    Sorry, You are allowed to add only <?php echo $NoOfBillCount;?> bill(s) in this plan!<br><br>
+                    <a href="<?php echo $this->basePath(); ?>/cb/plan/upgrade">Upgrade your plan!</a>
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+<?php else: ?>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.bootstrap-responsive-tabs.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    .form-control {
+        box-shadow:none !important
+    }
+    .single_dropdown2.error  + .select2 + .bar,
+    .single_dropdown2.error  + .select2 + .bar > .bar-in {background-color:#D64541!important;}
+    .single_dropdown2.error  + .select2 + .bar + label {color: #D64541!important;}
+
+    .panel {
+        border-radius:0px !important;
+    }
+    .panel-info {
+        border:none;
+        border-top:none;
+    }
+
+    .input-grouping > .polymer-form {width: 50%;float: left;}
+    .input-grouping > .input-group-btn {width: 30%;top: 2px;}
+    .input-grouping > .input-group-btn > select.parent_text {padding: 5px 4px 6px 4px;}
+    .input-grouping  > input.parent_text {width: 60%;float: left;}
+    .opt-listed ul li p{ height:25px !important; padding-top:0px !important;}
+    .opt-listed ul{ width:100% !important; margin-left:0% !important;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form  id="formWrapper"  method="post">
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                <input type="hidden" name="mode" id="mode" value="<?php echo (isset($mode)) ? $mode  : 'add'; ?>"/>
+                <div class="col-lg-12">
+                    <h1 class="text-center">Bill Entry</h1>
+                </div>
+                <!--form start-->
+                <div class="col-lg-12" >
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                            <div class="form-horizontal">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="ProjectName" id="ProjectName" class="form-control lbl_move" label="Project Name" value="<?php echo (isset($billinfo)) ? $billinfo['ProjectName'] : ''; ?>" <?php echo (isset($billinfo)) ? 'readonly' : '';?>/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="OrderNo" id="OrderNo" class="form-control lbl_move" label="Order No"  value="<?php echo (isset($billinfo)) ? $billinfo['WONo'] : ''; ?>" disabled/>
+                                            <input type="hidden" name="PWorkOrderId" id="PWorkOrderId" value="<?php echo (isset($billinfo)) ? $billinfo['WorkOrderId'] : 0; ?>"/>
+                                            <input type="hidden" name="WOStartDate" id="WOStartDate" value="<?php echo (isset($billinfo)) ? $billinfo['StartDate'] : ''; ?>"/>
+                                            <input type="hidden" id="WODate" value="<?php echo (isset($billinfo)) ? $billinfo['WODate'] : ''; ?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <?php if(!isset($billinfo)):?>
+                                                <span class="new-pg" id="btn-editbill" style="display: none;" data-toggle="modal" data-target="#billmodal"><i class="fa fa-pencil"></i></span>
+                                            <?php endif; ?>
+                                            <input type="text" name="BillNo" id="BillNo" class="form-control lbl_move" label="Bill No" value="<?php echo (isset($billinfo)) ? $billinfo['BillNo'] : ''; ?>" <?php echo (isset($billinfo)) ? 'readonly' : '';?>/>
+                                            <input type="hidden" name="BillId" id="BillId"  value="<?php echo (isset($billid)) ? $billid : 0; ?>"/>
+                                            <input type="hidden" id="BillDate" value="<?php echo (isset($billinfo)) ? $billinfo['BillDate'] : ''; ?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <select name="BillTypeL" id="BillTypeL" class="single_dropdown2 lbl_move" style="width:100%;" label="Bill Type" <?php echo (isset($type) && $type != '') ? 'disabled' : '';?>>
+                                                <option></option>
+                                                <option value="S" <?php echo (isset($type) && $type == "S") ? 'selected' : '';?>>Submit Bill</option>
+                                                <option value="C" <?php echo (isset($type) && $type == "C") ? 'selected' : '';?>>Certified Bill</option>
+                                            </select>
+                                            <?php if(isset($type)):?>
+                                                <input type="hidden" name="BillType" id="BillType" value="<?php echo (isset($type)) ? $type : ''; ?>"/>
+                                            <?php endif;?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--Modal-->
+                                <div id="billmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                                                <h1>Create Bill</h1>
+                                            </div>
+                                            <div class="modal-body" style="padding-top: 30px;">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control lbl_move" name="MBillNo" id="MBillNo" label="Bill No." onchange="CheckBillNo(this, this.value)">
+                                                </div>
+                                                <div class="form-group">
+                                                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" name="MBillDate" id="MBillDate" class="form-control date_picker lbl_move" label="Bill Date" onchange="validateDate(this)"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <select name="MBillEntryType" id="MBillEntryType" class="single_dropdown2 lbl_move" style="width:100%;" label="Bill Entry Type">
+                                                        <option></option>
+                                                        <!--                                        <option value="S">First Bill</option>-->
+                                                        <option value="R">Running Bill</option>
+                                                        <!--                                        <option value="F">Final Bill</option>-->
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" name="MFromDate" id="MFromDate" class="form-control date_picker lbl_move" label="From Date" onchange="CheckBillDates(this, this.value)"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" name="MToDate" id="MToDate" class="form-control date_picker lbl_move" label="To Date" onchange="CheckBillDates(this, this.value)"/>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                                                <button type="button" id="btn-newbill" class="md_ok" onclick="return BillUpdate()">Create</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="next-bt"><a href="#" onclick="validateIndex(); return false;">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+// UI Script
+$('.responsive-tabs').responsiveTabs({
+    accordionOn: ['xs', 'sm']
+});
+
+var arr_projects = <?php echo (isset($projects)) ? json_encode($projects) : '[]';?>;
+var arr_newbills = [],
+    arr_bills = [];
+var $ProjectName = $('#ProjectName'),
+    $WorkOrderId = $('#PWorkOrderId'),
+    $WOStartDate = $('#WOStartDate'),
+    $BillNo = $('#BillNo'),
+    $BillId = $('#BillId'),
+    tmpBillData = null,
+    $btn_newbill = $('#btn-newbill'),
+    $OrderNo = $('#OrderNo'),
+    tmpSelProjectId = null,
+    tmpSelOrderId = null,
+    $MBillNo = $('#MBillNo'),
+    $MBillDate = $('#MBillDate'),
+    $MFromDate = $('#MFromDate'),
+    $MToDate = $('#MToDate'),
+    $btn_editbill = $('#btn-editbill'),
+    $BillType = $('#BillType'),
+    $WODate = $('#WODate'),
+    $BillDate = $('#BillDate');
+
+$(function () {
+    // select2 initialize
+    $(".single_dropdown2").select2({
+        placeholder: "",
+        minimumResultsForSearch: -1
+    });
+    $ProjectName.autocomplete({
+        lookup: arr_projects,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $OrderNo.prop('disabled',false);
+                $OrderNo.removeClass('error');
+                bindOrderNoAutoComplete(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $OrderNo.prop('disabled',true);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $OrderNo.prop('disabled',true);
+            } else $(this).removeClass('error');
+        }
+    });
+
+    $('#BillTypeL').on('change', function() {
+        $('#BillType').val($(this).find('option:selected').val());
+    });
+});
+function AddNewBill() {
+    if(tmpBillData != null)
+        $btn_newbill.html('Update');
+
+    $MBillNo.val($BillNo.val());
+    $MBillNo.trigger('change');
+    $('.autocomplete-suggestions').hide();
+    $("#billmodal").modal('show');
+}
+
+function bindOrderNoAutoComplete(projectId) {
+    if(tmpSelProjectId == projectId)
+        return;
+
+    tmpSelProjectId = projectId;
+    $OrderNo.val('');
+    $WorkOrderId.val(0);
+    // fetch data
+    $.ajax({
+        url: getBaseURL() + "cb/clientbilling/billselection",
+        data: {rtype:'getWONo', data: projectId, csrf: '<?php echo isset($csrf)?$csrf:''; ?>'},
+        async: false,
+        type: 'post',
+        success: function(data,status, xhr) {
+            var detail = JSON.parse(data);
+            $OrderNo.autocomplete({
+                lookup: detail,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $WorkOrderId.val(suggestion.data);
+                        $WOStartDate.val(suggestion.StartDate);
+                        $WODate.val(suggestion.WODate);
+                        bindBillNoAutoComplete(suggestion.data);
+                        $(this).removeClass('error');
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $WorkOrderId.val(0);
+                    $WOStartDate.val('');
+                    $WODate.val('');
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $(this).addClass('error');
+                        $WorkOrderId.val(0);
+                        $WODate.val('');
+                        $WOStartDate.val('');
+                    } else $(this).removeClass('error');
+                }
+            });
+        }
+    });
+}
+function bindBillNoAutoComplete(orderid) {
+    if(tmpSelOrderId == orderid)
+        return;
+    tmpSelOrderId = orderid;
+    $BillNo.val('');
+    $BillId.val(0);
+    // fetch data
+    $.ajax({
+        url: getBaseURL() + "cb/clientbilling/billselection",
+        data: {rtype:'getBillNo', data: orderid, csrf: '<?php echo isset($csrf)?$csrf:''; ?>'},
+        async: false,
+        type: 'post',
+        success: function(data,status, xhr) {
+            arr_bills = JSON.parse(data);
+            initBillNoAutoComplete();
+        }
+    });
+}
+function initBillNoAutoComplete() {
+    $BillNo.autocomplete({
+        lookup: arr_bills.concat(arr_newbills),
+        showNoSuggestionNotice: <?php echo (isset($allowBillEntry) && !$allowBillEntry) ? 'false' : 'true';?>,
+        noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" value="Bill" onclick="return AddNewBill()">',
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $BillId.val(suggestion.data);
+                $BillDate.val(suggestion.BillDate);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $BillId.val(0);
+            $BillDate.val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $BillId.val(0);
+                $BillDate.val('');
+            } else $(this).removeClass('error');
+        }
+    });
+}
+function CheckBillNo(x, value) {
+    var $el = $(x);
+    $el.removeClass('error');
+    $.ajax({
+        url: getBaseURL() + "cb/clientbilling/index",
+        data: {rtype:'billno', data: value, csrf: '<?php echo isset($csrf)?$csrf:''; ?>'},
+        async: false,
+        type: 'post',
+        success: function(data,status) {
+            if (data == "Y") {
+                $el.addClass('error');
+                alert('Bill No. already exists!');
+            }
+        }
+    });
+}
+
+function CheckBillDates(x, value) {
+    var $el = $(x);
+    if(!(/^[0-9]{2}\-(1[0-2]|0[1-9])\-[0-9]{4}$/.test($el.val()))) {
+        showError($el, 'Invalid date');
+        return;
+    } else
+        removeError($el);
+
+    if(!checkDateRange($MFromDate.val(), $MToDate.val())) {
+        showError($MToDate, 'To date should be greater than From Date!');
+        $MToDate.focus();
+    } else
+        removeError($MToDate);
+}
+
+function BillUpdate() {
+    var billNo = $MBillNo.val();
+    if(billNo.length == 0) {
+        alert('Bill No. is required!');
+        return false;
+    }
+
+    if($MBillNo.hasClass('error')) {
+        alert('Bill No. already exists!');
+        return false;
+    }
+
+    var billDate = $MBillDate.val();
+    if(billDate.length == 0) {
+        alert('Bill Date is required!');
+        return false;
+    }
+
+    // check bill date is greater or equal to wo start date
+    if(!checkDateRange($WOStartDate.val(), billDate)) {
+        alert('Bill Date is should be greater than or equal to Commencement Date ('+$WOStartDate.val()+')!');
+        return false;
+    }
+
+    var $BillEntryType = $('#MBillEntryType');
+    if($BillEntryType.val().length == 0){
+        alert('Bill Entry Type is required!');
+        $BillEntryType.focus();
+        return false;
+    }
+
+    if($MBillDate.hasClass('error')) {
+        alert('Bill Date is invalid!');
+        return false;
+    }
+
+    if($MFromDate.val().length == 0) {
+        alert('From Date is required!');
+        return false;
+    }
+
+    // check from date is greater or equal to wo start date
+    if(!checkDateRange(billDate, $MFromDate.val())) {
+        alert('From Date is should be greater than or equal to Bill Date!');
+        return false;
+    }
+
+    if($MFromDate.hasClass('error')) {
+        alert('From Date is invalid!');
+        return false;
+    }
+
+    if($MToDate.val().length == 0) {
+        alert('To Date is required!');
+        return false;
+    }
+
+    if($MToDate.hasClass('error')) {
+        alert('To Date is invalid!');
+        return false;
+    }
+
+    if(tmpBillData != null)
+        arr_newbills.pop();
+
+    tmpBillData = billNo;
+
+    arr_newbills.push({data: 'new', value: billNo, BillDate: billDate});
+
+    initBillNoAutoComplete();
+    $BillNo.val(billNo);
+    $BillNo.trigger('focus');
+    $btn_editbill.show();
+    $("#billmodal").modal('hide');
+}
+
+function validateIndex() {
+    var projectName = $ProjectName.val(),
+        orderno = $OrderNo.val(),
+        billno = $BillNo.val(),
+        billType = $BillType.val();
+    if(projectName.length == 0 || $ProjectName.hasClass('error')) {
+        alert('Project Name is required!');
+        $ProjectName.focus();
+        return false;
+    }
+
+    if(orderno.length == 0 || $OrderNo.hasClass('error')) {
+        alert('Order No. is required!');
+        $OrderNo.focus();
+        return false;
+    }
+
+    if(billno.length == 0 || $BillNo.hasClass('error')) {
+        alert('Bill No. is required!');
+        $BillNo.focus();
+        return false;
+    }
+
+    if(billType.length == 0){
+        alert('Bill Type is required!');
+        $BillType.focus();
+        return false;
+    }
+	
+	if(($BillId.val()== 0 || $BillId.val() == "new") && $BillType.val()=="C"){
+		alert('Submit bill not found!');
+        $BillType.focus();
+        return false;
+	}
+
+	//PrevBillApproved
+	var WorkOrder_Id= $('#PWorkOrderId').val(),
+        Bill_Type =$BillType.val(),
+        value= 0,
+        Bill_Id= 0,
+        isBillValid = true;
+	if(($BillId.val()== 0 || $BillId.val() == "new") && $BillType.val()=="S"){
+		$.ajax({
+			url: getBaseURL() + "cb/clientbilling/billselection",
+			data: {rtype:'billAddchk', data: value, Bill_Id: Bill_Id, WorkOrderId: WorkOrder_Id, BillType:Bill_Type, csrf: '<?php echo isset($csrf)?$csrf:''; ?>'},
+			async: false,
+			type: 'post',
+			success: function(data,status) {
+				if (data == "Y") {
+					alert('Prev bill not approved!');
+                    isBillValid = false;
+				}
+			},
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403) {
+                    alert(jqXHR.responseText);
+                    isBillValid =  false;
+                }
+            }
+		});
+	} else if ($BillType.val()=="C"){
+		Bill_Id=$BillId.val();
+		$.ajax({
+			url: getBaseURL() + "cb/clientbilling/billselection",
+			data: {rtype:'billAddchk', data: value, Bill_Id: Bill_Id, WorkOrderId: WorkOrder_Id, BillType:Bill_Type, csrf: '<?php echo isset($csrf)?$csrf:''; ?>'},
+			async: false,
+			type: 'post',
+			success: function(data,status) {
+				if (data == "S") {
+					alert('Submit bill is not approved!');
+                    isBillValid =  false;
+				} else if (data == "C") {
+                    alert('Previous certify bill is not approved!');
+                    isBillValid =  false;
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403) {
+                    alert(jqXHR.responseText);
+                    isBillValid =  false;
+                }
+            }
+		});
+	}
+
+    if(!isBillValid)
+        return false;
+
+	$('#formWrapper').submit();
+}
+</script>
+<?php endif;?>

@@ -1,0 +1,651 @@
+<?php $bsf = new \BuildsuperfastClass(); ?>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/vertical-timeline.css"> <!-- vertical timeline css -->
+<script src="<?php echo $this->basePath(); ?>/js/vertical-timeline.js"></script> <!-- vertical timeline js-->
+<script src="<?php echo $this->basePath(); ?>/js/modernizr.js"></script> <!-- Modernizr -->
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/mediaelementplayer.min.css" />
+<script src="<?php echo $this->basePath(); ?>/js/mediaelement-and-player.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".lightGallery").lightGallery({
+		thumbnail        : false,
+		loop             : true,
+		controls         : false,
+		enableTouch      : false,  
+		enableDrag       : false   	
+	});
+});
+</script>
+<style type="text/css">
+.text-uppercase {text-transform:uppercase;}
+.fe_container .fe_title 	{border-bottom:0px !important;}
+.fe_forecast_link			{display:none !important;}
+#lg-slider .lg-slide img 	{cursor:inherit !important;}
+.popover					{background-color:lightgrey;font-size: 1px;}
+</style>
+<div class="content_wrapper padlr0 padtop0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12 clear padlr0">
+            <div id="cover_display" class="user_view_cover comp_view_cover" style='background: url("<?php if(isset($resultsMain['UserCover']) && trim($resultsMain['UserCover'])!='') { echo $this->basePath(); ?>/<?php echo $resultsMain['UserCover']; } else { echo $this->basePath();?>/images/companyview_cover.jpg<?php }?>");'>
+            	<div class="comp_view_logo brad_200 photomask">
+                    <div class="comp_view_logo_inner brad_200">
+                        <div class="brad_200 comp_vlogo">
+						    <img src="<?php if(isset($resultsMain['UserLogo']) && trim($resultsMain['UserLogo'])!='') { echo $this->basePath(); ?>/<?php echo $resultsMain['UserLogo']; } else { echo $this->basePath();?>/images/avatar.jpg<?php }?>"  class="brad_200" alt="" title="" />
+                        </div>
+                    </div>
+                </div>
+                <div class="comp_view_cnt">
+                    <div class="col-lg-12 col-md-12 col-sm-12 padlr0 comp_view_user">
+                        <h1 data-bsfhead="EmployeeName" id="ename"><?php echo (isset($resultsMain['EmployeeName'])) ? $resultsMain['EmployeeName'] : 'Employee Name';?></h1>
+                        <p class="clear" ><span><i class="fa fa-suitcase"></i></span> <span id="pos"><?php echo (isset($resultsMain['PositionName'])) ? $resultsMain['PositionName'] : 'Position';?></span><span class="vendor_phone" ><i class="fa fa-flag-o"></i></span><span id="dept"><?php if(isset($resultsMain['Dept_Name'])) { echo $resultsMain['Dept_Name']; }  else { echo 'Department'; }?></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 clear">
+        	<h1 class="float_l head">Time line</h1>
+            <ul class="float_r cnt_innermenu">
+                <li data-bsfshare="Timeline"><a href="javascript:void(0);" id="timeline" class="ripple current" data-placement="bottom" data-toggle="tooltip" onclick="newInfo(this);" data-original-title="Timeline"><span class="fa fa-retweet"></span></a></li>
+                <li data-bsfshare="About"><a href="javascript:void(0);" id="about" class="ripple" data-placement="bottom" data-toggle="tooltip" onclick="newInfo(this);" data-original-title="About"><span class="glyphicon glyphicon-user"></span></a></li>
+                <li data-bsfshare="Contacts"><a href="javascript:void(0);" id="contacts" class="ripple" data-placement="bottom" data-toggle="tooltip" onclick="newInfo(this);" data-original-title="Contacts"><span><i class="fa fa-book"></i></span></a></li>
+            </ul>
+            <div class="timeline clear">
+            	<section class="actvtcnt_stream">
+                    <div class="actvtcnt_area">
+                        <ul class="stream_area" id="newsFeedsList">
+                            <?php
+							if(isset($feedResult) && count($feedResult) > 0) {
+								foreach($feedResult as $feeds) {
+									if($feeds['UserAvatar'] != '' && $feeds['UserAvatar'] != Null) {
+										$feedAvatar = $this->basePath()."/".$feeds['UserAvatar'];
+									} else {
+										$feedAvatar = $this->basePath()."/images/avatar.jpg";
+									}
+									if($feeds['FeedType'] == 'status') { 
+										?>
+										<li data-bsfshare="Status">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4 data-bsfshare="User Name"><span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> shared a status</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Status CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Status Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p data-bsfshare="Message"><?php echo nl2br($feeds['Message']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Status FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Status FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+														<li data-bsfshare="Status Share"><a href="javascript:void(0);"><span><i class="fa fa-share-alt"></i></span>Share</a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'birthday') { ?>
+										<li data-bsfshare="Birthday">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4 ><span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> posted on <?php if($resultsMain['UserId'] == $this->identity()->UserId) { echo 'your'; } else { echo $resultsMain['EmployeeName']."'s"; } ?> timeline</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Birthday Created Date"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Birthday Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['BdayWish']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Birthday FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Birthday FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+														<li data-bsfshare="Birthday Share"><a href="javascript:void(0);"><span><i class="fa fa-share-alt"></i></span>Share</a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'photo') { 
+										$photoShareDetails = $this->BsfShareHelper()->getMultiImage($feeds['PhotoShareId']);?>
+										<li data-bsfshare="Photo">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4><span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> shared (<?php echo count($photoShareDetails); ?>) new photos</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Photo CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Photo Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['PhotoMessage']); ?></p>
+													<section class="post_photos clear">
+														<section class="lightGallery">
+															<?php if (isset($photoShareDetails)) {
+																	$count=1;
+																	foreach ($photoShareDetails as $dispMatch) {
+																		if($count<4){?>
+																			<a href="javascript:void(0);" data-src="<?php echo $this->basePath(); ?>/<?php echo $dispMatch['ImageUrl']; ?>"><img src="<?php echo $this->basePath(); ?>/<?php echo $dispMatch['ImageUrl']; ?>"/></a>
+																	<?php } else { ?>
+																			<a href="javascript:void(0);" style="display:none;" data-src="<?php echo $this->basePath(); ?>/<?php echo $dispMatch['ImageUrl']; ?>"><img src="<?php echo $this->basePath(); ?>/<?php echo $dispMatch['ImageUrl']; ?>"/></a>
+																		<?php  }
+																		$count++;
+																	}
+															} ?>
+														</section>
+														<?php if($count>4) { ?>
+															<a class="more_photos_a"><span><i class="fa fa-picture-o" aria-hidden="true"></i></span> <?php echo $count=$count-4; ?> more photos</a>
+														<?php } ?>
+													</section>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Photo FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Photo FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+														<li data-bsfshare="Photo Share"><a href="javascript:void(0);"><span><i class="fa fa-share-alt"></i></span>Share</a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'ask') { ?>
+										<li>
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4>
+														<span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> asks you to/for <?php echo $feeds['AskFor']; ?> - 
+														<a href="<?php echo (isset($feeds['AskUrl'])) ? $feeds['AskUrl'].'?AskId='.$feeds['AskId'].'&FeedId='.$feeds['FeedId'].'&type=ask' : '';?>"><?php echo (isset($feeds['AskTitle'])) ? $feeds['AskTitle'] : '';?></a>
+													</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Ask CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Ask Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['AskMessage']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Ask FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Ask FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+														<?php  if($feeds['AskFor']=='Information'){ ?>
+															<li data-bsfshare="Ask Respond"><a href="javascript:void(0);" onclick="showrespond();"><span><i class="fa fa-share-alt"></i></span>Respond</a></li>
+														<?php } else { ?>
+															<li><a href="<?php echo (isset($feeds['AskUrl'])) ? $feeds['AskUrl'].'?AskId='.$feeds['AskId'].'&FeedId='.$feeds['FeedId'].'&type=ask' : '';?>"><span><i class="fa fa-share-alt"></i></span>Respond</a></li>
+														<?php } ?>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'response') { ?>
+										<li data-bsfshare="Response">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4>
+														<span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> responded to <?php echo $feeds['AskToName']; ?>'s query on - <?php echo (isset($feeds['AskTitle'])) ? $feeds['AskTitle'] : '';?>
+													</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Response CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Response Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['RespondMessage']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Response FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Response FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'reminder') { ?>
+										<li data-bsfshare="Reminder">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4>
+														<span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> reminds you to/for <?php echo $feeds['AskFor']; ?> - <?php echo (isset($feeds['AskTitle'])) ? $feeds['AskTitle'] : '';?>
+													</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Reminder CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Reminder Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['RemindMessage']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Reminder FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Reminder FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'share') { ?>
+										<li data-bsfshare="Share">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4>
+														<span><?php if($feeds['UserId'] == $this->identity()->UserId) { echo 'You'; } else { echo $feeds['UserName']; } ?></span> shared you a info - 
+														<a href="<?php echo (isset($feeds['ShareUrl'])) ? $feeds['ShareUrl'].'?ShareId='.$feeds['ShareId'].'&FeedId='.$feeds['FeedId'].'&type=share' : '';?>"><?php echo (isset($feeds['ShareTitle'])) ? $feeds['ShareTitle'] : '';?></a>
+													</h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Share CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Share Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<p><?php echo nl2br($feeds['ShareMessage']); ?></p>
+													<ul class="lkcmt_btn">
+														<li data-bsfshare="Share FeedLikesCount"><a href="javascript:void(0);" id="like_<?php echo $feeds['FeedId']; ?>" onclick="likeFunc('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>','<?php echo $feeds['UserLike']; ?>');"><span><i class="fa fa-thumbs-o-up"></i></span><span id="like_name_<?php echo $feeds['FeedId']; ?>"><?php if($feeds['UserLike'] == '1') { echo 'You Likes'; } else { echo 'Like'; } ?></span><span id="like_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedLikesCount']; ?>)</span></a></li>
+														<li data-bsfshare="Share FeedCommentsCount"><a href="javascript:void(0);" id="comment" class="comment_a" onclick="commentClick('<?php echo $feeds['FeedId']; ?>');"><span><i class="fa fa-comments-o"></i></span>Comment&nbsp;<span id="comment_count_<?php echo $feeds['FeedId']; ?>">(<?php echo $feeds['FeedCommentsCount']; ?>)</span></a></li>
+														<li data-bsfshare="Share Respond"><a href="<?php echo (isset($feeds['ShareUrl'])) ? $feeds['ShareUrl'].'?ShareId='.$feeds['ShareId'].'&FeedId='.$feeds['FeedId'].'&type=share' : '';?>"><span><i class="fa fa-share-alt"></i></span>Respond</a></li>
+													</ul>
+												</div>
+												<div id="strm_cnt_cmt_<?php echo $feeds['FeedId']; ?>" class="strm_cnt_cmt">
+													<span class="v_morecmt"><!--a href="javascript:void(0);">View more comments</a--></span>
+													<ul id="commentli_<?php echo $feeds['FeedId']; ?>">
+
+													</ul>
+													<div class="cmtinput_area">
+														<div class="cmtinput_box">
+															<input id="comment_text_<?php echo $feeds['FeedId']; ?>" type="text" Placeholder="Write your comments here..."/>
+														</div>
+														<a href="javascript:void(0);" class="cmtsend_btn_a">
+															<div onclick="commentPost('<?php echo $feeds['FeedId']; ?>','<?php echo $this->identity()->UserId; ?>');" class="cmtsend_btn">
+																<span><i class="fa fa-share"></i></span>
+															</div>
+														</a>
+													</div>
+												</div>
+											</div>
+										</li>
+									<?php } else if($feeds['FeedType'] == 'approval') { ?>
+										<li data-bsfshare="Approval">
+											<div class="strm_pstr_pp">
+												<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+											</div>
+											<div id="strm_news_<?php echo $feeds['FeedId'];?>" class="strm_news">
+												<div class="strm_news_cnt">
+													<div class="m_strm_pstr_pp">
+														<div><img src="<?php echo $feedAvatar; ?>" alt="" title=""></div>
+													</div>
+													<h4><span><?php echo $feeds['UserName']; ?></span></h4>
+													<ul class="tmplc_summary">
+														<li data-bsfshare="Approval CreatedDate"><span><i class="fa fa-clock-o"></i></span><?php  echo $bsf::timeAgo($feeds['CreatedDate']); ?></li>
+														<li data-bsfshare="Approval Location"><span><i class="fa fa-map-marker"></i></span><?php echo $feeds['Location']; ?></li>
+													</ul>
+													<h5><?php echo $feeds['FeedParentCount']; ?> New Approvals  Remaining in this time period</h5>
+													<ul class="strm_appro">
+														<?php if($feeds['FeedParentCount'] > 0) {
+															echo $this->BsfShareHelper()->getPendingWorks($feeds['FeedId']);
+														} ?>
+													</ul>
+												</div>
+										 </div>
+										</li>
+									<?php }
+								}
+							}
+							?>
+                        </ul>
+                        <p class="strm_loader txt_center clear" style="display:none;" id="moreNewsFeed"><span></span>Loading...</p>
+						<p class="txt_center clear" style="display:none;" id="noMoreNewsFeed"><span></span>No more Activity Feeds...</p>
+						<input type="hidden" id="newsFeed_pageNo" value="1">
+						<input type="hidden" id="newsFeed_totalFound" value="<?php echo $totalFeeds['TotalFeeds']; ?>">
+						<input type="hidden" id="newsFeed_perpage" value="10">
+						<input type="hidden" id="newsFeed_type" value="user">
+						<input type="hidden" id="newsFeed_user" value="<?php echo $resultsMain['UserId']; ?>">
+                    </div>
+                </section>    
+            </div>
+            <div class="col-lg-12 about">
+                <div class="col-lg-8 col-lg-offset-2 wrkflw_cmpny_contact clear">
+                	<div class="col-lg-12 m_btm20">
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <?php
+                            $userDate = '';
+                            if(isset($resultsMain['UserDob'])) {
+                                $userDate = date('d-m-Y', strtotime($resultsMain['UserDob']));
+                            } ?>
+                            <p>Date of Birth</p>
+                            <h1 data-bsfshare="Date of Birth" class="txt_center padtop10"><?php echo $userDate; ?></h1>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <p>Level</p>
+                            <h1 data-bsfshare="Level" class="txt_center padtop10"><?php echo (isset($resultsMain['LevelName'])) ? $resultsMain['LevelName'] : '';?></h1>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <p>Superior User</p>
+                            <ul data-bsfshare="Superior User" class="flwup_rcnt_inrproject padtop10">
+                                <?php if(isset($superiorDetails)) {
+                                    foreach ($superiorDetails as $superior):
+                                        $arr = str_split($superior['EmployeeName'], 1); ?>
+                                        <li>
+                                            <span class="pad_t3"><?php echo (isset($arr)) ? $arr[0] : ''; ?></span>
+                                            <p>
+                                                <?php echo (isset($superior['EmployeeName'])) ? $superior['EmployeeName'] : ''; ?>
+                                            </p>
+                                        </li>
+                                    <?php endforeach;
+                                } ?>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 m_btm10 clear">
+                        <p>Company</p>
+                        <h1 data-bsfshare="Company" class="txt_center padtop10"><?php echo (isset($resultsMain['CompanyName'])) ? $resultsMain['CompanyName'] : '';?></h1>
+                    </div>
+                    <div class="col-lg-12 m_btm20">
+                        <p>Default CostCentre</p>
+                        <h1 data-bsfshare="Default CostCentre" class="txt_center padtop10"><?php echo (isset($resultsMain['CostCentreName'])) ? $resultsMain['CostCentreName'] : '';?></h1>
+                    </div>
+                    <div class="col-lg-12 m_btm20">
+                        <p>CostCentre</p>
+                        <ul data-bsfshare="CostCentre" class="flwup_rcnt_inrproject padtop10">
+                            <?php if(isset($resultCostCentre)) {
+                                foreach ($resultCostCentre as $rCostCentre):
+                                    $arr = str_split($rCostCentre['CostCentreName'], 1); ?>
+                                    <li>
+                                        <span class="pad_t3"><?php echo (isset($arr)) ? $arr[0] : ''; ?></span>
+
+                                        <p>
+                                            <?php echo (isset($rCostCentre['CostCentreName'])) ? $rCostCentre['CostCentreName'] : ''; ?>
+                                        </p>
+                                    </li>
+                                <?php endforeach;
+                            } ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 clear contacts">
+                <div class="col-lg-10 col-lg-offset-1 wrkflw_cmpny_contact">
+                    <div class="col-lg-12">
+                    	<div class="col-lg-12 m_btm10">
+                            <p>Address</p>
+                            <h1 data-bsfshare="Address" class="txt_center padtop10"><?php echo (isset($resultsMain['Address'])) ? $resultsMain['Address'] : '';?></h1>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                <p data-bsfshare="Phone">
+                                    <span class="wrkflw_p_spanicon"><i class="fa fa-fax"></i></span><br/>
+                                    <?php echo (isset($resultsMain['Phone'])) ? $resultsMain['Phone'] : '';?>
+                                </p>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                <p data-bsfshare="Mobile">
+                                    <span class="wrkflw_p_spanicon"><i class="fa  fa-phone"></i></span><br />
+                                    <?php echo (isset($resultsMain['Mobile'])) ? $resultsMain['Mobile'] : '';?>
+                                </p>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                <p data-bsfshare="Email">
+                                    <span class="wrkflw_p_spanicon"><i class="fa fa-envelope-o"></i></span><br />
+                                    <?php echo (isset($resultsMain['Email'])) ? $resultsMain['Email'] : '';?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="back-top" data-toggle="tooltip" data-placement="left" title="Lift Top"><a href="#top"><i class="fa fa fa-arrow-up"></i></a></div>
+<script>
+//top scroll
+$(document).ready(function(){
+$('a[href^="#"]').on('click',function (e) {
+e.preventDefault();
+var target = this.hash,
+$target = $(target);
+
+$('html, body').stop().animate({
+'scrollTop': $target.offset().top - 80
+}, 900, 'swing', function () {
+	if (windscroll > 80)
+	window.location.hash = target;
+	});
+	});
+
+	$("#back-top").fadeOut();
+	$(window).scroll(function(){
+		if ($(this).scrollTop() > 100) {
+			$("#back-top").fadeIn();
+		} else {
+			$("#back-top").fadeOut();
+		}
+	}); 
+	$("#back-top").click(function(){
+		$("html, body").animate({ scrollTop: 0 }, 1000);
+		return false;
+	});
+
+    $('.timeline').show();
+    $('.about').hide();
+    $('.contacts').hide();
+});
+function newInfo(ele) {
+    var inform = $(ele)[0].id;
+    $('.'+inform).show();
+    $('#'+inform).addClass('current');
+    switch (inform) {
+        case 'about':
+            $('.head').html('About');
+            $('.timeline').hide();
+            $('.contacts').hide();
+            $('#timeline').removeClass('current');
+            $('#contacts').removeClass('current');
+            break;
+        case 'timeline':
+            $('.head').html('Time Line');
+            $('.about').hide();
+            $('.contacts').hide();
+            $('#about').removeClass('current');
+            $('#contacts').removeClass('current');
+            break;
+        case 'contacts':
+            $('.head').html('Contacts');
+            $('.timeline').hide();
+            $('.about').hide();
+            $('#timeline').removeClass('current');
+            $('#about').removeClass('current');
+            break;
+        default:
+            $('.head').html('Time Line');
+            $('.timeline').show();
+            $('.about').hide();
+            $('.contacts').hide();
+            $('#timeline').addClass('current');
+            $('#about').removeClass('current');
+            $('#contacts').removeClass('current');
+            break;
+    }
+}
+
+function commentClick(ele) {
+    $.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data: {'FeedId': ele, 'mode': 'commentall'},
+        success: function (data, textStatus, jqXHR) {
+            $('#commentli_'+ele).html(data);
+            $(".strm_cnt_cmt").hide();
+            $(".strm_news").css('border','none');
+            $("#strm_cnt_cmt_"+ele).show();
+            $("#strm_news_"+ele).css('border','1px solid #6face3');
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+        }
+    });
+}
+function likeFunc(FeedId,UserId,LikePos) {
+    var likeCount = $('#like_count_'+FeedId).html();
+    likeCount = parseInt(likeCount.slice(1, -1));
+	$.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data: {'FeedId': FeedId,'UserId':UserId,'LikePos':LikePos, 'mode': 'like'},
+        success: function (data, textStatus, jqXHR) {
+            $('#like_'+FeedId).attr("onclick","likeFunc('"+FeedId+"','"+UserId+"','"+data+"')");
+            var innerLike="";
+            if(data==1) {
+                 innerLike='You Likes';
+                likeCount+=1;
+            } else {
+                innerLike='Like';
+                likeCount-=1;
+            }
+            $('#like_count_'+FeedId).html('('+likeCount+')');
+            $('#like_name_'+FeedId).html(innerLike);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+
+        }
+    });
+}
+function commentPost(cmtFeedId,cmtUserId) {
+    var commentCount = $('#comment_count_'+cmtFeedId).html();
+    commentCount = parseInt(commentCount.slice(1, -1));
+    var cmtTxt =  $('#comment_text_'+cmtFeedId).val();
+    $.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data: {'FeedId': cmtFeedId,'UserId':cmtUserId, 'mode': 'comment','commentTxt':cmtTxt},
+        success: function (data, textStatus, jqXHR) {
+            commentCount+=1;
+            $('#commentli_'+cmtFeedId).append(data);
+            $('#comment_count_'+cmtFeedId).html('('+commentCount+')');
+            $('#comment_text_'+cmtFeedId).val('');
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+
+        }
+    });
+}
+</script>

@@ -1,0 +1,421 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/tableHeadFixer.js"></script>
+<style type="text/css">
+    .save_btn{ width:auto!important;}
+    .table-responsive table.table tr td{padding: 4px 10px 3px 10px !important;}
+    .table-responsive table.table tr td input,.table-responsive table.table tr td textarea{border:none !important;}
+    .overlay {position: absolute; z-index: 99; width: 100%; height: 100%; background: rgba(255,255,255,0.5); top: 0; display: none;}
+    .has-overlay {position: relative;}
+    #iow-savebtn {display: none;}
+    .workgroup-link i {font-size: 16px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="col-lg-6 col-md-6 col-sm-6 padlr0">Quotation Sorting</h1>
+                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                    <div class="col-lg-8 col-lg-offset-4">
+                        <label class="col-sm-4 sel-type">Select Project</label>
+                        <div class="col-lg-8"  id="projects_list">
+                            <select name="enquiryId" id="enquiryId" class="form-control single_dropdown lbl_move" onchange="return ChangeProject()" data-size="6" title="Select Project..." style="width:100%;">
+                                <?php if(isset($quotationlists)):?>
+                                    <?php foreach ( $quotationlists as $quotation ):?>
+                                        <option value="<?php echo $quotation['TenderEnquiryId'];?>"<?php echo ($quotation['TenderEnquiryId'] == $enquiryId) ? 'selected' : '';?>><?php echo $quotation[ 'RefNo' ];?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 padlr0 padtop20 bot-35">
+                <div class="col-lg-6 col-md-6 col-sm-6 has-overlay">
+                    <section class="pnnal">
+                        <div class="floor_name_area">
+                            <h4>Project WorkGroup</h4>
+                        </div>
+                        <div class="pnnal-body">
+                            <form class="form-horizontal" method="post" role="form" id="wg-form">
+                                <div class="table-responsive clear parent-scroll">
+                                    <table class="fixTable table" id="wgtable">
+                                        <thead>
+                                        <tr>
+                                            <th>Serial No.</th>
+                                            <th>WorkGroup</th>
+                                            <th>Sort Order</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="sorting" id="wgbody">
+                                        <?php $i=0; if (isset($wglist)) {
+                                            foreach($wglist as $trans) { $i=$i+1; ?>
+                                                <tr id="wgrow_<?php echo $i; ?>" class="">
+                                                    <input type="hidden" name="pworkgroupid_<?php echo $i; ?>" id="pworkgroupid_<?php echo $i; ?>" value = "<?php echo $trans['PWorkGroupId'];?>">
+                                                    <td width="5%" class="tbl_input_td"><input class="tbl_input" type="text" name="wserialno_<?php echo $i; ?>" value="<?php echo $trans['SerialNo'];?>" id="wserialno_<?php echo $i; ?>" readonly/></td>
+                                                    <td width="20%" align="center" class="tbl_input_td"><textarea class="tbl_input parent_texts expand red-non" name="workgroupname_<?php echo $i; ?>" id="workgroupname_<?php echo $i; ?>" readonly><?php echo $trans['WorkGroupName'];?></textarea></td>
+                                                    <td width="5%" class="tbl_input_td"><input class="tbl_input" type="text" name="wsortid_<?php echo $i; ?>" value="<?php echo $trans['SortId'];?>" id="wsortid_<?php echo $i; ?>" onchange="sortChangeW(this.id)" /></td>
+                                                    <td width="3%"><a class="workgroup-link" id="workgroup-link_<?php echo $i; ?>" ><i class="fa fa-chevron-circle-right"></i></a></td>
+                                                </tr>
+                                            <?php }} ?>
+                                        </tbody>
+                                    </table>
+                                    <input type="hidden" name="type" value="workgroups">
+                                    <input type="hidden" name="wgrowid" id="wgrowid" value = "<?php echo $i;?>">
+                                    <input type="hidden" name="spworkgroupid" id="spworkgroupid">
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                    <div class="col-lg-12" id="wg-savebtn">
+                        <ul>
+                            <li class="dropdown save_btn float_r"><button type="button" onclick="submitForm(true);">Save </button></li>
+                        </ul>
+                    </div>
+                    <div class="overlay" id="wg-overlay"></div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 bot has-overlay">
+                    <section class="pnnal">
+                        <div class="floor_name_area">
+                            <h4>Item of Works</h4>
+                        </div>
+                        <div class="pnnal-body">
+                            <form class="form-horizontal" method="post" role="form" id="iow-form">
+                                <div class="table-responsive clear parent-scroll">
+                                    <table class="fixTable table" id="iowtable">
+                                        <thead>
+                                        <tr>
+                                            <th>Serial No.</th>
+                                            <th>Specification</th>
+                                            <th>Sort Order</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="sorting" id="iowbody"></tbody>
+                                    </table>
+                                    <input type="hidden" name="type" value="iows">
+                                    <input type="hidden" name="iowrowid" id="iowrowid">
+                                    <input type="hidden" name="pworkgroupid" id="pworkgroupid" value="0">
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                    <div class="col-lg-12" id="iow-savebtn">
+                        <ul>
+                            <li class="dropdown save_btn float_l"><button type="button" onclick="cancelEdit();">Cancel </button></li>
+                            <li class="dropdown save_btn float_r"><button type="button" onclick="submitForm();">Save </button></li>
+                        </ul>
+                    </div>
+                    <div class="overlay" id="iow-overlay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if (isset($enquiryId) && $enquiryId !=0): ?>
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+            <li class="cancel_btn float_l goback-foll"><a href="<?php echo $this->basePath() . '/project/tender/quotationregister';?>" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i>&nbsp;Back</a></li>
+        </ul>
+    </div>
+<?php endif; ?>
+
+<script type="text/template" id="iow-template">
+    <tr id="iowrow__">
+        <input type="hidden" name="iowpworkgroupid__" id="iowpworkgroupid__" value="{{PWorkGroupId}}">
+        <input type="hidden" name="quotationtransid__" id="quotationtransid__" value="{{QuotationTransId}}">
+        <td width="5%" class="tbl_input_td"><input class="tbl_input" type="text" name="serialno__" value="{{SerialNo}}" id="serialno__" readonly/></td>
+        <td width="20%" align="center" class="tbl_input_td"><textarea class="tbl_input parent_texts expand" name="spec__" id="spec__" readonly>{{Specification}}</textarea></td>
+        <td width="5%" class="tbl_input_td"><input class="tbl_input" type="text" name="sortid__" value="{{SortId}}" id="sortid__" onchange="sortChange(this.id)" /></td>
+    </tr>
+</script>
+<script type="text/javascript">
+    $(function() {
+        $('.workgroup-link').on('click', function () {
+            var rowid = $(this).attr('id').split('_')[1],
+                wgid = $('#pworkgroupid_'+rowid).val();
+            $('#pworkgroupid').val(wgid);
+            $('#wg-overlay').show();
+            $('#iow-overlay').hide();
+            $('#iow-savebtn').show();
+            bindiowlist(wgid);
+        });
+
+        bindwgSortablefn();
+    });
+
+    function bindiowlist(wgid) {
+        $('.loading_area').show();
+        $('#iowbody').html('');
+        $('#iowrowid').val(0);
+        $.ajax({
+            url: getBaseURL() + 'project/tender/quotationsortorder',
+            type: 'POST',
+            data: {'type': 'getiows', 'EnquiryId': isNullCheck($('#enquiryId').val(),'number'), 'PWorkGroupId': wgid},
+            success: function (data,status,xhr) {
+                var arr_iowlist = JSON.parse(data);
+                var rowid = 0;
+                var template = $('#iow-template').html();
+                $.each(arr_iowlist, function (i,o) {
+                    rowid++;
+                    $('#iowbody').append(template.replace(/__/g, '_'+rowid)
+                            .replace(/\{\{PWorkGroupId\}\}/, o.PWorkGroupId)
+                            .replace(/\{\{QuotationTransId\}\}/, o.QuotationTransId)
+                            .replace(/\{\{SerialNo\}\}/, o.SerialNo)
+                            .replace(/\{\{Specification\}\}/, o.Specification)
+                            .replace(/\{\{SortId\}\}/, o.SortId)
+                    );
+                });
+                $('#iowrowid').val(rowid);
+                bindMixSortablefn();
+                $('.loading_area').hide();
+            },
+            error: function (xhr, status,errorThrown) {
+                $('.loading_area').hide();
+            }
+        });
+    }
+
+    function cancelEdit() {
+        $('#iowbody').html('');
+        $('#wg-overlay').hide();
+        $('#iow-overlay').show();
+        $('#iow-savebtn').hide();
+    }
+
+    function submitForm(isWGForm) {
+        $('.loading_area').show();
+        var $form = $('#iow-form');
+        if(typeof isWGForm != 'undefined' && isWGForm) {
+            $form = $('#wg-form');
+        }
+
+        $.ajax({
+            url: getBaseURL() + 'project/tender/quotationsortorder',
+            type: 'POST',
+            data: $form.serialize(),
+            success: function (data,status,xhr) {
+                $('.loading_area').hide();
+            },
+            error: function (xhr, status,errorThrown) {
+                $('.loading_area').hide();
+            }
+        });
+        $('#iowbody').html('');
+        $('#wg-overlay').hide();
+        $('#iow-overlay').show();
+        $('#iow-savebtn').hide();
+    }
+
+    $(document).ready(function() {
+        $(".fixTable").tableHeadFixer();
+    });
+
+    function ChangeProject() {
+        var enquiryId = isNullCheck($('#enquiryId').val(),'number');
+        window.location.href = getBaseURL() + "project/tender/quotationsortorder/" + enquiryId;
+    }
+
+    function bindMixSortablefn(reset) {
+        var $rBody = $('#iowbody');
+        $.each($rBody, function(i, obj){
+            if ($(this).parent('table')[0].id.indexOf('__') != -1) {
+                $rBody.splice(i, 1);
+            }
+        });
+        var $sRTable = $rBody.find('tr');
+        if (typeof reset !== 'undefined' && reset === true) {
+            $sRTable.unbind('click', 'dblclick', 'select', 'sortable');
+            $rBody.unbind('sortable');
+        }
+        $sRTable.on( 'dblclick', function () {
+            var $this = $(this);
+            if ($this.hasClass('selected') == true) $this.toggleClass('selected', false);
+            else $this.toggleClass('selected', true);
+        });
+        $sRTable.on( 'click', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $sRTable.on( 'select', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $rBody.sortable({
+            helper: fixHelperModified,
+            stop: updateIndex,
+            axis: 'y',
+            distance: 40,
+            update: function( event, ui ) {
+                SortOrder();
+            }
+        });
+    }
+
+    function bindwgSortablefn(reset) {
+        var $rBody = $('#wgbody');
+        $.each($rBody, function(i, obj){
+            if ($(this).parent('table')[0].id.indexOf('__') != -1) {
+                $rBody.splice(i, 1);
+            }
+        });
+        var $sRTable = $rBody.find('tr');
+        if (typeof reset !== 'undefined' && reset === true) {
+            $sRTable.unbind('click', 'dblclick', 'select', 'sortable');
+            $rBody.unbind('sortable');
+        }
+        $sRTable.on( 'dblclick', function () {
+            var $this = $(this);
+            if ($this.hasClass('selected') == true) $this.toggleClass('selected', false);
+            else $this.toggleClass('selected', true);
+        });
+        $sRTable.on( 'click', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $sRTable.on( 'select', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $rBody.sortable({
+            helper: fixHelperModified,
+            stop: updateIndex,
+            axis: 'y',
+            distance: 40,
+            update: function( event, ui ) {
+                SortOrderW();
+            }
+        });
+    }
+
+    var fixHelperModified = function(e, tr) {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index) {
+                $(this).width($originals.eq(index).width())
+            });
+            return $helper;
+        },
+        updateIndex = function(e, ui) {
+            $('td.index', ui.item.parent()).each(function (i) {
+                $(this).html(i + 1);
+            });
+        };
+
+    function SortOrder() {
+        var rows = $('tr[id*=iowrow_]');
+        var iSortId=1;
+        $.each(rows, function() {
+            var id = $(this)[0].id;
+            var irow = id.split("_")[1];
+            $('#sortid_' + irow).val(iSortId);
+            iSortId = + iSortId+1;
+        });
+    }
+
+    function SortOrderW() {
+        var rows = $('tr[id*=wgrow_]');
+        var iSortId=1;
+        $.each(rows, function() {
+            var id = $(this)[0].id;
+            var irow = id.split("_")[1];
+            $('#wsortid_' + irow).val(iSortId);
+            iSortId = + iSortId+1;
+        });
+    }
+
+    function sortChangeW(keyid) {
+        var rows = $('tr[id*=wgrow_]'),
+            key= keyid.split("_")[1],
+            icSortId = parseInt(isNullCheck($('#wsortid_'+key).val(),'number')),
+            iSortId=1;
+        $.each(rows, function() {
+            var id = $(this)[0].id,
+                irow = id.split("_")[1],
+                iOldSortId = parseInt(isNullCheck($('#wsortid_' + irow).val(),'number'));
+            if (irow != key) {
+                $('#wsortid_' + irow).val(iSortId);
+                iSortId = +iSortId + 1;
+            }
+            if (icSortId == iSortId) iSortId = +iSortId + 1;
+        });
+        sortTableW();
+    }
+
+    function sortChange(keyid) {
+        var rows = $('tr[id*=iowrow_]'),
+            key= keyid.split("_")[1],
+            icSortId = parseInt(isNullCheck($('#sortid_'+key).val(),'number')),
+            iSortId=1;
+        $.each(rows, function() {
+            var id = $(this)[0].id,
+                irow = id.split("_")[1],
+                iOldSortId = parseInt(isNullCheck($('#sortid_' + irow).val(),'number'));
+            if (irow != key) {
+                $('#sortid_' + irow).val(iSortId);
+                iSortId = +iSortId + 1;
+            }
+            if (icSortId == iSortId) iSortId = +iSortId + 1;
+        });
+        sortTableW();
+    }
+
+    function sortTable(){
+        var rows = $('#iowtable tbody  tr').get();
+        rows.sort(function(a, b) {
+            var A = parseInt(isNullCheck($('#' + $(a).children('td').eq(2).find("input").attr("id")).val(),'number'));
+            var B = parseInt(isNullCheck($('#' + $(b).children('td').eq(2).find("input").attr("id")).val(),'number'));
+
+            if(A < B) {
+                return -1;
+            }
+
+            if(A > B) {
+                return 1;
+            }
+
+            return 0;
+
+        });
+
+        $.each(rows, function(index, row) {
+            $('#iowtable').children('tbody').append(row);
+        });
+    }
+
+
+    function sortTableW(){
+        var rows = $('#wgtable tbody  tr').get();
+        rows.sort(function(a, b) {
+            var A = parseInt(isNullCheck($('#' + $(a).children('td').eq(2).find("input").attr("id")).val(),'number'));
+            var B = parseInt(isNullCheck($('#' + $(b).children('td').eq(2).find("input").attr("id")).val(),'number'));
+
+            if(A < B) {
+                return -1;
+            }
+
+            if(A > B) {
+                return 1;
+            }
+
+            return 0;
+
+        });
+
+        $.each(rows, function(index, row) {
+            $('#wgtable').children('tbody').append(row);
+        });
+    }
+
+    function cancelForm() {
+        history.back();
+    }
+
+    $(document).ready(function() {
+        $(".fixTable").tableHeadFixer();
+    });
+</script>

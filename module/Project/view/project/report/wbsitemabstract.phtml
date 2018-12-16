@@ -1,0 +1,310 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+
+<!--Start-->
+<script src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxcore.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxbuttons.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxscrollbar.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqx-all.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdatatable.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxtreegrid.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdata.js"></script>
+<script type="text/javascript" src="https://jqwidgets.com/public/jqwidgets/jqxdata.export.js"></script>
+<script type="text/javascript" src="http://jqwidgets.com/jquery-widgets-demo/scripts/demos.js"></script>
+<!--End-->
+
+<style>
+    .color-green {
+        background-color: lightgreen;
+    }
+    .color-red {
+        background-color: rosybrown;
+    }
+    .sel-type {font-size:13px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <?php if ($projectId !=0) { ?>
+                <div class="col-lg-12 page_tittle" id="pagetittle">
+                    <h1 class="col-lg-4 col-sm-4">WBS Item Abstract</h1>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Project</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="project_id" id="project_id" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Project</option>
+                                    <?php if(isset($projectlists)):?>
+                                        <?php foreach ( $projectlists as $project ):?>
+                                            <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                                        <?php endforeach; ?>
+                                    <?php  endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-4">
+                        <div class="form-group">
+                            <label class="col-sm-12 sel-type">Select Type</label>
+                            <div class="col-lg-12 form-group">
+                                <select name="revtype" id="revtype" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                                    <option value="">Select Type</option>
+                                    <option value="B" <?php echo $revtype=='B' ? 'selected' : ''; ?>>Budget</option>
+                                    <option value="P" <?php echo $revtype=='P' ? 'selected' : ''; ?>>Plan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" data-visibility="hide">
+                    <div class="col-lg-9 col-lg-offset-3 col-sm-9 col-sm-offset-3 edit_del">
+                        <div class="col-lg-12">
+                            <ul>
+                                <li>
+                                    <button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="edit-btn form-group edit_al" id="expand-all">Expand All</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="edit-btn form-group edit_al" id="collapse-all">Collapse All</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="col-lg-12 clear" id="gridWrapper" >
+                    <div class="table-responsive clear">
+                        <div id="grid"></div>
+                        <div id='pager'></div>
+                    </div>
+                </div>
+            <?php } else { ?>
+                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts" id="formWrapper">
+                        <div class="col-lg-12 frmwrk_div" id="projects_list">
+                            <select name="newproject_id" id="newproject_id" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%;">
+                                <?php if(isset($projectlists)):?>
+                                    <?php foreach ( $projectlists as $project ):?>
+                                        <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                                    <?php endforeach; ?>
+                                <?php  endif; ?>
+                            </select>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                            <select name="newrevtype" id="newrevtype" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Type" style="width:100%;">
+                                <option value="B">Budget</option>
+                                <option value="P">Plan</option>
+                            </select>
+                        </div>
+                        <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+                            <ul>
+                                <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<script>
+
+    var $project = $('#project_select'),
+        $projectNew = $('#newproject_id'),
+        $type_list = $('#types_list'),
+        $type = $('#type_select'),
+        $grid = $("#grid");
+
+    $(function () {
+        $projectNew.on('change', function() {
+            var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+            if (nproj_id !=0) $type_list.show();
+            else $type_list.hide();
+        });
+    });
+
+    var $treeGrid = $("#grid");
+    $(function () {
+        /*$("#grid").jqxTreeGrid('expandAll');*/
+        var data = <?php echo (isset($tmpwbs)) ? json_encode($tmpwbs) : '[]'?>;
+        var projectId = <?php if(isset($projectId)) echo json_encode($projectId); else echo '""';?>;
+        var revtype = <?php if(isset($revtype)) echo json_encode($revtype); else echo '""'?>;
+        if(projectId != 0) {
+            var source = {
+                localdata:data,
+                dataType: "json",
+                dataFields: [
+                    { name: 'Id'},
+                    { name: 'TmpId'},
+                    { name: 'ParentId'},
+                    { name: 'SerialNo'},
+                    { name: 'Description'},
+                    { name: 'Amount' , type:'number'},
+                    { name: 'ProjectIOWId'},
+                    { name: 'Qty'},
+                    { name: 'Rate'},
+                    { name: 'UnitName'},
+                    { name: 'WBSId'}
+                ],
+                hierarchy:
+                {
+                    keyDataField: { name: 'TmpId' },
+                    parentDataField: { name: 'ParentId' }
+                },
+                id: 'Id'
+            };
+
+            var cellsRenderer = function (row, column, value, rowData)
+            {
+                if (rowData.records !== undefined)
+                {
+                    return '<span style="font-weight: bold;">' + value + '</span>';
+                } else
+                {
+                    return '<span>' + value + '</span>';
+                }
+            };
+            var aggregatesRenderer = function (aggregatesText, column, element, aggregates, type) {
+                if(data != '') {
+                    if (type == "aggregates") {
+                        var renderString = "<div style='margin: 4px; float: right;  height: 100%;'>";
+                    }
+                    else {
+                        var renderString = "<div style='float: right;  height: 100%;'>";
+                    }
+//                        var Total = dataAdapter.formatNumber(aggregates.Total, "d2");
+                    var Total = sanitizeNumber(aggregates.Total, 2,true);
+                    renderString += "<table><tr><td rowspan='2'></td><td align='right'><strong>" + Total+ "</strong> </td><tr><td align='right'> </td></tr></table>";
+                    return renderString;
+                }
+            }
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+
+            $treeGrid.jqxTreeGrid({
+                width: "100%",
+                source: dataAdapter,
+                height:"490",
+                filterable: true,
+                showSubAggregates: true,
+                showAggregates: true,
+                aggregatesHeight: 55,
+                sortable: true,
+                pageable:true,
+                exportSettings: {fileName: null},
+                columns: [
+                    { text: 'SerialNo', dataField: 'SerialNo', cellsRenderer: cellsRenderer ,width:'20%'},
+                    { text: 'Description', dataField: 'Description',cellsRenderer: cellsRenderer  ,width:'25%'},
+                    /*{ text: 'Amount', dataField: 'Amount', aggregates: ['sum'] , cellsRenderer: cellsRenderer,cellsFormat: "c2"*/
+                    { text: 'UnitName', dataField: 'UnitName',cellsRenderer: cellsRenderer  ,width:'25%'},
+                    { text: 'Qty', dataField: 'Qty',width:'10%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                        }
+                    },
+                    { text: 'Rate', dataField: 'Rate',width:'10%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Rate'),2, true) + '</div>';
+                        }
+                    },
+                    { text: 'Amount', dataField: 'Amount', cellsAlign: "right",cellsFormat: "c2",aggregatesRenderer:aggregatesRenderer, align: "right", width:'10%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin-top: 10px;">' +sanitizeNumberZeroEmpty($treeGrid.jqxTreeGrid('getCellValue', row, 'Amount'),2, true) + '</div>';
+                        },
+                        aggregates: [{
+                            'Total':
+                                function (aggregatedValue, currentValue, column, record, aggregateLevel) {
+                                    return aggregatedValue+ currentValue;
+                                }
+                        }]
+                    }
+                ]
+            });
+        }
+    });
+
+    function submitForm() {
+        var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+        var  nrevtype= isNullCheck($('#newrevtype').val(),'string');
+
+        if (nproj_id ==0) {
+            alert("select Project");
+            return;
+        }
+        if (nrevtype =="") {
+            alert("Select Type");
+            return;
+        }
+
+        window.location.href = getBaseURL() + "project/report/wbsitemabstract/" + nproj_id + "/" + nrevtype;
+    }
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#project_id').val(),'number');
+        var sType= isNullCheck($('#revtype').val(),'string');
+        window.location.href = getBaseURL() + "project/report/wbsitemabstract/" + iProjectId + "/" + sType;
+    }
+
+    $('#expand-all').click(function () {
+        var rows = $grid.jqxTreeGrid('getRows');
+        var traverseTree = function(rows)
+        {
+            for(var i = 0; i < rows.length; i++)
+            {
+                if (rows[i].records)
+                {
+                    var idValue = rows[i][idColumn];
+                    $grid.jqxTreeGrid('expandRow',idValue);
+                    traverseTree(rows[i].records);
+                }
+            }
+        };
+        var idColumn = $grid.jqxTreeGrid('source')._source.id;
+        traverseTree(rows);
+    });
+
+    $('#collapse-all').click(function () {
+        var rows = $grid.jqxTreeGrid('getRows');
+        var traverseTree = function(rows)
+        {
+            for(var i = 0; i < rows.length; i++)
+            {
+                if (rows[i].records)
+                {
+                    var idValue = rows[i][idColumn];
+                    $grid.jqxTreeGrid('collapseRow',idValue);
+                    traverseTree(rows[i].records);
+                }
+            }
+        };
+        var idColumn = $grid.jqxTreeGrid('source')._source.id;
+        traverseTree(rows);
+    });
+
+    $('#print-btn').click(function () {
+        var printdata = <?php echo (isset($tmpwbs)) ? json_encode($tmpwbs) : '[]'?>;
+        if(printdata != '') {
+            var gridContent = $("#grid").jqxTreeGrid('exportData', 'html');
+            //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+            var newWindow = window.open('', '', 'width=800, height=500'),
+                document = newWindow.document.open(),
+                pageContent =
+                    '<!DOCTYPE html>\n' +
+                    '<html>\n' +
+                    '<head>\n' +
+                    '<meta charset="utf-8" />\n' +
+                    '<title>WBS Item Abstract</title>\n' +
+                    '<h1>WBS Item Abstract</h1>\n' +
+                    '</head>\n' +
+                    '<body>\n' + gridContent + '\n</body>\n</html>';
+            document.write(pageContent);
+            document.close();
+            newWindow.print();
+        } else {
+            alert("No Data To Print");
+        }
+    });
+
+</script>

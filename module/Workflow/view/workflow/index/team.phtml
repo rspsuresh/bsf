@@ -1,0 +1,315 @@
+<style>
+    .search-container label {right: 10px;position: absolute;top: 30px;z-index:999;color:#ccc;}
+    .sr-only {border: 0 none;clip: rect(0px, 0px, 0px, 0px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;     width: 1px;}
+    .search-container {font-size: 18px;margin: -20px auto 10px;padding-top: 20px;position: relative;}
+    .input-group{margin-bottom:15px}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 col-md-6 col-sm-5 padlr0" data-bsfhead="Team">Team
+                <div class="stgedit_btn req_addbtn brad_50">
+                    <a href="javascript:void(0);" class="ripple mainTr" data-expandid="0" rel="oc" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Team" onclick="getPosId(this);"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+			<div class="col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 padlr0">
+                <div class="input-group col-md-12">
+                    <input name="search_all" id="search_all" type="text" onkeyup="teamSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+                </div>
+            </div>
+        </div>
+        <div id="add_data"></div>
+        <?php $k=0; if(count($resultTeamRegs)>0) { ?>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive" style="min-height:200px;">
+                    <table class="table table-hover tbltop_bdr0">
+                        <thead>
+                        <tr>
+                            <th width="3%">S.No</th>
+                            <th width="70%">Team Name</th>
+                            <th width="27%">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($resultTeamRegs as $resultRegs):
+                            $k += 1;?>
+                            <tr id="index_<?php echo $k; ?>">
+                                <td><?php echo $k; ?></td>
+                                <td><?php echo $resultRegs['TeamName']; ?></td>
+                                <td class="action_btns_td">
+                                    <ul class="action_btns">
+                                        <li>
+                                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left"
+                                               data-original-title="Delete"
+                                               onclick="teamDelete(this, '<?php echo $resultRegs['TeamId']; ?>', '<?php echo $resultRegs['TeamName']; ?>', '<?php echo $k; ?>')">
+                                                <span><i class="fa fa-trash-o"></i></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" data-toggle="tooltip" class="mainTr"
+                                               data-expandid="<?php echo $resultRegs['TeamId']; ?>"
+                                               onclick="getPosId(this);editPosition('<?php echo $resultRegs['TeamId']; ?>',$(this));"
+                                               rel="rt" data-placement="left" data-original-title="Edit">
+                                                <span><i class="fa fa-edit"></i></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        <?php endforeach;?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php } ?>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 data-bsfhead="Delete">Why do you want to delete <span id="delTeamName" class="bld-txt"></span>?</h1>
+                <input type="hidden" name="deleteTeamId" id="deleteTeamId" value="" />
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea data-bsfshare="Remarks" id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/>
+                                </textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+});
+$(".error_message").hide();
+var $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks'),
+    globalTimeout = null;
+
+$(document).on('click','.mainTr',function() {
+    var relDiv = $(this);
+    if(relDiv.attr('rel')=='oc') {
+        $('.close_tr').remove();
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/teamedit',
+            type: 'POST',
+            data: {teamId: 0},
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                $("#add_data").html(data);
+                $("#ocDivDept .lbl_move").polymerForm();
+                $("#ocDivDept .lbl_move").each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+                $(".single_dropdown").select2({
+                    placeholder: "",
+                    allowClear: true
+                });
+                $('#ocDivDept').show("slow");
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+
+            }
+        });
+    }
+});
+
+$(document).on('click','.panel-heading',function() {
+    $('.panel-heading').removeClass('accordion_head_crnt');
+    if($(this).next('div.in'))
+        $(this).addClass('accordion_head_crnt');
+    else
+        $(this).removeClass('accordion_head_crnt');
+});
+
+
+//$(document).on('click','.editSubmitBtn',function(){
+//    $(".error_message").hide();
+//
+//    if($("#teamName").val() == ""){
+//        $("#teamName").closest(".req_flds").find(".error_message").show();
+//        $("#teamName").focus();
+//        return;
+//    }
+//
+////    if($("#departmentId").val() == 0 || $("#departmentId").val() == ""){
+////        $("#departmentId").closest(".req_flds").find(".error_message").show();
+////        $("#departmentId").focus();
+////        return;
+////    }
+//    if($("#teamName").val() != ""){
+//        $valid=1;
+//        $.ajax({
+//            url: getBaseURL() + 'workflow/index/team',
+//            type: 'POST',
+//            data: {"teamId": $('#teamId').val(), "mode": 'check',"teamName": $('#teamName').val() },
+//            async: false,
+//            success:function(data, textStatus, jqXHR){
+//                if (jqXHR.status != 200) {
+//                    $valid=0;
+//                    alert('Already Exists Team Name!');
+//                }
+//            },
+//            error:function(jqXHR, textStatus, errorThrown){
+//                alert(textStatus+"-----"+errorThrown);
+//            }
+//        });
+//
+//        if($valid==0){
+//            $("#teamName").closest(".req_flds").find(".error_message").show();
+//            $("#teamName").focus();
+//            return;
+//        }
+//    }
+//    if(parseInt($('#teamId').val())!=0) {
+//        $("#editform").submit();
+//    } else {
+//        $("#addForm").submit();
+//    }
+//});
+
+$('#btnDeleteYes').on('click', function () {
+    var remarks = $remarks.val();
+    if(remarks.length == 0) {
+        showError($remarks, 'Required!');
+        return;
+    } else {
+        removeError($remarks);
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/team',
+        type: 'POST',
+        data: {"teamId": $('#deleteTeamId').val(), "Remarks": remarks, "mode": 'delete'},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                $('#index_'+$deleteModal.attr('data-rowid')).remove();
+                $('#rtDivDept').remove();
+            } else
+                alert('Cannot delete this Team, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Failed to delete the team!');
+        }
+    });
+    $deleteModal.modal('hide');
+    $remarks.val('');
+});
+
+function teamDelete(x, id, name, indexrowId) {
+    $deleteModal.attr('data-rowid', indexrowId).modal('show');
+    $("#remarks").val('');
+    $("#deleteTeamId").val(id);
+    $('#delTeamName').html(name);
+}
+function getPosId(data) {
+    curPosId = $(data).attr('data-expandid');
+}
+
+function editPosition(teamId,_this) {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/teamedit',
+        type: 'POST',
+        data: {teamId: teamId},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            $(data).insertAfter(_this.closest('tr'));
+            $("#rtDivDept .lbl_move").polymerForm();
+            $("#rtDivDept .lbl_move").each(function() {
+                if($(this).val() != '' && $(this).val() != null) {
+                    $(this).closest('div').addClass('dirty');
+                }
+            });
+            $(".single_dropdown").select2({
+                placeholder: "",
+                allowClear: true
+            });
+            _this.closest('tr').next('tr').show("slow");
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+
+        }
+    });
+}
+
+$(document).on('click','.close',function() {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+});
+
+function teamSearch(positionDetails) {
+    if (globalTimeout != null) {
+        clearTimeout(globalTimeout);
+    }
+    globalTimeout = setTimeout(function() {
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/team',
+            type: 'POST',
+            data: {'mode': 'searchpos','searchVal' : $.trim(positionDetails)},
+            async:false,
+            success: function (data, textStatus, jqXHR) {
+                var posDetail = JSON.parse(data);
+                $('.table tbody').html('');
+                var sHtml="";
+                if(posDetail.length>0) {
+                    $.each(posDetail,function(j,o) {
+                        var i = +j+1;
+                        sHtml = sHtml + '<tr id="index_' + i + '">'+
+                                '<td>' + i + '</td>'+
+                                '<td>' + o.TeamName + '</td>'+
+                                '<td class="action_btns_td"><ul class="action_btns"><li>'+
+                                '<a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" data-original-title="Delete" onclick="teamDelete(this,' + o.TeamId + ','+ o.TeamName + ',' + i +')">'+
+                                '<span><i class="fa fa-trash-o"></i></span>'+
+                                '</a></li><li>'+
+                                '<a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="' + o.TeamId +'" onclick="getPosId(this);editPosition('+ o.TeamId + ',$(this));" rel="rt" data-placement="left" data-original-title="Edit">'+
+                                '<span><i class="fa fa-edit"></i></span>'+
+                                '</a></li></ul></td></tr>';
+                    });
+                }
+                $('.table tbody').html(sHtml);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 400)
+                    alert(jqXHR.responseText);
+                else
+                    alert("Request Failed");
+
+            }
+        });
+        globalTimeout=null;
+    }, 500);
+}
+
+</script>

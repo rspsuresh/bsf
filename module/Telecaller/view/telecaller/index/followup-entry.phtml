@@ -1,0 +1,141 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<?php
+$url = $this->serverUrl(true);
+$url = array_pop(explode("/", $url));
+$url1 = array_pop(explode("/", $url));
+?>
+<form name="followup" class="form-horizontal stginner_cnt" method="post">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+                <h1>Lead Followup</h1>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="row">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+
+                        <div id="followup" class="showDiv">
+                            <div class="row" id="ProjectsId">
+                                <div class="form-group padtop20 col-lg-12">
+                                    <select name="ProjectId" id="ProjectId" class="dropChange form-control single_dropdown2 lbl_move" label="Select Project" style="width:100%;">
+                                        <option value="">Select Project</option>
+
+                                        <?php
+                                        foreach($resultsProjects as $type){
+                                            echo "<option value='".$type['ProjectId']."' >".$type['ProjectName']."</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <div class="error_message"><p>please select project...</p></div>
+                                </div>
+                            </div>
+                            <div class="row" id="showId">
+                                <div class="form-group col-lg-12">
+                                    <select name="leadId" id="LeadId" class="dropChange1 form-control single_dropdown2 lbl_move" label="Select Lead" style="width:100%;" >
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 savebtn_area no_border">
+                                <ul>
+                                    <li class="save_btn m_auto">
+                                        <a href="javascript:void(0);" class="ripple continue" id="continue" value="Continue">Proceed</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    $("#showId").hide();
+    $('#ProjectsId').on('change', function() {
+        //alert("hi");
+        var id = $(this).val();
+        if(id !=-1){
+            $('#showId').show();
+        }
+        else{
+            $('#showId').hide();
+        }
+    });
+</script>
+<script>
+    $(".continue").click(function(){
+        var ele = $(".showDiv:visible");
+        var bool = true;
+        ele.find("input,checkbox, select, textarea").each(function(){
+            var tagname = $(this).prop("tagName").toLowerCase();
+            if(tagname =='input'){
+                var type = $(this).attr("type");
+                if(type =='text' ){
+                }
+                else if(type == 'checkbox'){
+                }
+                else if(type == 'radio'){
+                }
+            }
+            else if(tagname =='select'){
+                if($(this).val() == ""){
+                    bool = false;
+                    $(this).closest('.form-group').find(".error_message").show();
+                    $(this).focus();
+                    return false;
+                }
+            }
+            else if(tagname == 'textarea'){
+            }
+        });
+        if(bool){
+            if($(".showDiv:visible").index() != $(".showDiv:last").index()){
+                $(".showDiv:visible").next(".showDiv").show();
+                ele.hide();
+                if($(".showDiv:Visible").index()){
+                    $(this).text("submit");
+                }
+            }
+            else{
+                $('form').submit();
+            }
+        }
+    });
+</script>
+<script>
+    $('#ProjectsId').on('change',function(){
+        var formData = $("#ProjectsId").find("input:text,input:hidden,select").serializeArray();
+        $.ajax({
+            url:getBaseURL()+"telecaller/index/followup-entry",
+            type:"post",
+            data:formData,
+            success:function(data,textStatus,jqXHR){
+                $('#LeadId').html('');
+                var opHtml = '<option value=""></option>';
+                var valu = JSON.parse(data);
+                $.each(valu,function(i,o){
+                    opHtml += '<option value="'+o.LeadId+'">' +o.LeadName+'</option>';
+                });
+
+                $('#LeadId').html(opHtml);
+
+
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    });
+</script>

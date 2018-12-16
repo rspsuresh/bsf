@@ -1,0 +1,149 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<style>
+.rf-fixed										{margin-top:0px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Resource List</h1>
+                <div class="col-lg-6">
+                    <div class="fixed-action-btn active rf-fixed">
+                        <a class="btn-floating btn-large">
+                            <i class="fa fa-print"></i>
+                        </a>
+                        <ul>
+                            <li>
+                                <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Print Report">
+                                    <i class="fa fa-print"></i>
+
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Download Excel">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn-floating" id="csvExport" href="javascript:void(0);" download data-toggle="tooltip" data-placement="top" data-original-title="Export CSV">
+                                    <i class="fa fa-file-archive-o"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0 tmss">
+                <div class="table-responsive clear">
+                    <div id="grid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12"><a data-text="Go to Resource Master" href="<?php echo $this->basePath(); ?>/project/main/resourcemaster" class="gobacklist"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i> Go to Resource Master</a></div>
+<script type="text/javascript">
+    var $grid = $("#grid");
+    $(function () {
+        var source = {
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'ResourceId', type: 'number' },
+                { name: 'Code',type: 'string'},
+                { name: 'ResourceName',type: 'string'},
+                { name: 'UnitName',type: 'string'},
+                { name: 'Rate', type: 'number' },
+                { name: 'ResourceGroupName',type: 'string'},
+                { name: 'TypeName',type: 'string'}
+            ],
+            id: 'ResourceId',
+            url: getBaseURL() + "project/report/getresourcewithgroup"
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $grid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            height:"490",
+            filterable: true,
+            sortable: true,
+            pageable:true,
+            groupable:true,
+            columns: [
+                { text: 'Code', dataField: 'Code'},
+                { text: 'ResourceName', dataField: 'ResourceName'},
+                { text: 'UnitName', dataField: 'UnitName'},
+                { text: 'Rate', dataField: 'Rate'},
+                { text: 'TypeName', dataField: 'TypeName', hidden: true},
+                { text: 'ResourceGroupName', dataField: 'ResourceGroupName', hidden: true}
+            ],
+            groups: ['TypeName','ResourceGroupName'],
+            groupsrenderer: function (defaultText, group, state, params) {
+                return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+            },
+            ready: function () {
+                $("#grid").jqxGrid('expandallgroups');
+            }
+        });
+    });
+
+    //Print option
+    $("#excelExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+    });
+    $("#csvExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+    });
+    $("#htmlExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'html', 'jqxGrid');
+    });
+
+    $("#print").click(function () {
+        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>Resource List</title>\n' +
+                '<h1>Resource List</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+        /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+    });
+
+
+    function  printTable() {
+//        var divToPrint=document.getElementById("grid");
+//        newWin= window.open("");
+//        newWin.document.write(divToPrint.outerHTML);
+//        newWin.print();
+//        newWin.close();
+        $("#grid").jqxGrid('exportdata', 'pdf', 'ResourceList');
+        //$("#grid").jqxGrid('exportdata', 'pdf', 'MovilesConsolidadoPDF', true, null, true);
+//        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+//        var newWindow = window.open('', '', 'width=800, height=500'),
+//            document = newWindow.document.open(),
+//            pageContent =
+//                '<!DOCTYPE html>\n' +
+//                '<html>\n' +
+//                '<head>\n' +
+//                '<meta charset="utf-8" />\n' +
+//                '<title>jQWidgets Grid</title>\n' +
+//                '</head>\n' +
+//                '<body>\n' + gridContent + '\n</body>\n</html>';
+//        document.write(pageContent);
+//        document.close();
+//        newWindow.print();
+    }
+</script>

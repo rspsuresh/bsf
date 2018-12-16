@@ -1,0 +1,311 @@
+<style>
+    .autocomplete-suggestions {z-index: 999999 !important;}
+	.rt_bx-clr{color:#07549b;font-size:16px;padding-bottom:6px;padding-top:6px;}
+</style>
+<form id="formWrapper" method="post" onsubmit="return entryValidate();">
+    <h2 class="vendordetail_change">Account Entry</h2>
+    <div class="right_lbox_inner_cnt">
+		<div class="form-group">
+			<div class="col-lg-12">
+				<label class="rt_bx-clr">Parent Account Name</label>
+				<input type="hidden" name="accountId" id="accountId" value="<?php echo (isset($accountId)) ? $accountId:''; ?>">
+				<input type="hidden" name="type" id="type" value="">
+				<input type="text" name="parentAccName" id="parentAccName" class="form-control lbl_move" value="<?php echo (isset($accdetList)) ? $strParentAccName:''; ?>" />
+				<input type="hidden" name="parentAccNameId" id="parentAccNameId" value="<?php echo (isset($accdetList)) ? $accdetList['ParentAccountId']:'0'; ?>"/>
+				<input type="hidden" name="LevelNo" id="LevelNo" value="<?php echo (isset($accdetList)) ? $accdetList['LevelNo']:'0'; ?>"/>
+				<span class="error" id="errorparentAccName"></span>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-lg-12">
+				<label class="rt_bx-clr">What is the new Account Name ?</label>
+				<input type="text" name="accountName" id="accountName" value="<?php echo (isset($accdetList)) ? $accdetList['AccountName']:''; ?>" class="form-control lbl_move" />
+				<span class="error" id="erroraccountName"></span>
+			</div>
+		</div>
+		<div class="form-group ">
+			<div class="col-lg-12">
+				<label class="rt_bx-clr"> Is this Account is a Last Level ?</label>
+				<div class="radio_check">
+					<p>
+					<input type="radio" name="levelGroup" <?php echo (isset($accdetList) && $accdetList['LastLevel'] =='Y') ? 'checked':''; ?> <?php echo ($accdetList['LastLevel'] !='Y' && $accdetList['LastLevel'] !='N') ? 'checked':''; ?> id="levelGroupYes" onchange="showAccountType()" value="Y" />
+					<label for="levelGroupYes" class="ripple has-ripple">Yes</label>
+					</p>
+				</div>
+				<div class="radio_check">
+					<p>
+					<input type="radio" name="levelGroup" <?php echo (isset($accdetList) && $accdetList['LastLevel'] =='N') ? 'checked':''; ?> id="levelGroupNo" onchange="showAccountType()" value="N" />
+					<label for="levelGroupNo" class="ripple has-ripple">No</label>
+					</p>
+				</div>     
+			</div>
+		</div>
+		<div class="form-group" id="divAccType" <?php echo (isset($accdetList) && $accdetList['LastLevel'] =='N') ? 'style="display: none;"':''; ?> >
+			<div class="col-lg-12">
+				<label class="rt_bx-clr">What type of Account is this ?</label>
+				<select style="width:100%;" class="single_dropdown2" name="accountType" id="accountType">
+					<option value=""></option>
+					<?php if(isset($accTypedetList)) {
+						foreach($accTypedetList as $typeList) : ?>
+							<option value="<?php echo $typeList['TypeId'];?>"
+                                <?php echo (isset($accdetList) && $accdetList['TypeId'] == $typeList['TypeId']) ? 'selected':''; ?>> <?php echo $typeList['TypeName'];?>
+                            </option>
+						<?php endforeach; } ?>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-lg-12">
+				<div class="radio_check">
+					<p>
+					<input type="radio" name="IFRSType" id="IFRSBalance" <?php echo (isset($accdetList) && $accdetList['IFRSType'] =='B') ? 'checked':''; ?> value="B" onchange="showIFRS()" />
+					<label for="IFRSBalance" class="ripple has-ripple">IFRS Balance Sheet</label>
+					</p>
+				</div>
+				<div class="radio_check">
+					<p>
+					<input type="radio" name="IFRSType" id="IFRSCash" <?php echo (isset($accdetList) && $accdetList['IFRSType'] =='C') ? 'checked':''; ?> value="C" onchange="showIFRS()" />
+					<label for="IFRSCash" class="ripple has-ripple">IFRS Cash Flow</label>
+					</p>
+				</div>   
+			</div>
+		</div>
+		<div class="form-group" id="divBalance" <?php echo (isset($accdetList) && $accdetList['IFRSType'] !='B') ? 'style="display: none;"':''; ?>>
+			<div class="col-lg-12">
+			   <label class="rt_bx-clr"> IFRS  Balance Sheet</label>
+				<select style="width:100%;" class="single_dropdown2" name="BalanceSheetId" id="BalanceSheetId">
+					<option value=""></option>
+					<?php if(isset($ifrsBSList)) {
+						foreach($ifrsBSList as $BSList) : ?>
+							<option value="<?php echo $BSList['BSId'];?>" <?php echo (isset($accdetList) && $accdetList['IFRSBSId'] == $BSList['BSId']) ? 'selected':''; ?> ><?php echo $BSList['Description'];?></option>
+						<?php endforeach; } ?>
+				</select>
+			</div>
+		</div>
+		<div class="form-group" id="divCash"  <?php echo (isset($accdetList) && $accdetList['IFRSType'] !='C') ? 'style="display: none;"':''; ?>>
+			<div class="col-lg-12">
+				<label class="rt_bx-clr"> IFRS Cash Flow</label>
+				<select style="width:100%;" class="single_dropdown2" name="cashFlowId" id="cashFlowId">
+					<option value=""></option>
+					<?php if(isset($ifrsCFList)) {
+						foreach($ifrsCFList as $CFList) : ?>
+							<option value="<?php echo $CFList['CFId'];?>" <?php echo (isset($accdetList) && $accdetList['IFRSCFId'] == $CFList['CFId']) ? 'selected':''; ?> ><?php echo $CFList['Description'];?></option>
+						<?php endforeach; } ?>
+				</select>
+			</div>
+		</div>
+		<div class="form-group" >
+			<div class="col-lg-12" style="margin-bottom:10px;">
+				<label class="rt_bx-clr"> IFRS  Profit Loss</label>
+				<select style="width:100%;" class="single_dropdown2" name="profitLossId" id="profitLossId">
+					<option value=""></option>
+					<?php if(isset($ifrsPLList)) {
+						foreach($ifrsPLList as $PLList) : ?>
+							<option value="<?php echo $PLList['PLId'];?>" <?php echo (isset($accdetList) && $accdetList['IFRSPLId'] == $PLList['PLId']) ? 'selected':''; ?> ><?php echo $PLList['Description'];?></option>
+						<?php endforeach; } ?>
+				</select>
+			</div>
+		</div>
+		<div class="col-lg-12 savebtn_area">
+			<ul>
+				<li class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="submitForm();" id="submitFId" data-toggle="tooltip" class="ripple" title="Submit">Submit</a>
+					<div id="submit-loaderF" class="post_loader ask_post_loader brad_50">
+						<img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+					</div>
+				</li>
+				<li class="cancel_btn float_r"><a href="javascript:void(0)" onclick="closeRightBox();" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+			</ul>
+		</div>
+	</div>
+</form>
+<script type="text/javascript">
+    var parentList=<?php echo (isset($arrAccNameLists)) ? json_encode($arrAccNameLists) : '[]';?>;
+    var fixedAccount=<?php echo (isset($fixedAccount)) ? $fixedAccount : 0;?>;
+
+    if(fixedAccount ==1){
+        $("#accountType").attr('disabled',true);
+    }else{
+        $("#accountType").attr('disabled',false);
+    }
+
+    $(function () {
+        $('.right_lightbox').attr('pageRefresh','0');
+        bindParentAutoComplete(parentList);
+    });
+
+    $(".single_dropdown2").select2({
+        placeholder: ""
+    });
+    $(".date_picker").datepicker({
+        format: "dd-mm-yyyy",
+        viewMode: "months",
+        minViewMode: "months"
+    });
+    function entryValidate(){
+        if($('#parentAccNameId').val() == 0) {
+            $('#parentAccName').focus();
+            $('#errorparentAccName').text('Select a valid Parent Account');
+            return false;
+        }else{
+            $('#errorparentAccName').text('');
+        }
+
+        if($('#accountName').val().length == 0) {
+            $('#accountName').focus();
+            $('#erroraccountName').text('Account Name is Required!');
+            return false;
+        }else{
+            $('#erroraccountName').text('');
+        }
+    }
+
+    function closeRightBox(){
+        $('.right_lightbox').hide();
+    }
+
+    function submitForm(){
+        //$('#formWrapper').submit();
+        var accEnable = 0;
+        if($('#parentAccNameId').val() == 0) {
+            $('#parentAccName').focus();
+            $('#errorparentAccName').text('Select a valid Parent Account');
+            accEnable = 1;
+            return false;
+        }else{
+            $('#errorparentAccName').text('');
+        }
+        if($('#accountName').val().length == 0) {
+            $('#accountName').focus();
+            $('#erroraccountName').text('Account Name is Required!');
+            accEnable = 1;
+            return false;
+        }else{
+            $('#erroraccountName').text('');
+        }
+        if(checkAccountNameDuplication() === true){
+            $("#accountName").focus();
+            $('#erroraccountName').text('Account Name Already found!');
+            accEnable = 1;
+            return false;
+        }
+        if(accEnable != 1){
+            $("#accountType").attr('disabled',false);
+        }
+        $('#type').val('addEditDetails');
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/accountentry",
+            type:"post",
+            //async:false,
+            data:$('#formWrapper').serialize(),
+            success:function(data, textStatus, jqXHR){
+                $('.right_lightbox').hide().attr('pageRefresh','1').trigger('change');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function bindParentAutoComplete(parentList) {
+        var $parentAccName = $('#parentAccName');
+        var $parentAccNameId = $('#parentAccNameId');
+        var LevelNo = $('#LevelNo');
+        $parentAccName.unbind('autocomplete');
+        $parentAccName.autocomplete({
+            lookup: parentList,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $parentAccNameId.val(suggestion.data);
+                    LevelNo.val(suggestion.LevelNo);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $parentAccNameId.val(0);
+                LevelNo.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $parentAccNameId.val(0);
+                    LevelNo.val(0);
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+    /*function bindAccTypeAutoComplete(accTypeList) {
+     var $accountType = $('#accountType');
+     var $accountTypeId = $('#accountTypeId');
+     $accountType.unbind('autocomplete');
+     $accountType.autocomplete({
+     lookup: accTypeList,
+     showNoSuggestionNotice: false,
+     lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+     if (queryLowerCase == '*') {
+     return suggestion.value;
+     } else {
+     var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+     return re.test(suggestion.value);
+     }
+     }, onSelect: function (suggestion) {
+     if (suggestion) {
+     $accountTypeId.val(suggestion.data);
+     $(this).removeClass('error');
+     }
+     }, onSearchStart: function (suggestion) {
+     $accountTypeId.val(0);
+     }, onSearchComplete: function (query, suggestions) {
+     if (!suggestions.length) {
+     $accountTypeId.val(0);
+     $(this).addClass('error');
+     } else $(this).removeClass('error');
+     }
+     });
+     }*/
+
+    function showAccountType(){
+        var level=$('input[name=levelGroup]:checked').val();
+        if(level == 'Y')
+            $('#divAccType').show();
+        else{
+            $('#accountType').val('').select2();
+            $('#divAccType').hide();
+        }
+    }
+    function showIFRS(){
+        var IFRSType=$('input[name=IFRSType]:checked').val();
+        if(IFRSType == 'B'){
+            $('#divCash').hide().find('select').val('').select2();;
+            $('#divBalance').show().find('select').val('').select2();;
+        }else if(IFRSType == 'C'){
+            $('#divBalance').hide().find('select').val('').select2();;
+            $('#divCash').show().find('select').val('').select2();;
+        }
+    }
+
+    function checkAccountNameDuplication() {
+        var isExists = false;
+        $('#type').val('CheckAccountNameValid');
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/accountentry",
+            type:"post",
+            async:false,
+            data:$('#formWrapper').serialize(),
+            success:function(data, textStatus, jqXHR){
+                var exitData=JSON.parse(data);
+                console.log(exitData.length);
+                if(exitData.length != 0){
+                    isExists = true;
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+        return isExists;
+    }
+</script>

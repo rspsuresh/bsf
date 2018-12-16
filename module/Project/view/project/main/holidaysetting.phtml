@@ -1,0 +1,240 @@
+<!--style-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<!--style end-->
+<style>
+ul.week-days7 		{float:left;border:1px solid #ddd;background:#fff;height:250px;width:100%;margin-bottom:10px;}
+ul.week-days7 h1 	{float:left;font-size:14px;color:#424141;font-weight:600!important;text-align:center;line-height:42px;height:40px;background:#E2EBEF;width:100%;border-bottom:2px solid #5D9BB6;}
+ul.week-days7 h2 	{float:left;font-size:15px;color:#545f9c;font-weight:400!important; padding-top:10px; padding-left:8px; width:100%;}
+ul.week-days7 li 	{float:left;list-style-type:none;padding:6px;width:31%;}
+ul.week-days7 li .checkbox label:after {content: '';display: table;clear: both;}
+ul.week-days7 li .checkbox label 	   {padding:0px;color:#266aa8;font-size:12px;font-weight:600;line-height:20px;}
+ul.week-days7 li .checkbox .cr 		   {position:relative;display:inline-block;border:1px solid #c2c2c2;width:20px;height:20px;float:left;margin-right: .5em;color:#e91e63;}
+ul.week-days7 li .checkbox .cr .cr-icon{position:absolute;line-height:0;top:50%;left:20%;}
+ul.week-days7 li .checkbox label input[type="checkbox"] {display:none;}
+ul.week-days7 li .checkbox label input[type="checkbox"] + .cr > .cr-icon{transform: scale(3) rotateZ(-220deg);opacity: 0;transition: all .7s ease-in;}
+ul.week-days7 li .checkbox label input[type="checkbox"]:checked + .cr > .cr-icon {transform: scale(1) rotateZ(0deg);opacity: 1;}
+ul.week-days7 li .checkbox label input[type="checkbox"]:disabled + .cr {opacity: .5;}
+</style>
+<div class="content_wrapper padlr0">
+  <form class="form-horizontal" onsubmit="return entryValidate()" method="post" role="form" >
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12 page_tittle">
+          <h1 class="col-lg-6" style="padding-left:0px !important;">Holiday Setting</h1>
+          <div class="col-lg-6">
+            <label class="col-sm-6 text-right sel-type">Select Project</label>
+            <div class="col-lg-6 form-group">
+              <select name="projectId" id="projectId" class="form-control single_dropdown lbl_move" onchange="return ChangeProject()" data-size="6" title="Select Project...">
+                <option value="0" selected>None</option>
+                <?php if(isset($projectlists)):?>
+                <?php foreach ( $projectlists as $project ):?>
+                <option value="<?php echo $project[ 'ProjectId' ];?>" <?php echo ($project['ProjectId']==$projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12">
+        <div class="col-lg-7 col-lg-offset-0 col-md-7 col-md-offset-0 col-sm-7 col-sm-offset-0" style="<?php echo ($projectId==0) ? 'display: none' : ''; ?>">
+          <div class="table-responsive topsp">
+            <table class="table" style=" margin-bottom:0px;">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Remarks</th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php $i=1;
+            if (isset($projectholidays)) {
+            foreach($projectholidays as $trans) {?>
+                <tr>
+                  <td width="10%"><input class="parent_text date_picker" type="text" name ="hdate_<?php echo $i; ?>" id="hdate_<?php echo $i; ?>" value="<?php echo date("d-m-Y", strtotime($trans['HDate'])) ;  ?>"  readonly/></td>
+                  <td width="15%"><textarea class="parent_texts" type="text"  name="hremarks_<?php echo $i; ?>" id="hremarks_<?php echo $i; ?>" onchange="addNewRow(this)"><?php echo $trans['Note']; ?></textarea></td>
+                  <td width="1%" align="center"><ul class="action_btns">
+                      <li style="float:left;"> <a class="deleterowTr_<?php echo $i; ?>" href="#" onclick="deleteRow(this, event);"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                    </ul></td>
+                </tr>
+                <?php $i=$i+1; }} ?>
+                <tr>
+                  <td width="10%"><input class="parent_text date_picker" type="text" name ="hdate_<?php echo $i; ?>" id="hdate_<?php echo $i; ?>" readonly/></td>
+                  <td width="15%"><textarea class="parent_texts" type="text"  name="hremarks_<?php echo $i; ?>" id="hremarks_<?php echo $i; ?>" onchange="addNewRow(this)"></textarea></td>
+                  <td width="1%" align="center"><ul class="action_btns">
+                      <li style="float:left;"> <a class="deleterowTr_<?php echo $i; ?>" href="#" onclick="deleteRow(this, event);"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                    </ul></td>
+                </tr>
+              </tbody>
+              <input type="hidden" name="hrowid" id="hrowid" value = "<?php echo $i; ?>">
+            </table>
+          </div>
+        </div>
+        <div class="col-lg-5 col-lg-offset-0 col-md-5 col-md-offset-0 col-sm-5 col-sm-offset-0" style="<?php echo ($projectId==0) ? 'display: none' : ''; ?>">
+          <ul class="week-days7">
+            <h1>Weekly Holidays</h1>
+            <h2>Select Holidays</h2>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Sunday" <?php echo (in_array('Sunday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Sunday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Monday" <?php echo (in_array('Monday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Monday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Tuesday" <?php echo (in_array('Tuesday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Tuesday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Wednesday" <?php echo (in_array('Wednesday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Wednesday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Thursday" <?php echo (in_array('Thursday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Thursday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Friday" <?php echo (in_array('Friday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Friday </label>
+              </div>
+            </li>
+            <li>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="weekday[]" value="Saturday" <?php echo (in_array('Saturday',$projectweekdays)) ? 'checked="checked"' : ''; ?>/>
+                  <span class="cr"><i class="cr-icon fa fa-star"></i></span>Saturday </label>
+              </div>
+            </li>
+          </ul>
+        </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-12 savebtn_area">
+      <ul>
+        <li class="dropdown save_btn float_r" style="<?php echo ($projectId==0) ? 'display: none' : ''; ?>" ><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Go to continue !">Save</a></li>
+        <li class="cancel_btn float_r" style="<?php echo ($projectId==0) ? 'display: none' : ''; ?>" ><a href="<?php echo $this->basePath(); ?>/project/dashboard/projectmain" data-toggle="tooltip" class="ripple" title="Go back!">Cancel</a></li>
+      </ul>
+    </div>
+    
+  </form>
+</div>
+<table id="dummy-date" style="display: none;">
+  <tbody>
+    <tr>
+      <td width="10%"><input class="parent_text date_picker" type="text" name ="hdate__1" id="hdate__1" readonly/></td>
+      <td width="15%"><input class="parent_texts" type="text"  name ="hremarks__1" id="hremarks__1" onchange="addNewRow(this)"/></td>
+      <td width="1%" align="center"><ul class="action_btns">
+          <li style="float:left;"> <a class="deleterowTr__1" href="#" onclick="deleteRow(this, event);"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+        </ul></td>
+    </tr>
+  </tbody>
+</table>
+<script>
+    function ChangeProject() {
+        var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+        window.location.href = getBaseURL() + "project/main/holidaysetting/" + iProjectId;
+    }
+    function addNewRow(x) {
+        var $tr = $(x).closest('tr');
+        var key = $(x)[0].id.split('_')[1];
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#hdate_'+ key).val().length==0) return;
+        if ($('#hremarks_'+ key).val().length==0) return;
+        var $hremarks = $('#hremarks_'+ key);
+        removeError($hremarks);
+
+        var $rowid = $('#hrowid'),
+            rowid = parseInt($rowid.val());
+        $('.deleterowTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#dummy-date tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        var today = new Date();
+        $tr.parent('tbody').append(template);
+        $tr.next('tr').find('input.date_picker[id^="hdate"]').datepicker({'format': 'dd-mm-yyyy'});
+
+        $tr.next('tr').find('.date_icon').click(function() {
+            $(this).parent().find('input').datepicker('show');
+        });
+        $rowid.val(count);
+    }
+
+    function deleteRow(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr').length == 1) {
+            var template = $('#dummy-date tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#hrowid').val(1);
+        }
+
+        $tr.remove();
+        setPageChanges(true);
+        return false;
+    }
+    function submitForm() {
+        var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+        if (iProjectId ==0) {
+            alert("Select Project");
+            return;
+        }
+        $('form').submit();
+    }
+    function entryValidate() {
+
+        var isValid = true;
+        $.each($('input[id^=hdate_]'), function() {
+            var $this = $(this),
+                id = $this[0].id,
+                key = id.split('_')[1];
+            if (id.indexOf('__') != -1)
+                return;
+
+            var $hdate = $('#hdate_' + key),
+                $hremarks = $('#hremarks_' +key);
+
+            if ($hdate.val().length !=0) {
+                if (isNullCheck($hremarks.val(),'string') == "") {
+                    isValid =false;
+                    showError($hremarks, 'Required');
+                } else {
+                    removeError($hremarks);
+                }
+            }
+        });
+
+        return isValid;
+    }
+</script> 
+
+
+

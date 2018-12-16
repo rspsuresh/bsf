@@ -1,0 +1,1002 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<style>
+    .form-control {
+        box-shadow:none !important
+    }
+    .panel {
+        border-radius:0px !important;
+    }
+    .panel-info {
+        border:none;
+        border-top:none;
+    }
+
+    .form-control {
+         box-shadow:none !important;
+     }
+    .opt-listed ul li p{ height:30px !important; padding-top:0px !important;}
+</style>
+<?php
+    $viewmode = false;
+    if(isset($mode) && $mode != 'edit' && isset($receiptid) && $receiptid == 0)
+        $viewmode = true;
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form  id="formWrapper"  method="post" autocomplete="off">
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+				<input type="hidden" name="receiptid" id="receiptid" value="<?php echo (isset($receiptid)) ? $receiptid  : 0; ?>"/>
+				<input type="hidden" name="mode" id="mode" value="<?php echo (isset($mode)) ? $mode  : 'add'; ?>"/>
+				 <?php if($viewmode || (isset($receiptregister) && $receiptregister['ReceiptAgainst'] != 'B')):?>
+                <div id="indexWrapper">
+                    <div class="col-lg-12">
+                        <h1 class="text-center">Receipt</h1>
+                    </div>
+                    <!--form start-->
+                    <div class="col-lg-12" >
+                        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                            <div class="col-sm-6 col-sm-offset-3 top-next">
+                                <div class="form-horizontal">
+                                    <div class="row">
+										<div class="form-group">
+											<div class="col-lg-12">
+												<input type="text" name="ReceiptNo" id="ReceiptNo" class="form-control lbl_move" label="Receipt No." maxlength="100" onchange="CheckReceiptNo(this, this.value)" value="<?php echo (!isset($receiptregister) && $genType) ? $svNo : ''; echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : '';?>" <?php echo ((isset($receiptregister) && $receiptregister['ReceiptAgainst'] != 'B') || $genType) ? 'readonly': ''; ?>/>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+												<input type="text" name="ReceiptDate" id="ReceiptDate" class="form-control date_picker lbl_move" readonly="readonly" label="Receipt Date" onchange="validateDate(this)"  value="<?php echo (isset($receiptregister)) ? date('d-m-Y', strtotime($receiptregister['ReceiptDate'])) : date('d-m-Y');?>"/>
+											</div>
+										</div>
+										<div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="ClientName" id="ClientName" class="form-control lbl_move" label="Client Name"  value="<?php echo (isset($receiptregister)) ? $receiptregister['ClientName'] : '';?>"/>
+												<input type="hidden" name="ClientId" id="ClientId" value="<?php echo (isset($receiptregister)) ? $receiptregister['ClientId'] : '';?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="ProjectName" id="ProjectName" class="form-control lbl_move" label="Project Name"  value="<?php echo (isset($receiptregister)) ? $receiptregister['ProjectName'] : '';?>"/>
+												<input type="hidden" name="ProjectId" id="ProjectId" value="<?php echo (isset($receiptregister)) ? $receiptregister['ProjectId'] : '';?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="OrderNo" id="OrderNo" class="form-control lbl_move" label="Order No" disabled  value="<?php echo (isset($receiptregister)) ? $receiptregister['WONo'] : '';?>"/>
+                                                <input type="hidden" name="PWorkOrderId" id="PWorkOrderId" value="<?php echo (isset($receiptregister)) ? $receiptregister['WORegisterId'] : '';?>"/>
+                                                <input type="hidden" id="WODate"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <select name="ReceiptAgainst" id="ReceiptAgainst" class="single_dropdown2 lbl_move" style="width:100%;" label="Receipt Against" <?php echo (!isset($receiptregister)) ? 'disabled': '';?>>
+                                                    <option></option>
+                                                    <option value="B" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'B') ? 'selected' : '';?>>Bill</option>
+													<option value="M" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'M') ? 'selected' : '';?>>Mobilization Advance</option>
+                                                    <option value="A" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'A') ? 'selected' : '';?>>Adhoc Advance</option>
+													<option value="R" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? 'selected' : '';?>>Retention</option>
+													<option value="W" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'W') ? 'selected' : '';?>>Withheld</option>
+                                                    <option value="O" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'O') ? 'selected' : '';?>>Others</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <select name="PaymentMode" id="PaymentMode" class="single_dropdown2 lbl_move" style="width:100%;" label="Payment Mode" onchange="paymentModeChange(this, this.value)">
+                                                    <option></option>
+                                                    <option value="CASH" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'CASH') ? 'selected' : '';?>>Cash</option>
+                                                    <option value="CARD" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'CARD') ? 'selected' : '';?>>Card</option>
+                                                    <option value="CHEQUE" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'CHEQUE') ? 'selected' : '';?>>Cheque</option>
+                                                    <option value="NEFT" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'NEFT') ? 'selected' : '';?>>NEFT</option>
+                                                    <option value="RTGS" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'RTGS') ? 'selected' : '';?>>RTGS</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="TNo" id="TNo" class="form-control lbl_move" label="Transaction No"  value="<?php echo (isset($receiptregister)) ? $receiptregister['TransactionNo'] : '';?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                <input type="text" name="TDate" id="TDate" class="form-control date_picker lbl_move" label="Transaction Date" readonly onchange="validateDate(this)"  value="<?php echo (isset($receiptregister)) ? date('d-m-Y', strtotime($receiptregister['TransactionDate'])) : '';?>"/>
+                                            </div>
+                                        </div>
+										<div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="BankName" id="BankName" class="form-control lbl_move" label="Bank Name" value="<?php echo (isset($receiptregister)) ? $receiptregister['BankName'] : '';?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <textarea class="form-control lbl_move" label="Remarks" name="Remarks" id="Remarks" ><?php echo (isset($receiptregister)) ? $receiptregister['TransactionRemarks'] : '';?></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div id="amountDetailsWrapper" <?php echo (!isset($receiptregister) || (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'B')) ? 'style="display: none;"' : '';?>>
+                                            <div class="form-group">
+                                                <div class="col-lg-12">
+                                                    <input type="text" id="TotalAmount" class="form-control lbl_move" label="Total Amount" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" readonly value="<?php echo (isset($receiptAmounts)) ? $this->commonHelper()->sanitizeNumber($receiptAmounts['Amount']) : '';?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-lg-12">
+                                                    <input type="text" id="CumAmount" class="form-control lbl_move" label="Previous Amount" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" readonly value="<?php echo (isset($receiptAmounts)) ? $this->commonHelper()->sanitizeNumber($receiptAmounts['RecoveredAmount']) : '';?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-lg-12">
+                                                    <input type="text" id="BalanceAmount" class="form-control lbl_move" label="Balance Amount" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" readonly value="<?php echo (isset($receiptAmounts)) ? $this->commonHelper()->sanitizeNumber($receiptAmounts['BalanceAmount']) : '';?>"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <input type="text" name="Amount" id="Amount" class="form-control lbl_move" label="Amount" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($receiptregister)) ? $this->commonHelper()->sanitizeNumber($receiptregister['Amount']) : '';?>"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="next-bt">
+                                    <a href="#" onclick="validateIndex(); return false;" id="receiptBtnNext" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] != 'B') ? 'style="display:none;"': '';?>>Next <i class="fa fa-chevron-circle-right"></i></a>
+                                    <a href="#" onclick="submitReceipt(); return false;" id="receiptBtnSubmit" <?php echo (!isset($receiptregister) || (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'B')) ? 'style="display:none;"': '';?>>Submit <i class="fa fa-chevron-circle-up"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<?php else: ?>
+				<input type="hidden" name="Amount" id="Amount" value="<?php echo (isset($receiptregister)) ? $receiptregister['Amount'] : '';?>"/>
+				<?php endif; ?>
+                <?php if($viewmode || isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'B'):?>
+                    <?php if(isset($receiptregister)): ?>
+                        <input type="hidden" name="ReceiptAgainst" id="ReceiptAgainst" value="<?php echo $receiptregister['ReceiptAgainst']; ?>"/>
+                    <?php endif; ?>
+                    <div id="mainWrapper" <?php echo (!$viewmode) ? 'style="display:block;"' : ''; ?>>
+                        <div class="content_wrapper padlr0">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h1>Receipt</h1>
+                                    </div>
+                                    <div class="col-lg-12 top_ct" >
+                                        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                            <div class="form-group col-lg-12">
+                                                <input type="text" name="Receipt_Date" id="Receipt_Date" class="form-control lbl_move" label="Receipt Date"  value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptDate'] : date("d-m-Y");?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                            <div class="form-group col-lg-12">
+                                                <input type="text" name="Receipt_No" id="Receipt_No" class="form-control lbl_move" label="Receipt No." value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : $svNo;?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <div class="row mb-b">
+                                    <div class="col-lg-12 col-lg-offset-0">
+                                    	<div class="tagcrd">
+                                            <ul>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr1">
+                                                        <div class="icon-bg"><i class="fa fa-suitcase i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed1 comnelips" style="font-weight:600 !important;">Project Name</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips" id="MW_ProjectName"><?php echo (isset($receiptregister)) ? $receiptregister['ProjectName'] : '';?></h5>
+                                                    </div>
+                                                </li>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr2">
+                                                        <div class="icon-bg"><i class="fa fa-list-alt i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed2 comnelips" style="font-weight:600 !important;">Order No</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips" id="MW_WorkOrderNo"><?php echo (isset($receiptregister)) ? $receiptregister['WONo'] : '';?></h5>
+                                                    </div>
+                                                </li>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr3">
+                                                        <div class="icon-bg"><i class="fa fa-usd  i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed3 comnelips" style="font-weight:600 !important;">Payment Mode</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips" id="MW_PaymentMode"><?php echo (isset($receiptregister)) ? $receiptregister['ReceiptMode'] : '';?></h5>
+                                                    </div>
+                                                </li>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr4">
+                                                        <div class="icon-bg"><i class="fa fa-server i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed4 comnelips" style="font-weight:600 !important;">Transaction No.</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips"  id="MW_TNo"><?php echo (isset($receiptregister) && $receiptregister['TransactionNo'] != '') ? $receiptregister['TransactionNo'] : 'N/A';?></h5>
+                                                    </div>
+                                                </li>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr5">
+                                                        <div class="icon-bg"><i class="fa fa-calendar i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed5 comnelips" style="font-weight:600 !important;">Work Transaction Date</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips" id="MW_TDate"><?php echo (isset($receiptregister)) ? $receiptregister['TransactionDate'] : '';?></h5>
+                                                    </div>
+                                                </li>
+                                                <li class="mnimumwidthres90">
+                                                    <div class="tagcardhdng pnl-overflow crmbrdrclr6">
+                                                        <div class="icon-bg"><i class="fa fa-money i-text-111"></i></div>
+                                                        <h2 class="comtex commargin_bottom_5 crmbrdrclrhed6 comnelips" style="font-weight:600 !important;">Work Amount</h2>
+                                                        <h5 class="tetmuted tet-clr11 comnelips" id="MW_Amount"><?php echo (isset($receiptregister)) ? $receiptregister['Amount'] : '';?></h5>
+                                                    </div>
+                                            	</li>                                            
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <!--table start-->
+                                    <div class="col-lg-12 col-lg-offset-0">
+                                        <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                            <table class="table highlightTable" style=" margin-bottom:0px;" id="EntryTable">
+                                                <thead>
+                                                <tr>
+                                                    <th>Bill Date</th>
+                                                    <th>Bill No</th>
+                                                    <th>Net Amount</th>
+                                                    <th>Adjusted Amount</th>
+                                                    <th>Balance Amount</th>
+                                                    <th>Current Amount</th>
+                                                    <th>&nbsp; </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="main">
+                                                <?php $CurAmtTotal = 0;
+                                                    if(isset($billformats)):
+                                                    $i=0;
+                                                    foreach($billformats as $trans):
+                                                    $i=$i+1;
+
+                                                    $netAmt = 0;
+                                                    $curAmt = $trans['CurAmount'];
+                                                    $adjAmt = $trans['AdjAmount'];
+                                                    if($adjAmt<0)
+                                                    {
+                                                        $adjAmt=$adjAmt*(-1);
+                                                    }
+                                                    $sAmt = $trans['SubmitAmount'];
+                                                    $cAmt = $trans['CertifyAmount'];
+                                                    if($cAmt > 0)
+                                                        $netAmt = $cAmt;
+                                                    else if ($sAmt > 0)
+                                                        $netAmt = $sAmt;
+
+                                                    $balAmt = $netAmt - $adjAmt;
+
+                                                    $CurAmtTotal += $curAmt;
+                                                    ?>
+                                                    <tr class="padi05">
+                                                        <td width="5%"><input class="parent_padi05" type="text" id="BDate_<?php echo $i; ?>" value="<?php echo $trans['BillDate'];?>" readonly/></td>
+                                                        <td width="8%"><input class="parent_padi05 text-right" type="text" id="BNo_<?php echo $i; ?>" value="<?php echo $trans['BillNo'];?>" readonly/></td>
+                                                        <td width="8%" ><input class="parent_padi05 text-right" type="text" id="NetAmt_<?php echo $i; ?>"  value="<?php echo $this->commonHelper()->sanitizeNumber($netAmt);?>" readonly/></td>
+                                                        <td width="8%"><input class="parent_padi05 text-right" type="text" id="AdjAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($adjAmt);?>" readonly/></td>
+                                                        <td width="8%"><input class="parent_padi05 text-right" type="text" id="BalAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($balAmt);?>" readonly/></td>
+                                                        <td width="8%">
+                                                            <input type="hidden" name="BillId_<?php echo $i; ?>" id="BillId_<?php echo $i; ?>" value="<?php echo $trans['BillId'];?>"/>
+                                                            <input class="parent_text text-right" type="text" name="CurAmt_<?php echo $i; ?>" id="CurAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($curAmt);?>" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcTotal()"/>
+                                                        </td>
+                                                        <td width="4%" align="center" class="action_btns_td">
+                                                            <ul class="action_btns">
+                                                                <li>
+                                                                    <a href="#" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <tr style="display:none;" class="subTr">
+                                                        <td colspan="9" style="padding:0px !important; ">
+                                                            <div class="subDiv" style="display:none;">
+                                                                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                                                                <div class="col-lg-12">
+                                                                    <div class="table-responsive topsp">
+                                                                        <table class="table" style="margin-bottom:0px;" id="absTable_<?php echo $i;?>" >
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th>Description</th>
+                                                                                <th>Net Amount</th>
+                                                                                <th>Adjusted Amount</th>
+                                                                                <th>Balance Amount</th>
+                                                                                <th>Current Amount</th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody class="main">
+                                                                                <?php
+                                                                                $cur_total = 0;
+                                                                                $j=0;
+                                                                                foreach($trans['BillAbs'] as $billAbs):
+                                                                                $j=$j+1;
+                                                                                $cur_total += $billAbs['CurrentAmount'];
+                                                                                ?>
+                                                                                <!-- Start -->
+                                                                                <tr class="padi05">
+                                                                                    <td width="15%"><input class="parent_padi05" type="text" id="BillAbs_<?php echo $i;?>_Desc_<?php echo $j;?>" value="<?php echo $billAbs['TypeName'];?>" readonly/></td>
+                                                                                    <td width="10%"><input class="parent_padi05 text-right" type="text" id="BillAbs_<?php echo $i;?>_NetAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurAmount']);?>" readonly/></td>
+                                                                                    <td width="5%"><input class="parent_padi05 text-right" type="text" id="BillAbs_<?php echo $i;?>_AdjAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['AdjAmount']);?>" readonly/></td>
+                                                                                    <td width="5%"><input class="parent_padi05 text-right" type="text" id="BillAbs_<?php echo $i;?>_BalAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurAmount'] - $billAbs['AdjAmount']);?>" readonly/></td>
+                                                                                    <td width="6%">
+                                                                                        <input type="hidden" name="BillAbs_<?php echo $i;?>_FormatId_<?php echo $j;?>" id="BillAbs_<?php echo $i;?>_FormatId_<?php echo $j;?>" value="<?php echo $billAbs['BillFormatId'];?>" readonly/>
+                                                                                        <input class="parent_text text-right" type="text" id="BillAbs_<?php echo $i;?>_CurAmt_<?php echo $j;?>" name="BillAbs_<?php echo $i;?>_CurAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurrentAmount']);?>" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcAbsTotal(this)"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <!-- End -->
+                                                                                <?php endforeach;?>
+                                                                            </tbody>
+                                                                            <tbody class="total">
+                                                                                <tr>
+                                                                                <td colspan="3"></td>
+                                                                                    <td align="right" class="rate_pri">Total</td>
+                                                                                    <td width="6%"><input class="parent_text text-right" type="text" id="TotalCurAmt_<?php echo $i;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($cur_total);?>" readonly/></td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <input type="hidden" name="billabsrowid_<?php echo $i;?>" id="billabsrowid_<?php echo $i;?>" value="<?php echo $j;?>"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; endif;?>
+                                                </tbody>
+                                                <tbody class="total">
+                                                    <tr>
+                                                        <td colspan="4">&nbsp;</td>
+                                                        <td align="right" class="rate_pri">Total</td>
+                                                        <td width="10%" ><input class="parent_text text-right" type="text" name="BillTotal" id="BillTotal" value="<?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal);?>"/></td>
+                                                        <td>&nbsp;</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <input type="hidden" name="billrowid" id="billrowid" value="<?php echo $i;?>"/>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 savebtn_area">
+                            <ul>
+                            <?php if(!$viewmode):?>
+                                <li class="cb-cancel"><a href="<?php echo $this->basePath() . '/cb/receipt/register';?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+                            <?php endif;?>
+                            <li class="dropdown save_btn float_r"><a href="#" onclick="submitForm(); return false;" data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+                            <?php if($viewmode):?>
+                                <li class="cancel_btn float_r"><a href="#" onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>
+                            <?php endif;?>
+                            </ul>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
+</div>
+<table id="dummy-bill" style="display: none;">
+    <tbody>
+        <tr class="padi05">
+            <td width="3%"><input class="parent_padi05" type="text" id="BDate__1" readonly/></td>
+            <td width="8%"><input class="parent_padi05" type="text" id="BNo__1" readonly/></td>
+            <td width="8%" ><input class="parent_padi05 text-right" type="text" id="NetAmt__1" readonly/></td>
+            <td width="8%"><input class="parent_padi05 text-right" type="text" id="AdjAmt__1" readonly/></td>
+            <td width="8%"><input class="parent_padi05 text-right" type="text" id="BalAmt__1" readonly/></td>
+            <td width="8%">
+                <input type="hidden" name="BillId__1" id="BillId__1"/>
+                <input class="parent_text text-right" type="text" name="CurAmt__1" id="CurAmt__1" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcTotal()"/>
+            </td>
+            <td width="4%" align="center" class="action_btns_td">
+                <ul class="action_btns">
+                    <li>
+                        <a href="#" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <tr style="display:none;" class="subTr">
+            <td colspan="9" style="padding:0px !important; ">
+                <div class="subDiv" style="display:none;">
+                    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                    <div class="col-lg-12">
+                        <div class="table-responsive topsp">
+                            <table class="table" style="margin-bottom:0px;" id="absTable__1">
+                                <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Net Amount</th>
+                                    <th>Adjusted Amount</th>
+                                    <th>Balance Amount</th>
+                                    <th>Current Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main">
+
+                                </tbody>
+                                <tbody class="total">
+                                    <tr>
+                                        <td align="right" class="rate_pri">Total</td>
+                                        <td width="6%"><input class="parent_text text-right" type="text" id="TotalCurAmt__1" readonly/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="billabsrowid__1" id="billabsrowid__1" value="1"/>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table id="dummy-bill-abs" style="display: none;">
+    <tbody>
+        <tr class="padi05">
+            <td width="15%"><input class="parent_padi05" type="text" id="BillAbs__1_Desc__9" readonly/></td>
+            <td width="10%"><input class="parent_padi05 text-right" type="text" id="BillAbs__1_NetAmt__9" readonly/></td>
+            <td width="5%"><input class="parent_padi05 text-right" type="text" id="BillAbs__1_AdjAmt__9" readonly/></td>
+            <td width="5%"><input class="parent_padi05 text-right" type="text" id="BillAbs__1_BalAmt__9" readonly/></td>
+            <td width="6%">
+                <input type="hidden" name="BillAbs__1_FormatId__9" id="BillAbs__1_FormatId__9" readonly/>
+                <input class="parent_text text-right" type="text" id="BillAbs__1_CurAmt__9" name="BillAbs__1_CurAmt__9" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcAbsTotal(this)"/>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<script type="text/javascript">
+	var arr_clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]';?>;
+	var arr_banks = <?php echo (isset($banks)) ? json_encode($banks) : '[]';?>;
+    var $ProjectName = $('#ProjectName'),
+        $OrderNo = $('#OrderNo'),
+        $ReceiptAgainst = $('#ReceiptAgainst'),
+        $PaymentMode = $('#PaymentMode'),
+        $TNo = $('#TNo'),
+        $TDate = $('#TDate'),
+        $Amount = $('#Amount'),
+        $WorkOrderId = $('#PWorkOrderId'),
+        $WODate = $('#WODate'),
+		$ReceiptNo = $('#ReceiptNo'),
+        $ReceiptDate = $('#ReceiptDate'),
+		$ClientName = $('#ClientName'),
+		$BankName = $('#BankName'),
+		$clientId = $('#ClientId'),
+        $amountDetailsWrapper = $('#amountDetailsWrapper'),
+        $TotalAmount = $('#TotalAmount'),
+        $CumAmount = $('#CumAmount'),
+        $BalanceAmount = $('#BalanceAmount'),
+        $receiptBtnNext = $('#receiptBtnNext'),
+        $receiptBtnSubmit = $('#receiptBtnSubmit'),
+        tmpSelProjectId = null;
+    var $MW_ProjectName = $('#MW_ProjectName'),
+        $MW_WorkOrderNo = $('#MW_WorkOrderNo'),
+        $MW_PaymentMode = $('#MW_PaymentMode'),
+        $MW_TDate = $('#MW_TDate'),
+        $MW_TNo = $('#MW_TNo'),
+        $MW_Amount = $('#MW_Amount');
+    $(function () {
+        // select2 initialize
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            minimumResultsForSearch: -1
+        });
+
+        bindExpandTrFn();
+
+        // onchange receipt type
+        $ReceiptAgainst.on('change', function () {
+            var type = $(this).val();
+            switch (type) {
+                case 'B':
+                    $receiptBtnNext.show();
+                    $receiptBtnSubmit.hide();
+                    $amountDetailsWrapper.hide();
+                    break;
+                case 'M':
+                case 'W':
+                case 'R':
+                    $receiptBtnNext.hide();
+                    $receiptBtnSubmit.show();
+                    $amountDetailsWrapper.show();
+                    getAmountColumns(type);
+                    break;
+                default:
+                    $receiptBtnNext.hide();
+                    $receiptBtnSubmit.show();
+                    $amountDetailsWrapper.hide();
+                    break;
+            }
+        });
+
+        <?php if(isset($receiptid) && $receiptid != 0): ?>
+            $PaymentMode.trigger('change');
+        <?php endif; ?>
+
+        // prompt dialog on page navigation
+        initPageChangeFn();
+    });
+
+    function getAmountColumns(type) {
+        $.ajax({
+            url: getBaseURL() + "cb/receipt/index",
+            data: {rtype:'getAmounts', data: $WorkOrderId.val(), 'ReceiptAgainst': type, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var json_data = JSON.parse(data);
+                $TotalAmount.val(parseFloatVal(json_data.Amount));
+                $CumAmount.val(parseFloatVal(json_data.RecoveredAmount));
+                $BalanceAmount.val(parseFloatVal(json_data.BalanceAmount));
+            }
+        });
+    }
+
+	$ClientName.autocomplete({
+        lookup: arr_clients,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+				$clientId.val(suggestion.data);
+                bindProjectAutoComplete(suggestion.data);
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+				$clientId.val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+				$clientId.val(0);
+                $(this).addClass('error');
+            } else $(this).removeClass('error');
+        }
+    });
+	
+	$BankName.autocomplete({
+        lookup: arr_banks,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }
+    });
+	
+	function bindProjectAutoComplete(clientId) {
+		 // fetch data
+        $.ajax({
+            url: getBaseURL() + "cb/receipt/index",
+            data: {rtype:'getProject', data: clientId, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var arr_projects = JSON.parse(data);
+				$ProjectName.autocomplete({
+					lookup: arr_projects,
+					showNoSuggestionNotice: false,
+					lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+						if (queryLowerCase == '*') {
+							return suggestion.value;
+						} else {
+							var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+							return re.test(suggestion.value);
+						}
+					}, onSelect: function (suggestion) {
+						if (suggestion) {
+							$OrderNo.prop('disabled',false);
+							$OrderNo.removeClass('error');
+							bindOrderNoAutoComplete(suggestion.data);
+							$(this).removeClass('error');
+						}
+					}, onSearchStart: function (suggestion) {
+						$OrderNo.prop('disabled',true);
+					}, onSearchComplete: function (query, suggestions) {
+						if (!suggestions.length) {
+							$(this).addClass('error');
+							$OrderNo.prop('disabled',true);
+						} else $(this).removeClass('error');
+					}
+				});
+			}
+        });
+	}
+  
+    function bindOrderNoAutoComplete(projectId) {
+        if(tmpSelProjectId == projectId)
+            return;
+
+        tmpSelProjectId = projectId;
+        $OrderNo.val('');
+        $WorkOrderId.val(0);
+        // fetch data
+        $.ajax({
+            url: getBaseURL() + "cb/receipt/index",
+            data: {rtype:'getWONo', data: projectId, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var detail = JSON.parse(data);
+                $OrderNo.autocomplete({
+                    lookup: detail,
+                    lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                        if (queryLowerCase == '*') {
+                            return suggestion.value;
+                        } else {
+                            var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                            return re.test(suggestion.value);
+                        }
+                    }, onSelect: function (suggestion) {
+                        if (suggestion) {
+                            $WorkOrderId.val(suggestion.data);
+                            $WODate.val(suggestion.WODate);
+                            $(this).removeClass('error');
+
+                            $ReceiptAgainst.prop('disabled',false).trigger('change');
+                        }
+                    }, onSearchStart: function (suggestion) {
+                        $WorkOrderId.val(0);
+                        $WODate.val('');
+                        $ReceiptAgainst.prop('disabled',true);
+                    }, onSearchComplete: function (query, suggestions) {
+                        if (!suggestions.length) {
+                            $(this).addClass('error');
+                            $WorkOrderId.val(0);
+                            $WODate.val('');
+                            $ReceiptAgainst.prop('disabled',true);
+                        } else $(this).removeClass('error');
+                    }
+                });
+            }
+        });
+    }
+
+    function submitReceipt(){
+        if(!validateIndex(false))
+            return false;
+
+        // check if amount is lesser or equal to balance amount
+        var amt = parseFloatVal($Amount.val()),
+            balance = parseFloatVal($BalanceAmount.val());
+
+        var exception = ['O', 'A'];
+        if(amt > balance && $.inArray($ReceiptAgainst.val(), exception) == -1) {
+            showError($Amount, 'Amount should be lesser than or equal to Balance Amount!');
+            return;
+        } else
+            $Amount.removeClass('error');
+
+        $('#mainWrapper').remove();
+        setPageChanges(false);
+        $('#formWrapper').submit();
+    }
+
+    function validateIndex(isBill) {
+        var projectName = $ProjectName.val(),
+            orderno = $OrderNo.val(),
+			ReceiptOrderNo = $ReceiptNo.val(),
+            ReceiptOrderDate = $ReceiptDate.val(),
+			clientName = $ClientName.val();
+			
+		if(ReceiptOrderNo.length == 0) {
+            alert('Receipt No. is required!');
+            $ReceiptNo.focus();
+            return false;
+        }
+
+        if(ReceiptOrderDate.length == 0) {
+            alert('Receipt Date is required!');
+            $ReceiptDate.focus();
+            return false;
+        }
+
+        if($ReceiptDate.val().length == 0) {
+            alert('Receipt Date is required!');
+            $ReceiptDate.focus();
+            return false;
+        }
+		
+		if($clientId.val().length == 0 || $clientId.val() == 0 || clientName.length == 0 || $ClientName.hasClass('error')) {
+            alert('Client Name is required!');
+            $ClientName.focus();
+            return false;
+        }
+		
+        if(projectName.length == 0 || $ProjectName.hasClass('error')) {
+            alert('Project Name is required!');
+            $ProjectName.focus();
+            return false;
+        }
+
+        if(orderno.length == 0 || $OrderNo.hasClass('error')) {
+            alert('Order No. is required!');
+            $OrderNo.focus();
+            return false;
+        }
+
+        var receiptAgainst = $ReceiptAgainst.val();
+        if(receiptAgainst.length == 0){
+            alert('Receipt Against is required!');
+            $ReceiptAgainst.focus();
+            return false;
+        }
+
+        var paymentMode = $PaymentMode.val();
+        if(paymentMode.length == 0){
+            alert('Payment Mode is required!');
+            $PaymentMode.focus();
+            return false;
+        }
+
+        if(paymentMode != 'CASH' && $TNo.val().length == 0) {
+            alert('Transaction No. is required!');
+            $TNo.focus();
+            return false;
+        }
+
+        if($TDate.val().length == 0 || $TDate.hasClass('error')) {
+            alert('Transaction Date is required!');
+            $TDate.focus();
+            return false;
+        }
+
+        if(receiptAgainst != 'B' && $Amount.val().length == 0){
+            alert('Amount is required!');
+            $Amount.focus();
+            return false;
+        }
+
+        if (typeof isBill != 'undefined' && !isBill) {
+            return true;
+        }
+
+        // Set Header Titles
+        if(paymentMode == 'CASH')
+            $MW_TNo.html('N/A');
+        else
+            $MW_TNo.html($TNo.val());
+
+        $MW_ProjectName.html(projectName);
+        $MW_WorkOrderNo.html(orderno);
+        $MW_PaymentMode.html($PaymentMode.find('option:selected').html());
+        $MW_TDate.html($TDate.val());
+        $MW_Amount.html(parseFloatVal($Amount.val()));
+		$('#Receipt_No').val($ReceiptNo.val());
+		$('#Receipt_Date').val($ReceiptDate.val());
+		
+        bindBills();
+    }
+
+    function paymentModeChange(x, value) {
+        var  $TNoGroup = $TNo.parents('.form-group'),
+            $BankNameGroup = $BankName.parents('.form-group'),
+            $TDateLabel = $TDate.nextAll('.placeholder');
+        if(value == 'CASH') {
+            $TNoGroup.hide();
+            $BankNameGroup.hide();
+            $TDateLabel.html('Payment Date');
+        } else {
+            $TNoGroup.show();
+            $BankNameGroup.show();
+            $TDateLabel.html('Transaction Date');
+        }
+    }
+
+	function CheckReceiptNo(x, value) {
+        var $el = $(x);
+        $el.removeClass('error');
+        $.ajax({
+            url: getBaseURL() + "cb/receipt/index",
+            data: {'rtype':'receiptno', 'data':value, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status) {
+                if (data == "Y") {
+                    $el.addClass('error');
+                    //alert('Receipt No. already exists!');
+                }
+            }
+        });
+    }
+	
+    function bindBills() {
+        var $tbody = $('#EntryTable tbody.main'),
+            $billrowid = $('#billrowid');
+        $tbody.html('');
+        $.ajax({
+            url: getBaseURL() + "cb/receipt/index",
+            data: {rtype:'billformat', data: $WorkOrderId.val(), csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var detail = JSON.parse(data);
+                if(detail.length == 0) {
+                    alert('No bill(s) certified!');
+                    return false;
+                }
+
+                var template = $('#dummy-bill tbody').html(),
+                    absTemplate = $('#dummy-bill-abs tbody').html(),
+                    count = 0,
+                    billAmt = parseFloatVal($Amount.val());
+                $.each(detail, function(i, obj) {
+                    count++;
+                    $tbody.append(template.replace(/__1/g, '_' + count));
+                    $('#BDate_' + count).val(obj.BillDate);
+                    $('#BillId_' + count).val(obj.BillId);
+                    $('#BNo_' + count).val(obj.BillNo);
+                    var adjAmt = parseFloatVal(obj.AdjAmount),
+                        sAmt = parseFloatVal(obj.SubmitAmount),
+                        cAmt = parseFloatVal(obj.CertifyAmount),
+                        netAmt = 0;
+
+//                    if(cAmt > 0)
+                        netAmt = cAmt;
+//                    else if (sAmt > 0)
+//                        netAmt = sAmt;
+
+                    var balAmt = netAmt - adjAmt,
+                        $curAmt = $('#CurAmt_' + count);
+
+                    if (balAmt > billAmt) {
+                        $curAmt.val(sanitizeNumber(billAmt));
+                        billAmt = 0;
+                    } else {
+                        $curAmt.val(sanitizeNumber(balAmt));
+                        billAmt = billAmt - balAmt;
+                    }
+
+                    $('#NetAmt_' + count).val(sanitizeNumber(netAmt));
+                    $('#AdjAmt_' + count).val(sanitizeNumber(adjAmt));
+                    $('#BalAmt_' + count).val(sanitizeNumber(balAmt));
+
+                    // Bill Abstract
+                    var absCount = 0,
+                        billAbsAmt = parseFloatVal($curAmt.val());
+                    $.each(obj.BillAbs, function (i,o) {
+                        absCount++;
+                        var nAmt = parseFloatVal(o.CurAmount),
+                            aAmt = parseFloatVal(o.AdjAmount),
+                            bAmt = (nAmt - aAmt);
+                        $('#absTable_' +count+ ' tbody.main').append(absTemplate.replace(/__1/g, '_' + count).replace(/__9/g, '_' + absCount));
+                        $('#BillAbs_'+count+'_Desc_'+absCount).val(o.TypeName);
+                        $('#BillAbs_'+count+'_FormatId_'+absCount).val(o.BillFormatId);
+                        $('#BillAbs_'+count+'_NetAmt_'+absCount).val(sanitizeNumber(nAmt));
+                        $('#BillAbs_'+count+'_AdjAmt_'+absCount).val(sanitizeNumber(aAmt));
+                        $('#BillAbs_'+count+'_BalAmt_'+absCount).val(sanitizeNumber(bAmt));
+                        var $cAmt = $('#BillAbs_'+count+'_CurAmt_'+absCount);
+
+                        if (bAmt >= billAbsAmt) {
+                            $cAmt.val(sanitizeNumber(billAbsAmt));
+                            billAbsAmt = 0;
+                        } else {
+                            $cAmt.val(sanitizeNumber(bAmt));
+                            billAbsAmt = billAbsAmt - bAmt;
+                        }
+                    });
+                    $('#billabsrowid_' + count).val(absCount);
+                    calcAbsTotal($('#billabsrowid_' + count));
+                });
+
+                bindExpandTrFn();
+                bindDatePicker();
+                calcTotal();
+                $billrowid.val(count);
+
+                $('#indexWrapper').hide();
+                $('#mainWrapper').fadeIn();
+            }
+        });
+    }
+
+    function bindDatePicker() {
+        $('.date_picker').datepicker({
+            'format': 'dd-mm-yyyy'
+        }).on('changeDate', function() {
+            $('.datepicker').hide();
+        }).data('datepicker');
+    }
+
+    function bindExpandTrFn() {
+        // expand tr
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function(e){
+            e.preventDefault();
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                $(this).find("i").addClass("tform");
+            }
+            else{
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+                $(this).find("i").removeClass("tform");
+            }
+        });
+    }
+
+    function submitForm() {
+        var $error = $('.error');
+        if($error.length != 0) {
+            alert('Kindly notice the error notifications!');
+
+            $error.parents('.collapse:not(.in)').siblings('.panel-heading').trigger('click');
+            return false;
+        }
+
+        setPageChanges(false);
+        $('#formWrapper').submit();
+    }
+
+    function backfn() {
+        $('#mainWrapper').hide();
+        $('#indexWrapper').fadeIn();
+    }
+
+    function calcTotal() {
+        var $curAmt = $('input[id^=CurAmt_]'),
+            gTotal = 0;
+        $.each($curAmt, function () {
+            var $this = $(this),
+                name = $this[0].id,
+                key = name.split('_')[1];
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+            var total = parseFloatVal($this.val()),
+                balAmt = parseFloatVal($('#BalAmt_' + key).val());
+
+            if(total > balAmt)
+                showError($this, 'Amount should be less or equal to Balance Amount!');
+             else
+                removeError($this);
+
+            gTotal += total;
+        });
+        $('#BillTotal').val(sanitizeNumber(gTotal));
+        $MW_Amount.html(sanitizeNumber(gTotal,2, true));
+        $Amount.val(sanitizeNumber(gTotal));
+    }
+
+    function calcAbsTotal(x) {
+        var key = $(x)[0].id.split('_')[1],
+            $curAmt = $('input[id*=BillAbs_'+key+'_CurAmt_]'),
+            cTotal = 0;
+        $.each($curAmt, function () {
+            var $this = $(this),
+                name = $this[0].id,
+                keys = name.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+            var total = parseFloatVal($this.val()),
+                balAmt = parseFloatVal($('#BillAbs_'+rowid+'_BalAmt_' + key).val()),
+                netAmt = parseFloatVal($('#BillAbs_'+rowid+'_NetAmt_' + key).val()),
+                adjAmt = parseFloatVal($('#BillAbs_'+rowid+'_AdjAmt_' + key).val());
+
+            if(total > balAmt)
+                showError($this, 'Amount should be less or equal to Balance Amount!');
+            else
+                removeError($this);
+
+            cTotal += total;
+            $('#TotalCurAmt_' + rowid).val(sanitizeNumber(cTotal));
+
+            // update to bill curAmt
+            var $billCurAmt = $('#CurAmt_' + rowid);
+            $billCurAmt.val(sanitizeNumber(cTotal));
+            $billCurAmt.trigger('change');
+        });
+    }
+
+
+    $(function () {
+        $('.highlightTable').on( 'focus', 'tbody:not(.total) tr input,textarea', function () {
+            var $this = $(this);
+            $('tr.highlighted').removeClass("highlighted");
+            $this.closest('tr').addClass('highlighted');
+        });
+    });
+</script>

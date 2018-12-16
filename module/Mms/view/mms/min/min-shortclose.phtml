@@ -1,0 +1,159 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css';?>"/>
+<!--content-->
+<style>
+    .mar_20{margin-top:20px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post" action="<?php echo $this->basePath(); ?>/mms/min/minshortclose-save" id="formWrapper">
+            <h1>Min ShortClose</h1>
+
+            <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                <?php if($dcId > 0){?>
+                <input class="parent_text border-none cal" type="text" name="dcno" id="dcno" value="<?php echo $selNo;?>">
+                <input class="parent_text border-none cal"  type="hidden" name="seldcId" id="seldcId" value="<?php echo $seldcId;?>">
+                <?php }
+                 else{ ?>
+                <select data-placeholder="MINNo" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="minno" id="minno" style="width:100%;"<?php if(isset($selNo)){echo 'disabled';}?>>
+                    <option value=""></option>
+                    <?php if(isset($arr_minno)):
+                        foreach($arr_minno as $arr_no): ?>
+                            <option value="<?php echo $arr_no['DCRegisterId'];?>"> <?php echo $arr_no['DCNo']; ?> </option>
+                        <?php endforeach ?>
+                   <?php endif; ?>
+                </select>
+                <?php } ?>
+            </div>
+
+            <div class="clearfix"></div>
+            <div class="col-lg-12 feed-bg">
+                <div class="fil-til top-count">
+                    <h2 class="h1-head">List of resources from the selected MINNo</h2>
+                </div>
+                <div class="col-lg-12">
+                    <div class="mar_20" id="resourceGrid"></div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="clearfix"></div>
+            <div id="requestTransInputsWrapper" class="hide"></div>
+            <input type="hidden" name="frm_index" value="1"/>
+            </form>
+        </div>
+    </div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r"> <a onclick="validateOnSubmit();" class="ripple">Submit</a></li>
+        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/mms/min/minshort-close';?>" class="ripple">Cancel</a></li>
+    </ul>
+</div>
+
+<script>
+    var $resourceGrid = $("#resourceGrid");
+    var tmpLocalData = [];
+    var arr_requests = <?php echo (isset($requests)) ? json_encode($requests) : '[]';?>;
+
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            { name: 'Include', type: 'boolean' },
+            { name: 'Code', type: 'string' },
+            { name: 'Resource', type: 'string' },
+            { name: 'DCQty', type: 'string' },
+            { name: 'BillQty', type: 'string' },
+            { name: 'BalQty', type: 'string' },
+            { name: 'DCGroupId', type: 'int' },
+            { name: 'DCRegisterId', type: 'int' }
+        ],
+        id: 'DCGroupId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+    $(function () {
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            editable: true,
+            columns: [
+                { dataField: 'DCGroupId', hidden: true},
+                { dataField: 'DCRegisterId', hidden: true},
+                { text: '', dataField: 'Include', columntype: 'checkbox', align:'center',width:'5%'},
+                { text: 'Code', dataField: 'Code',width:'15%', editable:false},
+                { text: 'Resource', dataField: 'Resource',width:'20%', editable:false},
+                { text: 'DCQty', dataField: 'DCQty',width:'20%', editable:false},
+                { text: 'BillQty', dataField: 'BillQty',width:'20%', editable:false},
+                { text: 'BalQty', dataField: 'BalQty',width:'20%', editable:false}
+            ]
+        });
+
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            generateSelResourceInputs();
+        });
+
+        $('#minno').on('change', function () {
+            bindRequests();
+        });
+        bindResponse();
+    });
+
+    function bindResponse() {
+        resourceSource.localdata = arr_requests;
+        resourceAdapter.dataBind();
+        generateSelResourceInputs();
+    }
+    function bindRequests() {
+        var dcid = $('#minno').val();
+        if(minno == ''){
+            return;
+        }
+        else{
+            $.ajax({
+                url:getBaseURL()+'mms/min/minshort-close',
+                type:"post",
+                data:{'DCRegisterId':dcid },
+                dataType:"json",
+                success:function(data, textStatus, jqXHR){
+                    if(jqXHR.status == 200) {
+
+                        tmpLocalData = data.response;
+                        renderRequests(data.response);
+                    }
+                }
+            });
+        }
+    }
+    function renderRequests(data) {
+        resourceSource.localdata = data;
+        resourceAdapter.dataBind();
+        generateSelResourceInputs();
+    }
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for(var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Include === true) {
+                $inputs += '<input type="hidden" name="DCGroupIds[]" class="DCGroupIds" value="' + row.uid + '"/>';
+            }
+        }
+        $('#requestTransInputsWrapper').html($inputs);
+    }
+    function validateOnSubmit(){
+
+        if($('#minno').val() == ''){
+            alert("1");
+            return false;
+        }
+
+        $('#formWrapper').submit();
+    }
+    </script>

@@ -1,0 +1,302 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+
+<!-- INLINE CSS -->
+<style>
+    .tr_hot 						{background:#f9eaea;}
+    .tr_warm 						{background:#f8f1e4;}
+    .tr_cold 						{background:#e8f0f6;}
+    .flwup_proimg					{margin-top:12px;}
+    #dataTable .jqx-grid-header 	{height:75px !important;}
+    .fixed-action-btn ul			{top:5px;}
+    .bootstrap-select.btn-group .btn .filter-option	{ margin-top:-3px;}
+</style>
+<!-- INLINE CSS -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Bulk Mail
+            </h1>
+            <div class="col-lg-6 col-lg-offset-6 col-md-8 col-md-offset-4 col-sm-10 col-sm-offset-2 clear padtop20 commargin_ttop_20 commargin_bottom">
+                <div class="form-group col-lg-6 col-md-6 col-sm-6 commargin_top">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="fromDate" id="fromDate" class="form-control date_picker lbl_move dFliter" readonly="readonly" label="From Date" value="<?php echo (isset($fromDate) && $fromDate != "") ? $fromDate : Date('d-m-Y'); ?>" />
+                </div>
+                <div class="form-group col-lg-6 col-md-6 col-sm-6 commargin_top">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="toDate" id="toDate" class="form-control date_pickers lbl_move dFliter" readonly="readonly" label="To Date" value="<?php echo (isset($toDate) && $toDate != "") ? $toDate : Date('d-m-Y'); ?>" />
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="col-lg-3 padlr0">
+                    <div class="radio_check">
+                        <p>
+                            <input type="checkbox" id="cfilter" value="filter" onchange="changeGrid()"/>
+                            <label for="cfilter" class="ripple ">Conditional Filter</label>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2">
+                    <label for="multiColumn" class="col-lg-6 col-md-6 col-sm-6 control-label txt_right">Column Chooser</label>
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <?php
+                        $arrGridColumn = array();
+                        if(isset($GridColumn)) {
+                            $arrGridColumn = explode(",", $GridColumn['ColumnName']);
+                        } ?>
+                        <select name="multiColumn[]" id="multiColumn" class="form-control selectpicker" data-size="5" multiple title="Choose Multiple Status">
+                            <option value="LeadName" <?php echo (in_array('LeadName',$arrGridColumn)) ? '' :'selected'?>>Lead Name</option>
+                            <option value="LeadDate"<?php echo (in_array('LeadDate',$arrGridColumn)) ? '' :'selected'?>>Lead Date</option>
+                            <option value="LeadTypeName" <?php echo (in_array('LeadTypeName',$arrGridColumn)) ? '' :''?>>Lead Type</option>
+                            <option value="Mobile" <?php echo (in_array('Mobile',$arrGridColumn)) ? '' :''?>>Contact No</option>
+                            <option value="Projects" <?php echo (in_array('Projects',$arrGridColumn)) ? '' :''?>>Projects</option>
+                            <option value="CityName" <?php echo (in_array('CityName',$arrGridColumn)) ? '' :''?>>Preffered Location</option>
+                            <option value="ExecutiveName" <?php echo (in_array('UserName',$arrGridColumn)) ? '' :'selected'?>>Executive Name</option>
+                            <option value="NRI" <?php echo (in_array('NRI',$arrGridColumn)) ? '' :''?>>NRI</option>
+                            <option value="state" <?php echo (in_array('StatusId',$arrGridColumn)) ? '' :'selected'?>>Status</option>
+                            <option value="VIP" <?php echo (in_array('VIP',$arrGridColumn)) ? '' :''?>>VIP</option>
+                            <option value="CreatedBy" <?php echo (in_array('CreatedBy',$arrGridColumn)) ? '' :''?>>Created By</option>
+                            <option value="SourceName" <?php echo (in_array('SourceName',$arrGridColumn)) ? '' :''?>>Source Name</option>
+                            <option value="Budget" <?php echo (in_array('Budget',$arrGridColumn)) ? '' :''?>>Budget</option>
+                            <option value="NextCallDate" <?php echo (in_array('NextCallDate',$arrGridColumn)) ? '' :'selected'?>>Next Followup Date</option>
+                            <option value="Converted" <?php echo (in_array('Converted',$arrGridColumn)) ? '' :''?>>Converted</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12 padtop10 clear">
+            <div class="table-responsive m_btm30">
+                <div id="dataTable"></div>
+            </div>
+        </div>
+        <form id="leadSubmit" method="post" action="<?php echo $this->basePath(); ?>/crm/lead/bulk-mail-send">
+
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 col-lg-offset-10 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a style="cursor:pointer;" >Submit</a></li>
+    </ul>
+</div>
+<!-- PAGE SCRIPTS -->
+<script>
+    $(document).ready(function() {
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    });
+</script>
+<!-- PAGE SCRIPTS -->
+
+<script>
+    var fdt=$('#fromDate').val();
+    var $dataTable=$("#dataTable");
+    $('.date_pickers').datepicker({
+        format: "dd-mm-yyyy",
+        startDate: fdt,
+        todayBtn: false,
+        orientation: "top auto",
+        autoclose: true
+    });
+    $(document).ready(function () {
+        leadSubmit = $('#leadSubmit');
+        sel_resource_count = 0;
+
+        var LeadColumns = [];
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/crm/lead/bulk-lead-mail",
+            type:"post",
+            data:{'fDate':$('#fromDate').val(),'tDate':$('#toDate').val()},
+            async:false,
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                // prepare the data
+                var source =
+                {
+                    localdata:data,
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'LeadId', type: 'number' },
+                        { name: 'LeadName', type: 'string' },
+                        { name: 'LeadDate',type: 'date'},
+                        { name: 'LeadTypeName', type: 'string' },
+                        { name: 'Mobile', type: 'string' },
+                        { name: 'CityName', type: 'string' },
+                        { name: 'ExecutiveName', type: 'string' },
+                        { name: 'state', type: 'string' },
+                        { name: 'VIP', type: 'number' },
+                        { name: 'CreatedBy', type: 'string' },
+                        { name: 'Projects', type: 'string' },
+                        { name: 'SourceName', type: 'string' },
+                        { name: 'Budget', type: 'string' },
+                        { name: 'Converted', type: 'string' },
+                        { name: 'NextCallDate', type: 'date' },
+                        { name: 'NRI', type: 'bool' }
+                    ],
+                    id: 'LeadId'
+                };
+
+                var dataAdapter = new $.jqx.dataAdapter(source);
+
+                var cellclassname = function (row, column, value, data) {
+                    if(data.StatusId == 1) {
+                        return 'tr_hot';
+                    } else if(data.StatusId == 2) {
+                        return 'tr_warm';
+                    } else if(data.StatusId == 3) {
+                        return 'tr_cold';
+                    }
+                };
+
+                var addfilter = function () {
+                    var filtergroup = new $.jqx.filter();
+
+                    var filter_or_operator = 1;
+                    var filtervalue = 'Beate';
+                    var filtercondition = 'contains';
+                    var filter1 = filtergroup.createfilter('stringfilter', filtervalue, filtercondition);
+
+                    filtervalue = 'Andrew';
+                    filtercondition = 'starts_with';
+                    var filter2 = filtergroup.createfilter('stringfilter', filtervalue, filtercondition);
+
+                    filtergroup.addfilter(filter_or_operator, filter1);
+                    filtergroup.addfilter(filter_or_operator, filter2);
+                    // add the filters.
+                    $dataTable.jqxGrid('addfilter', 'firstname', filtergroup);
+                    // apply the filters.
+                    $dataTable.jqxGrid('applyfilters');
+                };
+
+                var showhideColumns = function () {
+                    $dataTable.jqxGrid('beginupdate');
+                    $.each($('#multiColumn option'), function (i,o) {
+                        if($(this).is(':selected')) {
+                            $("#dataTable").jqxGrid('showcolumn', $(this).val());
+                        } else {
+                            $("#dataTable").jqxGrid('hidecolumn', $(this).val());
+                        }
+                    });
+                    $dataTable.jqxGrid('endupdate');
+                };
+
+                $dataTable.jqxGrid({
+                    width: '100%',
+                    source: dataAdapter,
+                    pageable: true,
+                    pagerButtonsCount: 6,
+                    rowsheight: 60,
+                    selectionmode: 'checkbox',
+                    autoheight:true,
+                    autorowheight: true,
+                    filterable: true,
+                    sortable: true,
+                    columnsResize: true,
+                    showfilterrow: true,
+                    editable: true,
+                    rowDetails: true,
+                    altrows: true,
+                    ready: function () {
+                        addfilter();
+                        showhideColumns();
+                    },
+                    autoshowfiltericon: true,
+                    rendered: function () {
+                    },
+                    columns: [
+
+                        { text: 'Lead Name', width:150,dataField: 'LeadName', cellclassname: cellclassname,editable: false},
+                        { text: 'Lead Date', filtertype: 'date', dataField: 'LeadDate',cellsformat: 'dd-MM-yyyy', cellclassname: cellclassname,editable: false },
+                        { text: 'Next Followup Date', filtertype: 'date', dataField: 'NextCallDate',cellsformat: 'dd-MM-yyyy', cellclassname: cellclassname,editable: false },
+                        { text: 'Lead Type', filtertype: 'list', dataField: 'LeadTypeName', cellclassname: cellclassname,editable: false },
+                        { text: 'Contact No', dataField: 'Mobile', cellclassname: cellclassname,editable: false },
+                        { text: 'Projects', width:220,dataField: 'Projects', cellclassname: cellclassname,editable: false },
+                        { text: 'Preffered Location', dataField: 'CityName', cellclassname: cellclassname,editable: false },
+                        { text: 'Executive Name', filtertype: 'list', dataField: 'ExecutiveName', cellclassname: cellclassname,editable: false },
+                        { text: 'NRI', width:50, columntype: 'checkbox', filtertype: 'bool', dataField: 'NRI', cellclassname: cellclassname,editable: false },
+                        { text: 'Converted', dataField: 'Converted', cellclassname: cellclassname,editable: false },
+                        { text: 'Status', dataField: 'state', cellclassname: cellclassname,editable: false},
+                        { text: 'VIP', dataField: 'VIP', cellclassname: cellclassname, width:50, columntype: 'checkbox', filtertype: 'bool',editable: false },
+                        { text: 'Created By', filtertype: 'list', dataField: 'CreatedBy', cellclassname: cellclassname,editable: false},
+                        { text: 'Source Name', dataField: 'SourceName', cellclassname: cellclassname,editable: false},
+                        { text: 'Budget', dataField: 'Budget', cellclassname: cellclassname,editable: false},
+                        { text: 'LeadId', dataField: 'LeadId', cellclassname: cellclassname,hidden:true}
+
+                    ]
+                });
+
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+
+        $(".savebtn_area").on("click",function() {
+            leadSubmit.html('');
+            var selection = $dataTable.jqxGrid('getselectedrowindexes');
+            if(selection.length<=0) {
+                alert('Please select atleast one Lead to proceed');
+                return false;
+            }
+            $inputs=[];
+            for (var rowId in selection) {
+                $inputs.push($dataTable.jqxGrid('getrowdata', selection[rowId]).LeadId);
+            }
+
+            leadSubmit.html('<input type="hidden" name="Extra" value="'+$inputs.toString()+'"/> <input type="hidden" name="type" value="convert" />');
+            leadSubmit.submit();
+        });
+
+    });
+
+    $('#multiColumn').on('change', function () {
+        var unSelected = [];
+        var Selected = [];
+        $dataTable.jqxGrid('beginupdate');
+        $.each($('#multiColumn option'), function (i,o) {
+            if($(this).is(':selected')) {
+                Selected.push($(this).val());
+                $("#dataTable").jqxGrid('showcolumn', $(this).val());
+            } else {
+                unSelected.push($(this).val());
+                $("#dataTable").jqxGrid('hidecolumn', $(this).val());
+            }
+        });
+        $dataTable.jqxGrid('endupdate');
+
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/crm/lead/bulk-lead-mail",
+            type:"post",
+            data:{'unCheckedColumnNames':unSelected.toString(),'type':'updateColumn'},
+            success:function(data, textStatus, jqXHR){
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    });
+
+    function changeGrid()
+    {
+        if($("#cfilter").is(':checked')) {
+            $("#dataTable").jqxGrid({
+                showfilterrow: false
+            });
+            $("#dataTable .jqx-grid-header").css("cssText", "height: 40px !important;");
+        } else {
+            $("#dataTable").jqxGrid({
+                showfilterrow: true
+            });
+
+        }
+    }
+
+    $(document).on("change",".dFliter",function(){
+        var fDate=$("#fromDate").val();
+        var tDate=$("#toDate").val();
+        window.location.replace(getBaseURL() + "crm/lead/bulk-lead-mail/0/" + fDate + "/" + tDate);
+    });
+</script>

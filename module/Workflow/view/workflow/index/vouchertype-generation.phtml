@@ -1,0 +1,1011 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .table-fixed tbody{max-height:420px;min-height:20px; overflow-y:auto;width:100%}
+    .table-fixed thead,.table-fixed tbody,.table-fixed tr,.table-fixed td,.table-fixed th{display:block}
+    .table-fixed tbody td,.table-fixed thead>tr>th{float:left; border-bottom:0;position:relative;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}
+    .alertmsg_txtarea {resize:none; height:90px; width:100%;}
+    .tds-sett-md a{background:#FF7919; font-size: 12px;padding:6px 14px;border:1px solid #E64500;color:#fff;float:right;margin:5px 0 0 0;text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.55);}
+    .tds-sett-md a:hover{background:#fff;border:1px solid #FF7919; color:#FF7919;text-shadow:none;}
+    .select2-container--default .select2-selection--single{border:1px solid #ccc}
+    .form-group1{margin-bottom:14px;}
+    .table-clr thead tr th{background:#E8E6CF;border-bottom:2px solid #B3AD6F !important}
+    .table-sub thead tr th{background:#D1D4ED;border-bottom:2px solid #717DC9 !important}
+    .table-sub tbody tr td,.table-clr tbody tr td{background:#fff !important}
+    ul.list-head li a.active { background-color: #EBE6DD;border-bottom:2px solid #AD9568; font-weight:600;box-shadow:none;color:#523502}
+    .date_icon, .time_icon{top:30px;}
+</style>
+<div class="content_wrapper padlr0">
+<div class="container-fluid padlr0">
+    <div class="col-lg-12">
+        <div class="col-lg-12" style="margin-bottom:5px;">
+            <h1 class="col-md-4 text-left animated growIn" style="font-size: 24px;">Voucher Setup
+                <div class="btn-group proname_btn"> <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><label style="font-size:18px" for ="ccname">for General</label><span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Change&nbsp;Type"><i class="fa fa-caret-down "></i></span></a>
+                    <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                        <ul>
+                            <li><a href="javascript:void(0);" id="genid" class="followupId" data-index="0">for General</a></li>
+                            <li><a href="javascript:void(0);" id="compid" class="followupId" data-index="1">for Company</a></li>
+                            <li><a href="javascript:void(0);" id="ccid" class="followupId" data-index="2">for CostCentre</a></li>
+                        </ul>
+                    </div>
+                    <input type="hidden" name="vtypeId" id="vtypeId"/>
+                </div>
+            </h1>
+            <div class="col-md-3">
+                <div id="divcompany" style="display: none">
+                    <select id="selcompany" class="single_dropdown" style="width:100%;border:2px solid #ddd !important"  >
+                        <?php  if(isset($resultCompany)) {
+                            foreach($resultCompany as $trans) { ?>
+                                <option value="<?php echo $trans['CompanyId'];?>"><?php echo $trans['CompanyName']; ?></option>
+                            <?php }
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div id="divcostcentre" style="display: none">
+                    <select id="selcostcentre" class="single_dropdown" style="width:100%;border:2px solid #ddd !important" >
+                        <?php  if(isset($resultCostCentre)) {
+                            foreach($resultCostCentre as $trans) { ?>
+                                <option value="<?php echo $trans['CostCentreId'];?>"><?php echo $trans['CostCentreName']; ?></option>
+                            <?php }
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-4 padlr0">
+                <div class="input-group col-md-12">
+                    <input name="search_all" id="search_all" type="text" onkeyup="voucherSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 tds-sett-md" style="padding-left:0px !important;"> <a href="#" title="Add New Period" onclick="showPeriod();" ><i class="fa fa-plus"></i> Add New Period</a>
+            </div>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive" style="min-height:200px;">
+                <table class="table table-hover table-fixed tbltop_bdr0" id="maintable">
+                    <thead>
+                    <tr class="col-xs-12" style="padding:0 !important">
+                        <th class="col-xs-5">Voucher Type</th>
+                        <th class="col-xs-5">Module Name</th>
+                        <th class="col-xs-2" style="text-align:right">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php $k=0;
+                    foreach($resultVoucherSelect as $resultLists) {
+                        $k+=1;?>
+                        <tr class="col-xs-12" style="padding:0 !important">
+                            <td class="col-xs-5" data-expandid="<?php echo $resultLists['TypeId']; ?>" rel="rt_<?php echo $k; ?>"><?php echo $resultLists['TypeName']; ?></td>
+                            <td class="col-xs-5" data-expandid="<?php echo $resultLists['ModuleId']; ?>" rel="rt_<?php echo $k; ?>"><?php echo $resultLists['ModuleName']; ?></td>
+                            <td class="col-xs-2" class="action_btns_td">
+                                <ul class="action_btns">
+                                    <li>
+                                        <a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="<?php echo $resultLists['TypeId']; ?>" onclick="editDept('<?php echo $resultLists['TypeId']; ?>',$(this));getDeptId(this);" rel="rt" data-placement="left" data-original-title="Edit">
+                                            <span><i class="fa fa-edit"></i></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    <input type="hidden" id="rtCount" name="rtCount" value="<?php echo count($resultVoucherSelect); ?>" />
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="periodmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false ">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                        <h1>Period Master</h1>
+                    </div>
+                    <div class="modal-body">
+                        <div class="topsp">
+                            <form method="post" action="" id="periodform">
+                                <input type="hidden" name="entryFrom" value="Period" />
+                                <table class="table" style=" margin-bottom:0px;" id="expenseTable">
+                                    <thead>
+                                    <tr>
+                                        <th>PeriodName</th>
+                                        <th>From date</th>
+                                        <th>To date</th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="main"></tbody>
+                                </table>
+                                <input type="hidden" name="rowid" id="rowid" value="1"/>
+                                <input type="hidden" name="rowdeleteids" id="rowdeleteids"/>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="modal-footer">
+                        <div class="col-lg-12"> <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                            <button type="Button" class="md_ok" onclick="updatePeriodMaster()">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="dummy-expense"  type="text/template" class="hide">
+    <tr id="periodrow__">
+        <input type="hidden" name="PeriodId__" id="PeriodId__"/>
+        <input type="hidden" name="UpdateRow__" id="UpdateRow__"/>
+        <td width="10%" style="position:relative;">
+            <input class="parent_text" type="text" name="periodName__" id="periodName__" onchange="return validatePeriodName(this)" >
+        </td>
+        <td width="10%"><input class="form-control parent_text date_picker" type="text" name="fromdate__" id="fromdate__"  onchange="validateFromDate(this)" readonly></td>
+        <td width="10%"><input class="form-control parent_text date_picker" type="text" name="todate__" id="todate__" onchange="validateToDate(this)" readonly /></td>
+        <td width="4%" align="center">
+            <ul class="action_btns">
+                <li><a id="deleteTr__" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<!--<script id="dummy-period"  type="text/template" class="hide">-->
+<!--    <tr>-->
+<!--        <input type="hidden" name="PeriodId__" id="PeriodId__"/>-->
+<!--        <input type="hidden" name="PeriodTypeId__" id="PeriodTypeId__"/>-->
+<!--        <td width="10%" style="position:relative;">-->
+<!--            <input class="parent_text" type="text" name="periodName__" id="periodName__" readonly >-->
+<!--        </td>-->
+<!--        <td width="10%"><input class="form-control date_picker" type="text" name="fromdate__" id="fromdate__" readonly></td>-->
+<!---->
+<!--        <td width="10%"><input class="form-control date_picker" type="text" name="todate__" id="todate__" readonly/></td>-->
+<!--        <td width="5%" align="center">-->
+<!--            <input type="radio" value="0" id="monthwiseNo__" name="monthwise__" checked onchange="onChangeMonthWise(this);"/>-->
+<!--            <label for="monthwiseNo__" class="ripple">No</label>-->
+<!---->
+<!--            <input type="radio" value="1" id="monthwiseYes__" name="monthwise__" onchange="onChangeMonthWise(this);"/>-->
+<!--            <label for="monthwiseYes__" class="ripple">Yes</label>-->
+<!--        </td>-->
+<!--    </tr>-->
+<!--    <tr class="subTr">-->
+<!--        <td colspan="9" style="padding:0px !important; ">-->
+<!--            <div class="subDiv">-->
+<!--                <div class="col-lg-12">-->
+<!--                    <div class="table-responsive topsp">-->
+<!--                        <table class="table" style="margin-bottom:0px;" id="type___PeriodSubTable">-->
+<!--                            <thead>-->
+<!--                            <tr>-->
+<!--                                <th class="monthwise">Description</th>-->
+<!--                                <th>Prefix</th>-->
+<!--                                <th>StartNo</th>-->
+<!--                                <th>Width</th>-->
+<!--                                <th>Suffix</th>-->
+<!--                            </tr>-->
+<!--                            </thead>-->
+<!--                            <tbody>-->
+<!--                            <tr>-->
+<!--                                <input type="hidden" name="type___TypeId_1" id="type___TypeId_1"/>-->
+<!--                                <input type="hidden" name="type___PeriodId_1" id="type___PeriodId_1"/>-->
+<!--                                <input type="hidden" name="type___Month_1" id="type___Month_1"/>-->
+<!--                                <input type="hidden" name="type___Year_1" id="type___Year_1"/>-->
+<!--                                <td width="13%" class="monthwise">-->
+<!--                                    <input class="parent_text" type="text" name="type___description_1" id="type___description_1" readonly/>-->
+<!--                                </td>-->
+<!--                                <td width="13%">-->
+<!--                                    <input class="parent_text" type="text" name="type___prefix_1" id="type___prefix_1" />-->
+<!--                                </td>-->
+<!--                                <td width="10%" >-->
+<!--                                    <input class="parent_text" type="text" name="type___startNo_1" id="type___startNo_1" onkeypress="return isNumberKey(event);" />-->
+<!--                                </td>-->
+<!--                                <td width="10%" >-->
+<!--                                    <input class="parent_text" type="text" name="type___width_1" id="type___width_1" onkeypress="return isNumberKey(event);"/>-->
+<!--                                </td>-->
+<!--                                <td width="10%" >-->
+<!--                                    <input class="parent_text" type="text" name="type___suffix_1" id="type___suffix_1"/>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            </tbody>-->
+<!--                        </table>-->
+<!--                        <input type="hidden" name="type___rowid" id="type___rowid" value="1"/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </td>-->
+<!--    </tr>-->
+<!--</script>-->
+<!--<script id="dummy-periodmonthwise"  type="text/template" class="hide">-->
+<!--    <tr>-->
+<!--        <input type="hidden" name="type___TypeId_0" id="type___TypeId_0"/>-->
+<!--        <input type="hidden" name="type___PeriodId_0" id="type___PeriodId_0"/>-->
+<!--        <input type="hidden" name="type___Month_0" id="type___Month_0"/>-->
+<!--        <input type="hidden" name="type___Year_0" id="type___Year_0"/>-->
+<!--        <td width="13%" class="monthwise">-->
+<!--            <input class="parent_text" type="text" name="type___description_0" id="type___description_0" readonly/>-->
+<!--        </td>-->
+<!--        <td width="13%">-->
+<!--            <input class="parent_text" type="text" name="type___prefix_0" id="type___prefix_0" />-->
+<!--        </td>-->
+<!--        <td width="10%" >-->
+<!--            <input class="parent_text" type="text" name="type___startNo_0" id="type___startNo_0" onkeypress="return isNumberKey(event);" />-->
+<!--        </td>-->
+<!--        <td width="10%" >-->
+<!--            <input class="parent_text" type="text" name="type___width_0" id="type___width_0" onkeypress="return isNumberKey(event);"/>-->
+<!--        </td>-->
+<!--        <td width="10%" >-->
+<!--            <input class="parent_text" type="text" name="type___suffix_0" id="type___suffix_0"/>-->
+<!--        </td>-->
+<!--    </tr>-->
+<!---->
+<!--</script>-->
+
+<script>
+var arrPeriodList = <?php echo (isset($resultPeriodList)) ? json_encode($resultPeriodList) : '[]';?>;
+var globalTimeout=null;
+var bLoad=false;
+
+$(function(){
+    $('.followupId').on('click',function(){
+        var typeId = $(this).attr('data-index'),
+            typeName = $(this).text();
+        $('#vtypeId').val(typeId);
+        $("label[for='ccname']").html(typeName);
+        $('#divcompany').hide();
+        $('#divcostcentre').hide();
+        if (typeId==1) $('#divcompany').show();
+        else if (typeId==2) $('#divcostcentre').show();
+    });
+});
+function bindPeriodMaster() {
+    var $rowid = $('#rowid');
+    var template = $('#dummy-expense').html();
+    var rowid = 0;
+    var $tbody = $('#expenseTable').find('tbody.main');
+    $tbody.html('');
+    bLoad=false;
+//    console.log(arrPeriodList);
+    if (arrPeriodList.length != 0) {
+        $.each(arrPeriodList, function (i, o) {
+            console.log(o);
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+            $('#PeriodId_' + rowid).val(o.PeriodId);
+            $('#periodName_' + rowid).val(o.PeriodDescription);
+            $('#fromdate_' + rowid).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', o.FromDate);
+            $('#todate_' + rowid).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', o.ToDate);
+            $('#deleteTr_' + rowid).attr('data-deleteflag', 'true').show();
+        });
+    }
+    bLoad=true;
+    var bRowFound=false;
+    var newDate;
+    if (rowid > 0) {
+        if ($('#todate_' + rowid).val().length !=0) {
+            var newDate = $('#todate_' + rowid).datepicker('getDate');
+            newDate.setTime(newDate.getTime() + (1000 * 60 * 60 * 24))
+            bRowFound = true;
+        }
+    }
+    rowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + rowid));
+    if (bRowFound==true) {
+        bLoad =false;
+        $('#fromdate_' + rowid).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', newDate);
+        bLoad =true;
+        $('#fromdate_' + rowid).prop('disabled',true);
+    }
+    $rowid.val(rowid);
+}
+
+function addNewRow(x) {
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = $x[0].id.split('_')[1];
+
+    if(parseFloatVal($('#PeriodId_'+key).val()) != 0)
+        $('#UpdateRow_' + key).val(1);
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#periodName_' + key).val().length == 0 || $('#fromdate_' + key).val().length == 0 || $('#todate_' + key).val().length == 0 )
+        return;
+
+    var $rowid = $('#rowid'),
+        rowid = parseInt($rowid.val());
+    $('#deleteTr_' + rowid).show();
+
+    var bRowFound=false;
+    var newDate;
+    if (rowid > 0) {
+        if ($('#todate_' + rowid).val().length !=0) {
+            var newDate = $('#todate_' + rowid).datepicker('getDate');
+            newDate.setTime(newDate.getTime() + (1000 * 60 * 60 * 24))
+            bRowFound = true;
+        }
+    }
+
+
+    var count = rowid + 1,
+        template = $('#dummy-expense').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody.main').append(template);
+    if (bRowFound==true) {
+        bLoad =false;
+        $('#fromdate_' + count).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', newDate);
+        bLoad =true;
+        $('#fromdate_' + count).prop('disabled',true);
+    }
+    $rowid.val(count);
+    $('.date_picker').datepicker({'format': 'dd-mm-yyyy',autoclose: true});
+    //datechange();
+}
+
+function deleteRow(x,e) {
+    e.preventDefault();
+
+    var $x = $(x),
+        key = $x[0].id.split('_')[1],
+        $tr = $x.closest('tr');
+
+    var $next = $tr.next();
+    if ($next.length !=0) {
+        var key1 = $next[0].id.split('_')[1];
+
+        var sPeriodName = isNullCheck($('#periodName_' + key1).val(), 'string'),
+            dFromDate = $('#fromdate_' + key1).val(),
+            dToDate = $('#todate_' + key1).val();
+
+        if (sPeriodName != "" && dFromDate.length != 0 && dToDate.length != 0) {
+            alert('Do Not Delete, Only Delete Last Period');
+            return;
+        }
+    }
+
+
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+
+    if(typeof $x.attr('data-deleteflag') !== 'undefined' && $x.attr('data-deleteflag') == 'true') {
+        var ids = $('#rowdeleteids').val();
+        if(ids.length == 0)
+            $('#rowdeleteids').val($('#PeriodId_'+key).val());
+        else
+            $('#rowdeleteids').val(ids + ',' + $('#PeriodId_'+key).val());
+    }
+
+    $tr.remove();
+
+    return false;
+}
+
+function validateDate(x) {
+//    var $x = $(x),
+//        $tr = $x.closest('tr'),
+//        key = parseInt($x[0].id.split('_')[1]),
+//        bAns=false;
+//    if  (key >1)
+//    {
+//        var ikey = key-1;
+//        var dPDate = new Date($('#fromdate_' + ikey).datepicker('getDate'));
+//        var dCDate = new Date($('#fromdate_' + key).datepicker('getDate'));
+//        var dLCDate =$('#fromdate_' + key).val();
+//        if (dCDate <=  dPDate) {
+//            bAns=true;
+//            $('#fromdate_' + key).val('');
+//            alert ("Invalid Date");
+//            //dCDate.setDate(dPDate .getDate() + 1);
+//            //$('#fromdate_' + key).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', dCDate);
+//            return;
+//        }
+//        var new_fromdate  = dLCDate.substr(6,4) + '-' + dLCDate.substr(3,2) + '-' + dLCDate.substr(0,2);
+//        var from = new Date(new_fromdate);
+//        var newDate = new Date(from - (60*60*24*1*1000));
+//        //dPDate.setDate(dCDate .getDate() - 1);
+//        //console.log(newDate);
+//        //  $('#todate_' + ikey).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', newDate);
+//    }
+//    if (bAns==false) addNewRow(x);
+}
+
+//    function validatePeriodRow() {
+//        var $tr = $('input[id*=periodName_]');
+//        $.each($tr, function (i, obj) {
+//            var $this = $(this),
+//                name = $this[0].id,
+//                key = name.split('_')[1];
+//            if (name.indexOf('__') != -1) return;
+//            var iPeriodId = isNullCheck($('#PeriodId_' + key).val(), 'number'),
+//                sPeriodName = isNullCheck($('#periodName_' + key).val(), 'string'),
+//                dFromDate = $('#fromdate_' + key).val(),
+//                dToDate = $('#todate_' + key).val();
+//
+//            if (sPeriodName == "" || dFromDate.length == 0 || dToDate.length == 0) {
+//                var $tr = $this.closest('tr');
+//                var $prev = $tr.prev();
+//                if ($prev.length==0) {
+//                    console.log($prev);
+//                    var $prevP = $prev.prev();
+//                    if ($prevP.length==0) {
+//                        console.log($prevP);
+////                        var key1 = $prevP[0].id.split('_')[1];
+////                        alert(key1);
+////                        $('#deleteTr_' + key1).hide();
+//                    }
+//                }
+//            }
+//
+//        });
+//    }
+
+function validatePeriodName(x) {
+    if (bLoad== false) return;
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = parseInt($x[0].id.split('_')[1]),
+        rowid = parseInt($('#rowid').val()),
+        sPeriodName = isNullCheck($('#periodName_' + key).val(),'string'),
+        bAns=false;
+    for (i=1;i <rowid;i++) {
+        if (i != key) {
+            var sCPeriodName = isNullCheck($('#periodName_' + i).val(),'string');
+            if (sPeriodName == sCPeriodName) {
+                bAns==true;
+                alert ("Period Name Already Exists");
+                $('#periodName_' + key).val('');
+                return;
+            }
+        }
+    }
+    if (bAns==false) addNewRow(x);
+}
+
+function validateFromDate(x) {
+    if (bLoad== false) return;
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+    // $tr =  $(this).parents("tr"),
+        key = parseInt($x[0].id.split('_')[1]);
+
+    var sDate = $('#todate_' + key).val();
+    if (sDate.length==0) return;
+
+    var dFDate = new Date($('#fromdate_' + key).datepicker('getDate')),
+        dTDate = new Date($('#todate_' + key).datepicker('getDate'));
+
+    if (dTDate <  dFDate) {
+        bLoad =false;
+        $('#fromdate_' + key).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', dTDate);
+        bLoad =true;
+    }
+
+    addNewRow(x);
+
+    var newDate= $('#todate_' + key).datepicker('getDate');
+    newDate.setTime(newDate.getTime() + (1000*60*60*24))
+    var $next = $tr.next();
+    if  ($next.length !=0) {
+        var ikey = $next[0].id.split('_')[1];
+        bLoad =false;
+        $('#fromdate_' + ikey).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', newDate);
+        bLoad =true;
+    }
+}
+
+function validateToDate(x) {
+    if (bLoad== false) return;
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+    // $tr =  $(this).parents("tr"),
+        key = parseInt($x[0].id.split('_')[1]);
+
+    var dFDate = new Date($('#fromdate_' + key).datepicker('getDate')),
+        dTDate = new Date($('#todate_' + key).datepicker('getDate'));
+
+    if (dTDate <  dFDate) {
+        alert ("Invalid Data");
+        bLoad =false;
+        $('#todate_' + key).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', dFDate);
+        bLoad =true;
+    }
+
+    addNewRow(x);
+
+    var newDate= $('#todate_' + key).datepicker('getDate');
+    newDate.setTime(newDate.getTime() + (1000*60*60*24))
+    var $next = $tr.next();
+    if  ($next.length !=0) {
+        var ikey = $next[0].id.split('_')[1];
+        bLoad =false;
+        $('#fromdate_' + ikey).datepicker({'format': 'dd-mm-yyyy'}).datepicker('setDate', newDate);
+        bLoad =true;
+    }
+
+//            var newDate= $('#todate_' + rowid).datepicker('getDate');
+//        var $next = $tr.next();
+//        var $prev = $tr.prev();
+//        if ($prev.length==0) {
+//            alert('ooo');
+//        } else {
+//            alert('aaa');
+//        }
+
+    //      console.log($prev);
+
+
+}
+
+
+
+
+
+//$(".mainTr").click(function(){
+//
+//	var relDiv = $(this).attr('rel');
+//	var relVal = relDiv.split("_");
+//
+//	if(relVal[0]=='rt') {
+//		$("#rtDivDept_"+relVal[1]).slideToggle("slow");
+//		var key=$(this).data('expandid');
+//
+//		$('.periodTableWrapper').html('');
+//
+//		//console.log(key);
+////		LoadVoucherTypetrans(key);
+////		LoadPeriodDetails(key);
+//		//console.log(cid1);
+//		//console.log(cid2);
+//	} /*else {
+//		$("#ocDivDept_"+relVal[1]).slideToggle("slow");
+//	}*/
+//
+//	var rtCount = $('#rtCount').val();
+//	var ocCount = $('#ocCount').val();
+//	for(i=1;i<=rtCount;i++) {
+//		if(relVal[0] == 'rt') {
+//			if(relVal[1] != i) {
+//				$("#rtDivDept_"+i).slideUp("slow");
+//			}
+//		} else {
+//			$("#rtDivDept_"+i).slideUp("slow");
+//		}
+//	}
+//	for(i=1;i<=ocCount;i++) {
+//		if(relVal[0] == 'oc') {
+//			if(relVal[1] != i) {
+//				$("#ocDivDept_"+i).slideUp("slow");
+//			}
+//		} else {
+//			$("#ocDivDept_"+i).slideUp("slow");
+//		}
+//	}
+//})
+
+//function LoadVoucherTypetrans(val) {
+//    $.ajax({
+//        url: getBaseURL() + 'workflow/index/vouchertypeGeneration',
+//        type: 'POST',
+//        data: {'typeId': val, "Type": 'voucher'},
+//        success:function(data, textStatus, jqXHR){
+//            if (jqXHR.status == 200){
+//                data=JSON.parse(data);
+//                //console.log(data);
+//                $("#prefix_"+val).val(data.PreFix);
+//                $("#suffix_"+val).val(data.Suffix);
+//                $("#width_"+val).val(data.Width);
+//                $("#startNo_"+val).val(data.StartNo);
+//                if(data.PeriodWise==1) {
+//                    $("#period_wise_"+val).prop('checked', true);
+//                    $("#periodTable_" + val).show();
+//
+//                } else {
+//                    $("#period_wise_"+val).prop('checked',false);
+//                    $("#periodTable_" + val).hide();
+//                }
+//                $("#periodTable_" + val).trigger('change');
+//                if(data.CCRequired==1) {
+//                    $("#cost_center_require_"+val).prop('checked', true);
+//                    $("#ccrequire_"+val).val("1");
+//                } else {
+//                    $("#cost_center_require_"+val).prop('checked',false);
+//                    $("#ccrequire_"+val).val("0");
+//                }
+//
+//                if(data.CompanyRequired==1) {
+//                    $("#company_require_"+val).prop('checked', true);
+//                    $("#corequire_"+val).val("1");
+//                } else {
+//                    $("#company_require_"+val).prop('checked',false);
+//                    $("#corequire_"+val).val("0");
+//                }
+//
+//                if(data.BaseType=="CO") {
+//                    $("#baseType_"+val).find("option[value=2]").prop('selected', true);
+//                } else if(data.BaseType=="CC"){
+//                    $("#baseType_"+val).find("option[value=3]").prop('selected', true);
+//                } else {
+//                    $("#baseType_"+val).find("option[value=1]").prop('selected', true);
+//                }
+//                $("#baseType_"+val).trigger('change');
+//
+//                if(data.GenType==1) {
+//                    $("#auto_"+val).prop("checked", true);
+//                    //console.log("#auto_"+val);
+//                } else {
+//                    $("#manual_"+val).prop("checked", true);
+//                    //console.log("#manual_"+val);
+//                }
+//
+//            } else {
+//                alert('Failed to Load the VoucherType detail!');
+//            }
+//        },
+//        error:function(jqXHR, textStatus, errorThrown){
+//            alert('Failed to Load the VoucherType detail!');
+//        }
+//    });
+//}
+
+//$('.autoVoucherNo').on('change', function(){
+//    var isAutoVoucher = $(this).val();
+//    //console.log(isAutoVoucher);
+//    var $parent = $(this).parents('.not_autoVoucherNo');
+//    var $count = $parent.nextAll('.not_period_wise');
+//    var $prefix = $parent.nextAll('.not_prefix');
+//    var $startNo = $parent.nextAll('.not_startNo');
+//    var $width = $parent.nextAll('.not_width');
+//    var $suffix = $parent.nextAll('.not_suffix');
+//    if(isAutoVoucher == 0){
+//        $count.hide();
+//        $prefix.hide();
+//        $startNo.hide();
+//        $width.hide();
+//        $suffix.hide();
+//    } else {
+//        $count.show();
+//        $prefix.show();
+//        $startNo.show();
+//        $width.show();
+//        $suffix.show();
+//    }
+//
+//});
+
+//$('.period_wise_YesNo').on('change', function(){
+//
+//});
+
+function showPeriod() {
+    $("#periodmodal").modal('show');
+    bindPeriodMaster();
+    $('.date_picker').datepicker({'format': 'dd-mm-yyyy',autoclose: true});
+    $("#periodmodal").modal('show');
+}
+
+//$(".editSubmitBtn").click(function(){
+//    //$(".error_message").hide();
+//    var key=$(this).data('editid');
+//    $("#editform_" + key).submit();
+//});
+
+function getDeptId(data) {
+    curDeptId = $(data).attr('data-expandid');
+}
+function editDept(typeId,_this) {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+    var ccId= 0,compId=0;
+    if ($('#vtypeId').val() ==1) compId = $('#selcompany').val();
+    else if ($('#vtypeId').val() ==2) ccId = $('#selcostcentre').val();
+
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/voucheredit',
+        type: 'POST',
+        async: false,
+        data: {'typeId': typeId,'ccId':ccId,'compId':compId},
+        success:function(data, textStatus, jqXHR){
+            $(data).insertAfter(_this.closest('tr'));
+            $('.card-body').slimScroll({
+                height : '100%',
+                alwaysVisible: false,
+                railVisible: true,
+                railColor: '#cececd',
+                railOpacity: 1
+            });
+            $(".lbl_move").polymerForm();
+            $(".lbl_move").each(function() {
+                if($(this).val() != '' && $(this).val() != null) {
+                    $(this).closest('div').addClass('dirty');
+                }
+            });
+            _this.closest('tr').next('tr').show("slow");
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+        }
+    });
+}
+$(document).on('click','.close',function() {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+});
+function checkPeriodFound(x, typeId) {
+    var $parent = $(x).parents('.not_period_wise');
+    var $prefix = $parent.nextAll('.not_prefix');
+    var $startNo = $parent.nextAll('.not_startNo');
+    var $width = $parent.nextAll('.not_width');
+    var $suffix = $parent.nextAll('.not_suffix');
+    if($(x).is(":checked")){
+        $("#periodTable_" + typeId).show();
+        $prefix.hide();
+        $startNo.hide();
+        $width.hide();
+        $suffix.hide();
+        LoadPeriodDetails(typeId);
+    } else {
+        $("#periodTable_" + typeId).hide();
+        $prefix.show();
+        $startNo.show();
+        $width.show();
+        $suffix.show();
+        //LoadPeriodDetails(typeId);
+    }
+}
+
+//function LoadPeriodDetails(TypeId) {
+//	$.ajax({
+//		url: getBaseURL() + 'workflow/index/vouchertypeGeneration',
+//		type: 'POST',
+//		data: {'typeId': TypeId, "Type": 'period'},
+//		success:function(data, textStatus, jqXHR){
+//			if (jqXHR.status == 200){
+//			//console.log(data);
+//				data=JSON.parse(data);
+//
+//				var $rowid = $('#periodrowid_'+TypeId);
+//				var template = $('#dummy-period').html();
+//				var rowid = 0;
+//				var $tbody = $('#periodTable_'+TypeId).find('tbody.main');
+//				$tbody.html('');
+//				//console.log(data.PeriodMaster);
+//				if(data.PeriodMaster.length != 0) {
+//					$.each(data.PeriodMaster, function(i, o) {
+//						rowid += 1;
+//						$tbody.append(template.replace(/__/g, '_' + rowid));
+//						$('#PeriodTypeId_' + rowid).val(TypeId);
+//						$('#PeriodId_' + rowid).val(o.PeriodId);
+//						$('#periodName_' + rowid).val(o.PeriodDescription);
+//						$('#fromdate_' + rowid).val(o.FromDate);
+//						$('#todate_' + rowid).val(o.ToDate);
+//						//console.log(data.PeriodTrans);
+//						if(data.PeriodTrans.length != 0) {
+//							$.each(data.PeriodTrans, function(j, l) {
+//								if(o.PeriodId== l.PeriodId && TypeId== l.TypeId){
+//									if(l.Monthwise==1) {
+//										$("#monthwiseYes_"+rowid).prop("checked", true);
+//										onChangeMonthWise($("#monthwiseYes_"+rowid));
+//									}else {
+//										$("#monthwiseNo_"+rowid).prop("checked", true);
+//										onChangeMonthWise($("#monthwiseNo_"+rowid));
+//									}
+//								}
+//							});
+//						} else {
+//							$("#monthwiseNo_"+rowid).prop("checked", true);
+//							onChangeMonthWise($("#monthwiseNo_"+rowid));
+//						}
+//
+//					});
+//				}
+//				/*rowid += 1;
+//				$tbody.append(template.replace(/__/g, '_' + rowid));*/
+//				$rowid.val(rowid);
+//
+//			} else {
+//				alert('Failed to Load the Period detail!');
+//			}
+//		},
+//		error:function(jqXHR, textStatus, errorThrown){
+//			alert('Failed to Load the Period detail!');
+//		}
+//	});
+//}
+
+//function onChangeMonthWise (x) {
+//	//console.log(x);
+//    var $x = $(x);
+//    var $monthwiseCols = $x.closest('tr').next('.subTr').find('.monthwise');
+//	var rowid = $x[0].id.split('_')[1];
+//	var FromDate=$('#fromdate_'+ rowid).val();
+//	var ToDate=$('#todate_'+ rowid).val();
+//	var PeriodId=$('#PeriodId_'+ rowid).val();
+//	var TypeId=$('#PeriodTypeId_'+ rowid).val();
+//	var PeriodDesc=$('#periodName_'+ rowid).val();
+//	//console.log(PeriodId);
+//	var periodrowid = 0;
+//	var $rowid = $('#type_'+rowid+'_rowid');
+//	var template = $('#dummy-periodmonthwise').html();
+//	var $tbody = $('#type_'+rowid+'_PeriodSubTable').find('tbody');
+//	var data1 = '';
+//	$tbody.html('');
+//	$.ajax({
+//		url: getBaseURL() + 'workflow/index/vouchertypeGeneration',
+//		type: 'POST',
+//		data: {'typeId': TypeId, "Type": 'period'},
+//		success:function(data, textStatus, jqXHR){
+//			if (jqXHR.status == 200){
+//			//console.log(data);
+//				data1 = JSON.parse(data);
+//				if($x.val() == 1) {
+//					$monthwiseCols.show();
+//
+//					var new_fromdate  = FromDate.substr(6,4) + '-' + FromDate.substr(3,2) + '-' + FromDate.substr(0,2);
+//					var new_todate  = ToDate.substr(6,4) + '-' + ToDate.substr(3,2) + '-' + ToDate.substr(0,2);
+//					var from = new Date(new_fromdate);
+//					var fromdate_month=from.getMonth()+1;
+//					var fromdate_year=from.getFullYear();
+//
+//					var to = new Date(new_todate);
+//					var todate_month=to.getMonth()+1;
+//					var todate_year=to.getFullYear();
+//					var sDate="";
+//					var sPerDesc="";
+//					var monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+//
+//					while((fromdate_year < todate_year) || (fromdate_year == todate_year && fromdate_month <= todate_month)){
+//						sDate = '1-' + fromdate_month + '-' + fromdate_year;
+//						sPerDesc= monthShortNames[fromdate_month-1] + ' ' + fromdate_year;
+//						//console.log( sPerDesc);
+//						periodrowid += 1;
+//						$tbody.append(template.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + periodrowid));
+//
+//						$('#type_'+rowid+'_TypeId_' + periodrowid).val(TypeId);
+//						$('#type_'+rowid+'_PeriodId_' + periodrowid).val(PeriodId);
+//						$('#type_'+rowid+'_Month_' + periodrowid).val(fromdate_month);
+//						$('#type_'+rowid+'_Year_' + periodrowid).val(fromdate_year);
+//						$('#type_'+rowid+'_description_' + periodrowid).val(sPerDesc);
+//						$('#type_'+rowid+'_prefix_' + periodrowid).val('');
+//						$('#type_'+rowid+'_startNo_' + periodrowid).val(1);
+//						$('#type_'+rowid+'_width_' + periodrowid).val(5);
+//						$('#type_'+rowid+'_suffix_' + periodrowid).val('');
+//						if(data1.PeriodmonthwiseTrans.length != 0) {
+//							$.each(data1.PeriodmonthwiseTrans, function(j, l) {
+//								if(l.PeriodId== PeriodId && l.TypeId== TypeId && l.Month== fromdate_month && l.Year== fromdate_year ){
+//									$('#type_'+rowid+'_prefix_' + periodrowid).val(l.PreFix);
+//									$('#type_'+rowid+'_startNo_' + periodrowid).val(l.StartNo);
+//									$('#type_'+rowid+'_width_' + periodrowid).val(l.Width);
+//									$('#type_'+rowid+'_suffix_' + periodrowid).val(l.Suffix);
+//								}
+//							});
+//						}
+//
+//						if (fromdate_month < 12) { fromdate_month = fromdate_month + 1; }
+//						else { fromdate_year = fromdate_year + 1; fromdate_month = 1; }
+//					}
+//				} else {
+//					periodrowid += 1;
+//					$tbody.append(template.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + periodrowid));
+//					$monthwiseCols.show();
+//
+//					$('#type_'+rowid+'_TypeId_' + periodrowid).val(TypeId);
+//					$('#type_'+rowid+'_PeriodId_' + periodrowid).val(PeriodId);
+//					$('#type_'+rowid+'_Month_' + periodrowid).val(0);
+//					$('#type_'+rowid+'_Year_' + periodrowid).val(0);
+//					$('#type_'+rowid+'_description_' + periodrowid).val(PeriodDesc);
+//					$('#type_'+rowid+'_prefix_' + periodrowid).val('');
+//					$('#type_'+rowid+'_startNo_' + periodrowid).val(1);
+//					$('#type_'+rowid+'_width_' + periodrowid).val(5);
+//					$('#type_'+rowid+'_suffix_' + periodrowid).val('');
+//					if(data1.PeriodTrans.length != 0) {
+//						$.each(data1.PeriodTrans, function(j, l) {
+//							if(l.PeriodId== PeriodId && l.TypeId== TypeId ){
+//								$('#type_'+rowid+'_prefix_' + periodrowid).val(l.PreFix);
+//								$('#type_'+rowid+'_startNo_' + periodrowid).val(l.StartNo);
+//								$('#type_'+rowid+'_width_' + periodrowid).val(l.Width);
+//								$('#type_'+rowid+'_suffix_' + periodrowid).val(l.Suffix);
+//							}
+//						});
+//					}
+//				}
+//				$rowid.val(periodrowid);
+//
+//			} else {
+//				alert('Failed to Load the Period detail!');
+//			}
+//		},
+//		error:function(jqXHR, textStatus, errorThrown){
+//			alert('Failed to Load the Period detail!');
+//		}
+//	});
+//}
+
+function updatePeriodMaster() {
+    arrM = [];
+    var $resnames = $('input[id*=periodName_]');
+    $.each($resnames, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id,
+            key = name.split('_')[1];
+        if (name.indexOf('__') != -1) return;
+        var iPeriodId = isNullCheck($('#PeriodId_'+key).val(),'number'),
+            sPeriodName= isNullCheck($('#periodName_'+key).val(),'string'),
+            dFromDate= $('#fromdate_'+key).val(),
+            dToDate= $('#todate_'+key).val();
+
+        if (sPeriodName==""  || dFromDate.length ==0 || dToDate.length==0) return;
+
+        arrM.push({
+            PeriodId: iPeriodId,
+            PeriodDescription: sPeriodName,
+            FromDate: dFromDate,
+            ToDate: dToDate
+        });
+    });
+    if (arrM.length ==0) { $('#periodmodal').modal('toggle'); return; }
+
+    $.ajax({
+        url:getBaseURL()+ 'workflow/index/updatevoucherperiod',
+        type:"post",
+        data: {'arrPeriodMaster':JSON.stringify(arrM)},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            arrPeriodList =[];
+            var obj = JSON.parse(data);
+            arrPeriodList  = obj['periodMaster'];
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            return false;
+        }
+    });
+
+    $('#periodmodal').modal('toggle');
+
+}
+
+function voucherSearch(positionDetails) {
+    if (globalTimeout != null) {
+        clearTimeout(globalTimeout);
+    }
+    globalTimeout = setTimeout(function() {
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/vouchertype-generation',
+            type: 'POST',
+            data: {'Type': 'search','searchVal' : $.trim(positionDetails)},
+            async:false,
+            success: function (data, textStatus, jqXHR) {
+                var posDetail = JSON.parse(data);
+                console.log(posDetail);
+                $('#maintable tbody').html('');
+                var sHtml="";
+                if(posDetail.length>0) {
+                    $.each(posDetail,function(j,o) {
+                        var i = +j+1;
+                        sHtml = sHtml + '<tr class="col-xs-12" style="padding:0 !important">'+
+                        '<td class="col-xs-5" data-expandid="' + o.TypeId + '" rel="rt_' + i + '">' + o.TypeName + '</td>'+
+                        '<td class="col-xs-5" data-expandid="' + o.ModuleId + '" rel="rt_' + i + '">' + o.ModuleName + '</td>'+
+                        '<td class="col-xs-2" class="action_btns_td">'+
+                        '<ul class="action_btns">'+
+                        '<li>'+
+                        '<a href="javascript:void(0);" data-toggle="tooltip" class="mainTr" data-expandid="'+ o.TypeId + '" onclick="editDept('+ o.TypeId + ',$(this));getDeptId(this);" rel="rt" data-placement="left" data-original-title="Edit">'+
+                        '<span><i class="fa fa-edit"></i></span>'+
+                        '</a></li></ul></td></tr>';
+                    });
+                }
+                $('#maintable tbody').html(sHtml);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 400)
+                    alert(jqXHR.responseText);
+                else
+                    alert("Request Failed");
+            }
+        });
+        globalTimeout=null;
+    }, 500);
+}
+</script>

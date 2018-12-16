@@ -1,0 +1,226 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style type="text/css">
+    /*border: 1px solid #333;*/
+/*DragResize*/
+
+/* Required CSS classes: must be included in all pages using this script */
+/* Apply the element you want to drag/resize */
+.drsElement{position: absolute;border: 1px solid #333;}
+/*
+ The main mouse handle that moves the whole element.
+ You can apply to the same tag as drsElement if you want.
+*/
+.drsMoveHandle{height:20px;background-color:#CCC;border-bottom:1px solid #666;cursor:move;}
+/*
+ The DragResize object name is automatically applied to all generated
+ corner resize handles, as well as one of the individual classes below.
+*/
+.dragresize{position:absolute;width:5px;height:5px;font-size:1px;background:#EEE;border:1px solid #333;}
+/*
+ Individual corner classes - required for resize support.
+ These are based on the object name plus the handle ID.
+*/
+.dragresize-tl{top:-8px;left:-8px;cursor:nw-resize;}
+.dragresize-tm{top:-8px;left:50%;margin-left:-4px;cursor:n-resize;}
+.dragresize-tr{top:-8px;right:-8px;cursor:ne-resize;}
+.dragresize-ml{top:50%;margin-top:-4px;left:-8px;cursor:w-resize;}
+.dragresize-mr{top:50%;margin-top:-4px;right:-8px;cursor:e-resize;}
+.dragresize-bl{bottom:-8px;left:-8px;cursor:sw-resize;}
+.dragresize-bm{bottom:-8px;left:50%;margin-left:-4px;cursor:s-resize;}
+.dragresize-br{bottom:-8px;right:-8px;cursor:se-resize;}
+/*DragResize End*/
+/*Main*/
+.text-bold, .text-bold * {ont-weight: bold !important;}
+.text-italic, .text-italic * {font-style: italic !important;}
+.text-underline, .text-underline * {text-decoration: underline !important;}
+.style-left, .style-left * {text-align: left;}
+.style-center, .style-center * {text-align: center;}
+.style-right, .style-right * {text-align: right;}
+.style-justify, .style-justify * {text-align: justify;}
+#styleOptions {display:  none;}
+#ElementTemplate,
+.remScnt {
+    display:none;
+}
+.remScnt{position:absolute; right:5px; top:3px; background:none; color:#990; font-size:14px;}
+.remScnt > .fa.fa-trash-o {
+    text-decoration: none !important;
+    font-style: normal !important;
+    font-size: 14px !important;
+    font-weight: normal !important;
+    color: #000 !important;
+    background: transparent !important;
+	border: none !important;
+}
+.up-buttm-10					{margin-top:8px; margin-bottom:8px;}
+/*------ scroll top 
+.navbar-fixed-top + .content-container {
+	margin-top: 70px;
+}
+.content-container {
+	margin: 0 130px;
+}
+
+
+
+#top-link-block.affix-top {
+    position: absolute;
+    bottom: -82px; 
+    right: 10px; 
+}
+#top-link-block.affix {
+    position: fixed;
+    bottom:60px;
+    right: 10px; 
+}
+scroll top ------*/
+</style>
+ <form method="post" action="<?php echo $this->basePath(); ?>/application/print" target="_blank">
+	<input type="hidden" name="htmlcontent" id="htmlcontent" />
+	<input type="hidden" name="clientId" id="clientId" value="<?php echo (isset($woregister)) ? $woregister['ClientId'] : 0;?>"  />
+	<input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+</form>
+
+<div style="width:700px; margin:auto; padding-top:20px; position:relative;">
+<div id="htmlwrapper">
+	<!--<div class="col-lg-12">
+		<style>
+		.thscss{font-size:15px;font-family:'Open Sans', sans-serif !important;font-weight:600 !important;background-color:#E2EBEF !important; border-bottom:2px solid #5D9BB6; padding:8px !important;}
+		.tdpds{font-size:14px;border-top: 1px solid #EFEFEF!important;line-height:1.42857!important;padding:8px!important;vertical-align:top!important;font-size:15px!important;font-family:'Open Sans', sans-serif !important;}
+		.bill-det{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:20px !important; display:block !important; padding-left:5px !important;}
+		.date-bills{font-size:14px; font-weight:nornal; font-family:'Open Sans', sans-serif !important; display:block; padding-left:5px !important; clear:both; }
+		.str-bill{ display:block !important; width:10px; padding-left:10px;}
+		.date-shw{font-size:14px; font-family:'Open Sans', sans-serif !important; line-height:25px !important; display:block !important; padding-left:12px !important; }
+
+		</style>	</div>-->
+		<?php echo (isset($template)) ? $template : '';?>
+
+	<div style="margin-bottom:30px; margin-top:20px; display:block">
+		<table class="table bill-cum" style=" margin-bottom:0px; margin-top:10px;" id="EntryTable" cellpadding="0" cellspacing="0" width="520">
+			<thead>
+			<tr>
+				<th class="thscss text-left" align="left">Agt No</th>
+				<th class="thscss text-left" align="left">Specification</th>
+				<th class="thscss text-left" align="left">Short Spec</th>
+				<th class="thscss text-left" align="left">Unit</th>
+				<th class="thscss text-right" align="right">Qty</th>
+				<th class="thscss text-right" align="right">Rate</th>
+				<th class="thscss text-right" align="right">Amount</th>
+			</tr>
+			</thead>
+			<tbody class="main">
+			<?php $CurAmtTotal = 0;
+				if(isset($woboq)):
+				foreach($woboq as $trans):
+				$CurAmtTotal += $trans['Amount'];;
+				?>
+				<tr class="padi05">
+					<td width="5%" class="tdpds text-left" align="left"><?php echo $trans['AgtNo'];?></td>
+					<?php if ($trans['TransType']=='H') { ?>
+					<td colspan="5" class="tdpds text-left" align="left"><?php echo $trans['Header'];?></td>
+					<td width="4%" class="tdpds text-left" align="left"><?php echo $trans['HeaderType'];?></td>
+					<?php } else { ?> 
+					<td width="8%" class="tdpds text-left" align="left"><?php echo $trans['Specification'];?></td>
+					<td width="8%" class="tdpds text-left" align="left"><?php echo $trans['ShortSpec'];?></td>
+					<td width="8%" class="tdpds text-left" align="left"><?php echo $trans['UnitName'];?></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Qty'], 3);?></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'], 2, true);?></td>
+					<td width="8%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($trans['Amount'], 2, true);?></td>
+					<?php } ?>
+				</tr>	
+			<?php endforeach; endif;?>
+			</tbody>
+			<tbody class="total">
+				<tr>
+					<td colspan="5" class="tdpds">&nbsp;</td>
+					<td align="right" class="tdpds text-right">Total</td>
+					<td width="10%" class="tdpds text-right" align="right"><?php echo $this->commonHelper()->sanitizeNumber($CurAmtTotal, 2, true);?></td>
+				</tr>
+			</tbody>
+		</table>                                       
+	</div>
+</div>
+<!--<div class="col-lg-12 fix-top">
+<a exportName="pdf" style="cursor:pointer" class="exportAction" ><i class="fa fa-print"></i> Print </a>
+</div>-->
+<!--<span id="top-link-block" class="hidden">
+    <a href="#top" class="well well-sm"  onclick="$('html,body').animate({scrollTop:0},'slow');return false;">
+        <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
+    </a>
+</span>-->
+  <div class="fixed-action-btn-ra active">
+        <!--<a class="btn-floating-ra btn-large-ra">
+        <i class="fa fa-print"></i>
+        </a>-->
+        <a exportName="pdf" class="exportAction btn-floating-ra btn-large-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+        <!--<ul>
+          <li>
+              <a exportName="pdf" class="exportAction btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print"><i class="fa fa-print"></i></a>
+             
+          </li>
+          <li>
+              <a class="btn-floating-ra" download data-toggle="tooltip" data-placement="top" data-original-title="Print preview "> <i class="fa fa-download"></i></a>
+          </li>
+        </ul>-->
+    </div>
+</div>
+
+<!-- /top-link-block -->
+
+<?php 
+$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/images/nolgo.jpg';
+	if(isset($woregister) && $woregister['Logo']!="") {
+		$imgUrl = 'http://'.$_SERVER['HTTP_HOST'].$this->basePath().'/uploads/cb/company/'.$woregister['SubscriberId'].'.'.$woregister['Logo'];
+	}				
+	//echo $imgUrl;
+?>
+<script type="text/javascript">
+
+$(function() {
+	var woregister = <?php echo (isset($woregister))?json_encode($woregister):'[]'; ?>;
+	var currentdate = '<?php echo date('d-m-Y'); ?>';
+	var imgUrl = '<?php echo $imgUrl; ?>';
+	var woAmtinwords = '<?php echo $woAmtinwords; ?>';
+	var $p_scents = $('#p_scents');
+	//  remove buttons
+	$p_scents.find('.remScnt').remove();
+	
+	$.each(woregister, function(index, value) {
+		if(value != null && value != '') {
+			$p_scents.find('#wo_' + index).text(value);
+		}
+		
+	});
+	$p_scents.find('#wo_OrderAmountinwords').text(woAmtinwords);
+	$p_scents.find('#wo_OrderAmount').text(sanitizeNumber(woregister.OrderAmount, 2, true));
+	$p_scents.find('#wo_OrderPercent').text(sanitizeNumber(woregister.OrderPercent, 2));
+	
+	$p_scents.find('#wo_Logo').attr('src', imgUrl);
+	$p_scents.find('#wo_Date').text(currentdate);
+	
+	$(".exportAction").click(function(){
+		$('#htmlcontent').val($('#htmlwrapper').html());
+		$('form').submit();
+	});
+});
+// Only enable if the document has a long scroll bar
+// Note the window height + offset
+if ( ($(window).height() + 100) < $(document).height() ) {
+    $('#top-link-block').removeClass('hidden').affix({
+        // how far to scroll down before link "slides" into view
+        offset: {top:100}
+    });
+}
+
+</script>
+<!--<script>
+// Only enable if the document has a long scroll bar
+// Note the window height + offset
+if ( ($(window).height() + 100) < $(document).height() ) {
+    $('#top-link-block').removeClass('hidden').affix({
+        // how far to scroll down before link "slides" into view
+        offset: {top:100}
+    });
+}
+
+</script>-->

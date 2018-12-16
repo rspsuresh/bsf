@@ -1,0 +1,255 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<style>
+.form-control {box-shadow:none !important}
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+          <div class="col-lg-12 clear">
+        <h1>Land Bank - Financial Feasibility</h1>
+      </div>
+      <?php if ($enquiryId !=0) { ?>
+      <input type="hidden" id="EnquiryId" name="EnquiryId"  value="<?php echo $enquiryId; ?>"/>
+      <?php } else { ?>
+      <div class="col-lg-12 top_ct fade in" id="MainWrapper">
+        <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+          <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts">
+            <div class="form-group">
+              <input type="text" name="PropertyName" class="form-control lbl_move" label="Name of Property" id="PropertyName" autofocus />
+              <input type="hidden" id="EnquiryId" name="EnquiryId" />
+            </div>
+            <div class="next-bt"><a href="javascript:submitProperty();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+          </div>
+        </div>
+      </div>
+      <?php } ?>
+      <div class="clearfix"></div>
+      <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear" style="display: none;" id="ProjectsWrapper"></div>
+      <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear" style="display: none;" id="ChartsWrapper">
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 chts" id="chartDiv1"></div>
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 chts" id="chartDiv2"></div>
+      </div>
+    </div>
+  </div>
+  <div class="clearfix"></div>
+</div>
+<div class="col-lg-12 savebtn_area" style="display: none;" id="button-area">
+  <ul>
+      <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/landbank/followup';?>" method="post" id="frmfollowup">
+          <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+          <input type="hidden" id="formfrom" name="formfrom"/>
+          <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $property['PropertyName']; ?>"/>
+          <input type="hidden" id="pageUrl" name="pageUrl" value="<?php if ($page != '') { echo $page; } else { echo ''; } ?>" />
+          <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Cancel</a></li>
+      </form>
+  </ul>
+</div>
+<script type="text/javascript">
+    var arr_propertynames = <?php echo json_encode($propertynames);?>;
+    var $propertyName = $('#PropertyName'),
+        $enquiryId = $('#EnquiryId'),
+        $mainWrapper = $('#MainWrapper'),
+        $projectWrapper = $('#ProjectsWrapper'),
+        $chartWrapper = $('#ChartsWrapper'),
+        $buttonArea = $('#button-area'),
+        $pageUrl = $('#pageUrl'),
+        Chart1 = null,
+        Chart2 = null,
+        iEnquiryId = isNullCheck($enquiryId.val(),'number');
+
+    $(function () {
+        // bind property name autocomplete
+        if (iEnquiryId !=0) submitProperty();
+        $propertyName.autocomplete({
+            lookup: arr_propertynames,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    $enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                $enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $enquiryId.val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+        $propertyName.on('keyup', function(e) {
+           if(e.keyCode  == 13)
+            submitProperty();
+        });
+    });
+
+    function submitProperty () {
+        var id = $enquiryId.val(),
+         pageUrl =$pageUrl.val();
+        console.log(pageUrl);
+        if(id == 0) {
+            alert('Select a property!');
+            return;
+        }
+
+        $.ajax({
+            url: getBaseURL() + "project/landbank/financialfeasibility",
+            async: false,
+            data: {'EnquiryId': id,'pageUrl':pageUrl},
+            type: 'post',
+            success: function (data, status) {
+                if(!data) {
+                    alert('No data found !');
+                    return;
+                }
+
+                data = $.parseJSON(data);
+                $mainWrapper.hide();
+                console.log(data);
+                // bind options
+                $projectWrapper.html(data.html);
+                $projectWrapper.fadeIn("slow");
+                $buttonArea.fadeIn("slow");
+
+                // bind chart data
+                $chartWrapper.fadeIn("slow");
+                updateChart1(data.chartData1);
+                updateChart2(data.chartData2);
+                $enquiryId.val(0);
+                $propertyName.val('');
+            }
+        });
+    }
+
+    function showPropertyOptions() {
+        $mainWrapper.fadeIn("slow");
+
+        $projectWrapper.hide();
+        $buttonArea.hide();
+        $chartWrapper.hide();
+        $propertyName.focus();
+    }
+
+    function updateChart1(chartData) {
+        if (Chart1 != null) {
+            Chart1.dataProvider = chartData;
+            Chart1.validateData();
+            return;
+        }
+
+        Chart1 = AmCharts.makeChart("chartDiv1", {
+            "theme": "light",
+            "type": "serial",
+            "marginRight": 80,
+            "autoMarginOffset": 20,
+            "marginTop":20,
+            "balloon": {
+                "adjustBorderColor": false,
+                "horizontalPadding": 10,
+                "verticalPadding": 8,
+                "color": "#ffffff"
+            },
+
+            "dataProvider": chartData,
+            "valueAxes": [{
+                "id": "v1",
+                "axisAlpha": 0.1
+            }],
+            "graphs": [{
+                "alphaField": "alpha",
+                "balloonText": "<span style='font-size:12px;'>[[category]]<br><b>value: [[value]]</b></span>",
+                "fillAlphas": 1,
+                "title": "Income",
+                "type": "column",
+                "valueField": "Rate",
+                "dashLengthField": "dashLengthColumn"
+            }],
+            "chartCursor": {
+                "valueLineEnabled": true,
+                "valueLineBalloonEnabled": true
+            },
+            "categoryField": "Name",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "axisAlpha": 0,
+                "tickLength": 0
+            },
+            "titles": [
+                {
+                    "text": "Proposal Cost Chart",
+                    "size": 15
+                }
+            ]
+        });
+    }
+
+    function updateChart2(chartData) {
+        if (Chart2 != null) {
+            Chart2.dataProvider = chartData;
+            Chart2.validateData();
+            return;
+        }
+
+        Chart2 = AmCharts.makeChart("chartDiv2", {
+            "theme": "light",
+            "type": "serial",
+            "marginRight": 80,
+            "autoMarginOffset": 20,
+            "marginTop":20,
+            "dataProvider": chartData,
+            "valueAxes": [{
+                "id": "v1",
+                "axisAlpha": 0.1
+            }],
+            "graphs": [{
+                "useNegativeColorIfDown": true,
+                "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#FFFFFF",
+                "hideBulletsCount": 50,
+                "lineThickness": 2,
+                "lineColor": "#fdd400",
+                "negativeLineColor": "#67b7dc",
+                "valueField": "ROI"
+            }],
+            "chartCursor": {
+                "valueLineEnabled": true,
+                "valueLineBalloonEnabled": true
+            },
+            "categoryField": "Name",
+            "categoryAxis": {
+                "axisAlpha": 0,
+                "minHorizontalGap": 60
+            },
+            "titles": [
+                {
+                    "text": "Return On Investment Chart",
+                    "size": 15
+                }
+            ]
+        });
+    }
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+</script>

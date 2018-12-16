@@ -1,0 +1,945 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/tableHeadFixer.js"></script>
+<!--STYLE-->
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form action="" onsubmit="return entryValidate()"  method="post">
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+                <div class="col-lg-12 page_tittle">
+                    <h1 class="col-lg-6">Request for Creation - Plan Qty Change</h1>
+                    <!--                    <div class="col-lg-6">-->
+                    <!--                        <a href="#" data-toggle="modal" onclick="showSequentialView();" class="sele-max2"><i class="fa fa-clipboard"></i> Sequential View</a>-->
+                    <!--                    </div>-->
+                </div>
+                <!--form start-->
+                <div class="col-lg-12 top_ct">
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" label="Reference Date" readonly  value="<?php  if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcid !=0 ) ? $rfcregister['RefNo'] : $svNo; ?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName'];?>"/>
+                            <input type="hidden" name="project_id" id="project_id"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId'];?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName'];?>"/>
+                            <input type="hidden" name="project_type" id="project_type" value="<?php if(isset($projecttype)) echo $projecttype; else if(isset($rfcregister['ProjectType'])) echo $rfcregister['ProjectType'];?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0">
+                        <div class="form-group">
+                            <select id="revselection" name="revrequired" class="form-control single_dropdown lbl_move" data-size="6" label="Revision" style="width:100%">
+                                <option value="Y" <?php echo ($revrequired == 'Y') ? 'selected' : '';?>>Yes</option>
+                                <option value="N" <?php echo ($revrequired == 'N') ? 'selected' : '';?>>No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!--form end-->
+
+                <div class="col-lg-12 col-lg-offset-0" id="edit-content">
+                    <div class="table-responsive topsp animated-panel zoomIn parent-scroll non-borde-td" style="animation-delay: 0.2s; margin-bottom:0">
+                        <table class="fixTable table" style=" margin-bottom:0px;" id="sample12">
+                            <thead>
+                            <tr>
+                                <th>RefNo</th>
+                                <th>Specification</th>
+                                <th>Unit</th>
+                                <th class="text-right">Rate </th>
+                                <th colspan="2" style="text-align:center;padding:0 !important; border-bottom:1px solid #333 !important">Current</th>
+                                <th colspan="2" style="text-align:center;padding:0 !important;border-bottom:1px solid #333 !important">Revise</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            <tr>
+                                <th style="padding:0 !important"></th>
+                                <th style="padding:0 !important"></th>
+                                <th style="padding:0 !important"></th>
+                                <th style="padding:0 !important"class="text-right"> </th>
+                                <th style="padding:0 !important;text-align:center;">Qty</th>
+                                <th style="padding:0 !important;text-align:center;">Amount</th>
+                                <th style="padding:0 !important;text-align:center;" >Qty</th>
+                                <th style="padding:0 !important;text-align:center;">Amount</th>
+                                <th style="padding:0 !important">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php $i=0;$iTRowId=1; $dCurAmt=0;$dRevAmt=0;
+                            if (isset($rfctrans)):
+                                foreach($rfctrans as $trans):
+                                    $i=$i+1;
+                                    ?>
+                                    <tr id="IOWiRowId_<?php echo $i; ?>">
+                                        <td width="5%"><input type="text" class="parent_text bor-non <?php if($trans['UnitName']=="") { echo 'fonts-blod'; } else { echo ''; }?>" name="refno_<?php echo $i; ?>" id="refno_<?php echo $i; ?>" value="<?php echo $trans['RefSerialNo'];?>"></td>
+                                        <td width="11%"><p class="parent_text max-min-height bor-non <?php if($trans['UnitName']=="") { echo 'fonts-blod'; } else {echo ''; }?>" id="piowname_<?php echo $i; ?>"><?php echo $trans['Specification'];?></p></td>
+                                        <?php if($trans['UnitName']!="") { ?>
+                                            <td width="3%"><input class="parent_text bor-non" type="text" value="<?php echo $trans['UnitName'];?>" readonly /></td>
+                                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'],2,true);?>"  id="rate_<?php echo $i; ?>" name="rate_<?php echo $i; ?>" readonly/></td>
+                                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['CurQty'],3);?>"  id="curqty_<?php echo $i; ?>" name="curqty_<?php echo $i; ?>" readonly/></td>
+                                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['CurAmount'],2,true);?>"  id="curamt_<?php echo $i; ?>" name="curamt_<?php echo $i; ?>" readonly/></td>
+                                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['RevQty'],3);?>"  id="revqty_<?php echo $i; ?>" name="revqty_<?php echo $i; ?>" onkeypress="return isDecimal(event,this);" onblur="return FormatNum(this, 2,true);" onchange="updateIOWQty(this.id);"/></td>
+                                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['RevAmount'],2,true);?>"  id="revamt_<?php echo $i; ?>" name="revamt_<?php echo $i; ?>" readonly/></td>
+                                            <td width="1%">
+                                                <ul class="expanded-dis">
+                                                    <li>
+                                                        <a href="#" class="mainTr wbsTr_<?php echo $i; ?>"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="WBS Qty" ></i></a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                            <input type="hidden" name="piowid_<?php echo $i; ?>" value="<?php echo $trans['ProjectIOWId'];?>" id="piowid_<?php echo $i; ?>">
+                                        <?php } ?>
+                                    </tr>
+                                    <tr style="display:none;" class="subTr wbsmainTr_<?php echo $i; ?>">
+                                        <td colspan="8" style="padding:0px !important; ">
+                                            <div class="col-lg-10 col-lg-offset-1" style="margin-top:10px; margin-bottom:10px;">
+                                                <div class="subDiv" style="display:none;overflow-y:auto; min-height:100%; max-height:500px;">
+                                                    <table class="table" style="margin-bottom:0px;" id="wbstable_<?php echo $i; ?>">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>WBS Name</th>
+                                                            <th class="text-right">Cur Qty</th>
+                                                            <th class="text-right">Rev Qty</th>
+                                                            <th>&nbsp;</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php
+                                                        $ProjectIOWId = $trans['ProjectIOWId'];
+                                                        $arrwbs = array_filter($wbstrans, function($v) use($ProjectIOWId) { return $v['ProjectIOWId'] == $ProjectIOWId; });
+                                                        $x=0; $dWBSCurQty=0;$dWBSRevQty=0;
+                                                        foreach($arrwbs as $wtrans) { $x=$x+1; ?>
+                                                            <tr>
+                                                                <td width="15%"><p class="parent_text max-min-height bor-non"><?php echo $wtrans['WBSName'];?></p></td>
+                                                                <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['CurQty'],3);?>"  id="wbstable_<?php echo $i; ?>_curqty_<?php echo $x; ?>" name="wbstable_<?php echo $i; ?>_curqty_<?php echo $x; ?>" readonly/></td>
+                                                                <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['RevQty'],3);?>"  id="wbstable_<?php echo $i; ?>_revqty_<?php echo $x; ?>" name="wbstable_<?php echo $i; ?>_revqty_<?php echo $x; ?>" onkeypress="return isDecimal(event,this);" onblur="return FormatNum(this, 2,true);" onchange="updateWBSQty(this.id);"/></td>
+                                                                <td width="5%">&nbsp;</td>
+                                                                <input type="hidden" name="wbstable_<?php echo $i; ?>_wbsid_<?php echo $x; ?>" id="wbstable_<?php echo $i; ?>_wbsid_<?php echo $x; ?>" value="<?php  echo $wtrans['WBSId']; ?>">
+                                                            </tr>
+                                                            <?php $dWBSCurQty= $dWBSCurQty + floatval($wtrans['CurQty']);$dWBSRevQty= $dWBSRevQty + floatval($wtrans['RevQty']);} ?>
+                                                        <?php if ($x !=0) { ?>
+                                                            <tr>
+                                                                <td class="rate_pri text-right">Total</td>
+                                                                <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalbudgetqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dWBSCurQty,3);?>" id="wbstable_<?php echo $i; ?>_totalcurqty" readonly/></td>
+                                                                <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalcumqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dWBSRevQty,3);?>" id="wbstable_<?php echo $i; ?>_totalrevqty" readonly/></td>
+                                                                <input type="hidden" name="wbstable_<?php echo $i; ?>_rows" id="wbstable_<?php echo $i; ?>_rows" value="<?php echo $x; ?>">
+                                                            </tr>
+                                                        <?php } ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div></div>
+                                        </td>
+                                    </tr>
+                                    <?php $i=$i+1; $iTRowId = $iTRowId+1; $dCurAmt=$dCurAmt+floatval($trans['CurAmount']);;$dRevAmt=$dRevAmt+floatval($trans['RevAmount']);
+                                endforeach;
+                            endif;?>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="<?php echo $i; ?>">
+                    </div>
+                    <div class="table-responsive topsp animated-panel zoomIn parent-scroll non-borde-td" style="animation-delay: 0.2s;">
+                        <table class="table" style=" margin-bottom:0px;" id="sample12">
+                            <tfoot>
+                            <tr>
+                                <td width="50%" colspan="5">&nbsp;</td>
+                                <td width="10%"><input class="parent_text text-right total-clr" name="curTotalAmt" value="<?php echo $this->commonHelper()->sanitizeNumber($dCurAmt,2,true);?>" id="curTotalAmt" readonly/></td>
+                                <td width="3%">&nbsp;</td>
+                                <td width="10%"><input class="parent_text text-right total-clr" name="revTotalAmt" value="<?php echo $this->commonHelper()->sanitizeNumber($dRevAmt,2,true);?>" id="revTotalAmt" readonly/></td>
+                                <td width="3%">&nbsp;</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" ><a onclick="submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="back-btn" ><a href="<?php echo $this->basePath() . '/project/rfc/rfciowplan';?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+
+<div id="excelmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" style="width: 90%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>IOW Import Sheet</h1>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive topsp animated-panel zoomIn" style="overflow:visible; animation-delay: 0.2s;">
+                    <table class="table" style="margin-bottom:0px;" id="excelTable">
+                        <thead>
+                        <tr>
+                            <th class="th-modal">IOW</th>
+                            <th class="th-modal">Unit</th>
+                            <th class="th-modal">Budget Qty</th>
+                            <th class="th-modal">Cumulative Plan Qty</th>
+                            <th class="th-modal">Previous Plan Qty</th>
+                            <th class="th-modal">Current Plan Qty</th>
+                        </tr>
+                        </thead>
+                        <tbody >
+                        <tr>
+                            <td width="11%"><input type="text" class="parent_text" name="excelparentname_1" id="excelparentname_1"></td>
+                            <td width="5%"><label for="excelunitid_1"></label></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" value="0" id="excelbudgetqty_1" readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" value="0" id="excelcumplanqty_1" readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" value="0" id="excelprevplanqty_1" readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" id="excelcurplanqty_1" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 3)"/></td>
+                            <input type="hidden" name="excelunitid_1" id="excelunitid_1">
+                            <input type="hidden" name="excelparentid_1" id="excelparentid_1">
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer"> <a href="#" class="cancel_btn ripple has-ripple" data-dismiss="modal"  data-toggle="tooltip" title="" data-original-title="Cancel" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                <button type="button" class="save_btn ripple has-ripple" onclick="return IOWUpdate()" data-dismiss="modal" data-toggle="tooltip" data-original-title="OK">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal end-->
+<!--Excel-->
+<!-- Sequential View -->
+<div class="modal fade bs-example-modal-lg2" id="sequentialViewModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1><i class="fa fa-clipboard"></i> Matrix View</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12" style="width: 100%; overflow-x: scroll;">
+                    <table class="fixTable table" style=" margin-bottom:0px;" id="sequentialViewTable">
+                        <thead>
+                        <tr>
+                            <th>Specification</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <a href="#" class="md_cance" data-dismiss="modal">Cancel</a>
+                <button type="button" class="md_ok" onclick="applySequentialValues()">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Sequential View end -->
+<?php //if ($mode != 'edit'):?>
+    <!--    <div class="fixed-action-btn active fixtopbtn">-->
+    <!--        <a class="btn-floating btn-large">-->
+    <!--            <i class="fa fa-paperclip"></i>-->
+    <!--        </a>-->
+    <!--        <ul>-->
+    <!--            <li>-->
+    <!--                <a class="btn-floating hide-input-file" data-toggle="tooltip" data-placement="bottom" data-original-title="Import From Excel">-->
+    <!--                    <i class="fa fa-file-excel-o"></i>-->
+    <!--                    <input type="file" name="myfile" id="myfile" class="input-large" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="fileupload(this)">-->
+    <!--                </a>-->
+    <!--            </li>-->
+    <!--            <li>-->
+    <!--                <a class="btn-floating" href="/bsf_v1.0/public/uploads/project/sample/iow.xlsx" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Sample">-->
+    <!--                    <i class="fa fa-download"></i>-->
+    <!--                </a>-->
+    <!--            </li>-->
+    <!--        </ul>-->
+    <!--    </div>-->
+<?php //endif; ?>
+<!--Excel end-->
+
+<script type="text/javascript">
+//var arryparentList = <?php echo (isset($parentiow)) ? json_encode($parentiow) : 'null'; ?>;
+
+//function bindAutoComplete() {
+//    var $parent_ids = $('input[id*=parentname_]');
+//
+//    // unbind previous autocomplete functionality
+//    $parent_ids.unbind('autocomplete');
+//
+//    $.each($parent_ids, function (i, obj) {
+//        var $this = $(this),
+//            name = $this[0].id;
+//
+//        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1)
+//            return;
+//
+//        var key1 =  name.split('_')[1];
+//
+//        $this.autocomplete({
+//            lookup: arryparentList,
+//            showNoSuggestionNotice:true,
+//            noSuggestionNotice: 'Do you want to Create New <input type="button" font-weight:bold"  class="btn btn-link"  value="IOW" onclick="return AddNewIOW('+name+')" >',
+//            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+//                var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+//                return re.test(suggestion.value);
+//            },
+//            onSelect: function(suggestion) {
+//                if(suggestion) {
+//                    $("#parentid_"+ key1).val(suggestion.data);
+//                    $("#unitid_"+ key1).val(suggestion.UnitId);
+//                    $('label[for=unitid_' + key1 + ']').html(suggestion.UnitName);
+//                    $(this).removeClass('error');
+//                }
+//            },
+//            onSearchStart: function(suggestion) {
+//                $("#parentid_"+ key1).val(0);
+//                $("#unitid_"+ key1).val(0);
+//                $('label[for=unitid_' + key1 + ']').html('');
+//            },
+//            onSearchComplete: function (query, suggestions) {
+//                if(!suggestions.length){
+//                    $("#parentid_"+ key1).val(0);
+//                    $("#unitid_"+ key1).val(0);
+//                    $('label[for=unitid_' + key1 + ']').html('');
+//                    $(this).addClass('error');
+//                } else
+//                    $(this).removeClass('error');
+//            }
+//        });
+//    });
+//}
+
+//function bindTRDeleteFn(reset) {
+//    var $trDelete = $('a[class*=mainTrDelete_]');
+//
+//    if (typeof reset !== 'undefined' && reset === true)
+//        $trDelete.unbind('click');
+//
+//    $.each($trDelete, function (i, obj) {
+//        var $this = $(this),
+//            name = $this[0].className,
+//            key =  name.split('_')[1];
+//
+//        if (name.indexOf('__') != -1)
+//            return;
+//
+//        $this.on('click', function(e) {
+//            e.preventDefault();
+//            if (confirm('Do you want to Delete')) {
+//                var tr_length = $('#sample12 > tbody tr[id*=IOWiRowId_]').length;
+//
+//                if(tr_length == 1) {
+//                    $('#rowid').val(0);
+//                 //   AddNewRowA(name, false);
+//                }
+//
+//                $this.closest('tr').remove();
+//            }
+//            return false;
+//        });
+//
+//    });
+//}
+
+$(function () {
+//    $(document).keydown(function(event) {
+//
+//        if(event.keyCode == 13) {
+//            event.preventDefault();
+//        }
+//
+//        else if(event.ctrlKey && event.keyCode == 78) {
+//            $("#addbut").trigger("click");
+//            event.preventDefault();
+//        }
+//        else if(event.ctrlKey && event.keyCode == 83) {
+//            $("#donebut").trigger("click");
+//            event.preventDefault();
+//        }
+//        else if(event.ctrlKey && event.keyCode == 82) {
+//            if (bSiteMix == true){$("#butresadd").trigger("click");}
+//            else{$("#butresRadd").trigger("click");}
+//            event.preventDefault();
+//        }
+//        else if(event.ctrlKey && event.keyCode == 67) {
+//
+//            if (bSiteMix==true){var iRows = $('#rowinfoid_' + iFocusRowId).val();}
+//            else {var iRows = $('#rowinfoidR_' + iFocusRowId).val();}
+//
+//            var arr= [];
+//            var k=0;
+//
+//            for (i = 1; i <= iRows; i++)
+//            {
+//                if (bSiteMix ==true){var sTable = '#rateanal_' + iFocusRowId + '_RowId_' + i;}
+//                else {var sTable = '#rateanalR_' + iFocusRowId + '_RowId_' + i;}
+//
+//                if ($(sTable).hasClass('selected') == true) {
+//                    if (bSiteMix ==true) {
+//                        arr.push({
+//                            inc: $('#rateanal_' + iFocusRowId + '_inc_' + i).val(),
+//                            ref: $('#rateanal_' + iFocusRowId + '_ref_' + i).val(),
+//                            code: $('#rateanal_' + iFocusRowId + '_code_' + i).val(),
+//                            resid: $('#rateanal_' + iFocusRowId + '_resid_' + i).val(),
+//                            resqty: $('#rateanal_' + iFocusRowId + '_resqty_' + i).val(),
+//                            resunit: $('#rateanal_' + iFocusRowId + '_resunit_' + i).val(),
+//                            resrate: $('#rateanal_' + iFocusRowId + '_resrate_' + i).val(),
+//                            resamt: $('#rateanal_' + iFocusRowId + '_resamt_' + i).val(),
+//                            formula: $('#rateanal_' + iFocusRowId + '_formula_' + i).val()
+//                        });
+//                    } else {
+//                        arr.push({
+//                            inc: $('#rateanalR_' + iFocusRowId + '_inc_' + i).val(),
+//                            ref: $('#rateanalR_' + iFocusRowId + '_ref_' + i).val(),
+//                            code: $('#rateanalR_' + iFocusRowId + '_code_' + i).val(),
+//                            resid: $('#rateanalR_' + iFocusRowId + '_resid_' + i).val(),
+//                            resqty: $('#rateanalR_' + iFocusRowId + '_resqty_' + i).val(),
+//                            resunit: $('#rateanalR_' + iFocusRowId + '_resunit_' + i).val(),
+//                            resrate: $('#rateanalR_' + iFocusRowId + '_resrate_' + i).val(),
+//                            resamt: $('#rateanalR_' + iFocusRowId + '_resamt_' + i).val(),
+//                            formula: $('#rateanalR_' + iFocusRowId + '_formula_' + i).val()
+//                        });
+//                    }
+//                }
+//            }
+//
+//            if (arr.length >0) {
+//                $.post(getBaseURL() + 'project/rfc/updatecopyanalysis', {ids: arr}, function (data) {
+//                    //alert (data);
+//                });
+//            }
+//            event.preventDefault();
+//        }
+//        else if(event.ctrlKey && event.keyCode == 86) {
+//
+//            $.post(getBaseURL() + 'project/rfc/getcopyanalysis', {ids: arr}, function (data) {
+//                var obj = jQuery.parseJSON(data);
+//
+//                if (bSiteMix==true) {
+//
+//                    var irowinfoId = $('#rowinfoid_' + iFocusRowId).val();
+//
+//                    for (i = 0; i < obj.length; i++) {
+//                        if ($('#rateanal_' + iFocusRowId + '_resid_'+ irowinfoId).val().length != 0) {
+//                            irowinfoId = +irowinfoId + 1;
+//
+//                            var stabelrow = '#rateanal_'+iFocusRowId + '_restable';
+//                            var sStr= '<tr id="rateanal__1_RowId__9">' + $("#rateanal__1_RowId__9").html() + '</tr>';
+//
+//                            sStr = sStr.replace(/__1/g,'_'+ iFocusRowId);
+//                            sStr = sStr.replace(/__9/g,'_'+ irowinfoId);
+//                            sStr = sStr.replace(/R1/g,'R'+ irowinfoId);
+//                            $(stabelrow+" tbody tr:last").after(sStr);
+//
+//                            $('#rowinfoid_' + iFocusRowId).val(irowinfoId);
+//                        }
+//                        $('#rateanal_' + iFocusRowId + '_inc_' + irowinfoId).val(obj[i]['inc']);
+//                        //$('#rateanal_' + iFocusRowId + 'ref_' + irowinfoId).val(obj[i]['ref']);
+//                        $('#rateanal_' + iFocusRowId + '_code_' + irowinfoId).val(obj[i]['code']);
+//                        $('#rateanal_' + iFocusRowId + '_resid_' + irowinfoId).val(obj[i]['resid']);
+//                        $('#rateanal_' + iFocusRowId + '_resqty_' + irowinfoId).val(obj[i]['resqty']);
+//                        $('#rateanal_' + iFocusRowId + '_resunit_' + irowinfoId).val(obj[i]['resunit']);
+//                        $('#rateanal_' + iFocusRowId + '_resrate_' + irowinfoId).val(obj[i]['resrate']);
+//                        $('#rateanal_' + iFocusRowId + '_resamt_' + irowinfoId).val(obj[i]['resamt']);
+//                        $('#rateanal_' + iFocusRowId + '_formula_' + irowinfoId).val(obj[i]['formula']);
+//                    }
+//                }
+//                else
+//                {
+//                    var irowinfoId = $('#rowinfoidR_' + iFocusRowId).val();
+//
+//                    for (i = 0; i < obj.length; i++) {
+//                        if ($('#rateanalR_' + iFocusRowId + '_resid_'+ irowinfoId).val().length != 0) {
+//                            irowinfoId = +irowinfoId + 1;
+//
+//                            var stabelrow = '#rateanalR_'+iFocusRowId + '_restable';
+//                            var sStr= '<tr id="rateanalR__1_RowId__9">' + $("#rateanalR__1_RowId__9").html() + '</tr>';
+//
+//                            sStr = sStr.replace(/__1/g,'_'+ iFocusRowId);
+//                            sStr = sStr.replace(/__9/g,'_'+ irowinfoId);
+//                            sStr = sStr.replace(/R1/g,'R'+ irowinfoId);
+//                            $(stabelrow+" tbody tr:last").after(sStr);
+//
+//                            $('#rowinfoid_' + iFocusRowId).val(irowinfoId);
+//                        }
+//                        $('#rateanalR_' + iFocusRowId + '_inc_' + irowinfoId).val(obj[i]['inc']);
+//                        //$('#rateanalR_' + iFocusRowId + 'ref_' + irowinfoId).val(obj[i]['ref']);
+//                        $('#rateanalR_' + iFocusRowId + '_code_' + irowinfoId).val(obj[i]['code']);
+//                        $('#rateanalR_' + iFocusRowId + '_resid_' + irowinfoId).val(obj[i]['resid']);
+//                        $('#rateanalR_' + iFocusRowId + '_resqty_' + irowinfoId).val(obj[i]['resqty']);
+//                        $('#rateanalR_' + iFocusRowId + '_resunit_' + irowinfoId).val(obj[i]['resunit']);
+//                        $('#rateanalR_' + iFocusRowId + '_resrate_' + irowinfoId).val(obj[i]['resrate']);
+//                        $('#rateanalR_' + iFocusRowId + '_resamt_' + irowinfoId).val(obj[i]['resamt']);
+//                        $('#rateanalR_' + iFocusRowId + '_formula_' + irowinfoId).val(obj[i]['formula']);
+//                    }
+//                }
+//            });
+//        }
+//    });
+
+//    bindTRDeleteFn();
+//    bindAutoComplete();
+    expandwbsTrFn();
+    checkWbsExpandShow();
+});
+
+function checkWbsExpandShow() {
+    var $mainTRs = $("a[class*=wbsTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            name = $(this)[0].className,
+            key = name.split('_')[1];
+
+        var rowCount = $("#wbstable_" + key + " > tbody > tr").length;
+        if (rowCount ==0) $this.hide();
+        else $this.show();
+    });
+}
+
+function expandwbsTrFn(reset) {
+    var $mainTRs = $("a[class*=wbsTr_]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+
+        var rowCount = $("#wbstable_" + key + " > tbody > tr").length;
+        if (rowCount ==0) return;
+
+        //if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".wbsmainTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closewbsdetails(key);
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function updateIOWQty(id) {
+    var key1 = id.split("_")[1],
+        dRevQty = parseFloat(isNullCheck($('#revqty_' + key1).val(),'number')),
+        dRate = parseFloat(isNullCheck($('#rate_' + key1).val(),'number'));
+    $('#revamt_' + key1).val(sanitizeNumber(dRevQty*dRate,2,true));
+
+    updateTotalAmount();
+}
+
+
+function updateWBSQty(rowid) {
+    var rows = $('input[id*=wbstable_'+rowid+'_revqty_]');
+    var dRevTQty = 0;
+    $.each(rows, function() {
+        var id = $(this)[0].id;
+        var key1 = id.split("_")[1],
+            key2 = id.split("_")[3],
+            drevQty = parseFloat(isNullCheck($('#wbstable_' + key1 + '_revqty_' + key2).val(),'number'));
+        dRevTQty =dRevTQty+drevQty;
+    });
+    $('#wbstable_' + key1 + '_totalrevqty').val(sanitizeNumber(dRevTQty,3));
+    var dRate = parseFloat(isNullCheck($('#rate_' + key1).val(),'number'));
+    $('#revamt_' + key1).val(sanitizeNumber(dRevTQty*dRate,2,true));
+    updateTotalAmount();
+}
+
+function updateTotalAmount() {
+    var rows = $('input[id*=revamt_]');
+    var dRevTAmt = 0;
+    $.each(rows, function() {
+        var id = $(this)[0].id,
+            key1 = id.split("_")[1],
+            dRevAmt = parseFloat(isNullCheck($('#revamt_' + key1).val(),'number'));
+        dRevTAmt =dRevTAmt+dRevAmt;
+    });
+    $('#revTotalAmt').val(sanitizeNumber(dRevTAmt,2,true));
+}
+
+function closewbsdetails(key) {
+    var $mainTRs = $("a[class*=wbsTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+
+
+function submitForm() {
+    // check for error(s)
+    var $err_inputs = $('.error');
+    if($err_inputs.length != 0) {
+        alert('Kindly notice the errors');
+        $.each($err_inputs, function () {
+            var $this = $(this),
+                $subTr = $this.closest('.subTr'),
+                $subDivTr = $subTr.closest('.subDiv').parents('.subTr');
+
+            if(!$subTr.is(':visible')) {
+                $subTr.prev('tr').find('.mainTr').trigger('click');
+            }
+
+            // SubDivs Parent
+            if($subDivTr.length != 0 && !$subDivTr.is(':visible')) {
+                $subDivTr.prev('tr').find('.mainTr').trigger('click');
+            }
+        });
+        return false;
+    }
+
+    $('form').submit();
+}
+
+function rateUpdate(x){
+    var rowId = x.split("_")[1];
+    var budgetQty = parseFloat(isNullCheck($('#budgetqty_' + rowId).val(),'number')),
+        dcurQty = parseFloat(isNullCheck($('#curplanqty_' + rowId).val(),'number')),
+        dprevQty = parseFloat(isNullCheck($('#prevplanqty_' + rowId).val(),'number')),
+        totQty = dcurQty+ dprevQty,
+        $curQty = $('#curplanqty_' + rowId),
+        $cumQty = $('#cumplanqty_' + rowId);
+
+    if (totQty > budgetQty || totQty < 0)
+        $curQty.addClass('error');
+    else
+        $curQty.removeClass('error');
+
+    $cumQty.val(sanitizeNumber(totQty,3));
+}
+function wbsrateUpdate(x){
+    var key1 = x.split("_")[1],
+        key2 = x.split("_")[3];
+
+    var budgetQty = parseFloat(isNullCheck($('#wbstable_' + key1 + '_wbsbudgetqty_' + key2).val(),'number')),
+        dcurQty = parseFloat(isNullCheck($('#wbstable_' + key1 + '_wbscurplanqty_' + key2).val(),'number')),
+        dprevQty = parseFloat(isNullCheck($('#wbstable_' + key1 + '_wbsprevplanqty_' + key2).val(),'number')),
+        totQty = dcurQty+ dprevQty,
+        $curQty = $('#wbstable_' + key1 + '_wbscurplanqty_' + key2),
+        $cumQty = $('#wbstable_' + key1 + '_wbscumplanqty_' + key2);
+
+    if (totQty > budgetQty || totQty < 0)
+        $curQty.addClass('error');
+    else
+        $curQty.removeClass('error');
+
+    $cumQty.val(sanitizeNumber(totQty,3));
+    updateQty(key1);
+}
+
+//function CheckParentValid(x) {
+//    var sStr = x.split("_");
+//    var iARowid = sStr[1];
+//
+//    if ($('#parentid_' + iARowid).val() == '0' || $('#parentid_' + iARowid).val().length==0) {
+//        if ($('#parentname_' + iARowid).val().length >0){$('#parentname_' + iARowid).addClass('error');}
+//        else {$('#parentname_' + iARowid).removeClass('error');}
+//    } else
+//        $('#parentname_' + iARowid).removeClass('error');
+//}
+
+//function AddNewRowA(id,is_validate) {
+//    var iRowId = $('#rowid').val(),
+//        key =   id.split('_')[1];
+//
+//    if($('#IOWiRowId_' + key).nextAll('tr[id*=IOWiRowId_]').length == 1)
+//        return;
+//
+//    if (typeof is_validate == 'undefined' && is_validate != false) {
+//        if ($('#parentid_' + key).val().length == 0)
+//            return;
+//
+//        if ($('#curplanqty_' + key).val().length == 0)
+//            return;
+//    }
+//
+//    var ioRowId =  iRowId;
+//    iRowId = +iRowId + 1;
+//    var snid = 'IOWiRowId_'+iRowId,
+//        sStr = $('#dummytable tbody').html();
+//
+//    sStr = sStr.replace(/__1/g,'_'+ iRowId);
+//    sStr = sStr.replace(/__9/g,'_1');
+//
+//    if (ioRowId != 1) {ioRowId = (ioRowId*2)-1 ;}
+//
+//    $('#sample12 > tbody > tr:last-child').after(sStr);
+//
+//    $('#rowid').val(iRowId);
+//
+//    bindAutoComplete();
+//    bindTRDeleteFn(true);
+//}
+
+function fileupload(x) {
+    var bValid=true;
+    var formData = new FormData();
+    formData.append('file', $('#myfile').prop("files")[0]);
+    $.ajax({
+        url: getBaseURL() + "project/rfc/UploadIOWPlanData",
+        dataType: 'script',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: formData,
+        type: 'post',
+        success: function(data,status, xhr) {
+            var obj = jQuery.parseJSON(data);
+
+            if (obj[0].Valid==true) {
+
+                var irows = $('#excelTable tr').length;
+                var irow = irows - 1;
+                var sOldid = "_1"
+
+                for (i = 0; i < obj.length; i++) {
+
+                    if ((irow != 1) || ( irow == 1 && $('#excelspec_1').val() != "")) {
+
+                        irow = +irow + 1;
+                        var sNewid = "_" + irow;
+
+                        $("#excelTable tbody tr:last").after("<tr>" + $("#excelTable tbody tr:first").html() + "</tr>");
+
+                        $("#excelTable tbody tr:last").find("input:text").each(function () {
+                            $(this).attr("name", $(this).attr("name").replace(sOldid, sNewid));
+                            $(this).attr("id", $(this).attr("id").replace(sOldid, sNewid));
+                        });
+
+                        $("#excelTable tbody tr:last").find("input:hidden").each(function () {
+                            $(this).attr("name", $(this).attr("name").replace(sOldid, sNewid));
+                            $(this).attr("id", $(this).attr("id").replace(sOldid, sNewid));
+                        });
+                    }
+
+                    $("#excelserialno_" + irow).val(obj[i].SerialNo);
+                    $("#excelcode_" + irow).val(obj[i].Code);
+                    $("#excelspec_" + irow).val(obj[i].Specification);
+                    $("#exceliows_" + irow).val(obj[i].IOWs);
+                    $("#excelunit_" + irow).val(obj[i].UnitName);
+                    $("#excelqty_" + irow).val(obj[i].Qty);
+                    $("#excelrate_" + irow).val(obj[i].Rate);
+                    $("#excelamount_" + irow).val(obj[i].Qty * obj[i].Rate);
+                    $("#excelrefslno_" + irow).val(obj[i].RefSerialNo);
+                    $("#excelrowtype_" + irow).val(obj[i].RowType);
+                    $("#exceliowid_" + irow).val(obj[i].IOWId);
+                    $("#excelparentid_" + irow).val(obj[i].ParentId);
+                    $("#excelwgid_" + irow).val(obj[i].WGId);
+                    $("#excelresid_" + irow).val(obj[i].ResourceId);
+                    $("#excelunitid_" + irow).val(obj[i].UnitId);
+                }
+            }
+            else
+            {
+                bValid=false;
+            }
+
+            if (bValid==true) {$("#excelmodal").modal('show');}
+            else { alert("Invalid File Format"); }
+        },
+        error: function(xhr, status, errorThrown) {
+            if (xhr.status == 400)
+                alert(xhr.responseText);
+            else
+                alert(errorThrown);
+        }
+    });
+}
+
+function IOWUpdate() {
+    var iMRowId = $('#rowid').val();
+    ioRowId = iMRowId;
+    var iRowTransId=1;
+    var irows = $('#excelTable tr').length-1;
+    for (i = 1; i <= irows; i++) {
+        if ($('#excelrowtype_'+i).val() == "I")
+        {
+            ioRowId = iMRowId;
+            if ($('#spec_' + iMRowId).val() != "") { iMRowId = + iMRowId+1;}
+
+            if (iMRowId !=1) {
+                var sStr = $('#dummytable tbody').html();
+
+                sStr = sStr.replace(/__1/g, '_' + iMRowId);
+                sStr = sStr.replace(/__9/g, '_1');
+
+                if (ioRowId !=1) {ioRowId = (ioRowId*2)-1 ;}
+
+                $('#sample12 > tbody > tr').eq(ioRowId).after(sStr);
+
+
+            }
+
+            var pId =$("#excelwgid_"+i).val();
+            if ($("#excelparentid_"+i).val() !=0)
+            {
+                pId = pId + "." + $("#excelparentid_"+i).val()
+            }
+
+            $('#parentid_' + iMRowId).val(pId);
+            $('#refserialno_' + iMRowId).val($('#excelrefslno_'+i).val());
+            $('#serialno_' + iMRowId).val($('#excelserialno_'+ i).val());
+            $('#spec_' + iMRowId).val($('#excelspec_'+ i).val());
+            $('#unitid_' + iMRowId).val($('#excelunitid_'+ i).val());
+
+            $('#rowid').val(iMRowId);
+
+            iRowTransId=1;
+        }
+        else
+        {
+            if (iRowTransId!=1) {
+                var stabelrow = '#rateanal_' + iMRowId + '_restable';
+                var sStr = '<tr id="rateanal__1_RowId__9">' + $("#rateanal__1_RowId__9").html() + '</tr>';
+                sStr = sStr.replace(/__1/g, '_' + iMRowId);
+                sStr = sStr.replace(/__9/g, '_' + iRowTransId);
+                sStr = sStr.replace(/R1/g, 'R' + iRowTransId);
+                $(stabelrow+" tbody tr:nth-child(" + (iRowTransId - 1) + ")").after(sStr);
+            }
+
+            $('#rateanal_' + iMRowId + '_code_' + iRowTransId).val($('#excelcode_' + i).val());
+            $('#rateanal_' + iMRowId + '_resid_' + iRowTransId).val($('#excelresid_' + i).val());
+            $('#rateanal_' + iMRowId + '_resqty_' + iRowTransId).val($('#excelqty_' + i).val());
+            $('#rateanal_' + iMRowId + '_resrate_' + iRowTransId).val($('#excelrate_' + i).val());
+            $('#rateanal_' + iMRowId + '_resamt_' + iRowTransId).val($('#excelamount_' + i).val());
+
+            $('#rowinfoid_' + iMRowId).val(iRowTransId);
+
+            iRowTransId = +iRowTransId+1;
+        }
+    }
+
+//    bindAutoComplete(true);
+//    bindTRDeleteFn(true);
+}
+
+function entryValidate() {
+    var isValid = true,
+        $trIOW = $('tr[id*=IOWiRowId_]');
+
+    $.each($trIOW, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id,
+            key = name.split('_')[1];
+
+        if (name.indexOf('__') != -1)
+            return;
+
+//        if ($('#parentid_' + key).val().length==0 && $('#curplanqty_' + key).val().length==0)
+//            return;
+//
+//        if ($('#parentid_' + key).val().length==0 || $('#parentid_' + key).val() == 0) {
+//            isValid=false;
+//            alert("Parent Not Selected");
+//            $('#parentname_' + key).focus();
+//            return;
+//        } else if ($('#curplanqty_' + key).val().length==0) {
+//            isValid = false;
+//            alert("Current Plan Qty is Empty");
+//            $('#curplanqty_' + key).focus();
+//            return;
+        //  }
+
+    });
+
+    return isValid;
+}
+</script>
+<script>
+    $(document).ready(function() {
+        $(".fixTable").tableHeadFixer();
+    });
+</script>
+<script type="text/javascript">
+    var wbsListSq = <?php echo (isset($wbsList)) ? json_encode($wbsList) : '[]';?>;
+    function showSequentialView() {
+        $("#sequentialViewModal").modal('show');
+        var $table = $('#sequentialViewTable tbody');
+        $table.html('');
+        // set iows and wbs qty
+        $.each($('input[id^=piowid_]'), function (i,o) {
+            var key = $(this)[0].id.split('_')[1];
+            var id = isNullCheck($(this).val(), 'number');
+            var value = isNullCheck($('#piowname_'+key).html(),'string');
+            var refno = isNullCheck($('#refno_'+key).val(),'string');
+            if(id == 0 || id == '' || value == '' || $('#wbstable_'+key+' > tbody > tr').length <= 1)
+                return;
+
+            var arr_qty = [];
+            $.each($('input[id^=wbstable_'+key+'_wbsid_]'), function (j,obj) {
+                var wbsid= isNullCheck($(this).val(),'number');
+                if(wbsid == 0)
+                    return;
+
+                var wbskey = $(this)[0].id.split('_')[3];
+                arr_qty[wbsid] = parseFloatVal($('#wbstable_'+key+'_wbscurplanqty_'+wbskey).val());
+            });
+            var rowid =  (i + 1);
+            var tbody = '<tr>'
+                + '<td><input type="hidden" id="wbsSqparentid_'+ rowid +'" value="'+ id+'"/><label id="wbsSqparenttext_'+(i+1)+'">'+refno+' '+value+'</label></td>';
+            $.each(wbsListSq, function (i,o) {
+                if($('input[id^=wbstable_'+key+'_wbsid_][value='+ o.data+']').length == 0) {
+                    tbody += '<td>&nbsp;</td>';
+                    return;
+                }
+
+                var wbsvalue = 0;
+                if(typeof arr_qty[o.data] != 'undefined')
+                    wbsvalue = arr_qty[o.data];
+
+                tbody += '<td><input type="text" class="parent_text" id="wbsSqqty_' + o.data + '_' + id+ '" data-id="'+o.data+'" value="'+sanitizeNumber(wbsvalue,3)+'" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 3)"/></td>';
+            });
+            tbody += '</tr>';
+            $table.append(tbody);
+        });
+
+        // set header
+        var $thead = $('#sequentialViewTable > thead > tr');
+        $thead.html('<th>Specification</th>');
+        $.each(wbsListSq, function (i,o) {
+            $thead.append('<th>'+ o.value +'</th>');
+        });
+    }
+    function applySequentialValues() {
+        $.each(wbsListSq, function (i,o) {
+            $.each($('input[id^=wbsSqqty_'+ o.data+']'), function (j,item) {
+                if($(this).length != 1)
+                    return;
+
+                var piowid = $(this)[0].id.split('_')[2];
+                var $piowid = $('input[name^=piowid_][value='+piowid+']');
+                if($piowid.length != 1)
+                    return;
+
+                var key = $piowid[0].id.split('_')[1];
+                var $input = $('input[id^=wbstable_'+key+'_wbsid_][value='+ o.data +']');
+                if($input.length == 0)
+                    return;
+
+                var inputkey = $input[0].id.split('_')[3];
+                $('#wbstable_'+key+'_wbscurplanqty_'+inputkey).val(sanitizeNumber($(this).val(),3)).trigger('change');
+            });
+        });
+        $('#sequentialViewModal').modal('hide');
+    }
+</script>

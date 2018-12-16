@@ -1,0 +1,1309 @@
+<style>
+#allResource .jqx-grid-header 	{height:75px !important;}
+#mostResource .jqx-grid-header 	{height:75px !important;}
+#recentResource .jqx-grid-header 	{height:75px !important;}
+#wbsGrid .jqx-grid-header 	{height:75px !important;}
+
+.jqx-grid-column-header .jqx-checkbox-default{
+	display:none;
+}
+#sequentialView tr th{
+	width:auto !important;
+}
+.input-group-addon{
+	background-color:#fff !important;
+	border:none !important;
+}
+.error{
+	border-color:red;
+	background-color:red !important;
+}
+.rmks_ara { border: 1px dashed #afbecc; font-size: 15px; height: 158px;padding: 10px;resize: none;width: 100% !important;margin-top:10px;margin-bottom:10px;}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="col-lg-12 clear">
+			<form class="form-horizontal" method="post">
+				<input type="hidden" name="requestId" id="requestId" value="<?php echo $requestId; ?>">
+				<?php
+					foreach($projectResult as $data){
+				?>
+				<div class="row" id="firstStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Request Entry<?php echo ($genType==true) ? "-".$data['RequestNo'] : ''; ?></h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row" style="<?php echo ($genType==true) ? 'display:none' : ''; ?>">
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" name="voucherNo" id="voucherNo" class="form-control lbl_move" label="Enter voucherNo" value="<?php echo $data['RequestNo']; ?>" >
+									<!--<input type="text" id="autocomplete-ajax-x" disabled="disabled" class="form-control" style="color: #CCC; position: static; background: transparent; z-index: 1;">-->
+									<div class="error_message"><p>Please enter VoucherNo...</p> </div> 
+								</div>
+							</div>
+							<div class="row">
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" name="project" id="autocomplete-ajax" class="form-control lbl_move" label="Select project" value="<?php echo $data['CostCentreName']; ?>" readonly>
+									<!--<input type="text" id="autocomplete-ajax-x" disabled="disabled" class="form-control" style="color: #CCC; position: static; background: transparent; z-index: 1;">-->
+									<input type="hidden" name="project_name" id="project_name" class="form-control" value="<?php echo $data['CostCentreId']; ?>">
+									<div class="error_message"><p>Please enter project name...</p> </div> 
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" name="request_type1" id="autocomplete-ajax1" class="form-control lbl_move" label="Request For" value="<?php echo $data['RequestType']; ?>" readonly>
+									<!--<input type="text" id="autocomplete-ajax-x1" disabled="disabled" class="form-control" style="color: #CCC; position: static; background: transparent; z-index: 1;" >-->
+									<input type="hidden" name="request_type" id="request_type" class="form-control" value="<?php echo $data['RequestType']; ?>">
+									<div class="error_message"><p>Please enter request type...</p> </div> 
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<span class="date_icon"><i class="fa fa-calendar"></i></span>
+									<input type="text" name="project_date" id="project_date" class="form-control lbl_move datepickerinput" label="Request date" value="<?php echo date('d-m-Y', strtotime($data['RequestDate'])); ?>" />
+									<div class="error_message"><p>Please enter project date...</p> </div> 
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<select class="form-control selectpicker show-tick" name="priority" id="priority" title="Choose priority...">
+										<option value="-1" selected>Select Priority</option>
+										<?php
+											$priority = array("1"=>"Low", "2"=>"Medium", "3"=>"High");
+											foreach($priority as $key=>$value){
+												if($key == $data['Priority'])
+													echo "<option value='".$key."' selected>".$value."</option>";
+												else
+													echo "<option value='".$key."'>".$value."</option>";
+											}
+										?>
+									</select>
+									<div class="error_message"><p>Please select the priority...</p> </div> 
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>			
+				<div class="row" id="excludeFirst" style="display:none;">
+				   <div class="col-lg-12">
+						<h1>Request Entry-<span id="VoucherSpan"><?php echo $data['RequestNo']; ?></span></h1> 
+						<div class="col-lg-12 clear" style="margin:10px;">
+							<div class="col-lg-6 col-md-6">
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Project<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p" id="projectSpan"> <?php echo $data['CostCentreName']; ?></p></div> 
+								</div>
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Selected Type<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p" id="materialSpan"><?php echo $data['RequestType']; ?></p></div> 
+							   </div>
+							</div>
+							<div class="col-lg-6 col-md-6">
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Requested Date<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p" id="dateSpan"><?php echo date('d-m-Y', strtotime($data['RequestDate'])); ?></p></div> 
+								</div>
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Priority<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"> <p class="space_p" id="prioritySpan"><?php echo $priority[$data['Priority']]; ?></p></div> 
+								</div>
+							</div>  
+						</div>
+					</div>
+				</div>
+				<?php } ?>				
+				<div class="row" id="thirdStep" style="display:none;">
+					<div class="col-lg-12">
+						<input type="hidden" name="sel_wbsId" id="sel_wbsId" value="none">
+						<div id="jqxWidget">
+							<div id="wbsGrid" style="width:100%;">
+							</div>
+						</div>
+					</div>	
+				</div>						
+				<div class="row" id="fourthStep" style="display:none;">
+					<input type="hidden" name="resourceId" id="resourceId">
+					<div class="col-lg-12">
+						<nav class="navbar inrmdltab_navbar navbar-default">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle mdlnvbr_tgl collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+								</button>
+								<a class="navbar-brand inrmdl_navbrand" href="javascript:void(0);">Select Menus</a>
+							</div>
+							<div id="navbar" class="navbar-collapse padlr0 collapse">
+								<ul class="nav nav-tabs innermdl_tabs">
+									<li class="active"><a href="#allresources" data-toggle="tab">All Resource</a></li>
+									<li><a href="#mostused" data-toggle="tab">Most used</a></li>
+									<li><a href="#recent" data-toggle="tab">Recent</a></li>
+								</ul>
+							</div>
+						</nav>
+						<div class="tab-content">
+							<div class="tab-pane fade" id="allresources">
+								<div class="table-responsive">
+									<div id="jqxWidget">
+										<div id="allResource" style="width:100%;">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane fade in active" id="mostused">
+								<div class="table-responsive">
+									<div id="jqxWidget">
+										<div id="mostResource" style="width:100%;">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane fade" id="recent">
+							   <div class="table-responsive">
+									<div id="jqxWidget">
+										<div id="recentResource" style="width:100%;">
+										</div>
+									</div>
+								</div> 
+							</div>
+						</div>								
+					</div>
+				</div>
+				<div class="row" id="fifthStep" style="display:none;">
+					<div class="col-lg-12">
+						<input type="hidden" name="all_wbsId" id="all_wbsId">
+						<!--<div class="col-lg-4">
+							<div class="form-group">
+								<a href="javascript:void(0);"id="addResource">Add Resource</a>
+							</div>		
+						</div>-->
+						<div class="col-lg-2 col-lg-offset-10">
+							<div class="form-group">
+								<ul class="grid_change">
+                                	<li><a class="addresorce_vendor" id="addResource" href="javascript:void(0)"><span><i class="fa fa-plus"></i> Resource</span></a></li>
+									<li class="sequentialViewDiv"><a class="grid_change_line grid_change_active" href="javascript:void(0)" data-original-title="Grid View" data-placement="top" data-toggle="tooltip"><span><i class="fa fa-list-ul"></i></span></a></li>
+								</ul>
+							</div>		
+						</div>
+                        <div class="form-group hideView" style="margin-top:20px;display:none;" id="sequentialViewDiv">
+                            <div>
+                                <div class="col-lg-12 clear">
+                                    <div class="table-responsive clear">						
+										<table id="sequentialView" class="table table-bordered tableView" style="width:100%;">
+											<thead>
+												<tr>
+													<th>Code</th>
+													<th>Description</th>
+													<th>Unit</th>
+													<th>Required Date</th>
+													<th>Remarks</th>
+													<th>Quantity</th>
+												</tr>
+											</thead>
+											<tbody class="appendData">
+											<?php
+												$response1 = json_decode($response, true);
+												$resource_id = array();
+												foreach($response1 as $data){
+													array_push($resource_id, $data['ResourceId']);
+											?>
+													<tr id="<?php echo $data['ResourceId']; ?>" class="mainTr deleteTr_<?php echo $data['ResourceId']; ?>">
+														<td><?php echo $data['Code']; ?><input type="hidden" name="resourceCode_<?php echo $data['ResourceId']; ?>" id="resourceCode_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Code']; ?>"></td>
+														<td><?php echo $data['ResourceName']; ?><input type="hidden" name="resourceName_<?php echo $data['ResourceId']; ?>" id="resourceName_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['ResourceName']; ?>"></td>
+														<td><?php echo $data['UnitName']; ?><input type="hidden" name="unitName_<?php echo $data['ResourceId']; ?>" id="unitName_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['UnitName']; ?>">
+														<input type="hidden" name="unitId_<?php echo $data['ResourceId']; ?>" id="unitId_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['UnitId']; ?>"></td>
+														<td>
+															<div class="row">
+																<div class="form-group col-lg-12">
+																	<span class="date_icon"><i class="fa fa-calendar"></i></span>
+																	<input type="text" name="requireddate_<?php echo $data['ResourceId']; ?>" id="seq_requireddate_<?php echo $data['ResourceId']; ?>" class="tbl_input datepickerinput seqDate" value="<?php echo Date("d-m-Y", strtotime($data['ReqDate'])); ?>"/>
+																</div>
+															</div>															
+														</td>
+														<td><input type="text" class="tbl_input changeVal" name="remarks_<?php echo $data['ResourceId']; ?>" id="remarks_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Remarks']; ?>"></td>
+														<td><input type="text" class="tbl_input totQuantity" oldVal="<?php echo $data['Quantity']; ?>" readonly name="quantity_<?php echo $data['ResourceId']; ?>" id="quantity_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Quantity']; ?>"></td>
+													</tr>
+											<?php			
+												}
+											?>											
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive clear col-lg-12 hideView" id="matrixView">
+							<div class="matrix_table_area">
+								<table class="table matrix_table clear">
+									<thead>
+										<tr>
+											<th class="headcol_l headcol_l1">Resource <br />Description</th>
+											<?php
+												foreach($response1[0]['second'] as $wbsHead){
+											?>
+													<th><span data-placement="bottom" data-toggle="tooltip" data-original-title="<?php echo $wbsHead['WbsName']; ?>"><?php echo $wbsHead['WbsName']; ?></span></th>
+											<?php		
+												}
+											?>
+											<th>Code</th>
+											<th>Unit</th>
+											<th class="all_date">Date</th>
+											<th class="all_remarks">Remarks</th>
+											<th>Total</th>											
+										</tr>
+									</thead>
+									<tbody class="appendDataMatrix">
+									<?php
+										foreach($response1 as $data){
+									?>		
+											<tr id="quantityRow_<?php echo $data['ResourceId']; ?>" class="deleteTr_<?php echo $data['ResourceId']; ?>" res_id="<?php echo $data['ResourceId']; ?>">
+													<td class="headcol_l"><?php echo $data['ResourceName']; ?><input type="hidden" name="resourceName_<?php echo $data['ResourceId']; ?>" id="resourceName_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['ResourceName']; ?>"></td>
+													<?php
+														foreach($data['second'] as $wbsData){
+													?>
+															<td class="tbl_input_td"><input type="text" oldVal="<?php echo $wbsData['ReqQty']; ?>" elename="quantity_<?php echo $data['ResourceId']; ?>" resourceId="<?php echo $data['ResourceId']; ?>" class="quantityVal" name="wbsQuantity_<?php echo $data['ResourceId']; ?>_<?php echo $wbsData['WbsId']; ?>" value="<?php echo $wbsData['ReqQty']; ?>"></td>
+													<?php			
+														}
+													?>	
+													<td class="bdr_left1ddd"><?php echo $data['Code']; ?><input type="hidden" name="resourceCode_<?php echo $data['ResourceId']; ?>" id="resourceCode_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Code']; ?>"></td>
+													<td class="bdr_left1ddd"><?php echo $data['UnitName']; ?><input type="hidden" name="unitName_<?php echo $data['ResourceId']; ?>" id="unitName_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['UnitName']; ?>">
+														<input type="hidden" name="unitId_<?php echo $data['ResourceId']; ?>" id="unitId_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['UnitId']; ?>">
+													</td>
+													<td class="all_date tbl_input_td">
+														<div class="col-lg-12">
+															<span class="date_icon matrix_date_icon"><i class="fa fa-calendar"></i></span>
+															<input type="text" name="requireddate_<?php echo $data['ResourceId']; ?>" id="mat_requireddate_<?php echo $data['ResourceId']; ?>" class="datepickerinput matDate date_picker matrix_date_input" value="<?php echo date("d-m-Y", strtotime($data['ReqDate'])); ?>" />
+														</div>
+													</td>
+													<td class="all_remarks tbl_input_td"><input type="text" class="changeVal matrix_remarks_input" name="remarks_<?php echo $data['ResourceId']; ?>" id="remarks_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Remarks']; ?>"></td>
+													<td class="tbl_input_td"><input type="text" class="quantityCheck matrix_total_input" oldVal="<?php echo $data['Quantity']; ?>" readonly name="quantity_<?php echo $data['ResourceId']; ?>" id="quantity_<?php echo $data['ResourceId']; ?>" value="<?php echo $data['Quantity']; ?>"></td>
+												</tr>
+									<?php				
+										}
+									?>									
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<table id="sequentialViewSub" class="table table-bordered table-hover tableView" style="margin-top:20px;display:none;">
+							<thead>
+								<tr>
+									<th>Sample</th>
+								</tr>
+							</thead>
+							<tbody class="subTable">
+							<?php
+								foreach($response1 as $data){
+							?>	
+									<tr class="deleteTr_<?php echo $data['ResourceId']; ?> subTr_<?php echo $data['ResourceId']; ?>" res_id="<?php echo $data['ResourceId']; ?>">
+										<td colspan=7>
+											<div class="subDiv">
+												<table class="table table-bordered table-hover">
+													<thead>
+														<tr>
+															<th>WBS Name</th>
+															<th>Quantity</th>
+														</tr>
+													</thead>
+													<tbody>
+												<?php
+													foreach($data['second'] as $wbsData){
+												?>	
+														<tr>
+															<td width="76%"><?php echo $wbsData['WbsName']; ?><input type="hidden" class="tbl_input" name="wbsName_<?php echo $data['ResourceId']; ?>_<?php echo $wbsData['WbsId']; ?>" value="<?php echo $wbsData['WbsName']; ?>"></td>
+															<td class="tbl_input_td" width="24%"><input type="text" elename="quantity_<?php echo $data['ResourceId']; ?>" oldVal="<?php echo $wbsData['ReqQty']; ?>" resourceId="<?php echo $data['ResourceId']; ?>" class="tbl_input quantityVal" name="wbsQuantity_<?php echo $data['ResourceId']; ?>_<?php echo $wbsData['WbsId']; ?>" value="<?php echo $wbsData['ReqQty']; ?>"></td>
+														</tr>
+												<?php		
+													}
+												?>
+													</tbody>
+												</table>
+											</div>	
+										</td>
+									</tr>
+							<?php			
+								}								
+							?>							
+							</tbody>
+						</table>							
+					</div>
+					<textarea name="narration" id="narration"  rows="3" class="rmks_ara"><?php echo (isset($projectResult)) ? $projectResult[0]['Narration']:""?></textarea>
+					<?php foreach($narration as $nar): ?>
+						<input type ="checkbox" class="checkboxNarration" name="narSel" value="<?php echo $nar['Description']; ?>"><?php echo $nar['Description']; ?>
+					<?php endforeach; ?>					
+				</div>								
+			</form>
+		</div>
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r">
+            <a href="javascript:void(0);" class="ripple">Continue</a>
+        </li>
+        <li id="backButton" class="cancel_btn float_r" style="display:none;"><a href="javascript:void(0);" class="ripple">back</a></li>
+    </ul>
+</div>
+<script>
+var apptextare=$('#narration').html();
+$(".checkboxNarration").change(function() {
+    if(this.checked) {
+		apptextare += this.value+'&#13';
+		$('#narration').html(apptextare);
+    } else {
+		if(apptextare !="" ){
+			apptextare = apptextare.replace(this.value+'&#13','');
+			$('#narration').html(apptextare);
+		}
+	}
+});
+
+
+	$('.datepickerinput').datepicker({
+		format: "dd-mm-yyyy",
+		todayBtn: true,
+		orientation: "top auto",
+		autoclose: true
+	}).on("changeDate", function(e){
+		if($(this).attr("id") == 'project_date'){
+			$("#dateSpan").text($(this).val());
+		}
+		else if($(this).hasClass("matDate")){
+			if($(this).is(":visible"))
+				$("#seq_"+$(this).attr("name")).datepicker("setDate", $(this).val());
+		}
+		else if($(this).hasClass("seqDate")){
+			if($(this).is(":visible"))
+				$("#mat_"+$(this).attr("name")).datepicker("setDate", $(this).val());
+		}		
+	});	
+	$('.date_icon').click(function() {
+		var input = $(this).parent().find('input').datepicker('show');
+	});	
+	
+	$(".error_message").hide();
+	var allWbs= <?php echo json_encode(array_column($wbsName, 'WbsId')); ?>;
+	
+	
+	var oTable = $("#sequentialView").dataTable({"aLengthMenu": [[1, 5, 10], [1, 5, 10]], "order": [],
+		"initComplete": function(settings, json) {
+			$("select[name=sequentialView_length]").addClass("show-tick").selectpicker();
+		},	
+		"drawCallback": function( settings ){
+			//alert($(this).find(".datepickerinput").attr("class"))
+			$(this).find("tr.mainTr .totQuantity").trigger('click');
+			if($('#sequentialView_next').hasClass('disabled') && $('#fifthStep').is(':visible'))
+				$("#continueButton a").text("Submit");
+			else
+				$("#continueButton a").text("Continue");			
+		}	
+	});
+
+	$("#voucherNo").blur(function(){
+		$("#VoucherSpan").text($(this).val());
+	});
+	
+  var change=false;
+	//var oTable = $("#decisionTable").dataTable();
+
+
+	//$('#project_date').datepicker('setDate', '<?php echo $projectResult[0]['RequestDate']; ?>');
+
+	$(".grid_change li.sequentialViewDiv").click(function(){
+		if($(this).find("a").hasClass("grid_change_box")){
+			$(".grid_change li.sequentialViewDiv a").removeClass("grid_change_box").addClass("grid_change_line").attr("data-original-title",'Sequential View');
+			$(".grid_change li.sequentialViewDiv a span i").removeClass("fa-th").addClass("fa-list-ul");
+			$(".hideView").hide();
+			$("#matrixView").show();
+			$("#continueButton a").text("Continue");
+		}
+		else {
+			$(".grid_change li.sequentialViewDiv a").removeClass("grid_change_line").addClass("grid_change_box").attr("data-original-title",'Grid View');
+			$(".grid_change li.sequentialViewDiv a span i").removeClass("fa-list-ul").addClass("fa-th");
+			$(".hideView").hide();
+			$("#sequentialViewDiv").show();
+			if($('#sequentialView_next').hasClass('disabled'))
+				$("#continueButton a").text("Submit");
+			else
+				$("#continueButton a").text("Continue");			
+		}
+	});	
+	function trimNumber(s){
+	  while (s.substr(0,1) == '0' && s.length>1) { s = s.substr(1,9999); }
+	  return s;
+	}
+	function changePage(){
+		$(".quantityVal").unbind();
+		/* $(".quantityVal").bind('focusin', function(e){
+			$(this).val(parseInput($(this).val()));
+			$(this).select();
+		}); */
+		$(".quantityVal").bind('keyup keydown', function(e){
+			var name = $(this).attr("name");
+			var eleName = $(this).attr("elename");
+			var key = e.which || e.keyCode;
+			
+			if(key != 9){
+				var sum = 0;
+				if($(this).val().indexOf(' ') > -1){
+					$(this).val($(this).val().trim());
+				}				
+				if(isNaN($(this).val())){
+					this.value = this.value.replace(/[^0-9\.]/g,'');
+					if($(this).val().indexOf('.') > -1){
+						var index = $(this).val().indexOf( '.' );
+						this.value = this.value.substr( 0, index + 1 ) + this.value.slice( index ).replace( /\./g, '' );
+					}
+				}
+				var ex = /^\d*(\.\d{0,6})?$/;
+				if(!ex.test($(this).val())){
+					$(this).val($(this).val().substring(0,$(this).val().length-1));
+				}
+				var currVal = $(this).val();
+				
+				if(!$('#matrixView').is(':visible')){
+					$("#matrixView input[name="+name+"]").attr("value", currVal);
+					$("#matrixView input[name="+name+"]").val(currVal);
+				}
+				$("#sequentialViewSub input[name="+name+"]").attr("value", currVal);
+				$("#sequentialViewSub input[name="+name+"]").val(currVal);
+				
+				$('#sequentialViewSub').find('input[name='+name+']').closest('.subDiv').find(".quantityVal").each(function() {
+					//add only if the value is number
+					if (!isNaN(this.value) && this.value.length != 0) {
+						sum += parseFloat(this.value);
+					}
+				});
+				$("input[name="+eleName+"]").val(sum.toFixed(6));
+				oTable.$("tr.mainTr").find("input[name="+eleName+"]").val(sum.toFixed(6));
+			}
+		});
+		$(".quantityVal").bind('blur', function(){
+			var name = $(this).attr("name");
+			var eleName = $(this).attr("elename");
+			
+			var sum = 0;
+			if (!isNaN($(this).val()) && $(this).val().length != 0) {
+
+			}
+			else{
+				$(this).val($(this).val().substring(0,$(this).val().length-1));
+			}
+			var ex = /^\d*(\.\d{0,6})?$/;
+			if(!ex.test($(this).val())){
+				$(this).val($(this).val().substring(0,$(this).val().length-1));
+			}
+			
+			$('#sequentialViewSub').find('input[name='+name+']').closest('.subDiv').find(".quantityVal").each(function() {
+				//add only if the value is number
+				if (!isNaN(this.value) && this.value.length != 0) {
+					sum += parseFloat(this.value);
+				}
+			});
+			$("input[name="+eleName+"]").val(sum.toFixed(6));
+			oTable.$("tr.mainTr").find("input[name="+eleName+"]").val(sum.toFixed(6));
+			
+			//$(this).val(parseInput($(this).val()));
+			var val = 0;
+			if($(this).val() == '' || $(this).val() == 0){
+				val = val+'.000000';
+			}
+			else{
+				$(this).val(trimNumber($(this).val()));
+				val1 = $(this).val();
+				var str = '000000';
+				var splitVal = val1.split('.');
+				var len = 6;
+				if(splitVal[1]){
+					len -= splitVal[1].length;
+				}
+				if(len == 6)
+					val = val1+'.000000';
+				else if(len < 0)
+					val = splitVal[0]+'.'+splitVal[1].substring(0,6);
+				else
+					val = val1+str.substring(0,len);
+			}
+			if(val.substring(0,1) == '.')
+				val = '0' + val;
+			
+			$("input[name="+name+"]").attr("value", val);
+			$("input[name="+name+"]").val(val);			
+		});
+	}
+	function trClick(){
+		oTable.$("tr.mainTr").find(".totQuantity").unbind();
+		oTable.$("tr.mainTr").find(".totQuantity").bind('click', function(){
+			if(!($(this).closest("tr.mainTr").next("tr").hasClass("duplicateTr"))){
+				$(this).closest("tr.mainTr").after("<tr class='duplicateTr'>"+$(".subTr_"+$(this).closest("tr.mainTr").attr("id")).html()+"</tr>");
+				changePage();
+			}
+		});
+		oTable.$("tr.mainTr").find('.date_icon').unbind('click');
+		oTable.$("tr.mainTr").find(".changeVal").unbind('change');
+		
+		oTable.$("tr.mainTr").find('.date_icon').bind('click', function() {
+			var input = $(this).parent().find('input').datepicker('show');
+		});
+		oTable.$("tr.mainTr").find(".changeVal").bind('change', function(){
+			var bname = $(this).attr("name");
+			$("input[name="+bname+"]").val($(this).val());
+		});
+	}
+	trClick();
+	function checkClick(id, mode, edit){
+		var rid=id;
+		var mode1='pickList';
+		if(mode == 1){
+			if(edit==1)
+				mode1 = "editPickList";			
+			//$("#allResource").jqxGrid('selectrow', rid);						
+			$.ajax({
+				url:getBaseURL()+"ats/index/resource",
+				type:"post",
+				data:"rid="+rid+"&mode="+mode1+"&request_id=<?php echo $requestId; ?>",
+				dataType:"json",
+				success:function(data, textStatus, jqXHR){
+					//alert(JSON.stringify(data))
+					//alert(data);
+					//$("#sequentialView tbody").append(data);
+					//$("#matrixView thead tr").html("<th class='headcol_l headcol_l1'>Resource <br />Description</th>");
+					var wi=1;
+					$.each(data['results'], function(i,v){
+							var qty=(v.Quantity)?v.Quantity:0;
+							var reqDate=(v.RequestDate)?v.RequestDate:'<?php echo Date('d-m-Y'); ?>';
+							var remarks=(v.Remarks)?v.Remarks:'';
+							
+							var ai = oTable.fnAddData([v.Code+"<input type='hidden' name='resourceCode_"+v.ResourceId+"' id='resourceCode_"+v.ResourceId+"' value='"+v.Code+"'>",
+												v.ResourceName+"<input type='hidden' name='resourceName_"+v.ResourceId+"' id='resourceName_"+v.ResourceId+"' value='"+v.ResourceName+"'>",
+												v.UnitName+"<input type='hidden' name='unitName_"+v.ResourceId+"' id='unitName_"+v.ResourceId+"' value='"+v.UnitName+"'><input type='hidden' name='unitId_"+v.ResourceId+"' id='unitId_"+v.ResourceId+"' value='"+v.UnitId+" '>",
+												"<div class='row'>"+
+													"<div class='form-group col-lg-12'>"+
+														"<span class='date_icon'><i class='fa fa-calendar'></i></span>"+
+														"<input type='text' name='requireddate_"+v.ResourceId+"' id='seq_requireddate_"+v.ResourceId+"' class='tbl_input datepickerinput' value='"+reqDate+"' />"+
+													"</div>"+
+												"</div>",												
+												"<input type='text' class='tbl_input changeVal' name='remarks_"+v.ResourceId+"' id='remarks_"+v.ResourceId+"' value='"+remarks+"'>",
+												"<input type='text' class='tbl_input totQuantity' value='"+qty+"' readonly name='quantity_"+v.ResourceId+"' id='quantity_"+v.ResourceId+"'>",
+											]);	
+							
+							var n = oTable.fnSettings().aoData[ai[0]].nTr;
+							n.setAttribute('id', v.ResourceId);
+							n.setAttribute('class', 'mainTr deleteTr_'+v.ResourceId);
+							//alert(JSON.stringify(n))
+																
+					$("#sequentialViewSub tbody:first").append("<tr res_id='"+v.ResourceId+"' class='deleteTr_"+v.ResourceId+" subTr_"+v.ResourceId+"' style=''>"+
+																	"<td colspan=7>"+
+																		"<div class='subDiv' style=''>"+
+																			"<table class='table table-bordered table-hover'>"+
+																				"<thead>"+
+																					"<tr>"+
+																						"<th>WBS Name</th>"+
+																						"<th>Quantity</th>"+
+																					"</tr>"+
+																				"</thead>"+
+																				"<tbody>");
+
+						/*Matrix view*/														
+						$("#matrixView tbody").append("<tr res_id='"+v.ResourceId+"' id='quantityRow_"+v.ResourceId+"' class='deleteTr_"+v.ResourceId+" showData'>"+
+															"<td class='headcol_l'>"+v.ResourceName+"<input type='hidden' name='resourceName_"+v.ResourceId+"' id='resourceName_"+v.ResourceId+"' value='"+v.ResourceName+"'></td>");
+									$.each(data['wbsResults'], function(wbsi,wv){
+										var wbsQty = (wv.ReqQty)?wv.ReqQty:0;
+										if(allWbs.length>0){
+											var style="display:none;";
+											if($.inArray(wv.WbsId, allWbs) != -1)
+												style="";
+											
+											$("#sequentialViewSub tbody:last").append("<tr style='"+style+"'>"+
+																						"<td width='76%'>"+wv.WbsName+" <input type='hidden' class='form-control' name='wbsName_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wv.WbsName+"'></td>"+
+																						"<td class='tbl_input_td' width='24%'><input type='text' resourceId='"+v.ResourceId+"' elename='quantity_"+v.ResourceId+"' class='tbl_input quantityVal' name='wbsQuantity_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wbsQty+"' autocomplete='off'></td>"+
+																					"</tr>");
+										}
+										else{
+											$("#sequentialViewSub tbody:last").append("<tr>"+
+																						"<td width='76%'>"+wv.WbsName+" <input type='hidden' class='form-control' name='wbsName_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wv.WbsName+"'></td>"+
+																						"<td class='tbl_input_td' width='24%'><input type='text' resourceId='"+v.ResourceId+"' elename='quantity_"+v.ResourceId+"' class='tbl_input quantityVal' name='wbsQuantity_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wbsQty+"' autocomplete='off'></td>"+
+																					"</tr>");											
+										}
+																				
+										$("#sequentialViewSub tbody:last").append("</tbody>"+
+																			"</table>"+
+																		"</div>"+
+																	"</td>"+
+																	
+																"</tr>");
+																
+																
+										/*Matrix view*/
+										/* if(wi==1)										
+											$("#matrixView thead tr").append("<th><span data-placement='bottom' data-toggle='tooltip' data-original-title='"+wv.WbsName+"'>"+wv.WbsName+"</span></th>"); */
+										
+										if(allWbs.length>0){
+											var style="display:none;";
+											if($.inArray(wv.WbsId, allWbs) != -1)
+												style="";											
+											
+											$("#matrixView tbody tr:last").append("<td class='tbl_input_td' style='"+style+"'><input type='text' elename='quantity_"+v.ResourceId+"' resourceId='"+v.ResourceId+"' class='quantityVal' "+(($.inArray(wv.WbsId, allWbs) != -1)? '': 'readonly')+" name='wbsQuantity_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wbsQty+"' autocomplete='off'></td>");
+											
+										}
+										/* else
+											$("#matrixView tbody tr:last").append("<td class='tbl_input_td'><input type='text' oldVal='"+wbsQty+"' resourceId='"+v.ResourceId+"' class='quantityVal' name='wbsQuantity_"+v.ResourceId+"_"+wv.WbsId+"' value='"+wbsQty+"'></td>"); */
+										
+									});
+									
+						/*Matrix view*/				
+						$("#matrixView tbody tr:last").append("<td class='bdr_left1ddd'>"+v.Code+"<input type='hidden' name='resourceCode_"+v.ResourceId+"' id='resourceCode_"+v.ResourceId+"' value='"+v.Code+"'></td>"+
+																"<td class='bdr_left1ddd'>"+v.UnitName+"<input type='hidden' name='unitName_"+v.ResourceId+"' id='unitName_"+v.ResourceId+"' value='"+v.UnitName+"'>"+
+																"<input type='hidden' name='unitId_"+v.ResourceId+"' id='unitId_"+v.ResourceId+"' value='"+v.UnitId+" '></td>"+
+																"<td class='all_date tbl_input_td'>"+
+																	"<div class='col-lg-12'>"+
+																		"<span class='date_icon matrix_date_icon'><i class='fa fa-calendar'></i></span>"+
+																		"<input type='text' name='requireddate_"+v.ResourceId+"' id='mat_requireddate_"+v.ResourceId+"' class='form-control datepickerinput date_picker matrix_date_input' value='"+reqDate+"' />"+
+																	"</div>"+
+																"</td>"+
+																"<td class='all_remarks tbl_input_td'><input type='text' class='changeVal matrix_remarks_input' name='remarks_"+v.ResourceId+"' id='remarks_"+v.ResourceId+"' value='"+remarks+"'></td>"+
+																"<td class='tbl_input_td'><input type='text' class='quantityCheck matrix_total_input' value='0' readonly name='quantity_"+v.ResourceId+"' id='quantity_"+v.ResourceId+"'></td>"+																	
+															"</tr>");
+															
+										$("#mat_requireddate_"+v.ResourceId).datepicker({
+											format: "dd-mm-yyyy",
+											//startDate: new Date(),
+											todayBtn: true,
+											orientation: "top auto",
+											autoclose: true
+										}).on("changeDate", function(e){
+											if($(this).is(":visible"))
+												oTable.$("tr.mainTr").find("input[name="+$(this).attr('name')+"]").datepicker("setDate", $(this).val());
+										});
+										
+										oTable.$("tr.mainTr").find("#seq_requireddate_"+v.ResourceId).datepicker({
+											format: "dd-mm-yyyy",
+											//startDate: new Date(),
+											todayBtn: true,
+											orientation: "top auto",
+											autoclose: true
+										}).on("changeDate", function(e){
+											if($(this).is(":visible"))
+												$("#matrixView input[name="+$(this).attr('name')+"]").datepicker("setDate", $(this).val());
+										});								
+						wi++;										
+									
+					});
+					//$("#matrixView thead tr").append("<th>Code</th><th>Unit</th><th class='all_date'>Date</th><th class='all_remarks'>Remarks</th><th>Total</th>");
+					trClick();
+				},
+				complete:function(data){
+					$('.date_icon').unbind("click");
+					$(".changeVal").unbind("change");
+				
+					$('.date_icon').bind('click', function() {
+						var input = $(this).parent().find('input').datepicker('show');
+					});
+					$(".changeVal").bind('change', function(){
+						var bname = $(this).attr("name");
+						$("input[name="+bname+"]").val($(this).val());
+					});
+				},
+				error:function(jqXHR, textStatus, errorThrown){
+					alert(textStatus+"-----"+errorThrown);
+				}
+			});
+		}
+		else{
+			$("#sequentialViewSub .deleteTr_"+rid).remove();
+			$("#matrixView .deleteTr_"+rid).remove();
+			oTable.$("tr.deleteTr_"+rid).each(function(){
+				var target_row = $(this).get(0); 
+				var aPos = oTable.fnGetPosition(target_row); 
+				oTable.fnDeleteRow(aPos);
+			});
+			changePage();	
+		}
+	}
+	$("#addResource").click(function(){
+		$("#fifthStep").hide();
+		$("#fourthStep").show();
+		$("#backButton").hide();
+		$("#continueButton a").text("Continue");
+	});
+	$("#continueButton").click(function(){
+		$(".error_message").hide();
+		if($("#firstStep").is(":visible")){
+			oTable.$("tr.mainTr").find(".totQuantity").trigger('click');
+			$("#firstStep").hide();
+			$("#fifthStep").show();
+			$("#backButton").show();
+			$("#excludeFirst").show();
+			$("#continueButton a").text("Submit");
+		}
+		else if($("#fourthStep").is(":visible")){
+			$("#backButton").show();
+			var index = $('#allResource').jqxGrid('getselectedrowindex');
+			if(index==-1){
+				alert('Atleast select one Resource')
+			}
+			else{
+				$("#fourthStep").hide();
+				$("#fifthStep").show();
+				
+				$("#continueButton a").text("Submit");
+				
+				oTable.$("tr.mainTr").find(".totQuantity").trigger("click");
+				if(!$('#sequentialView_next').hasClass('disabled') && $('#sequentialViewDiv').is(':visible'))
+					$("#continueButton a").text("Continue");
+			}
+		}		
+		else if($("#fifthStep").is(":visible")){
+			resourceId=[];
+			var index = $("#allResource").jqxGrid("getselectedrowindexes");
+			for(var i in index){
+				resourceId.push($("#allResource").jqxGrid("getrowid", index[i]));
+			}
+			$("#resourceId").val(resourceId);
+			$("#sel_wbsId").val(allWbs);
+				
+			if(!$('#sequentialView_next').hasClass('disabled')){
+				$('#sequentialView_next').trigger('click');
+				if($('#sequentialView_next').hasClass('disabled'))
+					$("#continueButton a").text("Submit");
+			}
+			else{				
+				oTable.$("tr.mainTr").find("input:text").removeClass("error");
+				$("input:text").removeClass("error");
+				
+				/*Restt to default setting in datatable*/
+				oTable.fnFilter('');
+				 var oSettings = oTable.fnSettings();
+				 oSettings.aaSorting = [];
+				/* Sort display arrays so we get them in numerical order */
+				oSettings.aiDisplay.sort( function (x,y) {
+					return x-y;
+				});
+				oSettings.aiDisplayMaster.sort( function (x,y) {
+					return x-y;
+				});
+				oTable.fnDraw();
+				
+				$("select[name=sequentialView_length]").val(1).trigger("change");
+				var bool = true;
+				$(".quantityCheck").each(function(){
+					var val = $(this).val();
+					var name = $(this).attr("name");
+					if(val <= 0 || val.length == 0 ){
+						/* if($("#sequentialView").is(":visible")){
+							oTable.$("tr.mainTr").find("input[name="+name+"]").each(function(){ */
+								var target_row = oTable.$("tr.mainTr").find("input[name="+name+"]").closest('tr').get(0);
+								var aPos = oTable.fnGetPosition(target_row);
+								oTable.fnPageChange(parseInt(aPos));
+							/* });
+						} */
+						bool=false;
+						$("input[name="+name+"]").focus();
+						oTable.$("tr.mainTr").find("input[name="+name+"]").addClass("error");
+						$("input[name="+name+"]").addClass("error");
+						return false;
+					}
+				});
+				if(bool){
+					if(allWbs.length > 0){
+						$("#all_wbsId").val(allWbs);
+					}
+					else{
+						var rows = $('#wbsGrid').jqxGrid('getrows');
+						for(var i = 0; i < rows.length; i++){
+							var row = rows[i];
+							allWbs.push(row.uid);
+						}
+						$("#all_wbsId").val(allWbs);
+					}
+					oTable.fnClearTable();
+					$("form").submit();
+				}
+			}
+		}
+	});
+
+	$("#backButton").click(function(){
+		$("#continueButton a").text("Continue");	
+		$("#fifthStep").hide();
+		$("#firstStep").show();
+		$("#backButton").hide();
+		$("#excludeFirst").hide();
+	});
+
+	/*WBS select start*/
+	var wbsSource =
+	{
+		localData: <?php echo json_encode($wbsResult); ?>,
+		dataType: "json",
+		dataFields:
+		[
+			{ name: 'WbsName', type: 'string' },
+		],
+		id:'WbsId'
+	};
+
+	var wbsDataAdapter = new $.jqx.dataAdapter(wbsSource,{
+		loadComplete: function (data) {
+			
+		},
+		loadError: function (xhr, status, error) {
+			
+		}
+	});
+
+	$("#wbsGrid").jqxGrid({
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready: function(){
+			if($("#selected_wbs").is(":checked")){
+				$.each(allWbs, function(i,v){
+					alert(v)
+					var rindex = $('#wbsGrid').jqxGrid('getrowboundindexbyid', v);
+					if(rindex!=-1)
+						$('#wbsGrid').jqxGrid('selectrow', rindex);	
+				});
+				var localizationobj = {};
+				localizationobj.emptydatastring = "No Wbs to display";
+				$("#wbsGrid").jqxGrid('localizestrings', localizationobj);								
+			}					
+		},
+		selectionmode: 'checkbox',						
+		source: wbsDataAdapter,
+		columns: [
+		  { text: 'Wbs Name', editable: false,datafield: 'WbsName'},
+		]
+	});	
+
+	
+	$("#wbsGrid").on('rowselect', function (event){
+		if($(this).is(":visible")){
+			// event arguments.
+			var args = event.args;
+			// row's bound index.
+			var rowBoundIndex = args.rowindex;
+			// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+			var rowData = args.row; 
+			var rid = rowData.uid;
+			allWbs.push(rid);
+			//alert(JSON.stringify(allWbs))
+			if($("#matrixView tbody tr").length > 0){
+				$("#sequentialViewSub .subDiv").each(function(){
+					var res_id = $(this).closest("tr").attr("res_id");
+					$("#sequentialViewSub input[name=wbsQuantity_"+res_id+"_"+rowData.uid+"]").closest("tr").show();
+				});
+				$("#matrixView tbody tr").each(function(){
+					var res_id = $(this).attr("res_id");
+					$(this).find("input[name=wbsQuantity_"+res_id+"_"+rowData.uid+"]").prop("readonly", false);
+				});
+			}
+		}
+		
+	});	
+
+	$('#wbsGrid').on('rowunselect', function (event){
+		if($(this).is(":visible")){
+			// event arguments.
+			var args = event.args;
+			// row's bound index.
+			var rowBoundIndex = args.rowindex;
+			// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+			var rowData = args.row;
+			var rid = rowData.uid;
+			allWbs.splice($.inArray(rid, allWbs),1);
+			//alert(JSON.stringify(allWbs))
+			if($("#matrixView tbody tr").length > 0){
+				$("#sequentialViewSub .subDiv").each(function(){
+					var res_id = $(this).closest("tr").attr("res_id");
+					$("#sequentialViewSub input[name=wbsName_"+res_id+"_"+rowData.uid+"]").closest("tr").hide();
+				});
+				$("#matrixView tbody tr").each(function(){
+					var res_id = $(this).attr("res_id");
+					$(this).find("input[name=wbsQuantity_"+res_id+"_"+rowData.uid+"]").prop("readonly", true);
+				});								
+			}
+		}								
+
+	});
+	
+	$('#wbsGrid').on('rowclick', function (event){
+		var args = event.args;
+		// row's bound index.
+		var boundIndex = args.rowindex;
+		var index = $('#wbsGrid').jqxGrid('selectedrowindexes'); 
+		//alert($.inArray(boundIndex, index))
+		if($.inArray(boundIndex, index) == -1)
+			$('#wbsGrid').jqxGrid('selectrow', boundIndex);
+		else
+			$('#wbsGrid').jqxGrid('unselectrow', boundIndex);
+	});							
+	
+	/*WBS select end*/
+
+
+	/*1.allResource*/
+	var initGrid = function () {				
+		var source =
+		{
+			localData: <?php echo json_encode($allRes); ?>,
+			dataType: "json",
+			dataFields:
+			[
+				
+				{ name: 'Code', type: 'string' },
+				{ name: 'ResourceName', type: 'string' },
+				{ name: 'ResourceGroupName', type: 'string' },
+				{ name: 'sel', type: 'string'}
+				
+			],
+			id:'ResourceId'
+		};
+
+		var dataAdapter = new $.jqx.dataAdapter(source,{
+			loadComplete: function (data) {
+				//alert("1");
+			},
+			loadError: function (xhr, status, error) {
+				
+			}
+		});
+   
+		$("#allResource").jqxGrid(
+		{
+			width: '100%',
+			pageable: true,
+			selectionMode: 'singleRow',
+			pagerButtonsCount: 6,
+			autoheight:true,
+			//rowsheight:60,
+			autorowheight: true,
+			filterable: true,
+			sortable: true,
+			//filtermode: 'advanced',				
+			columnsResize: true,
+			showfilterrow: true,
+			ready: function(){
+				var localizationobj = {};
+				localizationobj.emptydatastring = "No resource to display";
+				$("#allResource").jqxGrid('localizestrings', localizationobj);				
+			},							
+			selectionmode: 'checkbox',						
+			source: dataAdapter,
+			columns: [
+						
+					  { text: 'Code', editable: false,datafield: 'Code'},
+					  { text: 'ResourceName', editable: false,datafield: 'ResourceName'},
+					  { text: 'ResourceGroupName', editable: false,datafield: 'ResourceGroupName'},
+			]
+		});
+		
+		$("#allResource").on('rowselect', function (event){
+			if($(this).is(":visible")){
+				//alert("all")
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row; 
+				var rid = rowData.uid;
+				
+				checkClick(rid, '1', rowData.sel);
+				var mindex = $('#mostResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#mostResource').jqxGrid('selectrow', mindex);
+				var rindex = $('#recentResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#recentResource').jqxGrid('selectrow', rindex);							
+			}
+			
+		});	
+
+		$('#allResource').on('rowunselect', function (event){
+			if($(this).is(":visible")){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row;
+				var rid = rowData.uid;
+				
+				checkClick(rid, '2', rowData.sel);
+				var mindex = $('#mostResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#mostResource').jqxGrid('unselectrow', mindex);
+				var rindex = $('#recentResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#recentResource').jqxGrid('unselectrow', rindex);	
+			}								
+		});
+		
+		$('#allResource').on('rowclick', function (event){
+			var args = event.args;
+			// row's bound index.
+			var boundIndex = args.rowindex;
+			var index = $('#allResource').jqxGrid('selectedrowindexes'); 
+			//alert($.inArray(boundIndex, index))
+			if($.inArray(boundIndex, index) == -1)
+				$('#allResource').jqxGrid('selectrow', boundIndex);
+			else
+				$('#allResource').jqxGrid('unselectrow', boundIndex);
+		});				
+	
+
+	}
+
+	var initGrid2 = function () {
+		/*2.mostResource*/
+		var source1 =
+		{
+			localData: <?php echo json_encode($mostRes); ?>,
+			dataType: "json",
+			dataFields:
+			[
+				
+				{ name: 'Code', type: 'string' },
+				{ name: 'ResourceName', type: 'string' },
+				{ name: 'ResourceGroupName', type: 'string' },
+				{ name: 'sel', type: 'string'}
+				
+			],
+			id:'ResourceId'
+		};
+
+		var dataAdapter1 = new $.jqx.dataAdapter(source1,{
+			loadComplete: function (data) {
+				//alert("2");
+			},
+			loadError: function (xhr, status, error) {
+			}
+				
+		});
+   
+		$("#mostResource").jqxGrid(
+		{
+			width: '100%',
+			pageable: true,
+			selectionMode: 'singleRow',
+			pagerButtonsCount: 6,
+			autoheight:true,
+			//rowsheight:60,
+			autorowheight: true,
+			filterable: true,
+			sortable: true,
+			//filtermode: 'advanced',				
+			columnsResize: true,
+			showfilterrow: true,
+			ready: function(){
+				var localizationobj = {};
+				localizationobj.emptydatastring = "No resource to display";
+				$("#mostResource").jqxGrid('localizestrings', localizationobj);				
+			},							
+			selectionmode: 'checkbox',						
+			source: dataAdapter1,
+			columns: [
+						
+					  { text: 'Code', editable: false,datafield: 'Code'},
+					  { text: 'ResourceName', editable: false,datafield: 'ResourceName'},
+					  { text: 'ResourceGroupName', editable: false, datafield: 'ResourceGroupName'},
+					  { text: 'Sel', editable: false,datafield: 'sel', hidden:true},
+			]
+		});
+		
+		$("#mostResource").on('rowselect', function (event){
+			if($(this).is(":visible")){
+				//alert("most")
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row; 
+				var rid = rowData.uid;
+				checkClick(rid, '1', rowData.sel);
+				var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#allResource').jqxGrid('selectrow', mindex);
+				var rindex = $('#recentResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#recentResource').jqxGrid('selectrow', rindex);			
+			}								
+		});	
+
+		$('#mostResource').on('rowunselect', function (event){
+			if($(this).is(":visible")){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row;
+				var rid = rowData.uid;
+				checkClick(rid, '2', rowData.sel);
+				var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#allResource').jqxGrid('unselectrow', mindex);
+				var rindex = $('#recentResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#recentResource').jqxGrid('unselectrow', rindex);
+			}								
+		});
+		
+		$('#mostResource').on('rowclick', function (event){
+			var args = event.args;
+			// row's bound index.
+			var boundIndex = args.rowindex;
+			var index = $('#mostResource').jqxGrid('selectedrowindexes'); 
+			//alert($.inArray(boundIndex, index))
+			if($.inArray(boundIndex, index) == -1)
+				$('#mostResource').jqxGrid('selectrow', boundIndex);
+			else
+				$('#mostResource').jqxGrid('unselectrow', boundIndex);
+		});				
+		
+		
+	}
+	
+	var initGrid3 = function () {			
+		/*3.recentResource*/
+		var source2 =
+		{
+			localData: <?php echo json_encode($recentRes); ?>,
+			dataType: "json",
+			dataFields:
+			[
+				
+				{ name: 'Code', type: 'string' },
+				{ name: 'ResourceName', type: 'string' },
+				{ name: 'ResourceGroupName', type: 'string' },
+				{ name: 'sel', type: 'string' }
+				
+			],
+			id:'ResourceId'
+		};
+
+		var dataAdapter2 = new $.jqx.dataAdapter(source2,{
+			loadComplete: function (data) {
+				//alert("3");
+			},
+			loadError: function (xhr, status, error) {
+			}	
+		});
+   
+		$("#recentResource").jqxGrid(
+		{
+			width: '100%',
+			pageable: true,
+			selectionMode: 'singleRow',
+			pagerButtonsCount: 6,
+			autoheight:true,
+			//rowsheight:60,
+			autorowheight: true,
+			filterable: true,
+			sortable: true,
+			//filtermode: 'advanced',				
+			columnsResize: true,
+			showfilterrow: true,
+			ready: function(){
+				var localizationobj = {};
+				localizationobj.emptydatastring = "No resource to display";
+				$("#recentResource").jqxGrid('localizestrings', localizationobj);				
+			},								
+			selectionmode: 'checkbox',						
+			source: dataAdapter2,
+			columns: [
+						
+					  { text: 'Code', editable: false,datafield: 'Code'},
+					  { text: 'ResourceName', editable: false,datafield: 'ResourceName'},
+					  { text: 'ResourceGroupName', editable: false,datafield: 'ResourceGroupName'},
+					  { text: 'Sel', editable: false,datafield: 'sel', hidden:true},
+			  
+			]
+		});
+		
+		$("#recentResource").on('rowselect', function (event){
+			if($(this).is(":visible")){
+				//alert("recent")
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row; 
+				var rid = rowData.uid;
+				checkClick(rid, '1', rowData.sel);
+				var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#allResource').jqxGrid('selectrow', mindex);
+				var rindex = $('#mostResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#mostResource').jqxGrid('selectrow', rindex);	
+			}								
+		});	
+
+		$('#recentResource').on('rowunselect', function (event){
+			if($(this).is(":visible")){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row;
+				var rid = rowData.uid;
+				checkClick(rid, '2', rowData.sel);
+				var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+				if(mindex!=-1)
+					$('#allResource').jqxGrid('unselectrow', mindex);
+				var rindex = $('#mostResource').jqxGrid('getrowboundindexbyid', rid);
+				if(rindex!=-1)
+					$('#mostResource').jqxGrid('unselectrow', rindex);		
+			}								
+		});
+		
+		$('#recentResource').on('rowclick', function (event){
+			var args = event.args;
+			// row's bound index.
+			var boundIndex = args.rowindex;
+			var index = $('#recentResource').jqxGrid('selectedrowindexes'); 
+			//alert($.inArray(boundIndex, index))
+			if($.inArray(boundIndex, index) == -1)
+				$('#recentResource').jqxGrid('selectrow', boundIndex);
+			else
+				$('#recentResource').jqxGrid('unselectrow', boundIndex);
+		});				
+	}
+
+	initGrid();
+	initGrid2();			
+	initGrid3();
+	
+	$.each(<?php echo json_encode($allRes); ?>, function(i,v){
+		var rid = v.ResourceId;
+		if(v.sel == 1){
+			var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+			if(mindex!=-1)
+				$('#allResource').jqxGrid('selectrow', mindex);
+			
+			var rindex = $('#mostResource').jqxGrid('getrowboundindexbyid', rid);
+			if(rindex!=-1){
+				$('#mostResource').jqxGrid('selectrow', rindex);
+			}
+
+			var lindex = $('#recentResource').jqxGrid('getrowboundindexbyid', rid);
+			if(lindex!=-1){
+				$('#recentResource').jqxGrid('selectrow', lindex);
+			}					
+		}
+	});
+
+						
+</script>

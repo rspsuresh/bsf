@@ -1,0 +1,324 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<!-- dummy row -->
+<script id="dummy-row"  type="text/template" class="hide">
+	<tr>
+		<td width="10%" class="tbl_input_td"><input type="hidden" name="serviceId__" id="serviceId__"/>
+		<input class="tbl_input" type="text" value="" name="desc__" id="desc__"/>
+		<td width="2%"  class="tbl_input_td" ><input class="tbl_input txt_right" type="text" value="" name="transAmount__" id="transAmount__" onchange="FormatNum(this, 3);" /></td></td>
+		<td width="2%" align="center" class="action_btns_td">
+			<ul class="action_btns">
+				<li>
+					<a class="deleteTr__" onclick="deleteRow(this, event);" style="display: none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+				</li>
+			</ul>
+		</td>
+	</tr>
+</script>
+<!-- dummy row -->
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+    	<div class="row">
+			<!-- newly addind Div-->
+			<form action="" method="post" onSubmit="return validate();">
+                <div id="Step1">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Service Done</h1>
+                    </div>
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <div class="col-lg-offset-3">
+                                <label for="booking_no" class="bk_lbl bk_lbl_inpt">Service Done No <span class="colon_r">:</span></label>
+                                <input type="text" class="bk_lbl_inpt inputbg_ef bk_inpt1" <?php if ($arrVNo["genType"] == true){ ?> readonly <?php } ?> name="serviceNo" readonly id="booking_no" value="<?php echo $unitList['RefNo'];?>" /> 
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+                            <div class="col-lg-offset-5">
+                                <label for="booking_date" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Service Done Date <span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="serveice_date" id="booking_date" disabled value="<?php echo date('d-m-Y', strtotime($unitList['ServiceDoneDate'])); ?>" />
+							</div>
+							 <input type="hidden"  name="servicereg_id" id="servicereg_id" value="<?php echo $unitList['ServiceDoneRegId']; ?>" />
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="row form-group">   
+                                <div class="form-group col-lg-12 m3_auto padtop20">
+                                    <input type="text" name="unitname" id="unitname" class="form-control lbl_move" label="Project/Unit/Buyer" readonly value="<?php echo $unitList['value'];?>" />
+                                    <input type="hidden" name="unitId" id="unitid" value="<?php echo $unitList['data']; ?>"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 savebtn_area no_border">
+                                <ul>
+                                    <li class="save_btn m_auto">
+                                        <a href="javascript:void(0);" class="ripple" onclick="show_step2();">Continue</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="Step2">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Service Done</h1>
+                    </div>
+					 <input type="hidden" name="count" id="count" value="<?php echo (isset($unitTrans))? count($unitTrans) : 0 ; ?>" />
+                    <input type="hidden" name="finalCount" id="finalCount" value="<?php echo (isset($unitTrans))? count($unitTrans) : 0 ; ?>" />
+                    <div class="col-lg-12 clear">
+                        <div class="table-responsive">
+                            <table id="extra-bill-table" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Extra Item</th>
+                                        <th class="txt_center">Amount</th>
+                                        <th>&nbsp; </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="startcount" data-count="0">
+									<?php $i = 0;
+									foreach($unitTrans as $trans): ?>
+                                    <tr>
+                                        <td width="10%" class="tbl_input_td"><input type="hidden" name="serviceId_<?php echo $i; ?>" id="serviceId_<?php echo $i; ?>" value="<?php echo $trans['ServiceId']?>"/>
+											<input class="tbl_input" type="text" value="<?php echo $trans['ItemDescription']?>" name="desc_<?php echo $i; ?>" id="desc_<?php echo $i; ?>"/>
+                                        </td>
+                                        <td width="2%">
+											<input class="tbl_input txt_right" type="text" value="<?php echo $trans['Amount']?>" name="transAmount_<?php echo $i; ?>" id="transAmount_<?php echo $i; ?>" onchange="FormatNum(this, 3);"/>
+										</td>
+                                        
+                                        <td width="1%" align="center" class="action_btns_td">
+                                            <ul class="action_btns">
+                                                <li>
+                                                    <a class="deleteTr_<?php echo $i; ?>" onclick="deleteRow(this, event);"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+									<?php $i++; 
+									endforeach; ?>
+									<!--
+                                    <tr>
+                                        <td align="right" colspan="5" class="rate_pri">Gross Total</td>
+                                        <td width="5%" class="tbl_input_td"><input id="gross-total" readonly class="tbl_input txt_right" name="grossAmount" type="text"/></td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+									<tr>
+                                        <td align="right" colspan="5" class="rate_pri">Tax Amount</td>
+                                        <td width="5%" class="tbl_input_td"><input id="tax-amount" readonly class="tbl_input mainTr txt_right" name="taxAmount" type="text"/></td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+									<tr style="display:none;" class="subTr qualmainTr">
+										<td colspan="8" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+										<?php// echo $qualHtml;?>
+										</td>
+									</tr>
+                                    <tr>
+                                        <td align="right" colspan="5" class="rate_pri">NET Total</td>
+                                        <td width="5%" class="tbl_input_td"><input id="net-total" readonly class="tbl_input txt_right total_input" name="netAmount" type="text"/></td>
+                                        <td>&nbsp;</td>
+                                    </tr>-->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 savebtn_area clear">
+                        <ul>
+                            <li class="dropdown save_btn float_l">
+                                <a href="javascript:void(0);" onclick="$('#Step1').show(); $('#Step2').hide();" class="ripple">back</a>
+                            </li>
+                            <li class="dropdown save_btn float_r">
+                            	<input type="submit" name="submit" class="ripple" value="Save"/>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+		  	</form>
+        </div>
+	</div>
+</div>
+<script>
+function validate(){
+	if($('#finalCount').val()==0){
+		alert("Atlease one Extra Item Must be Selected");
+		return false
+	}
+}
+
+$(document).ready(function() {
+	$('#Step1').show();
+	$('#Step2').hide();
+   // bindTaxCalculation();
+
+});
+var extraItemData,tmpExtraItemData;
+$(document).ready(function() {
+	$(".multiple_dropdown").select2({
+	});
+});
+function bindOtherCostAutoComplete() {
+    var $otherCost = $('input[id^=desc_');
+	$.each($otherCost, function () {
+		
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+        checkOtherCost(name);
+        $this.unbind('autocomplete');
+        $this.autocomplete({
+            lookup: tmpExtraItemData,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                     
+                    $("#serviceId_" + key1).val(suggestion.data);
+                    $("#transAmount_" + key1).val(sanitizeNumber(suggestion.Amount));
+						removeError($(this));
+
+                    $(this).prop('disabled', true);
+                    addNewRow($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                $("#serviceId_" + key1).val(0);
+                removeError($(this));
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length && query.length > 1){
+                    showError($(this), 'Required');
+                    $("#serviceId_" + key1).val(0);
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+function addNewRow(x) {
+    var $tr = $(x).closest('tr');
+    /* if ($tr.next('tr').length != 0)
+        return; */
+    //count = parseInt($('#startcount').attr('data-count'));
+    count = parseInt($('#count').val());
+    $('.deleteTr_' + count).show();
+    template = $('#dummy-row').html();
+    count++;
+    template = template.replace(/__/g, '_' + count);
+    $(template).insertAfter($tr);
+    $('#count').val(count);
+    var finalvalue =  parseInt($('#finalCount').val());
+    finalvalue++;
+    $('#finalCount').val(finalvalue);
+    bindOtherCostAutoComplete();
+
+    //calcNetTotal();
+}
+function deleteRow(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+	var $x = $(x),
+        $tr = $x.closest('tr');
+    $tr.remove();
+	var finalCount = parseInt($('#finalCount').val());
+	finalCount--;
+	$('#finalCount').val(finalCount);
+   // bindOtherCostAutoComplete();
+
+    //calcNetTotal();
+    return false;
+}
+	
+function checkOtherCost(x) {
+    var arrname = x.split('_'),
+        id= arrname[1],
+        extraid = $('input[id^=serviceId_]');
+    tmpExtraItemData = extraItemData;
+    tmpExtraItemData = $.grep(extraItemData, function (element, index) {
+        var is_selected = true;
+        $.each(extraid, function (i, obj) {
+            var $this = $(this),
+                key = $this[0].id.split('_')[1];
+            if (key != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                }
+            }
+        });
+        return is_selected;
+    });
+}
+
+function show_step2() {	
+	if($('#booking_no').val()==0){
+		alert("Please Enter Ref Number");
+		return false
+	}
+	if($('#unitid').val()!=""){
+		load_extraItemList(function(isSuccess) {
+			if(isSuccess){
+				$('#Step1').hide();
+				$('#Step2').show();
+			}
+		});
+		} else {
+		alert("Please Select Project/unit/buyer");
+		}
+}
+
+function load_extraItemList(callback) {
+    var unit_id = $('#unitid').val();
+    var reg_id = $('#servicereg_id').val();
+	
+    if (/^\d+$/.test(unit_id) === false) {
+        return;
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'crm/property/servicelist',
+        data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", UnitId: unit_id,regId:reg_id},
+        type: 'POST',
+        success: function (data, status, xhr) {
+			if (data.service_list.length > 0) {
+                extraItemData = data.service_list;
+                tmpExtraItemData = data.service_list;
+				bindOtherCostAutoComplete();
+				
+				if (callback) {
+					callback(true);
+					return true;
+				}
+            } else {
+				alert("Service Not Available");
+				if (callback) {
+					callback(false);
+					return false;
+				}
+			}
+
+            
+        },
+        error: function (xhr, status, error) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+
+</script>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+
+});
+
+</script>

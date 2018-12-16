@@ -1,0 +1,88 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form id="formWrapper"  method="post">
+            <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+            <input type="hidden" name="projectId" id="projectId" value="<?php echo $projectId;?>">
+            <input type="hidden" name="projectType" id="projectType" value="<?php echo $projectType;?>">
+            <div class="row">
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - Project IOW Delete</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 top_ct" >
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                        <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" class="form-control date_picker lbl_move" label="Reference Date" readonly name="refdate" value = "<?php if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>"  id="refdate"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move" label="Reference No." name="refno" value = "<?php if ($rfcid !=0) { echo $rfcregister['RefNo'];} else { echo $svNo; } ?>" <?php if ($genType==true) { ?> readonly <?php } ?> id="refno" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                        <table class="table" style="width:100%" id="iowTable">
+                            <thead>
+                            <tr>
+                                <th>Ref no</th>
+                                <th>Specification</th>
+                                <th>Unit</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main">
+                            <?php $i=0;
+                            if (isset($projectIOWTrans)):
+                            foreach ($projectIOWTrans as $cur):
+                                $i = $i + 1; ?>
+                                <tr id="rowid_<?php echo $i; ?>">
+                                    <input type="hidden" name="ProjectIOWId_<?php echo $i; ?>" value="<?php echo $cur['ProjectIOWId']; ?>" id="ProjectIOWId_<?php echo $i; ?>">
+                                    <td style="width:10%"><input type="text" class="parent_text"  value="<?php echo $cur['RefSerialNo']; ?>" readonly></td>
+                                    <td style="width:80%"><input type="text" class="parent_text"  value="<?php echo $cur['Specification']; ?>" readonly></td>
+                                    <td style="width:10%"><input type="text" class="parent_text"  value="<?php echo $cur['UnitName']; ?>" readonly></td>
+                                </tr>
+                            <?php endforeach; endif;?>
+                            <tr>
+                                <td colspan="10">
+                                    <textarea class="remrk element"  name="narration" id="narration" placeholder="Why do you delete this?"><?php if(isset($rfcregister['Narration'])) echo $rfcregister['Narration']; else echo ''; ?></textarea>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value=<?php echo $i; ?>>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" style="<?php if ($rfcid !=0) { if ($rfcregister['Approve']=='Y') { echo 'display: none;'; } else { echo '';} }?>"><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit">Submit</a></li>
+        <li class="can_btn float_l" style="padding-bottom:10px;"><a href="<?php if ($rfcid !=0) { echo $this->basePath().'/project/rfc/rfcregister'; } else {echo $this->basePath().'/project/rfc/projboq/'.$projectId.'/'.$projectType;}?>">Cancel</a></li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    function submitForm() {
+        $('#formWrapper').submit();
+    }
+    function entryValidate() {
+        var isValid = true;
+        var $narration = $('#narration');
+        if ($narration.val().length==0 ||  $narration.val().trim() == "Why do you delete this?")
+        {
+            isValid = false;
+            $('#narration').addClass('error').attr('data-original-title', 'Required').attr('data-toggle', 'tooltip');
+            $narration.focus();
+        }
+
+        return isValid;
+    }
+</script>

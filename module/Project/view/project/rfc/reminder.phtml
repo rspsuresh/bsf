@@ -1,0 +1,482 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 padlr0">Reminder
+                <div class="stgedit_btn req_addbtn brad_50"> <a href="javascript:void(0);" class="ripple mainTr" data-expandid="" rel="oc_1" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Reminder"><i class="fa fa-plus"></i></a> </div>
+                <input type="hidden" id="ocCount" name="ocCount" value="1" />
+            </h1>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                <label class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12  control-label">Select Project</label>
+                <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <form id="formProject" action="" method="post">
+                        <select class="form-control single_dropdown lbl_move" id="ProjectSelect" name="ProjectSelect" onchange="loadProject();" style="width:100%;">
+                            <option value="">Select Project</option>
+                            <?php foreach($ProjectName as $Project) {
+                                if((isset($proj_id) && $Project['ProjectId'] == $proj_id) || (isset($pro_id) && $Project['ProjectId'] == $pro_id)) {
+                                    if(isset($proj_id)){?>
+                                        <option value="<?php echo $Project['ProjectId'];?>" selected> <?php echo $Project['ProjectName'];?> </option>
+                                    <?php } else if(isset($pro_id)){ ?>
+                                        <option value="<?php echo $Project['ProjectId'];?>" selected> <?php echo $Project['ProjectName'];?> </option>
+                                    <?php }?>
+                                <?php } else { ?>
+                                    <option value="<?php echo $Project['ProjectId'];?>"> <?php echo $Project['ProjectName'];?> </option>
+                                <?php } } ?>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <form method="post" id="addForm">
+            <div class="col-lg-12 clear" id="ocDivDept_1"  style="display:none;" >
+                <div class="col-lg-12 padlr0 adddprtmnt_box animated fadeInUp" id="adddprtmnt_boxAdd">
+                    <button type="button" class="close mainTr" data-expandid="" rel="oc_1" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12 form-group">
+                        <label>
+                            <input type="hidden" name="tag" id="tag" value="Add">
+                            <input type="checkbox" name="r_check" id="r_check" value="1" class="ios_checkbox inc_exc" checked />
+                            <div class="ios_switch"><span></span></div>
+                        </label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-xs-10 col-sm-4 padlr0">
+                        <div class="form-group col-lg-12">
+                            <textarea id="r_description" name="r_description" class="form-control lbl_move" label="Reminder Descrption"/>
+                            </textarea>
+                            <input type="hidden" name="ProjectId" id="ProjectId" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12 padlr0">
+                        <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="r_date" id="r_date" class="form-control date_picker lbl_move" readonly label="Date" value=""/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 padlr0">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control multiple_dropdown lbl_move" name="r_users[]" id="r_users" multiple="multiple" label="Users..." style="width:100%;">
+                                <option value="">Choose User</option>
+                                <?php foreach($users as $type){
+                                    echo "<option value='".$type['UserId']."' >".$type['UserName']."</option>";
+                                } ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-1 col-sm-1">
+                        <div class="col-lg-12">
+                            <button type="button" class="save adddprtmnt_box_ok float_r brad_200 ripple" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!--Edit Div-->
+
+        <!--Edit Div End-->
+        <div class="col-lg-12 clear">
+            <div class="table-responsive animated fadeInUp" style="min-height:200px;">
+                <table class="table table-hover tbltop_bdr0" id="tableProj" >
+                    <?php
+                    //                        if(!empty($reminders)) {
+                    if(isset($reminders)) {
+                    $i=1;	?>
+                    <thead>
+                    <tr>
+                        <th width="5%">Live</th>
+                        <th>Reminder Description</th>
+                        <th>Date</th>
+                        <th width="5%">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    foreach($reminders as $remind){ ?>
+                        <tr style="display: none;" id="remd_<?php echo $i; ?>">
+                            <td><label>
+                                    <input type="checkbox" name="recheck_<?php echo $i;?>" id="recheck_<?php echo $i;?>" value="1" tagname='cid' cid="<?php echo $remind['ReminderId'];?>" <?php if($remind){ echo ($remind['Type'] == 1 ? 'checked':''); }?> class="ios_checkbox inc_exc"/>
+
+                                    <!-- <input type="checkbox"  value="1" class="ios_checkbox" <?php //if($remind){ echo ($remind['Type'] == 1 ? 'checked':''); }?> onchange="return checkval('<?php //echo $i;?>','<?php //echo $remind['ReminderId'];?>')" />-->
+
+                                    <div class="ios_switch"><span></span></div>
+                                </label></td>
+                            <input type="hidden" name="reId_<?php echo $i;?>" id="reId_<?php echo $i;?>" value="<?php echo $remind['ReminderId'];?>" />
+                            <input type="hidden" name="RDescription_<?php echo $i;?>" id="RDescription_<?php echo $i;?>" value="<?php echo $remind['RDescription'];?>" />
+                            <input type="hidden" name="RDate_<?php echo $i;?>" id="RDate_<?php echo $i;?>" value="<?php echo $remind['DateFormat'];?>" />
+                            <input type="hidden" name="Type_<?php echo $i;?>" id="Type_<?php echo $i;?>" value="<?php echo $remind['Type'];?>" />
+                            <td><?php echo $remind['RDescription'];?></td>
+                            <td><?php echo $remind['DateFormat'];?></td>
+                            <td class="action_btns_td"><ul class="action_btns">
+                                    <a href="javascript:void(0);" class="mainTr" data-expandid="<?php echo $remind['ReminderId']; ?>" rel="rt_<?php echo $i; ?>" data-toggle="tooltip" data-placement="left" data-original-title="Edit" ><i class="fa fa-pencil-square-o reg-icon"></i></a> <a href="javascript:void(0);"  data-toggle="tooltip" data-placement="left" data-original-title="Delete" onclick="reminderDelete(this, '<?php echo $remind['ReminderId']; ?>','<?php echo $i; ?>')"> <span><i class="fa fa-trash-o"></i></span> </a> <!--onclick="reminderEdit(this, '<?php /*echo $remind['ReminderId']; */?>','<?php /*echo $i; */?>')"-->
+                                    </li>
+                                </ul></td>
+                        </tr>
+                        <tr id="divReminderEdit_<?php echo $i; ?>"  style="display:none;">
+                            <td colspan="3"><form method="post" id="editForm_<?php echo $i; ?>">
+                                    <div class="col-lg-12 clear">
+                                        <div class="col-lg-12 padlr0 adddprtmnt_box" id="adddprtmnt_boxEdit">
+                                            <button type="button" class="close mainTr" data-dismiss="modal"  data-expandid="<?php echo $remind['ReminderId']; ?>"  rel="rt_<?php echo $i; ?>"  aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <div class="col-lg-1 col-md-1 col-sm-1">
+                                                <label>
+                                                    <input type="hidden" name="tag" id="tag" value="Edit">
+                                                    <input type="checkbox" name="checkEdit_<?php echo $i;?>" id="checkEdit_<?php echo $i;?>" value="1" class="ios_checkbox inc_exc" checked />
+                                                    <div class="ios_switch"><span></span></div>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                                                <div class="form-group col-lg-12">
+                                                    <input type="hidden" name="RemindId_<?php echo $i;?>" id="RemindId_<?php echo $i;?>" value="<?php echo $remind['ReminderId']; ?>" />
+                                                    <input type="hidden" name="rowid" id="rowid" value="<?php echo $i; ?>" />
+                                                    <textarea id="descriptionEdit_<?php echo $i;?>" name="descriptionEdit_<?php echo $i;?>" class="form-control lbl_move" label="Reminder Descrption"/>
+                                                    </textarea>
+                                                    <input type="hidden" name="ProjectIdEdit_<?php echo $i;?>" id="ProjectIdEdit_<?php echo $i;?>" class="form-control" />
+                                                    <input type="hidden" name="ProjectIdEdit" id="ProjectIdEdit" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-3 col-sm-3 padlr0">
+                                                <div class="form-group col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" readonly name="dateEdit_<?php echo $i;?>" id="dateEdit_<?php echo $i;?>" class="form-control date_picker lbl_move" label="Date" value=""/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+                                                <div class="form-group col-lg-12">
+                                                    <select class="form-control multiple_dropdown lbl_move" name="usersEdit_<?php echo $i;?>[]" id="usersEdit_<?php echo $i;?>" multiple="multiple" label="Users..." style="width:100%;">
+                                                        <option value="">Choose User</option>
+                                                        <?php
+                                                        $Hidcid = array();
+                                                        foreach($users as $type) {
+                                                            foreach ($remindersTrans as $remindTrans) {
+                                                                if (trim($remind['ReminderId']) == trim($remindTrans['ReminderId']) && $remindTrans['ReminderUserId'] == $type['UserId']) {
+                                                                    array_push($Hidcid, $remindTrans['ReminderUserId']);
+                                                                }
+                                                            }
+                                                        }
+                                                        foreach($users as $type) {
+                                                            $staus=1;
+                                                            foreach ($Hidcid as &$value) {
+                                                                if($type['UserId']==$value) {
+                                                                    echo "<option value='".$type['UserId']."' selected>".$type['UserName']."</option>";
+                                                                    $staus=0;
+                                                                }
+                                                            }
+                                                            if($staus==1){
+                                                                echo "<option value='".$type['UserId']."' >".$type['UserName']."</option>";
+                                                            }
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-1 col-sm-1">
+                                                <div class="col-lg-12">
+                                                    <button type="button" class="saveEdit_<?php echo $i;?> adddprtmnt_box_ok float_r brad_200 ripple" onclick="reminderTrEdit(this, '<?php echo $remind['ReminderId']; ?>','<?php echo $i; ?>')" data-dismiss="modal" aria-label="Close"><span class="glyphicon glyphicon-ok"></span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form></td>
+                        </tr>
+                        <?php $i++;}
+                    }?>
+                    <input type="hidden" id="rtCount" name="rtCount" value="<?php echo count($reminders); ?>" />
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delDeptName" class="bld-txt"></span>?</h1>
+                <input type="hidden" name="deleteremindId" id="deleteremindId" value="" />
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" onsubmit="return false;">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/>
+                                </textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+<script>
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({
+        });
+
+    });
+
+    /*$('.addnew_reminder').click(function (){
+     console.log('test');
+     $('.adddprtmnt_box').show("slow");
+     //        $('#adddprtmnt_boxAdd').show('slow');
+     //        $('#adddprtmnt_boxEdit').hide();
+     });
+     $('.close').click(function(){
+     //  $('.adddprtmnt_box').hide();
+     });*/
+</script>
+<script>
+//form validation//
+$(function() {
+    var ProjectSelect = $('#ProjectSelect').val();
+    if(ProjectSelect != ''){
+       // loadProject();
+        var Project = $('#ProjectSelect').val();
+        $('#ProjectId').val(Project);
+
+        $('#tableProj').find('tr[id^=remd_]').show();
+    }
+});
+
+$(".error_message").hide();
+var $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+var cid = [];
+var cid1 = [];
+var cid2 = [];
+$(".mainTr").click(function(){
+//        $('#adddprtmnt_boxAdd').hide();
+//        $('#adddprtmnt_boxEdit').show('slow');
+    if (parseInt(isNullCheck($('#ProjectSelect').val(),'number')) ==0) {
+        alert ("Select Project");
+        return;
+    }
+
+    var relDiv = $(this).attr('rel');
+    var relVal = relDiv.split("_");
+    cid = [];
+    cid1 = [];
+    cid2 = [];
+    if(relVal[0]=='rt') {
+        $("#divReminderEdit_"+relVal[1]).slideToggle("slow");
+        var key=$(this).data('expandid');
+    }else {
+        $("#ocDivDept_"+relVal[1]).slideToggle("slow");
+    }
+    var rtCount = $('#rtCount').val();
+    var ocCount = $('#ocCount').val();
+
+    for(i=1;i<=rtCount;i++) {
+        $('#descriptionEdit_'+i).val($('#RDescription_'+i).val());
+        $('#dateEdit_'+i).val($('#RDate_'+i).val());
+        if($('#Type_'+i).val() == 0) {
+            $('#checkEdit_'+i).prop('checked',false);
+        } else {
+            $('#checkEdit_'+i).prop('checked',true);
+        }
+        if(relVal[0] == 'rt') {
+            if(relVal[1] != i) {
+                $("#divReminderEdit_"+i).slideUp("slow");
+            }
+        } else {
+
+            $("#divReminderEdit_"+i).slideUp("slow");
+        }
+    }
+//
+    for(i=1;i<=ocCount;i++) {
+        if(relVal[0] == 'oc') {
+
+            if(relVal[1] != i) {
+                $("#ocDivDept_"+i).slideUp("slow");
+            }
+        } else {
+            $("#ocDivDept_"+i).slideUp("slow");
+        }
+    }
+})
+function reminderTrEdit(x, id,indexrowId) {
+    if ($("#descriptionEdit_"+indexrowId).val() <= 0) {
+        showError($("#descriptionEdit_"+indexrowId), 'Description is required!');
+        return false;}
+    else {removeError($("#descriptionEdit_"+indexrowId)); }
+    if ($("#dateEdit_"+indexrowId).val() <= 0) {
+        showError($("#dateEdit_"+indexrowId), 'Date is required!');
+        return false;}
+    else { removeError($("#dateEdit_"+indexrowId)); }
+    if($("#usersEdit_"+indexrowId).val() <= 0) {
+        showError($("#usersEdit_"+indexrowId), 'User is required!');
+        return false;}
+    else {removeError($("#usersEdit_"+indexrowId));}
+    $("#editForm_"+indexrowId).submit();
+    $('.adddprtmnt_boxEdit').hide();
+}
+
+function loadProject() {
+    var Project = $('#ProjectSelect').val();
+    $('#ProjectId').val(Project);
+
+    $('#tableProj').find('tr[id^=remd_]').show();
+    $('#formProject').submit();
+//        $.ajax({
+//            url: getBaseURL() + "project/rfc/reminder",
+//            async: false,
+//            data: {'Projectid': Project,'type':'Project'},
+//            type: 'post',
+//            success: function (data, status) {
+//                if(!data)
+//                    return;
+//                var arrreminders =JSON.parse(data);
+//            },
+//            error: function (xhr,data, status) {
+//                console.log(xhr,data,status);
+//            }
+//        });
+}
+
+$('.save').click(function(){
+
+    if ($("#r_description").val() <= 0) {
+        showError($("#r_description"), 'Description is required!');
+        return false;}
+    else {removeError($("#r_description")); }
+    if ($("#r_date").val() <= 0) {
+        showError($("#r_date"), 'Date is required!');
+        return false;}
+    else { removeError($("#r_date")); }
+    if($("#r_users").val() <= 0) {
+        showError($("#r_users"), 'User is required!');
+        return false;}
+    else {removeError($("#r_users"));}
+    $("#addForm").submit();
+    $('.adddprtmnt_box').hide();
+});
+
+//    $('.saveEdit').click(function(){
+//
+//        if ($("#r_descriptionEdit").val() <= 0) {
+//            showError($("#r_descriptionEdit"), 'Description is required!');
+//            return false;}
+//        else {removeError($("#r_descriptioncEdit")); }
+//        if ($("#r_dateEdit").val() <= 0) {
+//            showError($("#r_dateEdit"), 'Date is required!');
+//            return false;}
+//        else { removeError($("#r_dateEdit")); }
+//        if($("#r_usersEdit").val() <= 0) {
+//            showError($("#r_usersEdit"), 'User is required!');
+//            return false;}
+//        else {removeError($("#r_usersEdit"));}
+//        $("#reminder").submit();
+//        $('.adddprtmnt_boxEdit').hide();
+//    });
+
+$("input:checkbox").click(function(){
+    var id = $(this).attr("cid");
+    if($(this).is(":checked")){
+        var checkr=1;}
+    else{
+        var checkr=0;}
+    $.ajax({
+        url:getBaseURL()+"project/rfc/reminder",
+        type:"post",
+        data:"rCheck="+checkr+"&remindId="+id,
+        success:function(data,textStatus,jqXHR){}});
+});
+
+$('#btnDeleteYes').on('click', function () {
+    var remarks = $("#remarks").val();
+
+    if(remarks.length == 0) {
+        showError($("#remarks"), 'Required!');
+        return;
+    } else {
+        removeError($("#remarks"));
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/reminder-delete',
+        type: 'POST',
+        data: {"RegisterId":$('#deleteremindId').val(), "Remarks": remarks},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                $('#remd_'+$('#DeleteModal').attr('data-rowid')).remove();
+
+            } else
+                alert('Cannot delete this reminder!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Failed to delete the Department!');
+        }
+    });
+    $('#DeleteModal').modal('hide');
+    $("#remarks").val('');
+});
+
+function reminderDelete(x, id,indexrowId) {
+    $('#DeleteModal').attr('data-rowid', indexrowId).modal('show');
+    $("#deleteremindId").val(id);
+    $("#remarks").val('');
+}
+
+function reminderEdit(x, id,indexrowId) {
+//        console.log(id);
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/reminder',
+        type: 'POST',
+        data: {"ReminderId":id, "type":"Edit"},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                var arr = JSON.parse(data);
+                var arrReminder = arr[0];
+                var arrReminder = JSON.parse(arrReminder);
+                var arrUsers = arr[1];
+                var arrUsers = JSON.parse(arrUsers);
+
+                $('#remd_'+indexrowId).after($('.adddprtmnt_boxEdit').show('slow'));
+
+//                    $('.adddprtmnt_boxEdit').show('slow');
+
+                $('#r_descriptionEdit').val(arrReminder.RDescription);
+                var d1 =arrReminder.RDate.substring(8,10) + '-' + arrReminder.RDate.substring(5,7) + '-' + arrReminder.RDate.substring(0,4);
+
+                $('#r_dateEdit').val(d1);
+                if(arrReminder.Type == 0) {
+                    $('#r_checkEdit').prop('checked',false);
+                } else {
+                    $('#r_checkEdit').prop('checked',true);
+                }
+//                    $('#r_usersEdit').html("<option value=''>Choose User</option>");
+                $('#r_usersEdit').val(arrUsers.RUserId);
+
+                $.each(arrUsers, function (index, value) {
+                    $('#r_usersEdit').append(
+                        $('<option></option>')
+                            .val(value.RUserId)
+                            .html(value.RUserId)
+                    ).selectpicker('refresh');
+                });
+
+            }
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Cannot Load Details !');
+            $('.adddprtmnt_boxEdit').hide();
+        }
+    });
+//        $('#DeleteModal').attr('data-rowid', indexrowId).modal('show');
+//        $("#deleteremindId").val(id);
+//        $("#remarks").val('');
+}
+</script>

@@ -1,0 +1,313 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid ">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="float_l">Admin Expense Library</h1>
+                <div class="edit_del float_r">
+                    <ul>
+                        <li>
+                            <a title="Add Admin Expense" href="#" onclick="adminExpenseAddEdit('add'); return false;" class="edit-btn edit_al" style=" display:block;"><i class="fa fa-plus"></i> Add Admin Expense</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0 tmss">
+                <div class="table-responsive clear">
+                    <div id="grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="deladminExpenseName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Add Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 id="headerText">Edit Admin Expense</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+                        <div class="row commargin_top_20">
+                            <div class="form-group req_flds col-lg-12">
+                                <input type="text" name="expenseName" id="expenseName" autocomplete="off" class="form-control lbl_move" label="Name"/>
+                                <input type="hidden" name="expenseId" id="expenseId"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group req_flds col-lg-12">
+                                <select name="account" id="account" style="width:100%;" class="form-control single_dropdown lbl_move hei-43" data-size="5" label="Type">
+                                    <option></option>
+                                    <?php if(isset($account)):
+                                        foreach($account as $type):?>
+                                            <option value="<?php echo $type['data']; ?>"><?php echo $type['value']; ?></option>
+                                        <?php endforeach; endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var $grid = $("#grid"),
+    $deleteModal = $('#DeleteModal'),
+    $editModal = $('#EditModal'),
+    $remarks = $('#remarks'),
+    $expenseName = $('#expenseName'),
+    $accountId = $('#account'),
+    $expenseId = $('#expenseId');
+
+$(function () {
+    var datasource =
+    {
+        dataType: "json",
+        dataFields: [
+            { name: 'ExpenseId', type: 'number' },
+            { name: 'AccountId', type: 'number' },
+            { name: 'ExpenseName', type: 'string' },
+            { name: 'AccountName', type: 'string' }
+        ],
+        id: 'expenseId',
+        localdata: <?php echo (isset($expenseReg)) ? json_encode($expenseReg): '[]';?>
+    };
+
+    var data = new $.jqx.dataAdapter(datasource);
+    $grid.jqxGrid( {
+        width: "100%",
+        source: data,
+        pageable: true,
+        autoheight: true,
+        sortable: true,
+        enabletooltips: true,
+        columns: [
+            { text: 'ExpenseId', datafield: 'ExpenseId', hidden: true},
+            { text: 'AccountId', datafield: 'AccountId', hidden: true},
+            { text: 'Name', datafield: 'ExpenseName'},
+            { text: 'AccountName', datafield: 'AccountName'},
+            { text: 'Action',sortable: false, filterable: false, align: 'left',
+                cellsrenderer: function (row) {
+                    var editLink = '<a title="Edit" href="#" onclick="adminExpenseAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink + "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="adminExpenseDelete(this,'+row+')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                }
+            }
+        ]
+    });
+
+    $('#btnDeleteYes').on('click', function () {
+        var remarks = $remarks.val();
+        if(remarks.length == 0) {
+            showError($remarks, 'Required!');
+            return;
+        } else
+            removeError($remarks);
+
+        $deleteModal.modal('hide');
+        var rowData = $grid.jqxGrid('getrowdata', $deleteModal.data('row'));
+        $.ajax({
+            url: getBaseURL() + 'project/main/deleteadminexpense',
+            type: 'POST',
+            async: false,
+            data: {"expenseId": rowData.expenseId, "Remarks": remarks, "Type": 'update'},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $grid.jqxGrid("deleterow", rowData.uid);
+                else
+                    alert('Cannot delete this Admin Expense, it is already in use!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete the Admin Expense!');
+            }
+        });
+        $remarks.val('');
+    });
+});
+
+function adminExpenseDelete(x, row) {
+    $(x).prop('disabled', true);
+    var rowData = $grid.jqxGrid('getrowdata', row);
+    $.ajax({
+        url: getBaseURL() + 'project/main/deleteadminexpense',
+        type: 'POST',
+        async: false,
+        data: {"expenseId": rowData.expenseId, "Type": 'check'},
+        success:function(data, textStatus, jqXHR){
+            $(x).prop('disabled', false);
+            if (jqXHR.status == 200){
+                $deleteModal.data('row', row).modal('show');
+                $('#deladminExpenseName').html(rowData.expenseName);
+                $("#remarks").val('');
+            } else
+                alert('Cannot delete this Admin Expense, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            $(x).prop('disabled', false);
+            alert('Cannot delete this Admin Expense!');
+        }
+    });
+}
+
+function addUpdateFn() {
+    var expenseName = $expenseName.val();
+    var expenseId = $expenseId.val();
+    var accountId = $accountId.val();
+
+    validate(function(isSuccess) {
+
+        if(isSuccess === false) {
+            return false;
+        } else {
+            $editModal.modal('hide');
+            var mode = $editModal.data('mode');
+            if(mode == 'edit') {
+                var rowData = $grid.jqxGrid('getrowdata', $editModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'project/main/editadminexpense',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $grid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                        } else {
+                            alert('Failed to Edit the Project!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the Project!')
+                    }
+                });
+            } else if(mode == 'add') {
+                $.ajax({
+                    url: getBaseURL() + 'project/main/addadminexpense',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $grid.jqxGrid('addrow',null,JSON.parse(data));
+                        } else {
+                            alert('Failed to Add Project!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Add Project!');
+                    }
+                });
+            }
+            $expenseId.val(0);
+            $expenseName.val('');
+            $accountId.select2("val", "");
+        }
+    });
+
+
+    function validate(callback) {
+        if(expenseName.length == 0) {
+            showError($expenseName, 'Required!');
+            return;
+        } else {
+            removeError($expenseName);
+        }
+
+//        if(accountId.length == 0) {
+//            showError($accountId, 'Required!');
+//            return;
+//        } else {
+//            removeError($accountId);
+//        }
+
+        //validate expense name already found
+        $.ajax({
+            url:getBaseURL()+ 'project/main/checkadminExpensefound',
+            type:"post",
+            data: $('#addEditForm').serialize(),
+            async: false,
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(data)
+                if(data.results != false){
+                    showError($expenseName, 'Name already found!');
+                    callback(false);
+                    return false;
+                }
+                else{
+                    removeError($expenseName);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+
+function adminExpenseAddEdit(mode,row) {
+    removeError($("#projectName"));
+    if(mode== 'edit') {
+        var rowData = $grid.jqxGrid('getrowdata', row);
+        $editModal.data('row', row).data('mode', 'edit').modal('show');
+        $expenseId.val(rowData.ExpenseId);
+        $expenseName.val(rowData.ExpenseName);
+        $accountId.val(rowData.AccountId).trigger('change');
+        $("#headerText").html("Edit Admin Expense");
+        $("#btnEditYes").html("Update");
+    } else if(mode== 'add'){
+        $editModal.data('mode', 'add').modal('show');
+        $expenseId.val(0);
+        $expenseName.val('');
+        $accountId.select2("val", "");
+        $("#headerText").html("New Admin Expense");
+        $("#btnEditYes").html("Create");
+    }
+}
+</script>

@@ -1,0 +1,285 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+#treeGrid .jqx-grid-header {
+	height:75px !important;
+}
+
+.social_profiles{ display:none !important;}
+.pro-sett ul.left-65 li a{width:auto !important; padding:0px 5px; font-size:14px !important;}
+.pro-sett ul.left-65	 {left: -295px !important;}
+.fnt-s12				 {font-size:13px !important;}
+.pro-flt-sett i			 { color:#FFF;}
+.pro-sett ul.left-65 li a:hover{ background:#00bcd4!important;}
+
+.pro-flt-sett{ background:#00bcd4!important;}
+</style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid padlr0">
+    <div class="col-lg-12">
+      <div class="pro-sett active"> <a class="pro-flt-sett btn-large"> <i class="fa fa-compass"></i> </a>
+        <ul class="left-65">
+          <li> <a class="pro-flt-sett hide-input-file" onclick="qualifierAddEdit('add'); return false;" style=" display:block;"><i class="fa fa-plus fnt-s12"></i> Add New</a> </li>
+          <li> <a class="pro-flt-sett" href="<?php echo $this->basePath(); ?>/project/qualifier/qualifiersetting"><i class="fa fa-file-text-o fnt-s12"></i> Type</a> </li>
+          <li> <a class="pro-flt-sett" href="<?php echo $this->basePath(); ?>/project/qualifier/tdssetting"><i class="fa fa-wrench fnt-s12"></i> TDS</a> </li>
+          <li> <a class="pro-flt-sett" href="<?php echo $this->basePath(); ?>/project/qualifier/servicetaxsetting"><i class="fa fa-cogs fnt-s12"></i> Service</a> </li>
+        </ul>
+      </div>
+      <h1 class="float_l" style="margin-bottom:30px;">Qualifier Master</h1>
+    </div>
+    <div class="col-lg-12 clear">
+      <div class="table-responsive clear">
+        <div id="treeGrid"> </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Edit Confirmation Modal-->
+<div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h1 id="headerText">Edit Qualifier</h1>
+      </div>
+      <div class="modal-body">
+        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+          <form class="form-horizontal" method="POST" id="addEditForm" autocomplete="off">
+            <div class="row">
+              <div class="form-group req_flds padtop10 col-lg-12">
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                <input type="text" id="qualifierName" name="qualifierName" autocomplete="off" class="form-control lbl_move" maxlength="150" label="Qualifier Name"/>
+                <input type="hidden" name="qualifierId" id="qualifierId"/>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group req_flds col-lg-12">
+                <input type="text" name="qualifierTypeName" id="qualifierTypeName" autocomplete="off" class="form-control lbl_move" label="Qualifier Type"/>
+                <input type="hidden" name="qualifierTypeId" id="qualifierTypeId"/>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group req_flds col-lg-12">
+                <input type="text" name="roundDecimal" id="roundDecimal" autocomplete="off" class="form-control lbl_move" label="Round Decimal" onkeypress="return isNumberKey(event,this)" />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer clear">
+        <div class="col-lg-12 savebtn_area no_border">
+          <ul>
+            <li class="save_btn float_r"> <a href="#" onclick="addUpdateFn(); return false;" id="btnEditYes" class="ripple">Update</a> </li>
+            <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+var arr_qualtype = <?php echo (isset($qualifiertypelist)) ? json_encode($qualifiertypelist) : '[]';?>;
+var $QualifierName = $('#qualifierName'),
+    $QualifierId = $('#qualifierId'),
+    $QualTypeName = $('#qualifierTypeName'),
+    $QualTypeId = $('#qualifierTypeId'),
+    $RoundDecimal = $('#roundDecimal')
+$(function () {
+    $QualTypeName.autocomplete({
+        lookup: arr_qualtype,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $QualTypeId.val(suggestion.data);
+            }
+        }, onSearchStart: function (suggestion) {
+            $QualTypeId.val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $QualTypeId.val('new');
+            }
+        }
+    });
+    //bindJqxGridAutoResize();
+});
+
+var data = <?php echo (isset($qualifierlist)) ? json_encode($qualifierlist) : ''?>,
+    $treeGrid = $("#treeGrid"),
+    $editModal = $('#EditModal'),
+    $qualifierName = $('#qualifierName');
+
+$(function () {
+    var source = {
+        localdata:data,
+        dataType: "json",
+        dataFields: [
+            { name: 'QualifierId', type: 'number' },
+            { name: 'QualifierTypeId', type: 'number' },
+            { name: 'QualifierName', type: 'string' },
+            { name: 'QualifierTypeName', type: 'string' },
+            { name: 'RoundDecimal', type: 'number' },
+        ],
+        id: 'QualifierId'
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    $treeGrid.jqxGrid({
+        width: "100%",
+        source: dataAdapter,
+        sortable: true,
+        pagerButtonsCount: 6,
+        filterable:true,
+        pageable:true,
+        rowDetails: true,
+        autoheight: true,
+        selectionmode: 'singlerow',
+        showfilterrow: true,
+        editable: false,
+        altrows: true,
+        enabletooltips: true,
+        showfilterrow: true,
+        columns: [
+            { text: 'QualifierId', datafield: 'QualifierId', hidden: true, filterable: false},
+            { text: 'QualifierTypeId', datafield: 'QualifierTypeId', hidden: true, filterable: false},
+            { text: 'QualifierName', dataField: 'QualifierName', width:'40%'},
+            { text: 'QualifierTypeName', dataField: 'QualifierTypeName', width:'40%'},
+            { text: 'RoundDecimal', dataField: 'RoundDecimal', hidden: true, filterable: false},
+            { text: 'Action', sortable: false, filterable: false, align: 'left', width:'20%',
+                cellsrenderer: function (row) {
+                    var editLink = '<a title="Edit" style=" margin-left:33px;" href="#" onclick="qualifierAddEdit(\'edit\','+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                    return editLink;
+                }
+            }
+        ]
+    });
+});
+
+function addUpdateFn() {
+    var qualifierName = $QualifierName.val();
+    var qualifierId = $QualifierId.val();
+    var qualifierTypeId = $QualTypeId.val();
+    var qualifierTypeName = $QualTypeName.val();
+
+    validate(function(isSuccess) {
+        if(isSuccess === false) {
+            return false;
+        } else {
+            $editModal.modal('hide');
+            var mode = $editModal.data('mode');
+            if(mode == 'edit') {
+                var rowData = $treeGrid.jqxGrid('getrowdata', $editModal.data('row'));
+                $.ajax({
+                    url: getBaseURL() + 'project/qualifier/editqualifier',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $treeGrid.jqxGrid('updaterow', rowData.uid,JSON.parse(data));
+                        } else {
+                            alert('Failed to Edit the Qualifier!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Edit the Qualifier!')
+                    }
+                });
+            } else if(mode == 'add') {
+                $.ajax({
+                    url: getBaseURL() + 'project/qualifier/addqualifier',
+                    type: 'POST',
+                    data: $('#addEditForm').serialize(),
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status == 200){
+                            $treeGrid.jqxGrid('addrow',null,JSON.parse(data));
+                        } else {
+                            alert('Failed to Add Qualifier!');
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to Add Qualifier!');
+                    }
+                });
+            }
+            $("#qualifierId").val(0);
+            $("#qualifierName").val('');
+            $("#qualifierTypeId").val(0);
+            $("#qualifierTypeName").val('');
+            $("#roundDecimal").val(0);
+        }
+    });
+
+    function validate(callback) {
+        if(qualifierName.length == 0) {
+            showError($QualifierName, 'Required!');
+            return;
+        } else {
+            removeError($QualifierName);
+        }
+
+        if(qualifierTypeName.length == 0) {
+            showError($QualTypeName, 'Required!');
+            return;
+        } else {
+            removeError($QualTypeName);
+        }
+
+        $.ajax({
+            url:getBaseURL()+ 'project/qualifier/checkqualifierfound',
+            type:"post",
+            data: $('#addEditForm').serialize(),
+            async: false,
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(data)
+                if(data.results != false){
+                    showError($qualifierName, 'Qualifier Name already found!');
+                    callback(false);
+                    return false;
+                }
+                else{
+                    removeError($qualifierName);
+                    callback(true);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                callback(false);
+                return false;
+            }
+        });
+    }
+}
+
+function qualifierAddEdit(mode,row) {
+    if (mode == 'edit') {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        $editModal.data('row', row).data('mode', 'edit').modal('show');
+        $("#qualifierId").val(rowData.QualifierId);
+        $("#qualifierName").val(rowData.QualifierName);
+        $("#qualifierName").trigger('change');
+        $("#qualifierTypeName").val(rowData.QualifierTypeName);
+        $("#qualifierTypeName").trigger('change');
+        $("#qualfierTypeId").val(rowData.QualifierTypeId);
+        $("#roundDecimal").val(rowData.RoundDecimal);
+        $("#roundDecimal").trigger('change');
+        $("#headerText").html("Edit Qualifier");
+        $("#btnEditYes").html("Update");
+    } else if (mode == 'add') {
+        $editModal.data('mode', 'add').modal('show');
+        $("#qualifierId").val(0);
+        $("#qualifierName").val('');
+        $("#qualifierName").trigger('change');
+        $("#qualfierTypeId").val(0);
+        $("#qualifierTypeName").val('');
+        $("#qualifierTypeName").trigger('change');
+        $("#roundDecimal").val(0);
+        $("#roundDecimal").trigger('change');
+        $("#headerText").html("Create Qualifier");
+        $("#btnEditYes").html("Create");
+    }
+}
+</script> 

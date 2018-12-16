@@ -1,0 +1,459 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<style>
+    #limain_bill,#lieb_charge,#litele_charge {
+        display: none;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1>Lease / Rental Bill</h1>
+        </div>
+        <form  id="theform" method="post"  autocomplete="off">
+            <div class="col-lg-12">
+                <ul class="edit-lbl">
+                    <li class="col-lg-4">
+                        <label>Date : </label>
+                        <span class="date_icon reen-date"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="entry_date" id="entry_date" class="date_picker" value="<?php echo (isset($payVal['PVDate'])) ? date('d-m-Y', strtotime($payVal['PVDate'])) : date('d-m-Y'); ?>" readonly>
+                    </li>
+                    <li class="col-lg-5">
+                        <label>Voucher No : </label>
+                        <input type="text" name="voucher_no" value="<?php echo (isset($payVal['PVNo'])) ? $payVal['PVNo'] : ''; ?>" id="voucher_no" readonly>
+                    </li>
+                </ul>
+            </div>
+            <!---------------------------Form Area--------------------------->
+            <div class="col-lg-12 flwup_topcnt fmg_topcnt clear" style="margin-bottom:10px;">
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <input type="text" id="proper_name"  class="form-control lbl_move" value="<?php echo $payVal['value']?>"  label="Property Name" readonly/>
+                    <input type="hidden" name="unitId" id="unitId" value="<?php echo $payVal['data']?>"/>
+                    <input type="hidden" name="DueDate" id="DueDate" value="<?php echo (isset($payVal['DueDayOfMonth']) && !is_null($payVal['DueDayOfMonth'])) ? $payVal['DueDayOfMonth'] : 0;?> "/>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <input type="text"  id="tenant_name"  name="tenant_name" class="form-control lbl_move" value="<?php echo (isset($payVal['LeaserName']) && $payVal['LeaserName']!="")  ? $payVal['LeaserName'] : $payVal['TenantName']; ?>"  label="Name of the Tenant" readonly/>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="target_from" id="target_from" data-bsfshare="From Date" readonly class="form-control lbl_move date_picker" value="<?php echo (isset($payVal['RentPeriodFrom'])) ? date('d-m-Y', strtotime($payVal['RentPeriodFrom'])) : date('d-m-Y'); ?>" onchange="changeCallDate($(this).val());" label="Rent Period From" <?php echo (isset($rCount) && $rCount>0) ? "disabled" : "";?> />
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar" ></i></span>
+                    <input type="text" name="target_to" id="target_to" data-bsfshare="To Date" readonly class="form-control lbl_move date_picker_call" value="<?php echo (isset($payVal['RentPeriodTo'])) ? date('d-m-Y', strtotime($payVal['RentPeriodTo'])) : ''; ?>" label="Rent Period To" onchange="dueDate();" <?php echo (isset($payVal['RentPeriodTo']) && $payVal['RentPeriodTo']!="") ? (isset($rCount) && $rCount>0) ? "disabled" : "" : 'disabled'; ?> />
+                </div>
+            </div>
+
+            <!---------------------------Form Area--------------------------->
+            <!---------------------------Particulars Detalis--------------------------->
+            <div class="clearfix"></div>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                <!---------------------------Particulars Detalis left--------------------------->
+
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="par-lessbill">
+                        <h1>Particulars</h1>
+                        <ul>
+                            <h2>Current Due</h2>
+                            <li>
+                                <label>Rental Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" value="<?php echo (isset($payVal['RentalCharge'])) ? $this->commonHelper()->sanitizeNumber($payVal['RentalCharge'],2) : '';?>" name="rent_charge" id="rent_charge" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                                <input type="hidden" name="RentalRegId" id="RentalRegId" value="<?php echo $payVal['RentalRegisterId']?>">
+                                <input type="hidden" name="RegisterId" id="RegisterId" value="<?php echo $payVal['RegisterId']?>">
+                            </li>
+                            <li id="limain_bill" style="<?php ?>">
+                                <label>Maintenance Bill</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="main_bill" onkeypress="return isDecimal(event,this;)" onchange="onChangeAmount();FormatNum(this, 2);" id="main_bill" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                                <input type="hidden" name="main_id" id="main_id">
+                            </li>
+                            <li id="lieb_charge">
+                                <label>EB Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="eb_charge" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" id="eb_charge" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                                <input type="hidden" name="eb_id" id="eb_id">
+                            </li>
+                            <li id="litele_charge">
+                                <label>Telephone Charges</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" name="tele_charge" onkeypress="return isDecimal(event,this);" onchange="onChangeAmount();FormatNum(this, 2);" id="tele_charge" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                                <input type="hidden" name="tele_id" id="tele_id">
+                            </li>
+                        </ul>
+                        <ul class="bgs-grs">
+                            <li>
+                                <label>Gross Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="gross_amount" name="gross_amount" value="<?php echo (isset( $payVal['GrossAmount'])) ? $this->commonHelper()->sanitizeNumber( $payVal['GrossAmount'],2) : '';?>" readonly="readonly" />
+                            </li>
+                            <li>
+                                <label>Service Tax <?php echo (isset($stlist) && $stlist['NetTax']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['NetTax'],2,false).' %' : '0 %';?></label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="service_tax" name="service_tax" onkeypress="return isDecimal(event,this);"  data-bsfshare="ServiceTax" value="<?php echo (isset( $payVal['ServiceTax'])) ? $this->commonHelper()->sanitizeNumber( $payVal['ServiceTax'],2) : '';?>" readonly />
+                                <input type="hidden" id="service_taxable" value="<?php echo (isset($stlist) && $stlist['TaxablePer']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['TaxablePer'],3,false) : 0;?>" />
+                                <input type="hidden" id="service_net" value="<?php echo (isset($stlist) && $stlist['NetTax']!=NULL) ? $this->commonHelper()->sanitizeNumber($stlist['NetTax'],3,false) : 0;?>" />
+                            </li>
+                            <li>
+                                <label>Total Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="total_amount" name="total_amount" value="<?php echo (isset( $payVal['TotalAmount'])) ? $this->commonHelper()->sanitizeNumber( $payVal['TotalAmount'],2) : '';?>" readonly="readonly">
+                            </li>
+                        </ul>
+                        <ul>
+                            <h2>Previous Bill Due</h2>
+                            <li>
+                                <label>Balance Amount</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" value="<?php echo (isset( $payVal['PreviousBillDue'])) ? $this->commonHelper()->sanitizeNumber( $payVal['PreviousBillDue'],2) : '';?>" onchange="preBillTot();FormatNum(this, 2);" id="last_bill" name="last_bill" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                            </li>
+                            <li>
+                                <label>Late Fess</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" value="<?php echo (isset( $payVal['LateFees'])) ? $this->commonHelper()->sanitizeNumber( $payVal['LateFees'],2) : '';?>" onchange="preBillTot();FormatNum(this, 2);" id="late_fee" name="late_fee" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?> />
+                            </li>
+                            <li>
+                                <label>Total Payable</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" id="total_payable" name="total_payable" value="<?php echo (isset( $payVal['TotalPayable'])) ? $this->commonHelper()->sanitizeNumber( $payVal['TotalPayable'],2) : '';?>" readonly />
+                            </li>
+                            <li>
+                                <label>Advance Paid</label>
+                                <i class="fa fa-inr cur-css"></i>
+                                <input class="parent_text" type="text" onkeypress="return isDecimal(event,this);" onchange="preBillTot();FormatNum(this, 2);" value="<?php echo (isset($payVal['ExcessAmount'])) ? $this->commonHelper()->sanitizeNumber($payVal['ExcessAmount'],2) : '';?>" data-bsfshare="Excess Amount" id="excess_amt" name="excess_amt" readonly />
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="pei-rem">
+                        <label>Remarks</label>
+                        <textarea name="remarks" maxlength="250" <?php echo (isset($rCount) && $rCount>0) ? "readonly" : "";?>><?php echo (isset($payVal['Remarks'])) ? $payVal['Remarks'] : '';?></textarea>
+                    </div>
+                </div>
+                <!---------------------------Particulars Detalis left end--------------------------->
+                <!---------------------------Previous Detalis right --------------------------->
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                    <div class="par-lessbill par-prew">
+                        <h1>Previous Details</h1>
+                        <ul>
+                            <li>
+                                <label>Rental Charges</label>
+                                <span><?php echo (isset($payVal['RentalCharge'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['RentalCharge'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Other Charges</label>
+                                <span><?php echo (isset($list['oAmt']) && !is_null($list['oAmt']['tAmount'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($list['oAmt']['tAmount'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Gross Amount</label>
+                                <span><?php echo (isset($payVal['GrossAmount'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['GrossAmount'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Service Tax</label>
+                                <span><?php echo (isset($payVal['ServiceTax'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['ServiceTax'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Total Amount</label>
+                                <span><?php echo (isset($payVal['TotalAmount'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['TotalAmount'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Previous Bill Due</label>
+                                <span><?php echo (isset($payVal['PreviousBillDue'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['PreviousBillDue'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Late Fees</label>
+                                <span><?php echo (isset($payVal['LateFees'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['LateFees'],2,true) : '';?></span> </li>
+                            <li>
+                            <li>
+                                <label>Total Amount Payable</label>
+                                <span><?php echo (isset($payVal['TotalAmountPayable'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($payVal['TotalAmountPayable'],2,true) : '';?></span> </li>
+                            <li>
+                                <label>Previous Paid</label>
+                                <span><?php if((isset($list['reAmt']) && !is_null($list['reAmt']['tAmount']))) {  ?>Bill No.<?php echo (isset($payVal['PVNo'])) ? $payVal['PVNo'] : '';?> on <?php echo (isset($list['date']) && $list['date']!="") ? $list['date'] : '';?> for <?php echo (isset($list['reAmt']) && !is_null($list['reAmt']['tAmount'])) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($list['reAmt']['tAmount'],2,true) : ''; }?></span></li>
+                            <?php $reAmt = 0 ;
+                            if(isset($list['reAmt']) && !is_null($list['reAmt']['tAmount'])) {
+                                $reAmt = $this->commonHelper()->sanitizeNumber($list['reAmt']['tAmount'],2);
+                            }
+                            $teAmt = 0;
+                            if(isset($payVal['TotalAmountPayable'])) {
+                                $teAmt = $this->commonHelper()->sanitizeNumber($payVal['TotalAmountPayable'],2);
+                            }
+                            $due=floatval($teAmt)-floatval($reAmt);
+
+                            ?>
+                            <li>
+                                <label>Previous Due</label>
+                                <span><?php echo (isset($due) && $due>0) ? 'Rs.'.$this->commonHelper()->sanitizeNumber($due,2,true) : '';?></span> </li>
+                        </ul>
+                    </div>
+                    <div class="totalpay">
+                        <label>Total Amount Payable</label> <i class="fa fa-inr cur-css-tol"></i>
+                        <p id="dueDay"><?php echo (isset($payVal['DueDate'])) ? 'on before '.date('d-m-Y', strtotime($payVal['DueDate'])) : ''; ?></p>
+                        <input type="hidden" id="dueDateVal" name="dueDateVal" value="<?php echo (isset($payVal['DueDate'])) ? date('d-m-Y', strtotime($payVal['DueDate'])) : ''; ?>"/>
+                        <span><input type="text" id="totalpayamount" name="totalpayamount" value="<?php echo (isset($payVal['TotalAmountPayable'])) ? $this->commonHelper()->sanitizeNumber($payVal['TotalAmountPayable'],2) : '';?>" readonly></span>
+                    </div>
+                </div>
+                <!---------------------------Previous Detalis right end--------------------------->
+            </div>
+        </form>
+        <div class="col-lg-12 m_tb40 padlr0 clear"></div>
+    </div>
+</div>
+<!---------------------------button--------------------------->
+<div class="col-lg-12 savebtn_area clear">
+    <ul>
+        <li class="dropdown save_btn float_r"><button class="ripple" onclick="submitFormData();" type="button">Submit</button></li>
+    </ul>
+</div>
+<!---------------------------button--------------------------->
+<script>
+    Date.isLeapYear = function (year) {
+        return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+    };
+
+    Date.getDaysInMonth = function (year, month) {
+        return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+    };
+
+    Date.prototype.isLeapYear = function () {
+        return Date.isLeapYear(this.getFullYear());
+    };
+
+    Date.prototype.getDaysInMonth = function () {
+        return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+    };
+
+    Date.prototype.addMonths = function (value) {
+        var n = this.getDate();
+        this.setDate(1);
+        this.setMonth(this.getMonth() + value);
+        this.setDate(Math.min(n, this.getDaysInMonth()));
+        return this;
+    };
+    $(document).ready(function() {
+        $('.date_picker_call').datepicker({
+            format: "dd-mm-yyyy",
+            startDate: new Date(),
+            todayBtn: true,
+            orientation: "top auto",
+            autoclose: true
+        });
+    });
+    function changeCallDate(myDat) {
+        if(myDat!="" && myDat!=null) {
+            var sDate = myDat.split('-');
+            var myDate = new Date(sDate[1]+'/'+sDate[0] +'/'+sDate[2]);
+            myDate.setMonth(myDate.getMonth() + 1);
+            $('.date_picker_call').val('').attr('disabled',false);
+            $('.date_picker_call').datepicker('setStartDate', myDate);
+        }
+    }
+    function dueDate() {
+        var dVal = $('#target_to').val();
+        if(dVal!="") {
+            var sDate = dVal.split('-');
+            var dueDay=1;
+            var oDate =parseInt($('#DueDate').val());
+            if(oDate!=0) {
+                dueDay=oDate;
+            }
+
+            var actualDate = new Date((sDate[1])+'/'+ sDate[0] +'/'+sDate[2]);
+
+            if(parseInt(actualDate.getDate()) > dueDay) {
+                actualDate = new Date((sDate[1])+'/'+ dueDay +'/'+sDate[2]);
+                actualDate = actualDate.addMonths(1);
+            } else {
+                actualDate = new Date((sDate[1])+'/'+ dueDay +'/'+sDate[2]);
+            }
+
+            var fDate = $.datepicker.formatDate('dd-mm-yy', actualDate);
+
+            $('#dueDay').html('on before '+fDate);
+
+            $('#dueDateVal').val(fDate);
+        } else {
+            $('#dueDay').html('');
+            $('#dueDateVal').val('');
+
+        }
+    }
+    var $unitName = $('#proper_name'),
+        $pvDate = $('#entry_date'),
+        $pvNo = $('#voucher_no'),
+        $UnitId = $('#unitId'),
+        $tenantName = $('#tenant_name'),
+        $rentCharge = $('#rent_charge'),
+        $rentPeriod = $('#rent_period'),
+        $maintenance = $('#main_bill'),
+        $mainId = $('#main_id'),
+        $ebId = $('#eb_id'),
+        $teleId = $('#tele_id'),
+        $ebCharge = $('#eb_charge'),
+        $teleCharge = $('#tele_charge'),
+        $limaintenance = $('#limain_bill'),
+        $liebCharge = $('#lieb_charge'),
+        $liteleCharge = $('#litele_charge'),
+        $grossAmount = $('#gross_amount'),
+        $serviceTax = $('#service_tax'),
+        $totalAmount = $('#total_amount'),
+        $lastBill = $('#last_bill'),
+        $lateFees = $('#late_fee'),
+        $excessAmt = $('#excess_amt'),
+        $totalPayable = $('#total_payable'),
+        $totalPayableAmount = $('#totalpayamount'),
+        $RentalRegisterId = $('#RentalRegId');
+    $(document).ready(function() {
+        var payService = <?php echo (isset($payService)) ? json_encode($payService) : '[]';?>;
+        $mainId.val(0);
+        $maintenance.val(0);
+        $ebCharge.val(0);
+        $ebId.val(0);
+        $teleCharge.val(0);
+        $teleId.val(0);
+        $.each(payService, function(index, data) {
+            var arr = data.ServiceName.split(' ');
+            if(arr[0]=="Maintenance"){
+                $maintenance.val(sanitizeNumber(data.Amount,2));
+                $mainId.val(data.ServiceId);
+                $limaintenance.show();
+            } else if(arr[0]=="EB"){
+                $ebCharge.val(sanitizeNumber(data.Amount,2));
+                $ebId.val(data.ServiceId);
+                $liebCharge.show();
+            } else if(arr[0]=="Telephone"){
+                    $teleCharge.val(sanitizeNumber(data.Amount,2));
+                    $teleId.val(data.ServiceId);
+                    $liteleCharge.show();
+            }
+        });
+    });
+    function onChangeAmount() {
+        var mAmt = parseFloatVal($maintenance.val()),
+            eAmt = parseFloatVal($ebCharge.val()),
+            tAmt = parseFloatVal($teleCharge.val()),
+            rAmt = parseFloatVal($rentCharge.val());
+        var gAmt = mAmt+eAmt+tAmt+rAmt;
+        $grossAmount.val(sanitizeNumber(gAmt,2));
+        onCalTotal();
+    }
+    function onCalTotal() {
+        var gAmt = parseFloatVal($grossAmount.val());
+        var taxable = parseFloatVal($('#service_taxable').val());
+        var nTax = parseFloatVal($('#service_net').val());
+        var tAmt=(taxable*gAmt);
+        if(tAmt!=0) {
+            tAmt = tAmt/100;
+        }
+        var sTax = tAmt*nTax;
+
+        if(sTax!=0) {
+            sTax = sTax/100;
+        }
+        var sAmt = parseFloatVal(sTax);
+        $('#service_tax').val(sanitizeNumber(sAmt,2));
+        var totAmt = gAmt+sAmt;
+        $totalAmount.val(sanitizeNumber(totAmt,2));
+        totalAmountPayable();
+    }
+    function preBillTot() {
+        var lAmt = parseFloatVal($lastBill.val()),
+            lFeeAmt = parseFloatVal($lateFees.val());
+        var totPay = lAmt+lFeeAmt;
+        $totalPayable.val(sanitizeNumber(totPay,2));
+        totalAmountPayable();
+    }
+
+    function totalAmountPayable() {
+        var totAmt = parseFloatVal($totalAmount.val()),
+            totPay = parseFloatVal($totalPayable.val()),
+            exAmt = parseFloatVal($excessAmt.val());
+        var totalPayAmount = totAmt+ totPay;
+        totalPayAmount-=exAmt;
+        if(totalPayAmount>0) {
+            $totalPayableAmount.val(sanitizeNumber(totalPayAmount,2));
+        } else {
+            $totalPayableAmount.val(0);
+        }
+    }
+
+    function submitFormData() {
+        var unitId =  $UnitId.val(),
+            rentalCharge = $rentCharge.val(),
+            grossAmount = $grossAmount.val(),
+            pvDate = $pvDate.val(),
+            pvNo = $pvNo.val(),
+            totalPayableAmount = $totalPayableAmount.val(),
+            maintenance = $maintenance.val(),
+            ebCharge = $ebCharge.val(),
+            teleCharge = $teleCharge.val();
+        if(unitId.length == 0 || unitId == 0) {
+            showError($unitName, "Required");
+            return;
+        } else {
+            removeError($unitName);
+        }
+        if($.trim($('#tenant_name').val()).length == 0) {
+            showError($('#tenant_name'), "Required");
+            return;
+        } else {
+            removeError($('#tenant_name'));
+        }
+        if($.trim($('#target_from').val()).length == 0) {
+            showError($('#target_from'), "Required");
+            return;
+        } else {
+            removeError($('#target_from'));
+        }
+        if($.trim($('#target_to').val()).length == 0) {
+            showError($('#target_to'), "Required");
+            return;
+        } else {
+            removeError($('#target_to'));
+        }
+
+        if(rentalCharge.length == 0) {
+            showError($rentCharge, "Required");
+            return;
+        } else {
+            removeError($rentCharge);
+        }
+        if(grossAmount.length == 0) {
+            showError($grossAmount, "Required");
+            return;
+        }else{
+            removeError($grossAmount);
+        }
+        if(pvNo.length == 0) {
+            showError($pvNo, "Required");
+            return;
+        } else{
+            removeError($pvNo);
+        }
+        if(pvDate.length == 0 || !/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/.test(pvDate)) {
+            showError($pvDate, "Invalid Date");
+            return;
+        }else {
+            removeError($pvDate);
+        }
+        if(totalPayableAmount.length == 0) {
+            showError($totalPayableAmount, "required");
+            return;
+        } else {
+            removeError($totalPayableAmount);
+        }
+        if(maintenance.length == 0) {
+            showError($maintenance, "required");
+            return;
+        } else{
+            removeError($maintenance);
+        }
+        if(ebCharge.length == 0) {
+            showError($ebCharge, "required");
+            return;
+        } else {
+            removeError($ebCharge);
+        }
+        if(teleCharge.length == 0) {
+            showError($teleCharge, "required");
+            return;
+        } else{
+            removeError($teleCharge);
+        }
+        $('#theform').submit();
+    }
+</script>

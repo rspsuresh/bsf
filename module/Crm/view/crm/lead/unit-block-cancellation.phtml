@@ -1,0 +1,623 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1>Unit Cancellation</h1>
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="col-lg-12 clear">
+                <div class="kickoff_area col-lg-12 clear">
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-12 col-md-12 col-sm-12 cnt_sliders padlr0">
+                            <?php if (isset( $leadId )): ?>
+                            <form id="cancellation-form" method="post">
+                                <input type="hidden" name="csrf" value="<?php echo isset( $csrf ) ? $csrf : ''; ?>">
+                                <input type="hidden" name="leadId" value="<?php echo ( isset( $leadId ) ) ? $leadId : ''; ?>">
+                                <input type="hidden" name="CancellationId" value="<?php echo ($isEditMode)?$$unitCancellation['CancellationId']:''; ?>">
+
+                                <div id="carousel" class="carousel slide" data-ride="carousel">
+                                    <!-- Wrapper for slides -->
+                                    <div class="carousel-inner" role="listbox">
+                                        <!--step 1-->
+                                        <div class="item active">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <div class="">
+                                                    <label for="vocher_no" class="bk_lbl bk_lbl_inpt">Vocher No <span class="colon_r">:</span></label>
+                                                    <input type="text" class="bk_lbl_inpt inputbg_ef bk_inpt1" name="vocher_no" id="vocher_no"
+                                                           value="<?php echo $svNo; ?>" <?php echo ($genType)?"readonly":''; ?> />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+                                                <div class="col-lg-offset-1">
+                                                    <label for="cancellation_date" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i
+                                                                class="fa fa-calendar-o"></i></span> Cancellation Date <span class="colon_r">:</span></label>
+                                                    <input type="text" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="cancellation_date" id="cancellation_date"
+                                                           value="<?php echo (isset($refDate))?$refDate:date( 'd-m-Y' ); ?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 m_tb10">
+                                                <div class="col-lg-8 col-lg-offset-2">
+                                                    <!--            <form class="form-horizontal">-->
+                                                    <div class="row">
+
+                                                        <div class="form-group m_top20 col-lg-12 padtop20">
+                                                            <?php if($isEditMode): ?>
+                                                                <input type="text" class="form-control lbl_move" label="Executive Name" readonly value="<?php echo $unitCancellation['EmployeeName']; ?>"/>
+                                                                <input type="hidden" name="executive_id" id="executive_id" value="<?php echo $unitCancellation['ExecutiveId']; ?>">
+                                                            <?php else: ?>
+                                                                <select id="executive_id" name="executive_id" class="form-control single_dropdown lbl_move"
+                                                                        label="Select Executive..." style="width:100%;">
+                                                                    <option value=""></option>
+                                                                    <?php if(isset($arrExecutives)):
+                                                                        foreach($arrExecutives as $executive): ?>
+                                                                            <option value="<?php echo $executive['UserId']; ?>">
+                                                                                <?php echo $executive['EmployeeName']; ?>
+                                                                            </option>
+                                                                        <?php endforeach;
+                                                                    endif; ?>
+                                                                </select>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <div id="unitno-wrapper" class="form-group col-lg-12 padtop20 animated fadeInUp">
+                                                            <?php if($isEditMode): ?>
+                                                                <input type="text" class="form-control lbl_move" label="Unit No" readonly value="<?php echo $unitCancellation['UnitNo']; ?>"/>
+                                                                <input type="hidden" name="unit_no" id="unit_no" value="<?php echo $unitCancellation['UnitId']; ?>">
+                                                            <?php else: ?>
+                                                                <select id="unit_no" name="unit_no" class="form-control single_dropdown lbl_move"
+                                                                        label="Select Unit No..." style="width:100%;">
+                                                                    <option value=""></option>
+                                                                    <?php if(isset($arrCurUnits)):
+                                                                        foreach($arrCurUnits as $unit): ?>
+                                                                            <option value="<?php echo $unit['UnitId'] ?>"><?php echo $unit['UnitName']; ?></option>
+                                                                        <?php endforeach;
+                                                                    endif; ?>
+                                                                </select>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <div id="cancellation-info-container" class="hide">
+                                                            <div class="form-group col-lg-12 padtop20 animated fadeInUp">
+                    <textarea id="Remarks" name="Remarks" maxlength="250" class="form-control lbl_move"
+                              label="Remarks"><?php echo ($isEditMode)?$unitCancellation['Remarks']:''; ?></textarea>
+                                                            </div>
+
+                                                            <div class="form-group col-lg-12 padtop10 animated fadeInUp">
+                                                                <input type="text" name="PaidAmt" id="PaidAmt" class="form-control lbl_move"
+                                                                       value="<?php echo ($isEditMode)?$this->commonHelper()->sanitizeNumber($unitCancellation['PaidAmt'], 2):''; ?>"
+                                                                       label="Total Paid Amount" readonly/>
+                                                            </div>
+
+                                                            <div class="form-group col-lg-12 padtop10 animated fadeInUp">
+                                                                <input type="text" name="CancellationAmt" id="CancellationAmt" class="form-control lbl_move"
+                                                                       value="<?php echo ($isEditMode)?$this->commonHelper()->sanitizeNumber($unitCancellation['CancellationAmt'], 2):''; ?>"
+                                                                       label="Cancellation Charges" readonly/>
+                                                            </div>
+
+                                                            <div class="form-group col-lg-12 padtop10 animated fadeInUp">
+                                                                <input type="text" name="OtherDetectionAmt" id="OtherDetectionAmt" class="form-control lbl_move"
+                                                                       value="<?php echo ($isEditMode)?$this->commonHelper()->sanitizeNumber($unitCancellation['OtherDetectionAmt'], 2):''; ?>"
+                                                                       label="Other Detection Charges" onkeypress="return isDecimal(event, this)"/>
+                                                            </div>
+
+                                                            <div class="form-group col-lg-12 padtop10 animated fadeInUp">
+                                                                <input type="text" name="PayableAmt" id="PayableAmt" class="form-control lbl_move"
+                                                                       value="<?php echo ($isEditMode)?$unitCancellation['PayableAmt']:''; ?>"
+                                                                       label="Payable Amount" readonly/>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <!--            </form>-->
+                                                </div>
+                                            </div>
+                                            <div id="unit-detail-wrapper" class="col-lg-6 m_tb10 hide">
+                                                <div class="form-group">
+                                                    <div class="col-lg-12">
+                                                        <div class="stginner_h5">
+                                                            <h5>Unit Detail</h5>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Unit Type</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_UnitTypeName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Block Name</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_BlockName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label
+                                                                    class="col-lg-5 padlr0 col-md-5 col-sm-5 col-md-4 txt_left control-label">Level</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_FloorName"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Area</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><span id="unitdetail_UnitArea"></span> Sq.ft</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Rate</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_Rate"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Base Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_BaseAmt"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Advance
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_AdvAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Land Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_LandAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Construction Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_ConstructionAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">UDS Land Area</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_UDSLandArea"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Other Cost
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_OtherCostAmt"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Gross Amont</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_GrossAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Qualifier
+                                                                    Amount</label>
+
+                                                                <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p id="unitdetail_QualifierAmount"></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="net_amnt">
+                                                            <h2>Net Amount</h2>
+
+                                                            <h1>Rs. <span id="unitdetail_NetAmt"></span></h1>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Receipt No</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody id="receipts-wrapper"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                <ul>
+                                                    <li class="save_btn float_r">
+                                                        <a href="#" data-slide="next" data-stepno="2" class="ripple carousel-next-btn">Submit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                    </form>
+                    <?php elseif ( isset( $err ) ): ?>
+                        <h1 class="text-center" style="margin: 150px auto;">Error: <?php echo $err; ?></h1>
+                    <?php
+                    endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        var $project_id = $('#project_id'),
+            $unit_no = $('#unit_no'),
+            $buyerWrapper = $('#buyer-wrapper'),
+            $unitpriceWrapper = $('#unitprice-wrapper'),
+            $unit_rate = $('#unit_rate'),
+            $unitDetailWrapper = $('#unit-detail-wrapper'),
+            $carousel = $('#carousel'),
+            $amount = $('#amount'),
+            $unitdetail_NetAmt = $('#unitdetail_NetAmt'),
+            $cancellation_date = $('#cancellation_date'),
+            $vocher_no = $('#vocher_no'),
+            $unit_id = $('#unit_id'),
+            $constructionAmt = $('#unitdetail_ConstructionAmount'),
+            $landAmt = $('#unitdetail_LandAmount'),
+            $unitdetail_UnitArea = $('#unitdetail_UnitArea'),
+            $unitdetail_Rate = $('#unitdetail_Rate'),
+            $unitdetail_BaseAmt = $('#unitdetail_BaseAmt'),
+            $unitdetail_GrossAmt = $('#unitdetail_GrossAmount'),
+            $unitdetail_OtherCostAmt = $('#unitdetail_OtherCostAmt'),
+            $cancellationInfoContainer = $('#cancellation-info-container'),
+            $receiptsWrapper = $('#receipts-wrapper'),
+            $PaidAmt = $('#PaidAmt'),
+            $CancellationAmt = $('#CancellationAmt'),
+            $PayableAmt = $('#PayableAmt'),
+            $OtherDetectionAmt = $('#OtherDetectionAmt'),
+            $Remarks = $('#Remarks'),
+            $cancellationForm = $('#cancellation-form'),
+            isEditMode = <?php echo ($isEditMode)?'true':'false'; ?>,
+            unitId = <?php echo (isset($unitId))?$unitId:'false'; ?>;
+
+        bindVocherNo_onChange();
+
+        bindUnit_onChange();
+
+        bindNextBtn_onClick();
+
+        bindCalcPayableAmt_onChange();
+
+        init();
+
+        function init() {
+
+            $carousel.carousel({
+                interval: false
+            });
+
+            $('.single_dropdown').select2();
+
+            if(isEditMode) {
+                $unit_no.trigger('change');
+            }
+
+            if(unitId) {
+                var $tarUnit = $unit_no.find('option[value="'+unitId+'"]');
+                if($tarUnit.length > 0) {
+                    $tarUnit.attr('selected', 'selected');
+                    $unit_no.trigger('change');
+                }
+            }
+        }
+
+        function bindCalcPayableAmt_onChange() {
+            $CancellationAmt.on('change', function() {
+                calcAmount();
+            });
+
+            $OtherDetectionAmt.on('change', function() {
+                calcAmount();
+            })
+
+            function calcAmount() {
+                var PaidAmt = parseFloat($PaidAmt.val()),
+                    CancellationAmt = parseFloat($CancellationAmt.val()),
+                    OtherDetectionAmt = parseFloat($OtherDetectionAmt.val());
+
+                if(isNaN(CancellationAmt)) {
+                    CancellationAmt = 0;
+                }
+
+                if(isNaN(PaidAmt)) {
+                    PaidAmt = 0;
+                }
+
+                if(isNaN(OtherDetectionAmt)) {
+                    OtherDetectionAmt = 0;
+                }
+
+                var PayableAmt = PaidAmt - CancellationAmt - OtherDetectionAmt;
+                $PayableAmt.val(PayableAmt.toFixed(2)).trigger('change');
+            }
+        }
+
+        function bindVocherNo_onChange() {
+            $vocher_no.on('change', function () {
+
+                checkVocherNo(function (isSuccess, msg) {
+                    if (isSuccess == false) {
+                        alert(msg);
+                        $vocher_no.focus();
+                    }
+                });
+            });
+
+        }
+
+        function checkVocherNo(callback) {
+            var vocher_no = $vocher_no.val().trim();
+            if (vocher_no.length <= 0) {
+                callback(false, 'Vocher No is required!');
+                return false;
+            } else {
+                $.ajax({
+                    url: getBaseURL() + 'crm/lead/check-cancellation-vocher-no',
+                    data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", VocherNo: vocher_no},
+                    type: 'POST',
+                    success: function (data, status, xhr) {
+
+                        if (data.unit_cancellation == false) {
+                            $vocher_no.addClass('already-exists');
+                            callback(false, 'Vocher No Already exists!');
+                            return false;
+                        } else {
+                            $vocher_no.removeClass('already-exists');
+                            callback(true);
+                            return true;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert(xhr.responseText);
+                        $vocher_no.addClass('already-exists');
+                    }
+                });
+            }
+        }
+
+        function bindNextBtn_onClick() {
+            $('.carousel-next-btn').on('click', function (ev) {
+                ev.preventDefault();
+
+                var stepno = parseInt($(this).attr('data-stepno'));
+                switch (stepno) {
+                    case 2:
+                        validate_step1(function (isSuccess) {
+                            if (isSuccess) {
+                                $cancellationForm.submit();
+                            }
+                        });
+                        break;
+                }
+            });
+        }
+
+        function validate_step1(callback) {
+            var unit_no = parseInt($unit_no.val()),
+                vocher_no = $vocher_no.val().trim(),
+                cancellation_date = $cancellation_date.val().trim(),
+                remarks = $Remarks.val().trim();
+
+            removeError($unit_no);
+            removeError($Remarks);
+
+            if (vocher_no.length <= 0) {
+                alert('Vocher No is required!');
+                $vocher_no.focus();
+
+                callback(false);
+                return false;
+            } else if ($vocher_no.hasClass('already-exists')) {
+                alert('Vocher No already exists!');
+                $vocher_no.focus();
+
+                callback(false);
+                return false;
+            } else if (cancellation_date.length <= 0) {
+                alert('Cancellation Date is required!');
+                $cancellation_date.focus();
+
+                callback(false);
+                return false;
+            } else if (isNaN(unit_no)) {
+                showError($unit_no, 'Unit is required!');
+
+                callback(false);
+                return false;
+            } else if(remarks.length <= 0) {
+                showError($Remarks, 'Remarks required!');
+
+                callback(false);
+                return false;
+            } else {
+                callback(true);
+                return true;
+            }
+        }
+
+        function bindUnit_onChange() {
+            $unit_no.on('change', function () {
+
+                removeError($unit_no);
+
+                load_unitDetails(function () {
+                    $unitDetailWrapper.removeClass('hide');
+                    $unit_no.removeAttr('disabled');
+
+                    $cancellationInfoContainer.removeClass('hide');
+                });
+            });
+        }
+
+        function load_unitDetails(callback) {
+
+            var unit_id = $unit_no.val();
+            if (/^\d+$/.test(unit_id) === false) {
+                return;
+            }
+
+            $unit_no.attr('disabled', true);
+
+            $.ajax({
+                url: getBaseURL() + 'crm/lead/unit-receipt-detail',
+                data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", UnitId: unit_id, LeadId: <?php echo (isset($leadId))?$leadId:''; ?>},
+                type: 'POST',
+                success: function (data, status, xhr) {
+
+                    $.each(data.unit_detail, function (index, detail) {
+                        var $tarDetail = $unitDetailWrapper.find('#unitdetail_' + index);
+
+                        if (detail == 0 || detail == null || detail.trim() == '') {
+                            $tarDetail.closest('.row').addClass('hide');
+                        } else {
+                            $tarDetail.closest('.row').removeClass('hide');
+                            $tarDetail.text(detail).attr('data-original-value', detail);
+                        }
+                        if(index!="NetAmt") {
+                            $tarDetail.text(detail).attr('data-original-value', detail);
+                        } else {
+                            $tarDetail.text(sanitizeNumber(detail,2,true)).attr('data-original-value', detail);
+                        }
+                        if(index=="AdvAmount" || index=="UDSLandArea" || index=="BaseAmt" || index=="GrossAmount" || index=="LandAmount" || index=="Rate" || index=="ConstructionAmount" || index=="GuideLinevalue" || index=="MarketLandValue" || index=="OtherCostAmt" || index=="QualifierAmount") {
+                            $tarDetail.text(sanitizeNumber(detail,2,true)).attr('data-original-value', detail);
+                        }
+                    });
+
+                    // receipts
+                    if(data.hasOwnProperty('receipts') && data.receipts.length > 0) {
+                        var receiptHtml = '',
+                            totAmt = 0;
+                        $.each(data.receipts, function(index, receipt) {
+                            receiptHtml += '<tr>'
+                            + '<td>' + receipt.ReceiptNo + '</td>'
+                            + '<td class="text-right">' + parseFloat(receipt.Amount).toFixed(2) + '</td>'
+                            + '</tr>';
+                            totAmt += parseFloat(receipt.Amount);
+                        });
+
+                        receiptHtml += '<tr>'
+                        + '<td class="text-right">Total</td>'
+                        + '<td class="text-right">' + totAmt.toFixed(2) + '</td>'
+                        + '</tr>';
+                        $receiptsWrapper.html(receiptHtml);
+
+                        if(totAmt > 0 && isEditMode === false) {
+                            $PaidAmt.val(totAmt.toFixed(2)).trigger('change');
+                        }
+                    } else {
+                        var receiptHtml = '<tr><td class="text-center" colspan="2">No Receipts Found!</td></tr>';
+                        $receiptsWrapper.html(receiptHtml);
+                    }
+
+                    // cancellation amt
+                    var cancellationAmt = parseFloat(data.cancellationAmt).toFixed(2);
+                    if(!isNaN(cancellationAmt) && isEditMode === false) {
+                        $CancellationAmt.val(cancellationAmt).trigger('change');
+                    }
+
+                    if (callback) {
+                        callback();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+
+                    $unit_no.removeAttr('disabled');
+                }
+            });
+        }
+
+        function resetUnitData() {
+            $buyerWrapper.addClass('hide');
+            $unitpriceWrapper.addClass('hide');
+            $unitDetailWrapper.addClass('hide');
+
+            $unit_rate.val('');
+
+            $unit_no.select2('val', '');
+        }
+
+        function load_units(callback) {
+
+            var project_id = $project_id.val();
+            if (/^\d+$/.test(project_id) === false) {
+                return;
+            }
+
+            $unit_no.attr('disabled', true);
+
+            $.ajax({
+                url: getBaseURL() + 'crm/lead/units',
+                data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", ProjectId: project_id},
+                type: 'POST',
+                success: function (data, status, xhr) {
+                    if (data.units.length > 0) {
+                        var opHtml = '<option value=""></option>';
+                        $.each(data.units, function (index, unit) {
+                            opHtml += '<option value="' + unit.UnitId + '">' + unit.UnitNo + '</option>';
+                        });
+                        $unit_no.html(opHtml);
+                    }
+
+                    $unit_no.removeAttr('disabled');
+
+                    if (callback) {
+                        callback();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+
+    });
+</script>

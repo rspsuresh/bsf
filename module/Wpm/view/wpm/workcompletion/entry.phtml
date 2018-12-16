@@ -1,0 +1,731 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css'; ?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css'; ?>"/>
+<!--STYLE-->
+<style>
+    .panel {
+        border-radius: 0px !important;
+    }
+
+    .panel-info {
+        border: none;
+        border-top: none;
+    }
+</style>
+
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form method="post" id="formWrapper">
+                <input type="hidden" id="CostCenterId" name="CostCenterId" value="<?php echo (isset($costcenter)) ? $costcenter['CostCentreId'] : '0';?>">
+                <input type="hidden" name="WorkType" id="WorkType" value="<?php echo (isset($WorkType)) ? $WorkType : '';?>">
+                <input type="hidden" id="wcTypeId" name="wcTypeId" value="<?php echo $wcTypeId; ?>" />
+                <input type="hidden" id="typeWc" name="typeWc" value="<?php echo $typeWc; ?>" />
+                <input type="hidden" name="CompanyId" id="CompanyId" value="<?php echo (isset($costcenter)) ? $costcenter['CompanyId'] : ''; ?>">
+                <div class="col-lg-12">
+                    <h1 class="text-center">Work Completion</h1>
+                </div>
+                <div class="col-lg-12">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                        <div class="panel-box">
+                            <ul>
+                                <li>
+                                    <label>Cost Centre</label>
+                                    <span><?php echo (isset($costcenter)) ? $costcenter['CostCentreName'] : ''; ?></span>
+                                </li>
+                                <li>
+                                    <label>Work Type</label>
+                                    <span><?php echo (isset($WorkTypeName)) ? $WorkTypeName : ''; ?></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                        <div class="panel-box box2th">
+                            <ul>
+                                <li>
+                                    <label>WCE Date</label>
+                                    <span>
+                                        <input type="text" placeholder="dd-mm-yyyy" class="date_picker" name="WCEDate" id="WCEDate" value="<?php echo (isset($wceregister)) ? $wceregister['WCEDate'] : date('d-m-Y'); ?>"/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>Ref Date</label>
+                                    <span>
+                                        <input type="text" placeholder="dd-mm-yyyy" class="date_picker" name="RefDate" id="RefDate" value="<?php echo (isset($wceregister)) ? $wceregister['RefDate'] : date('d-m-Y'); ?>"/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>From Date</label>
+                                    <span>
+                                        <input type="text" placeholder="dd-mm-yyyy" class="date_picker" name="FromDate" id="FromDate" value="<?php echo (isset($wceregister)) ? $wceregister['FDate'] : $FromDate; ?>"/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>To Date</label>
+                                    <span>
+                                        <input type="text" placeholder="dd-mm-yyyy" class="date_picker" name="ToDate" id="ToDate" value="<?php echo (isset($wceregister)) ? $wceregister['TDate'] : $ToDate; ?>"/>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                        <div class="panel-box box3th">
+                            <ul>
+                                <li>
+                                    <label>WCE No</label>
+                                    <span>
+                                        <input type="text" placeholder="xxxxx" id="WCENo" name="WCENo" value="<?php echo (!isset($wceregister) && $genType) ? trim($woNo) : ''; echo (isset($wceregister)) ? trim($wceregister['WCENo']) : '';?>" <?php echo (isset($wceregister) || $genType) ? 'readonly': ''; ?>/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>CC WCE No</label>
+                                    <span>
+                                        <input type="text" placeholder="xxxxx" id="CCWCENo" name="CCWCENo" value="<?php echo (isset($wceregister)) ? $wceregister['CCWCENo'] : '';?>"/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>Comp WCE No</label>
+                                    <span>
+                                        <input type="text" placeholder="xxxxx" id="CompWCENo" name="CompWCENo" value="<?php echo (isset($wceregister)) ? $wceregister['CompWCENo'] : '';?>"/>
+                                    </span>
+                                </li>
+                                <li>
+                                    <label>Ref No</label>
+                                    <span>
+                                        <input type="text" placeholder="xxxxx" id="RefNo" name="RefNo" value="<?php echo (isset($wceregister)) ? $wceregister['RefNo'] : '';?>"/>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-12 clear top-20">
+                    <div id="accordion" class="panel-group">
+                        <!-------------------------------Works Executed------------------------------->
+                        <div class="panel panel-info">
+                            <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse"
+                                 class="panel-heading collapsed panel_heads" id="panelheading-1">
+                                <h4 class="panel-title accordion-toggle defa_panels">Works Executed</h4>
+                            </div>
+                            <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                                <div class="panel-body bgcolr">
+                                    <div class="col-lg-12">
+                                        <div class="table-responsive top-30">
+                                            <table class="table" style=" margin-bottom:0px;" id="workorderTable">
+                                                <thead>
+                                                <tr>
+                                                    <th>Specification</th>
+                                                    <th>Unit</th>
+                                                    <th>Cumulative</th>
+                                                    <th>Previous</th>
+                                                    <th class="text-right">Current</th>
+                                                    <th>Percentage(%)</th>
+                                                    <th>&nbsp; </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="main"></tbody>
+                                            </table>
+                                            <input type="hidden" name="rowid" id="rowid" value="0"/>
+                                            <input type="hidden" name="deleteids" id="deleteids" value="0"/>
+                                        </div>
+                                        <div
+                                            class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                                            <ul>
+                                                <li><a href="javascript:nextAccordian(2)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-------------------------------Works Executed end------------------------------->
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div
+                    class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0 lab-natt"style="background:none; margin-top: 0;
+   ">
+                    <div class="form-group">
+                        <label>Narration</label>
+                        <textarea id="narration" name="narration" class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12"></textarea>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <!--table end-->
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a onclick="submitForm()" data-toggle="tooltip" class="ripple" title="Submit">Submit</a>
+        <li class="cancel_btn float_r"><a href="<?php echo $this->basePath();?>/wpm/workcompletion/index" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>
+    </ul>
+</div>
+<!--content-->
+<!--table Add lines start-->
+<script type="text/template" id="resource-template">
+    <tr>
+        <td width="30%">
+            <input class="parent_text resourceSuggest" type="text" name="desc__" id="desc__" onfocus="checkResourceUsed(this);"/>
+            <input type="hidden" name="descid__" id="descid__"/>
+            <input type="hidden" name="WCETransId__" id="WCETransId__" value="0"/>
+            <input type="hidden" name="UpdateRow__" id="UpdateRow__" value="0"/>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" type="text" name="unitname__" id="unitname__" readonly/>
+            <input type="hidden" name="unitid__" id="unitid__"/>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" type="text" name="cumulative__" id="cumulative__" readonly/>
+        </td>
+         <td width="15%">
+            <input class="parent_text border-none" type="text" name="previous__" id="previous__" readonly/>
+        </td>
+        <td width="8%"><input class="parent_text border-none text-right" type="text" name="qty__" id="qty__" readonly/></td>
+        <td width="8%"><input class="parent_text border-none text-right" type="text" name="percentage__" id="percentage__" readonly/></td>
+        <td width="5%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="deleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a href="#" class="mainTr" id="expandTr__" style="display:none;"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="iowTable__">
+                            <thead>
+                            <tr>
+                                <!--<th class="worktype-activity">Agt No</th>-->
+                                <th class="worktype-activity">Specification</th>
+                                <th>WBS Name</th>
+                                <th>Cumulative</th>
+                                <th>Previous</th>
+                                <th>current</th>
+                                <th>Work Completion</th>
+
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script type="text/template" id="iow-template">
+    <tr>
+        <input type="hidden" name="iow___iowid_0" id="iow___iowid_0"/>
+         <input type="hidden" name="iow___wbsid_0" id="iow___wbsid_0"/>
+        <input type="hidden" name="iow___WOIOWTransId_0" id="iow___WOIOWTransId_0" value="0"/>
+        <input type="hidden" name="iow___UpdateRow_0" id="iow___UpdateRow_0" value="0"/>
+        <!--<td width="10%" class="worktype-activity"><input class="parent_text border-none" type="text" name="iow___agtno_0" id="iow___agtno_0" readonly/></td>-->
+        <td width="13%" class="worktype-activity"><input class="parent_text border-none" type="text" name="iow___spec_0" id="iow___spec_0" readonly/></td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="iow___wbs_0" id="iow___wbs_0" readonly/></td>
+        <!--td width="5%"><input class="parent_text border-none" type="text" name="iow___unitname_0" id="iow___unitname_0" readonly/></td-->
+        <td width="5%"><input class="parent_text text-right" type="text" name="iow___wbcum_0" id="iow___wbcum_0" data-original="" readonly ></td>
+        <td width="7%"><input class="parent_text text-right" type="text" name="iow___wbpre_0" id="iow___wbpre_0" readonly ></td>
+        <td width="7%"><input class="parent_text text-right" type="text" name="iow___qty_0" id="iow___qty_0"  onclick="return showwktip(this)" onblur="return showwktipclose(this)"   onkeypress="return isNumberKey(event,this)" onchange="calcQuantity(this);"/>
+        <div style="position: relative; display:none;" id="wk___ewbqty_0">
+                <div class="top-tip top-addtip">
+                    <span>Estimate Qty : <i id="wk___estimateqty_0" ></i></span>
+                    <!--<span>Total Qty : <i id="wk___wktotbilledqty_0" ></i></span>-->
+                </div>
+            </div></td>
+
+        <td width="1%"><input class="parent_text text-right" type="checkbox" name="iow___wbwkcom_0" value="1" id="iow___wbwkcom_0" ></td>
+    </tr>
+</script>
+<script>
+var arr_requestResources = <?php echo (isset($arr_requestResources)) ? json_encode($arr_requestResources) : '[]';?>;
+var arr_resource_iows = <?php echo (isset($arr_resource_iows)) ? json_encode($arr_resource_iows) : '[]';?>;
+var arr_resources = <?php echo (isset($arr_resources)) ? json_encode($arr_resources) : '[]';?>;
+var tmp_arr_resources = arr_resources;
+var WorkType = $('#WorkType').val();
+
+$(function () {
+    var $rowid = $('#rowid');
+    var template = $('#resource-template').html();
+    var iowtemplate = $('#iow-template').html();
+    var rowid = 0;
+    var $tbody = $('#workorderTable').find('> tbody.main');
+
+    if(arr_requestResources.length != 0) {
+        $.each(arr_requestResources, function(i, o) {
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+            $('#desc_' + rowid).val(o.Desc).addClass('border-none').prop('disabled', true);
+            $('#descid_' + rowid).val(o.DescId);
+            $('#unitname_' + rowid).val(o.UnitName);
+            $('#unitid_' + rowid).val(o.UnitId);
+            $('#expandTr_' + rowid).show();
+            $('#deleteTr_' + rowid).show();
+
+            if(typeof o.WCETransId !== 'undefined') {
+                $('#WCETransId_' + rowid).val(o.WCETransId);
+                $('#qty_' + rowid).val(o.Qty);
+                $('#amount_' + rowid).val(sanitizeNumber(o.Amount,2));
+            }
+            var cumm1=0;
+            var prev1=0;
+            $.each(arr_resource_iows, function(j, l) {
+                if( (typeof o.WCETransId == 'undefined' && l.ResourceId != o.DescId && WorkType == 'activity')
+                    || (typeof o.WCETransId == 'undefined' && l.ProjectIOWId != o.DescId && WorkType == 'iow')
+                    || (typeof o.WCETransId !== 'undefined' && o.WCETransId != l.WCETransId) ) {
+                    return;
+                }
+
+                var iowrowid = parseInt($('#iow_'+rowid+'_rowid').val()) + 1;
+                $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                $('#iow_'+rowid+'_rowid').val(iowrowid);
+
+                $('#iow_'+ rowid +'_iowid_'+ iowrowid).val(l.ProjectIOWId);
+                $('#iow_'+ rowid +'_wbs_'+ iowrowid).val(l.ParentText +'->'+ l.WBSName);
+                $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+                //$('#iow_'+ rowid +'_unitname_'+ iowrowid).val(l.UnitName);
+                //$('#wk_' + rowid + '_estimateqty_'+iowrowid).text(l.Qty);
+                         //edit action qty show code
+
+                    $.ajax({
+                        url: getBaseURL() + 'wpm/workcompletion/entry',
+                        type: "post",
+                        data: {'ccId': $('#CostCenterId').val(), 'IOWId': l.ProjectIOWId, 'WBSId': l.WBSId, 'Type': 'gettotalqty'},
+                        async: false,
+                        success: function (data, textStatus, jqXHR) {
+                            if(jqXHR.status == 200) {
+                               data = JSON.parse(data);
+                                $('#wk_' + rowid + '_estimateqty_'+iowrowid).text(data.Qty);
+                            }
+                          
+                        }, error: function (jqXHR, textStatus, errorThrown) {
+                        }
+                    }); 
+
+                if(WorkType == 'activity') {
+                    $('#iow_'+ rowid +'_agtno_'+ iowrowid).val(l.SerialNo);
+                    $('#iow_'+ rowid +'_spec_'+ iowrowid).val(l.Specification);
+                } else if(WorkType == 'iow') {
+                    $('.worktype-activity').remove();
+                }
+
+                if(typeof l.WCEIOWTransId !== 'undefined') {
+                    $('#iow_'+ rowid +'_WOIOWTransId_'+ iowrowid).val(l.WOIOWTransId);
+                    $('#iow_'+ rowid +'_qty_'+ iowrowid).val(l.Qty).trigger('change');
+                }
+                var woeQty = 0;
+                    $.ajax({
+                        url: getBaseURL() + 'wpm/workcompletion/entry',
+                        type: "post",
+                        data: {'ccId': $('#CostCenterId').val(), 'IOWId': l.ProjectIOWId, 'WBSId': l.WBSId, 'Type': 'getwoqty'},
+                        async: false,
+                        success: function (data, textStatus, jqXHR) {
+                            if(jqXHR.status == 200) {
+                               data = JSON.parse(data);
+                                woeQty = data.Qty;
+                                wopqty =data.pqty;
+                                if (woeQty == null) {
+                                    woeQty = 0;
+                                }
+                                if(wopqty == null)
+                                {
+                                    wopqty = 0;   
+                                }
+                                   cumm1 += parseFloat(woeQty);
+                                   prev1 += parseFloat(wopqty);
+                                //$('#wk_' + rowid + '_wkorderqty_' + iowrowid).text(woeQty);
+                                $('#wk_' + rowid + '_wktotbilledqty_' + iowrowid).text(woeQty);
+                                $('#iow_' + rowid + '_wbcum_'+iowrowid).val(woeQty)
+                                $('#iow_' + rowid + '_wbcum_'+iowrowid).attr('data-original',woeQty);
+                                $('#iow_' + rowid + '_wbpre_'+iowrowid).val(wopqty)
+                                
+                            }
+                          
+                        }, error: function (jqXHR, textStatus, errorThrown) {
+                        }
+                    }); 
+
+            });
+                                $('#cumulative_'+rowid).val(cumm1);
+                                $('#previous_'+rowid).val(prev1);
+        });
+    }
+    rowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + rowid));
+    $rowid.val(rowid);
+    bindDescAutocomplete();
+
+    $(".content_wrapper").on('click','.mainTr', function (e) {
+        e.preventDefault();
+        if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        } 
+        else {
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+
+    nextAccordian(1);
+});
+
+function submitForm() {
+    var errFlag = 0;
+    $('.error_message').hide();
+    $('#ToDate').removeClass('red_bdr');
+
+    if(!validateLength($('#WCEDate'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#RefDate'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#FromDate'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#ToDate'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if (!compareDate($('#FromDate').val(), $('#ToDate').val())) {
+        $('#ToDate').addClass('red_bdr');
+        $('#ToDate').focus();
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#CCWCENo'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#CompWCENo'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if(!validateLength($('#RefNo'))) {
+        errFlag = 1;
+        return false;
+    }
+
+    if($('#formWrapper .error').length != 0) {
+        alert('Kindly notice the errors!');
+        errFlag = 1;
+        return false;
+    }
+    if($('#rowid').val()==1 && $('#desc_1').val()=='')
+    {
+      alert('Entry is not selected!');
+        $('#desc_1').addClass('red_bdr');
+        errFlag = 1;
+        return false;  
+    }
+
+    if(errFlag == 0) {
+        $('#formWrapper').submit();
+    }
+}
+
+function validateLength($input) {
+    if($.trim($input.val()).length == 0) {
+        showError($input, 'required');
+        return false;
+    }
+
+    removeError($input);
+    return true;
+}
+
+function nextAccordian(id) {
+    $('#panelheading-' + id).trigger('click');
+}
+
+function bindDescAutocomplete() {
+    // bind resource autocomplete
+    $('#workorderTable .resourceSuggest').autocomplete({
+        lookup: tmp_arr_resources,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $this.prop('readonly', true).addClass('border-none');
+                $('#descid_' + rowid).val(suggestion.data);
+                $('#unitname_' + rowid).val(suggestion.UnitName);
+
+                $('#expandTr_' + rowid).show();
+                bindResourceIOW($this);
+                addNewResourceRow($this);
+            }
+        }, onSearchStart: function (suggestion) {
+            var rowid = $(this)[0].id.split('_')[1];
+            $('#unitname_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                var rowid = $(this)[0].id.split('_')[1];
+                $('#unitname_' + rowid).val('');
+            }
+        }
+    });
+}
+
+function addNewResourceRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $rowid = $('#rowid'),
+        rowid = parseInt($rowid.val()),
+        $tbody = $('#workorderTable').find('> tbody.main');
+
+    $('#deleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#resource-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+
+    $rowid.val(count);
+    bindDescAutocomplete();
+}
+
+function deleteRow(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].id.split('_')[1];
+
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var transid = $('#WCETransId_' + key).val();
+    if(transid != 0) {
+        $('#deleteids').val($('#deleteids').val() + ',' + transid);
+    }
+
+    var $tr = $x.closest('tr');
+    $tr.next('.subTr').remove();
+    $tr.remove();
+
+    bindDescAutocomplete();
+    return false;
+}
+
+function checkResourceUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=descid_]');
+    tmp_arr_resources = arr_resources;
+    tmp_arr_resources = $.grep(arr_resources, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindDescAutocomplete();
+}
+
+function calcQuantity(x) {
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowid = ids[3];
+
+    if($('#iow_'+rowid+'_WOIOWTransId_' + iowid).val() != 0) {
+        $('#iow_'+rowid+'_UpdateRow_' + iowid).val(1);
+        $('#UpdateRow_'+rowid).val(1);
+    }
+
+    // calc total qty
+    var totalQty=0;
+    var qtyvalue=parseInt($('#iow_'+rowid+'_qty_'+iowid).val());
+    var preqtyvalue=parseInt($('#iow_'+rowid+'_wbpre_'+iowid).val());
+    var tooltip=parseInt($('#wk_'+rowid+'_estimateqty_'+iowid).text());
+    var givenvalue=parseInt($('#iow_'+rowid+'_qty_'+iowid).val());
+    var pre= parseInt($('#iow_'+rowid+'_wbpre_'+iowid).val());
+    var total=givenvalue + pre;
+    if(total <= tooltip)
+    {
+
+    var cumvalue=parseInt($('#iow_'+rowid+'_wbcum_'+iowid).data('original'));
+    var cumrowval=parseFloat(preqtyvalue)+parseFloat(qtyvalue);
+    $('#iow_'+rowid+'_qty_'+iowid).removeClass('error'); 
+    }
+    else if(total > tooltip)
+    {
+        alert("Qty Exceeds");
+        $('#iow_'+rowid+'_qty_'+iowid).addClass('error');
+        $('#iow_'+rowid+'_qty_'+iowid).focus();
+        var cumrowval=parseInt($('#iow_'+rowid+'_wbcum_'+iowid).data('original'));
+        return false;
+    }
+    $('#iow_'+rowid+'_wbcum_'+iowid).val(sanitizeNumber(cumrowval,2));
+    $('#iow_'+rowid+'_wbpre_'+iowid).val(sanitizeNumber(preqtyvalue,3))
+    $('#iow_'+rowid+'_qty_'+iowid).val(sanitizeNumber(givenvalue,3))
+    var qtyvalue=0;
+    var cumvalue=0;
+
+    $.each($('input[id^=iow_'+rowid+'_qty_'), function (i,o) {
+        var qty = parseInt($(this).val());
+        if(isNaN(qty))
+            qty = 0;
+        totalQty += qty;
+    });
+    var cuQty=0;
+    $.each($('input[id^=iow_'+rowid+'_wbcum_'), function (i,o) {
+        var cqty = parseInt($(this).val());
+        if(isNaN(cqty))
+            cqty = 0;
+        cuQty += cqty;
+    });
+   
+    $('#qty_'+rowid).val(sanitizeNumber(totalQty,2)); 
+    $('#cumulative_'+rowid).val(sanitizeNumber(cuQty,2));
+  
+}
+
+
+function bindResourceIOW(x) {
+
+    var rowid = $(x)[0].id.split('_')[1];
+    var $iowrowid = $('#iow_' + rowid + '_rowid');
+    var descId = $('#descid_' + rowid).val();
+    var data = {};
+        data.Type = 'getiowdetails';
+        data.IOWId = descId;
+
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + 'wpm/workcompletion/entry',
+        type: "post",
+        data: data,
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if(jqXHR.status == 200) {
+                data = JSON.parse(data);
+                var iowtemplate = $('#iow-template').html();
+                var cumm = 0;
+                var prev = 0;
+                $.each(data, function (i,l) {
+                    var iowrowid = parseInt($iowrowid.val()) + 1;
+                    $('#iowTable_' + rowid).find('tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                    $iowrowid.val(iowrowid);
+
+                    //$('#iow_' + rowid + '_agtno_' + iowrowid).val(l.SerialNo);
+                    //$('#iow_' + rowid + '_spec_' + iowrowid).val(l.Specification);
+                    $('.worktype-activity').remove();
+                    $('#iow_' + rowid + '_wbs_' + iowrowid).val(l.ParentText +'->'+ l.WBSName);
+                    $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+                    $('#iow_' + rowid + '_iowid_' + iowrowid).val(l.ProjectIOWId);
+                    $('#wk_' + rowid + '_estimateqty_'+iowrowid).text(l.Qty);
+
+                    // remaining qty
+        
+                    var woeQty = 0;
+                    $.ajax({
+                        url: getBaseURL() + 'wpm/workcompletion/entry',
+                        type: "post",
+                        data: {'ccId': $('#CostCenterId').val(), 'IOWId': l.ProjectIOWId, 'WBSId': l.WBSId, 'Type': 'getwoqty'},
+                        async: false,
+                        success: function (data, textStatus, jqXHR) {
+                            if(jqXHR.status == 200) {
+                                data = JSON.parse(data);
+                                woeQty = data.Qty;
+                                wopqty=data.pqty;
+                                if (woeQty == null) {
+                                    woeQty = 0;
+                                }
+                                if(wopqty==null)
+                                {
+                                  wopqty=0;  
+                                }
+                                cumm += parseFloat(woeQty);
+                                prev += parseFloat(wopqty);
+                                 $('#wk_' + rowid + '_wktotbilledqty_' + iowrowid).text(woeQty);
+                                 $('#iow_' + rowid + '_wbcum_'+iowrowid).val(woeQty);
+                                 $('#iow_' + rowid + '_wbcum_'+iowrowid).attr('data-original',woeQty);
+                                 $('#iow_' + rowid + '_wbpre_'+iowrowid).val(wopqty);
+                            }
+                        }, error: function (jqXHR, textStatus, errorThrown) {
+                        }
+                    }); 
+                });
+                $('#cumulative_'+rowid).val(cumm);
+                $('#previous_'+rowid).val(prev);
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+}
+function getCompCCNo()
+{
+    $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+        typeId: $('#wcTypeId').val(),
+        ccId: $('#CostCenterId').val()
+    },
+    function (data) {
+        var vNo = data.split('###');
+        $('#CCWCENo').val($.trim(vNo[0]));
+        $('#CompWCENo').val($.trim(vNo[1]));
+        if($.trim(vNo[0]) != '')
+            $('#CCWCENo').prop('readonly', true);
+        if($.trim(vNo[1]) != '')
+            $('#CompWCENo').prop('readonly', true);
+    });
+}
+
+if($('#typeWc').val() == 'e') {
+    getCompCCNo();
+}
+function showwktip(k)
+{
+  var rowid = $(k)[0].id.split('qty_')[1]; 
+  var rowidfirst = $(k)[0].id.split('_')[1];
+  $('#wk_'+rowidfirst+'_ewbqty_'+rowid).show();
+}
+function showwktipclose(k)
+{
+  var rowid = $(k)[0].id.split('qty_')[1]; 
+  var rowidfirst = $(k)[0].id.split('_')[1];
+  var tipvalue= parseInt($('#wk_'+rowidfirst+'_estimateqty_'+rowid).text());
+  var givenvalue=parseInt($('#iow_'+rowidfirst+'_qty_'+rowid).val());
+  $('#wk_'+rowidfirst+'_ewbqty_'+rowid).hide();
+}
+
+</script>

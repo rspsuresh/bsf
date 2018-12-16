@@ -1,0 +1,519 @@
+<style type="text/css">
+    .lbl_move{height:40px !important;}
+    .top-20{margin-top:15px;}
+    .mar_btm{margin-bottom:30px;}
+    .exp-tex										{height:40px !important;}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <form id="cashManageForm" method="post" onsubmit="return entryValidate();">
+            <div class="col-lg-12">
+                <h1 class="txt_center">Cash Management</h1>
+                <div class="col-lg-3">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="hidden" name="companyId" id="companyId" value="<?php echo (isset($companyId)) ? $companyId : '0';?>">
+                        <input type="hidden" name="EntryId" id="EntryId" value="<?php echo (isset($EntryId)) ? $EntryId: '0';?>">
+                        <input type="text" name="voucherNo" id="voucherNo" style="width:100%;" class="form-control lbl_move" value="<?php echo (isset($entryList)) ? $entryList['VoucherNo'] : $svNo;?>" <?php echo (isset($aVNo) && $aVNo['genType'] == 1) ? 'readonly' : '';?> label="Voucher No" />
+                        <div class="error_message"><p>please enter Voucher No...</p></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-lg-offset-6">
+                    <div class="form-group req_flds col-lg-12">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" name="voucherDate" id="voucherDate" class="form-control lbl_move datepickerinput" label="Voucher Date" value="<?php echo (isset($entryList)) ? $entryList['VoucherDate'] : '';?>" />
+                        <div class="error_message"><p>Please enter Voucher date...</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                        <div class="form-group req_flds col-lg-12">
+                            <select style="width:100%;" class="single_dropdown lbl_move" label="Book Name" name="bookName" id="bookName" onchange="showAccounts();">
+                                <option value="0"></option>
+                                <?php if(isset($accountList) && count($accountList) !=0) {
+                                    foreach($accountList as $book) : ?>
+                                        <option value="<?php echo $book['AccountID'];?>" <?php echo (isset($entryList) && $entryList['BookId'] == $book['AccountID']) ? 'selected' : '';?>><?php echo $book['AccountName'];?></option>
+                                    <?php endforeach; } ?>
+                            </select>
+                            <div class="error_message"><p>Please Select book...</p></div>
+                            <div><p style="color:#266aa8;float:right;">BALANCE: <span id="balanceAmt">0</span> DR</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" >
+                        <div class="form-group req_flds col-lg-12">
+                            <select style="width:100%;" class="form-control single_dropdown lbl_box lbl_move sortoption tbl_input changeVal" label="Cost Center"  name="CostcentreId" id="CostcentreId">
+                                <option value="0"></option>
+                                <?php if(isset($ccList) && count($ccList) !=0) {
+                                    foreach($ccList as $cc) : ?>
+                                        <option value="<?php echo $cc['CostCentreId'];?>" <?php echo (isset($entryList) && $entryList['CostCentreId'] == $cc['CostCentreId']) ? 'selected' : '';?>><?php echo $cc['CostCentreName'];?></option>
+                                    <?php endforeach; } ?>
+                            </select>
+                            <div class="error_message"><p>Please Select Costcentre...</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="divAccount" <?php echo (isset($EntryId) && $EntryId ==0) ? 'style="display: none;"' :'';?> >
+                <div class="col-lg-12">
+                    <div class="table-responsive top-20 mar_btm">
+                        <table class="table" style=" margin-bottom:0px;" id="wkTable">
+                            <thead>
+                            <tr>
+                                <th>Account Head</th>
+                                <th>Sub ledger Type</th>
+                                <th>Sub ledger Name</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody class="main" id="accountTable">
+
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="rowid" id="rowid" value="0"/>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <input type="hidden" name="DebitSumAMount" id="DebitSumAMount" value="0">
+            <input type="hidden" name="CreditSumAMount" id="CreditSumAMount" value="0">
+            <div class="row" id="divpayment"  <?php echo (isset($EntryId) && $EntryId ==0) ? 'style="display: none;"' :'';?> >
+                <div class="col-lg-12">
+                    <div class="col-lg-4 col-lg-offset-2">
+                        <div class="form-group col-lg-12">
+                            <select style="width:100%;" class="single_dropdown lbl_move" label="Payment Mode" name="paymentMode" id="paymentMode">
+                                <option value=""></option>
+                                <option value="Cheque" <?php echo (isset($entryList) && $entryList['PayType'] == 'Cheque') ? 'selected' : '';?>>Cheque</option>
+                                <option value="RTGS/NEFT (Cheque)" <?php echo (isset($entryList) && $entryList['PayType'] == 'RTGS/NEFT (Cheque)') ? 'selected' : '';?>>RTGS/NEFT (Cheque)</option>
+                                <option value="RTGS/NEFT (Fund Transfer)" <?php echo (isset($entryList) && $entryList['PayType'] == 'RTGS/NEFT (Fund Transfer)') ? 'selected' : '';?>>RTGS/NEFT (Fund Transfer)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="transactionDate" id="transactionDate" class="form-control lbl_move datepickerinput" label="Transaction date" value="<?php echo (isset($entryList)) ? $entryList['ChequeDate'] : '';?>" />
+                            <div class="error_message"><p>Please enter Transaction date...</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-2">
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move" label="Transaction No" id="transactionNo" name="transactionNo" value="<?php echo (isset($entryList)) ? $entryList['ChequeNo'] : '';?>">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move" label="Amount" id="amount" name="amount" value="<?php echo (isset($entryList)) ? $this->commonHelper()->sanitizeNumber($entryList['Amount'],2,true) : '0';?>" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" >
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-2">
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move" label="Bank charges" id="bankCharges" name="bankCharges" value="<?php echo (isset($entryList)) ? $this->commonHelper()->sanitizeNumber($entryList['OtherCharges'],2,true) : '0';?>" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" >
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <textarea class="exp-tex" name="narration" id="narration" placeholder="Remarks"><?php echo (isset($entryList)) ? $entryList['Narration'] : '';?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <?php if($allowEdit==1) { ?>
+        <li id="continue" class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="submitForm()" class="ripple">Add</a></li>
+        <?php } ?>
+        <li class="cancel_btn cancel_btn_bluecolor float_r">
+            <a href="<?php echo $this->basePath(); ?>/fa/index/cashmanagement" class="ripple has-ripple" style="cursor:pointer;" button type="button" onclick="" id="backRid" class="ripple">Cancel<span class="ripple-wrapper"></span></a></li>
+        </li>
+    </ul>
+</div>
+<script id="template-account"  type="text/template" class="hide">
+    <tr>
+        <td width="21%">
+            <input class="parent_text border-none" type="text" id="accountHead__" name="accountHead__" value=""  />
+            <input type="hidden" name="accountHeadId__" id="accountHeadId__" value="0">
+        </td>
+        <td width="18%">
+            <!--<select style="width:100%;" class="form-control single_dropdown lbl_box sortoption tbl_input changeVal" name="subLedgerType__" id="subLedgerType__" onchange="getSubLedgerName(this);">
+                <option value="0"></option>-->
+            <input class="parent_text border-none" type="text" id="subLedgerType__" name="subLedgerType__" value=""  />
+            <input type="hidden" name="subLedgerTypeId__" id="subLedgerTypeId__" value="0">
+        </td>
+        <td width="20%">
+            <input  class="parent_text border-none"type="text" id="subLedgerName__" name="subLedgerName__" value="" />
+            <input type="hidden" name="subLedgerId__" id="subLedgerId__" value="0" />
+        </td>
+        <td width="19%">
+            <input class="parent_text border-none" type="text" id="debit__" name="debit__" onchange="showPayment(this)" onblur="calcCreditDebit(this)" value="0.00" onkeypress="return isDecimal(event,this)" style="text-align:right;" />
+        </td>
+        <td width="19%">
+            <input class="parent_text border-none" type="text" id="credit__" name="credit__" onchange="showPayment(this)" onblur="calcCreditDebit(this)" value="0.00" onkeypress="return isDecimal(event,this)" style="text-align:right;" />
+        </td>
+        <td width="3%">
+            <a class="DeleteTr__"href="javascript:void(0);" onclick="deleteAccountRow(this, event);" aria-label="remove" style="display: none;" ><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    var AccountHead=<?php echo (isset($AccountHead)) ? json_encode($AccountHead) : '[]';?>;
+    var entryTransList=<?php echo (isset($entryTransList)) ? json_encode($entryTransList) : '[]';?>;
+
+    $(".datepickerinput").datepicker({
+        format: "dd-mm-yyyy",
+        autoclose: true
+    });
+    $(function () {
+        var template = $('#template-account').html();
+        var sno=0;
+        console.log(entryTransList)
+
+        if(entryTransList.length !=0){
+            $.each(entryTransList, function (i,o) {
+                sno += 1;
+                $('#accountTable').append(template.replace(/__/g, '_' + sno));
+                $('#accountHead_'+sno).val(o.AccountName);
+                $('#accountHeadId_'+sno).val(o.AccountId);
+                $('#subLedgerType_'+sno).val(o.SubLedgerTypeName);
+                $('#subLedgerTypeId_'+sno).val(o.SubLedgerTypeId);
+                $('#subLedgerName_'+sno).val(o.SubLedgerName);
+                $('#subLedgerId_'+sno).val(o.SubLedgerId);
+                if(o.TransType == 'D'){
+                    $('#credit_'+sno).val(sanitizeNumber(parseFloatVal(o.Amount,0),2,true));
+                } else if(o.TransType == 'C'){
+                    $('#debit_'+sno).val(sanitizeNumber(parseFloatVal(o.Amount,0),2,true));
+                }
+                $('.DeleteTr_' + sno).show();
+                readonlyCreditDebit($('#debit_'+sno))
+            });
+        }
+        sno += 1;
+        $('#accountTable').append(template.replace(/__/g, '_' + sno));
+        $('#rowid').val(sno);
+        bindAccountHeadAutoComplete(AccountHead);
+        bindSelect();
+    });
+
+    function readonlyCreditDebit(x){
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+
+        $('#debit_' + key).attr('readonly',false);
+        $('#credit_' + key).attr('readonly',false);
+
+        if (parseFloatVal($('#debit_' + key).val()) != 0){
+            $('#credit_' + key).attr('readonly',true);
+        }else if (parseFloatVal($('#credit_' + key).val()) != 0){
+            $('#debit_' + key).attr('readonly',true);
+        }
+
+    }
+
+    function bindSelect(){
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    }
+    function showAccounts(){
+        var accId=$('#bookName').val();
+        $('#divAccount').fadeIn();
+
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/cashmanagement",
+            type:"post",
+            //async:false,
+            data:{'accId':accId,'companyId':$('#companyId').val(),'type':'getAccountDetails'},
+            success:function(data, textStatus, jqXHR){
+                var balance=JSON.parse(data);
+                balance=balance['balance'];
+                var balanceAmt=parseFloatVal(balance.OpeningBalance)+parseFloatVal(balance.Amount);
+                $('#balanceAmt').text(balanceAmt);
+                bindAccountHeadAutoComplete(AccountHead);
+                bindSelect();
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+
+    }
+    function showPayment(x){
+        readonlyCreditDebit(x);
+        addNewRow(x);
+    }
+    function entryValidate(){
+        if($('.error').length != 0) {
+            alert('Kindly notice the error notifications!');
+            return false;
+        }
+    }
+    function submitForm(){
+        $(".error_message").hide();
+        bool=true;
+        if($.trim($('#voucherNo').val()) =='' || $("#voucherNo").val().length == 0){
+            $("#voucherNo").closest(".req_flds").find(".error_message").show();
+            $("#voucherNo").focus();
+            bool=false;
+        } else if($("#voucherDate").val().length == 0){
+            $("#voucherDate").closest(".req_flds").find(".error_message").show();
+            $("#voucherDate").focus();
+            bool=false;
+        } else if($("#bookName").val() == 0){
+            $("#bookName").closest(".req_flds").find(".error_message").show();
+            $("#bookName").focus();
+            bool=false;
+        } else if($("#CostcentreId").val() == 0){
+            $("#CostcentreId").closest(".req_flds").find(".error_message").show();
+            $("#CostcentreId").focus();
+            bool=false;
+        } else if($("#accountHeadId_1").val() == 0){
+            alert ("select Valid AccountHead");
+            bool=false;
+        } else if(validAccountHeadcheck()==false){
+            alert ("select Valid AccountHead");
+            bool=false;
+        }
+        if(bool === true) {
+            $('#cashManageForm').submit();
+        }
+    }
+
+    function validAccountHeadcheck() {
+        var isHead = true;
+        var irowcount=$('#rowid').val();
+        for(var i=1;i<=irowcount; i++) {
+            var AccHeadId = 0,debitAmt= 0,creditAmt= 0;
+            AccHeadId = $('#accountHeadId_' + i).val();
+            debitAmt = parseInt($('#debit_' + i).val());
+            creditAmt = parseInt($('#credit_' + i).val());
+            //console.log(debitAmt+'--'+ creditAmt)
+            if(AccHeadId==0 && (debitAmt!=0 || creditAmt!=0)){
+                isHead=false;
+            }
+        }
+        //if(irowcount==1 && AccHeadId==0)
+        //{isHead=false;}
+        return isHead;
+    }
+
+    function addNewRow(x) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+
+        //calcCreditDebit(x);
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#debit_' + key).val() == 0 && $('#credit_' + key).val() == 0)
+            return;
+
+        /*if ($('#accountHeadId_' + (key-1)).val() == 0 || $('#subLedgerTypeId_' + (key-1)).val() == 0 || $('#subLedgerId_' + (key-1)).val() == 0)
+            return;*/
+
+        var $rowid = $('#rowid'),
+            rowid = parseInt($rowid.val());
+        $('.DeleteTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#template-account').html();
+
+        template = template.replace(/__/g, '_' + count);
+        $tr.parent('tbody').append(template);
+        $rowid.val(count);
+
+        bindAccountHeadAutoComplete(AccountHead);
+        bindSelect();
+        if($('#divpayment').is(':visible'))
+            return false;
+
+        $('#divpayment').fadeIn();
+    }
+    function calcCreditDebit(x){
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[1];
+        var rowid=$('#rowid').val();
+        var debitTotal=0;
+        var creditTotal=0;
+
+        for(var i=1;i<=rowid;i++){
+//            if ($('#accountHeadId_' + i).val() != 0 && $('#subLedgerTypeId_' + i).val() != 0 && $('#subLedgerId_' + i).val() != 0){
+                debitTotal=parseFloatVal(debitTotal)+parseFloatVal($('#debit_'+i).val());
+                creditTotal=parseFloatVal(creditTotal)+parseFloatVal($('#credit_'+i).val());
+//            }
+        }
+        $('#DebitSumAMount').val(debitTotal);
+        $('#CreditSumAMount').val(creditTotal);
+        return FormatNum(x, 2, true);
+    }
+
+    function deleteAccountRow(x,e) {
+        e.preventDefault();
+        var $x = $(x),
+            key = $x[0].className.split('_')[1];
+
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $x.closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        $tr.remove();
+        bindAccountHeadAutoComplete(AccountHead);
+        bindSelect();
+        return false;
+    }
+    function getSubLedgerType(TypeId,x){
+        var $x=$(x),
+            id=$x.attr('id').split('_')[1];
+
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/cashmanagement",
+            type:"post",
+            //async:false,
+            data:{'AccountTypeId':TypeId,'type':'getSubLedgerType'},
+            success:function(data, textStatus, jqXHR){
+                var subLedgerType=JSON.parse(data);
+                subLedgerType=subLedgerType['subLedgerType'];
+                /*$('#subLedgerType_'+id).html('');
+                $('#subLedgerType_'+id).append('<option value="0"></option>');
+                $.each(subLedgerType,function(i,o){
+                    $('#subLedgerType_'+id).append('<option value='+ o.SubLedgerTypeId+'>'+ o.SubLedgerTypeName+'<option>');
+                });*/
+
+                bindAccountHeadAutoComplete(AccountHead);
+                bindSLTypeAutoComplete(subLedgerType);
+                bindSelect();
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+    function getSubLedgerName(x){
+        var $x=$(x),
+            id=$x.attr('id').split('_')[1];
+
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/cashmanagement",
+            type:"post",
+            //async:false,
+            data:{'SubLedgerTypeId':$('#subLedgerTypeId_'+id).val(),'type':'getSubLedgerName'},
+            success:function(data, textStatus, jqXHR){
+                var subLedgerName=JSON.parse(data);
+                subLedgerName=subLedgerName['subLedgerName'];
+                bindAccountHeadAutoComplete(AccountHead);
+                bindSLNameAutoComplete(subLedgerName);
+                bindSelect();
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function bindAccountHeadAutoComplete(AccountHead) {
+        var $accountHead = $('input[id^=accountHead_]');
+        $.each($accountHead, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            $this.unbind('autocomplete');
+            $this.autocomplete({
+                lookup: AccountHead,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $(this).prop('readonly',true);
+                        $("#accountHeadId_" + key1).val(suggestion.data);
+                        $(this).removeClass('error');
+                        getSubLedgerType(suggestion.TypeId,$(this));//$(this).attr('id').split('_')[1] //get row id
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $("#accountHeadId_" + key1).val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $("#accountHeadId_" + key1).val(0);
+                        $(this).addClass('error');
+                    } else $(this).removeClass('error');
+                }
+            });
+        });
+    }
+    function bindSLTypeAutoComplete(subLedgerType) {
+        var $subLedgerType = $('input[id^=subLedgerType_]');
+        var $subLedgerTypeId = $('input[id^=subLedgerTypeId_]');
+        $subLedgerType.unbind('autocomplete');
+        $subLedgerType.autocomplete({
+            lookup: subLedgerType,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $(this).prop('readonly',true);
+                    $subLedgerTypeId.val(suggestion.data);
+                    $(this).removeClass('error');
+                    getSubLedgerName($(this));
+                }
+            }, onSearchStart: function (suggestion) {
+                $subLedgerTypeId.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $subLedgerTypeId.val(0);
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+    function bindSLNameAutoComplete(subLedgerName) {
+        var $subLedgerName = $('input[id^=subLedgerName_]');
+        var $subLedgerId = $('input[id^=subLedgerId_]');
+        $subLedgerName.unbind('autocomplete');
+        $subLedgerName.autocomplete({
+            lookup: subLedgerName,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $(this).prop('readonly',true);
+                    $subLedgerId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $subLedgerId.val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $subLedgerId.val(0);
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+</script>

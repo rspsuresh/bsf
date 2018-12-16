@@ -1,0 +1,120 @@
+<style type="text/css">
+    .mkeflwup_btn_in{width:170px;float:left;}
+    .rjct_btn_in{width:160px;float:right;}
+    .mkeflwup_btn_in a {display: block;font-size: 16px;color: #fff;background-color: #38bd8b;padding: 8px 25px;text-align: center;}
+    .rjct_btn_in a {display: block;font-size: 16px;color: #fff;background-color: #f57268;padding: 8px 25px;text-align: center;}
+    .rjct_btn_in a:hover {background-color: #e4493e;}
+    .mkeflwup_btn_in a:hover {background-color: #2d946d;}
+    .calling_content_inner img {padding: 9% 0% 7% 0% !important;}
+</style>
+<div class="col-lg-12">
+    <div class="chatbox-holder">
+
+    </div>
+</div>
+<!--Call Modal-->
+<div class="modal fade" id="call_modal_in" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false" >
+    <div class="modal-dialog calling_dialog" role="document">
+        <div class="modal-content calling_content">
+            <i onclick="closeCallModalIn();" class="fa fa-times" style="float:right;color:#fff;cursor:pointer;font-size:20px;margin-top:5px;margin-right:5px;"></i>
+            <div class="calling_content_inner" id="bind_call_temp">
+<!--                <p id="caller_name_in">Make a call to <span id="calling_number_in"></span></p>-->
+<!--                <p>Dialing</p>-->
+<!--                <img src="--><?php //echo $this->basePath(); ?><!--/images/calling_icon.png" />-->
+<!--                <div class="endcall_btn"><a href="javascript:void(0)" onclick="connectCall('8807293058','9952688601');" class="brad_3 ripple">Call</a></div>-->
+<!--                <div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;"></div>-->
+<!--                <div class="mkeflwup_btn_in" style="margin-top:10px; display:none;"><a href="javascript:void(0)" class="brad_3 ripple">Make Followup</a></div>-->
+<!--                <div class="rjct_btn_in" style="margin-top:10px; display:none;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>-->
+            </div>
+            <input type="hidden" id="miss_call_track" name="miss_call_track" data-com="" value="0" />
+        </div>
+    </div>
+</div>
+<script>
+    function closeCallModalIn() {
+        $('#call_modal_in').modal('hide');
+        var cont = '<?php echo $this->currentRequest()->get('controller'); ?>';
+        var actn = '<?php echo $this->currentRequest()->get('action'); ?>';
+        if(cont=="index" &&  actn== 'missed-call-list') {
+            var CompleteCheck = $("#miss_call_track").attr("data-com");
+            if(CompleteCheck=='completed') {
+                $("#miss_call_track").attr("data-com","");
+                location.reload();
+            }
+
+        }
+    }
+</script>
+<footer>
+    <span class="copy_rights">Copyright &copy; <?php echo date('Y');?> Buildsuperfast. All Rights Reserved</span><span class="mmen_flogo"><img src="<?php echo $this->basePath(); ?>/images/mmen_flogo.png" alt="" title="Micromen software solutions pvt.ltd"></span>
+</footer>
+<?php
+if(isset($_GET['AskId']) && $_GET['type']=="ask") {
+    $type=$_GET['type'];
+    $askId = $_GET['AskId'];
+    $feedId =0;
+
+    $bsfDataSharaPage = $this->BsfShareHelper()->bsfDataShare($askId,$type,$feedId);
+    if(isset($bsfDataSharaPage)) { ?>
+        <script>
+            $(function () {
+                var dataMatch = <?php echo (isset($bsfDataSharaPage)) ? json_encode($bsfDataSharaPage) : ''?>;
+                $.each(dataMatch, function (i, o) {
+                    $('*[data-bsfshare]').each(
+                        function (index) {
+                            var input = $(this);
+                            if (o.InputValue == input.attr('data-bsfshare')) {
+                                if ($(this).prop("tagName") == "SELECT") {
+                                    $(this).next('span').addClass('watermark_yellow_bg');
+                                } else {
+                                    $(this).addClass('watermark_yellow_bg');
+                                }
+                            }
+                        }
+                    );
+                });
+            });
+        </script>
+    <?php }
+
+} else if(isset($_GET['FeedId']) && $_GET['type']=="feed") {
+    $feedId = $_GET['FeedId'];
+    $type=$_GET['type'];
+    $askId=$_GET['AskId'];
+
+    $this->BsfShareHelper()->bsfDataShare($feedId,$type,$askId);
+}
+else if(isset($_GET['ShareId']) && $_GET['type']=="share" && $_GET['FeedId']) {
+    $type=$_GET['type'];
+    $shareId = $_GET['ShareId'];
+    $feedId = $_GET['FeedId'];
+    $bsfDataSharaPage = $this->BsfShareHelper()->bsfDataView($shareId,$type,$feedId);
+    if(isset($bsfDataSharaPage)) { ?>
+        <script>
+            $(function () {
+                var dataMatch = <?php echo (isset($bsfDataSharaPage)) ? json_encode($bsfDataSharaPage) : ''?>;
+                $.each(dataMatch, function (i, o) {
+                    $('*[data-bsfshare]').each(
+                        function (index) {
+                            var input = $(this);
+                            if (o.InputValue == input.attr('data-bsfshare')) {
+                                if ($(this).prop("tagName") == "SELECT") {
+                                    $(this).next('span').addClass('watermark_yellow_bg');
+                                } else {
+                                    $(this).addClass('watermark_yellow_bg');
+                                }
+                            }
+                        }
+                    );
+                });
+            });
+        </script>
+    <?php }}
+?>
+<?php
+$action = $this->currentRequest()->get('action');
+$module = $this->currentRequest()->get('module');
+$controller = $this->currentRequest()->get('controller');
+$module = strtolower($module);
+$this->BsfShareHelper()->currenttask($module,$action,$controller);
+?>

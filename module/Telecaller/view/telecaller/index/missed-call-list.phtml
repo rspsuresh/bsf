@@ -1,0 +1,124 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+
+<!-- INLINE CSS -->
+<style>
+    .fixed-action-btn ul			{top:5px;}
+    .bootstrap-select.btn-group .btn .filter-option	{ margin-top:-3px;}
+    #dataTable .jqx-grid-header 	{height:75px !important;}
+</style>
+<!-- INLINE CSS -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Missed Calls
+            </h1>
+            <?php if(isset($ControlUserList) && count($ControlUserList) >1) { ?>
+                <div class="col-lg-5 col-md-8 col-sm-8 col-xs-12 pull-right padlr0 m_btm10">
+                    <label class="col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 control-label text-right">Executive</label>
+                    <div class="col-lg-6 col-md-6 col-sm-6 m_btm10">
+                        <select name="currentUserControll" id="currentUserControll" class="form-control single_dropdown lbl_move" style="width:100%;" onchange="executiveFilter(this);" title="Executive list">
+                            <option value="">All</option>
+                            <?php if(isset($ControlUserList)) { foreach($ControlUserList as $userList) { ?>
+                                <option <?php if(isset($executive) && $userList['UserId']==$executive) {  echo "selected"; }  ?> value="<?php echo $userList['UserId']; ?>"><?php echo $userList['EmployeeName']; ?></option>
+                            <?php  }
+                            } ?>
+                        </select>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+        <div class="col-lg-12 padtop10 clear">
+            <div class="table-responsive m_btm30">
+                <div id="dataTable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- PAGE SCRIPTS -->
+<script>
+
+    function executiveFilter(id) {
+        var val = $(id).val();
+
+        if($.trim(val)=="") {
+            val=0;
+        }
+        $(location).attr('href',"<?php echo $this->basePath(); ?>/telecaller/index/missed-call-list/"+val);
+
+    }
+    $(document).ready(function() {
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        var data = <?php echo (isset($missedCall)) ? json_encode($missedCall) : '[]'?>;
+
+        var dataTable =  $("#dataTable");
+        var source =
+        {
+            localdata:data,
+            dataType: "json",
+            dataFields: [
+                { name: 'TransId', type: 'number' },
+                { name: 'ModifiedDate',type: 'date'},
+                { name: 'CallFrom', type: 'string' },
+                { name: 'LeadNameFinal', type: 'string' },
+                { name: 'MissedCallCount', type: 'number' },
+                { name: 'TypeLeadFinal', type: 'string' },
+                { name: 'CampName', type: 'string' },
+                { name: 'ProjectName', type: 'string' },
+                { name: 'Time', type: 'string' },
+                { name: 'Attend', type: 'boolean' },
+                { name: 'AttendName', type: 'string' }
+            ],
+            id: 'ContactId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        dataTable.jqxGrid({
+            width: "100%",
+            autorowheight: true,
+            autoheight: true,
+            pageable:true,
+            sortable: true,
+            pagerButtonsCount: 6,
+            showfilterrow: true,
+            filterable: true,
+            rowDetails: true,
+            selectionmode: 'singlerow',
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            source: dataAdapter,
+            columns: [
+                { text: 'TransId', dataField: 'TransId', hidden:true },
+                { text: 'Call Date', filtertype: 'date', dataField: 'ModifiedDate',cellsformat: 'dd-MM-yyyy',width:'10%'},
+                { text: 'Mobile', dataField: 'CallFrom', width: '18%' ,cellsrenderer: function (row) {
+                    var callCount="";
+                    if(parseInt(dataTable.jqxGrid('getCellValue', row, 'MissedCallCount')) >1) {
+                        callCount="<p style='color:#FF0000;display:inline-block;'>("+dataTable.jqxGrid('getCellValue', row, 'MissedCallCount')+")</p>";
+                    }
+                    if(parseInt($.trim(dataTable.jqxGrid('getCellValue', row, 'Attend')))==0) {
+                        return '<div class=""><a href="javascript:void(0);" onclick="callModal('+dataTable.jqxGrid('getCellValue', row, 'CallFrom')+','+dataTable.jqxGrid('getCellValue', row, 'TransId')+');"><i class="fa fa-phone" style="color: green;font-size:18px;margin-right: 10px;margin-left:5px;margin-top:5px;"></i>' + dataTable.jqxGrid('getCellValue', row, 'CallFrom') + callCount + '</a></div>';
+                    } else {
+                        return '<div class="" style="margin-left:5px;margin-top:5px;">' + dataTable.jqxGrid('getCellValue', row, 'CallFrom') + callCount + '</div>';
+                    }
+                }
+                },
+                { text: 'Lead Name', dataField: 'LeadNameFinal' ,width:'10%'},
+                { text: 'missed count', dataField: 'MissedCallCount', hidden:true},
+                { text: 'Type', dataField: 'TypeLeadFinal' ,width:'10%'},
+                { text: 'Campaign', dataField: 'CampName' ,width:'12%'},
+                { text: 'Project', dataField: 'ProjectName',width:'18%'},
+                { text: 'Time',dataField: 'Time',width:'10%'},
+                { text: 'Attend Flag', dataField: 'Attend', hidden:true},
+                { text: 'Call Attended By', dataField: 'AttendName', width:'12%'}
+
+            ]
+        });
+    });
+</script>
+<!-- PAGE SCRIPTS -->

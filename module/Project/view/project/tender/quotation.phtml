@@ -1,0 +1,241 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<style type="text/css">
+.form-control {box-shadow:none!important}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			<form id="formWrapper" method="post" enctype="multipart/form-data">
+				<div id="indexWrapper">
+					<div class="col-lg-12">
+						<h1 class="text-center compadding_bottom_0 commargin_top">Quotation</h1>
+					</div>
+					<div class="col-lg-12 zoomIn animated">
+						<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+							<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+								<div class="form-horizontal">
+									<div class="row">
+										<div class="form-group">
+											<div class="col-lg-12">
+												<input type="text" name="clientName" id="clientName" class="form-control lbl_move" label="Client Name"  value="<?php if($tEnquiryId!=0){echo $eQuotation['ClientName'];} ?>"/>
+												<input type="hidden" name="clientId" id="clientId" value="<?php if($tEnquiryId!=0){echo $eQuotation['ClientId'];} ?>" />
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-lg-12">
+												<input type="text" name="enquiryName" id="enquiryName" class="form-control lbl_move" label="Enquiry Name" value="<?php if($tEnquiryId!=0){echo $eQuotation['NameOfWork'];} ?>" />
+												<input type="hidden" name="enquiryId" id="enquiryId" value="<?php if($tEnquiryId!=0){echo $tEnquiryId;} ?>"/>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-lg-12">
+												<select name="qType" id="qType" class="single_dropdown2 lbl_move" style="width:100%;" label="Quotation Type">
+                                                    <option value="">  </option>
+                                                    <option value="N">New Quotation</option>
+                                                    <option value="R" <?php if($tEnquiryId!=0) echo 'selected'; else '';?> >Revised Quotation</option>
+
+												</select>
+											</div>
+										</div>
+                                        <div id="revQuoteDiv" class="form-group" style="display:none;">
+                                            <div class="col-lg-12">
+                                                <select name="revQuoteId" id="revQuoteId" class="single_dropdown2 lbl_move" style="width:100%;" label="Quotation">
+                                                </select>
+                                            </div>
+                                        </div>
+									</div>
+								</div>
+								<div class="next-bt"><a onclick="return validateIndex();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+	$(".single_dropdown2").select2({
+		placeholder: ""
+	});
+<?php if($tEnquiryId != 0){?>
+    $('#clientName').trigger('change');
+    $('#clientId').trigger('change');
+    $('#enquiryName').trigger('change');
+    $('#enquiryId').trigger('change');
+    $('#qType').trigger('change');
+    <?php }?>
+	bindClientAutoComplete();
+});
+
+var arr_projects = <?php echo (isset($projects)) ? json_encode($projects) : '[]'; ?>;
+var arr_clients = <?php echo (isset($clients)) ? json_encode($clients) : '[]'; ?>;
+
+var $enquiryName = $('#enquiryName'),
+	$enquiryId= $('#enquiryId'),
+	$clientName = $('#clientName'),
+	$clientId = $('#clientId'),
+	$qType = $('#qType'),
+    $revQuoteId = $('#revQuoteId');
+
+$clientName.on('change', function() {
+    getQuotations();
+});
+
+$enquiryName.on('change', function() {
+    getQuotations();
+});
+
+$qType.on('change', function() {
+    getQuotations();
+});
+
+function getQuotations() {
+
+    if($enquiryId.val() != '' && $qType.val() =='R') {
+        $('#revQuoteDiv').show();
+        $.post(getBaseURL()+'project/tender/get-quotations', { enquiryId: $enquiryId.val() },
+            function(data) {
+                $('#revQuoteId').empty();
+                <?php if($tEnquiryId != 0){?>
+                var returnData = JSON.parse(data);
+                $.each(returnData, function(key, value){
+                    $('#revQuoteId')
+                        .append($("<option ></option>")
+                            .attr("value",value.data)
+                            .text(value.value));
+                <?php }else{?>
+                $('#revQuoteId').append('<option value="">Select Quotation</option>');
+                var returnData = JSON.parse(data);
+                $.each(returnData, function(key, value){
+                    $('#revQuoteId')
+                        .append($("<option></option>")
+                            .attr("value",value.data)
+                            .text(value.value));
+                <?php }?>
+
+                });
+            });
+    } else {
+        $('#revQuoteDiv').hide();
+    }
+}
+
+function validateIndex()
+{
+	var clientName = $clientName.val(),
+		enquiryName = $enquiryName.val(),
+		qType = $qType.val(),
+        revQuote = $revQuoteId.val();
+	
+	if(clientName.length == 0 || clientName.length == null) {
+		alert('Client Name is required!');
+		$clientName.focus();
+		return false;
+	}
+	
+	if(enquiryName.length == 0 || enquiryName.length == null) {
+		alert('Enquiry Name is required!');
+		$enquiryName.focus();
+		return false;
+	}
+
+	if(qType.length == 0 || qType.length == null) {
+		alert('Quotation Type is required!');
+		$qType.focus();
+		return false;
+	} else {
+        if(qType == 'R') {
+            if(revQuote.length == 0 || revQuote.length == null) {
+                alert('Quotation is required!');
+                $revQuoteId.focus();
+                return false;
+            }
+        }
+    }
+
+	$('#formWrapper').submit();
+}
+
+function bindEnquiryAutoComplete(clientId)
+{
+	$.ajax({
+		url: getBaseURL() + "project/tender/quotation",
+		data: {rtype:'getProject', data: clientId},
+		async: false,
+		type: 'post',
+		success: function(data,status, xhr) {
+			var arr_projects = JSON.parse(data);
+			$enquiryName.autocomplete({
+				lookup: arr_projects,
+				showNoSuggestionNotice: false,
+				lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+					if (queryLowerCase == '*') {
+						return suggestion.value;
+					} else {
+						var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+						return re.test(suggestion.value);
+					}
+				}, onSelect: function (suggestion) {
+					if (suggestion) {
+						$enquiryId.val(suggestion.data);
+					}
+				}, onSearchStart: function (suggestion) {
+					$enquiryId.val(0);
+				}, onSearchComplete: function (query, suggestion) {
+					if (!suggestion.length) {
+						$(this).addClass('error');
+						$enquiryId.val(0);
+					} else $(this).removeClass('error');
+				}
+			});
+		}
+	});
+}
+
+var localClientId = 0;
+function bindClientAutoComplete(noSuggestion)
+{
+	var showSuggestion = true;
+	if(typeof noSuggestion != 'undefined' && noSuggestion == true) {
+		showSuggestion = false;
+	}
+	
+	$clientName.unbind('autocomplete');
+	$clientName.autocomplete({
+		lookup: arr_clients,
+		showNoSuggestionNotice: showSuggestion,
+		noSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		}, onSelect: function (suggestion) {
+			if (suggestion) {
+				$clientId.val(suggestion.data);
+				$(this).removeClass('error');
+				if(localClientId != suggestion.data) {
+					localClientId = suggestion.data;
+					bindEnquiryAutoComplete(suggestion.data);
+				}
+			}
+		}, onSearchStart: function (suggestion) {
+			$clientId.val(0);
+		}, onSearchComplete: function (query, suggestions) {
+			if (!suggestions.length) {
+				$(this).addClass('error');
+				$clientId.val(0);
+			} else $(this).removeClass('error');
+		}
+	});
+}
+<?php if($tEnquiryId != 0) { ?>
+getQuotations();
+<?php } ?>
+</script>

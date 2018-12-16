@@ -1,0 +1,208 @@
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+	
+	#jqxgrid .jqx-grid-header 	{
+		height:120px !important;
+	}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script> 
+<div class="content_wrapper  padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="col-lg-12">Top Short Certification Items Order wise</h1> 
+                <div class="col-lg-3 col-lg-offset-9">
+						<input type="text" name="WorkOrderName" id="WorkOrderName" class="form-control lbl_move" label="Select WorkOrder" style="width:150px;"  value=""/>
+						<input type="hidden" name="WorkOrderId" id="WorkOrderId" value="0"/>
+                    </div>  
+                 </div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+					<div style='margin-top: 10px;' id="jqxgrid">
+				</div>
+				</div>
+             </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="float_r"><a href="#" class="ripple crmcmnbtn crmcmnbtn1 "  id="print"><i class="fa fa-print"></i> Print</a></li>
+        <li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn2  ripple" id="excelExport">Export to Excel</a></li>
+        <li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn3 ripple" id="csvExport">Export to CSV</a></li>
+        <!--<li class="float_r"><a href="#" class="crmcmnbtn crmcmnbtn4  ripple" id="htmlExport">Export to HTML</a></li>-->
+    </ul>
+</div>
+<script type="text/javascript">
+var arr_woLists = <?php echo (isset($woList)) ? json_encode($woList) : '[]';?>;
+var data = [];
+var $WorkOrderId = $('#WorkOrderId'),
+	$WorkOrderName = $('#WorkOrderName');
+	$(document).ready(function () {
+		// select rows.
+		//var rows = $("#table tbody tr");
+		// select columns.
+		//var columns = $("#table thead th");
+		$WorkOrderName.autocomplete({
+			lookup: arr_woLists,
+			showNoSuggestionNotice: false,
+			lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+				if (queryLowerCase == '*') {
+					return suggestion.value;
+				} else {
+					var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+					return re.test(suggestion.value);
+				}
+			}, onSelect: function (suggestion) {
+				if (suggestion) {
+					$WorkOrderId.val(suggestion.data);
+					bindLoadGrid(suggestion.data);
+					$(this).removeClass('error');
+				}
+			}, onSearchStart: function (suggestion) {
+					$WorkOrderId.val(0);
+					bindLoadGrid(0);
+			}, onSearchComplete: function (query, suggestions) {
+				if (!suggestions.length) {
+					$WorkOrderId.val(0);
+					bindLoadGrid(0);
+					$(this).addClass('error');
+				} else $(this).removeClass('error');
+			}
+		});
+		
+		//Print option
+		$("#excelExport").click(function () {
+			$("#jqxgrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+		});
+		$("#csvExport").click(function () {
+			$("#jqxgrid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+		});
+		$("#htmlExport").click(function () {
+			$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid');
+		});
+
+		$("#print").click(function () {
+			var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html');
+			//var gridContent = $("#jqxgrid").jqxGrid('contentjqxgrid', 'html');
+			console.log(gridContent);
+			var newWindow = window.open('', '', 'width=800, height=500'),
+			document = newWindow.document.open(),
+			pageContent =
+				'<!DOCTYPE html>\n' +
+				'<html>\n' +
+				'<head>\n' +
+				'<meta charset="utf-8" />\n' +
+				'<title>Top Short Certification Items</title>\n' +				
+				'<h1>Top Short Certification Items</h1>\n' +
+				'</head>\n' +
+				'<body>\n' + gridContent + '\n</body>\n</html>';
+			document.write(pageContent);
+			document.close();
+			newWindow.print();
+		});
+		
+	});
+	
+	function bindLoadGrid(workorderId) {
+	//alert(workorderId);
+		$.ajax({
+			url: getBaseURL() + "cb/report/shortcertification",
+			data: {rtype:'getLoad', data: workorderId, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+			async: false,
+			type: 'post',
+			success: function(data,status, xhr) {
+				var source = {
+					localdata: data,
+					datatype: "json",
+					pagesize: 15,
+					datafields:
+					[
+						{ name: "WOBOQId", type: "number" },
+						{ name: "AgtNo", type: "string" },
+						{ name: "Specification", type: "string" },
+						{ name: "UnitName", type: "number" },
+						{ name: "Rate", type: "number" },
+						{ name: "WOQty", type: "number" },
+						{ name: "WOAmount", type: "number" },
+						{ name: "SubmitQty", type: "number" },
+						{ name: "SubmitAmount", type: "number" },
+						{ name: "CertifyQty", type: "number" },
+						{ name: "CertifyAmount", type: "number" },
+						{ name: "DiffQty", type: "number" },
+						{ name: "DiffAmount", type: "number" },
+						{ name: "Type", type: "string" }
+					]
+				};
+
+				var dataAdapter = new $.jqx.dataAdapter(source);
+				$("#jqxgrid").jqxGrid(
+				{
+					width: "100%",
+					source: dataAdapter,
+					pageable: true,
+					columnsresize: true,
+					autoheight: true,
+					sortable: true,
+					altrows: true,
+					enabletooltips: true,
+					showfilterrow: true,
+					filterable: true,
+					//selectionmode: 'multiplecellsadvanced',
+					groupable: true,
+					showstatusbar: true,
+					statusbarheight: 25,
+					showaggregates: true,
+					columns: [
+					 { text: 'WOBOQId', dataField: 'WOBOQId', align: 'center' , pinned: true, hidden:true },
+					  { text: 'AgtNo', dataField: 'AgtNo', align: 'center', pinned: true ,width:"8%" },
+					  { text: 'Description', dataField: 'Specification', align: 'center', pinned: true ,width:"25%" },
+					  { text: 'Unit', dataField: 'UnitName', align: 'center', pinned: true ,width:"8%" },
+					  { text: 'Rate', dataField: 'Rate', align: 'center', pinned: true ,width:"8%" , cellsformat: "d2", cellsalign: 'right' },
+					  { text: 'WO', columngroup: 'Qty', dataField: 'WOQty', align: 'center', cellsalign: 'right',width:"10%",cellsformat: "f3"},
+					  { text: 'Submitted', columngroup: 'Qty', dataField: 'SubmitQty', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "f3"},
+					  { text: 'Certified', columngroup: 'Qty', dataField: 'CertifyQty', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "f3" },							  
+					  { text: 'WO', columngroup: 'Amount', dataField: 'WOAmount', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+                            function (aggregatedValue, currentValue, column, record) {
+								var total = currentValue;
+                                return aggregatedValue + total;
+                            }
+                      }]   },
+					  { text: 'Submitted', columngroup: 'Amount', dataField: 'SubmitAmount', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+                            function (aggregatedValue, currentValue, column, record) {
+								var total = currentValue;
+                                return aggregatedValue + total;
+                            }
+                      }] },
+					  { text: 'Certified', columngroup: 'Amount', dataField: 'CertifyAmount', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+                            function (aggregatedValue, currentValue, column, record) {
+								var total = currentValue;
+                                return aggregatedValue + total;
+                            }
+                      }] },
+					   { text: 'Qty', columngroup: 'Diff', dataField: 'DiffQty', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "f3" },
+					   { text: 'Amount', columngroup: 'Diff', dataField: 'DiffAmount', align: 'center', cellsalign: 'right',width:"10%", cellsformat: "d2", aggregates: [{ '<b>Total</b>':
+                            function (aggregatedValue, currentValue, column, record) {
+                                //var total = currentValue * parseInt(record['quantity']);
+								var total = currentValue;
+                                return aggregatedValue + total;
+                            }
+                      }]  },
+					   { text: 'Type', dataField: 'Type', align: 'center', hidden:true },
+					],
+					groups: ['Type'],
+					columngroups: [
+						{ text: 'Qty', align: 'center', name: 'Qty' },
+						{ text: 'Amount', align: 'center', name: 'Amount' },
+						{ text: 'Diff (Submiited Vs Certified)', align: 'center', name: 'Diff' },
+					]
+				});
+				 $("#jqxgrid").jqxGrid('expandallgroups');
+			}
+		});
+	}
+</script>

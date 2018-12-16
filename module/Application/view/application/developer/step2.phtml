@@ -1,0 +1,117 @@
+<div class="content_wrapper min_h550 padlr0">
+	<div class="container-fluid">
+		<div class="row frmwrk_area">
+			<div class="col-lg-12">
+				<h1 class="txt_center frmwrk_h1">BSF Developer Framework</h1> 
+			</div> 
+			<div class="col-lg-12">
+				<div class="row">
+					<div class="step_by_liner animated slideInDown"></div>
+					<ul class="step_by">
+						<li class="opacity_08">
+							<div class="step_by_sep animated_0_4s slideInRight"><p>1</p></div>
+						</li>
+						<li>
+							<div class="step_by_sep stepsep_active animated slideInRight"><p>2</p></div>
+						</li>
+						<li class="opacity_08">
+							<div class="step_by_sep animated_1_5s slideInRight"><p>3</p></div>
+						</li>
+					</ul>
+					<form action="" id="actionForm" method="post">
+						<div class="col-lg-6 col-md-6 col-sm-6 frmwrk_div" id="modules_list">
+							<select name="module_name" id="module_name" onchange="return moduleSelect(this.value);" class="form-control selectpicker show-tick" data-size="6" title="Select Module...">
+								<option value="">Select Module</option>
+								<option value="application">General Application</option>
+								<option value="ats">At Site</option>
+								<option value="crm">CRM</option>
+								<option value="designer">Designer</option>
+								<option value="mms">MMS</option>
+								<option value="pcm">Project Communciation</option>
+								<option value="project">Project</option>
+								<option value="schedule">Schedule</option>
+								<option value="vendor">Vendor Management</option>
+								<option value="workflow">Workflow Management</option>
+								<option value="portal">Portal</option>
+								<option value="warehouse">Warehouse</option>
+								<option value="cb">Client Billing</option>
+								<option value="kickoff">Kickoff</option>
+								<option value="wpm">WPM</option>
+							</select>
+						</div>
+						<div class="col-lg-6 col-md-6 col-sm-6 frmwrk_div" id="controller_list" style="display:none;">
+							<input type="text" name="controller_name" id="controller_name" onblur="return checkControllerExist();" class="form-control lbl_move" Label="Controller Name" />
+						</div>
+						<div class="col-lg-6 col-md-6 col-sm-6 frmwrk_div" id="action_list" style="display:none;">
+							<input type="text" name="action_name" id="action_name" onblur="return checkActionExist();" class="form-control lbl_move" Label="Action Name" />
+						</div>
+						<input type="hidden" value="" name="hidControllers" id="hidControllers" />
+					</form>
+					<div class="col-lg-12 savebtn_area m3_auto no_border" id="proceed_button" style="display:none;">
+						<ul>
+							<li class="save_btn m_auto">
+								<a href="javascript:void(0);" onclick="$('#actionForm').submit();" class="ripple">Proceed</a>
+							</li>
+						</ul>
+					</div>
+				</div> 
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	function moduleSelect(value) {
+		if(value=="") {
+			$('#controller_list').hide();
+			$('#controller_list').val('');
+			$('#action_list').hide();
+			$('#action_list').val('');
+			$('#proceed_button').hide();
+		} else {
+			$.post(getBaseURL()+'application/developer/check-controllername', {actionName: $('#action_name').val(),controllerName: $('#controller_name').val(),moduleName: $('#module_name').val() }, function(data) {
+				var splitData = data.split('####');
+				if(splitData[0]=='session-expired') {
+					location.href = getBaseURL()+'index/index/sessionexpire/1/sessionurl/'+splitData[1];
+				} else {
+					$('#hidControllers').val(data);
+					$('#controller_list').show();
+					$('#action_list').hide();
+					$('#action_list').val('');
+					$('#proceed_button').hide();
+				}
+			});
+			
+		}
+	}
+	function checkControllerExist() {
+		$('#action_list').val('');
+		$('#action_list').show();
+		$('#proceed_button').hide();
+	}
+	function checkActionExist() {
+		$.post(getBaseURL()+'application/developer/check-actionname', {actionName: $('#action_name').val(),controllerName: $('#controller_name').val(),moduleName: $('#module_name').val() }, function(data) {
+			var splitData = data.split('####');
+			if(splitData[0]=='session-expired') {
+				location.href = getBaseURL()+'index/index/sessionexpire/1/sessionurl/'+splitData[1];
+			} else {
+				if(data == '0') {
+					$('#proceed_button').show();
+				} else {
+					alert('Action Name already exist for this Controller, Please change it');
+				}
+			}
+		});
+	}
+	$('#controller_name').autocomplete({
+		lookup: $('#hidControllers').val(),
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		},
+		onSelect: function (suggestion) {
+			$('#action_list').val('');
+			$('#action_list').show();
+			$('#proceed_button').hide();
+		}
+	});
+</script>

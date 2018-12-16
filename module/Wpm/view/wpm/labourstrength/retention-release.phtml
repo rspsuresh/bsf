@@ -1,0 +1,1162 @@
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/workorder.css'; ?>" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath().'/css/wpm.css'; ?>" />
+<style>
+    .parent_text:hover{border:1px solid #68C46A}
+    .subDiv{padding:4px 10px}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 id="titleTag" class="text-center">Retention Release</h1>
+            </div>
+            <form method="post" id="formWrapper">
+                <div id="resourceInputsWrapper" class="hide"></div>
+                <div id="stageOne" class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                    <div class="col-lg-4 col-lg-offset-8 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8">
+                        <div class="form-group col-lg-8 col-lg-offset-4">
+                            <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="rreDate" id="rreDate" class="date_picker parnt-text" value="<?php echo date("d-m-Y"); ?>" readonly />
+                            <input type="hidden" id="retRelId" name="retRelId" value="<?php echo $retRelId; ?>" />
+                            <input type="hidden" id="rrTypeId" name="rrTypeId" value="<?php echo $rrTypeId; ?>" />
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active">
+                                <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move" label="Select Cost Centre" value="<?php if(isset($arRegister) && trim($arRegister['CostCentreId']) != '') { echo $arRegister['CostCentreId']; } else { echo ''; } ?>" name="costCentreName" id="costCentreName" />
+                                        <input type="hidden"  value="" name="costCentreId" id="costCentreId" />
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <select class="form-control single_dropdown lbl_move" label="Select Order Type" style="width:100%;" name="orderType" id="orderType">
+                                            <option value=""></option>
+                                            <option value="W">Work</option>
+                                            <option value="H">Hire</option>
+                                            <option value="S">Service</option>
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                        <input type="text" class="form-control lbl_move" label="Select Contractor" value="<?php if(isset($arRegister) && trim($arRegister['VendorId']) != '') { echo $arRegister['VendorId']; } else { echo ''; } ?>" name="vendorName" id="vendorName" />
+                                        <input type="hidden"  value="" name="vendorId" id="vendorId" />
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                    <div id="selOrdDiv" class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group" style="display: none;">
+                                        <select class="form-control single_dropdown lbl_move" label="Select Order No" style="width:100%;" name="eOrderNo" id="eOrderNo">
+                                        </select>
+                                        <div class="error_message"><p>Required</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item min_h550">
+                                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-12 top-sl-10">
+                                    <div class="top-conts animated fadeInRight">
+                                        <h2>Selected </h2>
+                                        <span id="NoOfSelResource">0</span>
+                                    </div>
+                                    <div id="resourceGrid"></div>
+                                </div>
+                            </div>
+                            <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5 col-md-7 col-md-offset-5 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-3">
+                                <li id="backPrev"><a href="javascript:void(0);" onclick="return goBack();"><span><i class="fa fa-arrow-left"></i></span> Back</a></li>
+                                <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next <span><i class="fa fa-arrow-right"></i></span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="stageTwo" style="display:none;">
+                    <div class="col-lg-12">
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Cost Centre</label>
+                                        <span class="hprojName"><?php if(isset($rrRegister) && $rrRegister['CostCentreName'] != '') { echo $rrRegister['CostCentreName']; } else { echo ''; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Contractor</label>
+                                        <span class="hconName"><?php if(isset($rrRegister) && $rrRegister['VendorName'] != '') { echo $rrRegister['VendorName']; } else { echo ''; } ?></span>
+                                    </li>
+                                    <li>
+                                        <label>Order No</label>
+
+                                        <?php if(isset($order)) {?>
+                                            <span class="orders"><?php echo $order['OrderNo']; ?></span>
+                                            <input type="hidden" name="orderNo" id="orderNo" value="<?php echo $order['OrderId'];?>" >
+                                        <?php } else{?>
+                                            <div class="select-style selected-mu">
+                                                <select name="orderNo" id="orderNo" disabled>
+                                                </select>
+                                            </div>
+                                        <?php } ?>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box2th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Retention Release Date</label>
+                                        <span><input type="text" id="rrDate" name="rrDate" class="date_picker" value="<?php if(isset($rrRegister) && ($rrRegister['RRDate'] != NULL)) { echo date("d-m-Y", strtotime($rrRegister['RRDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref Date</label>
+                                        <span><input type="text" id="refDate" name="refDate" class="date_picker" value="<?php if(isset($rrRegister) && ($rrRegister['RefDate'] != NULL)) { echo date("d-m-Y", strtotime($rrRegister['RefDate'])); } else { echo date("d-m-Y"); } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>Bill No</label>
+                                        <span><input type="text" id="billNo" name="billNo" value="" readonly /><input type="hidden" id="billId" name="billId" value="" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Order Type</label>
+                                        <span><input type="text" id="eOrderType" name="eOrderType" value="" readonly /><input type="hidden" id="orderVal" name="orderVal" value="" /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                            <div class="panel-box box3th zoomIn animated">
+                                <ul>
+                                    <li>
+                                        <label>Retention Release No</label>
+                                        <span><input type="text" id="rrNo" name="rrNo" value="<?php if(isset($rrRegister) && trim($rrRegister['RRNo']) != '') { echo trim($rrRegister['RRNo']); } else { echo ($genType) ? trim($rrNo) : ''; } ?>" readonly /></span>
+                                    </li>
+                                    <li>
+                                        <label>CC No</label>
+                                        <span><input type="text" id="ccRrNo" name="ccRrNo" value="<?php if(isset($rrRegister) && trim($rrRegister['RRCCNo']) != '') { echo $rrRegister['RRCCNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Comp No</label>
+                                        <span><input type="text" id="compRrNo" name="compRrNo" value="<?php if(isset($rrRegister) && trim($rrRegister['RRCompNo']) != '') { echo $rrRegister['RRCompNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                    <li>
+                                        <label>Ref No</label>
+                                        <span><input type="text" id="refNo" name="refNo" value="<?php if(isset($rrRegister) && trim($rrRegister['RefNo']) != '') { echo $rrRegister['RefNo']; } else { echo ''; } ?>" /></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slic">
+                        <ul>
+                            <li class="face"><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                            <li><a href="#"></a></li>
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="table-responsive top-30" style=" box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);">
+                            <table class="table" style="margin-bottom:0px;" id="rreTable">
+                                <thead>
+                                <tr>
+                                    <th width="32%">Description</th>
+                                    <th width="32%">Account Head</th>
+                                    <th width="32%">Amount</th>
+                                    <th width="4%">&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="retRelClass">
+                                    <td> Retention</td>
+                                    <td> <input class="form-control parent_text accountHead" name="retentionAccountName"  id="retentionAccountName" type="text" onkeypress="return bindAccountHeadAutoComplete(this);" >
+                                        <input class="form-control parent_text accountHead" name="retentionAccountId" id="retentionAccountId" type="hidden"  >
+                                    </td>
+                                    <td> <input id="retentionAmt" name="retentionAmt" class="form-control parent_text text-right" type="text" onkeypress="return isDecimal(event,this);" onblur="calcNetAmt(this,'rA'),FormatNum(this, 2);" readonly></td>
+                                    <td width="5%" align="center" class="action_btns_td">
+                                        <ul class="action_btns">
+                                            <li>
+                                                <a href="javascript:void(0);" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip"data-original-title="Expand" data-placement="left"></i></a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr style="display:none;" class="subTr">
+                                    <td colspan="6"><div class="subDiv animated-panel zoomIn"  style="animation-delay: 0.2s;">
+                                            <table class="table" style="margin-bottom:0px;" id="retentionTable">
+                                                <thead>
+                                                <tr>
+                                                    <th>Bill Date</th>
+                                                    <th> Bill No</th>
+                                                    <th>Recovery Amount</th>
+                                                    <th>Release Amount</th>
+                                                    <th>Balance</th>
+                                                    <th>Current Amount</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <td> <input class="form-control parent_text" type="hidden" id="retRowid" name="retRowid" ></td>
+                                                </tbody>
+                                            </table></div></td></tr>
+                                <!---subdiv-->
+                                <tr class="retRelClass">
+                                    <td> Withheld Amount</td>
+                                    <td> <input class="form-control parent_text accountHead" type="text" name="withHeldAccountName" id="withHeldAccountName" onkeypress="return bindAccountHeadAutoComplete(this);">
+                                        <input class="form-control parent_text accountHead" id="withHeldAccountId" name="withHeldAccountId" type="hidden" >
+                                    </td>
+                                    <td> <input id="withHeldAmt"name="withHeldAmt" class="form-control parent_text text-right" type="text" onkeypress="return isDecimal(event,this);" onblur="calcNetAmt(this,'wA'),FormatNum(this, 2);" readonly ></td>
+                                    <td width="5%" align="center" class="action_btns_td">
+                                        <ul class="action_btns">
+                                            <li>
+                                                <a href="javascript:void(0);" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-original-title="Expand" data-placement="left"></i></a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr style="display:none;" class="subTr">
+                                    <td colspan="5"><div class="subDiv animated-panel zoomIn"  style="animation-delay: 0.2s;">
+                                            <table class="table" style="margin-bottom:0px;" id="withheldTable">
+                                                <thead>
+                                                <tr>
+                                                    <th>Bill Date</th>
+                                                    <th> Bill No</th>
+                                                    <th>Recovery Amount</th>
+                                                    <th>Release Amount</th>
+                                                    <th>Balance</th>
+                                                    <th>Current Amount</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <td> <input class="form-control parent_text" type="hidden" id="withheldRowid" name="withheldRowid" ></td>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!---second step-->
+                                <tr class="retRelClass">
+                                    <td> Advance Recovery</td>
+                                    <td> <input class="form-control parent_text accountHead" type="text" id="advanceRecoverAccountName" name="advanceRecoverAccountName" onkeypress="return bindAccountHeadAutoComplete(this);">
+                                        <input type="hidden" class="form-control parent_text accountHead" id="advanceRecoverAccountId" name="advanceRecoverAccountId" >
+                                    </td>
+                                    <td> <input class="form-control parent_text text-right" type="text" name="advanceRecoverAmt" id="advanceRecoverAmt" onblur="calcNetAmt(this,'adR'),FormatNum(this, 2);" readonly ></td>
+                                    <td width="5%" align="center" class="action_btns_td">
+                                        <ul class="action_btns">
+                                            <li>
+                                                <a href="javascript:void(0);" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip"data-original-title="Expand" data-placement="left"></i></a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr style="display:none;" class="subTr">
+                                    <td colspan="6"><div class="subDiv animated-panel zoomIn"  style="animation-delay: 0.2s;">
+                                            <table class="table" style="margin-bottom:0px;" id="rreTable">
+                                                <thead>
+                                                <tr><th>Reg Date</th>
+                                                    <th>Reg No</th>
+                                                    <th>Advance Amount</th>
+                                                    <th>Deduct Amount</th>
+                                                    <th>Balance Amount</th>
+                                                    <th>Current Amount</th>
+
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td> <input class="form-control parent_text" name="advanceRecoverRegDate" id="advanceRecoverRegDate" type="text" readonly></td>
+                                                    <td> <input class="form-control parent_text" name="advanceRecoverRegNo" id="advanceRecoverRegNo" type="text" readonly></td>
+                                                    <td> <input class="form-control parent_text text-right" type="text" name="advanceRecoverAelvAmt" id="advanceRecoverAelvAmt" readonly onkeypress="return isDecimal(event,this);"></td>
+                                                    <td> <input class="form-control parent_text text-right" type="text" name="advanceRecoverDeductAmt" id="advanceRecoverDeductAmt" readonly  onkeypress="return isDecimal(event,this);"></td>
+                                                    <td> <input class="form-control parent_text" type="text"name="advanceRecoverBalAmt" id="advanceRecoverBalAmt" readonly onkeypress="return isDecimal(event,this);" ></td>
+                                                    <td> <input class="form-control parent_text text-right" name="advanceRecoverCurAmt" id="advanceRecoverCurAmt" type="text" onkeypress="return isDecimal(event,this);" onblur="amtChange(this,'ad'),FormatNum(this, 2);" ></td>
+                                                </tr>
+                                                </tbody>
+                                            </table></div></td></tr>
+                                <!---subdiv-->
+                                <tr>
+                                <tr>
+                                    <td> Penalty,If Any </td>
+                                    <td> <input class="form-control parent_text accountHead" type="text" id="penaltyAccountName" name="penaltyAccountName" onkeypress="return bindAccountHeadAutoComplete(this);" >
+                                        <input class="form-control parent_text accountHead" type="hidden" id="penaltyAccountId" name="penaltyAccountId">
+                                    </td>
+                                    <td colspan="1"> <input class="form-control parent_text text-right" type="text" id="penaltyAmt" name="penaltyAmt"  onkeypress="return isDecimal(event,this);" onblur="calcNetAmt(this,'pA'),FormatNum(this, 2);"></td>
+                                </tr>
+                                <!---second step-->
+                                <tr>
+                                    <td> Rounding Off</td>
+                                    <td> <input class="form-control parent_text accountHead" type="text" id="roundingOffAccountName" name="roundingOffAccountName" onkeypress="return bindAccountHeadAutoComplete(this);" >
+                                        <input type="hidden" class="form-control parent_text accountHead"  id="roundingOffAccountId" name="roundingOffAccountId" >
+                                    </td>
+                                    <td colspan="1"> <input class="form-control parent_text text-right" type="text" id="roundingOffAmt" name="roundingOffAmt" onkeypress="return isDecimal(event,this);" ></td>
+                                </tr>
+                                <tr>
+                                    <td> Net Amount</td>
+                                    <td> <input class="form-control parent_text" type="text" id="contractAccountHead" name="contractAccountHead"  readonly></td>
+                                    <td colspan="1"> <input class="form-control parent_text text-right" type="text" id="contractNetAmt" name="contractNetAmt" onkeypress="return isDecimal(event,this);" onblur="return FormatNum(this, 2);" ></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 lab-natt">
+                        <div class="form-group">
+                            <label>Narration</label>
+                            <textarea id="narration" name="narration" class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12"><?php if(isset($rrRegister) && $rrRegister['Narration'] != '') { echo $rrRegister['Narration']; } ?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+<div id="submitDiv" class="col-lg-12 savebtn_area" style="">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple" title="Submit" onclick="return submitForm();">Submit</a>
+            <?php if(isset($rrRegister)){?>
+        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/retention-release-register';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+        <?php }else{?>
+            <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/retention-release';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+        <?php }?>    </ul>
+</div>
+<script id="I-template"  type="text/template" class="hide">
+    <tr id="__">
+        <td width="15%"> <input class="form-control parent_text" type="text" name="billdate__" id="billdate__" readonly />
+            <input type="hidden" id="billRegisterId__" name="billRegisterId__">
+        </td>
+        <td width="15%"> <input class="form-control parent_text" type="text" name="billno__" id="billno__" readonly/></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="recoveryamt__" id="recoveryamt__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="Releaseamt__" id="Releaseamt__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="balance__" id="balance__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="currentamt__" id="currentamt__" type="text" onkeypress="return isDecimal(event,this);" onblur="amtChange(this,'r'),FormatNum(this, 2);" /></td>
+        <td width="5%"> <input class="form-control parent_text text-right checkRetent"  name="checkretention__" id="checkretention__" type="checkbox" disabled /></td>
+    </tr>
+</script>
+<script id="II-template"  type="text/template">
+    <tr>
+        <td width="15%"> <input class="form-control parent_text" type="text" name="billdates__" id="billdates__" readonly />
+            <input type="hidden" id="billRegisterIds__" name="billRegisterIds__">
+        </td>
+        <td width="15%"> <input class="form-control parent_text" type="text" name="billnos__" id="billnos__" readonly/></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="recoveryamts__" id="recoveryamts__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="Releaseamts__" id="Releaseamts__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="balances__" id="balances__" type="text" readonly /></td>
+        <td width="15%"> <input class="form-control parent_text text-right" name="currentamts__" id="currentamts__" type="text" onkeypress="return isDecimal(event,this);" onblur="amtChange(this,'w'),FormatNum(this, 2);"/></td>
+        <td width="5%"> <input class="form-control parent_text text-right checkRetents" name="checkretentions__" id="checkretentions__" type="checkbox" /></td>
+    </tr>
+</script>
+<script>
+    var arr_accountMaster = <?php echo (isset($accountMaster)) ? json_encode($accountMaster) : '[]';?>;
+    var opCostCentre=<?php echo (isset($opCostCentre)) ? json_encode($opCostCentre) : '[]';?>;
+    var vendorMaster=<?php echo (isset($vendorMaster)) ? json_encode($vendorMaster) : '[]';?>;
+
+    $("#backPrev").hide();
+
+    var sel_resource_count = 0;
+    var $resourceGrid = $("#resourceGrid");
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            { name: 'Include', type: 'boolean' },
+            { name: 'EDate', type: 'string' },
+            { name: 'RefNo', type: 'int' },
+            { name: 'RecoveryAmount', type: 'int' },
+            { name: 'ReleaseAmount', type: 'int' },
+            { name: 'Balance', type: 'int' },
+            { name: 'CurAmount', type: 'int' },
+            { name: 'PrevAmount', type: 'int' },
+            { name: 'BillRegisterId', type: 'int' }
+        ],
+        id: 'BillRegisterId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+    $(function(){
+//        bindAccountHeadAutoComplete();
+        bindcostCentreAutoComplete();
+        bindContractorAutoComplete();
+        $('.ripple').materialripple();
+        $('.cnt_slider .carousel').carousel({
+            interval: false
+        });
+
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            editable: true,
+            columns: [
+                { dataField: 'BillRegisterId', hidden: true},
+                { text: '', dataField: 'Include', columntype: 'checkbox', align: 'center', width: '4%'},
+                { text: 'Ref Date', dataField: 'EDate',width:'13%', editable:false},
+                { text: 'Ref No', dataField: 'RefNo',width:'12%', editable:false},
+                { text: 'Recovery Amt', dataField: 'RecoveryAmount',width:'14%', editable:false},
+                { text: 'Release Amt', dataField: 'ReleaseAmount',width:'14%', editable:false},
+                { text: 'Balance Amt', dataField: 'Balance',width:'14%', editable:false},
+                { text: 'Current Amt', dataField: 'CurAmount',width:'14%', editable:false},
+                { text: 'Prev Amt', dataField: 'PrevAmount',width:'14%', editable:false},
+            ]
+        });
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            if(args.newvalue === true)
+                sel_resource_count++;
+            else
+                sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+
+        $('#resourceGrid').bind('rowselect', function (event) {
+            var args = event.args;
+            var row = args.rowindex;true
+            var value = $('#resourceGrid').jqxGrid('getcellvalue', row, getFistCheckboxColumn());
+            if (value == 'false') {
+                $('#resourceGrid').jqxGrid('unselectrow', row);
+            }
+        });
+    });
+    function getFistCheckboxColumn() {
+        return $("#resourceGrid").jqxGrid('columns').records[0].datafield;
+    }
+
+
+    function bindAccountHeadAutoComplete(x)
+    {
+        var rowid = $(x)[0].id;
+        var typeId=0;
+        if(rowid == 'retentionAccountName'){
+            typeId=10;
+        }else if(rowid == 'withHeldAccountName'){
+            typeId=37;
+        }else if(rowid == 'advanceRecoverAccountName'){
+            typeId=9;
+        }else if(rowid == 'penaltyAccountName'){
+            typeId=7;
+        }else if(rowid == 'roundingOffAccountName'){
+            typeId=22;
+        }
+        var arr_accountMasterNew = $.grep(arr_accountMaster, function(element, index){
+            return element.TypeId == typeId;
+        });
+        $('#'+rowid).autocomplete({
+            lookup: arr_accountMasterNew,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $this = $(this);
+                    $this.prop('readonly', true).addClass('border-none');
+                    if(rowid == 'retentionAccountName'){
+                        $('#retentionAccountId').val(suggestion.data);
+                        $('#retentionAccountName').val(suggestion.value);
+                    }else if(rowid == 'withHeldAccountName'){
+                        $('#withHeldAccountId').val(suggestion.data);
+                        $('#withHeldAccountName').val(suggestion.value);
+                    }else if(rowid == 'advanceRecoverAccountName'){
+                        $('#advanceRecoverAccountId').val(suggestion.data);
+                        $('#advanceRecoverAccountName').val(suggestion.value);
+                    }else if(rowid == 'penaltyAccountName'){
+                        $('#penaltyAccountId').val(suggestion.data);
+                        $('#penaltyAccountName').val(suggestion.value);
+                    }else if(rowid == 'roundingOffAccountName'){
+                        $('#roundingOffAccountId').val(suggestion.data);
+                        $('#roundingOffAccountName').val(suggestion.value);
+                    }
+                }
+            }, onSearchStart: function(suggestion) {
+                var $this = $(this);
+                $('#AccountId').val('');
+                $('#AccountHead').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    }
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for(var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Include === true) {
+                $inputs += '<input type="hidden" name="resourceIds[]" class="resourceIds" value="' + row.uid + '"/>';
+            }
+        }
+        $('#resourceInputsWrapper').html($inputs);
+    }
+
+    var billList = <?php echo (isset($wbsMaster)) ? json_encode($wbsMaster) : '[]'; ?>;
+    var tmp_billList = billList;
+
+    $(".retRelClass").click(function(e){
+        e.preventDefault();
+        if(!$(this).closest("tr").next(".subTr").is(":visible")){
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        } else {
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    var $billType = $('#billType'),
+        $costCentreId = $('#costCentreId'),
+        $vendorId = $('#vendorId'),
+        $eOrderNo = $('#eOrderNo'),
+        $orderType = $('#orderType'),
+        $orderNo = $('#orderNo');
+
+    //$billType.on('change', function() {
+    //    getOrders('');
+    //});
+    $costCentreId.on('change', function() {
+        getOrders('');
+    });
+    $vendorId.on('change', function() {
+        getOrders('');
+    });
+    $orderType.on('change', function() {
+        getOrders('');
+    });
+    $eOrderNo.on('change', function() {
+        getBill($(this).val());
+    });
+    $orderNo.on('change', function() {
+        getBill($(this).val());
+    });
+
+    function getOrders(orderId)
+    {
+        if($billType.val() != '' && $costCentreId.val() != '' && $vendorId.val() != '') {
+            $('#selOrdDiv').show();
+            $.post(getBaseURL()+'wpm/labourstrength/get-ren-rel-orders', {ccId: $costCentreId.val(), vId: $vendorId.val(),type:$orderType.val() },
+                function(data) {
+                    $('#eOrderNo').empty();
+                    $('#eOrderNo').append('<option value="">Select Order No</option>');
+                    var returnData = JSON.parse(data);
+                    $.each(returnData, function(key, value){
+                        $('#eOrderNo')
+                            .append($("<option></option>")
+                                .attr("value",value.data)
+                                .text(value.value));
+                    });
+                    $('#orderNo').empty();
+                    $('#orderNo').append('<option value="">Select Order No</option>');
+                    var returnData = JSON.parse(data);
+                    $.each(returnData, function(key, value){
+                        $('#orderNo')
+                            .append($("<option></option>")
+                                .attr("value",value.data)
+                                .text(value.value));
+                    });
+                    if(orderId != '') {
+                        $('#orderNo').val(orderId).trigger('change');
+                    }
+                });
+        } else {
+            $('#selOrdDiv').hide();
+        }
+    }
+
+    function getBill(thisVal)
+    {
+        if(thisVal != '') {
+            $.post(getBaseURL()+'wpm/labourstrength/get-ren-rel-bill', { biTy: $billType.val(), ordNo: thisVal },
+                function(data) {
+                    var retData = JSON.parse(data);
+                    $('#billId').val(retData.data);
+                    $('#billNo').val(retData.value);
+
+                    var eOrder=$('#eOrderNo option:selected').text();
+
+                    $("#orderNo option").each(function () {
+                        if ($.trim($(this).text()) == $.trim(eOrder)) {
+                            $(this).attr("selected", "selected");
+                            return;
+                        }
+                    });
+                });
+        }
+    }
+    function bindResources() {
+        $('.loading_area').show();
+        $.ajax({
+            url:getBaseURL()+'wpm/labourstrength/get-retention-grid',
+            type:"post",
+            data:{'CostCentreId':$costCentreId.val(),'orderType':$orderType.val(), 'VendorId': $vendorId.val(), 'RegisterId': $eOrderNo.val()},
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                resourceSource.localdata = data;
+                resourceAdapter.dataBind();
+                $('#NoOfSelResource').html(0);
+                $('#carousel-example-generic').carousel({
+                    slide: "next"
+                });
+                $('.loading_area').hide();
+//            var retData = JSON.parse(data);
+//                var iTemplate = $('#I-template').html();
+//                var iiTemplate = $('#II-template').html();
+//                var rowid = 0;
+//                var $tbody = $('#retentionTable tbody');
+//                var $tbody1 = $('#withheldTable tbody');
+//                $.each(data,function(i,o){
+//                    rowid ++;
+//                    $tbody.append(iTemplate.replace(/__/g, '_' + rowid));
+////                $tbody.append(iTemplate.replace(/__/g, '_' + o.BillRegisterId));
+//                    $tbody1.append(iiTemplate.replace(/__/g, '_' + rowid));
+//                    if (data.Include === true) {
+//                        $('#billno_' + rowid).val(o.RefNo);
+//                        $('#billnos_' + rowid).val(o.RefNo);
+//                        $('#billdate_' + rowid).val(o.EDate);
+//                        $('#billdates_' + rowid).val(o.EDate);
+//                        $('#recoveryamt_' + rowid).val(o.RecoveryAmount);
+//                        $('#recoveryamts_' + rowid).val(o.RecoveryAmount);
+//                        $('#Releaseamt_' + rowid).val(o.ReleaseAmount);
+//                        $('#Releaseamts_' + rowid).val(o.ReleaseAmount);
+//                        $('#balance_' + rowid).val(o.Balance);
+//                        $('#balances_' + rowid).val(o.Balance);
+//                        $('#currentamt_' + rowid).val(o.CurAmount);
+//                        $('#currentamts_' + rowid).val(o.CurAmount);
+//                        if ($(data.Include).is(':checked')) {
+//                            $('#retentionTable').find('#_' + bill + ' .checkRetent').attr('checked', 'checked');
+//                        } else {
+//                            $('#retentionTable').find('#_' + bill + ' .checkRetent').attr('checked', false);
+//                        }
+//                    }
+//                });
+
+            }, error: function () {
+                $('.loading_area').hide();
+            }
+        });
+    }
+    function validateLabStg()
+    {
+        $('.error_message').hide();
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+        //alert(currentIndex);
+        if(currentIndex == 0) {
+            var lBillType = isNullCheck($billType.val(),'string');
+            var lCostCentreId = isNullCheck($costCentreId.val(),'number');
+            var lVendorId = isNullCheck($vendorId.val(),'number');
+            var leOrderNo = isNullCheck($eOrderNo.val(),'number');
+
+//        if (lBillType == '') {
+//            $billType.closest('.form-group').find(".error_message").show();
+//            return;
+//        } else {
+//            $('#rrDate').val($('#rreDate').val());
+//            /*getValueOfSlider('next');
+//            $('#carousel-example-generic').carousel({
+//                slide: "next"
+//            });*/
+//        }
+
+            if (lCostCentreId == 0) {
+                $costCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var projName = $('#costCentreId option:selected').text();
+                $('.projName').val(projName);
+                $('.hprojName').html($('#costCentreName').val());
+                /*getValueOfSlider('next');
+                 $('#carousel-example-generic').carousel({
+                 slide: "next"
+                 });*/
+            }
+
+            if (lVendorId == 0) {
+                $vendorId.closest('.form-group').find(".error_message").show();
+                return;bindResources
+            } else if (leOrderNo == 0) {
+                $eOrderNo.closest('.form-group').find(".error_message").show();
+                return;
+            } else {
+                var conName = $('#vendorId option:selected').text();
+                var orderName = $('#eOrderNo option:selected').text();
+                var billName = $('#billNo').val();
+                var oType = $('#orderType').val();
+                var orderType='';
+                if(oType == 'W'){
+                    orderType='Work';
+                }else if(oType == 'H'){
+                    orderType='Hire';
+                }else if(oType == 'S'){
+                    orderType='Service';
+                }
+                $('.conName').val(conName);
+                $('#eOrderType').val(orderType);
+                $('#orderVal').val(oType);
+                $('.hconName').html($('#vendorName').val());
+                $('#contractAccountHead').val($('#vendorName').val());
+                $('.orderName').val(orderName);
+                $('.billName').val(billName);
+                $('#orderNo').val($eOrderNo.val()).trigger('change');
+                getValueOfSlider('next');
+                $('#carousel-example-generic').carousel({
+                    slide: "next"
+                });
+            }
+            bindResources();
+        } else {
+            $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+                    typeId: $('#rrTypeId').val(),
+                    ccId: $('#costCentreId').val()
+                },
+                function (data) {
+                    var vNo = data.split('###');
+                    $('#ccRrNo').val($.trim(vNo[0]));
+                    $('#compRrNo').val($.trim(vNo[1]));
+                    if($.trim(vNo[0]) != '')
+                        $('#ccRrNo').prop('readonly', true);
+                    if($.trim(vNo[1]) != '')
+                        $('#compRrNo').prop('readonly', true);
+                });
+            showBack('e');
+            var iTemplate = $('#I-template').html();
+            var iiTemplate = $('#II-template').html();
+            var rows = $('#resourceGrid').jqxGrid('getboundrows');
+            var doneRow=0;
+            var $tbody = $('#retentionTable tbody');
+            var $tbody1 = $('#withheldTable tbody');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                if (row.Include === true) {
+                    doneRow++;
+                    $tbody.append(iTemplate.replace(/__/g, '_' + doneRow));
+                    $('#billno_' + doneRow).val(row.RefNo);
+                    $('#billRegisterId_' + doneRow).val(row.BillRegisterId);
+                    $('#billdate_' + doneRow).val(row.EDate);
+                    $('#recoveryamt_' + doneRow).val(row.RecoveryAmount);
+                    $('#Releaseamt_' + doneRow).val(row.ReleaseAmount);
+                    $('#balance_' + doneRow).val(row.Balance);
+                    $('#currentamt_' + doneRow).val(row.CurAmount).trigger('blur');
+                    $('.checkRetent').attr('checked', 'checked');
+                    $('#retRowid').val(doneRow);
+                }else{
+                    $('.checkRetent').attr('checked', false);
+                    $('.checkRetents').attr('checked', false);
+                }
+            }
+            $.post(getBaseURL() + 'wpm/labourstrength/with-held', {
+                    'CostCentreId':$costCentreId.val(), 'VendorId': $vendorId.val(), 'WORegisterId': $eOrderNo.val()
+                },
+                function (data) {
+                    var data = JSON.parse(data);
+                    if (data.length != 0){
+                        $.each(data, function (i, l) {
+                            doneRow++;
+                            $tbody1.append(iiTemplate.replace(/__/g, '_' + doneRow));
+                            $('#billnos_' + doneRow).val(l.RefNo);
+                            $('#billRegisterIds_' + doneRow).val(row.BillRegisterId);
+                            $('#billdates_' + doneRow).val(l.EDate);
+                            $('#recoveryamts_' + doneRow).val(l.RecoveryAmount);
+                            $('#Releaseamts_' + doneRow).val(l.ReleaseAmount);
+                            $('#balances_' + doneRow).val(l.Balance);
+                            $('#currentamts_' + doneRow).val(l.CurAmount);
+                            $('.checkRetents').attr('checked', 'checked');
+                            $('#withheldRowid').val(doneRow);
+                        });
+                    }
+                });
+        }
+    }
+    function amtChange(x,y){
+        var rowid = $(x)[0].id.split('_')[1];
+        if(y=='r'){
+            var retAmt=parseFloat($('#currentamt_'+rowid).val());
+            $('#retentionAmt').val(retAmt).trigger('blur');
+        }else if(y=='w'){
+            var withHeldAmt=parseFloat($('#currentamts_'+rowid).val());
+            $('#withHeldAmt').val(withHeldAmt).trigger('blur');
+        }else if(y=='ad'){
+            var advAmt=parseFloat($('#advanceRecoverCurAmt').val());
+            $('#advanceRecoverAmt').val(advAmt).trigger('blur');
+        }
+    }
+    function calcNetAmt(x,y){
+        var retAmt=parseFloat($('#retentionAmt').val());
+        var withAmt=parseFloat($('#withHeldAmt').val());
+        var advAmt=parseFloat($('#advanceRecoverAmt').val());
+        var penAmt=parseFloat($('#penaltyAmt').val());
+        if(isNaN(retAmt)) retAmt=0;
+        if(isNaN(withAmt)) withAmt=0;
+        if(isNaN(advAmt)) advAmt=0;
+        if(isNaN(penAmt)) penAmt=0;
+        var netAmt=sanitizeNumber(((retAmt+withAmt)-(advAmt+penAmt)),2);
+
+
+        var str = netAmt.toString();
+        var lastTwoDigit = $.trim(str.slice(-2));
+        $('#roundingOffAmt').val(lastTwoDigit);
+        if(lastTwoDigit >= 50){
+            var calcX=netAmt - (lastTwoDigit/100);
+            $('#contractNetAmt').val(calcX+1).trigger('blur');
+        }else{
+            var calcY=netAmt - (lastTwoDigit/100);
+            $('#contractNetAmt').val(calcY).trigger('blur');
+        }
+
+    }
+    function goBack()
+    {
+        $('#carousel-example-generic').carousel({
+            slide: "prev"
+        });
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType)
+    {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if(slType == 'next') {
+            $("#backPrev").show();
+        }
+        if(curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function showBack(sbType)
+    {
+        if(sbType == 'a') {
+            $('#submitDiv').hide();
+            $('#stageTwo').hide();
+            $('#stageOne').show();
+            $('#titleTag').addClass('text-center');
+        } else {
+            $('#stageOne').hide();
+            $('#stageTwo').show();
+            $('#submitDiv').show();
+            //$('#titleTag').removeClass('text-center');
+        }
+    }
+
+    function submitForm()
+    {
+        var errFlag = 0;
+
+        $('.red_bdr').removeClass('red_bdr');
+
+        if($.trim($('#rrNo').val()) == '') {
+            $('#rrNo').addClass('red_bdr');
+            $('#rrNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#ccRrNo').val()) == '') {
+            $('#ccRrNo').addClass('red_bdr');
+            $('#ccRrNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#compRrNo').val()) == '') {
+            $('#compRrNo').addClass('red_bdr');
+            $('#compRrNo').focus();
+            errFlag = 1;
+            return false;
+        }
+        if($.trim($('#refNo').val()) == '') {
+            $('#refNo').addClass('red_bdr');
+            $('#refNo').focus();
+            errFlag = 1;
+            return false;
+        }
+
+        if(errFlag == 0) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    for(i = 0; i <= 6; i++) {
+        bindBillAutoComplete(i, '');
+    }
+
+    function addBillRow(x, rId, trId)
+    {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            key = $x[0].id.split('_')[2];
+
+        if ($tr.next('tr:not(.subTr)').length != 0)
+            return;
+
+        if ($('#billName_'+rId+'_'+key).val().length == 0 && $('#billId_'+rId+'_'+key).val().length == 0)
+            return;
+
+        var $rowid = $('#billRows_'+rId),
+            count = parseInt($rowid.val()) + 1;
+
+        $rowid.val(count);
+        $tr.parent('tbody').append(addLineBill(rId, count));
+        bindBillAutoComplete(rId, trId);
+        $('.billDelete_'+rId+'_'+trId).show();
+    }
+
+    function deleteBill(x, e, rId)
+    {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('tr').length == 1) {
+            $tbody.append(addLineBill(rId, 1));
+            $('#billRows_'+rId).val(1);
+        }
+
+        $tr.next('tr.subTr').remove();
+        $tr.remove();
+        return false;
+    }
+
+    //    function addLineBill(rId, trId)
+    //    {
+    //        var billData = '';
+    //        if(trId == '') {
+    //            var trId = 1;
+    //        }
+    //
+    //        billData += '<tr id="subRowRowId_'+rId+'_'+trId+'">'+
+    //        '<td width="20%">'+
+    //        '<input class="parent_text billSuggest" type="text" name="billName_'+rId+'_'+trId+'" id="billName_'+rId+'_'+trId+'" onfocus="return checkBillUsed(this, \''+rId+'\', \''+trId+'\');" />'+
+    //        '<input type="hidden" name="billId_'+rId+'_'+trId+'" id="billId_'+rId+'_'+trId+'" />'+
+    //        '</td>'+
+    //        '<td width="18%"><input class="parent_text" type="text" name="billDate_'+rId+'_'+trId+'" id="billDate_'+rId+'_'+trId+'" readonly /></td>'+
+    //        '<td width="18%"><input class="parent_text text-right" type="text" name="billPrev_'+rId+'_'+trId+'" id="billPrev_'+rId+'_'+trId+'" readonly /></td>'+
+    //        '<td width="18%"><input class="parent_text text-right" type="text" name="billBal_'+rId+'_'+trId+'" id="billBal_'+rId+'_'+trId+'" readonly /></td>'+
+    //        '<td width="20%"><input class="parent_text text-right" type="text" name="billCur_'+rId+'_'+trId+'" id="billCur_'+rId+'_'+trId+'" onkeypress="return isDecimal(event,this);" onblur="return calAmount(\''+rId+'\', \''+trId+'\');" /></td>'+
+    //        '<td width="6%" align="center" class="action_btns_td">'+
+    //        '<ul class="action_btns">'+
+    //        '<li>'+
+    //        '<a href="#" class="billDelete_'+rId+'_'+trId+'" onclick="deleteBill(this, event, \''+rId+'\');" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>'+
+    //        '</li>'+
+    //        '</ul>'+
+    //        '</td>'+
+    //        '</tr>';
+    //
+    //        return billData;
+    //    }
+
+    function bindBillAutoComplete(rId, trId) {
+        $('#billTable_'+rId+' .billSuggest').autocomplete({
+            lookup: tmp_billList,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $this = $(this);
+                    var key1 = $this[0].id.split('_')[2];
+                    $this.prop('readonly', true).addClass('border-none');
+
+                    $('#billId_'+rId+'_'+key1).val(suggestion.data);
+                    addBillRow($this, rId, trId);
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                var $this = $(this);
+                var key1 = $this[0].id.split('_')[2];
+
+                $('#billId_'+rId+'_'+key1).val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+                } else
+                    removeError($(this));
+            }
+        });
+    }
+
+    function checkBillUsed(x, rId, trId) {
+        var id = $(x)[0].id.split('_')[2];
+        var reskeyid = $('input[id*=billId_'+rId+'_]');
+        tmp_billList = billList;
+        tmp_billList = $.grep(billList, function (element, index) {
+            var is_selected = true;
+            $.each(reskeyid, function (i, obj) {
+                var $this = $(this),
+                    name = $this[0].id;
+                var arrname = name.split('_');
+                var key1 = arrname[2];
+                if (key1 != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                        return false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+        bindBillAutoComplete(rId, trId);
+    }
+
+    function calAmount(rId, trId)
+    {
+        var balAmt = $('#billBal_'+rId+'_'+trId).val();
+        var curAmt = $('#billCur_'+rId+'_'+trId).val();
+
+        if(balAmt > curAmt) {
+            var $bilCur = $('input[id^=billCur_' + rId + '_]');
+            var sumBilCur = 0;
+            $.each($bilCur, function () {
+                var lCur = parseFloat($(this).val());
+
+                if (isNaN(lCur))
+                    return;
+
+                sumBilCur += lCur;
+            });
+            $('#amount_' + rId).val(sumBilCur);
+        } else {
+            alert("Amount shouldn't not exceed than Balance Amount");
+        }
+    }
+
+    <?php if(isset($rrRegister) && count($rrRegister) != 0) { ?>
+    var orderId = '<?php echo $rrRegister['OrderId']; ?>';
+    var advName = '<?php echo $rrRegister['AdvanceAccountName']; ?>';
+    var advId = '<?php echo $rrRegister['AdvanceAccountId']; ?>';
+    var penName = '<?php echo $rrRegister['PenaltyAccountName']; ?>';
+    var penId = '<?php echo $rrRegister['PenaltyAccountId']; ?>';
+    var relName = '<?php echo $rrRegister['ReleaseAccountName']; ?>';
+    var relId = '<?php echo $rrRegister['ReleaseAccountId']; ?>';
+    var roundName = '<?php echo $rrRegister['RoundingAccountName']; ?>';
+    var roundId = '<?php echo $rrRegister['RoundingAccountId']; ?>';
+    var withName = '<?php echo $rrRegister['WithHeldAccountName']; ?>';
+    var withId = '<?php echo $rrRegister['WithHeldAccountId']; ?>';
+    var advAmt = '<?php echo $rrRegister['AdvanceAmt']; ?>';
+    var penAmt = '<?php echo $rrRegister['PenaltyAmt']; ?>';
+    var relAmt = '<?php echo $rrRegister['ReleaseAmt']; ?>';
+    var roundAmt = '<?php echo $rrRegister['RoundingAmount']; ?>';
+    var withAmt = '<?php echo $rrRegister['WithHeldAmount']; ?>';
+    var netAmt = '<?php echo $rrRegister['NetAmount']; ?>';
+    var contractor = '<?php echo $rrRegister['VendorName']; ?>';
+    $('#orderType').val('<?php echo $rrRegister['OrderType'];?>')
+    var order='';
+    <?php if($rrRegister['OrderType'] == 'W'){?>
+    order='Work';
+    <?php }else if($rrRegister['OrderType'] == 'H'){?>
+    order='Hire';
+    <?php } else if($rrRegister['OrderType'] == 'S'){?>
+    order='Service';
+    <?php } ?>
+    $('#eOrderType').val(order);
+    $('#advanceRecoverAccountName').val(advName);
+    $('#advanceRecoverAccountId').val(advId);
+    $('#penaltyAccountName').val(penName);
+    $('#penaltyAccountId').val(penId);
+    $('#retentionAccountName').val(relName);
+    $('#retentionAccountId').val(relId);
+    $('#roundingOffAccountName').val(roundName);
+    $('#roundingOffAccountId').val(roundId);
+    $('#withHeldAccountName').val(withName);
+    $('#withHeldAccountId').val(withId);
+    $('#retentionAmt').val(relAmt).trigger('blur');
+    $('#withHeldAmt').val(withAmt).trigger('blur');
+    $('#advanceRecoverAmt').val(advAmt).trigger('blur');
+    $('#penaltyAmt').val(penAmt).trigger('blur');
+    $('#roundingOffAmt').val(roundAmt).trigger('blur');
+    $('#contractNetAmt').val(netAmt).trigger('blur');
+    $('#contractAccountHead').val(contractor);
+    showBack('e');
+    //    $('.cancel_btn').hide();
+    getOrders(orderId);
+    getBill(orderId);
+    <?php } ?>
+    <?php if(isset($rrRegister)){?>
+    <?php if($rrRegister['Approve'] == 'Y'){?>
+    $('.save_btn').hide();
+    <?php }} ?>
+
+    //costCentre AutoComplete
+    function bindcostCentreAutoComplete()
+    {
+        $('#costCentreName').autocomplete({
+            lookup:opCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#costCentreId').val(suggestion.data).trigger('change');
+                    $('#costCentreName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#costCentreId').val(0);
+//                $('#costCentreName').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#costCentreId').val(0);
+//                    $('#costCentreName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+
+    //Contractor AutoComplete
+    function bindContractorAutoComplete()
+    {
+        $('#vendorName').autocomplete({
+            lookup:vendorMaster,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    $('#vendorId').val(suggestion.data).trigger('change');
+                    $('#vendorName').val(suggestion.value);
+                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function(suggestion) {
+                $('#vendorId').val(0);
+//                $('#vendorName').val('');
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $(this).addClass('error');
+//                    $('#vendorId').val(0);
+//                    $('#vendorName').val('');
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+
+    }
+</script>
+

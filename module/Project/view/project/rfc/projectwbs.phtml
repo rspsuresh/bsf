@@ -1,0 +1,592 @@
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/handsontable/css/handsontable.full.min.css">
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/lodash.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/underscore.string.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeral.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/RuleJS/numeric.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/formula.js"></script>
+<script type="text/javascript"src="<?php echo $this->basePath(); ?>/library/handsontable/js/parser.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/ruleJS.all.full.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/handsontable/js/handsontable.formula.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<style>
+    #jqxTree{margin-top: 15px;max-height: 450px; min-height:490px !important; border:none}
+    .jqx-tree-dropdown{padding:0 0 0 5px}
+    .jqx-tree-dropdown-root{min-width:100% !important; width:100% !important}
+    .jqxgrid{background:#fff;border:1px solid #ddd;box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.24);padding:0;width:100% !important; margin-top:10px; /*height:490px !important; overflow-y:scroll*/}
+    .jqx-draggable{ border-bottom:1px solid #ddd; width:97%;margin-bottom:4px; padding:8px 0 8px 8px;background:#f1f1f1}
+    .jqx-fill-state-pressed,.jqx-item:hover,.jqx-draggable:hover{background:#3399ff !important;color:#fff !important}
+    .jqx-tree-item-li{display:block; width:90%}
+
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 page_tittle">
+                <?php if(isset($projectlists)){ ?>
+                    <h1 class="col-lg-6 text-left animated growIn">Project Work Breakdown Structure</h1>
+                    <?php } else {  ?>
+                        <h1 class="col-lg-6 text-left animated growIn">Project Work Breakdown Structure</h1>
+                    <?php }  ?>
+                    <div class="col-lg-6 edit_del" style="display: none;" id="headerLinks">
+                        <ul>
+                            <li>
+                                <button type="button" class="edit-btn edit_al" onclick="showSequentialView();"><i class="fa fa-clipboard"></i> Matrix View</button>
+                            </li>
+                            <!--li>
+                                <button type="button" class="edit-btn form-group edit_al" onclick="gridExpandAll();"><i class="fa fa-expand"></i> Expand All</button>
+                            </li>
+                            <li>
+                                <button type="button" class="edit-btn form-group edit_al" onclick="gridCollapseAll();"><i class="fa fa-compress"></i> Collapse All</button>
+                            </li-->
+                        </ul>
+                    </div>
+            </div>
+            <div class="col-lg-12 top_ct zoomIn animated" id="formWrapper">
+                <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 prt-next">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                        <div class="col-lg-12 frmwrk_div" id="projects_list">
+                            <select name="project_id" id="project_select" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%">
+                                <option value="">Select Project</option>
+                                <?php if(isset($projectlists)): ?>
+                                    <?php foreach ( $projectlists as $project ): ?>
+                                        <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+                            <select name="type_name" id="type_select" class="form-control single_dropdown lbl_move" data-size="6" title="Select Type..." style="width:100%">
+                                <option value="">Select Type</option>
+                                <option value="B">Budget</option>
+                                <option value="P">Plan</option>
+                            </select>
+                        </div>
+                        <div class="savebtn_areas col-lg-7 col-sm-7 col-sm-offset-3 col-xs-offset-4 col-lg-offset-3">
+                            <ul>
+                                <li class="subs"><a onclick="showGrid();" id="continue">Submit</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--jqxGrid Wrapper-->
+            <div class="col-lg-12 coll-top clear" id="divproject"  style="display: none;">
+                <div class="col-lg-4 col-sm-4">
+                    <select name="projectid" id="projid" class="form-control single_dropdown lbl_move" label="Project" style="width:100%;" onchange="return changeProject();">
+                        <option value="0">Select Project</option>
+                        <?php foreach($projectlists as $project) { ?>
+                            <option value="<?php echo $project['ProjectId']; ?>"><?php echo $project[ 'ProjectName' ]; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-sm-2">
+                    <select name="typename" id="typename" class="form-control single_dropdown lbl_move" label="Type" style="width:100%;" onchange="return changeProject();">
+                        <option value="B">Budget</option>
+                        <option value="P">Plan</option>
+                    </select>
+                </div>
+				 <div class="col-lg-5 col-sm-5">
+				    <a id="wbsedit" href="#" class="fancy-button"><i class="fa fa-pencil" style="margin-right:5px"></i>Edit</a>
+				 </div>
+            </div>
+            <div class="col-lg-12 clear" id="gridWrapper" style="display: none;">
+                <div class="col-lg-4 col-sm-4">
+                    <div class="col-md-12 jqxgrid" style="margin-bottom:10px;">
+                        <div class="slimScroll" id='jqxTree'></div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-sm-8" id="tbodyWrapper"> </div>
+            </div>
+        
+            <!--WBS IOW Wrapper-->
+        <div class="col-lg-12 col-lg-offset-0" id="iowWrapper" style="display: none;"></div>
+       
+    </div>
+</div>
+</div> <div class="clearfix"></div>
+<!--div class="col-lg-12 savebtn_area">
+	<ul>
+		<li id="back-btn" style="display: none;"><a href="javascript:showOptions();" style="float:left; padding-top:13px; padding-bottom:10px;" data-toggle="tooltip" data-placement="right" title="Go Back"><i class="fa fa-arrow-circle-o-left" style="font-size: 25px; color:#3580C4;"></i></a></li>
+		<li id="iow-back-btn" style="display: none;"><a href="javascript:showWBSGrid();" style="float:left; padding-top:13px; padding-bottom:10px;" data-toggle="tooltip" data-placement="right" title="Go Back"><i class="fa fa-arrow-circle-o-left" style="font-size: 25px; color:#3580C4;"></i></a></li>
+	</ul>
+</div-->
+<!-- Sequential View -->
+<div class="modal fade bs-example-modal-lg2" id="sequentialViewModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1><i class="fa fa-clipboard"></i> Matrix View</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12" style="width: 100%; overflow-x: scroll;">
+                    <table class="fixTable table" style=" margin-bottom:0px;" id="sequentialViewTable">
+                        <thead>
+                        <tr>
+                            <th>Specification</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <a href="#" class="md_cance" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="workgroupTemplate" type="text/template">
+    <tr>
+        <input type="hidden" name="WBSId__" id="WBSId__" value="{{WBSId}}"/>
+        <input type="hidden" name="ProjectIOWId__" id="ProjectIOWId__" value="{{ProjectIOWId}}"/>
+        <td width="15%">{{serialno}}</td>
+        <td width="25%">{{spec}}</td>
+        <td width="8%">{{unitname}}</td>
+        <td width="8%">{{qty}}</td>
+        <!--        <td class="action_btns_td" width="5%">-->
+        <!--            <a href="#" class="mainTr"> <i class="fa fa-chevron-circle-down ctls" data-toggle="tooltip" data-placement="left" data-original-title="Expand" ></i></a>-->
+        <!--        </td>-->
+    </tr>
+</script>
+<!-- Sequential View end -->
+<script type="text/javascript">
+var $project = $('#project_select'),
+    $type_list = $('#types_list'),
+    $type = $('#type_select'),
+    baseURL = getBaseURL(),
+    $rowcount = $('#rowcount'),
+    $grid = $("#grid"),
+    jqxGridElem = null,
+    bLoad=false,
+    $tbodyWrapper = $('#tbodyWrapper'),
+    workgroupTemplate = $('#workgroupTemplate').html();
+    arr_wbslist =[],
+    $jqxTree = $('#jqxTree'),
+    iProjectId = <?php echo (isset($projectId)) ? $projectId : '0'; ?>,
+    sProjectType = "<?php echo (!empty($projectType)) ? $projectType : 'B'; ?>";
+
+function getWBSData() {
+    var iProjectId = $('#projid').val(),
+        sProjType = $('#typename').val();
+
+    $.ajax({
+        url: getBaseURL() + "project/rfc/projectwbs",
+        type: 'post',
+        data: {'Type': 'getwbs','ProjectId': iProjectId,'ProjectType':sProjType},
+        success: function (data,status, xhr) {
+            if(xhr.status == 200) {
+                data = JSON.parse(data);
+                arr_wbslist = data;
+            } else {
+                arr_wbslist = [];
+            }
+            bindTreeGrid();
+        },
+        error: function (status, error, xhr) {
+            arr_wbslist = [];
+            bindTreeGrid();
+        }
+    });
+}
+
+function bindTreeGrid() {
+    var source = {
+        async: false,
+        datatype: "json",
+        editable:false,
+        datafields: [
+            { name: 'id' },
+            { name: 'parentid' },
+            { name: 'text' }
+        ],
+        id: 'id',
+        localdata: arr_wbslist
+    };
+
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    dataAdapter.dataBind();
+    var records = dataAdapter.getRecordsHierarchy('id', 'parentid', 'items', [{ name: 'text', map: 'label'}]);
+
+    $jqxTree.jqxTree({ source: records, width: '100%' });
+    $('.loading_area').hide();
+}
+
+
+function showGrid() {
+    if ($project.val() == '') {
+        alert('Select a project!');
+        $project.addClass('error');
+        return;
+    }
+
+    if ($type.val() == '') {
+        alert('Select a type!');
+        $type.addClass('error');
+        return;
+    }
+    bLoad =true;
+    $('#project_name').val($project.find('option:selected').html());
+    $('#type_name').val($type.find('option:selected').html());
+
+    var iProjectId = $project.val(),
+        sProjType = $type.val();
+
+    $('#projid').val(iProjectId).prop('selected', true).trigger('change');
+    $('#typename').val(sProjType).prop('selected', true).trigger('change');
+
+    $('#formWrapper').hide();
+    $('#gridWrapper').show();
+    $('#divproject').show();
+    $('#project-title').show();
+    $('#back-btn').show();
+    getWBSData();
+//	renderGridData();
+    $('#headerLinks').show();
+    bLoad =false;
+}
+
+function changeProject() {
+    if (bLoad ==true) return;
+
+    if ($('#projid') == '') {
+        alert('Select a project!');
+        $('#projid').addClass('error');
+        return;
+    }
+
+    if ($('#typename').val() == '') {
+        alert('Select a type!');
+        $('#typename').addClass('error');
+        return;
+    }
+    getWBSData();
+//    renderGridData();
+}
+
+$(function () {
+    $("#wbsedit").hide();
+    $('.slimScroll').slimScroll({
+        height : '100%',
+        alwaysVisible: false,
+        railVisible: true,
+        railColor: '#cececd',
+        railOpacity: 1
+    });
+
+    if (iProjectId !=0) {
+        $project.val(iProjectId);
+        $type.val(sProjectType);
+        showGrid();
+    }
+
+    $project.on('change', function() {
+        if ($(this).val() == '') {
+            $type_list.hide();
+        } else {
+            $type_list.show();
+        }
+    });
+
+    $jqxTree.on('select', function (event) {
+        var item = $('#jqxTree').jqxTree('getItem', event.args.element);
+        $tbodyWrapper.html('');
+        $("#wbsedit").hide();
+
+        if(item.hasItems)
+            return;
+
+        var iProjectId = $('#projid').val(),
+            sProjType = $('#typename').val();
+
+        $('.loading_area').show();
+        var sHtml = renderRowDetail(item.id);
+        $('.loading_area').hide();
+
+        $tbodyWrapper.html(sHtml);
+        if (sHtml.length > 0) {
+            wbseditlinkchange(item.id);
+            $("#wbsedit").show();
+        }
+
+    });
+
+    $('.content_wrapper').on('click', '.show_hide11',function(e){
+        if($(e.target).is('span:not(.chk-name)') || $(e.target).is('.search-element')) {
+            return;
+        }
+
+        var $slideDiv = $(this).nextAll(".slidingDiv11");
+        $('.slidingDiv11:visible').not($slideDiv).slideUp();
+        $slideDiv.slideToggle();
+    });
+});
+
+// jqxgrid
+var source = {
+    dataType: "json",
+    dataFields: [
+        { name: 'WBSId', type: 'number' },
+        { name: 'ParentId', type: 'number' },
+        { name: 'WBSName', type: 'string' },
+        { name: 'LastLevel', type: 'number' },
+        { name: 'Amount', type: 'Number' }
+    ],
+    hierarchy:
+    {
+        keyDataField: { name: 'WBSId' },
+        parentDataField: { name: 'ParentId' }
+    },
+    id: 'WBSId'
+};
+
+//function renderGridData()
+//{
+//    var iProjectId = $('#projid').val(),
+//        sProjType = $('#typename').val();
+//
+//	source.url = baseURL + "project/rfc/getprojectwbsmaster/" + iProjectId;
+//	if (jqxGridElem != null) {
+//		// bind project datas
+//		var dataAdapter = new $.jqx.dataAdapter(source);
+//		$grid.jqxTreeGrid({ source: dataAdapter });
+//		return;
+//	}
+//
+//
+//    var cellsRenderer = function (row, column, value, rowData)
+//    {
+//        if (rowData.records !== undefined)
+//        {
+//            return '<span style="font-weight: bold;">' + value + '</span>';
+//        } else
+//        {
+//            return '<span>' + value + '</span>';
+//        }
+//    };
+//    // jqxgrid
+//	var dataAdapter = new $.jqx.dataAdapter(source);
+//	$grid.jqxTreeGrid({
+//		width: "100%",
+//		source: dataAdapter,
+//		height:"490",
+//		sortable: true,
+//		pageable:true,
+//        rowDetails: true,
+////        rowDetailsRenderer: function (rowKey, row) {
+////            if(row.LastLevel == 0)
+////                return '';
+////            return renderRowDetail(row.WBSId);
+////        },
+//
+//		columns: [
+//			{ text: 'WBSId', dataField: 'WBSId', hidden: true},
+//			{ text: 'ParentId', dataField: 'ParentId', hidden: true},
+//            { text: 'LastLevel', dataField: 'LastLevel', hidden: true},
+//			{ text: 'Name', dataField: 'WBSName', width: '90%'},
+////			{ text: 'Amount', dataField: 'Amount', align: 'center', cellsalign: 'right', width: '20%'},
+////            { text: 'Action', sortable: false, filterable: false, align: 'left',width: '10%',
+////                cellsrenderer: function (row) {
+////                    var wbsid = $grid.jqxTreeGrid('getCellValue', row, 'WBSId'),
+////                        parentId = $grid.jqxTreeGrid('getCellValue', row, 'ParentId'),
+////                        editLink = '';
+////
+////                    if ($grid.jqxTreeGrid('getRow', row).leaf != true)
+////                        return editLink;
+////
+////                    editLink = '<a title="Edit" href="'+ getBaseURL() + 'project/rfc/rfcwbsedit/'+ wbsid +'/'+iProjectId +'/'+ sProjType +'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+////                    editLink  = editLink + "&nbsp;&nbsp;" + '<a title="Expand"><i class="fa fa-chevron-circle-down reg-icon"></i></a>';
+////                    return editLink;
+//////                    return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: checkRFCDelete(event,'+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+////                }
+////            }
+//		]
+//	});
+//}
+
+function checkRFCDelete(event, row) {
+    var id = $treeGrid.jqxTreeGrid('getCellValue', row, 'IOWId');
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/checkrfcdelete',
+        type: 'POST',
+        data: {'id': id, 'type': 'IOW'},
+        success: function (data, status, xhr) {
+            if (xhr.status == 204) {
+                alert('Request to delete this iow is already pending');
+                return false;
+            }
+            window.location = getBaseURL() + 'project/rfc/rfciowdelete/0/' + id;
+        },
+        error: function(xhr,status, error) {
+        }
+    });
+}
+
+function renderRowDetail(id) {
+    var sProjectType = $('#typename').val();
+    var dataValue = '';
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/getprojectwbsdetails',
+        type: 'POST',
+        data: {WBSId: id,ProjectType:sProjectType},
+        async: false,
+        success: function(data,status, xhr) {
+            if(xhr.status == 200)
+                dataValue = data;
+        }, error: function(xhr, status, errorThrown) {
+        }
+    });
+    return dataValue;
+}
+
+
+function showIOW(row)
+{
+    var WBSId = $grid.jqxGrid('getCellValue', row, 'WBSId');
+    $.ajax({
+        url: getBaseURL() + 'project/rfc/getprojectwbsdetails',
+        type: 'POST',
+        data: {'WBSId': WBSId},
+        success: function (data, status, xhr) {
+            if(xhr.status == 200) {
+                $('#back-btn').hide();
+                $('#gridWrapper').hide();
+                $('#divproject').hide();
+                $('#iowWrapper').html(data);
+                $('#iowWrapper').show();
+                $('#iow-back-btn').show();
+            }
+        },
+        error: function(xhr,status, error) {
+        }
+    });
+}
+
+function showWBSGrid()
+{
+    $('#gridWrapper').show();
+    $('#divproject').show();
+    $('#project-title').show();
+    $('#back-btn').show();
+    $('#iowWrapper').hide();
+    $('#iow-back-btn').hide();
+}
+
+function showOptions()
+{
+    $('#formWrapper').show();
+    $('#gridWrapper').hide();
+    $('#divproject').hide();
+    $('#project-title').hide();
+    $('#back-btn').hide();
+}
+</script>
+
+<script type="text/javascript">
+    var wbsListSq = [];
+    var iowListSq = [];
+    var wbsqtylist = [];
+    function showSequentialView() {
+        if(iowListSq.length == 0) {
+            $('.loading_area').show();
+            $.ajax({
+                url: getBaseURL() + 'project/rfc/getprojectwbsmasterlisting',
+                type: 'POST',
+                data: {'projectid': $('#projid').val()},
+                async: false,
+                success: function (data, status, xhr) {
+                    data = JSON.parse(data);
+                    wbsListSq = data.wbslist;
+                    iowListSq = data.iowlist;
+                    wbsqtylist = data.wbsqtylist;
+                },
+                error: function (xhr, status, error) {
+                }
+            });
+            $('.loading_area').hide();
+        }
+
+        $("#sequentialViewModal").modal('show');
+        var $table = $('#sequentialViewTable tbody');
+        $table.html('');
+        // set iows and wbs qty
+        $.each(iowListSq, function (i,o) {
+            var tbody = '<tr>'
+                + '<td><label>'+ o.SerialNo+' '+ o.Specification+'</label></td>';
+            var qtyTotal = 0;
+            $.each(wbsListSq, function (j,ob) {
+                var qty = '';
+                $.each(wbsqtylist, function (k, w) {
+                    if(w.ProjectIOWId != o.ProjectIOWId || ob.data != w.WBSId)
+                        return;
+
+                    qty = sanitizeNumber(w.Qty,3);
+                });
+                if(qty == '') {
+                    tbody += '<td>&nbsp;</td>';
+                    return;
+                }
+                qtyTotal += parseFloat(qty);
+                tbody += '<td><input type="text" class="parent_text" value="'+qty+'" readonly/></td>';
+            });
+            tbody += '<td><input type="text" class="parent_text" value="'+sanitizeNumber(qtyTotal,3)+'" readonly/></td>';
+
+            tbody += '</tr>';
+            $table.append(tbody);
+        });
+
+        // set header
+        var $thead = $('#sequentialViewTable > thead > tr');
+        $thead.html('<th>Specification</th>');
+        $.each(wbsListSq, function (i,o) {
+            $thead.append('<th>'+ o.value +'</th>');
+        });
+        $thead.append('<th>Total Qty</th>');
+    }
+
+    function gridExpandAll() {
+        var rows = $grid.jqxTreeGrid('getRows');
+        var traverseTree = function(rows)
+        {
+            for(var i = 0; i < rows.length; i++)
+            {
+                if (rows[i].records)
+                {
+                    var idValue = rows[i][idColumn];
+                    $grid.jqxTreeGrid('expandRow',idValue);
+                    traverseTree(rows[i].records);
+                }
+            }
+        };
+        var idColumn = $grid.jqxTreeGrid('source')._source.id;
+        traverseTree(rows);
+    }
+
+    function gridCollapseAll() {
+        var rows = $grid.jqxTreeGrid('getRows');
+        var traverseTree = function(rows)
+        {
+            for(var i = 0; i < rows.length; i++)
+            {
+                if (rows[i].records)
+                {
+                    var idValue = rows[i][idColumn];
+                    $grid.jqxTreeGrid('collapseRow',idValue);
+                    traverseTree(rows[i].records);
+                }
+            }
+        };
+        var idColumn = $grid.jqxTreeGrid('source')._source.id;
+        traverseTree(rows);
+    }
+    function wbseditlinkchange(id) {
+        var iProjectId = $('#projid').val(),
+            sProjType = $('#typename').val()
+        var sUrl =  getBaseURL() + 'project/rfc/rfcwbsedit/' + id + '/' + iProjectId + '/' + sProjType;
+        $("#wbsedit").attr("href", sUrl);
+        $("#wbsedit").show();
+    }
+</script>

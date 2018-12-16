@@ -1,0 +1,569 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<!--<script type="text/javascript" src="--><?php //echo $this->basePath(); ?><!--/js/jquery.scrollbox.js"></script>-->
+<style>
+    .parent_text.error                 				{border:1px solid #D64541!important;color:#333!important;background:#FFEBEB !important;}
+    .error + .tooltip > .tooltip-inner				{background: #E74C3C;}
+    .error + .tooltip > .tooltip-arrow 				{border-top-color: #E74C3C;}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post" id="multiGroupTransfer">
+            <div class="col-lg-12">
+                    <h1 class="txt_center">Transfer Entry</h1>
+                    <div class="col-lg-3">
+                        <div class="form-group req_flds col-lg-12">
+                            <input type="text" name="voucherNo" id="voucherNo" style="width:100%;" class="form-control lbl_move" label="Voucher No" value="<?php echo (isset($editDetails) && $editDetails['VoucherNo'] !='') ? $editDetails['VoucherNo'] : $svNo;?>" <?php echo (isset($aVNo) && $aVNo['genType'] == 1) ? 'readonly' : '';?> />
+                            <input type="hidden" name="iEntryId" id="iEntryId" value="<?php echo (isset($entryId)) ? $entryId :'0'; ?>">
+                            <div class="error_message"><p>please enter Voucher No...</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-6">
+                        <div class="form-group req_flds col-lg-12">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" readonly name="voucherDate" id="voucherDate" class="form-control lbl_move datepickerinput" label="Voucher Date" value="<?php echo (isset($editDetails) && $editDetails['VoucherDate']!='') ? $editDetails['VoucherDate'] : date('d-m-Y');?>"/>
+                            <div class="error_message"><p>Please enter Voucher date...</p></div>
+                        </div>
+                    </div>
+            </div>
+            <div id="firstStep">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                        <div class="form-group req_flds col-lg-12">
+                            <select style="width:100%;" class="single_dropdown lbl_move" label="From Book Name" name="fromBookName" id="fromBookName" onchange="showToBookName()">
+                                <option value="">Select Project</option>
+                                <?php if(isset($bookNameSelect)):?>
+                                    <?php foreach ( $bookNameSelect as $bookName ):?>
+                                        <option value="<?php echo $bookName['AccountId'];?>" <?php if($bookName['AccountId'] == $editDetails['BookId']){echo 'selected';} ?>><?php echo $bookName['AccountName'];?></option>
+                                    <?php endforeach; ?>
+                                <?php  endif; ?>
+                            </select>
+                            <input type="hidden" name="accountType" id="accountType" value="">
+                            <div>BALANCE:<p id="balAmnt" style="color:#266aa8;float:right;"> 0.00</p></div>
+                            <div class="error_message"><p>Please select from book name</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" id="costCenterMode">
+                        <div class="form-group req_flds col-lg-12">
+                            <select style="width:100%;" class="single_dropdown lbl_move" label="From Cost Center" name="costCenter" id="costCenter">
+                                <option value=""></option>
+                                <?php if(isset($costCentreLists)): ?>
+                                    <?php foreach($costCentreLists as $costCentreListss): ?>
+                                        <option value="<?php echo $costCentreListss['CostCentreId'];?>" <?php if($costCentreListss['CostCentreId'] == $editDetails['FromCostCentreId']){echo 'selected';} ?>><?php echo $costCentreListss['CostCentreName'];?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <div class="error_message"><p>Please select cost center</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 feed-bg clear top-20">
+                        <div class="table-responsive top-30">
+                            <table class="table" style=" margin-bottom:0px;" id="wkTable">
+                                <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Book Name</th>
+                                    <th>Voucher No</th>
+                                    <th>Ref Vocher No</th>
+                                    <th>Costcenter</th>
+                                    <th>Amount</th>
+                                    <th>Bank charges</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main" id="billWrapper">
+                                </tbody>
+                                <tbody class="total">
+                                <tr>
+                                    <td colspan="2">&nbsp;</td>
+                                    <td colspan="2">&nbsp;</td>
+                                    <td align="right" class="t_amt">Total</td>
+                                    <td width="20%">
+                                        <input class="parent_text border-none" style="text-align:right;" type="text" name="totAmount" id="totAmount" value="0.0" readonly>
+                                    </td>
+                                    <td width="20%">
+                                        <input class="parent_text border-none" style="text-align:right;" type="text" name="chrgAmount" id="chrgAmount" value="0.0" readonly>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="rowSize" id="rowSize" value="0"/>
+                            <input type="hidden" name="rowIsDelete" id="rowIsDelete" value="0"/>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+            </div>
+            <div id="secondStep">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" id="payMode">
+                                <div class="form-group req_flds col-lg-12">
+                                    <select style="width:100%;" class="single_dropdown lbl_move" label="Payment Mode" name="paymentMode" id="paymentMode" onchange="paymentType()">
+                                        <option value=""></option>
+                                        <option value="1" <?php if($editDetails['PayType'] == 1){echo 'selected';} ?> >Cheque</option>
+                                        <option value="2" <?php if($editDetails['PayType'] == 2){echo 'selected';} ?> >RTGS/NEFT (Cheque)</option>
+                                        <option value="3" <?php if($editDetails['PayType'] == 3){echo 'selected';} ?> >RTGS/NEFT (Fund Transfer)</option>
+                                    </select>
+                                    <div class="error_message"><p>Please select payment type...</p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" id="chequeField">
+                                <div class="form-group req_flds col-lg-12">
+                                    <input type="text" class="form-control lbl_move" label="Cheque No" id="transactionNo" name="transactionNo" value="<?php echo (isset($editDetails)) ? $editDetails['ChequeNo'] : '';?>">
+                                    <input type="hidden"  id="chequeTransId" name="chequeTransId" value="<?php echo (isset($editDetails)) ? $editDetails['ChequeTransId'] : '0';?>" >
+                                    <input type="hidden"  id="previousChequeTransId" name="previousChequeTransId" value="<?php echo (isset($editDetails)) ? $editDetails['ChequeTransId'] : '0';?>" >
+                                    <div class="error_message"><p>Please enter valid Cheque No...</p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                <div class="form-group col-lg-12">
+                                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                    <input type="text" name="transactionDate" id="transactionDate" class="form-control lbl_move datepickerinput" label="Transaction date" value="<?php echo (isset($editDetails)) ? $editDetails['ChequeDate'] : '';?>" />
+                                    <div class="error_message"><p></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                <div class="form-group col-lg-12">
+                                    <input type="text" class="form-control lbl_move" label="Amount" id="overAllAmount" name="overAllAmount" value="0.0" readonly>
+                                    <div class="error_message"><p></p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                <div class="form-group req_flds col-lg-12">
+                                    <select style="width:100%;" class="single_dropdown lbl_move" label="Account No" name="ExpAccountId" id="ExpAccountId">
+                                        <option value=""></option>
+                                        <?php if(isset($accountList)): ?>
+                                            <?php foreach($accountList as $accountLists): ?>
+                                                <option value="<?php echo $accountLists['AccountId'];?>" <?php if($accountLists['AccountId'] == $editDetails['OtherAccountId']){echo 'selected';} ?>><?php echo $accountLists['AccountName'];?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                    <div class="error_message"><p>Please select account number</p></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                <div class="form-group col-lg-12">
+                                    <textarea class="exp-tex" name="narration" id="narration" placeholder="Narration"><?php echo (isset($editDetails))? $editDetails['Narration'] : '';?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continue" class="dropdown save_btn float_r"><a href="javascript:void(0);" class="ripple">Next</a></li>
+        <?php if($allowEdit==1) { ?>
+        <li id="add" class="dropdown save_btn float_r"><a href="javascript:void(0);" class="ripple">Add</a></li>
+        <?php } ?>
+        <li class="cancel_btn cancel_btn_bluecolor float_r">
+            <a class="ripple has-ripple" style="cursor:pointer;" button type="button" onclick="" id="cancelBtn" class="ripple">Cancel<span class="ripple-wrapper"></span></a></li>
+            <a class="ripple has-ripple" style="cursor:pointer;" button type="button" onclick="" id="backBtn" class="ripple">Back<span class="ripple-wrapper"></span></a></li>
+        </li>
+    </ul>
+</div>
+
+<script type="text/template" id="dummy-bill">
+    <tr>
+        <td class="tbl_input_td" width="5%" id="">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="check_{{sno}}" name="check_{{sno}}" value="1" onchange="calcAmount();"  {{checkValue}} />
+                    <label for="check_{{sno}}"></label>
+                </p>
+            </div>
+        </td>
+        <td width="30%">
+            <input class="parent_text border-none" type="text" id="toBookName_{{sno}}" name="toBookName_{{sno}}" value="{{toBankName}}" readonly/>
+            <input type="hidden" name="toBankId_{{sno}}" id="toBankId_{{sno}}" value="{{toBankId}}" />
+            <input type="hidden" name="toAccType_{{sno}}" id="toAccType_{{sno}}" value="{{toAccountType}}" />
+            <input type="hidden" name="rowEntryId_{{sno}}" id="rowEntryId_{{sno}}" value="{{rowEntryId}}" />
+            <input type="hidden" name="rowRefEntryId_{{sno}}" id="rowRefEntryId_{{sno}}" value="{{rowRefEntryId}}" />
+        </td>
+        <td width="25%">
+            <input  class="parent_text border-none" type="text" id="voucherNo_{{sno}}" name="voucherNo_{{sno}}" value="{{voucherNo}}" />
+        </td>
+        <td width="25%">
+            <input  class="parent_text border-none" type="text" id="refVoucherNo_{{sno}}" name="refVoucherNo_{{sno}}" value="{{refVoucherNo}}" />
+        </td>
+        <td width="25%">
+            <input  class="parent_text border-none" type="text" id="costcenter_{{sno}}" name="costcenter_{{sno}}" value="{{CostCenter}}" />
+            <input  class="parent_text border-none" type="hidden" id="costCenterId_{{sno}}" name="costCenterId_{{sno}}" value="{{costCenterId}}" />
+        </td>
+        <td width="20%">
+            <input class="parent_text border-none" type="text" id="toAmount_{{sno}}" name="toAmount_{{sno}}" value="{{Amount}}" {{amntReadonly}} style="text-align:right;"  onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="calcAmount();"/>
+        </td>
+        <td width="20%">
+            <input class="parent_text border-none" type="text" id="bankcharges_{{sno}}" name="bankcharges_{{sno}}" value="{{BankCharge}}" readonly style="text-align:right;" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="calcAmount();"/>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+
+var loadEditTabData=<?php echo (isset($loadEditTabData)) ? json_encode($loadEditTabData) : '[]';?>;
+var costCenterdata=<?php echo (isset($costCenterdata)) ? json_encode($costCenterdata) : '[]';?>;
+var chequeList=<?php echo (isset($chequeList)) ? json_encode($chequeList) : '[]';?>;
+var entryId = <?php echo isset($entryId)? $entryId:0; ?>;
+
+$(function(){
+    if(entryId != 0){
+        renderRequests(loadEditTabData,costCenterdata,chequeList);
+    }
+});
+$(".datepickerinput").datepicker({
+    format: "dd-mm-yyyy",
+    autoclose: true
+});
+    var chckCount=0;
+    $(document).ready(function () {
+        $("#firstStep").show();
+        $("#cancelBtn").show();
+        $("#secondStep").hide();
+        $("#add").hide();
+        $("#backBtn").hide();
+    });
+
+    function renderRequests(data,costCenterdata,chequeList) {
+        var $billWrapper = $('#billWrapper');
+        if(data.length == 0) {
+            $billWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            var sno = 0,
+                totalAmount=0,
+                totalOtherCharge=0;
+            var template = $('#dummy-bill').html();
+            $billWrapper.html('');
+            $.each(data, function (i,o) {
+                sno++;
+                $("#fromBookName").attr('disabled',false);
+                var rowEntryId = 0,
+                    select = '',
+                    costCenterId=0,
+                    costCenterName='',
+                    voucherNo='',
+                    refVoucherNo='',
+                    Amount=0,
+                    otherCharge=0,
+                    rowRefEntryId = 0,
+                amntReadonly='readonly';
+                if(entryId != 0) {
+                    $("#fromBookName").attr('disabled',true);
+                    rowEntryId = o.EntryId;
+                    rowRefEntryId = o.RefEntryId;
+                    costCenterName = o.CostCentreName;
+                    costCenterId = o.CostCentreId;
+                    voucherNo = o.VoucherNo;
+                    refVoucherNo = o.RefNo;
+                    Amount = o.Amount;
+                    otherCharge = o.OtherCharges;
+                    totalAmount = parseFloat(totalAmount)+parseFloat(o.Amount);
+                    totalOtherCharge = parseFloat(totalOtherCharge)+parseFloat(o.OtherCharges);
+                    if(o.sel !=0){
+                        select = 'checked';
+                        amntReadonly='';
+                    }
+                }
+
+
+                $billWrapper.append(template
+                    .replace(/\{\{sno\}\}/g,sno)
+                    .replace(/\{\{checkValue\}\}/g,select)
+                    .replace(/\{\{toBankName\}\}/g,o.AccountName)
+                    .replace(/\{\{checkValue\}\}/g,'')
+                    .replace(/\{\{rowEntryId\}\}/g,rowEntryId)
+                    .replace(/\{\{rowRefEntryId\}\}/g,rowRefEntryId)
+                    .replace(/\{\{toBankId\}\}/g,o.AccountId)
+                    .replace(/\{\{toAccountType\}\}/g,o.AccountType)
+                    .replace(/\{\{voucherNo\}\}/g,voucherNo)
+                    .replace(/\{\{refVoucherNo\}\}/g,refVoucherNo)
+                    .replace(/\{\{CostCenter\}\}/g,costCenterName)
+                    .replace(/\{\{costCenterId\}\}/g,costCenterId)
+                    .replace(/\{\{Amount\}\}/g,sanitizeNumber(parseFloatVal(Amount,0),2,true))
+                    .replace(/\{\{amntReadonly\}\}/g,amntReadonly)
+                    .replace(/\{\{BankCharge\}\}/g,sanitizeNumber(parseFloatVal(otherCharge,0),2,true)));
+            });
+            $("#rowSize").val(sno);
+            $("#totAmount").val(sanitizeNumber(parseFloatVal(totalAmount,0),2,true));
+            $("#chrgAmount").val(sanitizeNumber(parseFloatVal(totalOtherCharge,0),2,true));
+        }
+        bindCostCenterAutoComplete(costCenterdata);
+        bindChequeListAutoComplete(chequeList);
+    }
+
+    function showToBookName() {
+        var fromBookName = $("#fromBookName").val();
+        $('#totAmount').val(0);
+        $('#chrgAmount').val(0);
+        if(fromBookName == '' || fromBookName == null){
+            $('#billWrapper').html('');
+            return;
+        }
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/multicompanytransfer",
+            data: {'fromName':fromBookName, 'mode':'pickList'},
+            type:"post",
+            //async:false,
+            success:function(data, textStatus, jqXHR){
+                var datas = JSON.parse(data);
+                renderRequests(datas['tabData'],datas['costCent'],datas['chequeList']);
+                AccountType(datas['accType']);
+                BalanceAmount(datas['balAmount']);
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    $('#continue').click(function () {
+        var fromBookName = $("#fromBookName").val(),
+            costCenter = $("#costCenter").val(),
+            errorFlag = 0;
+        $(".error_message").hide();
+        if($("#voucherNo").val() == ''){
+            errorFlag = 1;
+            $("#voucherNo").focus();
+            $("#voucherNo").closest(".req_flds").find(".error_message").show();
+        }else if($("#voucherDate").val() == ''){
+            errorFlag = 1;
+            $("#voucherDate").focus();
+            $("#voucherDate").closest(".req_flds").find(".error_message").show();
+        }else if(fromBookName == ''){
+            errorFlag = 1;
+            $("#fromBookName").focus();
+            $("#fromBookName").closest(".req_flds").find(".error_message").show();
+        }else if(costCenter == '' || costCenter == null){
+            errorFlag = 1;
+            $("#costCenter").focus();
+            $("#costCenter").closest(".req_flds").find(".error_message").show();
+        } else if(ChkValidation()=='noBookName'){
+            errorFlag = 1;
+        } else if(ChkValidation()=='noCostCenter'){
+            errorFlag = 1;
+        } else if(ChkValidation()=='noAmount'){
+            errorFlag = 1;
+        }else if(calcAmount() === false){
+            alert("Please select atleast one account");
+            return;
+        }
+        var isDeleteEntryId = '0';
+        if(errorFlag == 0) {
+            for(var i=1;i<=$("#rowSize").val(); i++){
+               var isSelect =  $('#check_'+i).is(':checked');
+                if(isSelect == false){
+                    var deleteRowId=$("#rowEntryId_"+i).val();
+                    if(deleteRowId != 0){
+                        isDeleteEntryId = isDeleteEntryId +"," + deleteRowId;
+                    }
+                }
+            }
+            $("#rowIsDelete").val(isDeleteEntryId);
+            $("#backBtn").show();
+            $("#secondStep").show();
+            $("#add").show();
+            $("#continue").hide();
+            $("#firstStep").hide();
+            $("#cancelBtn").hide();
+        }
+    });
+    $('#add').click(function () {
+         var ExpAccountId = $("#ExpAccountId").val(),
+             payMode = $("#paymentMode").val(),
+             transactionNo = $("#transactionNo").val(),
+             errorFlag = 0;
+        $(".error_message").hide();
+
+        if($("#voucherNo").val() == ''){
+            errorFlag = 1;
+            $("#voucherNo").focus();
+            $("#voucherNo").closest(".req_flds").find(".error_message").show();
+        } else if($("#voucherDate").val() == ''){
+            errorFlag = 1;
+            $("#voucherDate").focus();
+            $("#voucherDate").closest(".req_flds").find(".error_message").show();
+        } else if(($("#payMode").is(':visible')) && (payMode == '')){
+            errorFlag = 1;
+            $("#paymentMode").focus();
+            $("#paymentMode").closest(".req_flds").find(".error_message").show();
+        } else if(($("#payMode").is(':visible')) && transactionNo == '') {
+            errorFlag = 1;
+            $("#transactionNo").focus();
+            $("#transactionNo").closest(".req_flds").find(".error_message").show();
+        } else if(ExpAccountId == ''){
+            errorFlag = 1;
+            $("#ExpAccountId").focus();
+            $("#ExpAccountId").closest(".req_flds").find(".error_message").show();
+        }
+
+        if(errorFlag == 0){
+            $("#fromBookName").attr('disabled',false);
+            $("#multiGroupTransfer").submit();
+        }
+    });
+    $('#backBtn').click(function () {
+        $("#backBtn").hide();
+        $("#secondStep").hide();
+        $("#add").hide();
+        $("#continue").show();
+        $("#firstStep").show();
+        $("#cancelBtn").show();
+    });
+
+    function calcAmount(){
+        var totBillAmount= 0,
+            chkErr = true,
+            selFieldAmount = true,
+            chckCount = 0;
+            totBankCharge=0;
+        $.each($('input[id^=check_]'),function(){
+            if($('#'+$(this).attr('id')).is(':checked')){
+                chckCount++;
+                var id = $(this).attr('id').split('_')[1];
+                $('#toAmount_'+id).attr('readonly',false);
+                $('#bankcharges_'+id).attr('readonly',false);
+                totBillAmount=parseFloatVal(totBillAmount)+ parseFloatVal($('#toAmount_'+$(this).attr('id').split('_')[1]).val());
+                totBankCharge=parseFloatVal(totBankCharge)+ parseFloatVal($('#bankcharges_'+$(this).attr('id').split('_')[1]).val());
+            }
+            if(!$('#'+$(this).attr('id')).is(':checked')){
+                chckCount++;
+                var id = $(this).attr('id').split('_')[1];
+                $('#toAmount_'+id).attr('readonly',true);
+                $('#bankcharges_'+id).attr('readonly',true);
+                $('#toAmount_'+id).val(0);
+                $('#bankcharges_'+id).val(0);
+            }
+        });
+        if(chckCount == 0){
+            chkErr = false;
+        }
+        $('#totAmount').val(sanitizeNumber(parseFloatVal(totBillAmount,0),2,true));
+        $('#chrgAmount').val(sanitizeNumber(parseFloatVal(totBankCharge,0),2,true));
+        var overAllAmnt = totBillAmount+totBankCharge;
+        $('#overAllAmount').val(sanitizeNumber(parseFloatVal(overAllAmnt,0),2,true));
+        return chkErr;
+    }
+    function AccountType(data){
+        $("#accountType").val(data['AccountType']);
+        $("#paymentMode").val('').select2();
+        if(data['AccountType'] == 'B'){
+            $("#payMode").show();
+            $("#chequeField").show();
+        }else{
+            $("#payMode").hide();
+            $("#chequeField").hide();
+        }
+    }
+
+    function BalanceAmount(data){
+        if(data !=0){
+            $("#balAmnt").val(data['OpeningBalance']);
+        }else{
+            $("#balAmnt").val(0.00);
+        }
+    }
+    function paymentType(){
+        $("#transactionNo").val('');
+        $("#chequeTransId").val(0);
+    }
+    /*divAccount Autocomplete Start*/
+    function bindCostCenterAutoComplete(costCentreList) {
+        var $costCentreList = $('input[id^=costcenter_]');
+        $.each($costCentreList, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            $this.unbind('autocomplete');
+            $this.autocomplete({
+                lookup: costCentreList,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $("#costCenterId_" + key1).val(suggestion.data);
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $("#accountHeadId_" + key1).val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $("#costCenterId_" + key1).val(0);
+                        $(this).addClass('error');
+                    } else {
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }
+            });
+        });
+    }
+    function bindChequeListAutoComplete(chqueList) {
+        var $chqueList = $('input[id=transactionNo]');
+            $chqueList.unbind('autocomplete');
+            $chqueList.autocomplete({
+                lookup: chqueList,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $("#chequeTransId").val(suggestion.data);
+                        $(this).removeClass('error');
+                        removeError($chqueList);
+                    }
+                }, onSearchStart: function (suggestion) {
+                        $("#chequeTransId").val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $("#chequeTransId").val(0);
+                        $(this).addClass('error');
+                    } else {
+                        $(this).removeClass('error');
+                        removeError($chqueList);
+                    }
+                }
+            });
+    }
+
+    function ChkValidation(){
+        for(var i=1;i<=$("#rowSize").val(); i++){
+            if($("#check_"+i).is(':checked')){
+                if($('#toBankId_'+i).val() == 0){
+                    $('#toBookName_'+i).focus();
+                    showError($('#toBookName_' + i), "Required");
+                    return 'noBookName';
+                }else{
+                    removeError($('#toBookName_' + i));
+                }
+                if($('#costCenterId_'+i).val() == 0){
+                    $('#costcenter_'+i).focus();
+                    showError($('#costcenter_' + i), "Required");
+                    return 'noCostCenter';
+                }else{
+                    removeError($('#costcenter_' + i));
+                }
+                if($('#toAmount_'+i).val() == 0){
+                    $('#toAmount_'+i).focus();
+                    showError($('#toAmount_' + i), "Required");
+                    return 'noAmount';
+                }else {
+                    removeError($('#toAmount_' + i));
+                }
+            }
+        }
+    }
+</script>
+

@@ -1,0 +1,150 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>" />
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important;padding:5px 15px !important;}
+#treeGrid .jqx-grid-header 							{height:75px !important;}
+.text-right 										{color:#666;font-size: 15px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Advance Recommendation Register</h1>
+                <div class="col-lg-12">
+                    <div class="col-lg-12 col-lg-offset-0">
+                        <div class="table-responsive clear animated fadeInUp">
+                            <div id="treeGrid"> </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $treeGrid = $("#treeGrid");
+
+    $(document).ready(function () {
+        var data = <?php echo (isset($arRegister)) ? json_encode($arRegister) : ''; ?>;
+        var source =
+        {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                { name: 'ARRegisterId', type: 'number' },
+                { name: 'ARNo', type: 'string' },
+                { name: 'ARDate', type: 'date' },
+                { name: 'CostCentreName', type: 'string' },
+                { name: 'VendorName', type: 'string' },
+                { name: 'OrderNo', type: 'string' },
+                { name: 'OrderType', type: 'string' },
+                { name: 'PaidAmount', type: 'string' },
+                { name: 'Approve', type: 'string' },
+            ],
+            id: 'ARRegisterId'
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $treeGrid.jqxGrid(
+            {
+                width: '100%',
+                theme: 'bootstrap',
+                pagerButtonsCount: 6,
+                source: dataAdapter,
+                pageable: true,
+                sortable: true,
+                filterable:true,
+                altrows: true,
+                enabletooltips: true,
+                autoheight: true,
+                editable: false,
+                selectionmode: 'singlerow',
+                showfilterrow: true,
+                rowdetails: true,
+                columns: [
+                    { text: 'ARRegisterId', datafield: 'ARRegisterId', hidden: true, filterable: false},
+                    { text: 'AR Date', datafield: 'ARDate', width: '10%', editable: false,filtertype:'date', cellsformat: 'dd-MM-yyyy' },
+                    { text: 'AR No', datafield: 'ARNo', width: '10%', editable: false },
+                    { text: 'WO No', datafield: 'OrderNo', width: '10%', editable: false },
+                    { text: 'Cost Centre', datafield: 'CostCentreName', width: '15%', editable: false },
+                    { text: 'Vendor', datafield: 'VendorName', width: '15%', editable: false },
+                    { text: 'Order Type', datafield: 'OrderType', width: '10%', editable: false },
+                    { text: 'Amount', datafield: 'PaidAmount', width: '10%', editable: false,align:'right',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin: 6px 10px 0 0;">' +sanitizeNumber($('#treeGrid').jqxGrid('getCellValue', row, 'PaidAmount'),2, true) + '</div>';
+                        }
+                    },
+                    { text: 'Approve', datafield: 'Approve', width: '10%', align: 'center', editable: false,
+                        cellsrenderer: function (row) {
+                            return '<div class="text-center" style="margin: 6px 10px 0 0;">' +$('#treeGrid').jqxGrid('getCellValue', row, 'Approve') + '</div>';
+                        }
+                    },
+                    { text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                        cellsrenderer: function (row) {
+                            var arRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'ARRegisterId'),
+                                approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve'),
+                                editLink = '<a title="Edit" href="'+ getBaseURL() + 'wpm/labourstrength/advance/'+arRegisterId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            if(approve == 'No') {
+                                editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="deleteAR(event,' + row + ')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                            }
+                            return editLink;
+                        }
+                    }
+                ]
+            });
+    });
+    $('#treeGrid').on('rowexpand', function (event) {
+        var prev_row = $('#treeGrid').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#treeGrid').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#treeGrid').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#treeGrid').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $('#treeGrid').on('rowcollapse', function (event) {
+        $('#treeGrid').jqxGrid('clearselection');
+    });
+    $('#treeGrid').on('rowexpand', function (event) {
+        var prev_row = $('#treeGrid').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#treeGrid').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#treeGrid').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#treeGrid').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $('#treeGrid').on('rowcollapse', function (event) {
+        $('#treeGrid').jqxGrid('clearselection');
+    });
+
+    function deleteAR(event, row)
+    {
+        event.preventDefault();
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        if (confirm("Do you want to delete?")) {
+            $.ajax({
+                url: getBaseURL() + 'wpm/labourstrength/delete-ar',
+                type: 'POST',
+                data: "arRegId="+ rowData.ARRegisterId,
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the request!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        }
+    }
+
+</script>

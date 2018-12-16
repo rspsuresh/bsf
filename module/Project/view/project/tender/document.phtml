@@ -1,0 +1,298 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.bootstrap-responsive-tabs.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.bootstrap-responsive-tabs.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<form id="formWrapper" method="post" enctype="multipart/form-data">
+<input type="hidden" name="enquiryId" id="enquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+  <div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+      <div class="col-lg-12 clear">
+        <div id="indexWrapper">
+            <h1 class="compadding_bottom_0 commargin_top">Documents <?php echo isset($EnquiryName) ? '- '.$EnquiryName:'';?></h1>
+            <div class="table-responsive topsp" style=" margin-top:10px;">
+              <table class="table tableWithFloatingHeader highlightTable" style=" margin-bottom:0px;" id="docTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Document Type</th>
+                    <th>Document Description</th>
+                    <th>HandOver To</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php $i=1; if(isset($arrdocument)):
+                        foreach($arrdocument as $dtrans): ?>
+                  <tr>
+                    <td width="10%" style="position:relative;"><span class="date_icon" style="margin-top:5px;"><i class="fa fa-calendar"></i></span>
+                      <input class="parent_text date_picker" type="text" id="refdate_<?php echo $i; ?>" name="refdate_<?php echo $i; ?>" readonly value="<?php echo date('d-m-Y', strtotime($dtrans['RefDate']));?>" /></td>
+                    <td width="10%"><input type="hidden" name="docId_<?php echo $i; ?>" value="<?php echo $dtrans['DocumentId'];?>">
+                      <input class="parent_text" type="text" name="docType_<?php echo $i; ?>" id="docType_<?php echo $i; ?>"  value="<?php echo $dtrans['DocumentTypeName'];?>" onchange="addNewDocRow(this)"/></td>
+                    <input type="hidden" name="docTypeId_<?php echo $i; ?>" id="docTypeId_<?php echo $i; ?>" value="<?php echo $dtrans['DocumentTypeId'];?>">
+                    <td width="20%"><textarea class="parent_texts" name="docDesc_<?php echo $i; ?>" id="docDesc_<?php echo $i; ?>" onchange="addNewDocRow(this)"><?php echo $dtrans['DocumentDescription'];?></textarea></td>
+                    <td width="10%"><input class="parent_text" type="text" name="user_<?php echo $i; ?>" id="user_<?php echo $i; ?>"  value="<?php echo $dtrans['UserName'];?>" onchange="addNewDocRow(this)"/></td>
+                    <input type="hidden" name="userId_<?php echo $i; ?>" id="userId_<?php echo $i; ?>" value="<?php echo $dtrans['UserId'];?>">
+                    <td width="20%"><textarea class="parent_texts" name="remarks_<?php echo $i; ?>" id="remarks_<?php echo $i; ?>" onchange="addNewDocRow(this)"><?php echo $dtrans['Remarks'];?></textarea></td>
+                    <td width="5%" class="action_btns_td"><ul class="action_btns">
+                        <li style="float:left;"> <a class="pull-left" id="docAttachment_<?php echo $i; ?>" href="<?php echo (trim($dtrans['dURL']) == '')?'#': $this->basePath(). $dtrans['dURL'];?>" <?php if(trim($dtrans['dURL']) != ''): ?> target="_blank" download="" <?php endif; ?>>
+                          <?php if(trim($dtrans['dURL']) == ''): ?>
+                          <span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch"></i>
+                          <input type="file" name="docFile_<?php echo $i; ?>" id="docFile_<?php echo $i; ?>">
+                          <i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>
+                          </span>
+                          <?php else: ?>
+                          <i class="fa fa-eye" data-toggle="tooltip" data-placement="left" data-original-title="Download Attachment"></i>
+                          <input type="hidden" name="docFile_<?php echo $i; ?>" id="docFile_<?php echo $i; ?>" value="<?php echo $dtrans['dURL'];?>">
+                          <?php endif; ?>
+                          </a>
+                        </li>
+                        <li class=""> <a href="#" class="deleteDocTr_<?php echo $i; ?>" onclick="deleteDoc(this, event, <?php echo $dtrans['DocumentId'];?>);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                      </ul></td>
+                  </tr>
+                  <?php $i=$i+1; endforeach;?>
+                  <?php endif; ?>
+                  <tr>
+                    <td width="10%" style="position:relative;"><span class="date_icon" style="margin-top:5px;"><i class="fa fa-calendar"></i></span>
+                      <input class="parent_text date_picker" type="text" id="refdate_<?php echo $i; ?>" name="refdate_<?php echo $i; ?>" readonly value="<?php echo date('d-m-Y');?>" /></td>
+                    <td width="10%"><input class="parent_text" type="text" name="docType_<?php echo $i; ?>" id="docType_<?php echo $i; ?>" onchange="addNewDocRow(this)"/></td>
+                    <input type="hidden" name="docTypeId_<?php echo $i; ?>" id="docTypeId_<?php echo $i; ?>" value="">
+                    <td width="20%"><textarea class="parent_texts" name="docDesc_<?php echo $i; ?>" id="docDesc_<?php echo $i; ?>" onchange="addNewDocRow(this)"></textarea></td>
+                    <td width="10%"><input class="parent_text" type="text" name="user_<?php echo $i; ?>" id="user_<?php echo $i; ?>"  value="" onchange="addNewDocRow(this)"/></td>
+                    <input type="hidden" name="userId_<?php echo $i; ?>" id="userId_<?php echo $i; ?>" value="">
+                    <td width="20%"><textarea class="parent_texts" name="remarks_<?php echo $i; ?>" id="remarks_<?php echo $i; ?>" onchange="addNewDocRow(this)"></textarea></td>
+                    <td width="5%" class="action_btns_td"><ul class="action_btns">
+                        <li style="float:left;" class="lft-doc"> <a id="docAttachment_<?php echo $i; ?>" href="#"><span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch"></i>
+                          <input type="file" name="docFile_<?php echo $i; ?>" id="docFile_<?php echo $i; ?>">
+                          </span></a> </li>
+                        <li style="float:left;"> <a href="#" class="deleteDocTr_<?php echo $i; ?>" onclick="deleteDoc(this, event, 0);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                      </ul>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <input type="hidden" name="documentrowid" id="documentrowid" value="<?php echo $i;?>"/>
+            </div>
+      
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="col-lg-12 savebtn_area">
+  <ul>
+    <li class="dropdown save_btn float_r"><a onclick="submitForm(); return false;" data-toggle="tooltip" class="ripple" title="Save">Save</a></li>
+      <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/followup/followup';?>" method="post" id="frmfollowup">
+          <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+          <input type="hidden" id="formfrom" name="formfrom"/>
+          <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $EnquiryName; ?>"/>
+          <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Go Back</a></li>
+      </form>
+  </ul>
+</div>
+<table id="dummy-document" style="display: none;">
+  <tbody>
+    <tr>
+      <td width="10%" style="position:relative;"><span class="date_icon" style="margin-top:5px;"><i class="fa fa-calendar"></i></span>
+        <input class="parent_text date_picker" type="text" id="refdate__1" name="refdate__1" readonly value="<?php echo date('d-m-Y');?>" /></td>
+      <td width="10%"><input class="parent_text" type="text" name="docType__1" id="docType__1"  onchange="addNewDocRow(this)"/></td>
+      <input type="hidden" name="docTypeId__1" id="docTypeId__1" value="">
+      <td width="20%"><textarea class="parent_texts" name="docDesc__1" id="docDesc__1" onchange="addNewDocRow(this)"></textarea></td>
+      <td width="10%"><input class="parent_text" type="text" name="user__1" id="user__1" onchange="addNewDocRow(this)"/></td>
+      <input type="hidden" name="userId__1" id="userId__1" value="">
+      <td width="20%"><textarea class="parent_texts" name="remarks__1" id="remarks__1" onchange="addNewDocRow(this)" ></textarea></td>
+      <td width="5%" class="action_btns_td"><ul class="action_btns">
+          <li style="float:left;"> <a id="docAttachment__1" href="#"> <span  data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch dcm_atch"></i>
+            <input type="file" name="docFile__1" id="docFile__1">
+            </span> </a> </li>
+          <li style="float:left;"> <a href="#" class="deleteDocTr__1" onclick="deleteDoc(this, event, 0);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<script>
+    var doctypelist = <?php echo (isset($arrdocumenttype)) ? json_encode($arrdocumenttype) : '[]';?>;
+    var userlist = <?php echo (isset($arruser)) ? json_encode($arruser) : '[]';?>;
+    $(function () {
+        bindDocAttached();
+        binddoctypeAutoComplete();
+        binduserAutoComplete();
+    });
+
+    function bindDocAttached() {
+        var docFiles = $('input[id^=docFile_]');
+        docFiles.unbind('change');
+
+        docFiles.on('change', function() {
+            var $this = $(this);
+            var $tarEl = $(this).siblings('i');
+            var $tooltip = $tarEl.parent('span');
+            var $tarA = $tarEl.closest('a');
+            if($(this).val() != '') {
+                $tarEl.removeClass('fa-paperclip').addClass('fa-file-o file-do');
+                $tooltip.attr('data-original-title', 'Document Attached');
+
+                if($tarA.next('i.brkn').length == 0)
+                    $('<i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>').insertAfter($tarA);
+            } else {
+                $tarA.next('i.brkn').remove();
+                $tarEl.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+                $tooltip.attr('data-original-title', 'Click to attach documents');
+            }
+        });
+    }
+
+    function removeAttachment($tarEl) {
+
+        if (!confirm('Do you want to Remove')) {
+            return false;
+        }
+
+        var $tarLi = $tarEl.closest('li');
+        var $tarA = $tarLi.find('a');
+        var $tarI = $tarA.find('i.fa-file-o');
+        var $tarIp = $tarLi.find('input[type="hidden"]');
+
+        $tarIp.attr('type', 'file').removeAttr('value');
+//        $tarA.attr('href', '#').removeAttr('download').removeAttr('target');
+        $tarI.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+        $tarA.html('<span class="btn-file butclr_imp">' + $tarA.html() + '</span>');
+        bindDocAttached();
+
+        $tarEl.remove();
+    }
+
+    function addNewDocRow(x) {
+        var $tr = $(x).closest('tr');
+        if ($tr.next('tr').length != 0)
+            return;
+
+        var $rowid = $('#documentrowid'),
+            rowid = parseInt($rowid.val());
+        $('.deleteDocTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#dummy-document tbody').html();
+
+        if ($('#docType_' + rowid).val().length == 0 || $('#user_' + rowid).val().length == 0)
+            return;
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.parent('tbody').append(template);
+
+        bindDocAttached();
+        binddoctypeAutoComplete();
+        binduserAutoComplete();
+        $rowid.val(count);
+    }
+
+    function submitForm() {
+        $('#formWrapper').submit();
+    }
+
+    function binddoctypeAutoComplete() {
+        var $doctype = $('input[id^=docType_]');
+        $doctype.unbind('autocomplete');
+        $.each($doctype, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+
+            $this.autocomplete({
+                lookup: doctypelist,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#docTypeId_" + key1).val(suggestion.data);
+                        $("#docType" + key1).val(suggestion.value);
+                        removeError($(this));
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#docTypeId_" + key1).val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length){
+                        showError($(this), 'Required');
+                        $("#docTypeId_" + key1).val(0);
+                        $(this).addClass('error');
+                    } else
+                        removeError($(this));
+                }
+            });
+        });
+    }
+
+    function binduserAutoComplete() {
+        var $user = $('input[id^=user_]');
+        $user.unbind('autocomplete');
+        $.each($user, function () {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+
+            $this.autocomplete({
+                lookup: userlist,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#userId_" + key1).val(suggestion.data);
+                        $("#user_" + key1).val(suggestion.value);
+                        removeError($(this));
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#userId_" + key1).val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length){
+                        showError($(this), 'Required');
+                        $("#userId_" + key1).val(0);
+                        $(this).addClass('error');
+                    } else
+                        removeError($(this));
+                }
+            });
+        });
+    }
+
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+    function deleteDoc(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr').length == 1) {
+            var template = $('#dummy-document tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#soildocumentrowid').val(1);
+
+            bindDocAttached();
+        }
+
+        $tr.next('tr.subTr').remove();
+        $tr.remove();
+        return false;
+    }
+</script>

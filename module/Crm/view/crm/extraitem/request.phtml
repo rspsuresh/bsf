@@ -1,0 +1,269 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+    	<div class="row">
+			<!-- newly addind Div-->
+			<form action="" method="post" id="ExtraForm" name="ExtraForm">
+                <div id="Step1">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center" data-bsfhead="Request ExtraItems" >Request Extra Items</h1>
+                    </div>
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <div class="col-lg-offset-3">
+                                <label for="booking_no" class="bk_lbl bk_lbl_inpt">ExtraItem Request No <span class="colon_r">:</span></label>
+                                <input type="text" data-bsfshare="Type" class="bk_lbl_inpt inputbg_ef bk_inpt1" <?php if ($arrVNo["genType"] == true){ ?> readonly <?php } ?> name="ExtraRequestNo" id="booking_no" value="<?php if ($arrVNo["genType"] == true){ echo $arrVNo['voucherNo']; } else { echo "";}?>" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+                            <div class="col-lg-offset-5">
+                                <label for="request_date" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Extra Bill Date <span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="request_date" id="request_date" value="<?php echo date('d-m-Y'); ?>" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="row form-group">   
+                                <div class="form-group col-lg-12 m3_auto padtop20">
+                                    <input type="text" name="unitname" id="unitname" class="form-control lbl_move" label="Project/Unit/Buyer" value="" />
+                                    <input type="hidden" name="unitId" id="unitid" value=""/>
+                                    <input type="hidden" name="projId" id="projId" value=""/>
+									<input type="hidden" value="" id="hiddenTypeId" name="ExtraItemId"/>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 savebtn_area no_border">
+                                <ul>
+                                    <li class="save_btn m_auto">
+                                        <a href="javascript:void(0);" class="ripple" onclick="show_step2();">Continue</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="Step2" style="display:none;">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Select Required ExtraItems</h1>
+                    </div>
+                    <div class="col-lg-12 padtop10">
+						<div class="table-responsive m_btm30">
+                                <table class="table payment-schedule">
+                                    <thead>
+                                    <tr>
+                                        <th>&nbsp;</th>
+                                        <th>Description</th>
+                                        <th>Rate</th>
+                                        <th>Unit</th>
+                                        <th>Quantity</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="bind_table">
+
+                                    </tbody>
+                                    <input type="hidden" id="itemRowId" name="itemRowId" value="0" />
+
+                                </table>
+						</div>
+					</div>
+                    <div class="col-lg-12 savebtn_area clear">
+                        <ul>
+                            <li class="dropdown save_btn float_l">
+                                <a href="javascript:void(0);" onclick="$('#Step1').show(); $('#Step2').hide(); $('#unitname').attr('readonly',false); $('#continueBtn').show()" class="ripple">back</a>
+                            </li>
+                            <li class="dropdown save_btn float_r">
+							   <a href="javascript:void(0);" id="finalsubmit" class="ripple continue">Add Extra Item</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+		  	</form>
+        </div>
+	</div>
+</div>
+<script id="bind_template" type="text/template" class="hide" >
+    <tr class="mainTr">
+        <td>
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" name="include__" id="include__" value="1" />
+                    <label for="include__" class="ripple"></label>
+                </p>
+            </div>
+        </td>
+        <td id="desc__"></td>
+        <td id="rate__"></td>
+        <td id="unit__"></td>
+        <td><input type="text" id="qty__" name="qty__" class="tbl_input txt_right" value="" onkeypress="return isNumberKey(event);" onchange="qtyChange(this);"/></td>
+        <td><input type="text" id="quotedVal__" name="quotedVal__" class="tbl_input sch-tax txt_right qEnable" value=""/></td>
+        <input type="hidden" id="extraItemId__" name="extraItemId__" class="tbl_input txt_right" value=""/>
+    </tr>
+</script>
+<script>
+$(document).ready(function() {
+	$(".multiple_dropdown").select2({
+	});
+});
+function qtyChange(el) {
+    var idCount = $(el).attr('id').split('_')[1];
+    var qt = $.trim($('#qty_'+idCount).val());
+    var qty=0;
+    if(qt!="" && !isNaN(qt)) {
+        qty = parseInt($('#qty_'+idCount).val());
+    }
+    var rate = parseFloat($('#rate_'+idCount).html());
+    $('#quotedVal_'+idCount).val(sanitizeNumber(qty*rate,2));
+    var totQty= 0;
+    var totQuoted= 0;
+    $.each($('input[id*=qty_]'),function(i,j) {
+        if($.trim($(this).val())!="") {
+            totQty += parseFloat($(this).val());
+        } else {
+            totQty +=0;
+        }
+
+    });
+    $.each($('input[id*=quotedVal_]'),function(i,j) {
+        if($.trim($(this).val())!="") {
+            totQuoted += parseFloat($(this).val());
+        } else {
+            totQuoted +=0;
+        }
+
+    });
+    $('#totQty').html(sanitizeNumber(totQty,0));
+    $('#totQAmt').html(sanitizeNumber(totQuoted,2));
+
+}
+var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+var $unitname = $('#unitname'),$UnitId = $('#unitid');
+$projId= $('#projId');
+$unitname.autocomplete({
+  lookup: arr_Units,
+  showNoSuggestionNotice: false,
+  lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+      if (queryLowerCase == '*') {
+          return suggestion.value;
+      } else {
+          var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+          return re.test(suggestion.value);
+      }
+  }, onSelect: function (suggestion) {
+      if (suggestion) {
+          $UnitId.val(suggestion.data);
+          $projId.val(suggestion.ProjectId);
+          $(this).removeClass('error');
+      }
+  }, onSearchStart: function (suggestion) {
+      $UnitId.val(0);
+  }, onSearchComplete: function (query, suggestions) {
+      if (!suggestions.length) {
+          $UnitId.val(0);
+          $(this).addClass('error');
+      } else $(this).removeClass('error');
+  }
+});
+  
+function show_step2() {	
+	if($('#booking_no').val()==0){
+		alert("Please Enter Bill Number");
+		return false
+	}
+	if($('#unitid').val()!=""){
+		load_extraItemList(function(isSuccess) {
+			if(isSuccess){
+				$('#Step1').hide();
+				$('#Step2').show();
+			}
+		});
+		} else {
+		alert("Please Select Project/unit/buyer");
+		}
+}
+
+function load_extraItemList(callback) {
+
+    var unit_id = $UnitId.val();
+    var projId = $projId.val();
+    if (/^\d+$/.test(unit_id) === false) {
+        return;
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'crm/extraitem/projectextraitem',
+        data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", UnitId: unit_id, projId: projId},
+        type: 'POST',
+        success: function (data, status, xhr) {
+            //var ext = JSON.parse(data);
+            var ex = data.extra_item_list;
+            if (ex.length > 0) {
+                var h=0;
+                var totQty=0;
+                var totQAmt=0;
+                $('#bind_table').html('');
+                var bind_template = $('#bind_template').html();
+                    $.each(ex,function(j,p) {
+                        h++;
+                        totQty+=parseFloat(p.Qty);
+                        totQAmt+=parseFloat(p.Amount);
+                        $('#bind_table').append(bind_template.replace(/__/g, '_' + h));
+                       $('#desc_'+h).html(p.ItemDescription);
+                       $('#extraItemId_'+h).val(p.ExtraItemId);
+                       $('#rate_'+h).html(sanitizeNumber(p.Rate,2));
+                       $('#unit_'+h).html(p.UnitName);
+                       $('#qty_'+h).val(sanitizeNumber(p.Qty,0));
+                        $('#quotedVal_'+h).val(sanitizeNumber(p.Amount,2));
+                        $('#quotedVal_'+h).attr('disabled',true);
+                    });
+                $('#itemRowId').val(h);
+                $('#bind_table').append('<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="text-right rate_pri">Total</td><td id="totQty" class="text-right">'+sanitizeNumber(totQty,0)+'</td><td id="totQAmt" class="text-right">'+sanitizeNumber(totQAmt,2)+'</td></tr>');
+            } else {
+				alert("No Extra Items Found");
+				if (callback) {
+					callback(false);
+					return false;
+				}
+			}
+			if (callback) {
+					callback(true);
+					return true;
+            }
+
+        },
+        error: function (xhr, status, error) {
+            alert(xhr.responseText);
+        }
+    });
+}
+$('#finalsubmit').click(function () {
+    var err=0;
+    $.each($('input[type=checkbox][name*=include_]'),function(i,o) {
+        if(this.checked) {
+            err=1;
+        }
+    });
+    if(err==0) {
+        alert("Atlease one Extra Item Must be Selected");
+        return false
+    } else {
+        $('.qEnable').attr('disabled',false);
+        $('#ExtraForm').submit();
+    }
+
+});
+			
+
+</script>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+
+});
+</script>

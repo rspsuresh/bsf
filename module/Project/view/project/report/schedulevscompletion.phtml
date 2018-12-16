@@ -1,0 +1,260 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-chart.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-lightchart.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-serialchart.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-piechart.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-radarchart.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/landbank-xychart.js"></script>
+<style>
+.top_ct                                          {background:#fff; padding:5px 0;margin:0}
+#scdule-db1, #scdule-db2, #chartdiv3, #chartdiv4 {width:100%;height:435px !important;font-size:11px;}
+.panel-body 									 {border:1px solid #e7e7e7;box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.23);}
+.panel-heading 									 {border-bottom: 1px solid #ddd; border-top-left-radius: 3px;border-top-right-radius:3px;color:#06528c;font-size:20px;padding:10px 15px;transition: margin 0.5s ease-out 0s;}
+</style>
+<!--content-->
+
+<div class="content_wrapper padlr0">
+<div class="container-fluid padlr0">
+    <div class="col-lg-12">
+        <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Schedule Vs Completion Report</h1>
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="margin-bottom:10px; padding-right:0px !important;">
+            <label class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 control-label text-right">Select by</label>
+            <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="padding-right:0px !important;">
+                <select name="projectId" id="projectId" class="form-control selectpicker show-tick" onchange="return ChangeProject()" data-size="6" title="Select Project...">
+                    <option value="0">None</option>
+                    <?php if(isset($projectlists)):?>
+                        <?php foreach ( $projectlists as $project ):?>
+                            <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                        <?php endforeach; ?>
+                    <?php  endif; ?>
+                </select>
+            </div>
+
+            <!--Short by end-->
+        </div>
+
+        <!--chart2 start-->
+        <div class="col-lg-12 divdash" >
+            <section class="panel">
+                <header class="panel-heading"><i class="fa fa-area-chart"></i> Schedule vs Completion</header>
+                <div class="panel-body">
+                    <div id="scdule-db1" class="top_ct"></div>
+                </div>
+            </section>
+        </div>
+
+        <!--chart3complete-->
+        <div class="col-lg-12 divdash">
+            <section class="panel">
+                <header class="panel-heading"><i class="fa fa-area-chart"></i>Schedule vs Completion</header>
+                <div class="panel-body">
+                    <div class="table-responsive clear">
+                        <div id="dataTable"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+      
+    </div>
+</div></div>
+<div class="col-lg-12"><a data-text="Go to Report List" href="<?php echo $this->basePath(); ?>/project/report/reportlist" class="gobacklist"><i class="fa fa-chevron-circle-left" aria-hidden="true"></i> Go to Report List</a></div>
+<!--datepicker-->
+
+<script>
+
+    var shcomp = <?php echo json_encode($shcomp); ?>;
+
+
+    $(function () {
+        if (shcomp.length ==0) $('.divdash').hide();
+        else $('.divdash').show();
+    });
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#projectId').val(),'number');
+        window.location.href = getBaseURL() + "project/report/schedulevscompletion/" + iProjectId;
+    }
+
+
+
+    $dataGrid = $("#dataTable"),
+        $(function () {
+            var source = {
+                localdata:shcomp,
+                dataType: "json",
+                dataFields: [
+                    { name: 'Mon', type: 'number' },
+                    { name: 'Mondata', type: 'string' },
+                    { name: 'ShAmount', type: 'number' },
+                    { name: 'CompAmount', type: 'number' },
+                    { name: 'ShPer', type: 'number' },
+                    { name: 'CompPer', type: 'number' }
+                ],
+                id: 'Mon'
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+            $("#dataTable").jqxGrid({
+                width: '100%',
+                pageable: true,
+                rowsheight: 35,
+                filterable: true,
+                showfilterrow: true,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight:true,
+                source: dataAdapter,
+                altrows: true,
+                editable:true,
+                enabletooltips: true,
+                selectionmode: 'singlerow',
+                editmode: 'selectedcell',
+                columns: [
+                    { text: 'Mon', datafield: 'Mon', hidden: true},
+                    { text: 'Month', dataField: 'Mondata',width:'30%',editable:false},
+                    { text: 'Schedule Amount', dataField: 'ShAmount',editable:false, width:'25%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'ShAmount'),2,true) + '</div>';
+                        }},
+                    { text: 'Completion Amount', dataField: 'CompAmount', editable:false, align: 'right', cellsalign: 'right', width:'25%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'CompAmount'),2,true) + '</div>';
+                        }},
+                    { text: 'Schedule %', dataField: 'ShPer', editable:false, align: 'right', cellsalign: 'right', width:'10%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'ShPer'),2,true) + '</div>';
+                        }},
+                    { text: 'Completion %', dataField: 'CompPer', editable:false, align: 'right', cellsalign: 'right',width:'10%',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right">' + sanitizeNumber($dataGrid.jqxGrid('getCellValue', row, 'CompPer'),2,true) + '</div>';
+                        }}
+                ]
+            });
+        });
+
+
+    var chart = AmCharts.makeChart("scdule-db1", {
+        "type": "serial",
+        "theme": "dark",
+        "precision": 2,
+        "valueAxes": [{
+            "id": "v1",
+            "title": "Cost",
+            "position": "left",
+            "autoGridCount": false,
+            "labelFunction": function(value) {
+                return + Math.round(value) ;
+            }
+        }, {
+            "id": "v2",
+            "unit": "%",
+            "gridAlpha": 0,
+            "position": "right",
+            "autoGridCount": false
+        }],
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#e1ede9",
+            "fillColors": "#e1ede9",
+            "fillAlphas": 1,
+            "type": "column",
+            "title": "ScheduleCost",
+            "valueField": "ShAmount",
+            "clustered": false,
+            "columnWidth": 0.5,
+            "legendValueText": "[[value]]",
+            "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
+        }, {
+            "id": "g4",
+            "valueAxis": "v1",
+            "lineColor": "#67b7dc",
+            "fillColors": "#67b7dc",
+            "fillAlphas": 1,
+            "type": "column",
+            "title": "CompletionCost",
+            "valueField": "CompAmount",
+            "clustered": false,
+            "columnWidth": 0.3,
+            "legendValueText": "[[value]]",
+            "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#000",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 2,
+                "lineColor": "#068d39",
+                "type": "smoothedLine",
+                "title": "Schedule %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "ShPer",
+                "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
+            }, {
+                "id": "g2",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#000",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 2,
+                "lineColor": "#000",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Completion %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "CompPer",
+                "balloonText": "[[title]]<br/><b style='font-size: 130%'>[[value]]</b>"
+            }],
+        "chartScrollbar": {},
+        "chartCursor": {
+            "cursorPosition": "mouse"
+        },
+
+        // "chartScrollbar": {
+//        "graph": "g1",
+//        "oppositeAxis": false,
+//        "offset": 30,
+//        "scrollbarHeight": 50,
+//        "backgroundAlpha": 0,
+//        "selectedBackgroundAlpha": 0.1,
+//        "selectedBackgroundColor": "#888888",
+//        "graphFillAlpha": 0,
+//        "graphLineAlpha": 0.5,
+//        "selectedGraphFillAlpha": 0,
+//        "selectedGraphLineAlpha": 1,
+//        "autoGridCount": true,
+//        "color": "#AAAAAA"
+//    },
+//    "chartCursor": {
+//        "pan": true,
+//        "valueLineEnabled": true,
+//        "valueLineBalloonEnabled": true,
+//        "cursorAlpha": 0,
+//        "valueLineAlpha": 0.2
+//    },
+        "categoryField": "Mondata",
+        "categoryAxis": {
+            "dashLength": 1,
+            "minorGridEnabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top"
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "export": {
+            "enabled": true
+        },
+        "dataProvider": shcomp});
+
+</script>

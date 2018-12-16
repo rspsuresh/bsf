@@ -1,0 +1,232 @@
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/library/jqgrid/css/ui.jqgrid-bootstrap-ui.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.fmatter.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/jquery.jqGrid.js"></script>
+<script src="<?php echo $this->basePath(); ?>/library/jqgrid/src/i18n/grid.locale-en.js"></script>
+<style>
+.color-green {background-color:#a3cc8e;}
+.color-red {background-color: rosybrown;}
+.sel-type {font-size:13px;}
+</style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <?php if ($projectId !=0) { ?>
+      <div class="col-lg-12 page_tittle" id="pagetittle">
+        <h1 class="col-lg-4 col-sm-4">WBS Alloted Report</h1>
+        <div class="col-lg-4 col-sm-4">
+          <div class="form-group">
+            <label class="col-sm-12 sel-type">Select Project</label>
+            <div class="col-lg-12 form-group">
+              <select name="project_id" id="project_id" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                <option value="">Select Project</option>
+                <?php if(isset($projectlists)):?>
+                <?php foreach ( $projectlists as $project ):?>
+                <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                <?php endforeach; ?>
+                <?php  endif; ?>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-4">
+          <div class="form-group">
+            <label class="col-sm-12 sel-type">Select Type</label>
+            <div class="col-lg-12 form-group">
+              <select name="revtype" id="revtype" onChange="ChangeProject();" class="form-control multiple_dropdown lbl_move" style="width:100%;">
+                <option value="">Select Type</option>
+                <option value="B" <?php echo $revtype=='B' ? 'selected' : ''; ?>>Budget</option>
+                <option value="P" <?php echo $revtype=='P' ? 'selected' : ''; ?>>Plan</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-lg-offset-8 edit_del" data-visibility="hide">
+        <ul>
+          <li>
+            <button type="button" class="edit-btn form-group edit_al" id="print-btn"><i class="fa fa-print"></i> Print</button>
+          </li>
+        </ul>
+      </div>
+      <div class="col-lg-12 clear" id="gridWrapper" >
+        <div id="grid"></div>
+        <div id='pager'></div>
+      </div>
+      <?php } else { ?>
+      <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts" id="formWrapper">
+          <div class="col-lg-12 frmwrk_div" id="projects_list">
+            <select name="newproject_id" id="newproject_id" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Project" style="width:100%;">
+              <?php if(isset($projectlists)):?>
+              <?php foreach ( $projectlists as $project ):?>
+              <option value="<?php echo $project[ 'ProjectId' ];?>"><?php echo $project[ 'ProjectName' ];?></option>
+              <?php endforeach; ?>
+              <?php  endif; ?>
+            </select>
+          </div>
+          <div class="clearfix"></div>
+          <div class="col-lg-12 frmwrk_div" id="types_list" style="display: none;">
+            <select name="newrevtype" id="newrevtype" class="form-control multiple_dropdown lbl_move" data-size="6" label="Select Type" style="width:100%;">
+              <option value="B">Budget</option>
+              <option value="P">Plan</option>
+            </select>
+          </div>
+          <div class="savebtn_areas col-lg-7 col-lg-offset-4 col-md-7 col-md-offset-4 col-sm-7 col-sm-offset-4 col-xs-7 col-xs-offset-4">
+            <ul>
+              <li class="subs"><a href="javascript:void(0);" onClick="submitForm();" id="continue">Submit</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <?php } ?>
+    </div>
+  </div>
+</div>
+<script>
+
+    var $project = $('#project_select'),
+        $projectNew = $('#newproject_id'),
+        $type_list = $('#types_list'),
+        $type = $('#type_select');
+
+    $(function () {
+        $projectNew.on('change', function() {
+            var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+            if (nproj_id !=0) $type_list.show();
+            else $type_list.hide();
+        });
+    });
+
+
+    $dataGrid = $("#grid"),
+    $(function () {
+
+        var data = <?php echo (isset($wbslists)) ? json_encode($wbslists) : '[]'?>;
+        var projectId = <?php if(isset($projectId)) echo json_encode($projectId); else echo '""';?>;
+        var revtype = <?php if(isset($revtype)) echo json_encode($revtype); else echo '""'?>;
+        if(projectId != 0) {
+            var source = {
+                localdata:data,
+                dataType: "json",
+                dataFields: [
+                    { name: 'SerialNo', type: 'string' },
+                    { name: 'Specification', type: 'string' },
+                    { name: 'TotalQty', type: 'string' },
+                    { name: 'UnitName', type: 'string' },
+                    { name: 'WBSAllotedQty', type: 'string' },
+                    { name: 'Allot', type: 'string' }
+                ],
+                updaterow: function (rowid, rowdata) {
+                    // synchronize with the server - send update command
+                },
+                id: 'ProjectIOWId'
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+          /*  var toThemeProperty = function (className) {
+                return className;
+            };
+            function getSubItems(data) {
+                var subItems = [];
+                if (data.subItems.length > 0) {
+                    subItems = data.subItems;
+                } else if (data.subGroups.length > 0) {
+                    for (var i = 0; i < data.subGroups.length; i++) {
+                        if (data.subGroups[i].subItems.length > 0) {
+                            subItems = subItems.concat(data.subGroups[i].subItems);
+                        } else {
+                            subItems = subItems.concat(getSubItems(data.subGroups[i]));
+                        }
+                    }
+                }
+                return subItems;
+            }
+            var groupsrenderer = function (text, group, expanded, data) {
+                var number = dataAdapter.formatNumber(group, data.groupcolumn.cellsformat);
+                var text = data.groupcolumn.text + ': ' + number;
+
+                var aggregate = this.getcolumnaggregateddata('Amount', ['sum'], true, getSubItems(data));
+                return '<div class="' + toThemeProperty('jqx-grid-groups-row') + '" style="position: absolute;"><span>' + text + ', </span>' + '<span class="' + toThemeProperty('jqx-grid-groups-row-details') + '">' + "Amount" + ' (' + aggregate.sum + ')' + '</span></div>';
+
+            };*/
+            var cellclassname = function (row, column, value, data) {
+                if (data.Allot == "Alloted") {
+                    return 'color-green';
+                } else {
+                    return 'color-red';
+                }
+            }
+            $("#grid").jqxGrid({
+                width: '100%',
+                pageable: true,
+                rowsheight: 35,
+                filterable: true,
+                showfilterrow: true,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight:true,
+                source: dataAdapter,
+                altrows: true,
+                editable:true,
+                enabletooltips: true,
+                selectionmode: 'singlecell',
+                editmode: 'selectedcell',
+                autorowheight: true,
+                columns: [
+                    { text: 'SerialNo', dataField: 'SerialNo',width:'20%',editable:false, cellclassname: cellclassname},
+                    { text: 'Specification', dataField: 'Specification',width:'20%',editable:false, cellclassname: cellclassname},
+                    { text: 'Unit', dataField: 'UnitName',editable:false, width:'20%', cellclassname: cellclassname},
+                    { text: 'TotalQty', dataField: 'TotalQty',editable:false, width:'20%',cellsformat: 'c2', cellclassname: cellclassname},
+                    { text: 'WBSAllotedQty', dataField: 'WBSAllotedQty', editable:false, width:'20%', cellclassname: cellclassname /*,align: 'right', cellsalign: 'right'*//*,cellsformat: 'c2'*/},
+                    { text: 'Allot', dataField: 'Allot',editable:false, hidden:true,cellclassname: cellclassname}
+                ]
+            });
+        }
+    });
+
+    function submitForm() {
+        var  nproj_id= parseInt(isNullCheck($('#newproject_id').val(),'number'));
+        var  nrevtype= isNullCheck($('#newrevtype').val(),'string');
+
+        if (nproj_id ==0) {
+            alert("select Project");
+            return;
+        }
+        if (nrevtype =="") {
+            alert("Select Type");
+            return;
+        }
+
+        window.location.href = getBaseURL() + "project/report/wbsalloted-report/" + nproj_id + "/" + nrevtype;
+    }
+
+    function ChangeProject() {
+        var iProjectId = isNullCheck($('#project_id').val(),'number');
+        var sType= isNullCheck($('#revtype').val(),'string');
+        window.location.href = getBaseURL() + "project/report/wbsalloted-report/" + iProjectId + "/" + sType;
+    }
+
+    $("#print-btn").click(function () {
+        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>WBS Alloted - Report</title>\n' +
+                '<h1>WBS Alloted - Report</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+        /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+    });
+</script> 

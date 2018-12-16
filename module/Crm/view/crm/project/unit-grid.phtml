@@ -1,0 +1,398 @@
+<style type="text/css">
+    .rightbox_trigger.active .slot_no {
+        background-color: #636363;
+    }
+
+    .rightbox_trigger.active .slot_no p {
+        color: #FFF;
+    }
+.proname_btn .select2-container{ background-color:#efefef;color:#244996;}
+.proname_btn .select2-container .select2-selection--single .select2-selection__rendered{padding-top:0px; padding-bottom:5px;}
+.proname_btn .select2-container--default .select2-selection--single{font-size:26px; line-height:28px;}
+.collpse-btn{width:100%;}
+.collpse-btn li{float:left; background:#A2E0F5;padding:6px 16px; margin-right:10px; box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #6CBED9; font-size:14px;margin-bottom:18px;cursor:pointer}
+.collpse-btn li:hover{background:#BED96C;box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #BED96C;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+
+        <?php if(isset($project) && isset($arrProjects)): ?>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="float_l">Project Info of
+                        <div class="btn-group proname_btn">
+                                <select name="project_filter" id="project_filter" onchange="pFilterSearch($(this).val());" class="form-control single_dropdown" style="width:auto; min-width:150px !important;max-width:200px !important;">
+                                    <?php if(isset($arrProjects)) {
+                                        foreach($arrProjects as $rowProject) { ?>
+                                            <option <?php if(isset($project['ProjectId']) && $project['ProjectId']==$rowProject['ProjectId']) { echo 'selected'; } ?> value="<?php echo $rowProject['ProjectId']; ?>"><?php echo ucfirst($rowProject['ProjectName']);?></option>
+                                        <?php }
+                                    } ?>
+							</select>
+                        </div>
+                    </h1>
+                    <div class="promote_social float_r">
+                        <ul>
+                            <span>Promote Project</span>
+                            <li><a href="#" class="fb_c ripple"><i class="fa fa-facebook-square"></i></a></li>
+                            <li><a href="#" class="twt_c ripple"><i class="fa fa-twitter-square"></i></a></li>
+                            <li><a href="#" class="g_c ripple"><i class="fa fa-google-plus-square"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-12 clear">
+					<div class="col-lg-3 col-md-3 col-sm-3">
+						<ul class="collpse-btn">
+							<li>
+								<span>
+									<a class="" style="font-size: 15px; display: inline-block;color:#000;" id="collapse-init" title="Expand" ><i class="fa fa-list-ul"></i></a>
+									<a class="" style="font-size: 15px; display: none;color:#000;" id="collapse-init"><i class="fa fa-indent"></i></a>
+								</span>
+						   </li>
+						</ul>
+						<a style="cursor:pointer;margin-left:20px;" href="<?php echo $this->basePath(); ?>/crm/project/car-park/<?php echo $ProjId;?>/2"><img src="<?php echo $this->basePath(); ?>/images/car_park.png" style="width:98px;height:56px;margin-top:-6px;margin-bottom:6px;" title="" alt=""></a>
+					</div>
+                    <div class="col-lg-9 col-md-9 col-sm-9 padlr0">
+                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                            <label for="search_block_all" class="col-lg-6 col-md-6 col-sm-6 control-label text-right">Block</label>
+                            <div class="col-lg-6 col-md-6 col-sm-6 m_btm10">
+                                <select name="search_block_all" id="search_block_all" onchange="filterSearch();" class="form-control lbl_move multiple_dropdown" multiple="multiple" style="width:100%;">
+                                    <?php if(isset($arrBlocks)) {
+                                        foreach($arrBlocks as $blockList) { ?>
+                                            <option value="<?php echo $blockList['BlockId']?>"><?php echo $blockList['BlockName']?></option>
+                                        <?php }
+                                    } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+                            <label for="search_status_all" class="col-lg-4 col-md-4 col-sm-4 control-label text-right">Status</label>
+                            <div class="col-lg-8 col-md-8 col-sm-8 m_btm10">
+
+                                <select name="search_status_all" id="search_status_all" onchange="filterSearch();" class="form-control lbl_move single_dropdown" style="width:100%;">
+                                    <option value="0">None</option>
+                                    <option <?php if($filldet == 2){ echo 'selected'; } else { echo ''; }?> value="U">Unsold</option>
+                                    <option value="S">Sold Out</option>
+                                    <option value="B">Blocked</option>
+                                    <option value="P">Pre Booked</option>
+                                    <option value="R">Reserved</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 padlr0">
+                            <label for="search_unit_all" class="col-lg-4 col-md-4 col-sm-4 control-label text-right">Search</label>
+                            <div class="col-lg-8 col-md-8 col-sm-8 m_btm10">
+                                <input name="search_unit_all" id="search_unit_all" type="text" onkeyup="searchDelay();" class="form-control lbl_move" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php if(isset($project)): ?>
+                <div class="panel-group block_panel clear" id="accordion"  role="tablist" aria-multiselectable="true">
+                    <?php if(isset($arrBlocks)): $isFirst = TRUE; ?>
+                        <?php foreach($arrBlocks as $block): ?>
+                            <div class="panel panel-default" >
+                                <div class="panel-heading accordion_head <?php echo ($isFirst)?'accordion_head_crnt':''; ?>" role="tab" data-toggle="collapse" data-parent="#accordion" href="#block-collapse-<?php echo $block['BlockId']; ?>" aria-expanded="true" aria-controls="collapseOne">
+                                    <h4><?php echo $block['PhaseName'].' - '.$block['BlockName']; ?></h4>
+                                </div>
+                                <div id="block-collapse-<?php echo $block['BlockId']; ?>"
+                                     class="panel-collapse collapse <?php echo ($isFirst)?'in':''; $isFirst = FALSE; ?>" role="tabpanel" style="height:auto !important;  overflow: hidden;">
+                                    <div class="panel-body">
+                                        <div class="row" >
+                                            <div class="col-lg-12 clear">
+                                                <?php if(!empty($block['arrFloors'])):?>
+                                                    <?php foreach($block['arrFloors'] as $floor): ?>
+                                                        <div class="floor_name_area">
+                                                            <h4><?php echo $floor['FloorName']; ?></h4>
+                                                        </div>
+                                                        <div class="col-lg-12 clear">
+
+                                                            <?php if(!empty($floor['arrUnits'])):?>
+                                                                <?php foreach($floor['arrUnits'] as $unit): ?>
+                                                                    <div class="col-lg-3 col-md-3 col-sm-6 flat_grid carpark_grid <?php echo ($unit['Status'] == 'S')?'sold_out':(($unit['Status'] == 'R')?'reserved':(($unit['Status'] == 'B')?'blocked':(($unit['Status'] == 'P')?'prebook':''))); ?>">
+                                                                        <a  class="ripple rightbox_trigger unitgrid"  cid="<?php echo $unit['UnitId']; ?>">
+                                                                            <div class="slot_no flat_no">
+                                                                                <span class="float_r brad_50" id="UnitNo" title="<?php echo $unit['UnitNo']; ?>"><?php echo $unit['UnitNo']; ?></span>
+                                                                                <p>Unit No</p>
+                                                                            </div>
+                                                                            <ul>
+                                                                                <li>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 txt_left padlr0"><p><span class="p_label">Buyer Name</span></p></div>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padlr0">
+                                                                                        <p><?php echo $unit['BuyerName']; ?></p>
+                                                                                    </div>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 txt_left padlr0"><p><span class="p_label">Area</span></p></div>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                                                        <p><?php echo $this->commonHelper()->sanitizeNumber($unit['UnitArea'],3,true); echo ' '.$unit['UnitName']; ?></p>
+                                                                                    </div>
+                                                                                </li>
+                                                                                <!--                                                                    <li>-->
+                                                                                <!--                                                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 txt_left padlr0"><p><span class="p_label">Rate</span></p></div>-->
+                                                                                <!--                                                                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">-->
+                                                                                <!--                                                                            <p>--><?php //echo $unit['Rate']; ?><!--</p>-->
+                                                                                <!--                                                                        </div>-->
+                                                                                <!--                                                                    </li>-->
+                                                                                <!--                                                                    <li>-->
+                                                                                <!--                                                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 txt_left padlr0"><p><span class="p_label">Base Amount</span></p></div>-->
+                                                                                <!--                                                                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">-->
+                                                                                <!--                                                                            <p>--><?php //echo $unit['Rate']; ?><!--</p>-->
+                                                                                <!--                                                                        </div>-->
+                                                                                <!--                                                                    </li>-->
+                                                                                <li>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 txt_left padlr0"><p><span class="p_label">Net Amount</span></p></div>
+                                                                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                                                                        <p><?php echo $this->commonHelper()->sanitizeNumber($unit['NetAmt'],2,true); ?></p>
+                                                                                    </div>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </a>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            <?php else: ?>
+                                                                <p class="text-center">No Units Found!</p>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+
+                <div class="right_lightbox">
+                    <div class="right_lightbox_close">
+                        <span class="right_lightbox_closeicon"><i class="fa fa-times"></i></span>
+                    </div>
+                    <div class="right_lbox_inner lead_register_rbox" id="lead_short_detail"></div>
+                </div>
+            <?php endif; ?>
+
+        <?php endif; ?>
+        <?php if(isset($err)): ?>
+            <h1 class="text-center" style="margin-top: 150px;">Error: <?php echo $err; ?></h1>
+        <?php endif; ?>
+    </div>
+</div>
+<!--buttons-->
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({
+            placeholder: ""
+        });
+        $(".single_dropdown").select2({
+            placeholder: ""
+        });
+        filterSearch();
+
+    });
+    function pFilterSearch(pId) {
+        if(pId!=0 && pId!="") {
+            $(location).attr('href',"<?php echo $this->basePath(); ?>/crm/project/unit-grid/"+pId);
+        }
+    }
+    var $ProjectName = $('#ProjectName'),
+        $ProjectId = $('#ProjectId'),
+        $leadShortDetail = $('#lead_short_detail'),
+        $accordion = $('#accordion');
+
+    $(function() {
+        bindProjectsAutoComplete();
+        bindUnitInfo_onClick();
+        bindBlock_onOpen();
+
+        bindUI_rightBox();
+    });
+
+
+    function bindBlock_onOpen() {
+        $accordion.find(".collapse").on('shown.bs.collapse', function(){
+            var $tarPanel = $(this).closest('.panel'),
+                panelPos = $tarPanel.position().top;
+
+            $accordion.find('.accordion_head_crnt').removeClass('accordion_head_crnt');
+            $tarPanel.find('.accordion_head').addClass('accordion_head_crnt');
+
+            $('body,html').animate({ scrollTop: panelPos}, 700);
+        });
+    }
+
+    function bindUI_rightBox() {
+        $('.rightbox_trigger').click(function(ev){
+            ev.preventDefault();
+
+            $('.block_panel').addClass('block_panel_open');
+            $('.right_lightbox').show();
+            $('.left-panel').removeClass('collapsed');
+            $('.l_menuicon_nav').removeClass('cross');
+
+            $('.rightbox_trigger.active').removeClass('active');
+            $(this).addClass('active');
+        });
+        $('.right_lightbox_close').click(function(){
+            $('.right_lightbox').hide();
+            $('.block_panel').removeClass('block_panel_open');
+            if ($(window).width() >=980){
+                $('.left-panel').addClass('collapsed');
+                $('.l_menuicon_nav').addClass('cross');
+            }
+
+            $('.rightbox_trigger.active').removeClass('active');
+        });
+
+        $('.rightbox_trigger').hover(function(){
+            $(this).parent().find('.slot_no span').addClass('animated fadeInLeft');
+        },function(){
+            $('.slot_no span').removeClass('animated fadeInLeft');
+            $(this).parent().find('.slot_no span').addClass('animated fadeIn');
+        });
+    }
+
+    function bindProjectsAutoComplete() {
+
+        $ProjectName.autocomplete({
+            lookup: <?php echo (isset($jsonProjects))?$jsonProjects:'[]'; ?>,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    if(parseInt($ProjectId.val()) != parseInt(suggestion.data)) {
+                        $ProjectId.val(suggestion.data);
+                        window.location.replace(getBaseURL() + "crm/project/unit-gridnew/" +suggestion.data);
+                    }
+                    removeError($ProjectName);
+                } else {
+                    $ProjectId.val('');
+                }
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $ProjectId.val('');
+                    showError($ProjectName, 'Project not found!');
+                } else {
+                    removeError($ProjectName);
+                }
+            }
+        });
+
+    }
+
+    function bindUnitInfo_onClick() {
+        $(".unitgrid").on('click',function(ev){
+            ev.preventDefault();
+
+            var id = parseInt($(this).attr("cid"));
+            if(isNaN(id)) {
+                alert('Invalid Unit!');
+            }
+
+            // hide all visible unit grid details
+            var $arrUnitGridDetails = $leadShortDetail.find('>.unitgrid-details');
+            $arrUnitGridDetails.addClass('hide');
+
+            var $tarUnitDetail = $arrUnitGridDetails.filter('[data-id="'+id+'"]');
+            if($tarUnitDetail.length > 0) {
+                $tarUnitDetail.removeClass('hide');
+            } else {
+                loadUnitGridDetails(id);
+            }
+
+        });
+    }
+
+    function loadUnitGridDetails(id) {
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/crm/project/unitgrid-details",
+            type:"post",
+            data: {cid: id, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async:false,
+            success:function(data, textStatus, jqXHR){
+                var opHtml = '<div class="unitgrid-details" data-id="'+id+'">'+data+'</div>';
+
+                $leadShortDetail.append(opHtml);
+                $('.right_lightbox').show();
+                $('.left-panel').removeClass('collapsed');
+                $('.l_menuicon_nav').removeClass('cross');
+            }, error:function(jqXHR, textStatus, errorThrown){
+                //$('.right_lightbox').hide();
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+
+    function filterSearch() {
+        timeOut = null;
+        var blockId = $('#search_block_all').val();
+        var unitValue=$.trim($('#search_unit_all').val());
+        var uStatus=$('#search_status_all').val();
+        if(blockId==null)
+            blockId=[];
+
+
+        $('#accordion').html('');
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/crm/project/unit-grid",
+            type:"post",
+            data: {bId: JSON.stringify(blockId), uValue: unitValue, uStatus: uStatus, pId: "<?php echo $project['ProjectId']; ?>", csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200) {
+                    if(data !="") {
+                        $('#accordion').html(data);
+
+                        bindProjectsAutoComplete();
+                        bindUnitInfo_onClick();
+                        bindBlock_onOpen();
+                        bindUI_rightBox();
+                    }
+                }
+
+            }, error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    var timeOut = null;
+    function searchDelay() {
+        if(timeOut != null)
+            clearTimeout(timeOut);
+
+        timeOut = setTimeout(function () {
+            filterSearch();
+        }, 1500);
+    }
+</script>
+<script>
+    $(function () {
+        var active = true;
+        $('#collapse-init').click(function () {
+            $(this).find('i').remove();
+            if (active) {
+                active = false;
+                $('.panel-collapse').collapse('show');
+                $('.panel-title').attr('data-toggle', '');
+                $(this).append('<i class="fa fa-indent"></i>');
+            } else {
+                active = true;
+                $('.panel-collapse').collapse('hide');
+                $('.panel-title').attr('data-toggle', 'collapse');
+                $(this).append('<i class="fa fa-list-ul"></i>');
+            }
+        });
+        $('#accordion').on('show.bs.collapse', function () {
+            if (active) $('#accordion .in').collapse('hide');
+        });
+
+    });
+</script>

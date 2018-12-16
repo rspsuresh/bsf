@@ -1,0 +1,185 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+.panel 						{border-radius:0px !important;}
+.panel-info 				{border:none;border-top:none;}
+.chat_content 				{float:left;width:100%;}
+.toolbar_ddown ul			{height:314px !important;border:none !important;}
+.toolbar_ddown 				{border:none !important;}
+#ContentWrapper 			{display: none;}
+.form-control 				{box-shadow:none !important}
+.top-btm 					{margin-top:50px;}
+</style>
+
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <form method="">
+      </form>
+      <div class="col-lg-12">
+        <div id="divnewconception" class="create-newcon col-lg-12" style="display:none"> 
+        <h1>Project Conception</h1>
+		<div class="col-lg-12 edit_del" >
+            <ul>
+                <li>
+        <a href="javascript:CreateNewConception();" class="edit-btn edit_al">Create New Conception <i class="fa fa-plus-circle"></i></a> 
+        </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+		</div>
+        <?php if ($enquiryId !=0) { ?>
+        <input type="hidden" id="PropertyName" name="PropertyName" value="<?php echo $landname; ?>"/>
+        <input type="hidden" id="EnquiryId" name="EnquiryId" value="<?php echo $enquiryId; ?>"/>
+        <?php } else { ?>
+        <div class="col-lg-12 top_ct fade in" id="MainWrapper">
+        <h1 class="text-center">Project Conception</h1>
+          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+            <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-btm">
+              <div class="form-group">
+                <input type="text" name="PropertyName" class="form-control lbl_move" label="Name of Property" id="PropertyName" autofocus/>
+                <input type="hidden" id="EnquiryId" name="EnquiryId"/>
+              </div>
+              <div class="next-bt"><a href="javascript:submitProperty();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+            </div>
+          </div>
+        </div>
+        <?php } ?>
+        <div class="clearfix"></div>
+        <div class="col-lg-12"><a id="back-to-top" href="#" class="back-to-top animated bounceInUp" role="button" title="Click to return on the top page" data-toggle="tooltip" data-placement="right"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></div>
+      </div>
+      <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear" id="ContentWrapper"> </div>
+    </div>
+  </div>
+</div>
+<div class="col-lg-12 savebtn_area" style="display: none;" id="button-area">
+  <ul>
+<!--    --><?php //if ($enquiryId ==0) { ?>
+<!--    <li class="pull-left">-->
+<!--      <div id="back-btn" class="back-bts"> <a href="javascript:showPropertyOptions();" data-toggle="tooltip" data-placement="right" title="Go Back"><i class="fa fa-chevron-circle-left"></i> Back</a> </div>-->
+<!--    </li>-->
+<!--    --><?php //} else { ?>
+<!--    <li class="dropdown save_btn float_r ripple has-ripple" style="position: relative; overflow: hidden;"> <a href="--><?php //echo $this->basePath(); ?><!--/project/landbank/register">Cancel</a> <span class="ripple-wrapper animated" style="width: 120px; height: 120px; top: -55px; left: 9px;"></span> </li>-->
+<!--    --><?php //} ?>
+<!--    <div class="clearfix"></div>-->
+      <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/landbank/followup';?>" method="post" id="frmfollowup">
+          <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+          <input type="hidden" id="formfrom" name="formfrom"/>
+          <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo $landname; ?>"/>
+          <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Cancel</a></li>
+      </form>
+  </ul>
+</div>
+<script type="text/javascript">
+    var arr_propertynames = <?php echo json_encode($propertynames);?>;
+    var $propertyName = $('#PropertyName'),
+        $enquiryId = $('#EnquiryId'),
+        $mainWrapper = $('#MainWrapper'),
+        $buttonArea = $('#button-area'),
+        $lblProjectName = $('#lblPropertyName'),
+        $lblEnquiryId = $('#lblEnquiryId'),
+        $contentWrapper = $('#ContentWrapper'),
+        iEnquiryId = isNullCheck($enquiryId.val(),'number');
+
+    $(function () {
+        // bind property name autocomplete
+        if (iEnquiryId !=0) submitProperty();
+        $propertyName.autocomplete({
+            lookup: arr_propertynames,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    $enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                $enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $enquiryId.val(0);
+                } else
+                    $(this).removeClass('error');
+            }
+        });
+    });
+
+    function submitProperty () {
+        var id = parseInt(isNullCheck($enquiryId.val(),'number'));
+        if(id == 0 || $propertyName.val().trim().length == 0) {
+            alert('Select a property!');
+            return;
+        }
+        $.ajax({
+            url: getBaseURL() + "project/landbank/projectconception",
+            async: false,
+            data: {'EnquiryId': id},
+            type: 'post',
+            success: function (data, status) {
+                $contentWrapper.html(data);
+                $mainWrapper.hide();
+
+                // bind options
+                $contentWrapper.fadeIn("slow");
+                $buttonArea.fadeIn("slow");
+
+                $lblProjectName.val($propertyName.val());
+                $lblEnquiryId.val($enquiryId.val());
+//                $enquiryId.val(0);
+//                $propertyName.val('');
+            }
+        });
+
+        if (id!=0) $('#divnewconception').show();
+        else $('#divnewconception').hide();
+    }
+
+
+    function CreateNewConception() {
+        var iEnquiryId = isNullCheck($('#EnquiryId').val(),'number')
+        window.location.href = getBaseURL() + "project/landbank/projectconceptiondetail/" + iEnquiryId + "/0"+"/F";
+    }
+
+    function showPropertyOptions() {
+        $mainWrapper.fadeIn("slow");
+
+        $contentWrapper.hide();
+        $buttonArea.hide();
+        $propertyName.focus();
+    }
+//	<!---windows scroll--->
+	$(document).ready(function(){
+     $(window).scroll(function () {
+            if ($(this).scrollTop() > 500) {
+                $('#back-to-top').fadeIn();
+            } else {
+                $('#back-to-top').fadeOut();
+            }
+        });
+        // scroll body to 0px on click
+        $('#back-to-top').click(function () {
+            $('#back-to-top').tooltip('hide');
+            $('body,html').animate({
+                scrollTop: 0
+            }, 800);
+            return false;
+        });
+        
+        $('#back-to-top').tooltip('show');
+
+});
+//<!---windows scroll end--->
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+</script> 

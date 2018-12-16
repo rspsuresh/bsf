@@ -1,0 +1,457 @@
+
+<style>
+.rnwl_h1		{padding-top:10px; padding-bottom:10px; font-size:1.8em !important;}
+.rwl			{margin-left:5px !important;}
+.spd			{margin-left:11px !important;}
+.bkl			{margin-left:11px !important;}
+.sply			{font-size:18px !important;padding-bottom:30px; margin-left:5px;color:#3580c4; font-weight:500 !important; text-align:center !important;}
+.cnrt			{font-size:18px !important;padding-bottom:30px; margin-left:5px;color:#3580c4; font-weight:500 !important; text-align:center !important;}
+.srvc			{font-size:18px !important;padding-bottom:30px; margin-left:5px;color:#3580c4; font-weight:500 !important; text-align:center !important;}
+.ub				{font-size:18px !important;padding-bottom:10px;vertical-align:middle;color:#3580c4; font-weight:500 !important;}
+</style>
+<?php $this->bsf = new \BuildsuperfastClass(); ?>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1 class="txt_center rnwl_h1">Renewal</h1>
+			</div>
+			<div class="form-group">
+				<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+					<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="return validation();">
+					<input type="hidden" name="registerId" id="registerId" value="<?php echo (isset($registrationData) && $registrationData['RegisterId']!="")?$registrationData['RegisterId']:'0'; ?>">
+					<input type="hidden" name="regTransId" id="regTransId" value="<?php echo (isset($regTransResult) && $regTransResult['RegTransId']!="")?$regTransResult['RegTransId']:'0'; ?>">
+					<input type="hidden" name="supplyFound" id="supplyFound" value="<?php echo (($resultMasterData['Supply']=='1')?'1':'0'); ?>">
+					<input type="hidden" name="contractFound" id="contractFound" value="<?php echo (($resultMasterData['Contract']=='1')?'1':'0'); ?>">
+					<input type="hidden" name="serviceFound" id="serviceFound" value="<?php echo (($resultMasterData['Service']=='1')?'1':'0'); ?>">
+						<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<select name="vendor" id="vendor" class="single_dropdown lbl_move" onchange="return vendorRedirect(this.value);" label="Select Vendor" style="width:100%;">
+									<option value="" >Select Vendor></option>
+									<?php foreach($vendorList as $vendor): ?>
+											<option value="<?php echo $this->bsf->encode($vendor['VendorId']); ?>" <?php if(isset($vendorId)){ if($vendorId == $vendor['VendorId']) { echo "selected" ;} } ?>><?php echo $vendor['VendorName']; ?></option>
+									<?php endforeach; ?>
+									</select>
+									<div class="error_message"><p>Please select vendor</p> </div> 
+								</div>
+						</div>
+						<div class="row">   
+							<div class="form-group req_flds col-lg-12">
+								   <span class="date_icon"><i class="fa fa-calendar"></i></span>
+								   <input type="text" name="regdate" id="regdate" value="<?php echo isset($regTransResult)?date('d-m-Y',strtotime($regTransResult['RDate'])):date('d-m-Y'); ?>" class="form-control lbl_move datepickerinput" label="Reg Date" readonly />
+							</div>
+						</div> 
+						<div class="row">
+							<div class="form-group col-lg-12">
+							<label for="type" class="col-lg-6 txt_left col-md-6 control-label">Status Type</label>
+								<div class="radio_check">
+									<p>					
+											<input type="radio" id="renewal" name="type" texshow="renewalDiv" value="R" <?php echo (isset($regTransResult) && $regTransResult['StatusType']=="R" )?'checked':''; if(!isset($regTransResult)){ echo 'checked';} if(isset($regTransResult) && $regTransResult['StatusType']!="R" ){ echo 'disabled'; } ?> />
+											<label for="renewal" class="rwl">Renewal</label>
+
+											<input type="radio" id="suspend" name="type" texshow="suspendfromto"  value="S" <?php echo (isset($regTransResult) && $regTransResult['StatusType']=="S" )?'checked':''; if(isset($regTransResult) && $regTransResult['StatusType']!="S" ){ echo 'disabled'; }?>  />
+											<label for="suspend" class="spd">Suspend</label>
+												
+                                            <input type="radio" id="blacklist" name="type" texshow="blacklist"  value="B" <?php echo (isset($regTransResult) && $regTransResult['StatusType']=="B" )?'checked':''; if(isset($regTransResult) && $regTransResult['StatusType']!="B" ){ echo 'disabled';};?> />
+											<label for="blacklist" class="bkl">Blacklist</label>
+									</p>
+								</div>
+							</div>    
+						</div>
+						<div class="row">
+							<div class="form-group col-lg-12">
+								<input type="text" class="form-control lbl_move" name="refno" id="refno" value="<?php echo isset($regTransResult)?$regTransResult['RefNo']:""; ?>" label="Reference No" onkeypress="return alphaNumeric(event)" />
+								<div class="error_message"><p>Please enter Reference no</p> </div>
+							</div>
+							
+						</div>
+						<div class="renewalDiv">
+						<?php 
+							if(isset($resultMasterData) && $resultMasterData['Supply']=='1'){
+						?> 
+						 <div class="row">
+							   <div class="form-group col-lg-12">
+									<label for="buyer" class="col-lg-6 txt_left col-md-6 control-label">Suppiler Life Time</label>
+									<div class="col-lg-6 col-md-6">  
+										<div class="radio_check">
+											<p>					
+												<input type="radio" id="supplyyes" name="supply" texshow="supplyfromto" <?php echo (isset($regTransResult) && $regTransResult['SLifeTime']=='1' )?'checked':'';  if(!isset($regTransResult)){ echo 'checked';}?> value="yes" />
+												<label for="supplyyes">Yes</label>
+											</p>
+											<p>
+												<input type="radio" id="supplyno" name="supply" texshow="supplyfromto" <?php echo (isset($regTransResult) && $regTransResult['SLifeTime']=='0' )?'checked':''; ?> value="no" />
+												<label for="supplyno">No</label>
+											</p>
+										</div>
+									</div>
+								</div>    
+						  </div>						 
+							<div class="row">
+								 <div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 supplyfromto showDiv">
+										   <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										   <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid From" name="sfdate" id="sfdate" value="<?php echo (isset($regTransResult) && $regTransResult['SFDate']!="" )?date('m-d-Y',strtotime($regTransResult['SFDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								 </div>
+								 <div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 supplyfromto showDiv">
+										  <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										  <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid To" name="stdate" id="stdate" value="<?php echo (isset($regTransResult) && $regTransResult['STDate']!="" )?date('m-d-Y',strtotime($regTransResult['STDate'])):date('m-d-Y');?>" readonly />
+									   </div>
+									  </div>          
+						   </div> 						   
+							<?php
+								}					
+								if(isset($resultMasterData) && $resultMasterData['Contract']=='1'){
+							?>
+							<div class="row">
+							   <div class="form-group col-lg-12">
+									<label for="buyer" class="col-lg-6 txt_left col-md-6 control-label">Contractor Life Time</label>
+									<div class="col-lg-6 col-md-6">  
+										<div class="radio_check">
+											<p>					
+												<input type="radio" id="contractyes" name="contract" texshow="contractfromto" <?php echo (isset($regTransResult) && $regTransResult['CLifeTime']=='1' )?'checked':'';  if(!isset($regTransResult)){ echo 'checked';}?> value="yes" />
+												<label for="contractyes">Yes</label>
+											</p>
+											<p>
+												<input type="radio" id="contractno" name="contract" texshow="contractfromto" <?php echo (isset($regTransResult) && $regTransResult['CLifeTime']=='0' )?'checked':''; ?> value="no" />
+												<label for="contractno">No</label>
+											</p>
+										</div>
+									</div>
+								</div>    
+							</div> 				     
+							<div class="row">
+							   <div class="col-lg-6 col-md-6"> 
+								  <div class="form-group col-lg-12  contractfromto showDiv">
+									 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+									 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid From" name="cfdate" id="cfdate" value="<?php echo (isset($regTransResult) && $regTransResult['CFDate']!="" )?date('m-d-Y',strtotime($regTransResult['CFDate'])):date('m-d-Y');?>" readonly />
+								  </div>
+							  </div>
+							  <div class="col-lg-6 col-md-6"> 
+								  <div class="form-group col-lg-12  contractfromto showDiv">
+									 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+									 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid To" name="ctdate" id="ctdate" value="<?php echo (isset($regTransResult) && $regTransResult['CTDate']!="" )?date('m-d-Y',strtotime($regTransResult['CTDate'])):date('m-d-Y');?>" readonly />
+								  </div>
+							  </div>       
+							</div>
+							<?php
+								}					
+								if(isset($resultMasterData) &&   $resultMasterData['Service']=='1'){
+							?>							
+							<div class="row">
+								<div class="form-group col-lg-12">
+										<label for="buyer" class="col-lg-6 txt_left col-md-6 control-label">ServiceProvider Life Time</label>
+										<div class="col-lg-6 col-md-6">  
+												<div class="radio_check">
+													<p>					
+														<input type="radio" id="serviceyes" name="service" texshow="servicefromto" <?php echo (isset($regTransResult) && $regTransResult['HLifeTime']=='1' )?'checked':'';  if(!isset($regTransResult)){ echo 'checked';}?> value="yes" />
+														<label for="serviceyes">Yes</label>
+													</p>
+													<p>
+														<input type="radio" id="serviceno" name="service" texshow="servicefromto" <?php echo (isset($regTransResult) && $regTransResult['HLifeTime']=='0' )?'checked':''; ?> value="no" />
+														<label for="serviceno">No</label>
+													</p>
+												</div>
+										</div>
+								</div>    
+							</div>							
+							<div class="row">
+								   <div class="col-lg-6 col-md-6"> 
+										  <div class="form-group col-lg-12 servicefromto showDiv">
+											 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+											 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid From" name="hfdate" id="hfdate" value="<?php echo (isset($regTransResult) && $regTransResult['HFDate']!="" )?date('m-d-Y',strtotime($regTransResult['HFDate'])):date('m-d-Y');?>" readonly />
+										  </div>
+								  </div>
+								  <div class="col-lg-6 col-md-6"> 
+										  <div class="form-group col-lg-12 servicefromto showDiv">
+											 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+											 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="Valid To" name="htdate" id="htdate" value="<?php echo (isset($regTransResult) && $regTransResult['HTDate']!="" )?date('m-d-Y',strtotime($regTransResult['HTDate'])):date('m-d-Y');?>" readonly />
+										  </div>
+								  </div>       
+							</div> 
+							<?php } ?>
+						</div>
+                        <div class="suspendfromto" >
+							<?php if(isset($resultMasterData) && $resultMasterData['Supply']=='1'){ ?>
+							<p class="sply">Supply</p> 
+                            <div class="row"> 
+                                <div class="col-lg-6 col-md-6">
+								
+                                      <div class="form-group col-lg-12 suspendfromto showDiv">                                  
+										 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="From" name="suspendsupplyfdate" id="suspendfdate" value="<?php echo (isset($regTransResult) && $regTransResult['SFDate']!="" )?date('m-d-Y',strtotime($regTransResult['SFDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								</div>
+								<div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 suspendfromto showDiv">
+										 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="To" name="suspendsupplytdate" id="suspendtdate" value="<?php echo (isset($regTransResult) && $regTransResult['STDate']!="" )?date('m-d-Y',strtotime($regTransResult['STDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								</div>       
+							</div>
+							<?php } 
+							if(isset($resultMasterData) && $resultMasterData['Contract']=='1'){ ?>
+							<p class="cnrt">Contract</p>
+                            <div class="row">
+								<div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 suspendfromto showDiv">
+										 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="From" name="suspendcontractfdate" id="suspendfdate" value="<?php echo (isset($regTransResult) && $regTransResult['CFDate']!="" )?date('m-d-Y',strtotime($regTransResult['CFDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								</div>
+								<div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 suspendfromto showDiv">
+										 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="To" name="suspendcontracttdate" id="suspendtdate" value="<?php echo (isset($regTransResult) && $regTransResult['CTDate']!="" )?date('m-d-Y',strtotime($regTransResult['CTDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								</div>       
+							</div>
+							<?php }
+								if(isset($resultMasterData) &&   $resultMasterData['Service']=='1'){ ?>	
+							<p class="srvc">Service</p>
+                            <div class="row">
+								<div class="col-lg-6 col-md-6"> 
+									  <div class="form-group col-lg-12 suspendfromto showDiv">
+										 <span class="date_icon"><i class="fa fa-calendar"></i></span>
+										 <input type="text" class="form-control date_picker lbl_move datepickerinput" label="From" name="suspendservicefdate" id="suspendfdate" value="<?php echo (isset($regTransResult) && $regTransResult['HFDate']!="" )?date('m-d-Y',strtotime($regTransResult['HFDate'])):date('m-d-Y');?>" readonly />
+									  </div>
+								</div>
+								<div class="col-lg-6 col-md-6"> 
+									<div class="form-group col-lg-12 suspendfromto showDiv">
+										<span class="date_icon"><i class="fa fa-calendar"></i></span>
+										<input type="text" class="form-control date_picker lbl_move datepickerinput" label="To" name="suspendservicetdate" id="suspendtdate" value="<?php echo (isset($regTransResult) && $regTransResult['HTDate']!="" )?date('m-d-Y',strtotime($regTransResult['HTDate'])):date('m-d-Y');?>" readonly />
+									</div>
+								</div>       
+							</div>
+							<?php } ?>
+						</div>
+						<div class="blacklist">
+							<div class="col-lg-6 col-md-6"> 
+								<div class="form-group col-lg-12 blacklist showDiv">
+									<div class="col-md-3 col-md-offset-9 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-3 ">
+                                   		<div class="checkbox checkbox-styled">
+										<label class="lt-mar">
+										<input type="Checkbox" class="form-control" name="unblock" id="unblock" <?php echo (isset($regTransResult) && $regTransResult['UnBlock']== 1 )?'checked':''; ?>><span class="ub">Unblock</span>
+										</label>
+                                    	</div>
+                                   	</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-lg-12">
+								<input type="text" class="form-control lbl_move" name="regno" id="regno" value="<?php if(isset($registrationData) && $registrationData['RegNo']!="" ){ echo $registrationData['RegNo']; }?>" label="Registration No" onkeypress="return alphaNumeric(event)" readonly	 />
+							</div>
+						</div>				
+						<div class="row">
+							<div class="form-group col-lg-12">
+								<textarea class="form-control lbl_move" label="Remarks" name="remarks" id="remarks"/><?php if(isset($regTransResult) && $regTransResult['Remarks']!="" ){ echo $regTransResult['Remarks']; }?></textarea>  
+								<div class="error_message"><p>Please enter Remarks</p> </div>   
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>								
+		</div>
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="save" class="dropdown save_btn float_r">
+            <a href="javascript:submitForm()" class="ripple">Continue</a>
+        </li>
+        <li class="goto">
+            <label for="go_to" class="float_l">Go to</label>
+            <select id="dropdown" name="dropdown" class="dropdown float_l goto_select" title="Choose Page to go....">
+                <option value="1">Basic Details</option>
+                <option value="2">Contact Details</option>
+                <option value="3">Statutory Details</option>
+                <option value="4">Bank Details</option>
+                <option value="5">Branch Details</option>
+                <option value="6">Experience Details</option>
+                <option value="7">Vendor Terms</option>
+                <option value="8">Assessment</option>
+                <option value="9">Vendor Registration</option>
+                <option value="10">Resource</option>
+                <option value="11">Financial</option>
+                <option value="12">Supply</option>
+                <option value="13">Work Group</option>
+                <option value="14">Service</option>
+                <option value="15">Other Details</option>
+                <option value="16">Manufacture Details</option>
+                <option value="17">Dealer Details</option>
+                <option value="18">Distributor Details</option>
+                <option value="19">Vehicle Details</option>
+                <option value="20" selected="selected" style="background-color:gray;color:white;">Vendor Renewal</option>
+                <option value="21">Vendor Profile</option>
+            </select>
+        </li>
+        <li id="back" class="cancel_btn float_r" ><a href="<?php echo $this->basePath();?>/vendor/index/assessment-detail/<?php echo $this->bsf->encode($vendorId); ?>" class="ripple">back</a></li>
+    </ul>
+</div>
+<script>
+
+    $("#dropdown").change(function(){
+        if($(this).val() == 1){
+            $(location).attr('href',"../basic-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 2){
+            $(location).attr('href',"../contact-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 3){
+            $(location).attr('href',"../statutory-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 4){
+            $(location).attr('href',"../bankfinance-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 5){
+            $(location).attr('href',"../branch/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 6){
+            $(location).attr('href',"../experience-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 7){
+            $(location).attr('href',"../vendor-terms/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 8){
+            $(location).attr('href',"../assessment-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 9){
+            $(location).attr('href',"../vendor-registration/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 10){
+            $(location).attr('href',"../resource/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 11){
+            $(location).attr('href',"../financial/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 12){
+            $(location).attr('href',"../supply/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 13){
+            $(location).attr('href',"../works/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 14){
+            $(location).attr('href',"../service/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 15){
+            $(location).attr('href',"../others/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 16){
+            $(location).attr('href',"../manufacture-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 17){
+            $(location).attr('href',"../dealer-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 18){
+            $(location).attr('href',"../distributor-detail/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 19){
+            $(location).attr('href',"../vehicleregister/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 20){
+            $(location).attr('href',"../vendor-renewal/<?php echo $this->bsf->encode($vendorId); ?>");
+        }
+        if($(this).val() == 21){
+            $(location).attr('href',"../vendor-profile/<?php echo $vendorId;?>");
+        }
+    });
+
+    $(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+});
+function vendorRedirect(vendorId){
+	if(vendorId!=""){
+		window.location.href= getBaseURL() +"vendor/index/vendor-renewal/"+vendorId;
+	} else {
+		window.location.href= getBaseURL() +"vendor/index/vendor-renewal";
+	}
+}
+function validation(){
+	if($('#vendor').val() == ""){
+		$('#vendor').closest('.form-group').find('.error_message').show();
+		$('#vendor').focus();
+		return false;
+	} else { 
+		$('#vendor').closest('.form-group').find('.error_message').hide();
+	}
+	if($('#refno').val() == ""){
+		$('#refno').closest('.form-group').find('.error_message').show();
+		$('#refno').focus();
+		return false;
+	} else { 
+		$('#refno').closest('.form-group').find('.error_message').hide();
+	}
+	if($('#remarks').val() == ""){
+		$('#remarks').closest('.form-group').find('.error_message').show();
+		$('#remarks').focus();
+		return false;
+	} else { 
+		$('#remarks').closest('.form-group').find('.error_message').hide();
+	}
+}
+function submitForm() {
+	$("form").submit();
+}
+
+$(document).ready(function() {
+	$(".showDiv").hide();
+	$('input[type="radio"]').each(function(){
+		if($(this).is(":checked") && $(this).val() == 'no'){
+			$("."+$(this).attr("texshow")).show();
+		}
+		if($(this).is(":checked") && $(this).val() == 'R'){
+			$("."+$(this).attr("texshow")).show();
+			$('.suspendfromto').hide();
+			$('.blacklist').hide();
+		}
+		if($(this).is(":checked") && $(this).val() == 'S'){
+			$("."+$(this).attr("texshow")).show();
+			$('.renewalDiv').hide();
+			$('.blacklist').hide();
+		}
+		if($(this).is(":checked") && $(this).val() == 'B'){
+			$('.renewalDiv').hide();
+			$('.suspendfromto').hide();
+			$('.blacklist').show();
+		}
+	});
+	
+	$('input[type="radio"]').click(function(){
+		if($(this).val() == 'yes'){
+			$("."+$(this).attr("texshow")).hide();
+		} else if($(this).val() == 'R'){
+			$("."+$(this).attr("texshow")).show();
+			$('.suspendfromto').hide();
+			$('.blacklist').hide();
+		} else if($(this).val() == 'S'){
+			$("."+$(this).attr("texshow")).show();
+			$('.renewalDiv').hide();
+			$('.blacklist').hide();
+		} else if($(this).val() == 'B'){
+			$('.renewalDiv').hide();
+			$('.suspendfromto').hide();
+			$('.blacklist').show();
+		} else {
+			$("."+$(this).attr("texshow")).show();
+		}
+	});
+});
+
+$('.datepickerinput').datepicker({
+		format: "dd-mm-yyyy",
+		//startDate: new Date(),
+		todayBtn: true,
+		orientation: "top auto",
+		autoclose: true
+	}).on("changeDate", function(e){
+		//$("#dateSpan").text($(this).val());
+	});	
+	$('.date_icon').click(function() {
+		var input = $(this).parent().find('input').datepicker('show');
+	});	
+</script>

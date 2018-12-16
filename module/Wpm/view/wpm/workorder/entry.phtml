@@ -1,0 +1,2859 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css'; ?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css'; ?>"/>
+<!--STYLE-->
+<style>
+    .popuptable table tr th{background:#E2EBEF!important;padding:5px;border-right:2px solid #5D9BB6;}
+    .popuptable table tr th input[type=text]{ font-size:14px; font-weight:600; color:#333}
+    .popuptable table tr tr{border-bottom:1px solid #dcdbdb; width:100%;}
+    .popuptable table{border:1px solid #c2c2c2;}
+    .row_header input[type=text] {font-weight:600 !important; font-size:15px !important; border:none !important; color: #015de6;}
+    .row_specheader input[type=text],.row_specheader textarea {font-weight:600 !important; font-size:15px !important; color: #015de6;}
+    .expandDiv{overflow:visible !important;}
+    .expandDiv > .docu-spc {height: auto !important;}
+    .expandDivn > .docu-spcn {height: auto !important;}
+    .red-thss tr th {background:#b3d4ef!important; margin-top:10px !important;}
+    .top-css{ margin-top:10px;}
+    .sam-up i{ font-size:15px; color:#fff; font-weight:600; line-height:32px !important; padding-left:10px;}
+    .table-responsive table.table tr td {padding:10px;vertical-align: top !important;}
+    .from_work_btn		{padding:6px 15px; margin-top:2px;background-color:#333399; color:#fff;display:block;}
+    .table-responsive table.table tr td input.srl_no {font-size:10px !important; padding: 10px 4px;}
+	.top-addtip{width: 168px;left: -80px;top: -58px;height: 74px;z-index: 1000001 !important;visibility: visible;}
+	.top-addtip:after{content: ""; display: block; width: 0; height: 0; border-left: 6px solid #7d73b3; border-top: 6px solid transparent; border-bottom: 6px solid transparent; position: absolute; top:32px; left:104%;z-index:1}
+	.action_btns li {float: left !important;padding-top: 7px;}
+
+	</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form method="post" id="formWrapper">
+                <input type="hidden" name="WORegisterId" id="WORegisterId" value="<?php echo (isset($WORegisterId)) ? $WORegisterId : '0'; ?>">
+                <input type="hidden" name="CostCenterId" id="costCentreId" value="<?php echo (isset($costcenter)) ? $costcenter['CostCentreId'] : ''; ?>">
+                <input type="hidden" name="VendorId" value="<?php echo (isset($vendor)) ? $vendor['VendorId'] : ''; ?>">
+                <input type="hidden" name="OrderType" id="OrderType" value="<?php echo (isset($OrderType)) ? $OrderType : ''; ?>">
+                <input type="hidden" name="WorkType" id="WorkType" value="<?php echo (isset($WorkType)) ? $WorkType : ''; ?>">
+                <input type="hidden" name="woTypeId" id="woTypeId" value="<?php echo (isset($woTypeId)) ? $woTypeId : ''; ?>">
+                <input type="hidden" name="wbsReq" id="wbsReq" value="<?php echo $wbsReq; ?>">
+                <input type="hidden" name="projectId" id="projectId" value="<?php echo $projectId; ?>">
+                <input type="hidden" name="CompanyId" id="CompanyId" value="<?php echo (isset($costcenter)) ? $costcenter['CompanyId'] : ''; ?>">
+                <div class="col-lg-12">
+                    <h1 class="text-center">Work Order</h1>
+                </div>
+                <div class="col-lg-12">
+                    <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 animated">
+                        <div class="panel-box zoomIn animated">
+                            <ul>
+                                <li>
+                                    <label>Cost Centre</label>
+                                    <span><?php echo (isset($costcenter)) ? $costcenter['CostCentreName'] : ''; ?></span>
+                                </li>
+                                <li>
+                                    <label>Vendor</label>
+                                    <span><?php echo (isset($vendor)) ? $vendor['VendorName'] : ''; ?></span>
+                                </li>
+                                <li>
+                                    <label>Order Type</label>
+                                    <span><?php echo (isset($OrderType)) ? ucfirst($OrderType) : ''; ?></span>
+                                </li>
+                                <li>
+                                    <label>Work Type</label>
+                                    <span>
+                                        <?php
+                                        if($WorkType == 'activity')
+                                            echo 'Activity';
+                                        else if($WorkType == 'iow')
+                                            echo 'IOW';
+                                        else
+                                            echo 'Turn Key';
+                                        ?>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 animated">
+                        <div class="panel-box box2th zoomIn animated">
+                            <ul>
+                                <li>
+                                    <label>Work Order Date</label>
+                                    <span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" id="WODate" name="WODate" value="<?php echo (isset($woregister)) ? $woregister['WODate'] : date('d-m-Y'); ?>" readonly onchange="validateDate(this)"/></span>
+                                </li>
+                                <li>
+                                    <label>Ref Date</label>
+                                    <span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" id="RefDate" name="RefDate" value="<?php echo (isset($woregister)) ? $woregister['RefDate'] : date('d-m-Y'); ?>" onchange="validateDate(this)"/></span>
+                                </li>
+                                <li>
+                                    <label>From Date</label>
+                                    <span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" id="FromDate" name="FromDate" value="<?php echo (isset($woregister)) ? $woregister['FDate'] : date('d-m-Y'); ?>" onchange="validateDate(this)"/></span>
+                                </li>
+                                <li>
+                                    <label>To Date</label>
+                                    <span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" id="ToDate" name="ToDate" value="<?php echo (isset($woregister)) ? $woregister['TDate'] : date('d-m-Y'); ?>" onchange="validateDate(this)"/></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0 animated">
+                        <div class="panel-box box3th zoomIn animated">
+                            <ul>
+                                <li>
+                                    <label>Work Order No</label>
+                                    <span><input type="text" placeholder=" xxxx" id="WONo" name="WONo" value="<?php echo (!isset($woregister) && $genType) ? trim($woNo) : ''; echo (isset($woregister)) ? trim($woregister['WONo']) : ''; ?>" <?php echo (isset($workorder) || $genType) ? 'readonly': ''; ?>/></span>
+                                </li>
+                                <li>
+                                    <label>CC Work Order No</label>
+                                    <span><input type="text" placeholder=" xxxx" id="CCWONo" name="CCWONo" value="<?php echo (isset($woregister)) ? $woregister['CCWONo'] : ''; ?>"/></span>
+                                </li>
+                                <li>
+                                    <label>Comp Work Order No</label>
+                                    <span><input type="text" placeholder=" xxxx" id="CompWONo" name="CompWONo" value="<?php echo (isset($woregister)) ? $woregister['CompWONo'] : ''; ?>"/></span>
+                                </li>
+                                <li>
+                                    <label>Ref No</label>
+                                    <span><input type="text" placeholder=" xxxx" id="RefNo" name="RefNo" value="<?php echo (isset($woregister)) ? $woregister['RefNo'] : ''; ?>"/></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-sm-12">
+                    <div id="accordion" class="panel-group">
+                        <!-------------------------------Bill of Quantities------------------------------->
+                        <div class="panel panel-info">
+                            <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+                                <h4 class="panel-title accordion-toggle defa_panels">Bill of Quantity</h4>
+                            </div>
+                            <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                                <div class="panel-body bgcolr">
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="table-responsive top-30 animated fadeInUp">
+                                            <table class="table" style=" margin-bottom:0px;" id="workorderTable">
+                                                <thead>
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Unit</th>
+                                                    <th class="text-right">Qty</th>
+                                                    <th class="text-right">Rate</th>
+                                                    <th class="text-right">Amount</th>
+                                                    <th>&nbsp; </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody class="main"></tbody>
+                                                <tbody class="total">
+                                                </tbody>
+                                                <tbody class="total" style="border: none;">
+                                                <tr style="border-bottom:none;">
+                                                    <td colspan="4" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Base Amount </label></td>
+                                                    <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" data-total="" name="total" id="total" onblur="return FormatNum(this, 2, true)" value="<?php echo (isset($woregister)) ? $woregister['Amount'] : ''; ?>" onchange="myfunc($(this).val())" readonly/></td>
+                                                    <td style="border-right:none;border-top:none;">&nbsp;</td>
+                                                </tr>
+                                                <tr style="border-bottom:none;">
+                                                    <td colspan="4" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Amount</label></td>
+                                                    <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" data-qual="" name="qualAmt" id="qualAmt" onblur="return FormatNum(this, 2, true)" value="<?php echo (isset($woregister)) ? $woregister['QualifiedAmount'] : ''; ?>" readonly/></td>
+                                                    <td style="border-right:none;border-top:none;">
+                                                        <ul class="action_btns">
+                                                            <li>
+                                                                <a href="#" class="qualTr">
+                                                                    <span data-original-title="Expand" data-placement="top" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                                <tr style="display:none;" class="qualmainTr">
+                                                    <td colspan="10" style="padding:0px !important; ">
+                                                        <div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                                                            <?php echo $qualRHtml; ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr style="border-bottom:none;">
+                                                    <td colspan="4" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanal__1_lbltotrate">Net Amount</label></td>
+                                                    <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="totAmount" id="totAmount" onblur="return FormatNum(this, 2, true)" value="<?php echo (isset($woregister)) ? $woregister['NetAmount'] : ''; ?>" readonly/></td>
+                                                    <td style="border-right:none;border-top:none;">&nbsp;</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <input type="hidden" name="rowid" id="rowid" value="0"/>
+                                            <input type="hidden" name="deleteids" id="deleteids" value="0"/>
+                                        </div>
+                                        <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                                            <ul>
+                                                <li><a href="javascript:nextAccordian(2)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-------------------------------Bill of Quantities end------------------------------->
+                        <!-------------------------------Terms and Conditions------------------------------->
+                        <div class="panel panel-info">
+                            <div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+                                <h4 class="panel-title accordion-toggle defa_panels">Terms and Conditions</h4>
+                            </div>
+                            <div class="panel-collapse collapse" id="collapseTwo" style="height: 0px;">
+                                <div class="panel-body bgcolr">
+                                    <div class="clearfix"></div>
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="card">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a href="#generalTerm" aria-controls="terms" role="tab" data-toggle="tab">General Terms</a></li>
+                                                <?php if($WorkType !='activity') {  ?>
+                                                <li><a href="#home1" aria-controls="home" role="tab" data-toggle="tab">Price Escalation</a></li>
+                                                <li><a href="#profile1" aria-controls="profile" role="tab" data-toggle="tab">Materials Supply</a></li>
+                                                <li><a href="#messages1" aria-controls="messages" role="tab" data-toggle="tab">Material Advance</a></li>
+                                                <?php } ?>
+                                                <li><a href="#tech-tem" aria-controls="settings" role="tab" data-toggle="tab">Technical Specification</a></li>
+                                                <li><a href="#otherTerm" aria-controls="term" role="tab" data-toggle="tab">Other Terms</a></li>
+                                                <li><a href="#Note" aria-controls="settings" role="tab" data-toggle="tab">Note</a></li>
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div class="tab-pane active" id="generalTerm">
+                                                    <p>
+                                                    <div class="panel-body bgcolr">
+                                                        <div class="col-lg-12 col-sm-12">
+                                                            <div class="col-sm-3 col-sm-offset-9" style="margin-top:10px;">
+                                                                <select name="valuefrom" id="valuefrom" class="form-control single_dropdown lbl_move" data-placeholder="Amount" style="width:100%;">
+                                                                    <option value="BaseAmount" <?php if($valuefrom == 0) echo "selected";  ?>>Base Amount</option>
+                                                                    <option value="NetAmount" <?php if($valuefrom == 1) echo "selected";  ?>>Net Amount</option>
+                                                                    <option value="GrossAmount" <?php if($valuefrom == 2) echo "selected";  ?>>Gross Amount</option>
+                                                                </select>
+
+                                                                <script>
+                                                                    $(document).ready(function(){
+
+                                                                        var tCount =  $('#gTermsTable tbody tr').length;
+                                                                        if(tCount > 1){
+                                                                            $('#valuefrom').attr("disabled", true);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            $('#valuefrom').attr("disabled", false);
+                                                                        }
+                                                                    });
+                                                                </script>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-12 col-sm-12">
+                                                            <div class="table-responsive top-30 bot-20">
+                                                                <table class="table" style=" margin-bottom:0px;" id="gTermsTable" >
+                                                                    <thead>
+                                                                    <tr>
+                                                                       <!-- <th>Sl.No</th>-->
+                                                                        <th>Terms</th>
+                                                                        <th id="percentage">%</th>
+                                                                        <th id="values">Value</th>
+                                                                        <th id="periods">Period</th>
+                                                                        <th id="dateshow">Date</th>
+                                                                        <th id="descriptionshow">Description</th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody class="main"></tbody>
+                                                                </table>
+                                                                <input type="hidden" name="trowid" id="trowid" value="0"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <?php if($WorkType !='activity') { ?>
+                                                <div class="tab-pane" id="home1">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <div class="table-responsive topsp animated fadeInUp">
+                                                            <table class="table highlightTable" style=" margin-bottom:0px;" id="materialTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Material Name</th>
+                                                                    <th class="text-center">Unit</th>
+                                                                    <th class="text-right">Rate</th>
+                                                                    <th class="text-right">Condition</th>
+                                                                    <th class="text-right">Escalation %</th>
+                                                                    <th class="text-right">Esc. Rate</th>
+                                                                    <th class="text-center">&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                            <input type="hidden" name="materialrowid" id="materialrowid" value="0"/>
+                                                            <input type="hidden" name="materialdeleteids" id="materialdeleteids" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <div class="tab-pane" id="profile1">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <div class="table-responsive topsp animated fadeInUp">
+                                                            <table class="table highlightTable" style=" margin-bottom:0px;" id="materialExcTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Material Name</th>
+                                                                    <th>Unit</th>
+                                                                    <th class="text-right">Rate</th>
+                                                                    <th>Supply Type</th>
+                                                                    <th>&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                            <input type="hidden" name="materialExcrowid" id="materialExcrowid" value="0"/>
+                                                            <input type="hidden" name="materialexcdeleteids" id="materialexcdeleteids" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <div class="tab-pane" id="messages1">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <div class="table-responsive topsp animated fadeInUp">
+                                                            <table class="table highlightTable" style="margin-bottom:0px;" id="materialAdvTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Material Name</th>
+                                                                    <th class="text-left">Percentage</th>
+                                                                    <th>&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                            <input type="hidden" name="materialAdvrowid" id="materialAdvrowid" value="0"/>
+                                                            <input type="hidden" name="materialadvdeleteids" id="materialadvdeleteids" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <?php } ?>
+                                                <div class="tab-pane" id="tech-tem">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <div class="table-responsive topsp animated fadeInUp">
+                                                            <table class="table tableWithFloatingHeader highlightTable" style=" margin-bottom:0px;" id="techTitleTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Title</th>
+                                                                    <th>Specification</th>
+                                                                    <th>&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                            <input type="hidden" name="techrowid" id="techrowid" value="0"/>
+                                                            <input type="hidden" name="techdeleteids" id="techdeleteids" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <div class="tab-pane" id="Note">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <textarea class="exp-tex" name="Notes" id="Notes"> <?php echo (isset($woregister)) ? $woregister['Narration'] : ''; ?> </textarea>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                                <div class="tab-pane " id="otherTerm">
+                                                    <p>
+                                                    <div class="col-lg-12 col-sm-12">
+                                                        <div class="table-responsive topsp animated fadeInUp" style="margin-top:20px;">
+                                                            <table class="table tableWithFloatingHeader highlightTable" style=" margin-bottom:0px;" id="otherTermsTable">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Terms Title</th>
+                                                                    <th>Terms Description</th>
+                                                                    <th>&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody></tbody>
+                                                            </table>
+                                                            <input type="hidden" name="termrowid" id="termrowid" value="0"/>
+                                                            <input type="hidden" name="termdeleteids" id="termdeleteids" value="0"/>
+                                                        </div>
+                                                    </div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-------------------------------Terms and Conditions------------------------------->
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <?php
+        $show = 1;
+        if(isset($woregister) && $woregister['Approve']=='Y') { $show = 0; }
+        if($show == 1) {
+        ?>
+        <li class="dropdown save_btn float_r"><a onclick="submitForm()" data-toggle="tooltip" class="ripple" title="Submit">Submit</a>
+        <?php } ?>
+        <li class="cancel_btn float_r"><a href="<?php echo $this->basePath(); ?>/wpm/workorder/<?php echo (isset($woregister)) ? 'register' : 'index'; ?>" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>
+    </ul>
+</div>
+<script id="resource-template" type="text/template">
+    <tr>
+        <td width="30%">
+            <input class="parent_text resourceSuggest" data-toggle="popover" type="text" name="desc__" id="desc__" onfocus="checkResourceUsed(this);" data-content=""/>
+            <input type="hidden" name="descid__" id="descid__"/>
+            <input type="hidden" name="WOTransId__" id="WOTransId__" value="0"/>
+            <input type="hidden" name="UpdateRow__" id="UpdateRow__" value="0"/>
+        </td>
+        <td width="8%">
+            <input class="parent_text border-none" type="text" name="unitname__" id="unitname__" readonly/>
+            <input type="hidden" name="unitid__" id="unitid__"/>
+            <input type="hidden" name="ratetype__" id="ratetype__"/>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none text-right <?php if($wbsReq != '' && $wbsReq == 1) { ?>mainTr<?php } ?>" type="text" name="qty__" id="qty__" <?php if($wbsReq != '' && $wbsReq == 1) { ?>readonly<?php } else { ?>onchange="calcQuantityWOWbs(this);" onkeypress="return isDecimal(event,this);" onfocus="return hideShow(this,'s','wo');" onblur="return hideShow(this,'h','wo');"<?php } ?> autocomplete="off" />
+            <?php if($wbsReq != '' && $wbsReq == 1) { ?>
+            <?php } else { ?>
+            <div id="ewbqty__" style="position:relative;display:none;">
+                <div class="top-tip top-addtip">
+                    <span>Estimate Qty : <i id="estimateqty__"></i></span>
+                    <span>Total Work Order Qty : <i id="workorderqty__"></i></span>
+                    <span>Total Billed Qty : <i id="totbilledqty__"></i></span>
+                </div>
+            </div>
+            <?php } ?>
+        </td>
+        <td width="17%"><input class="parent_text border-none text-right" type="text" name="rate__" id="rate__" readonly/></td>
+        <td width="20%"><input class="parent_text border-none text-right" type="text" name="amount__" id="amount__" readonly/></td>
+        <td width="10%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="deleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a href="#" class="mainTr" id="expandTr__" style="display:none;"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="iowTable__">
+                            <thead>
+                            <tr>
+                                <th class="worktype-activity">Agt No</th>
+                                <th class="worktype-activity">Specification</th>
+                                <th>WBS</th>
+                                <th class="text-right">Qty</th>
+                                <th class="text-right">Rate</th>
+                                <th class="text-right">Amount</th>
+                                <th class="iow___requestfields" style="display: none;">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody class="total">
+                            <tr>
+                                <!--td>&nbsp;</td-->
+                                <td class="worktype-activity">&nbsp;</td>
+                                <td class="iow___requestfields" style="display: none;"></td>
+                                <td align="right" class="rate_pri">Total Qty</td>
+                                <td width="6%"><input class="parent_text border-none text-right bold-text-clr" type="text" name="totalqty__" id="totalqty__" readonly/></td>
+                                <td class="worktype-activity">&nbsp;</td>
+                            </tr>
+                            </tbody>
+                            <input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="iow-template" type="text/template">
+    <tr>
+        <input type="hidden" name="iow___iowid_0" id="iow___iowid_0"/>
+        <input type="hidden" name="iow___WOIOWTransId_0" id="iow___WOIOWTransId_0" value="0"/>
+        <input type="hidden" name="iow___UpdateRow_0" id="iow___UpdateRow_0" value="0"/>
+        <input type="hidden" name="iow___wbsid_0" id="iow___wbsid_0"/>
+        <td width="5%" class="worktype-activity"><input class="parent_text border-none" type="text" name="iow___agtno_0" id="iow___agtno_0" readonly/></td>
+        <td width="8%" class="worktype-activity"><input class="parent_text border-none" type="text" name="iow___spec_0" id="iow___spec_0" readonly/></td>
+        <td width="10%"><input class="parent_text border-none" type="text" name="iow___wbs_0" id="iow___wbs_0" readonly/></td>
+        <td width="5%">
+            <input class="parent_text text-right" type="text" name="iow___qty_0" id="iow___qty_0" onkeypress="return isDecimal(event,this)" onchange="calcQuantity(this);" onfocus="return hideShow(this,'s','w');" onblur="return hideShow(this,'h','w');" autocomplete="off" />
+            <div id="iow___ewbqty_0" style="position:relative;display:none;">
+                <div class="top-tip top-addtip">
+                    <span>Estimate Qty : <i name="iow___estimateqty_0" id="iow___estimateqty_0"></i></span>
+                    <span>Total Work Order Qty : <i name="iow___workorderqty_0" id="iow___workorderqty_0"></i></span>
+                    <span>Total Billed Qty : <i name="iow___totbilledqty_0" id="iow___totbilledqty_0"></i></span>
+                </div>
+            </div>
+        </td>
+        <td width="5%"><input class="parent_text text-right" type="text" name="iow___rate_0" id="iow___rate_0" onkeypress="return isDecimal(event,this)" onchange="calcQuantity(this);" /></td>
+        <td width="5%"><input class="parent_text text-right" type="text" name="iow___amount_0" id="iow___amount_0" readonly /></td>
+        <td width="4%" align="center" class="action_btns_td iow___requestfields" style="display: none;">
+            <ul class="action_btns">
+                <li> <a href="#" class="mainTr"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <!--tr style="display:none;" class="subTr">
+        <td colspan="5">
+            <ul class="total-qty">
+                <li>
+                    <label>Estimate Qty : </label>
+                    <input class="parent_text bold-text-clr text-right" type="text" name="iow___estimateqty_0" id="iow___estimateqty_0" value="" readonly/>
+                </li>
+                <li>
+                    <label>Work Order Qty : </label>
+                    <input class="parent_text bold-text-clr text-right" type="text" name="iow___workorderqty_0" id="iow___workorderqty_0" value="" readonly/>
+                </li>
+                <li>
+                    <label>Total Billed Qty : </label>
+                    <input class="parent_text bold-text-clr text-right" type="text" name="iow___totbilledqty_0" id="iow___totbilledqty_0" value="" readonly/>
+                </li>
+            </ul>
+        </td>
+    </tr-->
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="iow___request_0_reqno">
+                            <thead>
+                            <tr>
+                                <th>Req No.</th>
+                                <th class="text-right">Req Qty</th>
+                                <th class="text-right">Order Qty</th>
+                                <th class="text-right">Bal Qty</th>
+                                <th class="text-right">Cur Qty</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody class="total">
+                            <!--tr>
+                                <td colspan="5">
+                                    <ul class="total-qty">
+                                        <li>
+                                            <label>Estimate Qty : </label>
+                                            <input class="parent_text bold-text-clr text-right" type="text" name="iow___request_0_estimateqty" id="iow___request_0_estimateqty" value="50" readonly/>
+                                        </li>
+                                        <li>
+                                            <label>Work Order Qty : </label>
+                                            <input class="parent_text bold-text-clr text-right" type="text" name="iow___request_0_workorderqty" id="iow___request_0_workorderqty" value="10" readonly/>
+                                        </li>
+                                        <li>
+                                            <label>Total Billed Qty : </label>
+                                            <input class="parent_text bold-text-clr text-right" type="text" name="iow___request_0_totbilledqty" id="iow___request_0_totbilledqty" value="0" readonly/>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr-->
+                            </tbody>
+                            <input type="hidden" name="iow___request_0_rowid" id="iow___request_0_rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="request-template" type="text/template">
+    <tr>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" name="iow___request_0_reqno__9" id="iow___request_0_reqno__9" readonly/>
+            <input type="hidden" name="iow___request_0_requesttransid__9" id="iow___request_0_requesttransid__9"/>
+            <input type="hidden" name="iow___request_0_WOIPDTransId__9" id="iow___request_0_WOIPDTransId__9" value="0"/>
+            <input type="hidden" name="iow___request_0_UpdateRow__9" id="iow___request_0_UpdateRow__9" value="0"/>
+        </td>
+        <td width="10%"><input class="parent_text border-none text-right" type="text" name="iow___request_0_reqqty__9" id="iow___request_0_reqqty__9" readonly/></td>
+        <td width="10%"><input class="parent_text border-none text-right" type="text" name="iow___request_0_orderqty__9" id="iow___request_0_orderqty__9" readonly/></td>
+        <td width="10%"><input class="parent_text border-none text-right" type="text" name="iow___request_0_balqty__9" id="iow___request_0_balqty__9" readonly/></td>
+        <td width="10%"><input class="parent_text text-right" type="text" name="iow___request_0_curqty__9" id="iow___request_0_curqty__9"  onkeypress="return isNumberKey(event,this)" onchange="calcRequestQuantity(this);"/></td>
+    </tr>
+</script>
+<script id="turnkey-table-template" type="text/template">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Unit</th>
+            <th class="text-right">Area</th>
+            <th class="text-right">BOQ Rate</th>
+            <th class="text-right">BOQ Amount</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">Variance %</th>
+            <th>&nbsp; </th>
+        </tr>
+    </thead>
+    <tbody class="main"></tbody>
+    <tbody class="total">
+    <tr>
+        <td colspan="5">&nbsp;</td>
+        <td align="right" class="rate_pri">Total Amount</td>
+        <td width="10%"><input class="parent_text border-none text-right bold-text-clr" type="text" name="total" id="total" readonly/></td>
+        <td>&nbsp;</td>
+    </tr>
+    </tbody>
+</script>
+<script id="turnkey-template" type="text/template">
+    <tr>
+        <td width="20%">
+            <input class="parent_text wbsSuggest" data-toggle="popover" type="text" name="desc__" id="desc__" onfocus="checkWBSUsed(this);" data-content="" />
+            <input type="hidden" name="descid__" id="descid__"/>
+            <input type="hidden" name="WOTransId__" id="WOTransId__" value="0"/>
+            <input type="hidden" name="UpdateRow__" id="UpdateRow__" value="0"/>
+        </td>
+        <td width="10%">
+            <input class="parent_text unitSuggest" type="text" name="unitname__" id="unitname__"/>
+            <input type="hidden" name="unitid__" id="unitid__"/>
+        </td>
+        <td width="10%"><input class="parent_text text-right" type="text" name="area__" id="area__" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcTurnKeyAmount(this);"/></td>
+        <td width="15%"><input class="parent_text border-none text-right" type="text" name="boqrate__" id="boqrate__" readonly/></td>
+        <td width="15%"><input class="parent_text border-none text-right" type="text" name="boqamount__" id="boqamount__" readonly/></td>
+        <td width="15%"><input class="parent_text text-right" type="text" name="rate__" id="rate__" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="calcTurnKeyAmount(this);"></td>
+        <td width="15%"><input class="parent_text border-none text-right" type="text" name="amount__" id="amount__" readonly/></td>
+        <td width="15%"><input class="parent_text border-none text-right" type="text" name="variance__" id="variance__" readonly/></td>
+        <td width="10%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="deleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a href="#" class="mainTr" id="expandTr__" style="display:none;"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="iowTable__">
+                            <thead>
+                            <tr>
+                                <th>Serial No.</th>
+                                <th>Specification</th>
+                                <th>Unit</th>
+                                <th>Qty</th>
+                                <th class="text-right">Rate</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="turnkey-iow-template" type="text/template">
+    <tr>
+        <input type="hidden" name="iow___iowid_0" id="iow___iowid_0"/>
+        <input type="hidden" name="iow___unitid_0" id="iow___unitid_0"/>
+        <td width="5%">{{serialno}}</td>
+        <td width="30%">{{spec}}</td>
+        <td width="10%">{{unit}}</td>
+        <td width="10%"><input class="parent_text border-none text-right" type="text" name="iow___qty_0" id="iow___qty_0" readonly/></td>
+        <td width="15%"><input class="parent_text border-none text-right" type="text" name="iow___rate_0" id="iow___rate_0" readonly/></td>
+        <td width="20%"><input class="parent_text border-none text-right" type="text" name="iow___amount_0" id="iow___amount_0" readonly/></td>
+    </tr>
+</script>
+<script id="otherterms-template"  type="text/template">
+    <tr>
+        <td width="15%">
+            <input class="parent_text" type="text" name="termTitle__" id="termTitle__" maxlength="155" onchange="addNewTermRow(this)"/>
+            <input type="hidden" name="termtransid__" id="termtransid__" value="0"/>
+            <input type="hidden" name="termupdaterow__" id="termupdaterow__" value="0"/>
+        </td>
+        <td width="15%"><textarea class="parent_texts" name="termDesc__" id="termDesc__" onchange="addNewTermRow(this)"></textarea></td>
+        <td width="4%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a href="#" class="deleteTermTr__" onclick="deleteTerm(this, event);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Term Delete"><i class="fa fa-trash-o"></i></span></a></li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="material-template"  type="text/template">
+    <tr class="padi05">
+        <td width="13%">
+            <input class="parent_text" type="text" name="materialName__" id="materialName__" onfocus="return checkMaterialPriceUsed(this)" onchange="addNewMaterialRow(this)"/>
+            <input type="hidden" class="materialNameInputs" name="materialId__" id="materialId__"/>
+            <input type="hidden" class="materialNameInputs" name="materialtransid__" id="materialtransid__" value="0"/>
+            <input type="hidden" class="materialNameInputs" name="materialupdaterow__" id="materialupdaterow__" value="0"/>
+        </td>
+        <td width="2%"><input class="parent_padi05" type="text" name="materialUnit__" id="materialUnit__" value="" readonly/></td>
+        <td width="3%"><input class="parent_text text-right" type="text" name="materialRate__" id="materialRate__" onchange="addNewMaterialRow(this)" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" maxlength="18"/></td>
+        <td width="2%">
+            <div class="select-style heg30">
+                <select name="materialbase__" id="materialbase__" onchange="addNewMaterialRow(this)">
+                    <option value=">">&gt;</option>
+                    <option value="<">&lt;</option>
+                </select>
+            </div>
+        </td>
+        <td width="2%"><input class="parent_text text-right" type="text" name="escalationper__" id="escalationper__" onchange="addNewMaterialRow(this)" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18"/></td>
+        <td width="8%"><input class="parent_text text-right" type="text" name="materialnewRate__" id="materialnewRate__" onchange="addNewMaterialRow(this)" onblur="return FormatNum(this, 2, true)" onkeypress="return isDecimal(event,this)" maxlength="18"/></td>
+        <td width="1%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a class="materialDeleteTr__" onclick="deleteMaterial(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="materialexc-template"  type="text/template">
+    <tr class="padi05">
+        <td width="15%">
+            <input class="parent_text" type="text" name="materialExcName__" id="materialExcName__" onfocus="return checkMaterialSupplyUsed(this)" onchange="addNewMaterialExcRow(this)"/>
+            <input type="hidden" class="materialExcNameInputs" name="materialExcId__" id="materialExcId__"/>
+            <input type="hidden" name="materialexctransid__" id="materialexctransid__" value="0"/>
+            <input type="hidden" name="materialexcupdaterow__" id="materialexcupdaterow__" value="0"/>
+        </td>
+        <td width="3%"><input class="parent_padi05" type="text" name="materialExcUnit__" id="materialExcUnit__" readonly/></td>
+        <td width="3%"><input class="parent_text text-right" type="text" name="materialExcRate__" id="materialExcRate__" onkeypress="return isDecimal(event,this)" onchange="addNewMaterialExcRow(this)" onblur="return FormatNum(this, 2, true)"/></td>
+        <td width="6%">
+            <div class="select-style heg30">
+                <select name="materialExcType__" id="materialExcType__" onchange="addNewMaterialExcRow(this)">
+                    <option value="C">Chargeable</option>
+                    <option value="F">Free</option>
+                </select>
+            </div>
+        </td>
+        <td width="1%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a class="materialExcDeleteTr__" onclick="deleteMaterialExc(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="terms-template"  type="text/template" class="hide">
+    <tr>
+        <!--<td width="10%">
+            <input class="parent_text border-none" type="text" name="slno__" id="slno__" />
+        </td>-->
+        <td width="26%">
+            <input class="parent_text resourceSuggest" type="text" name="terms__" id="terms__" value="" onfocus="checkTermsUsed(this);" />
+            <input type="hidden" name="termsid__" id="termsid__"/>
+            <input type="hidden"  name="isper__" id="isper__"/>
+            <input type="hidden"  name="isvalue__" id="isvalue__"/>
+            <input type="hidden"  name="isperiod__" id="isperiod__"/>
+            <input type="hidden"  name="istdate__" id="istdate__"/>
+            <input type="hidden"  name="iststring__" id="iststring__"/>
+            <input type="hidden"  name="includegross__" id="includegross__"/>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" name="per__" id="per__"  style="text-align:right;" onkeypress="return isDecimal(event,this)" onchange="TermsCalculation(this.id);" />
+        </td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="value__" style="text-align:right;" id="value__" onkeypress="return isDecimal(event,this)" onchange="TermsCalculation(this.id);"/></td>
+        <td width="10%"><input class="parent_text border-none" type="text" name="period__" style="text-align:right;" onkeypress="return isDecimal(event,this)" id="period__"/></td>
+        <td width="14%">
+            <div class="col-lg-12 padlr0">
+                <input type="text" name="date__" id="date__" class="tbl_input date_picker" style="cursor:pointer;" value='<?php echo Date('d/m/Y'); ?>' />
+                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            </div>
+        </td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="string__" id="string__"/></td>
+        <td width="15%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="termsdeleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="materialadv-template"  type="text/template">
+    <tr>
+        <td width="7%">
+            <input class="parent_text" type="text" name="materialAdvName__" id="materialAdvName__" onchange="addNewMaterialAdvRow(this)" onfocus="return checkMaterialAdvUsed(this)"/>
+            <input type="hidden" class="materialAdvNameInputs" name="materialAdvId__" id="materialAdvId__"/>
+            <input type="hidden" name="materialadvtransid__" id="materialadvtransid__" value="0"/>
+            <input type="hidden" name="materialadvupdaterow__" id="materialadvupdaterow__" value="0"/>
+        </td>
+        <td width="2%"><input class="parent_text text-left" type="text" name="materialAdvRate__" id="materialAdvRate__" onchange="addNewMaterialAdvRow(this)" onblur="return checkPercent(this);" onkeypress="return isDecimal(event,this)" maxlength="18"/></td>
+        <td width="1%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a class="materialAdvDeleteTr__"  onclick="deleteMaterialAdv(this, event);" style="display: none;"> <span data-toggle="tooltip" data-placement="right" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script id="techtitle-template"  type="text/template">
+    <tr>
+        <td width="15%">
+            <input class="parent_text" type="text" name="techTitle__" id="techTitle__" maxlength="155" onchange="addNewTechRow(this)"/>
+            <input type="hidden" name="techtransid__" id="techtransid__" value="0"/>
+            <input type="hidden" name="techupdaterow__" id="techupdaterow__" value="0"/>
+        </td>
+        <td width="15%"><textarea class="parent_texts" name="techDesc__" id="techDesc__" onchange="addNewTechRow(this)"></textarea></td>
+        <td width="4%" class="action_btns_td">
+            <ul class="action_btns">
+                <li style="float:left;"> <a class="deleteTechTr__" onclick="deleteTech(this, event);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Term Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+bindPopOver();
+var arr_resources = <?php echo (isset($arr_resources)) ? json_encode($arr_resources) : '[]'; ?>;
+console.log(arr_resources);
+var tmp_arr_resources = arr_resources;
+var arr_units = <?php echo (isset($arr_units)) ? json_encode($arr_units) : '[]'; ?>;
+
+var arr_requestResources = <?php echo (isset($arr_requestResources)) ? json_encode($arr_requestResources) : '[]'; ?>;
+var arr_resource_iows = <?php echo (isset($arr_resource_iows)) ? json_encode($arr_resource_iows) : '[]'; ?>;
+var arr_resource_iow_requests = <?php echo (isset($arr_resource_iow_requests)) ? json_encode($arr_resource_iow_requests) : '[]'; ?>;
+
+/*var materiallists = <?php echo (isset($materiallists)) ? json_encode($materiallists) : '[]'; ?>;
+var materialPrice = materiallists;
+var materialSupply = materiallists;
+var materialaAdv = materiallists;*/
+
+ var materiallists =[]
+ var materialPrice = materiallists;
+ var materialSupply = materiallists;
+ var materialaAdv = materiallists;
+
+var arr_otherTerms = <?php echo (isset($arr_otherTerms)) ? json_encode($arr_otherTerms) : '[]'; ?>;
+var arr_techTerms = <?php echo (isset($arr_techTerms)) ? json_encode($arr_techTerms) : '[]'; ?>;
+var arr_materials = <?php echo (isset($arr_materials)) ? json_encode($arr_materials) : '[]'; ?>;
+var arr_exc_materials = <?php echo (isset($arr_exc_materials)) ? json_encode($arr_exc_materials) : '[]'; ?>;
+var arr_adv_materials = <?php echo (isset($arr_adv_materials)) ? json_encode($arr_adv_materials) : '[]'; ?>;
+var qualRHtml = <?php echo (isset($qualRHtml)) ? json_encode($qualRHtml) : '[]'; ?>;
+var arr_edit_terms = <?php echo (isset($arr_edit_terms)) ? json_encode($arr_edit_terms) : '[]'; ?>;
+var arr_terms = <?php echo (isset($arr_terms)) ? json_encode($arr_terms) : '[]'; ?>;
+var tmp_arr_terms = arr_terms;
+
+var WorkType = $('#WorkType').val();
+var OrderType = $('#OrderType').val();
+//$('#qualifierTable').html(qualRHtml);
+
+$(function () {
+    <?php if(isset($woregister)) { ?>
+    $('#total').trigger('onblur');
+    $('#qualAmt').trigger('onblur');
+    $('#totAmount').trigger('onblur');
+    <?php } ?>
+    var $rowid = $('#rowid');
+    if(OrderType == 'work' && WorkType == 'turn-key') {
+        $('#workorderTable').html($('#turnkey-table-template').html()); // change main table template
+        var template = $('#turnkey-template').html();
+        var iowtemplate = $('#turnkey-iow-template').html();
+        var rowid = 0;
+        var $tbody = $('#workorderTable').find('> tbody.main');
+        if (arr_requestResources.length != 0) {
+            $.each(arr_requestResources, function (i, o) {
+                rowid += 1;
+                $tbody.append(template.replace(/__/g, '_' + rowid));
+
+                $('#desc_' + rowid).val(o.Desc).addClass('border-none').prop('disabled', true);
+                $('#desc_' + rowid).attr('data-content', o.Desc);
+                $('#descid_' + rowid).val(o.DescId);
+                $('#area_' + rowid).val(o.Area);
+                $('#boqrate_' + rowid).val(o.BOQRate);
+                $('#boqamount_' + rowid).val(o.BOQAmount);
+                $('#expandTr_' + rowid).show();
+                $('#deleteTr_' + rowid).show();
+
+                if (typeof o.WOTurnKeyTransId !== 'undefined') {
+                    $('#WOTransId_' + rowid).val(o.WOTurnKeyTransId);
+                    $('#unitname_' + rowid).val(o.UnitName);
+                    $('#unitid_' + rowid).val(o.UnitId);
+                    $('#area_' + rowid).val(o.Area);
+                    $('#rate_' + rowid).val(o.Rate);
+                    $('#amount_' + rowid).val(o.Amount);
+                    $('#variance_' + rowid).val(o.Variance);
+                }
+                calcTotal();
+
+                $.each(arr_resource_iows, function (j, l) {
+                    if ((typeof o.WOTurnKeyTransId !== 'undefined' && o.WOTurnKeyTransId != l.WOTurnKeyTransId)) {
+                        return;
+                    }
+
+                    var iowrowid = parseInt($('#iow_' + rowid + '_rowid').val()) + 1;
+                    $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid)
+                        .replace(/_0/g, '_'+iowrowid)
+                        .replace(/\{\{serialno\}\}/g, l.RefSerialNo)
+                        .replace(/\{\{spec\}\}/g, l.Specification)
+                        .replace(/\{\{unit\}\}/g, l.UnitName));
+                    $('#iow_'+rowid+'_rate_'+iowrowid).val(sanitizeNumber(l.Rate,2,true));
+                    $('#iow_'+rowid+'_qty_'+iowrowid).val(sanitizeNumber(l.Qty,3));
+                    $('#iow_'+rowid+'_amount_'+iowrowid).val(sanitizeNumber(l.Amount,2,true));
+                    $('#iow_'+rowid+'_unitid_'+iowrowid).val(l.UnitId);
+                    $('#iow_'+rowid+'_iowid_'+iowrowid).val(l.ProjectIOWId);
+                    $('#iow_' + rowid + '_rowid').val(iowrowid);
+
+                    if (typeof l.WOTurnKeyIOWTransId !== 'undefined') {
+                        $('#iow_' + rowid + '_WOIOWTransId_' + iowrowid).val(l.WOTurnKeyIOWTransId);
+//                        $('#iow_' + rowid + '_qty_' + iowrowid).val(l.Qty).trigger('change');
+                    }
+                });
+            });
+        }
+        rowid++;
+        $tbody.append(template.replace(/__/g, '_' + rowid));
+        $rowid.val(rowid);
+        bindTurnKeyDescAutocomplete();
+        bindUnitAutocomplete();
+    } else {
+        var template = $('#resource-template').html();
+        var iowtemplate = $('#iow-template').html();
+        var requesttemplate = $('#request-template').html();
+        var rowid = 0;
+        var $tbody = $('#workorderTable').find('> tbody.main');
+        if (arr_requestResources.length != 0) {
+            $.each(arr_requestResources, function (i, o) {
+                rowid += 1;
+                $tbody.append(template.replace(/__/g, '_' + rowid));
+
+                $('#desc_' + rowid).val(o.Desc).addClass('border-none').prop('disabled', true);
+                $('#desc_' + rowid).attr('data-content', o.Desc);
+                $('#descid_' + rowid).val(o.DescId);
+                $('#unitname_' + rowid).val(o.UnitName);
+                $('#unitid_' + rowid).val(o.UnitId);
+                $('#rate_' + rowid).val(sanitizeNumber(o.Rate, 2));
+                if($('#wbsReq').val() != '' && $('#wbsReq').val() == 1) {
+                    $('#expandTr_' + rowid).show();
+                } else {
+                    $('#estimateqty_' + rowid).html(parseFloatVal(o.EstQty));
+                    bindWithoutWbs(rowid,2);
+                }
+                $('#deleteTr_' + rowid).show();
+
+                if (WorkType == 'activity') {
+                    $('#ratetype_' + rowid).val(o.RateType);
+                }
+
+                if (typeof o.WOTransId !== 'undefined') {
+                    $('#WOTransId_' + rowid).val(o.WOTransId);
+                    $('#qty_' + rowid).val(sanitizeNumber(o.Qty, 3));
+                    $('#amount_' + rowid).val(sanitizeNumber(o.Amount, 2));
+                }
+
+                if($('#wbsReq').val() != '' && $('#wbsReq').val() == 1) {
+                    $.each(arr_resource_iows, function (j, l) {
+                        if ((typeof o.WOTransId == 'undefined' && l.ResourceId != o.DescId && OrderType == 'work' && WorkType == 'activity')
+                            || (typeof o.WOTransId == 'undefined' && l.ProjectIOWId != o.DescId && OrderType == 'work' && WorkType == 'iow')
+                            || (typeof o.WOTransId !== 'undefined' && o.WOTransId != l.WOTransId)) {
+                            return;
+                        }
+                        var estQty = 0;
+                        var iowrowid = parseInt($('#iow_' + rowid + '_rowid').val()) + 1;
+                        $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                        $('#iow_' + rowid + '_rowid').val(iowrowid);
+
+                        $('#iow_' + rowid + '_wbs_' + iowrowid).val(l.ParentText + '->' + l.WBSName);
+                        $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+
+                        if (WorkType == 'activity') {
+                            $('#iow_' + rowid + '_agtno_' + iowrowid).val(l.RefSerialNo);
+                            $('#iow_' + rowid + '_spec_' + iowrowid).val(l.Specification);
+                            $('#iow_' + rowid + '_iowid_' + iowrowid).val(l.ProjectIOWId);
+
+                            estQty = ((l.eQty / l.bQty) * l.cQty);
+                            $('#iow_' + rowid + '_estimateqty_' + iowrowid).html(parseFloatVal(estQty));
+                        } else if (WorkType == 'iow') {
+                            $('.worktype-activity').remove();
+                            $('#iow_' + rowid + '_estimateqty_' + iowrowid).html(parseFloatVal(l.EstQty));
+                        }
+
+                        if (typeof l.WOIOWTransId !== 'undefined') {
+                            $('#iow_' + rowid + '_WOIOWTransId_' + iowrowid).val(l.WOIOWTransId);
+                            $('#iow_' + rowid + '_qty_' + iowrowid).val(sanitizeNumber(l.Qty, 3));//.trigger('change');
+                            $('#iow_' + rowid + '_rate_' + iowrowid).val(l.Rate);
+                            $('#iow_' + rowid + '_amount_' + iowrowid).val(l.Amount);
+                        } else {
+                            if(l.Rate == 0)
+                                $('#iow_' + rowid + '_rate_' + iowrowid).val($('#rate_' + rowid).val());
+                            else
+                                $('#iow_' + rowid + '_rate_' + iowrowid).val(l.Rate);
+                        }
+
+                        $.each(arr_resource_iow_requests, function (k, r) {
+                            if ((typeof o.WOTransId == 'undefined' && (l.ResourceId != r.ResourceId || l.ProjectIOWId != r.IowId || l.WBSId != r.WbsId))
+                                || (typeof o.WOTransId != 'undefined' && l.WOIOWTransId != r.IowId)) {
+                                return;
+                            }
+
+                            $('#iow_' + rowid + '_qty_' + iowrowid).addClass('border-none').prop('readonly', true);
+                            $('.iow_' + rowid + '_requestfields').show();
+                            var requestrowid = parseInt($('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val()) + 1;
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_reqno').find('> tbody.main').append(requesttemplate
+                                .replace(/__9/g, '_' + requestrowid)
+                                .replace(/_0/g, '_' + iowrowid)
+                                .replace(/__/g, '_' + rowid));
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val(requestrowid);
+
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_requesttransid_' + requestrowid).val(r.RequestId);
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_reqno_' + requestrowid).val(r.RequestNo);
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_reqqty_' + requestrowid).val(sanitizeNumber(r.Qty, 3));
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_orderqty_' + requestrowid).val(sanitizeNumber(r.WOQty, 3));
+                            $('#iow_' + rowid + '_request_' + iowrowid + '_balqty_' + requestrowid).val(sanitizeNumber((r.Qty - r.WOQty), 3));
+
+                            if (typeof o.WOTransId != 'undefined') {
+                                $('#iow_' + rowid + '_request_' + iowrowid + '_WOIPDTransId_' + requestrowid).val(r.WOIPDTransId);
+                                $('#iow_' + rowid + '_request_' + iowrowid + '_curqty_' + requestrowid).val(sanitizeNumber(r.CurQty, 3));
+                            }
+                        });
+
+                        var woeQty = 0;
+                        var wbeQty = 0;
+                        $.ajax({
+                            url: getBaseURL() + 'wpm/workorder/entry',
+                            type: "post",
+                            data: {
+                                'ResourceId': o.DescId,
+                                'ccId': $('#costCentreId').val(),
+                                'IOWId': l.ProjectIOWId,
+                                'WBSId': l.WBSId,
+                                'Type': 'getwoqty',
+                                'WOType': WorkType
+                            },
+                            async: false,
+                            success: function (data, textStatus, jqXHR) {
+                                if (jqXHR.status == 200) {
+                                    data = JSON.parse(data);
+                                    woeQty = data.WOQty;
+                                    wbeQty = data.WBQty;
+                                    if (woeQty == null) {
+                                        woeQty = 0;
+                                    }
+                                    if (wbeQty == null) {
+                                        wbeQty = 0;
+                                    }
+                                    $('#iow_' + rowid + '_workorderqty_' + iowrowid).html(parseFloatVal(woeQty));
+                                    $('#iow_' + rowid + '_totbilledqty_' + iowrowid).html(parseFloatVal(wbeQty));
+                                }
+                            }, error: function (jqXHR, textStatus, errorThrown) {
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        rowid++;
+        $tbody.append(template.replace(/__/g, '_' + rowid));
+        $rowid.val(rowid);
+
+        bindDescAutocomplete();
+        expandQualTrFn();
+        bindQualExpandTr();
+        bindPopOver();
+        if($('#WORegisterId').val() != 0) {
+            calcTotalQty();
+        }
+    }
+
+    //terms & condition start
+    // other terms
+    var $termrowid = $('#termrowid');
+    var template = $('#otherterms-template').html();
+    var termrowid = 0;
+    var $tbody = $('#otherTermsTable').find('> tbody');
+    if(arr_otherTerms.length != 0) {
+        $.each(arr_otherTerms, function(i, o) {
+            termrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + termrowid));
+
+            $('#termtransid_' + termrowid).val(o.TransId);
+            $('#termTitle_' + termrowid).val(o.Title);
+            $('#termDesc_' + termrowid).val(o.Desc);
+            $('.deleteTermTr_' + termrowid).show();
+        });
+    }
+    termrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + termrowid));
+    $termrowid.val(termrowid);
+
+    //general terms &condition
+    var $trowid = $('#trowid');
+    var template = $('#terms-template').html();
+    var trowid = 0;
+    var $tbody = $('#gTermsTable').find('> tbody');
+
+    if(arr_edit_terms.length != 0) {
+
+        $.each(arr_edit_terms, function(i, o) {
+            trowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + trowid));
+
+            //$('#slno_' + trowid).val(o.SlNo).addClass('border-none').prop('disabled', true);
+            $('#termsid_' + trowid).val(o.data);
+            $('#terms_' + trowid).val(o.value);
+            $('#per_' + trowid).val(o.Per);
+            $('#value_' + trowid).val(o.Val);
+            $('#period_' + trowid).val(o.Period);
+            $('#date_' + trowid).val(o.Dte);
+            $('#string_' + trowid).val(o.Strg);
+            $('#isper_' + trowid).val(o.IsPer);
+            $('#isvalue_' + trowid).val(o.IsValue);
+            $('#isperiod_' + trowid).val(o.IsPeriod);
+            $('#istdate_' + trowid).val(o.IsTDate);
+            $('#iststring_' + trowid).val(o.IsTString);
+            $('#includegross_' + trowid).val(o.IncludeGross);
+            $('#termsdeleteTr_' + trowid).show();
+        });
+    }
+    trowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + trowid));
+    $trowid.val(trowid);
+
+    // material
+    var $materialrowid = $('#materialrowid');
+    var template = $('#material-template').html();
+    var materialrowid = 0;
+    var $tbody = $('#materialTable').find('> tbody');
+    if(arr_materials.length != 0) {
+        $.each(arr_materials, function(i, o) {
+            materialrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + materialrowid));
+
+            $('#materialtransid_' + materialrowid).val(o.TransId);
+            $('#materialName_' + materialrowid).val(o.MaterialName);
+            $('#materialId_' + materialrowid).val(o.MaterialId);
+            $('#materialUnit_' + materialrowid).val(o.UnitName);
+            $('#materialRate_' + materialrowid).val(o.Rate);
+            $('#escalationper_' + materialrowid).val(o.EscalationPer);
+            $('#materialbase_' + materialrowid).val(o.RateCondition);
+            $('#materialnewRate_' + materialrowid).val(o.ActualRate);
+            $('.materialDeleteTr_' + materialrowid).show();
+        });
+    }
+    materialrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + materialrowid));
+    $materialrowid.val(materialrowid);
+    bindMaterialBaseAutoComplete();
+
+    // exc material
+    var $materialExcrowid = $('#materialExcrowid');
+    var template = $('#materialexc-template').html();
+    var materialExcrowid = 0;
+    var $tbody = $('#materialExcTable').find('> tbody');
+    if(arr_exc_materials.length != 0) {
+        $.each(arr_exc_materials, function(i, o) {
+            materialExcrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + materialExcrowid));
+
+            $('#materialexctransid_' + materialExcrowid).val(o.TransId);
+            $('#materialExcName_' + materialExcrowid).val(o.MaterialName);
+            $('#materialExcId_' + materialExcrowid).val(o.MaterialId);
+            $('#materialExcUnit_' + materialExcrowid).val(o.UnitName);
+            $('#materialExcRate_' + materialExcrowid).val(o.Rate);
+            $('#materialExcType_' + materialExcrowid).val(o.SType);
+            $('.materialExcDeleteTr_' + materialExcrowid).show();
+        });
+    }
+    materialExcrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + materialExcrowid));
+    $materialExcrowid.val(materialExcrowid);
+    bindMaterialExcAutoComplete();
+
+    // adv material
+    var $materialAdvrowid = $('#materialAdvrowid');
+    var template = $('#materialadv-template').html();
+    var materialAdvrowid = 0;
+    var $tbody = $('#materialAdvTable').find('> tbody');
+    if(arr_adv_materials.length != 0) {
+        $.each(arr_adv_materials, function(i, o) {
+            materialAdvrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + materialAdvrowid));
+
+            $('#materialAdvName_' + materialAdvrowid).val(o.MaterialName);
+            $('#materialAdvId_' + materialAdvrowid).val(o.MaterialId);
+            $('#materialadvtransid_' + materialAdvrowid).val(o.TransId);
+            $('#materialAdvRate_' + materialAdvrowid).val(o.AdvPercent);
+            $('.materialAdvDeleteTr_' + materialAdvrowid).show();
+        });
+    }
+    materialAdvrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + materialAdvrowid));
+    $materialAdvrowid.val(materialAdvrowid);
+    bindMaterialAdvAutoComplete();
+
+    // tech title
+    var $techrowid = $('#techrowid');
+    var template = $('#techtitle-template').html();
+    var techrowid = 0;
+    var $tbody = $('#techTitleTable').find('> tbody');
+    if(arr_techTerms.length != 0) {
+        $.each(arr_techTerms, function(i, o) {
+            techrowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + techrowid));
+
+            $('#techtransid_' + techrowid).val(o.TransId);
+            $('#techTitle_' + techrowid).val(o.Title);
+            $('#techDesc_' + techrowid).val(o.Desc);
+            $('.deleteTechTr_' + techrowid).show();
+        });
+    }
+    techrowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + techrowid));
+    $techrowid.val(techrowid);
+
+    //terms &condition end
+
+    $('.content_wrapper').on('click','.mainTr',function(e){
+        e.preventDefault();
+        if(!$(this).closest("tr").next(".subTr").is(":visible")){
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        }
+        else{
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+
+    nextAccordian(1);
+});
+
+function closeMainTr()
+{
+    var $mainTr = $(".mainTr");
+    $.each($mainTr, function () {
+        $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+        $(this).closest("tr").next(".subTr").slideUp("slow");
+        $(this).find("i").removeClass("tform");
+    });
+}
+
+function expandQualTrFn(reset) {
+    var $mainTRs = $("a[class*=qualTr]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className;
+//            key = name.split('_')[1];
+//        if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".qualmainTr"),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            closeMainTr();
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closeQualdetails();
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function closeQualdetails(key) {
+    var $mainTRs = $("a[class*=qualTr]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+function bindQualExpandTr() {
+    var $mainTr = $(".qualmainExp");
+    $mainTr.unbind('click');
+    $mainTr.click(function (e) {
+        e.preventDefault();
+        if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+            closeQualTr();
+            $(this).closest("tr").next(".qualsubTr").show();
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+        }
+        else {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        }
+    });
+}
+function closeQualTr() {
+    var $mainTr = $(".qualmainExp");
+    $.each($mainTr, function () {
+        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+        $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+    });
+}
+
+function submitForm()
+{
+    var errFlag = 0;
+    var tRows = $('#rowid').val();
+    var tCnt = 0;
+
+    if(!validateLength($('#WODate')))
+        return false;
+
+    if(!validateLength($('#RefDate')))
+        return false;
+
+    if(!validateLength($('#FromDate')))
+        return false;
+
+    if(!validateLength($('#ToDate')))
+        return false;
+
+    if (!compareDate($('#FromDate').val(), $('#ToDate').val())) {
+        showError($('#ToDate'), 'smaller than from date');
+        scrTop($('#ToDate'));
+        return false;
+    }
+
+    if(!validateLength($('#CCWONo')))
+        return false;
+
+    if(!validateLength($('#CompWONo')))
+        return false;
+
+    if(!validateLength($('#RefNo')))
+        return false;
+
+    for (var i = 1; i <= tRows; i++) {
+        if (typeof $('#descid_' + i).val() !== 'undefined') {
+            if ($('#descid_' + i).val() != '') {
+                tCnt = tCnt + 1;
+            }
+        }
+    }
+
+    if(tCnt == 0) {
+        for (var i = 1; i <= tRows; i++) {
+            if (typeof $('#descid_' + i).val() !== 'undefined') {
+                if ($('#descid_' + i).val() == '') {
+                    validateLength($('#desc_' + i));
+                }
+            }
+        }
+        errFlag = 1;
+        return false;
+    }
+
+    for (var i = 1; i <= tRows; i++) {
+        if ($('#descid_' + i).val() != '' && $('#qty_' + i).val() == '') {
+            validateLength($('#qty_' + i));
+            errFlag = 1;
+            return false;
+        } else if ($('#descid_' + i).val() != '') {
+            validateLength($('#qty_' + i));
+        }
+    }
+
+    var $material=$("#materialAdvrowid");
+    var $mobzid=$("#materialrowid");
+    var mbzrow=$mobzid.val();
+    var matrowid=$material.val();
+    for (var i = 1; i <= matrowid; i++) {
+        if ($('#materialAdvId_' + i).val() != '' && $('#materialAdvRate_' + i).val() == '') {
+            validateLength($('#materialAdvRate_' + i));
+            errFlag = 1;
+            return false;
+        } else if ($('#materialAdvRate_' + i).val() != '') {
+            validateLength($('#materialAdvRate_' + i));
+        }
+    }
+    /*for (var i = 1; i <= mbzrow; i++) {
+        if ($('#terms_' + i).val() != '' && $('#per_' + i).val() == 0) {
+            validateLength($('#per_' + i));
+            errFlag = 1;
+            $('#per_' + i).addClass('error').attr('data-original-title','required').attr('data-toggle', 'tooltip');
+            return false;
+        } else if ($('#per_' + i).val() != '') {
+            validateLength($('#per_' + i));
+        }
+    }*/
+    if($('#formWrapper .error').length != 0) {
+        alert('Kindly notice the errors!');
+        return false;
+    }
+
+    if(errFlag == 0) {
+        $('#formWrapper').submit();
+    }
+}
+
+function scrTop(divId)
+{
+    $('html, body').animate({
+        scrollTop: divId.offset().top-100
+    }, 'slow');
+}
+
+function validateLength($input) {
+    if($.trim($input.val()).length == 0) {
+        showError($input, 'required');
+        scrTop($input);
+        return false;
+    }
+
+    removeError($input);
+    return true;
+}
+
+function bindTurnKeyDescAutocomplete() {
+    // bind wbs autocomplete
+    $('#workorderTable .wbsSuggest').autocomplete({
+        lookup: tmp_arr_resources,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $this.prop('readonly', true).addClass('border-none');
+                $('#descid_' + rowid).val(suggestion.data);
+                $('#desc_' + rowid).attr('data-content', suggestion.value);
+                $('#boqrate_' + rowid).val(sanitizeNumber(suggestion.BOQRate,2));
+                $('#boqamount_' + rowid).val(sanitizeNumber(suggestion.BOQAmount,2));
+                $('#expandTr_' + rowid).show();
+                addnewTurnKeyRow($this);
+                // bind iows
+                $('.loading_area').show();
+                $.ajax({
+                    url: getBaseURL() + 'wpm/workorder/entry',
+                    type: "post",
+                    data: {'WBSId': suggestion.data, 'Type': 'getwbsdetails'},
+                    async: false,
+                    success: function (data, textStatus, jqXHR) {
+                        if(jqXHR.status == 200) {
+                            data = JSON.parse(data);
+                            var iowtemplate = $('#turnkey-iow-template').html();
+                            var iowrowid = 0;
+                            $.each(data, function (i,l) {
+                                iowrowid++;
+                                $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_'+rowid)
+                                    .replace(/_0/g, '_'+iowrowid)
+                                    .replace(/\{\{serialno\}\}/g, l.RefSerialNo)
+                                    .replace(/\{\{spec\}\}/g, l.Specification)
+                                    .replace(/\{\{unit\}\}/g, l.UnitName));
+                                $('#iow_'+rowid+'_rate_'+iowrowid).val(sanitizeNumber(l.Rate,2,true));
+                                $('#iow_'+rowid+'_qty_'+iowrowid).val(sanitizeNumber(l.Qty,3));
+                                $('#iow_'+rowid+'_amount_'+iowrowid).val(sanitizeNumber(l.Amount,2,true));
+                                $('#iow_'+rowid+'_unitid_'+iowrowid).val(l.UnitId);
+                                $('#iow_'+rowid+'_iowid_'+iowrowid).val(l.ProjectIOWId);
+                            });
+                            $('#iow_'+rowid+'_rowid').val(iowrowid);
+                        }
+                        $('.loading_area').hide();
+                    }, error: function (jqXHR, textStatus, errorThrown) {
+                        $('.loading_area').hide();
+                    }
+                });
+                removeError($this);
+            }
+        }, onSearchStart: function (suggestion) {
+            var rowid = $(this)[0].id.split('_')[1];
+            $('#unitname_' + rowid).val('');
+            $('#rate_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                var rowid = $(this)[0].id.split('_')[1];
+                $('#unitname_' + rowid).val('');
+                $('#rate_' + rowid).val('');
+            }
+        }
+    });
+}
+function checkWBSUsed(x) {
+    closeMainTr();
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=descid_]');
+    tmp_arr_resources = arr_resources;
+    tmp_arr_resources = $.grep(arr_resources, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindTurnKeyDescAutocomplete();
+}
+function bindUnitAutocomplete() {
+    // bind unit autocomplete
+    $('#workorderTable .unitSuggest').autocomplete({
+        lookup: arr_units,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $('#unitid_' + rowid).val(suggestion.data);
+            }
+        }, onSearchStart: function (suggestion) {
+            var rowid = $(this)[0].id.split('_')[1];
+            $('#unitid_' + rowid).val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                var rowid = $(this)[0].id.split('_')[1];
+                $('#unitid_' + rowid).val(0);
+            }
+        }
+    });
+}
+function calcTurnKeyAmount(x) {
+    var ids = $(x)[0].id.split('_'),
+        rowid = ids[1];
+
+    var rate = parseFloatVal($('#rate_'+rowid).val()),
+        area = parseFloatVal($('#area_'+rowid).val()),
+        boqamount = parseFloatVal($('#boqamount_'+rowid).val());
+    var amount = rate * area;
+    $('#amount_'+rowid).val(sanitizeNumber( amount ,2,true));
+    $('#variance_'+rowid).val(sanitizeNumber( (amount/boqamount) ,3,true));
+
+    if($('#WOTransId_' + rowid).val() != 0) {
+        $('#UpdateRow_'+rowid).val(1);
+    }
+
+    calcTotal();
+}
+function addnewTurnKeyRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $rowid = $('#rowid'),
+        rowid = parseInt($rowid.val()),
+        $tbody = $('#workorderTable').find('> tbody.main');
+
+    $('#deleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#turnkey-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+    $rowid.val(count);
+
+    bindTurnKeyDescAutocomplete();
+    bindUnitAutocomplete();
+}
+
+function bindDescAutocomplete() {
+    // bind resource autocomplete
+    $('#workorderTable .resourceSuggest').autocomplete({
+        lookup: tmp_arr_resources,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $this.prop('readonly', true).addClass('border-none');
+                $('#descid_' + rowid).val(suggestion.data);
+                $('#desc_' + rowid).attr('data-content', suggestion.value);
+                $('#unitname_' + rowid).val(suggestion.UnitName);
+                $('#rate_' + rowid).val(sanitizeNumber(suggestion.Rate,2));
+                $('#ratetype_' + rowid).val(suggestion.RateType);
+                $('#estimateqty_' + rowid).html(parseFloatVal(suggestion.Qty));
+                priceescalation();
+                if($('#wbsReq').val() != '' && $('#wbsReq').val() == 1) {
+                    $('#expandTr_' + rowid).show();
+                    bindResourceIOW($this);
+                } else {
+                    bindWithoutWbs($this,1);
+                }
+                addNewResourceRow($this);
+                bindPopOver();
+                removeError($this);
+            }
+        }, onSearchStart: function (suggestion) {
+            var rowid = $(this)[0].id.split('_')[1];
+            $('#unitname_' + rowid).val('');
+            $('#rate_' + rowid).val('');
+            $('#ratetype_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                var rowid = $(this)[0].id.split('_')[1];
+                $('#unitname_' + rowid).val('');
+                $('#rate_' + rowid).val('');
+                $('#ratetype_' + rowid).val('');
+            }
+        }
+    });
+}
+function priceescalation()
+{  var t=[];
+    var reskeyid = $('input[id*=descid_]');
+    $.each(reskeyid, function (i, obj) {
+        console.log('t : ',t)
+        var $this = $(this),
+            name = $this[0].id;
+        var arrname = name.split('_');
+        t.push($(this).val());
+    });
+    $.ajax({url:getBaseURL()+'wpm/workorder/entry',
+        type:"post",
+        data:{CostCentreId:$("#costCentreId").val(),Type:"price",iowidid: t.toString()},
+        dataType:"json",
+        success:function(data, textStatus, jqXHR){
+            if(jqXHR.status == 200) {
+                 materiallists =data;
+                 materialPrice = materiallists;
+                 materialSupply = materiallists;
+                 materialaAdv = materiallists;
+
+            }
+        }
+    });
+}
+function bindResourceIOW(x) {
+    var rowid = $(x)[0].id.split('_')[1];
+    var $iowrowid = $('#iow_' + rowid + '_rowid');
+    var descId = $('#descid_' + rowid).val();
+    var data = {};
+
+    data.ProjectId = $('#projectId').val();
+    if(OrderType == 'work' && WorkType == 'activity') {
+        data.Type = 'getresourcedetails';
+        data.ResourceId = descId;
+    } else if (OrderType == 'work' && WorkType == 'iow') {
+        data.Type = 'getiowdetails';
+        data.IOWId = descId;
+    }
+
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + 'wpm/workorder/entry',
+        type: "post",
+        data: data,
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if(jqXHR.status == 200) {
+                data = JSON.parse(data);
+                var iowtemplate = $('#iow-template').html();
+                $.each(data, function (i,l) {
+                    var iowrowid = parseInt($iowrowid.val()) + 1;
+                    $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                    $iowrowid.val(iowrowid);
+
+                    var estQty = 0;
+                    if(OrderType == 'work' && WorkType == 'activity') {
+                        $('#iow_' + rowid + '_agtno_' + iowrowid).val(l.RefSerialNo);
+                        $('#iow_' + rowid + '_spec_' + iowrowid).val(l.Specification);
+
+                        estQty = ((l.Qty / l.bQty) * l.cQty);
+                        $('#iow_' + rowid + '_estimateqty_' + iowrowid).html(parseFloatVal(estQty));
+                    } else {
+                        $('.worktype-activity').remove();
+                        $('#iow_' + rowid + '_estimateqty_' + iowrowid).html(parseFloatVal(l.Qty));
+                    }
+                    $('#iow_' + rowid + '_wbs_' + iowrowid).val(l.ParentText +'->'+ l.WBSName);
+                    $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+                    //$('#iow_' + rowid + '_unitname_' + iowrowid).val(l.UnitName);
+                    $('#iow_' + rowid + '_iowid_' + iowrowid).val(l.ProjectIOWId);
+                    if(l.Rate == 0)
+                        $('#iow_' + rowid + '_rate_' + iowrowid).val($('#rate_' + rowid).val());
+                    else
+                        $('#iow_' + rowid + '_rate_' + iowrowid).val(l.Rate);
+
+                    var woeQty = 0;
+                    var wbeQty = 0;
+                    $.ajax({
+                        url: getBaseURL() + 'wpm/workorder/entry',
+                        type: "post",
+                        data: {'ResourceId': descId, 'ccId': $('#costCentreId').val(), 'IOWId': l.ProjectIOWId, 'WBSId': l.WBSId, 'Type': 'getwoqty', 'WOType': WorkType},
+                        async: false,
+                        success: function (data, textStatus, jqXHR) {
+                            if(jqXHR.status == 200) {
+                                data = JSON.parse(data);
+                                woeQty = data.WOQty;
+                                wbeQty = data.WBQty;
+                                if (woeQty == null) {
+                                    woeQty = 0;
+                                }
+                                if (wbeQty == null) {
+                                    wbeQty = 0;
+                                }
+                                $('#iow_' + rowid + '_workorderqty_' + iowrowid).html(parseFloatVal(woeQty));
+                                $('#iow_' + rowid + '_totbilledqty_' + iowrowid).html(parseFloatVal(wbeQty));
+                            }
+                        }, error: function (jqXHR, textStatus, errorThrown) {
+                        }
+                    });
+                });
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+}
+
+function bindWithoutWbs(x,xty) {
+    if(xty == 1) {
+        var rowid = $(x)[0].id.split('_')[1];
+    } else if(xty == 2) {
+        var rowid = x;
+    }
+    var descId = $('#descid_' + rowid).val();
+
+    var resId = 0;
+    var wiowId = 0;
+    var woeQty = 0;
+    var wbeQty = 0;
+
+    if(OrderType == 'work' && WorkType == 'activity') {
+        resId = descId;
+    } else if (OrderType == 'work' && WorkType == 'iow') {
+        wiowId = descId;
+    }
+
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + 'wpm/workorder/entry',
+        type: "post",
+        data: {'ResourceId': resId, 'ccId': $('#costCentreId').val(), 'IOWId': wiowId, 'Type': 'getqtywio'},
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if(jqXHR.status == 200) {
+                data = JSON.parse(data);
+                woeQty = data.WOQty;
+                wbeQty = data.WBQty;
+                if (woeQty == null) {
+                    woeQty = 0;
+                }
+                if (wbeQty == null) {
+                    wbeQty = 0;
+                }
+                $('#workorderqty_' + rowid).html(parseFloatVal(woeQty));
+                $('#totbilledqty_' + rowid).html(parseFloatVal(wbeQty));
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+}
+
+function addNewResourceRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $rowid = $('#rowid'),
+        rowid = parseInt($rowid.val()),
+        $tbody = $('#workorderTable').find('> tbody.main');
+
+    $('#deleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#resource-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+
+    $rowid.val(count);
+    bindDescAutocomplete();
+    bindPopOver();
+}
+
+function deleteRow(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].id.split('_')[1];
+
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var transid = $('#WOTransId_' + key).val();
+    if(transid != 0) {
+        $('#deleteids').val($('#deleteids').val() + ',' + transid);
+    }
+
+    var $tr = $x.closest('tr');
+    $tr.next('.subTr').remove();
+    $tr.remove();
+
+    calcTotal();
+    return false;
+}
+
+function checkResourceUsed(x) {
+    closeMainTr();
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=descid_]');
+    tmp_arr_resources = arr_resources;
+    //console.log(tmp_arr_resources);
+    tmp_arr_resources = $.grep(arr_resources, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindDescAutocomplete();
+}
+
+function nextAccordian(id) {
+    $('#panelheading-' + id).trigger('click');
+}
+
+function calcQuantity(x)
+{
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowid = ids[3];
+
+    $('#iow_'+rowid+'_qty_' + iowid).removeClass('red_bdr');
+
+    var thisQty = parseFloat($('#iow_'+rowid+'_qty_' + iowid).val());
+    var estQty = parseFloat($('#iow_'+rowid+'_estimateqty_' + iowid).html());
+    var wotQty = parseFloat($('#iow_'+rowid+'_workorderqty_' + iowid).html());
+    var totbillQty = parseFloat($('#iow_'+rowid+'_totbilledqty_' + iowid).html());
+
+    if(thisQty != 0) {
+        removeError($('#qty_'+rowid));
+    }
+
+    var chkQty = 0;
+    if(wotQty > totbillQty)
+        chkQty = wotQty;
+    else
+        chkQty = totbillQty;
+
+    chkQty = (estQty - chkQty);
+
+    //if((estQty >= thisQty) && (thisQty >= chkQty)) {
+    if(chkQty >= thisQty) {
+        $('#iow_'+rowid+'_qty_' + iowid).removeClass('red_bdr');
+        $('#iow_'+rowid+'_qty_' + iowid).val(sanitizeNumber(thisQty, 3));
+    } else {
+        $('#iow_'+rowid+'_qty_' + iowid).addClass('red_bdr');
+        $('#iow_'+rowid+'_qty_' + iowid).val('');
+        alert('Qty exceeds estimated qty');
+    }
+
+    if ($('#iow_' + rowid + '_WOIOWTransId_' + iowid).val() != 0) {
+        $('#iow_' + rowid + '_UpdateRow_' + iowid).val(1);
+        $('#UpdateRow_' + rowid).val(1);
+    }
+
+    var thisrate = parseFloatVal($('#iow_'+rowid+'_rate_' + iowid).val());
+    if($('#rate_' + rowid).val() >= thisrate) {
+        $('#iow_'+rowid+'_rate_' + iowid).removeClass('red_bdr');
+        $('#iow_'+rowid+'_amount_' + iowid).val(sanitizeNumber(thisQty * thisrate));
+    } else {
+        $('#iow_'+rowid+'_rate_' + iowid).addClass('red_bdr');
+        $('#iow_'+rowid+'_amount_' + iowid).val(sanitizeNumber(0));
+        alert('Rate exceeds');
+    }
+
+    // calc total qty
+    var totalQty = 0;
+    var totalAmount = 0;
+    $.each($('input[id^=iow_' + rowid + '_qty_'), function (i, o) {
+        var qty = parseFloat($(this).val());
+        if (isNaN(qty))
+            qty = 0;
+
+        totalQty += qty;
+    });
+    $('#totalqty_' + rowid).val(sanitizeNumber(totalQty, 3));
+    $('#qty_' + rowid).val(sanitizeNumber(totalQty, 3));
+
+    // calc total amount
+    //var rate = parseFloatVal($('#rate_' + rowid).val());
+    $.each($('input[id^=iow_' + rowid + '_amount_'), function (i, o) {
+        var wamt = parseFloat($(this).val());
+        if (isNaN(wamt))
+            wamt = 0;
+
+        totalAmount += wamt;
+    });
+    $('#amount_' + rowid).val(sanitizeNumber(totalAmount));
+    calcTotal();
+}
+
+function calcQuantityWOWbs(x)
+{
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+
+    $('#qty_' + rowid).removeClass('red_bdr');
+
+    var thisQty = parseFloat($('#qty_' + rowid).val());
+    var estQty = parseFloat($('#estimateqty_' + rowid).html());
+    var wotQty = parseFloat($('#workorderqty_' + rowid).html());
+    var totbillQty = parseFloat($('#totbilledqty_' + rowid).html());
+
+    var chkQty = 0;
+    if(wotQty > totbillQty)
+        chkQty = wotQty;
+    else
+        chkQty = totbillQty;
+
+    chkQty = (estQty - chkQty);
+
+    //if((estQty >= thisQty) && (thisQty >= chkQty)) {
+    if(chkQty >= thisQty) {
+        $('#qty_' + rowid).removeClass('red_bdr');
+        $('#qty_' + rowid).val(sanitizeNumber(thisQty, 3));
+    } else {
+        $('#qty_' + rowid).addClass('red_bdr');
+        $('#qty_' + rowid).val('');
+        alert('Qty exceeds estimated qty');
+    }
+
+    // calc total amount
+    var qty = parseFloatVal($('#qty_' + rowid).val());
+    var rate = parseFloatVal($('#rate_' + rowid).val());
+    $('#amount_' + rowid).val(sanitizeNumber(qty * rate));
+    calcTotal();
+}
+
+function checkPercent(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var thisVal = parseFloat($('#materialAdvRate_' + id).val());
+    if(thisVal > 100) {
+        $('#materialAdvRate_' + id).addClass('red_bdr');
+        $('#materialAdvRate_' + id).val('');
+        $('#materialAdvRate_' + id).focus();
+        alert('Percentage exceeds 100');
+    } else {
+        $('#materialAdvRate_' + id).removeClass('red_bdr');
+        $('#materialAdvRate_' + id).val(sanitizeNumber(thisVal, 2));
+    }
+}
+
+function myfunc(x){
+    $(".base").val(x);
+    CalcQualifier();
+    var $mainTr = $(".qualChange");
+    $mainTr.change(function (e) {
+        CalcQualifier();
+    });
+}
+
+function CalcQualifier() {
+    $.each($(".base"), function () {
+        var qId = $(this).attr('id').split('_')[4];
+        var iId = $(this).attr('id').split('_')[2];
+        var sFormula = isNullCheck($('#QualR__' + iId + '_Exp_' + qId).val(), 'string');
+        var dbaseAmt = isNullCheck($('#QualR__' + iId + '_ExpValue_' + qId).val(), 'string');
+        var dPer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_ExpPer_' + qId).val(), 'number'));
+        var sbaseRef = 'R0';
+        if (parseFloatVal(dPer) == 0) dPer = 100;
+        var sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+        var fvaule = computeEval(sFormula);
+        var iQualTypeid = $('#QualR__' + iId + '_TypeId_' + qId).val();
+        var dAmt=0;
+        if (iQualTypeid==1 || iQualTypeid==2) {
+            var dTaxablePer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_TaxablePer_' + qId).val(),'number'));
+            var dTaxPer = parseFloatVal(isNullCheck($('#QualR__' + iId + '_TaxPer_' + qId).val(),'number'));
+            var dCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_CessPer_' + qId).val(),'number'));
+            var dEDCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_EduCessPer_' + qId).val(),'number'));
+            var dHEDCess = parseFloatVal(isNullCheck($('#QualR__' + iId + '_HEduCessPer_' + qId).val(),'number'));
+            var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+            $('#QualR__' + iId + '_NetPer_' + qId).val(dNetPer);
+
+            $('#QualR__' + iId + '_NetPer_' + qId).val(numberFormat(dNetPer,'C'));
+            $('#QualR__' + iId + '_ExpPer_'+ qId).val(numberFormat(dNetPer,'C'));
+
+            var dTaxableAmt =  fvaule* (dTaxablePer/100);
+            var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+            var dCessAmt =  dTaxAmt* (dCess/100);
+
+            var dEDAmt =  dTaxAmt* (dEDCess/100);
+            var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+            var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+            $('#QualR__' + iId + '_TaxableAmt_'+ qId).val(numberFormat(dTaxableAmt,'C'));
+            $('#QualR__' + iId +  '_TaxPerAmt_'+ qId).val(numberFormat(dTaxAmt,'C'));
+            $('#QualR__' + iId + '_CessAmt_'+ qId).val(numberFormat(dCessAmt,'C'));
+            $('#QualR__' + iId + '_EduCessAmt_'+ qId).val(numberFormat(dEDAmt,'C'));
+            $('#QualR__' + iId + '_HEduCessAmt_'+ qId).val(numberFormat(dHEDAmt,'C'));
+            $('#QualR__' + iId + '_NetAmt_'+ qId).val(numberFormat(dNetAmt,'C'));
+
+            dAmt = dNetAmt;
+        }else{
+            dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+        }
+//        var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+        $('#QualR__' + iId + '_Amount_' + qId).val(numberFormat(dAmt,'C'));
+    });
+    sign();
+}
+
+function sign(){
+    var tot=0;
+    $.each($(".signCh"), function () {
+        var qId = $(this).attr('id').split('_')[4];
+        var iId = $(this).attr('id').split('_')[2];
+        var cAmt=parseFloatVal($('#QualR__' + iId + '_Amount_' + qId).val());
+        var yesNo=$('#QualR__' + iId +'_YesNo_'+ qId).is(':checked');
+        var sSign='-';
+        if ($('#QualR__' + iId +'_SignC_' + qId).hasClass("fa-plus")) {
+            sSign='+';
+        }
+        if(yesNo== true){
+            if (sSign =="-") {
+                tot = tot - parseFloatVal(cAmt);
+            } else {
+                tot = tot + parseFloatVal(cAmt);
+            }
+        }
+    });
+    $('#QualRTotalAmt__1').val(numberFormat(tot,'C'));
+    $('#qualAmt').val(numberFormat(tot,'C'));
+    var bAmt = $('#qualAmt').val();
+    var qAmt = $('#total').val();
+    $('#totAmount').val(numberFormat((parseFloatVal(bAmt)+parseFloatVal(qAmt)),'C'));
+}
+
+function calcTotal(x) {
+    var total = 0;
+    $.each($('input[id^=amount_]'), function (i,o) {
+        total += parseFloatVal($(this).val());
+    });
+    $('#total').val(sanitizeNumber(total)).trigger('change');
+}
+
+function calcTotalQty()
+{
+    var tRows = $('#rowid').val();
+    for (var i = 1; i <= tRows; i++) {
+        var totalQty = 0;
+        $.each($('input[id^=iow_' + i + '_qty_'), function (i, o) {
+            var qty = parseFloat($(this).val());
+            if (isNaN(qty))
+                qty = 0;
+
+            totalQty += qty;
+        });
+
+        $('#totalqty_' + i).val(sanitizeNumber(totalQty, 3));
+    }
+}
+
+function calcRequestQuantity(x) {
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowrowid = ids[3];
+    var requestrowid = ids[5];
+
+    // calc total qty
+    var totalQty=0;
+    $.each($('input[id^=iow_'+rowid+'_request_'+iowrowid+'_curqty_]'), function (i,o) {
+        var qty = parseInt($(this).val());
+        if(isNaN(qty))
+            qty = 0;
+
+        totalQty += qty;
+    });
+
+    if(totalQty > $('#iow_'+rowid+'_request_'+iowrowid+'_estimateqty').html()) {
+        showError($x, 'Qty should not exceed estimate qty!');
+        return;
+    } else {
+        removeError($x);
+    }
+
+    if($('#iow_'+rowid+'_request_'+iowrowid+'_WOIPDTransId_' + requestrowid).val() != 0) {
+        $('#iow_'+rowid+'_request_'+iowrowid+'_UpdateRow_' + requestrowid).val(1);
+    }
+
+//        $('#iow_'+rowid+'_request_'+iowrowid+'_totbilledqty').val(sanitizeNumber(totalQty,0));
+    $('#iow_'+rowid+'_qty_'+iowrowid).val(sanitizeNumber(totalQty,0)).trigger('change');
+}
+
+
+function addNewTermRow(x) {
+    var $tr = $(x).closest('tr');
+    var id = $(x)[0].id.split('_')[1];
+
+    if($('#termtransid_' + id).val() != 0) {
+        $('#termupdaterow_' + id).val(1);
+    }
+
+    if ($tr.next('tr').length != 0 || $('#termTitle_' + id).val().length == 0)
+        return;
+
+    var $rowid = $('#termrowid'),
+        rowid = parseInt($rowid.val());
+    $('.deleteTermTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#otherterms-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+}
+
+function deleteTerm(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        id = $(x)[0].className.split('_')[1],
+        $tbody = $tr.parent('tbody');
+
+    var termid = $('#termtransid_' + id).val();
+    if(termid != 0) {
+        $('#termdeleteids').val($('#termdeleteids').val() + ',' + termid);
+    }
+
+    $tr.remove();
+    return false;
+}
+
+function addNewTechRow(x) {
+    var $tr = $(x).closest('tr');
+    var id = $(x)[0].id.split('_')[1];
+
+    if($('#techtransid_' + id).val() != 0) {
+        $('#techupdaterow_' + id).val(1);
+    }
+
+    if ($tr.next('tr').length != 0 || $('#techTitle_' + id).val().length == 0)
+        return;
+
+    var $rowid = $('#techrowid'),
+        rowid = parseInt($rowid.val());
+    $('.deleteTechTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#techtitle-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+}
+
+function deleteTech(x,e) {
+    e.preventDefault();
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        id = $(x)[0].className.split('_')[1],
+        $tbody = $tr.parent('tbody');
+
+    var techid = $('#techtransid_' + id).val();
+    if(techid != 0) {
+        $('#techdeleteids').val($('#techdeleteids').val() + ',' + techid);
+    }
+
+    $tr.remove();
+    return false;
+}
+
+function addNewMaterialRow(x) {
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = $x[0].id.split('_')[1];
+
+    if($('#materialtransid_' + key).val() != 0) {
+        $('#materialupdaterow_' + key).val(1);
+    }
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#materialName_' + key).val().length == 0 || $('#materialRate_' + key).val().length == 0)
+        return;
+
+    var $rowid = $('#materialrowid'),
+        rowid = parseInt($rowid.val());
+    $('.materialDeleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#material-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+    bindMaterialBaseAutoComplete();
+}
+
+function deleteMaterial(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1],
+        materialId = $('#materialId_' + key).val();
+
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var $tr = $x.closest('tr'),
+        id = $(x)[0].className.split('_')[1],
+        $tbody = $tr.parent('tbody');
+
+    var transid = $('#materialtransid_' + id).val();
+    if(transid != 0) {
+        $('#materialdeleteids').val($('#materialdeleteids').val() + ',' + transid);
+    }
+
+    $tr.remove();
+    materialPrice = materiallists;
+
+    bindMaterialBaseAutoComplete();
+    return false;
+}
+
+function addNewMaterialExcRow(x) {
+    var $tr = $(x).closest('tr'),
+        key = $(x)[0].id.split('_')[1];
+
+    if($('#materialexctransid_' + key).val() != 0) {
+        $('#materialexcupdaterow_' + key).val(1);
+    }
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#materialExcId_' + key).val().length == 0 || $('#materialExcRate_' + key).val().length == 0)
+        return;
+
+    var $rowid = $('#materialExcrowid'),
+        rowid = parseInt($rowid.val());
+    $('.materialExcDeleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#materialexc-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+    bindMaterialExcAutoComplete();
+}
+
+function deleteMaterialExc(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1],
+        materialId = $('#materialExcId_' + key).val(),
+        type = $('#materialExcType_' + key).val();
+
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        id = $(x)[0].className.split('_')[1],
+        $tbody = $tr.parent('tbody');
+
+    var transid = $('#materialexctransid_' + id).val();
+    if(transid != 0) {
+        $('#materialexcdeleteids').val($('#materialexcdeleteids').val() + ',' + transid);
+    }
+
+    $tr.remove();
+    bindMaterialExcAutoComplete();
+    return false;
+}
+
+function addNewMaterialAdvRow(x) {
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = $x[0].id.split('_')[1];
+
+    if($('#materialadvtransid_' + key).val() != 0) {
+        $('#materialadvupdaterow_' + key).val(1);
+    }
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#materialAdvName_' + key).val().length == 0 || $('#materialAdvRate_' + key).val().length == 0)
+        return;
+
+    var $rowid = $('#materialAdvrowid'),
+        rowid = parseInt($rowid.val());
+    $('.materialAdvDeleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#materialadv-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+    bindMaterialAdvAutoComplete();
+}
+
+function deleteMaterialAdv(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1],
+        materialId = $('#materialAdvId_' + key).val();
+
+    if (!confirm('Do you want to Delete?'))
+        return false;
+
+    var $tr = $x.closest('tr'),
+        id = $(x)[0].className.split('_')[1],
+        $tbody = $tr.parent('tbody');
+
+    var transid = $('#materialadvtransid_' + id).val();
+    if(transid != 0) {
+        $('#materialadvdeleteids').val($('#materialadvdeleteids').val() + ',' + transid);
+    }
+
+    $tr.remove();
+    bindMaterialAdvAutoComplete();
+    return false;
+}
+
+function bindMaterialBaseAutoComplete() {
+
+    var $matertialName = $('input[id^=materialName_]');
+    $matertialName.unbind('autocomplete');
+    var addedMaterials = [];
+    $.each($matertialName, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+        $this.autocomplete({
+            lookup: materialPrice,
+//                showNoSuggestionNotice:true,
+//                noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" id="matpricenew_' + key1+'" value="Material" onclick="return AddNewMaterial(this.id)">',
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $el = $("#materialId_" + key1);
+                    $el.val(suggestion.data);
+                    $('#materialUnit_' + key1).val(suggestion.unit);
+                    $('#materialRate_' + key1).val(suggestion.Rate).prop('readonly', true);
+                    addNewMaterialRow($(this));
+                    removeError($(this));
+                }
+            }, onSearchStart: function (suggestion) {
+                $("#materialId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    //showError($(this), 'Required');
+                    $("#materialId_" + key1).val(0);
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+
+function bindMaterialExcAutoComplete() {
+    var $materialName = $('input[id^=materialExcName_]');
+    $materialName.unbind('autocomplete');
+
+    $.each($materialName, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+
+        $this.autocomplete({
+            lookup: materialSupply,
+//                showNoSuggestionNotice:true,
+//                noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" id="matsupplynew_' + key1+'" value="Material" onclick="return AddNewMaterial(this.id)">',
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $el = $("#materialExcId_" + key1);
+                    $el.val(suggestion.data);
+                    $('#materialExcUnit_' + key1).val(suggestion.unit);
+                    $('#materialExcRate_' + key1).val(suggestion.Rate).prop('readonly', true);
+                    addNewMaterialExcRow($(this));
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                $("#materialExcId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    //showError($(this), 'Required');
+                    $("#materialExcId_" + key1).val(0);
+                } else {
+                    removeError($(this));
+                }
+            }
+        });
+    });
+}
+
+function bindMaterialAdvAutoComplete() {
+    var $matertialName = $('input[id^=materialAdvName_]');
+    $matertialName.unbind('autocomplete');
+    $.each($matertialName, function () {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var arrname = name.split('_');
+        var key1 = arrname[1];
+
+        $this.autocomplete({
+            lookup: materialaAdv,
+//                showNoSuggestionNotice:true,
+//                noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" id="matadvnew_' + key1+'" value="Material" onclick="return AddNewMaterial(this.id)">',
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function(suggestion) {
+                if(suggestion) {
+                    var $el = $("#materialAdvId_" + key1);
+                    $el.val(suggestion.data);
+                    removeError($(this));
+                }
+            }, onSearchStart: function(suggestion) {
+                $("#materialAdvId_" + key1).val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    //showError($(this), 'Required');
+                    $("#materialAdvId_" + key1).val(0);
+                } else
+                    removeError($(this));
+            }
+        });
+    });
+}
+
+function checkMaterialPriceUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=materialId_]');
+    materialPrice = materiallists;
+    materialPrice = $.grep(materiallists, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindMaterialBaseAutoComplete();
+}
+
+function checkMaterialSupplyUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=materialExcId_]');
+    materialSupply = materiallists;
+
+    materialSupply = $.grep(materiallists, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindMaterialExcAutoComplete();
+}
+
+
+function checkMaterialAdvUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=materialAdvId_]');
+    materialaAdv = materiallists;
+    materialaAdv = $.grep(materiallists, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindMaterialAdvAutoComplete();
+}
+
+if($('#woTypeId').val() != '') {
+    $.post(getBaseURL() + 'wpm/labourstrength/get-comp-cc-no', {
+        typeId: $('#woTypeId').val(),
+        ccId: $('#costCentreId').val()
+    },
+    function (data) {
+        var vNo = data.split('###');
+        $('#CCWONo').val($.trim(vNo[0]));
+        $('#CompWONo').val($.trim(vNo[1]));
+        if($.trim(vNo[0]) != '')
+            $('#CCWONo').prop('readonly', true);
+        if($.trim(vNo[1]) != '')
+            $('#CompWONo').prop('readonly', true);
+    });
+}
+
+function signChange(x) {
+    var $this = $(x);
+    if ($this.hasClass( "fa-plus" )) {
+        $this.removeClass('fa-plus clr-gre');
+        $this.addClass('fa-minus clr-red');
+        var sname= $this[0].id.split('_')[0],
+            key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('-');
+    } else {
+        $this.removeClass('fa-minus clr-red');
+        $this.addClass('fa-plus clr-gre');
+        var sname= $this[0].id.split('_')[0],
+            key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('+');
+    }
+    sign();
+}
+function validPercent(){
+    CalcQualifier();
+}
+
+function closeAllActivity() {
+    var $resrate = $('input[id*=_resrate_]');
+    $.each($resrate, function() {
+        var x = $(this)[0].id;
+        if (x.indexOf('__') != -1) return;
+        closeIOWAnalysis(x);
+    });
+}
+
+
+function bindPopOver() {
+    var $inputs =  $('input[data-toggle="popover"]');
+    $inputs.unbind('popover');
+    $inputs.popover({
+        placement : 'auto left',
+        trigger : 'hover'
+    });
+}
+function hideShow(x,hsType,wiType)
+{
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+
+    if(wiType == 'w') {
+        var iowid = ids[3];
+
+        if (hsType == 's')
+            $('#iow_' + rowid + '_ewbqty_' + iowid).show();
+        else if (hsType == 'h')
+            $('#iow_' + rowid + '_ewbqty_' + iowid).hide();
+    } else if(wiType == 'wo') {
+        if($('#descid_' + rowid).val() != '') {
+            if (hsType == 's')
+                $('#ewbqty_' + rowid).show();
+            else if (hsType == 'h')
+                $('#ewbqty_' + rowid).hide();
+        }
+    }
+}
+function checkTermsUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var termkeyid = $('input[id*=termsid_]');
+    tmp_arr_terms = arr_terms;
+    tmp_arr_terms = $.grep(arr_terms, function (element, index) {
+        var is_selected = true;
+        $.each(termkeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindTermsAutocomplete();
+}
+function bindTermsAutocomplete() {
+    // bind resource autocomplete
+    $('#gTermsTable .resourceSuggest').autocomplete({
+        lookup: tmp_arr_terms,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $this.prop('readonly', true).addClass('border-none');
+                $('#termsid_' + rowid).val(suggestion.data);
+                //$('#slno_' + rowid).val(suggestion.SlNo);
+                $('#terms_' + rowid).val(suggestion.value);
+                $('#per_' + rowid).val(suggestion.Per);
+                $('#value_' + rowid).val(suggestion.Val);
+                $('#period_' + rowid).val(suggestion.Period);
+                $('#date_' + rowid).val(suggestion.Dte);
+                $('#string_' + rowid).val(suggestion.Strg);
+                $('#isper_' + rowid).val(suggestion.IsPer);
+                $('#isvalue_' + rowid).val(suggestion.IsValue);
+                $('#isperiod_' + rowid).val(suggestion.IsPeriod);
+                $('#istdate_' + rowid).val(suggestion.IsTDate);
+                $('#iststring_' + rowid).val(suggestion.IsTString);
+                $('#includegross_' + rowid).val(suggestion.IncludeGross);
+                $('#termsdeleteTr_' + rowid).show();
+                /*if(parseInt($('#isper_' + rowid).val())==0){$('#per_' + rowid).attr("readonly",true);}
+                if(parseInt($('#isvalue_' + rowid).val())==0) {$('#value_' + rowid).attr("readonly",true);}
+                if(parseInt($('#isperiod_' + rowid).val())==0) {$('#period_' + rowid).attr("readonly",true);}
+                if(parseInt($('#istdate_' + rowid).val())==0) {$('#date_' + rowid).attr("readonly",true);}
+                if(parseInt($('#iststring_' + rowid).val())==0) {$('#string_' + rowid).attr("readonly",true);}*/
+                 if(parseInt($('#isper_' + rowid).val())==0){$('#per_' + rowid).hide();}
+                 if(parseInt($('#isvalue_' + rowid).val())==0) {$('#value_' + rowid).hide();}
+                 if(parseInt($('#isperiod_' + rowid).val())==0) {$('#period_' + rowid).hide();}
+                 if(parseInt($('#istdate_' + rowid).val())==0) {$('#date_' + rowid).hide();}
+                 if(parseInt($('#iststring_' + rowid).val())==0) {$('#string_' + rowid).hide();}
+                addNewTermsRow($this);
+            }
+        }, onSearchStart: function (suggestion) {
+            //var rowid = $(this)[0].id.split('_')[1];
+            ////$('#terms_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                // var rowid = $(this)[0].id.split('_')[1];
+                // $('#terms_' + rowid).val('');
+            }
+        }
+    });
+}
+function addNewTermsRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $trowid = $('#trowid'),
+        trowid = parseInt($trowid.val()),
+        $tbody = $('#gTermsTable').find('> tbody.main');
+
+    $('#deleteTr_' + trowid).show();
+    var count = trowid + 1,
+        template = $('#terms-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+
+    $trowid.val(count);
+    var tCount =  $('#gTermsTable tbody tr').length;
+    if(tCount > 1){
+        $('#valuefrom').attr("disabled", true);
+    }
+    else
+    {
+        $('#valuefrom').attr("disabled", false);
+    }
+    bindTermsAutocomplete();
+}
+
+function deleteRow(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1];
+
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $x.closest('tr');
+    $tr.next('.subTr').remove();
+    $tr.next('.subTr').remove();
+    $tr.remove();
+//    calcTotal();
+    bindTermsAutocomplete();
+//    TermsAutoRefresh();
+    return false;
+}
+function TermsCalculation(x)
+{
+    var valueFrom=$('#valuefrom').val();
+    var sname= x.split('_')[0],
+        key= x.split('_')[1];
+    if($("#per_"+key).val() >100)
+    {
+        alert("Enter Valid value!");
+        $('#per_'+key).val(0);
+        $('#value_'+key).val(0);
+        return;
+    }
+    var valpair=$("#value_"+key).val();
+    if(valueFrom == 'BaseAmount'){
+        var bid ="total";
+        basevaluecalculation(x,bid);
+    }
+    else  if(valueFrom =='NetAmount')
+    {
+        var bid ="totAmount";
+        netvaluecalculation(x,bid);
+    }
+
+}
+function basevaluecalculation(x,bid)
+{
+
+    var sname= x.split('_')[0],
+        key= x.split('_')[1];
+    if(sname=="per") {
+        var pervalue = parseFloat(isNullCheck($("#per_" + key).val(), 'number'));
+        var boxvalue = parseFloat(isNullCheck($('#total').val(), 'number'));
+        var percentage = (boxvalue / 100) * pervalue;
+        $("#value_" + key).val(percentage.toFixed(3));
+    }
+    else if(sname=="value")
+    {
+
+        var pervalue =  parseFloat(isNullCheck($("#value_" + key).val(),'number'));
+        var boxvalue = parseFloat(isNullCheck($('#total').val(), 'number'));
+        var percentage = parseFloat(((pervalue *100) / boxvalue));
+        $("#per_" + key).val(percentage);
+        $("#per_" + key).val(percentage.toFixed(2));
+        if(percentage.toFixed(2) > 100)
+        {
+            alert("Enter Valid value!");
+            $('#per_'+key).val(0);
+            $('#value_'+key).val(0);
+            return;
+        }
+    }
+
+}
+function netvaluecalculation(x,bid)
+{
+
+    var sname= x.split('_')[0],
+        key= x.split('_')[1];
+    if(sname=="per") {
+        var pervalue = $("#per_" + key).val();
+        var boxvalue = parseFloat(isNullCheck($('#total').val(), 'number'));
+        var percentage = (boxvalue / 100) * pervalue;
+        $("#value_" + key).val(percentage);
+    }
+    else if(sname=="value")
+    {
+        var pervalue = $("#value_" + key).val();
+        var boxvalue = parseFloat(isNullCheck($('#total').val(), 'number'));
+        var percentage = parseFloat((boxvalue / pervalue));
+        $("#per_" + key).val(percentage);
+        console.log("net base:"+perint);
+    }
+
+}
+
+
+function TotAmtValidation(argAdv,argADel,argAWork,argABill,argACer)
+{
+    var bRet=false;
+    var dTot=parseFloat(isNullCheck(argAdv,'number')) + parseFloat(isNullCheck(argADel,'number')) + parseFloat(isNullCheck(argABill,'number')) + parseFloat(isNullCheck(argACer,'number')) + parseFloat(isNullCheck(argAWork,'number'));
+    if(dTot > 100)
+    {
+        bRet = true;
+    }
+    return bRet;
+}
+function AmtCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+{
+    var Val,TotPer = 0.0;
+    TotPer = parseFloat(isNullCheck(argAgaDel,'number')) + parseFloat(isNullCheck(argAgaBill,'number')) + parseFloat(isNullCheck(argAgaCer,'number')) + parseFloat(isNullCheck(argAgaWork,'number'));
+    Val = AmountToPer(parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(TotPer,'number')));
+    $('#per_'+key).val(sanitizeNumber(Val,3,true));
+}
+function PerCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+{
+    var Val,TotPer=0.0;
+    TotPer = parseFloat(isNullCheck(argAgaDel,'number'))+parseFloat(isNullCheck(argAgaBill,'number'))+parseFloat(isNullCheck(argAgaCer,'number'))+parseFloat(isNullCheck(argAgaWork,'number'));
+    Val = PerToAmount(parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(TotPer,'number')));
+    $('#value_'+key).val(sanitizeNumber(Val,3,true));
+}
+function PerToAmount(argPer,argAmt,argTotPer)
+{
+    if(parseFloat(isNullCheck(argAmt,'number'))>0 && parseFloat(isNullCheck(argPer,'number')) > 0)
+    {
+        argPer = (parseFloat(isNullCheck(argPer,'number')) / 100) * parseFloat(isNullCheck(argAmt,'number'));
+    }
+    return argPer;
+}
+function AmountToPer(argAmt,argPer,argTotPer)
+{
+    if(parseFloat(isNullCheck(argAmt,'number')) > 0 && parseFloat(isNullCheck(argPer,'number')) >0)
+    {
+        argAmt = ((parseFloat(isNullCheck(argPer,'number')) / parseFloat(isNullCheck(argAmt,'number'))) * 100)
+    }
+    return argAmt;
+}
+function yesNo(){
+    CalcQualifier();
+
+}
+</script>

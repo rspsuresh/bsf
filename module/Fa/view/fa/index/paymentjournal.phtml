@@ -1,0 +1,1830 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/fa.css';?>"/>
+<style type="text/css">
+    .lbl_move{height:40px !important;}
+    .top-20{margin-top:20px;}
+    .mar_btm{margin-bottom:20px;}
+    .parent_text.error                 				{border:1px solid #D64541!important;color:#333!important;background:#FFEBEB !important;}
+    .error + .tooltip > .tooltip-inner				{background: #E74C3C;}
+    .error + .tooltip > .tooltip-arrow 				{border-top-color: #E74C3C;}
+    .diff_txt {height: 42px !important;}
+    .diff_txt {background: #fff none repeat scroll 0 0;border: 1px solid #ccc;font-size: 14px !important;font-weight: normal !important;padding: 6px 4px;transition: border-color 1s ease 0s;width: 100%;}
+	.table-responsive {box-shadow: 0 0px 0 rgba(0, 0, 0, 0.12), 0 0px 0px rgba(0, 0, 0, 0.24)!important;}
+
+    .error_select{border-color: red;}
+</style>
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <form id="paymentJournalForm" method="post">
+            <div class="col-lg-12">
+                <h1 class="txt_center">Payment Journal<?php echo $aVNo['genType'];?></h1>
+                <div class="col-lg-3">
+                    <div class="form-group req_flds col-lg-12">
+                        <input type="text" name="voucherNo" id="voucherNo" value="<?php echo (isset($regOPJouralList) && $regOPJouralList['VoucherNo'] !='') ? $regOPJouralList['VoucherNo'] : $svNo;?>" <?php echo (isset($aVNo) && $aVNo['genType'] == 1) ? 'readonly' : '';?> style="width:100%;" class="form-control lbl_move" label="Payment Journal No" />
+                        <input type="hidden" name="EntryId" id="EntryId" value="<?php echo (isset($EntryId)) ? $EntryId : '0';?>" />
+                        <input type="hidden" name="hiddenGetHOAccountId" id="hiddenGetHOAccountId" value="<?php echo (isset($getHOAccId)) ? $getHOAccId : '0';?>" />
+                        <div class="error_message"><p>Please enter Payment Journal No...</p></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-lg-offset-6">
+                    <div class="form-group req_flds col-lg-12">
+                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                        <input readonly type="text" name="voucherDate" id="voucherDate" class="form-control lbl_move datepickerinput" label="Voucher Date" value="<?php echo (isset($regOPJouralList) && $regOPJouralList['VoucherDate'] !='') ? $regOPJouralList['VoucherDate'] : date('d-m-Y');?>"/>
+                        <div class="error_message"><p>Please enter Voucher date...</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="firstSlide">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <label style="font-size: 15px;margin-left:10px;">Payment through which Book?</label>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-12">
+                                <div class="radio_check" style="" label="select">
+                                    <p class="stat_lbl">
+                                        <input type="radio" id="bankBook" class="paymentBook" value="B" <?php echo (isset($regOPJouralList) && $regOPJouralList['PayType'] != 'BA') ? 'checked' : '';?>  name="paymentBook" onchange="bookType();" />
+                                        <label for="bankBook" class="ripple has-ripple" style="position: relative; overflow: hidden;">Bank Book<span class="ripple-wrapper animated"></span></label>
+                                    </p>
+                                    <p class="stat_lbl">
+                                        <input type="radio" id="cashBook" class="paymentBook" value="C" <?php echo (isset($regOPJouralList) && $regOPJouralList['PayType'] == 'CA') ? 'checked' : '';?> name="paymentBook" onchange="bookType();"/>
+                                        <label for="cashBook" class="ripple has-ripple" style="position: relative; overflow: hidden;">Cash Book<span class="ripple-wrapper animated"></span></label>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-12 req_flds">
+                                <select style="width:100%;" class="single_dropdown lbl_move" label="Book Name" name="bookName" id="bookName" onchange="AccountType(this)">
+                                    <option value="0"></option>
+                                    <?php if(isset($bookNameDet))  {
+                                        foreach($bookNameDet as $books) :?>
+                                            <option value="<?php echo $books['AccountID'];?>" <?php echo (isset($regOPJouralList) && $regOPJouralList['BookID'] == $books['AccountID']) ? 'selected' : '';?> ><?php echo $books['AccountName'];?></option>
+                                        <?php endforeach; } ?>
+                                </select>
+                                <div class="error_message"><p>Book Name is Required</p></div>
+                            </div>
+						</div>
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-12 req_flds">
+                                <select multiple style="width:100%;" class="single_dropdown lbl_move" label="Account Head" name="accountHeadId" id="accountHeadId">
+                                    <option value="0"></option>
+                                    <?php if(isset($accountHeadDet))  {
+                                        foreach($accountHeadDet as $accHead) :?>
+                                            <option value="<?php echo $accHead['AccountId'];?>" <?php echo (isset($regOPJouralList) && $regOPJouralList['AccountID'] == $accHead['AccountId']) ? 'selected' : '';?> ><?php echo $accHead['AccountName'];?></option>
+                                        <?php endforeach; } ?>
+                                </select>
+                                <div class="error_message"><p>Invalid Account Head</p></div>
+                                <input type="hidden" name="accountHeadIds" id="accountHeadIds" />
+                                <input type="hidden" name="accountHeadLength" id="accountHeadLength" />
+                            </div>
+                        </div>
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="form-group col-lg-12">
+								<select style="width:100%;" class="single_dropdown lbl_move" label="Ledger Type" name="ledgerType" id="ledgerType" onchange="fillSubLedgerName();">
+									<option value="0"></option>
+									<?php if(isset($subLedgerList)) {
+										foreach($subLedgerList as $subLedgerLists) :?>
+											<option value="<?php echo $subLedgerLists['SubLedgerTypeId'];?>" <?php echo (isset($regOPJouralList) && $regOPJouralList['SubLedgerTypeId'] == $subLedgerLists['SubLedgerTypeId']) ? 'selected' : '';?> ><?php echo $subLedgerLists['SubLedgerTypeName'];?></option>
+										<?php endforeach; } ?>
+								</select>
+							</div>
+						</div>
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-12">
+                                <input type="text" name="subLedgerName" class="lbl_move" id="subLedgerName" value="" label="SubLedger Name" />
+                                <input type="hidden" name="subLedgerId" id="subLedgerId" value="" />
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="form-group col-lg-12">
+                                <input type="text" name="costCenterName" class="lbl_move" id="costCenterName" value="" label="CostCenter Name" />
+                                <input type="hidden" name="costCenterId" id="costCenterId" value="" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			<div class="secondSlide" style="display: none;">
+				<div class="col-lg-12">
+					<div class="col-lg-3 col-lg-offset-1">
+						<label>Book Name:</label><span id="bookName1"></span>
+					</div>
+					<div class="col-lg-3 col-lg-offset-1">
+						<label>Account Head:</label><span id="accountHead1"></span>
+					</div>
+					<div class="col-lg-4">
+						<label>Ledger Type:</label><span id="ledgerType1"></span>
+					</div>
+				</div>
+				<div class="col-lg-12 top-20">
+					<div class="col-lg-3 col-lg-offset-1">				
+						<label>SubLedger Type Name:</label><span id="subLedgerName1"></span>
+					</div>
+					<div class="col-lg-3 col-lg-offset-1">
+						<label>CostCenter Name:</label><span id="costCenterName1"></span>
+					</div>
+				</div>
+                <div class="col-lg-12 top-20">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+								<tr>
+									<th class="red-ths">&nbsp;</th>
+									<th class="red-ths">Advice Date</th>
+									<th class="red-ths">Advice No</th>
+									<th class="red-ths">Currency</th>
+									<th class="red-ths">Advice Amount</th>
+                                    <th class="red-ths">Bill Amount</th>
+                                    <th class="red-ths">Deduction</th>
+									<th class="red-ths">Amount</th>
+								</tr>
+                            </thead>
+                            <tbody class="main" id="pickListAdvice">
+                            </tbody>
+                            <input type="hidden" name="payAdvDetRowId" id="payAdvDetRowId" value="0">
+                            <input type="hidden" name="payAdvPickIds" id="payAdvPickIds" value="">
+                            <tbody class="total">
+                            <tr>
+                                <td colspan="1">&nbsp;</td>
+                                <td colspan="2">&nbsp;</td>
+                                <td align="right" class="t_amt">Total</td>
+                                <td width="14%">
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="pickAdvice" id="pickAdvice" value="0" readonly />
+                                </td>
+                                <td width="14%">
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="pickBill" id="pickBill" value="0" readonly />
+                                </td>
+                                <td width="14%">
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="pickDeduction" id="pickDeduction" value="0" readonly />
+                                </td>
+                                <td width="14%">
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="pickAmount" id="pickAmount" value="0" readonly />
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+				</div>
+			</div>
+            <div class="thirdSlide" style="display: none;">
+                <div class="col-lg-12">
+                    <div class="table-responsive top-30">
+                        <table class="table tableView dataTable no-footer" style=" margin-bottom:0px;">
+                            <thead>
+                            <tr>
+                                <th class="red-ths">&nbsp;</th>
+                                <th class="red-ths">Advice Date</th>
+                                <th class="red-ths">Advice No</th>
+                                <th class="red-ths">Currency</th>
+                                <th class="red-ths">Advice Amount</th>
+                                <th class="red-ths">Bill Amount</th>
+                                <th class="red-ths">Deduction</th>
+                                <th class="red-ths">Amount</th>
+                                <th class="red-ths">&nbsp;</th>
+                                <th class="red-ths">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main seq-class" id="operationalJournal">
+                            </tbody>
+                            <tbody class="total" id="listTotal">
+                            <tr>
+                                <td colspan="3">&nbsp;</td>
+                                <td align="right" class="t_amt">Amount</td>
+                                <td width="10%" >
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="OJAdvice" id="OJAdvice" readonly/>
+                                </td>
+                                <td width="10%" >
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="OJBill" id="OJBill" readonly/>
+                                </td>
+                                <td width="10%" >
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="OJDeduction" id="OJDeduction" readonly/>
+                                </td>
+                                <td width="10%" >
+                                    <input class="parent_text border-none" style="text-align:right;" type="text" name="OJAmount" id="OJAmount" readonly/>
+                                </td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="operationalJournalRowId" id="operationalJournalRowId" value="0"/>
+                        <input type="hidden" name="overAllApproveAmt" id="overAllApproveAmt" value="0"/>
+                        <input type="hidden" name="overAllQualifierAmt" id="overAllQualifierAmt" value="0"/>
+                        <input type="hidden" name="overAllNetAmt" id="overAllNetAmt" value="0"/>
+                    </div>
+                </div>
+                <div class="col-lg-12 top-20">
+                    <div class="col-lg-4">
+                        <div class="form-group req_flds col-lg-12" id="payMode">
+                            <select name="paymentMode" id="paymentMode" style="width:100%;" class="single_dropdown lbl_move" label="Payment Mode" onchange="AccountType(this)" >
+                                <option value="0"></option>
+                                <option value="1" <?php echo (isset($regOPJouralList) && $regOPJouralList['PayType'] == '1') ? 'selected':''; ?> >Cheque</option>
+                                <option value="2" <?php echo (isset($regOPJouralList) && $regOPJouralList['PayType'] == '2') ? 'selected':''; ?> >RTGS/NEFT (Cheque)</option>
+                                <option value="3" <?php echo (isset($regOPJouralList) && $regOPJouralList['PayType'] == '3') ? 'selected':''; ?> >RTGS/NEFT (Fund Transfer)</option>
+                            </select>
+                            <div class="error_message"><p>Payment Mode is Required</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input readonly type="text" name="transactionDate" id="transactionDate" class="form-control lbl_move datepickerinput" label="Transaction Date"  value="<?php echo (isset($regOPJouralList) && $regOPJouralList['ChequeDate'] != '') ? $regOPJouralList['ChequeDate']: date('d-m-Y');?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <input type="text" name="transactionNo" id="transactionNo" value="<?php echo (isset($regOPJouralList)) ? $regOPJouralList['ChequeNo']:'';?>" style="width:100%;" class="form-control lbl_move" label="<?php echo (isset($groupData) && $groupData['PayType'] == '3') ? 'Transaction No':'Cheque No'; ?>" />
+                            <input type="hidden" name="chequeTransId" id="chequeTransId" value="<?php echo (isset($regOPJouralList)) ? $regOPJouralList['ChequeTransId']:'0';?>">
+                            <input type="hidden" name="previousChequeTransId" id="previousChequeTransId" value="<?php echo (isset($regOPJouralList)) ? $regOPJouralList['ChequeTransId']:'0';?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 top-20 mar_btm">
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <input readonly type="text" name="netAmount" id="netAmount" style="width:100%;" class="form-control lbl_move" label="Amount" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <input type="text" name="bankCharges" id="bankCharges" style="width:100%;" class="form-control lbl_move" label="Bank Charges" value="<?php echo (isset($regOPJouralList)) ? $regOPJouralList['OtherCharges']:'0';?>" onchange="showExpenseAccount()" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group col-lg-12">
+                            <select name="bankExpenseAccountId" id="bankExpenseAccountId" style="width:100%;" class="single_dropdown lbl_move" label="Expense Account" <?php echo (isset($regOPJouralList) && $regOPJouralList['OtherAccountId'] == 0) ? 'disabled':'';?>  >
+                                <option value=""></option>
+                            <?php if(isset($expenseAccount) && count($expenseAccount) != 0) {
+                                    foreach($expenseAccount as $expense):?>
+                                        <option value="<?php echo $expense['AccountId'];?>" <?php echo (isset($regOPJouralList) && $regOPJouralList['OtherAccountId'] ==  $expense['AccountId']) ? 'selected':''; ?> ><?php echo $expense['AccountName'];?></option>
+                            <?php endforeach; } ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+		</form>
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" id="next" onclick="nextRegisterView()" class="ripple">Next</a></li>
+        <?php if($allowEdit==1) { ?>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" id="add" class="ripple" onclick="submitForm()">Add</a></li>
+        <?php } ?>
+        <li class="cancel_btn cancel_btn_bluecolor float_l">
+            <a href="<?php echo $this->basePath(); ?>/fa/index/paymentjournal" class="ripple has-ripple" style="cursor:pointer;" button type="button" id="backRid" class="ripple">Cancel<span class="ripple-wrapper"></span></a>
+		</li>
+		<li class="cancel_btn cancel_btn_bluecolor float_l">
+			<a class="ripple has-ripple" style="cursor:pointer; display: none" button type="button" id="back" onclick="backRegisterView()" class="ripple">Back<span class="ripple-wrapper"></span></a>
+		</li>
+    </ul>
+</div>
+
+<script type="text/template" id="template-pickList">
+    <tr>
+        <td class="tbl_input_td" width="5%">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="tick_{{sno}}" name="tick_{{sno}}" {{Sel}} onclick="pickListCheckRow()" />
+                    <label for="tick_{{sno}}"></label>
+                </p>
+            </div>
+        </td>
+        <td width="13%">
+            <input readonly class="parent_text border-none" type="text" id="adviceDate_{{sno}}" name="adviceDate_{{sno}}" value="{{PayAdviceDate}}" />
+        </td>
+        <td width="13%">
+            <input readonly class="parent_text border-none" type="text" id="adviceNo_{{sno}}" name="adviceNo_{{sno}}" value="{{PayAdviceNo}}" />
+        </td>
+        <td width="13%">
+            <input readonly class="parent_text border-none" type="text" id="Currency_{{sno}}" name="Currency_{{sno}}" value="{{CurrencyName}}" />
+            <input type="hidden" name="CurrencyId_{{sno}}" id="CurrencyId_{{sno}}" value="{{CurrencyId}}">
+            <input type="hidden" name="PayAdviceId_{{sno}}" id="PayAdviceId_{{sno}}" value="{{PayAdviceId}}">
+        </td>
+        <td width="14%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="adviceAmount_{{sno}}" name="adviceAmount_{{sno}}" value="{{AdviceAmount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="14%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="billAmount__" name="billAmount__" value="{{BillAmount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="14%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="deduction__" name="deduction__" value="{{Deduction}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="14%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="amount_{{sno}}" name="amount_{{sno}}" value="{{Amount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+    </tr>
+</script>
+
+<script type="text/template" id="template-operationalJournal">
+    <tr class="count-tr adviceRow" id="operationalRow__">
+        <td width="5%">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="OTick__" name="OTick__" {{Sel}} onclick="CalculateAmount();">
+                    <label for="OTick__"></label>
+                </p>
+            </div>
+        </td>
+        <td width="15%">
+            <div class="col-lg-12 padlr0">
+                <input readonly type="text" name="OAdviceDate__" id="OAdviceDate__" class="tbl_input" value="{{PayAdviceDate}}">
+            </div>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" type="text" name="OAdviceNo__" id="OAdviceNo__" value="{{PayAdviceNo}}"/>
+        </td>
+        <td width="14%">
+            <input readonly class="parent_text border-none" type="text" id="OCurrency__" name="OCurrency__" value="{{CurrencyName}}" />
+            <input type="hidden" name="OCurrencyId__" id="OCurrencyId__" value="{{CurrencyId}}">
+            <input type="hidden" name="OPayAdviceId__" id="OPayAdviceId__" value="{{PayAdviceId}}">
+        </td>
+        <td width="12%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="OAdviceAmount__" name="OAdviceAmount__" value="{{AdviceAmount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="12%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="OBillAmount__" name="OBillAmount__" value="{{BillAmount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="12%">
+            <input readonly class="parent_text border-none" style="text-align:right;" type="text" id="ODeduction__" name="ODeduction__" value="{{Deduction}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+        </td>
+        <td width="12%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="OAmount__" name="OAmount__" value="{{Amount}}" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" />
+            <input type="hidden" name="approveAmt__" id="approveAmt__" />
+            <input type="hidden" name="qualifierAmt__" id="qualifierAmt__" />
+            <input type="hidden" name="netAmt__" id="netAmt__" />
+            <input type="hidden" name="advice___rowid" id="advice___rowid" value="0"/>
+        </td>
+        <td width="3%" align="center" class="action_btns_td" style="border:none !important;">
+            <ul class="action_btns">
+                <li><a href="#" class="mainTr" id="expandTr__" style="cursor:pointer;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a></li>
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<script type="text/template" id="template-operationalTrans">
+    <tr style="display: none" class="subTr count-tr" id="advice___operationalTrans_0">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12">
+					<div class="floor_name_area">
+						<h4 id="advice___billtitle_0"></h4>
+					</div>
+					<div class="card">
+						<ul class="nav nav-tabs">
+							<li class="active" ><a id="advice___det_0" href="#advice___n_0" aria-controls="naration" role="tab" data-toggle="tab">Detail</a></li>
+							<li class="" ><a id="advice___qual_0" href="#advice___b_0" aria-controls="branchdetails" role="tab" data-toggle="tab">Qualifier</a></li>
+							<li class="" ><a id="advice___accTag_0" href="#advice___a_0" aria-controls="branchdetails" role="tab" data-toggle="tab">Account Taging</a></li>
+						</ul>
+						<div class="tab-content" id="narration">
+							<div class="tab-pane active" id="advice___n_0">
+								<div class="table-responsive topsp">
+									<table class="table table-bordered tableView dataTable no-footer" style="margin-bottom:0px;" bgcolor="#00FF00">
+										<thead>
+										<tr>
+											<th class="worktype-activity sub_tbl1 red-ths">Bill No</th>
+											<th class="worktype-activity sub_tbl1 red-ths">Bill Date</th>
+											<th class="sub_tbl1 red-ths">Approve Amt</th>
+											<th class="sub_tbl1 red-ths">SubLedger Name</th>
+											<th class="sub_tbl1 red-ths">CostCentre Name</th>
+										</tr>
+										</thead>
+										<tbody class="main">
+										<tr>
+											<td width="15%">
+												<input class="parent_text border-none" type="text" name="advice___billno_0" id="advice___billno_0" readonly/>
+											</td>
+											<td width="15%">
+												<input class="parent_text border-none" type="text" name="advice___billdate_0" id="advice___billdate_0" readonly/>
+											</td>
+											<td width="15%">
+												<input class="parent_text border-none" type="text" name="advice___approveamt_0" id="advice___approveamt_0" readonly/>
+											</td>
+											<td width="15%">
+												<input class="parent_text border-none" type="text" name="advice___subledgername_0" id="advice___subledgername_0" readonly/>
+											</td>
+											<td width="15%">
+												<input class="parent_text border-none" type="text" name="advice___costcentrename_0" id="advice___costcentrename_0" readonly/>
+												<input type="hidden" name="advice___costcentreid_0"  id="advice___costcentreid_0" />
+												<input type="hidden" name="advice___subledgerid_0"  id="advice___subledgerid_0" />
+												<input type="hidden" name="advice___subledgertypeid_0"  id="advice___subledgertypeid_0" />
+												<input type="hidden" name="advice___payadviceid_0" id="advice___payadviceid_0" />
+												<input type="hidden" name="advice___paytransid_0" id="advice___paytransid_0" />
+												<input type="hidden" name="advice___billregisterid_0" id="advice___billregisterid_0" />
+												<input type="hidden" name="advice___accountid_0" id="advice___accountid_0" />
+                                                <input type="hidden" name="advice___Current_0" id="advice___Current_0" />
+                                                <input type="hidden" name="advice___CurrencyId_0" id="advice___CurrencyId_0" />
+                                                <input type="hidden" name="advice___Advance_0" id="advice___Advance_0" />
+                                                <input type="hidden" name="advice___ForexAmount_0" id="advice___ForexAmount_0" />
+                                                <input type="hidden" name="advice___ForexRate_0" id="advice___ForexRate_0" />
+                                                <input type="hidden" name="advice___BranchId_0" id="advice___BranchId_0" />
+											</td>
+										</tr>
+										</tbody>
+										<tbody class="total">
+										</tbody>
+
+									</table>
+								</div>
+							</div>
+							<div class="tab-pane " id="advice___b_0">
+								<table class="table" style="margin-bottom:0px; display: none;" id="qualifierTable_advice___bill_0" onchange="CalculateRate(this.id)">
+								</table>
+							</div>
+							<div class="tab-pane " id="advice___a_0">
+								<table class="table tableView dataTable no-footer" style="margin-bottom:0px;" bgcolor="#00FF00" id="">
+									<thead>
+									<tr>
+										<th class="red-ths">&nbsp;</th>
+										<th class="red-ths">Qualifier Name</th>
+										<th class="red-ths">Account Name</th>
+										<th class="red-ths">SubLedger Name</th>
+										<th class="red-ths">Sign</th>
+										<th class="red-ths">%</th>
+										<th class="red-ths">Amount</th>
+									</tr>
+									</thead>
+									<tbody class="main" id="QualifierAccTable_advice___bill_0">
+
+									</tbody>
+									<tbody class="total">
+									</tbody>
+									<input type="hidden" name="QualifierAccTable_advice___bill_0_rowid" id="QualifierAccTable_advice___bill_0_rowid" value="0"/>
+								</table>
+							</div>
+						</div>
+						<div class="col-lg-12 padlr0">
+							<table class="table" style="margin-bottom: 0px;" id="">
+								<tbody class="total">
+									<tr>
+										<td align="right" class="rate_pri">Approve Amount</td>
+										<td width="18%">
+											<input readonly class="parent_text border-none" name="advice___bill_0_approveAmt" id="advice___bill_0_approveAmt" style="text-align:right;" type="text">
+										</td>
+										<td align="right" class="rate_pri">Qualifier Amount</td>
+										<td width="18%">
+											<input readonly class="parent_text border-none" style="text-align:right;" type="text" name="advice___bill_0_qualifierAmt" id="advice___bill_0_qualifierAmt">
+										</td>
+										<td align="right" class="rate_pri">Net Amount</td>
+										<td width="18%">
+											<input readonly class="parent_text border-none" style="text-align:right;" type="text" name="advice___bill_0_netAmt" id="advice___bill_0_netAmt">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+
+<script type="text/template" id="template-QualifierAccTable">
+    <tr>
+        <td width="5%">
+            <label>
+                <input type="checkbox" name="accTag_advice___bill_0_YesNo__9" id="accTag_advice___bill_0_YesNo__9" class="ios_checkbox qualmainTrInput" >
+                <div class="ios_switch"><span></span>
+                </div>
+            </label>
+        </td>
+        <td width="16%">
+            <input readonly class="parent_text border-none" type="text" name="accTag_advice___bill_0_qualifiername__9" id="accTag_advice___bill_0_qualifiername__9" />
+        </td>
+        <td width="16%">
+            <select class="form-control tbl_input" name="accTag_advice___bill_0_accountid__9" id="accTag_advice___bill_0_accountid__9" style="width:%;">
+            </select>
+        </td>
+        <td width="16%">
+            <select class="form-control tbl_input" name="accTag_advice___bill_0_subledgerid__9" id="accTag_advice___bill_0_subledgerid__9" style="width: 100%;">
+            </select>
+        </td>
+        <td width="15%">
+            <input readonly class="parent_text border-none" type="text" name="accTag_advice___bill_0_sign__9" id="accTag_advice___bill_0_sign__9" />
+        </td>
+        <td width="16%">
+            <input readonly class="parent_text border-none" type="text" name="accTag_advice___bill_0_ExpPer__9" id="accTag_advice___bill_0_ExpPer__9" />
+        </td>
+        <td width="16%">
+            <input readonly class="parent_text border-none" type="text" name="accTag_advice___bill_0_Amount__9" id="accTag_advice___bill_0_Amount__9" />
+
+            <input type="hidden" name="accTag_advice___bill_0_Id__9" id="accTag_advice___bill_0_Id__9" />
+            <input type="hidden" name="accTag_advice___bill_0_QualTypeId__9" id="accTag_advice___bill_0_QualTypeId__9" />
+            <input type="hidden" name="accTag_advice___bill_0_Ref__9" id="accTag_advice___bill_0_Ref__9" />
+            <input type="hidden" name="accTag_advice___bill_0_Exp__9" id="accTag_advice___bill_0_Exp__9" />
+            <input type="hidden" name="accTag_advice___bill_0_ExpValue__9" id="accTag_advice___bill_0_ExpValue__9" value=""/>
+
+            <input type="hidden" name="accTag_advice___bill_0_TaxablePer__9" id="accTag_advice___bill_0_TaxablePer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_TaxPer__9" id="accTag_advice___bill_0_TaxPer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_CessPer__9" id="accTag_advice___bill_0_CessPer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_EduCessPer__9" id="accTag_advice___bill_0_EduCessPer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_HEduCessPer__9" id="accTag_advice___bill_0_HEduCessPer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_NetPer__9" id="accTag_advice___bill_0_NetPer__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_TaxableAmt__9" id="accTag_advice___bill_0_TaxableAmt__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_TaxPerAmt__9" id="accTag_advice___bill_0_TaxPerAmt__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_CessAmt__9" id="accTag_advice___bill_0_CessAmt__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_EduCessAmt__9" id="accTag_advice___bill_0_EduCessAmt__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_HEduCessAmt__9" id="accTag_advice___bill_0_HEduCessAmt__9" value="0"/>
+            <input type="hidden" name="accTag_advice___bill_0_NetAmt__9" id="accTag_advice___bill_0_NetAmt__9" value="0"/>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    var qualiferHTML = '<?php echo (isset($qualHtml)) ? preg_replace('~>\s+<~', '><',$qualHtml) : '';?>';
+    var costCenterdata=<?php echo (isset($costCenterdata)) ? json_encode($costCenterdata) : '[]';?>;
+    var PayAdviceDet=<?php echo (isset($PayAdviceDet)) ? json_encode($PayAdviceDet) : '[]';?>;
+    var pickList=[];
+    var newPickList=[];
+    var qualAccountList=<?php echo (isset($qualAccountList)) ? json_encode($qualAccountList) : '[]';?>;
+    var qualSubLegderList=<?php echo (isset($qualSubLegderList)) ? json_encode($qualSubLegderList) : '[]';?>;
+
+    var EntryId=<?php echo (isset($EntryId)) ? $EntryId : '0';?>;
+    var editAdviceDet=<?php echo (isset($editAdviceDet)) ? json_encode($editAdviceDet) : '[]';?>;
+    var editBillTrans=<?php echo (isset($editBillTrans)) ? json_encode($editBillTrans) : '[]';?>;
+    var OJAccType=<?php echo (isset($OJAccType)) ? json_encode($OJAccType) : '[]';?>;
+    var OJChequeDet=<?php echo (isset($OJChequeDet)) ? json_encode($OJChequeDet) : '[]';?>;
+
+    $(".datepickerinput").datepicker({
+        format: "dd-mm-yyyy",
+        autoclose: true
+    });
+    $(function () {
+        $("#add").hide();
+        bindCostCenterAutoComplete(costCenterdata);
+        if(EntryId != 0){
+            nextRegisterView();
+            paymentHide(OJAccType,OJChequeDet);
+            $('#back').hide();
+        }
+    });
+
+    function bindSelect(){
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    }
+    function nextRegisterView(){
+        if(EntryId != 0){
+            $(".firstSlide").hide();
+            $(".secondSlide").hide();
+
+            $("#next").hide();
+
+            $(".thirdSlide").show();
+            $("#back").show();
+            $("#add").show();
+
+            bindPayAdvTrans(editAdviceDet,editBillTrans,qualiferHTML);
+
+        }else {
+            var slide1 = $(".firstSlide").is(":visible");
+            var slide2 = $(".secondSlide").is(":visible");
+            var slide3 = $(".thirdSlide").is(":visible");
+            if (slide1 == true) { //show slide 2
+                $(".error_message").hide();
+                if (firstSlideValidation() == false)
+                    return false;
+
+                var accountHeadNames = [];
+                $.each($("#accountHeadId option:selected"), function () {
+                    accountHeadNames.push($(this).text());
+                });
+                $('#accountHead1').text(accountHeadNames.toString());
+
+                $.ajax({
+                    url: "<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+                    type: "post",
+                    //async:false,
+                    data: {'AccountId': $('#accountHeadId').val().toString(), 'type': 'loadPayAdvDet'},
+                    success: function (data, textStatus, jqXHR) {
+                        var payAdvPickList = JSON.parse(data);
+                        payAdvPickList = payAdvPickList['PayAdvPickList'];
+                        pickList = payAdvPickList;
+                        if (payAdvPickList.length != 0) {
+                            bindPickList(payAdvPickList);
+                        } else {
+                            alert('No data available for this Account Head');
+                            return false;
+                        }
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    }
+                });
+
+            } else if (slide2 == true) { //show slide 3
+                var tickExist = 0; //If not checked even one checkbox , cannot proceed
+                $.each($('input[id^=tick_]'), function () {
+                    if ($('#' + $(this).attr('id')).is(':checked'))
+                        tickExist = 1;
+                });
+                if (tickExist != 1) {
+                    alert('Please Select at least one advice and proceed !!!');
+                    return false;
+                }
+
+                $(".firstSlide").hide();
+                $(".secondSlide").hide();
+
+                $("#next").hide();
+
+                $(".thirdSlide").show();
+                $("#back").show();
+                $("#add").show();
+
+                $.ajax({
+                    url: "<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+                    type: "post",
+                    //async:false,
+                    data: {
+                        'AccountId': $('#accountHeadId').val().toString(),
+                        'payAdvPickIds': $('#payAdvPickIds').val(),
+                        'type': 'loadPayAdvTrans'
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        var payAdvTrans = JSON.parse(data);
+                        payAdvTrans = payAdvTrans['payAdvTrans'];
+                        bindPayAdvTrans(newPickList,payAdvTrans,qualiferHTML);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                    }
+                });
+            }
+        }
+    }
+
+    function firstSlideValidation(){
+        if($.trim($('#voucherNo').val()) =='' || $("#voucherNo").val().length == 0){
+            $("#voucherNo").closest(".req_flds").find(".error_message").show();
+            $("#voucherNo").focus();
+            return false;
+        } else if($("#voucherDate").val().length == 0){
+            $("#voucherDate").closest(".req_flds").find(".error_message").show();
+            $("#voucherDate").focus();
+            return false;
+        }if($("#bookName").val() == 0){
+            $("#bookName").closest(".req_flds").find(".error_message").show();
+            $("#bookName").focus();
+            return false;
+        }else if($("#accountHeadId").val() == null){
+            $("#accountHeadId").closest(".req_flds").find(".error_message").show();
+            $("#accountHeadId").focus();
+            return false;
+        }
+    }
+    function bindPickList(pickListData){
+        $(".firstSlide").hide();
+        $(".thirdSlide").hide();
+
+        $("#add").hide();
+
+        $(".secondSlide").show();
+        $("#back").show();
+        $("#next").show();
+
+        $("#bookName1").html($("#bookName option:selected").text());
+        $("#accountHead1").html($("#accountHead").val());
+        $("#ledgerType1").html($("#ledgerType option:selected").text());
+        $("#subLedgerName1").html($("#subLedgerName").val());
+        $("#costCenterName1").html($("#costCenterName").val());
+
+        $('#pickListAdvice').html('');
+        var pickListTemplate = $('#template-pickList').html();
+        var sno = 0;
+        var payAdvPickIds = [];
+
+        var pickAdvice=0,
+            pickBill=0,
+            pickDeduction=0,
+            pickAmount=0;
+
+        newPickList = [];
+        $.each(pickListData, function (i,o) {
+            sno+=1;
+            var Sel='';
+            var CurrencyName ='';
+
+            if(o.Sel == 1){
+                payAdvPickIds.push(o.PayAdviceId);
+                Sel='checked';
+                newPickList.push(o);
+            }
+
+            if(o.CurrencyName == null)
+                CurrencyName='';
+
+            var AdviceAmt= o.TotalAmount;
+            var ForexRate= o.ForexRate;
+            if(ForexRate == 0)
+                ForexRate=1;
+
+            var netTot=AdviceAmt*ForexRate;
+
+            pickAdvice=parseFloatVal(pickAdvice)+parseFloatVal(AdviceAmt);
+            pickBill=parseFloatVal(pickBill)+parseFloatVal(o.BillAmount);
+            pickDeduction=parseFloatVal(pickDeduction)+parseFloatVal(o.ReturnAmount);
+            pickAmount=parseFloatVal(pickAmount)+parseFloatVal(netTot);
+
+            $('#pickListAdvice').append(pickListTemplate
+                    .replace(/\{\{sno\}\}/g, sno)
+                    .replace(/\{\{PayAdviceDate\}\}/g, o.PayAdviceDate)
+                    .replace(/\{\{PayAdviceId\}\}/g, o.PayAdviceId)
+                    .replace(/\{\{PayAdviceNo\}\}/g, o.PayAdviceNo)
+                    .replace(/\{\{CurrencyId\}\}/g, o.CurrencyId)
+                    .replace(/\{\{CurrencyName\}\}/g, CurrencyName)
+                    .replace(/\{\{AdviceAmount\}\}/g,sanitizeNumber(parseFloatVal(AdviceAmt,0),2,true))
+                    .replace(/\{\{BillAmount\}\}/g,sanitizeNumber(parseFloatVal(o.BillAmount,0),2,true))
+                    .replace(/\{\{Deduction\}\}/g,sanitizeNumber(parseFloatVal(o.ReturnAmount,0),2,true))
+                    .replace(/\{\{ForexRate\}\}/g, o.ForexRate)
+                    .replace(/\{\{Amount\}\}/g,sanitizeNumber(parseFloatVal(netTot,0),2,true))
+                    .replace(/\{\{Sel\}\}/g, Sel)
+            );
+        });
+        $('#payAdvPickIds').val(payAdvPickIds.toString());
+        $('#payAdvDetRowId').val(sno);
+
+        $('#pickAdvice').val(sanitizeNumber(parseFloatVal(pickAdvice,0),2,true));
+        $('#pickBill').val(sanitizeNumber(parseFloatVal(pickBill,0),2,true));
+        $('#pickDeduction').val(sanitizeNumber(parseFloatVal(pickDeduction,0),2,true));
+        $('#pickAmount').val(sanitizeNumber(parseFloatVal(pickAmount,0),2,true));
+    }
+
+    function bindPayAdvTrans(adviceDet,payAdvTrans,qualifierData){
+        $('#operationalJournal').html('');
+        var operationalJournalTemplate = $('#template-operationalJournal').html();
+        var operationalTransTemplate = $('#template-operationalTrans').html();
+        var AccTableTemplate = $('#template-QualifierAccTable').html();
+        var mainRowId = 0;
+
+        var OJAdvice= 0,
+            OJBill=0,
+            OJDeduction=0,
+            OJAmount=0;
+
+        var overAllApproveAmt= 0,
+            overAllQualifierAmt=0,
+            overAllNetAmt=0;
+        /*Advice Details Template*/
+        $.each(adviceDet,function (i,o) {
+            mainRowId+=1;
+
+            var Sel='';
+            var CurrencyName ='';
+
+            if(o.CurrencyName == null)
+                CurrencyName='';
+
+            var AdviceAmt= o.TotalAmount;
+            var ForexRate= o.ForexRate;
+            if(ForexRate == 0)
+                ForexRate=1;
+
+            var netTot=AdviceAmt*ForexRate;
+
+            if(o.Sel == 1){
+                Sel='checked';
+                OJAdvice=parseFloatVal(OJAdvice)+parseFloatVal(AdviceAmt);
+                OJBill=parseFloatVal(OJBill)+parseFloatVal(o.BillAmount);
+                OJDeduction=parseFloatVal(OJDeduction)+parseFloatVal(o.ReturnAmount);
+                OJAmount=parseFloatVal(OJAmount)+parseFloatVal(netTot);
+            }
+
+            $('#operationalJournal').append(operationalJournalTemplate.replace(/__/g, '_' + mainRowId)
+                    .replace(/\{\{PayAdviceDate\}\}/g, o.PayAdviceDate)
+                    .replace(/\{\{PayAdviceId\}\}/g, o.PayAdviceId)
+                    .replace(/\{\{PayAdviceNo\}\}/g, o.PayAdviceNo)
+                    .replace(/\{\{CurrencyId\}\}/g, o.CurrencyId)
+                    .replace(/\{\{CurrencyName\}\}/g, CurrencyName)
+                    .replace(/\{\{AdviceAmount\}\}/g, sanitizeNumber(parseFloatVal(AdviceAmt,0),2,true))
+                    .replace(/\{\{BillAmount\}\}/g, sanitizeNumber(parseFloatVal(o.BillAmount,0),2,true))
+                    .replace(/\{\{Deduction\}\}/g, sanitizeNumber(parseFloatVal(o.ReturnAmount,0),2,true))
+                    .replace(/\{\{ForexRate\}\}/g, o.ForexRate)
+                    .replace(/\{\{Amount\}\}/g, sanitizeNumber(parseFloatVal(netTot,0),2,true))
+                    .replace(/\{\{Sel\}\}/g, Sel)
+            );
+            var subRowId= 0,
+                ApproveAmt= 0,
+                adviceApproveAmt= 0,
+                adviceQualifierAmt= 0,
+                adviceNetAmt=0;
+
+            $('#operationalTrans_'+mainRowId).html('');
+            /*Load Bill Trans Template*/
+            $.each(payAdvTrans, function (j,k) {
+                if(o.PayAdviceId == k.PayAdviceId){
+                    subRowId++;
+
+                    //ApproveAmt=parseFloatVal(ApproveAmt)+parseFloatVal(k.ApproveAmount);
+                    ApproveAmt=parseFloatVal(k.ApproveAmount);
+
+
+                    $('#operationalRow_'+mainRowId).after(operationalTransTemplate
+                            .replace(/__/g, '_' + mainRowId)
+                            .replace(/_0/g, '_' + subRowId)
+
+                    );
+                    $('#advice_' + mainRowId + '_billno_' + subRowId).val(k.BillNo);
+                    $('#advice_' + mainRowId + '_billtitle_' + subRowId).text('Advice - '+k.BillNo);
+                    $('#advice_' + mainRowId + '_billdate_' + subRowId).val(k.BillDate);
+                    $('#advice_' + mainRowId + '_approveamt_' + subRowId).val(sanitizeNumber(parseFloatVal(k.ApproveAmount,0),2,true));
+                    $('#advice_' + mainRowId + '_subledgername_' + subRowId).val(k.SubLedgerName);
+                    $('#advice_' + mainRowId + '_costcentrename_' + subRowId).val(k.CostCentreName);
+                    $('#advice_' + mainRowId + '_costcentreid_' + subRowId).val(k.CostCentreId);
+
+                    $('#advice_' + mainRowId + '_subledgerid_' + subRowId).val(k.SubLedgerId);
+                    $('#advice_' + mainRowId + '_subledgertypeid_' + subRowId).val(k.SubLedgerId);
+                    $('#advice_' + mainRowId + '_payadviceid_' + subRowId).val(k.PayAdviceId);
+                    $('#advice_' + mainRowId + '_paytransid_' + subRowId).val(k.PayTransId);
+                    $('#advice_' + mainRowId + '_billregisterid_' + subRowId).val(k.BillRegisterId);
+                    $('#advice_' + mainRowId + '_accountid_' + subRowId).val(k.AccountId);
+                    $('#advice_' + mainRowId + '_Current_' + subRowId).val(k.Current);
+                    $('#advice_' + mainRowId + '_CurrencyId_' + subRowId).val(k.CurrencyId);
+                    $('#advice_' + mainRowId + '_Advance_' + subRowId).val(k.Advance);
+                    $('#advice_' + mainRowId + '_ForexAmount_' + subRowId).val(k.ForexAmount);
+                    $('#advice_' + mainRowId + '_ForexRate_' + subRowId).val(k.ForexRate);
+                    $('#advice_' + mainRowId + '_BranchId_' + subRowId).val(k.BranchId);
+
+                    $('#advice_'+mainRowId+'_bill_'+subRowId+'_approveAmt').val(ApproveAmt);
+
+                    /*Qualifier Details Template*/
+                    if(EntryId!=0  &&  $('#OTick_' + mainRowId).is(':checked')){
+                        $.ajax({
+                            url: "<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+                            type: "post",
+                            async:false,
+                            data: {'EntryId': EntryId,'PayAdviceId':k.PayAdviceId,'BillRegisterId':k.BillRegisterId,'type': 'loadQualEdit'},
+                            success: function (data, textStatus, jqXHR) {
+                               var qualHtml = JSON.parse(data);
+                                qualHtml=qualHtml['QualHtml'];
+                                if(qualHtml != ''){
+                                    $('#qualifierTable_advice_' + mainRowId + '_bill_' + subRowId).html(qualHtml.replace(/__1/g, '_advice_' + mainRowId + '_bill_' + subRowId));
+                                    $('#qualifierTable_advice_' + mainRowId + '_bill_' + subRowId).show();
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                            }
+                        });
+                    }else {
+                        $('#qualifierTable_advice_' + mainRowId + '_bill_' + subRowId).html(qualifierData.replace(/__1/g, '_advice_' + mainRowId + '_bill_' + subRowId));
+                        $('#qualifierTable_advice_' + mainRowId + '_bill_' + subRowId).show();
+                    }
+
+                    /*Account Taging Template*/
+                    $('#QualifierAccTable_advice_'+mainRowId+'_bill_'+subRowId).html('');
+                    var QualRowId=0;
+                    $.each($('input[id^=Qual_advice_'+mainRowId+'_bill_'+subRowId+'_YesNo_]'),function(){
+                        var QualRow = $(this).attr('id').split('_');
+                        QualRowId = QualRow[6];
+                        var QualYesNo = $('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_YesNo_'+QualRowId);
+
+                        $('#QualifierAccTable_advice_'+mainRowId+'_bill_'+subRowId).append(AccTableTemplate
+                                .replace(/__9/g, '_' + QualRowId)
+                                .replace(/__/g, '_' + mainRowId)
+                                .replace(/_0/g, '_' + subRowId)
+                        );
+                        /*Get Qual Type Id Value*/
+                        var QualTypeId=$('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TypeId_'+QualRowId).val();
+
+                        /*Set All values in Account taging Template*/
+                        setAccountTagingValues(mainRowId,subRowId,QualRowId,QualTypeId,QualYesNo);
+
+                    });
+                    $('#QualifierAccTable_advice_'+mainRowId+'_bill_'+subRowId+'_rowid').val(QualRowId);
+
+                    CalculateRate('#qualifierTable_advice_'+ mainRowId + '_bill_' + subRowId);
+
+                    adviceApproveAmt=parseFloatVal(adviceApproveAmt)+parseFloatVal($('#advice_'+mainRowId+'_bill_'+subRowId+'_approveAmt').val());
+                    adviceQualifierAmt=parseFloatVal(adviceQualifierAmt)+parseFloatVal($('#advice_'+mainRowId+'_bill_'+subRowId+'_qualifierAmt').val());
+                    adviceNetAmt=parseFloatVal(adviceNetAmt)+parseFloatVal($('#advice_'+mainRowId+'_bill_'+subRowId+'_netAmt').val());
+                }
+            });
+
+
+            $('#advice_'+mainRowId+'_rowid').val(subRowId);
+
+            $('#approveAmt_'+mainRowId).val(adviceApproveAmt);
+            $('#qualifierAmt_'+mainRowId).val(adviceQualifierAmt);
+            $('#netAmt_'+mainRowId).val(adviceNetAmt);
+            if ($('#OTick_' + mainRowId).is(':checked')) {
+                overAllApproveAmt = parseFloatVal(overAllApproveAmt) + parseFloatVal(adviceApproveAmt);
+                overAllQualifierAmt = parseFloatVal(overAllQualifierAmt) + parseFloatVal(adviceQualifierAmt);
+                overAllNetAmt = parseFloatVal(overAllNetAmt) + parseFloatVal(adviceNetAmt);
+            }
+
+        });
+
+        $('#operationalJournalRowId').val(mainRowId);
+
+        $('#overAllApproveAmt').val(overAllApproveAmt);
+        $('#overAllQualifierAmt').val(overAllQualifierAmt);
+        $('#overAllNetAmt').val(overAllNetAmt);
+        $('#netAmount').val(overAllNetAmt);
+
+        $('#OJAdvice').val(sanitizeNumber(parseFloatVal(OJAdvice,0),2,true));
+        $('#OJBill').val(sanitizeNumber(parseFloatVal(OJBill,0),2,true));
+        $('#OJDeduction').val(sanitizeNumber(parseFloatVal(OJDeduction,0),2,true));
+        $('#OJAmount').val(sanitizeNumber(parseFloatVal(OJAmount,0),2,true));
+
+        bindExpandTrFn();
+        bindQualExpandTr();
+    }
+
+    function setAccountTagingValues(mainRowId,subRowId,QualRowId,QualTypeId,QualYesNo){
+        /*Checkbox Values Hide or Show Row*/
+        if (QualYesNo.is(':checked'))
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_YesNo_'+QualRowId).prop('checked',true).closest('tr').show();
+        else
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_YesNo_'+QualRowId).prop('checked',false).closest('tr').hide();
+
+        /*Set Account Name list*/
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_accountid_'+QualRowId).html('');
+        var accOption= bindAccountNames(QualTypeId);
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_accountid_'+QualRowId).html(accOption);
+
+        /*Set SubLedger Name list*/
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_subledgerid_'+QualRowId).html('');
+        var SLOption= bindSubLedgerNames(QualTypeId);
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_subledgerid_'+QualRowId).html(SLOption);
+
+        if(EntryId!=0  &&  $('#OTick_' + mainRowId).is(':checked')){ //For edit mode set Accoung Id and SubLedger Id Values
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_accountid_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxAccountId_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_subledgerid_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxSubLedgerId_'+QualRowId).val());
+        }
+
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_qualifiername_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Desc_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_sign_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Sign_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_ExpPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_ExpPer_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_Amount_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Amount_'+QualRowId).val());
+
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_Id_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Id_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_QualTypeId_'+QualRowId).val(QualTypeId);
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_Ref_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Ref_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_Exp_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_Exp_'+QualRowId).val());
+        $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_ExpValue_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_ExpValue_'+QualRowId).val());
+
+        if(QualTypeId == 1 || QualTypeId == 2){
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_TaxablePer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxablePer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_TaxPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxPer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_CessPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_CessPer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_EduCessPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_EduCessPer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_HEduCessPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_HEduCessPer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_NetPer_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_NetPer_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_TaxableAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxableAmt_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_TaxPerAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_TaxPerAmt_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_CessAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_CessAmt_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_EduCessAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_EduCessAmt_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_HEduCessAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_HEduCessAmt_'+QualRowId).val());
+            $('#accTag_advice_' + mainRowId + '_bill_' + subRowId + '_NetAmt_'+QualRowId).val($('#Qual_advice_'+mainRowId+'_bill_'+subRowId+'_NetAmt_'+QualRowId).val());
+        }
+    }
+
+    function bindAccountNames(QualTypeId){
+        var accOption = '<option value="0"></option>';
+        $.each(qualAccountList, function (m, n) {
+            switch(parseInt(QualTypeId)){
+                case 1:
+                    if(n.TypeId==12 || n.TypeId==13)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 2:
+                    if(n.TypeId==14 || n.TypeId==15)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 3:
+                    if(n.TypeId==30 || n.TypeId==31)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 4:
+                    if(n.TypeId==32 || n.TypeId==33)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 6:
+                case 7:
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                    if(n.TypeId==22)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 18:
+                    if(n.TypeId==7 || n.TypeId==54)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                case 21:
+                    if(n.TypeId==57)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+                default:
+                    if(n.TypeId==7)
+                        accOption += '<option value="' + n.AccountId + '">' + n.AccountName + '</option>';
+                    break;
+
+            }
+        });
+        return accOption;
+    }
+
+    function bindSubLedgerNames(QualTypeId){
+        var SLOption = '<option value="0"></option>';
+        $.each(qualSubLegderList, function (m, n) {
+            var m_sVType='';
+            switch(parseInt(QualTypeId)){
+                case 1:
+                    if(n.SubLedgerTypeId == 8 && n.ServiceTypeId != 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 2:
+                    if(n.SubLedgerTypeId == 8 && n.ServiceTypeId == 0 && n.SLRatio != 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 3:
+                    if(n.SubLedgerTypeId == 8 && n.ServiceTypeId == 0 && n.StateId != 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 4:
+                    if(n.SubLedgerTypeId == 8 && n.ServiceTypeId == 0 && n.StateId != 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 18:
+                    if(n.ServiceTypeId == 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 21:
+                    if(n.SubLedgerTypeId == 8 && n.ServiceTypeId == 0 && n.SLRatio != 0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                case 6:
+                case 7:
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                    if(n.SubLedgerTypeId == 9)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+
+                default:
+                    if(n.SubLedgerTypeId==0)
+                        SLOption += '<option value="' + n.SubLedgerId+ '">' + n.SubLedgerName + '</option>';
+                    break;
+            }
+        });
+        return SLOption;
+    }
+
+    function bindQualExpandTr() {
+        var $mainTr = $(".qualmainExp");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr();
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+            }
+        });
+    }
+
+    function closeQualTr() {
+        var $mainTr = $(".qualmainExp");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        });
+    }
+
+    var openedBill='';
+    function bindExpandTrFn() {
+        // expand tr
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function(e){
+            e.preventDefault();
+
+            /*Close if the sub table is open */
+            if(openedBill != $(this) && openedBill.length != 0) {
+                $(openedBill).closest("tr").nextUntil(".adviceRow").find(".subDiv").slideUp("slow");
+                $(openedBill).closest("tr").nextUntil(".adviceRow").slideUp("slow");
+            }
+
+            openedBill=$(this);
+
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").nextUntil(".adviceRow").slideDown("slow");
+                $(this).closest("tr").nextUntil(".adviceRow").find(".subDiv").slideDown("slow");
+            }
+            else{
+                $(this).closest("tr").nextUntil(".adviceRow").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").nextUntil(".adviceRow").slideUp("slow");
+            }
+        });
+    }
+
+    function pickListCheckRow(){
+        var payAdvPickIds = [];
+        newPickList = [];
+        $.each($('input[id^=tick_]'), function () {
+            if ($('#' + $(this).attr('id')).is(':checked')) {
+                var tickId = $(this).attr('id').split('_')[1];
+                payAdvPickIds.push($('#PayAdviceId_'+tickId).val());
+                $.each(pickList, function (i,o) {
+                    if(o.PayAdviceId == $('#PayAdviceId_'+tickId).val()){
+                        newPickList.push(o);
+                    }
+                });
+            }
+        });
+        $('#payAdvPickIds').val(payAdvPickIds.toString());
+    }
+
+    function backRegisterView(){
+        var slide1=$(".firstSlide").is(":visible");
+        var slide2=$(".secondSlide").is(":visible");
+        var slide3=$(".thirdSlide").is(":visible");
+        if(slide3 == true){ //show slide 2
+            $(".firstSlide").hide();
+            $(".thirdSlide").hide();
+            $("#add").hide();
+            $("#back").show();
+            $(".secondSlide").show();
+            $("#next").show();
+        }else if(slide2==true){ //show slide 1
+            $(".secondSlide").hide();
+            $(".thirdSlide").hide();
+            $("#add").hide();
+            $("#back").hide();
+            $(".firstSlide").show();
+            $("#next").show();
+        }
+    }
+
+    /*Book and Payment Type Change Cheque Details*/
+    function AccountType(x) {
+        var bookId = $('#bookName').val();
+        var payMode=$('#paymentMode').val();
+
+        if($(x).attr('id') == 'bookName')
+            $("#paymentMode").val(1).select2();
+
+        if(payMode == 3)
+            $('#transactionNo').siblings('label').text('Transaction No');
+        else
+            $('#transactionNo').siblings('label').text('Cheque No');
+
+        $('#transactionNo').val('');
+        $('#chequeTransId').val('0');
+        $.ajax({
+            url: "<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+            type: "post",
+            //async:false,
+            data: {'bookId': bookId, 'type': 'bookDet','payMode':payMode},
+            success: function (data, textStatus, jqXHR) {
+                var bookDet = JSON.parse(data);
+                $('#transactionNo').removeClass('error');
+                paymentHide(bookDet['AccTypeDet'],bookDet['chequeDet']);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            }
+        });
+    }
+
+    function paymentHide(payType,chequeDet){
+        if(payType['AccountType'] == 'C'){
+            $("#payMode").hide();
+            $("#paymentMode").val('').select2();
+        }else{
+            $("#payMode").show();
+            bindChequeAutoComplete(chequeDet);
+        }
+    }
+
+    function bindChequeAutoComplete(chequeDet){
+        var $transactionNo= $('#transactionNo');
+        $transactionNo.autocomplete({
+            lookup: chequeDet,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    $("#chequeTransId").val(suggestion.data);
+//                    $(this).removeClass('error');
+                }
+            }, onSearchStart: function (suggestion) {
+                $("#chequeTransId").val(0);
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $("#chequeTransId").val(0);
+//                    $(this).addClass('error');
+                } else {
+//                    $(this).removeClass('error');
+                }
+            }
+        });
+    }
+
+    function submitForm(){
+        $(".error_message").hide();
+        $('#accountHeadIds').val($('#accountHeadId').val().toString());
+        $('#accountHeadLength').val($('#accountHeadId').val().length);
+        var bool=true;
+
+        var validationResult=finalAdviceValidation();
+
+        var paymentBook = $("input[name=paymentBook]:checked").val();
+
+        if (firstSlideValidation() == false){
+            bool=false;
+        }else if (validationResult == 'NoTick') {
+            alert('Please Select at least one advice and proceed !!!');
+            bool=false;
+        }else if (validationResult == 'NoAmount') {
+            alert('Selected Advice Amount Cannot be 0 !!!');
+            bool=false;
+        }else if (validationResult == 'AccountError') {
+            alert('Select Account Name for Selected Qualifier !!!');
+
+            var focusRow=$('.error_select').first().attr('id').split('_');
+            var key1=focusRow[2],
+                key2=focusRow[4],
+                key3=focusRow[6];
+
+            if($('#operationalRow_'+key1).next(".subTr").is(":visible")){
+
+                if($('#advice_'+key1+'_accTag_'+key2).parent().hasClass('active') == false)
+                    $('#advice_'+key1+'_accTag_'+key2).trigger('click');
+
+                $('.error_select').first().focus();
+            }else{
+                $(openedBill).closest("tr").nextUntil(".adviceRow").find(".subDiv").slideUp("slow");
+                $(openedBill).closest("tr").nextUntil(".adviceRow").slideUp("slow");
+
+                openedBill=$('#operationalRow_'+key1);
+
+                $('#operationalRow_'+key1).closest("tr").nextUntil(".adviceRow").slideDown("slow");
+                $('#operationalRow_'+key1).closest("tr").nextUntil(".adviceRow").find(".subDiv").slideDown("slow");
+
+                if($('#advice_'+key1+'_accTag_'+key2).parent().hasClass('active') == false)
+                    $('#advice_'+key1+'_accTag_'+key2).trigger('click');
+
+                $('.error_select').first().focus();
+
+            }
+            bool=false;
+        }else if(paymentBook =='B' && $('#paymentMode').val() == 0){
+            $("#paymentMode").closest(".req_flds").find(".error_message").show();
+            $("#paymentMode").focus();
+            bool=false;
+        }
+            if(bool === true) {
+//            alert('submitted');
+           $('#paymentJournalForm').submit();
+        }
+    }
+    function finalAdviceValidation(){
+        var tickExist = 0,AmountExist= 1,AccountError=0; //If not checked even one checkbox , cannot proceed
+        $.each($('input[id^=OTick_]'), function () {
+            if ($('#' + $(this).attr('id')).is(':checked')){ //checked True condition;
+                var tickId = $(this).attr('id').split('_')[1];
+                tickExist = 1;
+
+                if(parseInt($('#OAmount_'+tickId).val()) == 0)
+                    AmountExist=0;
+
+
+                //advice_3_rowid
+                var curAdviceRowId=$('#advice_'+tickId+'_rowid').val();
+                for(var billRowId=1;billRowId<=curAdviceRowId;billRowId++){
+                    $.each($('input[id^=accTag_advice_'+tickId+'_bill_'+billRowId+'_YesNo_]'), function () {
+                        if ($('#' + $(this).attr('id')).is(':checked')){
+                            var accTagId = $(this).attr('id').split('_')[6];
+                            if($('#accTag_advice_'+tickId+'_bill_'+billRowId+'_accountid_'+accTagId).val() =='0'){
+                                //alert('error');
+                                $('#accTag_advice_'+tickId+'_bill_'+billRowId+'_accountid_'+accTagId).addClass('error_select');
+                                AccountError=1;
+                                return 'AccountError';
+                            }else{
+                                $('#accTag_advice_'+tickId+'_bill_'+billRowId+'_accountid_'+accTagId).removeClass('error_select');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        if(tickExist != 1)
+            return 'NoTick';
+        else if(AmountExist == 0)
+            return 'NoAmount';
+        else if(AccountError!=0)
+            return 'AccountError';
+    }
+
+    function showExpenseAccount(){
+        if(parseFloatVal($('#bankCharges').val()) == 0){
+            $('#bankExpenseAccountId').val('').select2();
+            $('#bankExpenseAccountId').prop('disabled',true);
+        }else{
+            $('#bankExpenseAccountId').prop('disabled',false);
+
+        }
+    }
+
+    function bookType(){
+       var paymentBook = $("input[name=paymentBook]:checked").val();
+        $('#bookName').html('');
+        //$("#bookName").val('').select2();
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+            type:"post",
+            //async:false,
+            data:{'paymentBookType':paymentBook,'type':'loadBookName'},
+            success:function(data, textStatus, jqXHR){
+                var BookList = JSON.parse(data);
+                BookList = BookList['BookList'];
+                if(BookList){
+                    $('#bookName').append('<option value=""></option>');
+                    $.each(BookList,function(i,o){
+                        $('#bookName').append('<option value='+ o.AccountID+'>'+ o.AccountName+'<option>');
+                    });
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function fillSubLedgerName(){
+        var ledgerType = $("#ledgerType").val();
+        $("#subLedgerName").val('');
+        $("#subLedgerId").val(0);
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/paymentjournal",
+            type:"post",
+            //async:false,
+            data:{'ledgerType':ledgerType,'type':'loadSubLedgerName'},
+            success:function(data, textStatus, jqXHR){
+                subLedgerAutoComplete(JSON.parse(data));
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function subLedgerAutoComplete(SubLedgerList) {
+        var SubLedgerNameList = SubLedgerList['SubLedgerNameList'];
+        var $this = $(this);
+            $this.unbind('autocomplete');
+        $("#subLedgerName").autocomplete({
+                lookup: SubLedgerNameList,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $("#subLedgerId").val(suggestion.data);
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $("#subLedgerId").val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $("#subLedgerId").val(0);
+                        $(this).addClass('error');
+                    } else {
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }
+            });
+    }
+
+    function bindCostCenterAutoComplete(costCentreList) {
+            var $this = $(this);
+            $this.unbind('autocomplete');
+            $("#costCenterName").autocomplete({
+                lookup: costCentreList,
+                showNoSuggestionNotice: false,
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function (suggestion) {
+                    if (suggestion) {
+                        $("#costCenterId").val(suggestion.data);
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }, onSearchStart: function (suggestion) {
+                    $("#costCenterId").val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if (!suggestions.length) {
+                        $("#costCenterId").val(0);
+                        $(this).addClass('error');
+                    } else {
+                        $(this).removeClass('error');
+                        removeError($this);
+                    }
+                }
+            });
+    }
+
+    function CalculateRate(x) {
+        var iFocusRowId=x.split("_")[2],
+            name = '#OAdviceNo_' + iFocusRowId,
+            iRows = $('#rowid_' + iFocusRowId).val(),
+            sname = x.split("_")[0],
+            sQualName = "Qual";
+        var billTransId=x.split("_")[4];
+
+        /*sUnit =isNullCheck($('#unitid_' + iFocusRowId).val(),'string');
+
+
+        if (sname.substr(sname.length-1) ==  "R") {
+            name = '#rateanalR_' + iFocusRowId;
+            iRows = $('#rowinfoidR_' + iFocusRowId).val();
+            sQualName = "QualR";
+        }*/
+
+
+    //    var dTAmt = 0;
+    //    var dTWasteAmt =0;
+    //    for (i = 1; i <= iRows; i++) {
+    //        if ($(name + '_inc_' + i).is(':checked') == true) {
+    //            var val = parseFloat(isNullCheck($(name + "_resamt_" + i).val(),'number')),
+    //                wasteval = parseFloat(isNullCheck($(name + "_WastageAmount_" + i).val(),'number'));
+    //            dTAmt = dTAmt + val;
+    //            dTWasteAmt = dTWasteAmt + wasteval;
+    //        }
+    //    }
+
+    //    $(name + '_totwastage').val(sanitizeNumber(dTWasteAmt,2,true));
+    //    dTAmt =  dTAmt + dTWasteAmt;
+    //    $(name + '_totbaserate').val(sanitizeNumber(dTAmt,2,true));
+
+        var dbaseAmt=$('#advice_'+iFocusRowId+'_bill_'+billTransId+'_approveAmt').val();
+
+        var dQAmt =  CalculateQualifier(dbaseAmt,iFocusRowId,billTransId,sQualName);
+
+        $('#advice_'+iFocusRowId+'_bill_'+billTransId+'_qualifierAmt').val(sanitizeNumber(parseFloatVal(dQAmt),2,true));
+        $('#advice_'+iFocusRowId+'_bill_'+billTransId+'_netAmt').val(sanitizeNumber(parseFloatVal(dbaseAmt)+parseFloatVal(dQAmt),2,true));
+
+        //$('#amount_' + iFocusRowId).val(sanitizeNumber(parseFloatVal(dbaseAmt)+parseFloatVal(dQAmt),2,true));
+        //$('#qrate_' + iFocusRowId).val(sanitizeNumber((parseFloatVal(dbaseAmt)+parseFloatVal(dQAmt))/parseFloatVal(qty)),2,true);
+        CalculateAmount();
+
+        /*For Terms Calculation*/
+        /*calcTotal();
+        TermsAutoRefresh();*/
+
+    }
+
+    function CalculateQualifier(baseValue, key1,key2,sQualName) {
+        var sQName = sQualName + '_advice_';
+        var rows = $('#QualRowId_advice_'+key1+'_bill_'+ key2).val();
+        var sformula="";
+        var dbaseAmt=parseFloatVal(isNullCheck(baseValue,'number'));
+        var dTotalQualAmt=0;
+
+        for (i = 1; i <= rows; i++) {
+            var sRef = $('#' + sQName + key1 +'_bill_'+ key2 + '_Ref_' + i).val().trim();
+            var sFormula = isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_Exp_'+ i).val(),'string');
+            var dPer = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_ExpPer_'+ i).val(),'number'));
+            var sbaseRef = 'R0';
+            if (parseFloatVal(dPer) ==0) dPer=100;
+            sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+            for (j = 1; j <= rows; j++) {
+                var sFRef = $('#' + sQName + key1 +'_bill_'+ key2 + '_Ref_' + j).val().trim();
+                var dFamt = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_Amount_'+ j).val(),'number'));
+                sFormula = sFormula.replace(new RegExp(sFRef, 'g'), dFamt);
+            }
+            var fvaule = computeEval(sFormula);
+            $('#' + sQName + key1 +'_bill_'+ key2 + '_ExpValue_' + i).val(numberFormat(fvaule,'C'));
+
+            var iQualTypeid = $('#' + sQName + key1 +'_bill_'+ key2 + '_TypeId_' + i).val();
+
+            if (iQualTypeid==1 || iQualTypeid==2) {
+                var dTaxablePer = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_TaxablePer_' + i).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_TaxPer_' + i).val(),'number'));
+                var dCess = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_CessPer_' + i).val(),'number'));
+                var dEDCess = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_EduCessPer_' + i).val(),'number'));
+                var dHEDCess = parseFloatVal(isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_HEduCessPer_' + i).val(),'number'));
+                var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_NetPer_' + i).val(dNetPer);
+
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_NetPer_' + i).val(numberFormat(dNetPer,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_ExpPer_'+ i).val(numberFormat(dNetPer,'C'));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dCessAmt =  dTaxAmt* (dCess/100);
+                var dEDAmt =  dTaxAmt* (dEDCess/100);
+                var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+                var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_TaxableAmt_'+ i).val(numberFormat(dTaxableAmt,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_TaxPerAmt_'+ i).val(numberFormat(dTaxAmt,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_CessAmt_'+ i).val(numberFormat(dCessAmt,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_EduCessAmt_'+ i).val(numberFormat(dEDAmt,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_HEduCessAmt_'+ i).val(numberFormat(dHEDAmt,'C'));
+                $('#' + sQName + key1 +'_bill_'+ key2 + '_NetAmt_'+ i).val(numberFormat(dNetAmt,'C'));
+
+                dAmt = dNetAmt;
+            } else {
+
+                var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+            }
+
+            $('#' + sQName + key1 +'_bill_'+ key2 + '_Amount_' + i).val(numberFormat(dAmt,'C'));
+            if ($('#' + sQName + key1 +'_bill_'+ key2 + '_YesNo_' + i).is(':checked') == true) {
+                var sSign = isNullCheck($('#' + sQName + key1 +'_bill_'+ key2 + '_Sign_' + i).val(),'string');
+                if (sSign =="-") dTotalQualAmt = dTotalQualAmt - parseFloatVal(dAmt);
+                else dTotalQualAmt = dTotalQualAmt + parseFloatVal(dAmt);
+            }
+            CalculateAccountQualifier(baseValue, key1,key2,sQualName,i);
+        }
+
+        var Approve=$('#advice_' + key1 + '_bill_' + key2 +'_approveAmt').val();
+        var netTotAmt=parseFloatVal(Approve)+parseFloatVal(dTotalQualAmt);
+
+        $('#'+ sQualName + 'TotalAmt_advice_' + key1 + '_bill_' + key2).val(numberFormat(dTotalQualAmt,'C'));
+        $('#advice_' + key1 + '_bill_' + key2 +'_qualifierAmt').val(numberFormat(dTotalQualAmt,'C'));
+        $('#advice_' + key1 + '_bill_' + key2 +'_netAmt').val(numberFormat(netTotAmt,'C'));
+
+        return dTotalQualAmt;
+        //qualTotal();
+    }
+    function CalculateAccountQualifier(baseValue, key1,key2,sQualName,i){
+        var iQualTypeid = $('#Qual_advice_' + key1 +'_bill_'+ key2 + '_TypeId_' + i).val();
+
+        var Exp= isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_Exp_'+ i).val(),'string');
+        var ExpPer= parseFloatVal(isNullCheck($('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_ExpPer_'+ i).val(),'number'));
+        var Amount= parseFloatVal(isNullCheck($('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_Amount_'+ i).val(),'number'));
+        var Sign= isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_Sign_'+ i).val(),'string');
+        var YesNo= $('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_YesNo_'+ i);
+
+        $('#accTag_advice_' + key1 + '_bill_' + key2 + '_Exp_'+i).val(Exp);
+        $('#accTag_advice_' + key1 + '_bill_' + key2 + '_ExpPer_'+i).val(ExpPer);
+        $('#accTag_advice_' + key1 + '_bill_' + key2 + '_Amount_'+i).val(Amount);
+        $('#accTag_advice_' + key1 + '_bill_' + key2 + '_sign_'+i).val(Sign);
+
+        if (YesNo.is(':checked'))
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_YesNo_'+i).prop('checked',true).closest('tr').show();
+        else
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_YesNo_'+i).prop('checked',false).closest('tr').hide();
+
+        if (iQualTypeid==1 || iQualTypeid==2) {
+            var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_TaxablePer_' + i).val(),'number'));
+            var dTaxPer = parseFloatVal(isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_TaxPer_' + i).val(),'number'));
+            var dCess = parseFloatVal(isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_CessPer_' + i).val(),'number'));
+            var dEDCess = parseFloatVal(isNullCheck($('#Qual_advice_' + key1 +'_bill_'+ key2 + '_EduCessPer_' + i).val(),'number'));
+            var dHEDCess = parseFloatVal(isNullCheck($('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_HEduCessPer_' + i).val(),'number'));
+            var NetPer=$('#Qual_advice_' + key1 +'_bill_'+ key2 + '_NetPer_' + i).val();
+            var ExpPer=$('#Qual_advice_' + key1 +'_bill_'+ key2 + '_ExpPer_'+ i).val();
+
+            var TaxableAmt=$('#Qual_advice_' + key1 +'_bill_'+ key2 + '_TaxableAmt_'+ i).val();
+            var TaxPerAmt=$('#Qual_advice_' + key1 +'_bill_'+ key2 + '_TaxPerAmt_'+ i).val();
+            var CessAmt=$('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_CessAmt_'+ i).val();
+            var EduCessAmt=$('#Qual_advice_' + key1 +'_bill_'+ key2 + '_EduCessAmt_'+ i).val();
+            var HEduCessAmt=$('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_HEduCessAmt_'+ i).val();
+            var NetAmt=$('#Qual_advice_'+ key1 +'_bill_'+ key2 + '_NetAmt_'+ i).val();
+
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_TaxablePer_'+i).val(dTaxablePer);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_TaxPer_'+i).val(dTaxPer);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_CessPer_'+i).val(dCess);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_EduCessPer_'+i).val(dEDCess);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_HEduCessPer_'+i).val(dHEDCess);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_NetPer_'+i).val(NetPer);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_ExpPer_'+i).val(ExpPer);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_TaxableAmt_'+i).val(TaxableAmt);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_TaxPerAmt_'+i).val(TaxPerAmt);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_CessAmt_'+i).val(CessAmt);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_EduCessAmt_'+i).val(EduCessAmt);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_HEduCessAmt_'+i).val(HEduCessAmt);
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_NetAmt_'+i).val(NetAmt);
+
+
+        }
+    }
+
+    function CalculateAmount(){
+        var overAllApproveAmt= 0,overAllQualifierAmt= 0,overAllNetAmt=0;
+        var OJAdvice= 0,OJBill= 0,OJDeduction= 0,OJAmount=0;
+
+        for(var mainRowId=1;mainRowId<=$('#operationalJournalRowId').val();mainRowId++) {
+            if ($('#OTick_' + mainRowId).is(':checked')) {
+                var adviceApproveAmt = 0,
+                    adviceQualifierAmt = 0,
+                    adviceNetAmt = 0;
+
+                for (var subRowId = 1; subRowId <= $('#advice_' + mainRowId + '_rowid').val(); subRowId++) {
+                    adviceApproveAmt = parseFloatVal(adviceApproveAmt) + parseFloatVal($('#advice_' + mainRowId + '_bill_' + subRowId + '_approveAmt').val());
+                    adviceQualifierAmt = parseFloatVal(adviceQualifierAmt) + parseFloatVal($('#advice_' + mainRowId + '_bill_' + subRowId + '_qualifierAmt').val());
+                    adviceNetAmt = parseFloatVal(adviceNetAmt) + parseFloatVal($('#advice_' + mainRowId + '_bill_' + subRowId + '_netAmt').val());
+                }
+                $('#approveAmt_' + mainRowId).val(adviceApproveAmt);
+                $('#qualifierAmt_' + mainRowId).val(adviceQualifierAmt);
+                $('#netAmt_' + mainRowId).val(adviceNetAmt);
+
+                overAllApproveAmt = parseFloatVal(overAllApproveAmt) + parseFloatVal(adviceApproveAmt);
+                overAllQualifierAmt = parseFloatVal(overAllQualifierAmt) + parseFloatVal(adviceQualifierAmt);
+                overAllNetAmt = parseFloatVal(overAllNetAmt) + parseFloatVal(adviceNetAmt);
+
+                OJAdvice=parseFloatVal(OJAdvice)+parseFloatVal($('#OAdviceAmount_'+mainRowId).val());
+                OJBill=parseFloatVal(OJBill)+parseFloatVal($('#OBillAmount_'+mainRowId).val());
+                OJDeduction=parseFloatVal(OJDeduction)+parseFloatVal($('#ODeduction_'+mainRowId).val());
+                OJAmount=parseFloatVal(OJAmount)+parseFloatVal($('#OAmount_'+mainRowId).val());
+            }
+        }
+        $('#overAllApproveAmt').val(overAllApproveAmt);
+        $('#overAllQualifierAmt').val(overAllQualifierAmt);
+        $('#overAllNetAmt').val(overAllNetAmt);
+        $('#netAmount').val(overAllNetAmt);
+
+        $('#OJAdvice').val(OJAdvice);
+        $('#OJBill').val(OJBill);
+        $('#OJDeduction').val(OJDeduction);
+        $('#OJAmount').val(OJAmount);
+    }
+
+    function computeEval(formula) {
+        with (document.forms){
+            with (Math) {
+                A = eval((formula));
+            }
+        } return A;
+    }
+
+    function signChange(x) {
+        var $this = $(x);
+        if ($this.hasClass( "fa-plus" )) {
+            $this.removeClass('fa-plus clr-gre');
+            $this.addClass('fa-minus clr-red');
+            var sname= $this[0].id.split('_')[0],
+                key1 = $this[0].id.split('_')[2],
+                key2 = $this[0].id.split('_')[4],
+                key3=$this[0].id.split('_')[6];
+            $('#Qual_advice_' + key1 + '_bill_' + key2 + '_Sign_'+ key3).val('-');
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_sign_'+ key3).val('-');
+        } else {
+            $this.removeClass('fa-minus clr-red');
+            $this.addClass('fa-plus clr-gre');
+            var sname= $this[0].id.split('_')[0],
+                key1 = $this[0].id.split('_')[2],
+                key2 = $this[0].id.split('_')[4],
+                key3=$this[0].id.split('_')[6];
+            $('#Qual_advice_' + key1 + '_bill_' + key2 + '_Sign_'+ key3).val('+');
+            $('#accTag_advice_' + key1 + '_bill_' + key2 + '_sign_'+ key3).val('+');
+        }
+        CalculateQualifier($this[0].id);
+    }
+
+    /*function calcTotal() {
+        var total = 0;
+        var btotal = 0;
+
+        $.each($('input[id^=amount_]'), function (i,o) {
+            total += parseFloatVal($(this).val());
+        });
+
+        $.each($('input[id^=baseamount_]'), function (i,o) {
+            btotal += parseFloatVal($(this).val());
+        });
+
+        //Terms Calctotal
+        var iKey = 0;
+        var dCurVal = 0.0;
+        var dFAmt=0.0;
+        var sInclGross=0;
+        $.each($('input[id^=includegross_]'), function (i,o) {
+            iKey = iKey + 1;
+            sInclGross = $(this).val();
+            if(sInclGross == 1)
+            {
+                dCurVal = parseFloat(isNullCheck($('#value_'+iKey).val(),'number'));
+                dFAmt += (parseFloat(isNullCheck(dCurVal,'number')));
+            }
+        });
+        var gtype = $('#gridtype').val();
+        if(gtype == 0){
+            $('#total1').val(sanitizeNumber(total,2,true));
+            $('#basetotal1').val(sanitizeNumber(btotal,2,true));
+            $('#nettotal1').val(sanitizeNumber(total+dFAmt,2,true));
+        } else {
+            $('#total').val(sanitizeNumber(total,2,true));
+            $('#basetotal').val(sanitizeNumber(btotal,2,true));
+            $('#nettotal').val(sanitizeNumber(total+dFAmt,2,true));
+        }
+        var tCount =  $('#termsTable tbody tr').length;
+
+        if(tCount > 1){
+            $('#valuefrom').attr("disabled", true);
+        }
+        else
+        {
+            $('#valuefrom').attr("disabled", false);
+        }
+    }*/
+
+    /*function TermsAutoRefresh() {
+        var valueFrom=$('#valuefrom').val();
+        var ggtype =$('#gridtype').val();
+        var netAmt=0.0;
+        if(valueFrom == 'BaseAmount'){
+            if(ggtype == 0){
+                netAmt = parseFloat(isNullCheck($('#basetotal1').val(),'number'));
+            } else {
+                netAmt = parseFloat(isNullCheck($('#basetotal').val(),'number'));
+            }
+        } else if(valueFrom == 'NetAmount'){
+            if(ggtype == 0){
+                netAmt=parseFloat(isNullCheck($('#total1').val(),'number'));
+            } else {
+                netAmt=parseFloat(isNullCheck($('#total').val(),'number'));
+            }
+        } else {
+            if(ggtype == 0){
+                netAmt=parseFloat(isNullCheck($('#basetotal1').val(),'number'));
+            } else {
+                netAmt=parseFloat(isNullCheck($('#basetotal').val(),'number'));
+            }
+        }
+        var iKey=0;
+        var dFAmt=0.0;
+        var sTerms='';
+
+        $.each($('input[id^=terms_]'), function (i,o) {
+            var kVal = o.id;
+            var kVal1= kVal.split('_');
+            iKey = kVal1[1];
+
+            sTerms = $(this).val();
+
+            if((sTerms == 'Advance' || sTerms == 'Against Delivery' || sTerms == "Against Work" || sTerms == "Against Bill" || sTerms == "Against Certification") && iKey>0)
+            {
+                dCurPer = parseFloat(isNullCheck($('#per_'+iKey).val(),'number'));
+
+                if(parseFloat(isNullCheck(netAmt,'number'))>0 && parseFloat(isNullCheck(dCurPer,'number')) > 0)
+                {
+                    dFAmt = (parseFloat(isNullCheck(dCurPer,'number')) / 100) * parseFloat(isNullCheck(netAmt,'number'));
+                }
+                $('#value_'+iKey).val(sanitizeNumber(dFAmt,3,true));
+            }
+
+        });
+
+
+        var tCount =  $('#termsTable tbody tr').length;
+
+        if(tCount > 1){
+            $('#valuefrom').attr("disabled", true);
+        }
+        else
+        {
+            $('#valuefrom').attr("disabled", false);
+        }
+        calcTotal();
+    }*/
+
+</script>

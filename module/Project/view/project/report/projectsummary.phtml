@@ -1,0 +1,1222 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    .print-icon {color: #E01488; font-size: 18px;padding:14px 0 0 15px;position: absolute; top:-3px;right: 0;background:#EDD8E4; border:1px solid #CC78A8;width:50px;height:50px; border-radius:50px;}
+    .proname_btn a{font-size:15px;font-weight:600}
+    #chart1 {width:100%;height:350px;font-size:10px;overflow:hidden!important;}
+    #chart2 {width:100%;height:240px;font-size:10px;overflow:hidden!important;}
+    #datagrid .jqx-grid-header 	{ height:75px !important;}
+    #datagrid .jqx-grid-cell{font-size:12px;}
+    #datagrid .jqx-grid-header{font-size:12px;}
+    #datagrid1 .jqx-grid-cell{font-size:13px;}
+    #datagrid1 .jqx-grid-header{font-size:12px;}
+    #datagrid2 .jqx-grid-cell{font-size:13px;}
+    #datagrid2 .jqx-grid-header{font-size:13px;}
+	.summary-bg{height:55px;padding-top:4px; background: linear-gradient(0deg, #d3d3d3 9%, #e4e4e4 8%, rgba(0, 0, 0, 0) 8%, #d3d3d3 8%, #d3d3d3 8.33333%, rgba(0, 0, 0, 0) 8.4444%, rgba(0, 0, 0, 0) 8.4444%, #d3d3d3 8.4444%, #d3d3d3 8.4444%, rgba(0, 0, 0, 0) 8%), -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f9f9f9), color-stop(100%, #e4e4e4));
+  background: -moz-linear-gradient(0deg, #d3d3d3 9%, #e4e4e4 8%, rgba(0, 0, 0, 0) 8%, #d3d3d3 8%, #d3d3d3 8.33333%, rgba(0, 0, 0, 0) 8.4444%, rgba(0, 0, 0, 0) 8.4444%, #d3d3d3 8.4444%, #d3d3d3 8.4444%, rgba(0, 0, 0, 0) 8.4444%), -moz-linear-gradient(top, #f9f9f9, #e4e4e4);
+  background: -webkit-linear-gradient(0deg, #d3d3d3 9%, #e4e4e4 8%, rgba(0, 0, 0, 0) 8%, #d3d3d3 8%, #d3d3d3 8.33333%, rgba(0, 0, 0, 0) 8%, rgba(0, 0, 0, 0)5%, #d3d3d3 8.4444%, #d3d3d3 8.4444%, rgba(0, 0, 0, 0) 8%), -webkit-linear-gradient(top, #f9f9f9, #e4e4e4);
+  background: linear-gradient(0deg, #d3d3d3 9%, #e4e4e4 8%, rgba(0, 0, 0, 0) 8%, #d3d3d3 8%, #d3d3d3 8.33333%, rgba(0, 0, 0, 0) 8.4444%, rgba(0, 0, 0, 0)8%, #d3d3d3 8.4444%, #d3d3d3 8.4444%, rgba(0, 0, 0, 0) 9%), linear-gradient(to bottom, #f9f9f9, #e4e4e4);}
+  .summary-bd{background:#fff;border:1px solid #ddd; padding-top:20px;}
+</style>
+<div class="col-lg-12" id ="divselect">
+    <div class="col-lg-12">
+        <h1 class="text-center">Project Summary</h1>
+    </div>
+    <div class="col-lg-12 clear">
+        <div class="row">
+            <div class="col-lg-12 top_ct zoomIn animated" id="MainWrapper">
+                <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-nexts">
+                        <div class="form-group">
+                            <input type="text" name="projectselect" class="form-control lbl_move" label="Name of Project" id="projectselect" autofocus />
+                        </div>
+                        <div class="next-bt"><a href="javascript:submitProject();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content_wrapper padlr0" id="divmain">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+        <div class="summary-bg col-md-12">
+            <input type="hidden" id="projectId" name="projectId" value = "<?php echo $projectId; ?>"/>
+            <input type="hidden" id="projectName" name="projectName" value = "<?php echo $projectName; ?>"/>
+            <div class="col-lg-8">
+                <h1 style="color:#333;" data-bsfhead="Followup Details">Project Summary
+                    <div class="btn-group proname_btn"> <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php echo $projectName; ?><span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Change&nbsp;Project&nbsp;Name"><i class="fa fa-caret-down "></i></span></a>
+                        <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                            <ul>
+                                <?php
+                                foreach($projectlists as $data){?>
+                                    <li><a href="javascript:void(0);" class="followupId" data-index="<?php echo $data['data'];?>"><?php echo ucfirst($data['value']);?></a></li>
+                                <?php }	?>
+                            </ul>
+                        </div>
+                    </div>
+                </h1>
+            </div>
+           
+            <!--    <h1 class="col-sm-7 font-icon"><i class="fa fa-file-text"></i> Project Summary</h1>-->
+            <div class="col-lg-4" id="divType">
+<!--                <label class="col-lg-3" style="padding-top:5px;text-align:right">Type</label>-->
+                <div class="col-lg-10">
+                    <select name="reporttype" id="reporttype" class="form-control single_dropdown lbl_move"  style="width:100%;" onchange="return changeReport();">
+                        <option value="1">Summary Sheet</option>
+                        <option value="2">Work Group Summary</option>
+                        <option value="3">Other Cost Summary</option>
+                        <option value="4">Resource Type Summary</option>
+                        <option value="5">Resource Summary</option>
+                        <option value="6">Budget BOQ</option>
+                        <option value="7">Plan BOQ</option>
+                        <option value="8">Budget Vs Plan</option>
+<!--                        <option value="9">WBS Summary</option>-->
+                    </select></div>
+                <div class="col-md-2">
+                    <a id="print" href="#"><i class="fa fa-print print-icon"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+     </div>
+     <div class="col-md-12">
+     <div class="col-md-12 summary-bd form-group">
+    <div style="height:460px; overflow-y:scroll" id="divreport" >
+        <div id="divgrid" class="col-lg-12" style="display: none">
+            <div id="datagrid"></div>
+        </div>
+        <div id="divchart" class="col-lg-12" style="display: none">
+            <div class="col-lg-6">
+                <div id="datagrid1"></div>
+            </div>
+            <div class="col-lg-6">
+                <div id="chart1"></div>
+            </div>
+        </div>
+        <div id="divwg" class="col-lg-12" style="display: none">
+            <div id="datagrid2"></div>
+            <div id="chart2"></div>
+        </div>
+    </div>
+    </div>
+    </div>
+</div>
+
+<script>
+var arr_Project =  <?php echo (isset($projectlists)) ? json_encode($projectlists) : '[]';?>;
+
+$(function () {
+    $('#divType').hide();
+    $('#print').hide();
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+    if (iProjectId !=0) {
+        $('#divselect').hide();
+        $('#divmain').show();
+        var sProjectName = isNullCheck($('#projectName').val(),'string');
+//        $('.followupId').attr('data-index',iProjectId);
+        $('.followupId').parents('.btn-group').find('.dropdown-toggle').html(sProjectName+'<span class="caret"></span>');
+        $('#reporttype').val(1).prop('selected', true).trigger('change');
+        $('#divType').show();
+        changeReport();
+    } else {
+        $('#divmain').hide();
+        $('#divselect').show();
+    }
+    $('#projectselect').autocomplete({
+        lookup: arr_Project,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function (suggestion) {
+            if (suggestion) {
+                $('#projectId').val(suggestion.data);
+                $('#projectName').val(suggestion.value);
+                changeReport();
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function (suggestion) {
+            $('#projectId').val(0);
+            $('#projectName').val("");
+        },
+        onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $(this).addClass('error');
+                $('#projectId').val(0);
+            } else
+                $(this).removeClass('error');
+        }
+    });
+});
+
+$('.followupId').on('click',function(){
+    var urlId = $(this).attr('data-index');
+    $('#projectId').val(urlId);
+    var selText = $(this).text();
+    $('#projectName').val(selText);
+    $(this).parents('.btn-group').find('.dropdown-toggle').html(selText+'<span class="caret"></span>');
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+    if (iProjectId !=0) $('#divType').show();
+    changeReport();
+});
+
+function submitProject() {
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+    if (iProjectId !=0) {
+        $('#divselect').hide();
+        $('#divmain').show();
+        var sProjectName = isNullCheck($('#projectName').val(),'string');
+//        $('.followupId').attr('data-index',iProjectId);
+        $('.followupId').parents('.btn-group').find('.dropdown-toggle').html(sProjectName+'<span class="caret"></span>');
+        $('#reporttype').val(1).prop('selected', true).trigger('change');
+        $('#divType').show();
+        changeReport();
+    }
+}
+
+function changeReport() {
+    $('#divreport').hide();
+    var iReportId = $('#reporttype').val();
+    if ( iReportId==1) bindSummary();
+    else if ( iReportId==2) bindWorkGroup();
+    else if ( iReportId==3) bindOH();
+    else if ( iReportId==4) bindResourceType();
+    else if ( iReportId==5) bindResourceReport();
+    else if ( iReportId==6) bindbudgetBOQ();
+    else if ( iReportId==7) bindplanBOQ();
+    else if ( iReportId==8) bindBudgetVsPlan();
+}
+function bindSummary() {
+    $('#divgrid').hide();
+    $('#print').hide();
+    $('#divwg').hide();
+    $('#divchart').show();
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    var chartData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getprojectsummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            var data = JSON.parse(data);
+            var dBaseAmt = parseFloatVal(isNullCheck(data['BOQAmt'],'number')),
+                dOtherCost = parseFloatVal(isNullCheck(data['OHAmt'],'number')),
+                dTotalAmount = parseFloatVal(isNullCheck(data['NetAmt'],'number')),
+                dBasePer= 0, dOtherCostPer= 0,dTotalPer= 0;
+
+            if (dTotalAmount !=0) {
+                dBasePer = (dBaseAmt / dTotalAmount * 100);
+                dOtherCostPer = (dOtherCost / dTotalAmount * 100);
+                dTotalPer = (dTotalAmount / dTotalAmount * 100);
+
+                arrData.push({
+                    Type: 'BOQ Cost',
+                    Amount: dBaseAmt,
+                    TPer: dBasePer
+                });
+                arrData.push({
+                    Type: 'Other Cost',
+                    Amount: dOtherCost,
+                    TPer: dOtherCostPer
+                });
+                arrData.push({
+                    Type: 'Total Cost',
+                    Amount: dTotalAmount,
+                    TPer: dTotalPer
+                });
+
+                chartData.push({
+                    Type: 'BOQ Cost',
+                    Amount: dBaseAmt
+                });
+                chartData.push({
+                    Type: 'Other Cost',
+                    Amount: dOtherCost
+                });
+            }
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'Type', type: 'string'},
+            {name: 'Amount', type: 'number'},
+            {name: 'TPer', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#datagrid1").jqxGrid({
+        width: "100%",
+//            height: 300,
+        autoheight: true,
+        rowsheight: 60,
+        source: rfcdata,
+        pageable: false,
+        sortable: true,
+        altrows: true,
+        enabletooltips: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'Description', datafield: 'Type', 'editable': false, width: '40%'},
+            {text: 'Cost', datafield: 'Amount', 'editable': false,renderer:columnsrenderer,cellsalign: 'right', width: '40%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid1").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                }
+            },
+            {text: 'Weightage %', datafield: 'TPer', 'editable': false, width: '20%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid1").jqxGrid('getCellValue', row, 'TPer'),2) + '</div>';
+                }
+            }
+        ]
+    });
+    populateChart1(chartData);
+}
+function populateChart1(data) {
+    var chart = AmCharts.makeChart("chart1", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": data,
+        "valueField": "Amount",
+        "titleField": "Type",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function bindWorkGroup() {
+    $('#divgrid').hide();
+    $('#print').hide();
+    $('#divchart').hide();
+    $('#divwg').show();
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getworkgroupsummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'WorkGroup', type: 'string'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#datagrid2").jqxGrid({
+        width: "100%",
+        autoheight: false,
+        height: 200,
+        rowsheight: 30,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'WorkGroup', datafield: 'WorkGroup', 'editable': false, width: '60%'},
+            {text: 'Amount', datafield: 'Amount', 'editable': false, width: '30%', cellsalign: 'right',renderer: columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid2").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '10%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid2").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+    populateChart2(arrData);
+}
+function populateChart2(data) {
+    var chart = AmCharts.makeChart("chart2", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": data,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        },
+            {
+                "unit":"%",
+                "id": "v2",
+                "position": "right",
+                "autoGridCount": false,
+                "title": "%"
+            }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+            "balloonText": "Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Cost",
+            "type": "column",
+            "valueField": "Amount"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#4B0082",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Weightage %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "Per",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Weightage % :<b style='font-size: 130%'>"+val+"</b>%";
+                }
+            },
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "WorkGroup",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function bindOH() {
+    $('#divgrid').hide();
+    $('#print').hide();
+    $('#divchart').hide();
+    $('#divwg').show();
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getohsummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'OHName', type: 'string'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#datagrid2").jqxGrid({
+        width: "100%",
+        autoheight: false,
+        height: 200,
+        rowsheight: 30,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'OHName', datafield: 'OHName', 'editable': false, width: '60%'},
+            {text: 'Amount', datafield: 'Amount', 'editable': false, width: '30%', cellsalign: 'right',renderer: columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid2").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '10%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid2").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+    populateChart3(arrData);
+}
+function populateChart3(data) {
+    var chart = AmCharts.makeChart("chart2", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": data,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        },
+            {
+                "unit":"%",
+                "id": "v2",
+                "position": "right",
+                "autoGridCount": false,
+                "title": "%"
+            }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+            "balloonText": "Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Cost",
+            "type": "column",
+            "valueField": "Amount"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#4B0082",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Weightage %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "Per",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Weightage % :<b style='font-size: 130%'>"+val+"</b>%";
+                }
+            },
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "OHName",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 20
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function bindResourceType() {
+    $('#divgrid').hide();
+    $('#divwg').hide();
+    $('#print').hide();
+    $('#divchart').show();
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getresourcetypesummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'ResourceType', type: 'string'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+
+    $("#datagrid1").jqxGrid({
+        width: "100%",
+        autoheight: true,
+        rowsheight: 60,
+        source: rfcdata,
+        pageable: false,
+        sortable: true,
+        altrows: true,
+        showstatusbar: true,
+        showaggregates: true,
+        enabletooltips: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'ResourceType', datafield: 'ResourceType', 'editable': false, width: '40%'},
+            {text: 'Cost', datafield: 'Amount', 'editable': false,renderer:columnsrenderer,cellsalign: 'right', width: '40%',
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid1").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '20%', renderer:columnsrenderer,cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid1").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+    populateChart4(arrData);
+}
+
+function populateChart4(data) {
+    var chart = AmCharts.makeChart("chart1", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": data,
+        "valueField": "Amount",
+        "titleField": "ResourceType",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function bindResourceReport() {
+    $('#divchart').hide();
+    $('#divwg').hide();
+    $('#print').show();
+    $('#divgrid').show();
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getresourcesummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'ResourceName', type: 'string'},
+            {name: 'Unit', type: 'string'},
+            {name: 'Qty', type: 'number'},
+            {name: 'Rate', type: 'number'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+    $("#datagrid").jqxGrid({
+        width: "100%",
+        height: 436,
+        rowsheight: 35,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'Resource', datafield: 'ResourceName', 'editable': false, width: '45%'},
+            {text: 'Unit', datafield: 'Unit', 'editable': false, width: '10%'},
+            {text: 'Qty', datafield: 'Qty', 'editable': false, width: '10%', cellsalign: 'right',renderer: columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                }
+            },
+            {text: 'Rate', datafield: 'Rate', 'editable': false, width: '10%', cellsalign: 'right',renderer: columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }
+            },
+            {text: 'Amount', datafield: 'Amount', 'editable': false, width: '15%', cellsalign: 'right',renderer: columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '10%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+}
+function bindbudgetBOQ() {
+    $('#divchart').hide();
+    $('#divwg').hide();
+    $('#print').show();
+    $('#divgrid').show();
+
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getbudgetboqsummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'SerialNo', type: 'string'},
+            {name: 'Specification', type: 'string'},
+            {name: 'Unit', type: 'string'},
+            {name: 'Qty', type: 'number'},
+            {name: 'Rate', type: 'number'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+    $("#datagrid").jqxGrid({
+        width: "100%",
+        height: 436,
+        rowsheight: 35,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'SerialNo', datafield: 'SerialNo', 'editable': false, width: '10%'},
+            {text: 'Specification', datafield: 'Specification', 'editable': false, width: '40%'},
+            {text: 'Unit', datafield: 'Unit', 'editable': false, width: '7%'},
+            {text: 'Qty', datafield: 'Qty', 'editable': false, width: '10%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                }
+            },
+            {text: 'Rate', datafield: 'Rate', 'editable': false, width: '10%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }
+            },
+            {text: 'Amount', datafield: 'Amount', 'editable': false, width: '15%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '8%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+        ]
+    });
+}
+function bindplanBOQ() {
+    $('#divchart').hide();
+    $('#divwg').hide();
+    $('#print').show();
+    $('#divgrid').show();
+
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+
+    var arrData=[];
+    $.ajax({
+        url: getBaseURL() + "project/report/getplanboqsummary",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            arrData = JSON.parse(data);
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'SerialNo', type: 'string'},
+            {name: 'Specification', type: 'string'},
+            {name: 'Unit', type: 'string'},
+            {name: 'Qty', type: 'number'},
+            {name: 'Rate', type: 'number'},
+            {name: 'Amount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+    $("#datagrid").jqxGrid({
+        width: "100%",
+        height: 436,
+        rowsheight: 35,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'SerialNo', datafield: 'SerialNo', 'editable': false, width: '10%'},
+            {text: 'Specification', datafield: 'Specification', 'editable': false, width: '40%'},
+            {text: 'Unit', datafield: 'Unit', 'editable': false, width: '7%'},
+            {text: 'Qty', datafield: 'Qty', 'editable': false, width: '10%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Qty'),3) + '</div>';
+                }
+            },
+            {text: 'Rate', datafield: 'Rate', 'editable': false, width: '10%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }
+            },
+            {text: 'Amount', datafield: 'Amount', 'editable': false, width: '15%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Amount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Weightage %', datafield: 'Per', 'editable': false, width: '8%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Weightage<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Per'),2) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+        ]
+    });
+}
+function bindBudgetVsPlan() {
+    $('#divchart').hide();
+    $('#divwg').hide();
+    $('#divgrid').show();
+    $('#print').show();
+
+    var iProjectId = parseInt(isNullCheck($('#projectId').val(),'number'));
+    var arrData=[],dVar =0;
+    $.ajax({
+        url: getBaseURL() + "project/report/getbudgetvsplan",
+        async: false,
+        type: 'post',
+        data: {'projectId': iProjectId},
+        success: function(data,status) {
+            var obj = JSON.parse(data);
+            arrData = obj['arrData'];
+            dVar = parseFloatVal(isNullCheck(obj.variance,'number'));
+        }
+    });
+
+    if (arrData.length ==0) return;
+    $('#divreport').show();
+
+    var rfcsource =
+    {
+        async: false,
+        dataType: "json",
+        localdata: arrData,
+        dataFields: [
+            {name: 'SerialNo', type: 'string'},
+            {name: 'Specification', type: 'string'},
+            {name: 'Unit', type: 'string'},
+            {name: 'Rate', type: 'number'},
+            {name: 'BudgetQty', type: 'number'},
+            {name: 'BudgetAmount', type: 'number'},
+            {name: 'PlanQty', type: 'number'},
+            {name: 'PlanAmount', type: 'number'},
+            {name: 'Per', type: 'number'}
+        ]
+    };
+    var rfcdata = new $.jqx.dataAdapter(rfcsource);
+    var columnsrenderer = function (value) {
+        return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+    }
+    $("#datagrid").jqxGrid({
+        width: "100%",
+        height: 436,
+        rowsheight: 35,
+        pagerButtonsCount: 6,
+        pagesize: 10,
+        source: rfcdata,
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        showfilterrow: true,
+        altrows: true,
+        enabletooltips: true,
+        editable: true,
+        showstatusbar: true,
+        showaggregates: true,
+        selectionmode: 'singlerow',
+        columns: [
+            {text: 'SerialNo', datafield: 'SerialNo', 'editable': false, width: '8%'},
+            {text: 'Specification', datafield: 'Specification', 'editable': false, width: '22%'},
+            {text: 'Unit', datafield: 'Unit', 'editable': false, width: '5%'},
+            {text: 'Rate', datafield: 'Rate', 'editable': false, width: '9%', cellsalign: 'right',renderer:columnsrenderer,
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Rate'),2,true) + '</div>';
+                }
+            },
+            {text: 'Budget Qty', datafield: 'BudgetQty', 'editable': false, width: '9%', cellsalign: 'right',renderer:columnsrenderer,
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Budget<br>Qty</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'BudgetQty'),3) + '</div>';
+                }
+            },
+            {text: 'Budget Amount', datafield: 'BudgetAmount', 'editable': false, width: '15%', cellsalign: 'right',renderer:columnsrenderer,
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Budget<br>Amount</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'BudgetAmount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Plan Qty', datafield: 'PlanQty', 'editable': false, width: '9%', cellsalign: 'right',renderer:columnsrenderer,
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Plan<br>Qty</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'PlanQty'),3) + '</div>';
+                }
+            },
+            {text: 'Plan Amount', datafield: 'PlanAmount', 'editable': false, width: '15%', cellsalign: 'right',renderer:columnsrenderer,
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Plan<br>Amount</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'PlanAmount'),2,true) + '</div>';
+                },aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+                    $.each(aggregates, function (key, value) {
+                        renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(value,2,true) +'</div>';
+                    });
+                    return renderstring;
+                }
+            },
+            {text: 'Variance %', datafield: 'Per', 'editable': false, width: '8%', cellsalign: 'right',
+                renderer: function (defaultText, alignment, height) {
+                    return '<div style="margin: 3px 0 0 3px;text-align: right;">Variance<br>%</div>';
+                },
+                cellsrenderer: function (row) {
+                    return '<div class="text-right" style="overflow: hidden; text-overflow: ellipsis; margin-right: 2px; margin-left: 10px; margin-top: 9.5px;">' + sanitizeNumber($("#datagrid").jqxGrid('getCellValue', row, 'Per'),2,true) + '</div>';
+                },
+                aggregates: ['sum'],
+                aggregatesrenderer: function (aggregates) {
+                    var renderstring = "";
+//                        $.each(aggregates, function (key, value) {
+                    renderstring += '<div style="position: relative; margin: 4px; font-size:13px;padding:5px;font-weight:bold; overflow: hidden;">'+ sanitizeNumber(dVar,2,true) +'</div>';
+//                        });
+                    return renderstring;
+                }
+            }
+        ]
+    });
+}
+$("#print").click(function () {
+    var repName =$("#reporttype option:selected").text();
+    var sprojectName = isNullCheck($('#projectName').val(),'string');
+    repName = sprojectName + ' - ' + repName;
+    var gridContent = $("#datagrid").jqxGrid('exportdata', 'html');
+    var newWindow = window.open('', '', 'width=800, height=500'),
+        document = newWindow.document.open(),
+        pageContent =
+            '<!DOCTYPE html>\n' +
+            '<html>\n' +
+            '<head>\n' +
+            '<meta charset="utf-8" />\n' +
+            '<title>'+repName+'</title>\n' +
+            '<h1>'+repName+'</h1>\n' +
+            '</head>\n' +
+            '<body>\n' + gridContent + '\n</body>\n</html>';
+    document.write(pageContent);
+    document.close();
+    newWindow.print();
+
+    /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+});
+</script>

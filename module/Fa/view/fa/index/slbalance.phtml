@@ -1,0 +1,571 @@
+<style type="text/css">
+    .table-responsive {overflow-x: inherit !important;}
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <form id="subLedgerForm" method="post">
+            <div class="col-lg-12">
+                <h1 class="txt_center">SubLedger Balance</h1>
+                <input type="hidden"  name="accountId" id="accountId" value="<?php echo (isset($accountId)? $accountId : 0); ?>"/>
+                <input type="hidden" name="accountTypeId" id="accountTypeId" value="<?php echo (isset($m_iTypeId)? $m_iTypeId : 0); ?>"/>
+                <input type="hidden" name="mode" id="mode"/>
+                <input type="hidden" name="mainRowId" id="mainRowId"/>
+                <input type="hidden" name="subRowId" id="subRowId"/>
+                <div class="row" id="divAccount">
+                    <div class="col-lg-12">
+                        <div class="table-responsive top-20 mar_btm">
+                            <table class="table" style=" margin-bottom:0px;">
+                                <thead>
+                                <tr>
+                                    <th>SubLedger Name</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                    <th>From Bill</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody class="main" id="slTable">
+                                </tbody>
+                                <tbody class="total">
+                                <tr id="totalTD">
+                                    <td align="right" class="t_amt">Total</td>
+                                    <td width="25%">
+                                        <input class="parent_text border-none" style="text-align:right;" type="text" name="totDebit" id="totDebit" value="0.0" readonly>
+                                    </td>
+                                    <td width="25%">
+                                        <input class="parent_text border-none" style="text-align:right;" type="text" name="totCredit" id="totCredit" value="0.0" readonly>
+                                    </td>
+                                </tr>
+                                <tr id="totalBalTD">
+                                    <td align="right" class="t_amt">Overall Total</td>
+                                    <td width="25%">
+                                        <input class="parent_text border-none" style="text-align:right;" type="text" name="totAmount" id="totAmount" value="0.0" readonly>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="rowid" id="rowid" value="0"/>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <a class="ripple has-ripple" href="<?php echo $this->basePath(); ?>/fa/index/companyaccountdet/<?php echo $curFYearId; ?>/<?php echo $curCompanyId; ?>" style="cursor:pointer;" button type="button" id="backBtn" class="ripple">Back<span class="ripple-wrapper"></span></a>
+        <!--<li id="continue" class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="submitForm()" class="ripple">submit</a></li>-->
+    </ul>
+</div>
+<script id="template-sl"  type="text/template" class="hide">
+    <tr>
+        <td width="50%">
+            <input class="parent_text border-none" type="text" id="subLedgerName__" name="subLedgerName__" value="" />
+            <input type="hidden" name="subLedgerId__" id="subLedgerId__" value="0">
+        </td>
+        <td width="20%">
+            <input  class="parent_text border-none" style="text-align:right;" type="text" id="debit__" name="debit__" value="0" readonly />
+        </td>
+        <td width="20%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" name="credit__" id="credit__" value="0" readonly>
+        </td>
+        <td width="20%">
+            <input type="radio" name="fromBill__" id="Yes__" onchange="subRowType(this)" value="Y">Yes
+            <input type="radio" name="fromBill__" id="No__" onchange="subRowType(this)" value="N">No
+        </td>
+        <td width="6%" align="center" class="action_btns_td" style="border:none !important;display: none;">
+            <ul class="action_btns">
+                <li><a href="javascript:void(0)" class="mainTr" id="expandTr__" style="cursor:pointer;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <tr class="subTr" style="display: none;" id="yesTr__">
+        <td colspan="9" style="padding:0px !important;">
+            <div class="subDiv" style="display: none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;">
+                    <div class="table-responsive topsp">
+                        <table class="table " style="margin-bottom:0px;" bgcolor="#00FF00" id="">
+                            <thead>
+                            <tr>
+                                <th>Bill No</th>
+                                <th>Bill Date</th>
+                                <th>Costcentre</th>
+                                <th>Bill Amount</th>
+                                <th>Type</th>
+                                <th>Branch</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main" id="billTbody__"></tbody>
+                            <tbody class="total">
+                                <tr>
+                                    <td colspan="6">
+                                        <button id="continue" class="nx-btn float_r"><a href="javascript:void(0);" id="btnBillSave__" onclick="saveBillRow(this)" class="ripple">Save</a></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <input type="hidden" name="sl___rowid" id="sl___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr class="subTr" style="display: none;" id="noTr__">
+        <td colspan="9" style="padding:0px !important;">
+            <div class="subDiv" style="display: none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;">
+                    <div class="table-responsive topsp">
+                        <table class="table " style="margin-bottom:0px;" bgcolor="#00FF00" id="">
+                            <thead>
+                            <tr>
+                                <th>Costcentre</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main" id="ccTbody__"></tbody>
+                            <tbody class="total">
+                            <tr>
+                                <td colspan="6">
+                                    <button id="continue" class="nx-btn float_r"><a href="javascript:void(0);" id="btnCCSave__" onclick="saveCCRow(this)" class="ripple">Save</a></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                            <input type="hidden" name="cc___rowid" id="cc___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="template-bill" type="text/template" class="hide">
+    <tr>
+        <td width="15%">
+            <input class="parent_text border-none"type="text" id="sl___billno_0" name="sl___billno_0" value="" onchange="calcAmount();" />
+            <input type="hidden" name="sl___BillRegisterId_0" id="sl___BillRegisterId_0">
+        </td>
+        <td width="15%">
+            <div class="col-lg-12 padlr0">
+                <input type="text" name="sl___billdate_0" id="sl___billdate_0" class="tbl_input date_picker" style="cursor:pointer;" value='<?php echo Date('d/m/Y'); ?>' />
+                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            </div>
+        </td>
+        <td width="20%">
+            <select data-placeholder="" style="width:100%;" class="form-control single_dropdown lbl_box sortoption tbl_input" name="sl___costcentre_0" id="sl___costcentre_0">
+                <option value="0"></option>
+            </select>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="sl___billamount_0" name="sl___billamount_0" value="0" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="calcBillAmount(this)" />
+        </td>
+        <td width="15%">
+            <select data-placeholder="" style="width:100%;" class="form-control single_dropdown lbl_box sortoption tbl_input" name="sl___type_0" id="sl___type_0" onchange="addNewBillRow(this)">
+                <option value="0"></option>
+            </select>
+        </td>
+        <td width="15%">
+            <select data-placeholder="" style="width:100%;" class="form-control single_dropdown lbl_box sortoption tbl_input" name="sl___branch_0" id="sl___branch_0" onchange="addNewBillRow(this)">
+                <option value="0"></option>
+            </select>
+        </td>
+    </tr>
+</script>
+<script id="template-cc" type="text/template" class="hide">
+    <tr>
+        <td width="15%">
+            <select data-placeholder="" style="width:100%;" class="form-control single_dropdown lbl_box sortoption tbl_input" name="sl___cc_0" id="sl___cc_0" onchange="addNewCCRow(this);">
+                <option value="0"></option>
+            </select>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="sl___ccDebit_0" name="sl___ccDebit_0" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="calcCCAmount(this)" value="0"/>
+        </td>
+        <td width="15%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="sl___ccCredit_0" name="sl___ccCredit_0" value="0" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="calcCCAmount(this)" />
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    var billDet=<?php echo (isset($billDet)) ? json_encode($billDet) : '[]';?>; //Bill Trans
+    var billCCDet=<?php echo (isset($billCCDet)) ? json_encode($billCCDet) : '[]';?>; // CC Trans
+    var slDet=<?php echo (isset($slDet)) ? json_encode($slDet) : '[]';?>; //Main SL table
+    var ccList=<?php echo (isset($ccList)) ? json_encode($ccList) : '[]';?>;
+    var branchList=<?php echo (isset($branchList)) ? json_encode($branchList) : '[]';?>;
+    var typeList=<?php echo (isset($typeList)) ? json_encode($typeList) : '[]';?>;
+    var openedBill='';
+    var template = $('#template-sl').html();
+    var billtemplate= $('#template-bill').html();
+    var cctemplate= $('#template-cc').html();
+
+    $(function () {
+        var sno= 0,
+            debitSum = 0,
+            creditSum = 0;
+
+        if(slDet.length !=0){
+            $('#divAccount').fadeIn();
+            $.each(slDet, function (i,o) {
+                var slRowId=0;
+                var ccRowId=0;
+
+                sno += 1;
+                $('#slTable').append(template.replace(/__/g, '_' + sno));
+                $('#subLedgerName_'+sno).val(o.SubLedgerName).attr('readonly', true);
+                $('#subLedgerId_'+sno).val(o.SubLedgerId);
+                $('#debit_'+sno).val(o.Debit);
+                $('#credit_'+sno).val(o.Credit);
+                debitSum = parseFloatVal(debitSum) + parseFloatVal(o.Debit);
+                creditSum = parseFloatVal(creditSum) + parseFloatVal(o.Credit);
+
+                if(o.FromBill == 1){
+                    $('#Yes_'+sno).attr('checked',true);
+                    $('#yesTr_'+sno).show().find(".subDiv").show();
+
+                    /*For Bill Sub Table Start*/
+                    $.each(billDet, function (j,k) {
+                        if(o.SubLedgerId == k.SubLedgerId){
+                            slRowId += 1;
+                            $('#billTbody_'+sno).append(billtemplate.replace(/__/g, '_' + sno).replace(/_0/g, '_' + slRowId));
+                            bindBillCC(sno,slRowId); //Load data for Cost Center
+                            bindType(sno,slRowId); //Load data for Type
+                            bindBranch(sno,slRowId); //Load data for Branch
+
+                            $('#sl_'+sno+'_billno_'+slRowId).val(k.BillNo);
+                            $('#sl_'+sno+'_BillRegisterId_'+slRowId).val(k.BillRegisterId);
+                            $('#sl_'+sno+'_billdate_'+slRowId).val(k.BillDate);
+                            $('#sl_'+sno+'_costcentre_'+slRowId).val(k.CostCentreId);
+                            $('#sl_'+sno+'_billamount_'+slRowId).val(k.BillAmount);
+                            $('#sl_'+sno+'_type_'+slRowId).val(k.Type);
+                            $('#sl_'+sno+'_branch_'+slRowId).val(k.BranchId);
+                        }
+                    });
+                    loadBillTBody(sno,slRowId); //default one row for adding
+                    /*For Bill Sub Table End*/
+                }else{
+                    $('#No_'+sno).attr('checked',true);
+                    $('#noTr_'+sno).show().find(".subDiv").show();
+                    /*For CC Sub Table Start*/
+                    $.each(billCCDet, function (j,k) {
+                        if(o.SubLedgerId == k.SubLedgerId){
+                            ccRowId += 1;
+                            $('#ccTbody_'+sno).append(cctemplate.replace(/__/g, '_' + sno).replace(/_0/g, '_' + ccRowId));
+                            bindCC(sno,ccRowId); //Load Cost Center
+
+                            $('#sl_'+sno+'_cc_'+ccRowId).val(k.CostCentreId);
+                            $('#sl_'+sno+'_ccDebit_'+ccRowId).val(k.Debit);
+                            $('#sl_'+sno+'_ccCredit_'+ccRowId).val(k.Credit);
+                        }
+                    });
+                    loadCCTBody(sno,ccRowId); //default one row for adding
+                    /*For CC Sub Table End*/
+                }
+            });
+            $('#totDebit').val(debitSum);
+            $('#totCredit').val(creditSum);
+            var overAllSum = debitSum-creditSum;
+            $('#totAmount').val(overAllSum);
+        }else{
+            $('#totalBalTD').hide();
+            $('#totalTD').hide();
+            $('#slTable').html("No data to display");
+        }
+        $('#rowid').val(sno);
+        bindExpandTrFn();
+        bindSelect();
+        bindDatePicker();
+    });
+    function loadBillTBody(sno,slRowId){
+        slRowId += 1;
+        $('#billTbody_'+sno).append(billtemplate.replace(/__/g, '_' + sno).replace(/_0/g, '_' + slRowId));
+        $('#sl_'+sno+'_rowid').val(slRowId);
+        bindBillCC(sno,slRowId); //Load data for Cost Center
+        bindType(sno,slRowId); //Load data for Type
+        bindBranch(sno,slRowId); //Load data for Branch
+        bindSelect();
+        bindDatePicker();
+    }
+    function loadCCTBody(sno,ccRowId){
+        ccRowId += 1;
+        $('#ccTbody_'+sno).append(cctemplate.replace(/__/g, '_' + sno).replace(/_0/g, '_' + ccRowId));
+        $('#cc_'+sno+'_rowid').val(ccRowId);
+        bindCC(sno,ccRowId);
+        bindSelect();
+    }
+    function bindBillCC(sno,slRowId){
+        $('#sl_'+sno+'_costcentre_'+slRowId).html('');
+        $('#sl_'+sno+'_costcentre_'+slRowId).append('<option value="0"></option>');
+        $.each(ccList,function(m,n){
+            $('#sl_'+sno+'_costcentre_'+slRowId).append('<option value='+ n.CostCentreId+'>'+ n.CostCentreName+'<option>');
+        });
+    }
+    function bindCC(sno,slRowId){
+        $('#sl_'+sno+'_cc_'+slRowId).html('');
+        $('#sl_'+sno+'_cc_'+slRowId).append('<option value="0"></option>');
+        $.each(ccList,function(m,n){
+            $('#sl_'+sno+'_cc_'+slRowId).append('<option value='+ n.CostCentreId+'>'+ n.CostCentreName+'<option>');
+        });
+    }
+    function bindType(sno,slRowId){
+        $('#sl_'+sno+'_type_'+slRowId).html('');
+        $('#sl_'+sno+'_type_'+slRowId).append('<option value="0"></option>');
+        $.each(typeList,function(m,n){
+            $('#sl_'+sno+'_type_'+slRowId).append('<option value='+ n.TypeId+'>'+ n.TypeName+'<option>');
+        });
+    }
+    function bindBranch(sno,slRowId){
+        $.each(slDet, function (i,o) {
+            $('#sl_'+sno+'_branch_'+slRowId).html('');
+            $('#sl_'+sno+'_branch_'+slRowId).append('<option value="0"></option>');
+            $.each(branchList,function(m,n){
+                if(o.SubLedgerId == n.SubLedgerId){
+                    $('#sl_'+sno+'_branch_'+slRowId).append('<option value='+ n.BranchId+'>'+ n.BranchName+'<option>');
+                }
+            });
+        });
+    }
+
+    function submitForm(){
+        alert('dont submit');
+//        $("#subLedgerForm").submit();
+    }
+
+    function calcBillAmount(x){
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            mainRowid = $x[0].id.split('_')[1],
+            subRowid = $x[0].id.split('_')[3];
+        var creditRowTot=0;
+        var subRowCount=$('#sl_'+mainRowid+'_rowid').val();
+        for(var i=1;i<=subRowCount;i++){
+            creditRowTot=parseFloatVal(creditRowTot)+parseFloatVal($('#sl_'+mainRowid+'_billamount_'+i).val());
+        }
+        $('#credit_'+mainRowid).val(creditRowTot);
+        calcAmount();
+        addNewBillRow(x);
+    }
+    function calcCCAmount(x){
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            mainRowid = $x[0].id.split('_')[1],
+            subRowid = $x[0].id.split('_')[3],
+            debitId=$('#sl_'+mainRowid+'_ccDebit_'+subRowid),
+            creditId=$('#sl_'+mainRowid+'_ccCredit_'+subRowid);
+
+        if(debitId.val() !=0)
+            creditId.prop('readonly',true);
+        else
+            creditId.prop('readonly',false);
+
+        if(creditId.val() !=0)
+            debitId.prop('readonly',true);
+        else
+            debitId.prop('readonly',false);
+
+
+        var creditCCTot=0;
+        var debitCCTot=0;
+        var subRowCount=$('#cc_'+mainRowid+'_rowid').val();
+        for(var i=1;i<=subRowCount;i++){
+            debitCCTot=parseFloatVal(debitCCTot)+parseFloatVal($('#sl_'+mainRowid+'_ccDebit_'+i).val());
+            creditCCTot=parseFloatVal(creditCCTot)+parseFloatVal($('#sl_'+mainRowid+'_ccCredit_'+i).val());
+        }
+        $('#debit_'+mainRowid).val(debitCCTot);
+        $('#credit_'+mainRowid).val(creditCCTot);
+
+        calcAmount();
+        addNewCCRow(x);
+    }
+    function calcAmount(){
+        var totDebitAmount= 0,
+            id = 0,
+            totCreditAmount= 0;
+        $.each($('input[id^=debit_]'),function(){
+            id = $(this).attr('id').split('_')[1];
+            if($("#costCenterId_"+id).val() != 0){
+                totDebitAmount=parseFloatVal(totDebitAmount)+ parseFloatVal($('#debit_'+id).val());
+                totCreditAmount=parseFloatVal(totCreditAmount)+ parseFloatVal($('#credit_'+id).val());
+            }
+        });
+        $('#totDebit').val(totDebitAmount);
+        $('#totCredit').val(totCreditAmount);
+        var overAllAmnt = totDebitAmount-totCreditAmount;
+        $('#totAmount').val(overAllAmnt);
+    }
+
+    function addNewBillRow(x) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            mainRowid = $x[0].id.split('_')[1],
+            subRowid = $x[0].id.split('_')[3];
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#sl_' + mainRowid+'_billno_'+subRowid).val() == '' || $('#sl_' + mainRowid+'_costcentre_'+subRowid).val() == '0' || $('#sl_' + mainRowid+'_billamount_'+subRowid).val() == '0' || $('#sl_' + mainRowid+'_type_'+subRowid).val() == '0' )
+            return;
+
+        var $rowid = $('#sl_'+mainRowid+'_rowid'),
+            rowid = parseInt($rowid.val());
+//        $('.DeleteTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#template-bill').html();
+
+        template = template.replace(/__/g, '_' + mainRowid).replace(/_0/g, '_' + count);
+        $tr.parent('tbody').append(template);
+        $rowid.val(count);
+
+        bindBillCC(mainRowid,count);
+        bindType(mainRowid,count);
+        bindBranch(mainRowid,count);
+        bindSelect();
+        bindDatePicker();
+    }
+    function addNewCCRow(x) {
+        var $x = $(x),
+            $tr = $x.closest('tr'),
+            mainRowid = $x[0].id.split('_')[1],
+            subRowid = $x[0].id.split('_')[3];
+
+        if ($tr.next('tr').length != 0)
+            return;
+
+        if ($('#sl_' + mainRowid+'_cc_'+subRowid).val() == '0' || ($('#sl_' + mainRowid+'_ccDebit_'+subRowid).val() == '0' && $('#sl_' + mainRowid+'_ccCredit_'+subRowid).val() == '0'))
+            return;
+
+        var $rowid = $('#cc_'+mainRowid+'_rowid'),
+            rowid = parseInt($rowid.val());
+//        $('.DeleteTr_' + rowid).show();
+        var count = rowid + 1,
+            template = $('#template-cc').html();
+
+        template = template.replace(/__/g, '_' + mainRowid).replace(/_0/g, '_' + count);
+        $tr.parent('tbody').append(template);
+        $rowid.val(count);
+
+        bindCC(mainRowid,count);
+        bindSelect();
+    }
+
+    function saveBillRow(x){
+        var $x=$(x),
+            rowId=$x.attr('id').split('_')[1],
+            slRowId=$('#sl_'+rowId+'_rowid').val();
+
+        $('#mode').val('saveBill');
+        $('#mainRowId').val(rowId);
+        $('#subRowId').val(slRowId);
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/slbalance",
+            type:"post",
+            //async:false,
+            data:$('#subLedgerForm').serialize(),
+            success:function(data, textStatus, jqXHR){
+                alert('Saved');
+                /*if(data =='success'){
+                    $(openedBill).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(openedBill).closest("tr").next(".subTr").slideUp("slow");
+                    $(openedBill).find("i").removeClass("tform");
+                }*/
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+    function saveCCRow(x){
+        var $x=$(x),
+            rowId=$x.attr('id').split('_')[1],
+            slRowId=$('#cc_'+rowId+'_rowid').val();
+
+        $('#mode').val('saveBill');
+        $('#mainRowId').val(rowId);
+        $('#subRowId').val(slRowId);
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/slbalance",
+            type:"post",
+            //async:false,
+            data:$('#subLedgerForm').serialize(),
+            success:function(data, textStatus, jqXHR){
+                alert('Saved');
+                /*if(data =='success'){
+                    $(openedBill).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(openedBill).closest("tr").next(".subTr").slideUp("slow");
+                    $(openedBill).find("i").removeClass("tform");
+                }*/
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function subRowType(x){ //Select Bill row or CC row
+        var $x=$(x),
+            sno=$x.attr('id').split('_')[1];
+        var fromBillId='fromBill_'+sno;
+        var fromBill=$("input[name='"+fromBillId+"']:checked").val();
+
+        var slRowId=0;
+        var ccRowId=0;
+        $('#billTbody_'+sno).html('');
+        $('#ccTbody_'+sno).html('');
+        $('#debit_'+sno).val(0);
+        $('#credit_'+sno).val(0);
+
+        if(fromBill =='Y'){
+            $('#noTr_'+sno).show().find(".subDiv").hide();
+            $('#yesTr_'+sno).show().find(".subDiv").show();
+
+            loadBillTBody(sno,slRowId);
+        }else{
+            $('#yesTr_'+sno).show().find(".subDiv").hide();
+            $('#noTr_'+sno).show().find(".subDiv").show();
+
+            loadCCTBody(sno,ccRowId);
+        }
+        calcAmount();
+    }
+
+    function bindSelect(){
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    }
+    function bindDatePicker(){
+        $(".date_picker").datepicker({
+            format: "dd-mm-yyyy",
+            autoclose: true
+        });
+        $('.date_icon').click(function() {
+            var input = $(this).parent().find('input').datepicker('show');
+        });
+    }
+    function bindExpandTrFn(){
+        // expand tr
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function(e){
+            e.preventDefault();
+
+            /*Close if the sub table is open */
+            if(openedBill != $(this) && openedBill.length != 0) {
+                $(openedBill).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(openedBill).closest("tr").next(".subTr").slideUp("slow");
+            }
+
+            openedBill=$(this);
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+            else{
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+            }
+        });
+    }
+</script>

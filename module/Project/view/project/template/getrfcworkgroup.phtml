@@ -1,0 +1,338 @@
+<div class="col-lg-12" >
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            <input type="text" class="form-control date_picker lbl_move" label="Reference Date" readonly name="refdate" value = "<?php echo date("d-m-Y", strtotime($rfcregister['RefDate']))?>"  id="refdate" readonly/>
+        </div>
+    </div>
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <div class="col-lg-12">
+            <input type="text" class="form-control lbl_move" label="Reference No" name="refno" value = "<?php echo $rfcregister['RefNo'];?>" readonly id="refno"/>
+        </div>
+    </div>
+</div>
+<div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+    <table class="table" style=" margin-bottom:0px; id="sample12">
+    <thead>
+    <tr>
+        <th <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>>SerialNo</th>
+        <th>WorkGroup Name</th>
+        <th>WorkType</th>
+        <th class="text-center">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php $i=0;
+    if (isset($rfctrans)) {
+        foreach ($rfctrans as $cur) { $rfctransid=0; $rfctransid=$cur['RFCTransId']; $i = $i + 1; ?>
+            <tr id="rowid_<?php echo $i; ?>">
+                <input type="hidden" name="workgroupid_<?php echo $i; ?>" value="<?php echo $cur['WorkGroupId']; ?>" id="workgroupid_<?php echo $i; ?>">
+                <input type="hidden" name="worktypeid_<?php echo $i ?>" id ="worktypeid_<?php echo $i ?>" value="<?php echo $cur['WorkTypeId'] ?>">
+                <td width="5%" <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>><input type="text" class="parent_text"  name="slno_<?php echo $i; ?>" value="<?php echo $cur['SerialNo']; ?>" id="slno_<?php echo $i; ?>" maxlength="50" readonly></td>
+                <td width="15%"><input type="text" class="parent_text"  name="workgroupname_<?php echo $i; ?>" value="<?php echo $cur['WorkGroupName']; ?>" id="workgroupname_<?php echo $i; ?>"  maxlength="100" readonly></td>
+                <td width="15%"><input type="text" class="parent_text"  name="worktypename_<?php echo $i; ?>" value="<?php echo $cur['WorkType']; ?>" id="worktypename_<?php echo $i; ?>" disabled></td>
+                <td width="3%" align="left">
+                    <ul class="action_btns">
+                        <li>
+                            <a href="#" class="mainTr_<?php echo $i; ?>">
+                                <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="display:none;" class="subTr_<?php echo $i ?> paintTr">
+                <td colspan="12">
+                    <div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:350px;">
+                        <div class="col-lg-12 col-lg-offset-0" style="margin-top:5px;">
+                            <div class="radio_check createds firstStep hideStep">
+                                <p>
+                                    <input type="checkbox" name="wrateanal_<?php echo $i ?>" id="wrateanal_<?php echo $i ?>" <?php echo ($cur['AutoRateAnalysis'] == '1') ? 'checked' : '';?> readonly>
+                                    <label for="wrateanal_<?php echo $i; ?>">Automatically Generate Rate Analysis for Item of Work based on this Work Group Analysis</label>
+                                </p>
+                                <div class="clearfix"></div>
+                            </div>
+                            <!-- Nav tabs -->
+                            <div class="darkmenu" id="mixtype_<?php echo $i; ?>">
+                                <ul>
+                                    <li class="active"><a href="#" id="analtypeSS_<?php echo $i; ?>" onclick="showmix('sitemix',this.id, event)"><i class="fa fa-caret-right"></i> Sitemix</a></li>
+                                    <li><a href="#" id="analtypeSR_<?php echo $i; ?>" onclick="showmix('readymix',this.id, event)"><i class="fa fa-caret-right"></i> Readymix</a></li>
+                                </ul>
+                            </div>
+                            <!-- Tab panes -->
+                            <div class="lstate worktype_listed">
+                                <ul id="raworktable_<?php echo $i; ?>">
+                                    <li>
+                                        <label class="lbl_style">Working Qty</label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_AnalQty" id="rateanal_<?php echo $i; ?>_AnalQty" title="Working Qty" value="<?php echo $this->commonHelper()->sanitizeNumber($cur['WorkingQty'],3);?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                    <li id="rateanal_<?php echo $i; ?>_AQty_li">
+                                        <label>Cement<span align="center" class="wrktype_label_span">(C)</span></label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_AQty" id="rateanal_<?php echo $i; ?>_AQty" title="Cement (C)" value="<?php echo $cur['CementRatio'];?>" onblur="return FormatNum(this, 3)" onchange="changeRatio(this.id,'C')" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                    <li id="rateanal_<?php echo $i; ?>_BQty_li">
+                                        <label>Sand<span align="center" class="wrktype_label_span">(S)</span></label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_BQty" id="rateanal_<?php echo $i; ?>_BQty" title="Sand (S)" value="<?php echo $cur['SandRatio'];?>" onblur="return FormatNum(this, 3)" onchange="changeRatio(this.id,'S')" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                    <li id="rateanal_<?php echo $i; ?>_CQty_li">
+                                        <label>Aggregate<span align="center" class="wrktype_label_span">(A)</span></label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_CQty" id="rateanal_<?php echo $i; ?>_CQty" title="Aggregate (A)" value="<?php echo $cur['MetalRatio'];?>" onblur="return FormatNum(this, 3)" onchange="changeRatio(this.id,'A')" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                    <li id="rateanal_<?php echo $i; ?>_thick_li">
+                                        <label>Thickness (mm)<span align="center" class="wrktype_label_span">(A)</span></label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_thick" id="rateanal_<?php echo $i; ?>_thick" title="Thickness (mm) (T)" value="<?php echo $cur['ThickQty'];?>" onblur="return FormatNum(this, 3)" onchange="changeRatio(this.id,'T')" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                </ul>
+                                <ul  style="display: none;" id="raworkRtable_<?php echo $i; ?>">
+                                    <li>
+                                        <label class="lbl_style">Working Qty</label>
+                                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanalR_<?php echo $i; ?>_AnalQty" id="rateanal_<?php echo $i; ?>_AnalQty" title="Working Qty" value="<?php echo $this->commonHelper()->sanitizeNumber($cur['RWorkingQty'],2); ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+                                <table class="table" style="margin-bottom:0px;" id="type_<?php echo $i ?>_restable">
+                                    <thead>
+                                    <tr>
+                                        <th class="bg_clo_subTr">Inc / Exc</th>
+                                        <th class="bg_clo_subTr">Ref no</th>
+                                        <th class="bg_clo_subTr">Resource</th>
+                                        <th class="bg_clo_subTr">Unit</th>
+                                        <th class="bg_clo_subTr">Coefficient</th>
+                                        <th class="bg_clo_subTr">Formula</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="sorting" ><?php $j=1; $iRefId=1;
+                                    if (isset($worktypeanal)) {
+                                        foreach($worktypeanal as $curanal)
+                                        {
+                                            if (($cur['WorkTypeId'] == $curanal['WorkTypeId'] && $rfctransid==0) || ($rfctransid==$curanal['RFCTransId'])) { if($curanal['Type'] !='R') {
+                                                ?>
+                                                <tr id="type_<?php echo $i ?>_RowId_<?php echo $j ?>" <?php if($curanal['TransType'] == 'H') { echo 'class="tr-header"'; } ?>>
+                                                    <?php if($curanal['TransType'] == 'H'): ?>
+                                                        <td colspan="6"><input type="text" class="parent_text" style="font-weight:bold" name="type_<?php echo $i ?>_resdes_<?php echo $j ?>" id="type_<?php echo $i ?>_resdes_<?php echo $j ?>" value="<?php echo $curanal['Description'];?>" readonly></td>
+                                                        <input type="hidden" name="type_<?php echo $i ?>_rowrefid_<?php echo $j ?>" value="<?php echo $j;?>" id="type_<?php echo $i ?>_rowrefid_<?php echo $j ?>">
+                                                        <input type="hidden" name="type_<?php echo $i ?>_rowtype_<?php echo $j ?>" value="H" id="type_<?php echo $i ?>_rowtype_<?php echo $j ?>">
+                                                    <?php else:
+                                                        ?>
+                                                        <td width="1%" style="padding: 10px 0 10px 16px !important;"><label>
+                                                                <input type="checkbox" value = "<?php echo true; ?>" name="type_<?php echo $i ?>_inc_<?php echo $j ?>" <?php echo ($curanal['IncludeFlag'] == 1) ? 'checked' : '';?> id="type_<?php echo $i ?>_inc_<?php echo $j ?>" class="ios_checkbox inc_exc" readonly/>
+                                                                <div class="ios_switch"><span></span></div>
+                                                            </label></td>
+                                                        <td width="3%"><label for="type_<?php echo $i ?>_ref_<?php echo $j ?>">R<?php echo $curanal['ReferenceId'];?></label></td>
+                                                        <td width="15%"><input class="parent_text" data-toggle="popover" name="type_<?php echo $i ?>_resname_<?php echo $j ?>" id ="type_<?php echo $i ?>_resname_<?php echo $j ?>" value="<?php echo $curanal['Code'] .' '. $curanal['ResourceName']; ?>" readonly /></td>
+                                                        <td width="5%"><label for ="type_<?php echo $i ?>_unitname_<?php echo $j ?>"><?php echo $curanal['UnitName'];?></label></td>
+                                                        <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="type_<?php echo $i ?>_qty_<?php echo $j ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($curanal['Qty'],3);?>" id="type_<?php echo $i ?>_qty_<?php echo $j ?>" onfocus="return showformula(this.id)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" readonly> </td>
+                                                        <td width="5%"><input type="text" class="parent_text" name="type_<?php echo $i ?>_formula_<?php echo $j ?>" value = "<?php echo $curanal['CFormula'];?>" id="type_<?php echo $i ?>_formula_<?php echo $j ?>" readonly> </td>
+                                                        <input type="hidden" name="type_<?php echo $i ?>_ref_<?php echo $j ?>" value = "R<?php echo $curanal['ReferenceId'];?>" id="type_<?php echo $i ?>_ref_<?php echo $j ?>"  />
+                                                        <input type="hidden" name="type_<?php echo $i ?>_resid_<?php echo $j ?>" value="<?php echo $curanal['ResourceId'];?>" id ="type_<?php echo $i ?>_resid_<?php echo $j ?>" />
+                                                        <input type="hidden" name="type_<?php echo $i ?>_unit_<?php echo $j ?>" value = "<?php echo $curanal['UnitId'];?>" id="type_<?php echo $i ?>_unit_<?php echo $j ?>" />
+                                                        <input type="hidden" name="type_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="type_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                                                        <input type="hidden" name="type_<?php echo $i; ?>_rowtype_<?php echo $j; ?>" value = "<?php echo $curanal['TransType'];?>" id="type_<?php echo $i; ?>_rowtype_<?php echo $j; ?>">
+                                                        <input type="hidden" name="type_<?php echo $i; ?>_newresname_<?php echo $j; ?>" value = "<?php echo $curanal['ResourceName'];?>" id="type_<?php echo $i; ?>_newresname_<?php echo $j; ?>">
+                                                    <?php endif; ?>
+                                                </tr>
+                                            <?php }} $j=$j+1; if(intval($curanal['ReferenceId']) >= $iRefId) {$iRefId = intval($curanal['ReferenceId'])+1; } }}
+                                    ?>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="wrowid_<?php echo $i; ?>" id="wrowid_<?php echo $i; ?>" value="<?php echo $j; ?>">
+                                <table class="table" style="margin-bottom:0px; display:none;" id="typeR_<?php echo $i ?>_restable">
+                                    <thead>
+                                    <tr>
+                                        <th class="bg_clo_subTr">Inc / Exc</th>
+                                        <th class="bg_clo_subTr">Ref no</th>
+                                        <th class="bg_clo_subTr">Resource</th>
+                                        <th class="bg_clo_subTr">Unit</th>
+                                        <th class="bg_clo_subTr">Coefficient</th>
+                                        <th class="bg_clo_subTr">Formula</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="sorting">
+                                    <?php $j=1; $iRefId=1;
+                                    if (isset($worktypeanal)) {
+                                        foreach($worktypeanal as $curanal)
+                                        {
+                                            if (($cur['WorkTypeId'] == $curanal['WorkTypeId'] && $rfctransid==0) || ($rfctransid==$curanal['RFCTransId'])) { if($curanal['Type'] =='R') {
+                                                ?>
+                                            <tr id="typeR_<?php echo $i ?>_RowId_<?php echo $j ?>" <?php if($curanal['TransType'] == 'H') { echo 'class="tr-header"'; } ?>>
+                                                <?php if($curanal['TransType'] == 'H'): ?>
+                                                    <td colspan="6"><input type="text" class="parent_text" style="font-weight:bold" name="typeR_<?php echo $i ?>_resdes_<?php echo $j ?>" id="typeR_<?php echo $i ?>_resdes_<?php echo $j ?>" value="<?php echo $curanal['Description'];?>" readonly></td>
+                                                    <input type="hidden" name="typeR_<?php echo $i ?>_rowrefid_<?php echo $j ?>" value="<?php echo $j;?>" id="typeR_<?php echo $i ?>_rowrefid_<?php echo $j ?>">
+                                                    <input type="hidden" name="typeR_<?php echo $i ?>_rowtype_<?php echo $j ?>" value="H" id="typeR_<?php echo $i ?>_rowtype_<?php echo $j ?>">
+                                                <?php else: ?>
+                                                    <td width="1%" style="padding: 10px 0 10px 16px !important;"><label>
+                                                            <input type="checkbox" name="typeR_<?php echo $i ?>_inc_<?php echo $j ?>" value = "<?php echo true;?>" <?php echo ($curanal['IncludeFlag'] == 1) ? 'checked' : '';?> id="typeR_<?php echo $i ?>_inc_<?php echo $j ?>" class="ios_checkbox inc_exc" readonly/>
+                                                            <div class="ios_switch"><span></span></div>
+                                                        </label></td>
+                                                    <td width="3%"><label for ="typeR_<?php echo $i ?>_ref_<?php echo $j ?>">R<?php echo $curanal['ReferenceId'];?></label></td>
+                                                    <td width="15%"><input class="parent_text" data-toggle="popover" name="typeR__<?php echo $i ?>_resname_<?php echo $j ?>" id ="typeR__<?php echo $i ?>_resname_<?php echo $j ?>" value="<?php echo $curanal['Code'] .' '. $curanal['ResourceName']; ?>" readonly /></td>
+                                                    <td width="5%"><label for ="typeR_<?php echo $i ?>_unitname_<?php echo $j ?>" ><?php echo $curanal['UnitName'];?></label></td>
+                                                    <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="typeR_<?php echo $i ?>_qty_<?php echo $j ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($curanal['Qty'],3);?>" id="typeR_<?php echo $i ?>_qty_<?php echo $j ?>" onfocus="return showformulaR(this.id)" onkeypress="return isDecimal(event,this)" onkeydown="return showFR(this.id,event)" readonly> </td>
+                                                    <td width="5%"><input type="text" class="parent_text" name="typeR_<?php echo $i ?>_formula_<?php echo $j ?>" value = "<?php echo $curanal['CFormula'];?>" id="typeR_<?php echo $i ?>_formula_<?php echo $j ?>" readonly> </td>
+                                                    <input type="hidden" name="typeR_<?php echo $i ?>_ref_<?php echo $j ?>" value = "R<?php echo $curanal['ReferenceId'];?>" id="typeR_<?php echo $i ?>_ref_<?php echo $j ?>" />
+                                                    <input type="hidden" name="typeR_<?php echo $i ?>_resid_<?php echo $j ?>" id ="typeR_<?php echo $i ?>_resid_<?php echo $j ?>" value="<?php echo $curanal['ResourceId'];?>" />
+                                                    <input type="hidden" name="typeR_<?php echo $i ?>_unit_<?php echo $j ?>" value = "<?php echo $curanal['UnitId'];?>" id="typeR_<?php echo $i ?>_unit_<?php echo $j ?>" />
+                                                    <input type="hidden" name="typeR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="typeR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                                                    <input type="hidden" name="typeR_<?php echo $i; ?>_rowtype_<?php echo $j; ?>" value = "<?php echo $curanal['TransType'];?>" id="typeR_<?php echo $i; ?>_rowtype_<?php echo $j; ?>">
+                                                    <input type="hidden" name="typeR_<?php echo $i; ?>_newresname_<?php echo $j; ?>" value = "<?php echo $curanal['ResourceName'];?>" id="typeR_<?php echo $i; ?>_newresname_<?php echo $j; ?>">
+                                                    </tr>
+                                                <?php endif; ?>
+                                            <?php }}$j=$j+1; if(intval($curanal['ReferenceId']) >= $iRefId) {$iRefId = intval($curanal['ReferenceId'])+1; }}}
+                                    ?>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="wrowRid_<?php echo $i; ?>" id="wrowRid_<?php echo $i; ?>" value="<?php echo $j; ?>">
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        <?php
+        }
+    } ?>
+    <tr class="remarks">
+        <td colspan="7"><textarea placeholder="Enter Remarks" class="remrk element" name="narration" id="narration" title="Remarks" onfocus="inputFocus(this)" onblur="inputBlur(this)"><?php if(isset($rfcregister['Narration'])) echo $rfcregister['Narration'];?></textarea></td>
+    </tr>
+    </tbody>
+    </table>
+    <input type="hidden" name="rowid" id="rowid" value="<?php echo isset($rfctrans) ? count($rfctrans) : 1; ?>">
+</div>
+
+
+<script>
+    $(function () {
+        expandTrFn();
+        bindResourceChange();
+        bindPopOver();
+    });
+    function expandTrFn(reset) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+        $mainTRs.click(function(e){
+            e.preventDefault();
+            var name = $(this)[0].className,
+                key = name.split('_')[1],
+                $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                $i = $(this).find("i");
+            if(!$subTr.is(":visible")) {
+                $subTr.show();
+                $subTr.find(".subDiv").slideDown("slow");
+                $i.addClass("tform");
+                $('rateanal_'+ key +'restable').show();
+                iFocusRowId = key;
+                CheckShowDetails();
+                closedetails(name);
+            } else {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("tform");
+            }
+            return false;
+        });
+    }
+    function clickExpandTr(name) {
+        if ($('.subTr_' + iFocusRowId).is(':visible')) return;
+        var key = name.split('_')[1];
+        $('a.mainTr_' + key).trigger('click');
+    }
+//    function closedetails(key) {
+//        var $mainTRs = $("a[class*=mainTr_]");
+//        $.each($mainTRs, function (i, obj) {
+//            var $this = $(this),
+//                $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//            if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+//            if($mainTr.length != 0) $mainTr.trigger('click');
+//        });
+//    }
+    function closedetails(name) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this);
+            if (name != $this[0].className) {
+                key = $this[0].className.split('_')[1];
+                var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                    $i = $(this).find("i");
+                if ($subTr.is(":visible")) {
+                    $subTr.find(".subDiv").slideUp("slow");
+                    $subTr.slideUp("slow");
+                    $i.removeClass("fa-chevron-circle-up");
+                    $i.addClass("fa-chevron-circle-down");
+                }
+            }
+        });
+    }
+
+    function CheckShowDetails() {
+        if ($('#concrete_' + iFocusRowId).is(':checked') == false) {
+
+//        $('#cement_' + iFocusRowId).prop("checked", false);
+//        $('#sand_' + iFocusRowId).prop("checked", false);
+//        $('#metal_' + iFocusRowId).prop("checked", false);
+//        $('#thick_' + iFocusRowId).prop("checked", false);
+//
+//        $('#divconcrete_'+ iFocusRowId).hide();
+
+            $('#mixtype_'+ iFocusRowId).hide();
+//        $('#cement_' + iFocusRowId).hide();
+//        $('#sand_' + iFocusRowId).hide();
+//        $('#metal_' + iFocusRowId).hide();
+//        $('#thick_' + iFocusRowId).hide();
+
+        }   else {
+            $('#mixtype_' + iFocusRowId).show();
+        }
+        if ($('#cement_' + iFocusRowId).is(':checked') == false) $('#rateanal_' + iFocusRowId + '_AQty_li').hide();
+        else $('#rateanal_' + iFocusRowId + '_AQty_li').show();
+        if ($('#sand_' + iFocusRowId).is(':checked') == false) $('#rateanal_' + iFocusRowId + '_BQty_li').hide();
+        else $('#rateanal_' + iFocusRowId + '_BQty_li').show();
+        if ($('#metal_' + iFocusRowId).is(':checked') == false) $('#rateanal_' + iFocusRowId + '_CQty_li').hide();
+        else $('#rateanal_' + iFocusRowId + '_CQty_li').show();
+        if ($('#thick_' + iFocusRowId).is(':checked') == false) $('#rateanal_' + iFocusRowId + '_thick_li').hide();
+        else $('#rateanal_' + iFocusRowId + '_thick_li').show();
+    }
+    function bindResourceChange() {
+        var $resnames = $('input[id*=_resname_]');
+        $.each($resnames, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+            $('#'+ name).attr('data-content', $('#'+ name).val());
+            $this.blur(function () {
+                if (isNullCheck($('#'+ name).val(),'string') =="") $this.removeClass('error')
+                $('#'+ name).attr('data-content', $('#'+ name).val());
+            });
+            $this.change(function () {
+                $('#'+ name).attr('data-content', $('#'+ name).val());
+            });
+        });
+    }
+    function bindPopOver() {
+        var $inputs =  $('input[data-toggle="popover"]');
+        $inputs.unbind('popover');
+        $inputs.popover({
+            placement : 'bottom',
+            trigger : 'hover'
+        });
+    }
+    function showmix(x,y,e) {
+        $('#' + y).parent('li').addClass('active').siblings('li').removeClass('active');
+        iFocusRowId = y.substr(y.lastIndexOf('_') + 1);
+        e.preventDefault();
+        bSiteMix=true;
+        if (x=="readymix") {
+            $('#type_' + iFocusRowId + '_restable').hide();
+            $('#raworktable_' + iFocusRowId).hide();
+            $('#typeR_' + iFocusRowId + '_restable').show();
+            $('#raworkRtable_' + iFocusRowId).show();
+            bSiteMix=false;
+            return false;
+        }
+        $('#typeR_' + iFocusRowId + '_restable').hide();
+        $('#raworkRtable_' + iFocusRowId).hide();
+        $('#type_' + iFocusRowId + '_restable').show();
+        $('#raworktable_' + iFocusRowId).show();
+        return false;
+    }
+</script>

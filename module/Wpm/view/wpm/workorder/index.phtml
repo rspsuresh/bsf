@@ -1,0 +1,588 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css';?>"/>
+<style type="text/css">
+    #WorkTypeWrapper, #ServiceTypeWrapper, #HireTypeWrapper, #pref-details,  #vendorServiceListWrapper {
+        display: none;
+    }
+    #WorkType + .select2,  #vendorServiceList + .select2 {
+        width: 100% !important;
+    }
+    .tpic {
+        color: #c60d4e;
+        font:700 15px/25px "Open Sans",sans-serif;
+    }
+	.par span,.tpic span{width:40%;font-style:normal;font-weight:600; font-size:14px; color:#333; float:left;}
+    .par {
+        color: #666;font-style:italic;
+        font-size: 12px;
+    }
+	.pref_vendor{width:100%;padding-left:10px;background:rgb(255, 255, 255,0.9);border-left:3px solid #edd655; box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);margin-bottom:8px;background:#fff }
+	.info{padding:45px 25px 25px}
+    .vendor_subscriber1{background:rgb(255, 255, 255,0.4); box-shadow:0 1px 0 rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.16);height:186px !important; overflow-y:auto !important; margin-top:20px;padding:8px;}
+
+
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post" action="<?php echo $this->basePath(); ?>/wpm/workorder/entry" id="formWrapper" enctype="multipart/form-data">
+            <div class="col-lg-12">
+                <h1 id="title" class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0" style="text-transform: capitalize;">Order</h1>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <select data-placeholder="Cost Centre" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="CostCentre" id="CostCentre" style="width:100%;">
+                        <option value=""></option>
+                        <?php if(isset($arr_costcenter)):
+                            foreach($arr_costcenter as $costcenter): ?>
+                                <option value="<?php echo $costcenter['CostCentreId'];?>"><?php echo $costcenter['CostCentreName'];?></option>
+                            <?php endforeach;
+                        endif; ?>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <select data-placeholder="Order Type" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="OrderType" id="OrderType" style="width:100%;">
+                        <option value=""></option>
+                        <option value="work">Work</option>
+                        <option value="hire">Hire</option>
+                        <option value="service">Service</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group" id="WorkTypeWrapper">
+                    <select data-placeholder="Work Type" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="WorkType" id="WorkType" style="width:100%;">
+                        <option value=""></option>
+                        <option value="activity">Activity</option>
+                        <option value="iow">IOW</option>
+                        <option value="turn-key">Turn Key</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group" id="ServiceTypeWrapper">
+                    <select data-placeholder="Service Type" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="serviceTypeId" id="serviceTypeId" style="width:100%;">
+                    </select>
+                </div>
+                <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group" id="HireTypeWrapper">
+                    <select data-placeholder="Hire Type" class="form-control single_dropdown lbl_move sortoption" tabindex="7" name="eHireTypeId" id="eHireTypeId" style="width:100%;">
+                        <option value=""></option>
+                        <?php foreach($hireTypeMaster as $htm) { ?>
+                            <option value="<?php echo $htm['HireTypeId']; ?>" <?php if(isset($hoRegister) && $hoRegister['HireTypeId']==$htm['HireTypeId']) { ?>selected<?php } ?>><?php echo $htm['HireTypeName']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 feed-bg">
+                <div class="top-conts animated fadeInLeft col-lg-8 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                    <h2>List of requests.</h2>
+                    <p>Selected Requests</p>
+                    <span id="NoOfSelRequest">0</span>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8 col-xs-12 col-xs-offset-0">
+                    <div class="cf search-wrapper ">
+                        <input type="text" class="search-btns form-group"  placeholder="Search by request no." id="searchRequestNo" style="width:100%;">
+                        <button type="submit"><i class="fa fa-search"></i></button>
+                    </div>
+                </div>
+                <!--<div class="fil-til top-count">
+                  <h2 class="h1-head">List of requests.</h2>
+                  <p>Selected Requests </p>
+                  <span id="NoOfSelRequest">0</span> </div>-->
+                <div class="div-overallscroll">
+                    <div id="requestWrapper">
+                        <p style="text-align: center;padding: 88px;">No data to display</p>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 feed-bg">
+                <div class="top-conts animated fadeInLeft col-lg-8 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                    <h2>List of resources from the selected requests.</h2>
+                    <p>Selected Requests</p>
+                    <span id="NoOfSelResource">0</span>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8 col-xs-12 col-xs-offset-0 form-group top-45">
+                    <div id="vendorContractListWrapper">
+                        <select class="form-control single_dropdown2 lbl_move sortoption single_dropdown_vendor" name="VendorId" id="vendorContractList"  label="Select Vendor" style="width:100%;">
+                            <option value=""></option>
+                            <?php if(isset($arr_contract_vendors)):
+                                foreach($arr_contract_vendors as $vendor): ?>
+                                    <option data-image='<?php echo $vendor['LogoPath'];?>' value='<?php echo $vendor['VendorId'];?>'><?php echo $vendor['VendorName'];?></option>
+                                <?php endforeach;
+                            endif;?>
+                        </select>
+                    </div>
+                    <div id="vendorServiceListWrapper">
+                        <select class="form-control single_dropdown2 lbl_move sortoption single_dropdown_vendor" style="width:100%;" name="VendorId" id="vendorServiceList" label="Select Vendor" disabled>
+                            <option value=""></option>
+                            <?php if(isset($arr_service_vendors)):
+                                foreach($arr_service_vendors as $vendor): ?>
+                                    <option data-image='<?php echo $vendor['LogoPath'];?>' value='<?php echo $vendor['VendorId'];?>'><?php echo $vendor['VendorName'];?></option>
+                                <?php endforeach;
+                            endif;?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                    <div id="resourceGrid" class="animated fadeInUp"></div>
+                </div>
+                <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                    <div class="col-md-12">
+                        <div class="bubble">
+                            <div class="rectangle">
+                                <h2>Preferred Vendor</h2>
+                            </div>
+                            <div class="triangle-l"></div>
+                            <div class="triangle-r"></div>
+                            <div class="info">
+							<div class="vendor_subscriber1" id="prevenmain" style="overflow: hidden; width: auto; height: 100%;">
+                                <?php if(isset($arr_service_vendorslist)):
+                                    foreach($arr_service_vendorslist as $vendor): ?>
+                                        <div class="pref_vendor">
+                                            <p class="tpic"><span>Vendor Name</span>:&nbsp;<?php echo $vendor['VendorName'] ?></p>
+                                            <p class="par"><span>Address</span>:&nbsp;<?php echo $vendor['RegAddress'] ?></p>
+                                        </div>
+                                    <?php endforeach;
+                                endif;?>
+                            </div>
+							
+                                <!--<p id="pref-no-data" class="text-center" style="color: #fff; margin-top: 80px;">Select a resource from <b>List of resources</b>.</p>
+                                <div id="pref-details">
+                                    <div align="center"><img align="baseline" src="<?php /*echo $this->basePath() . '/images/avatar.jpg';*/?>" id="pref-vendor-img"></div>
+                                    <h2 id="pref-vendor-name"></h2>
+                                    <address id="pref-vendor-details">
+                                    </address>
+                                </div>>
+                                <div class="vendor_subscriber" id="prevenmain"-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="clearfix"></div>
+            <div id="requestTransInputsWrapper" class="hide"></div>
+            <input type="hidden" name="frm_index" value="1"/>
+        </form>
+
+
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r"> <a onclick="validateOnSubmit();" class="ripple">Continue</a> </li>
+        <li class="cancel_btn cancel_btn_bluecolor float_l"><a href="<?php echo $this->basePath() . '/wpm/workorder/index';?>" class="ripple">Cancel <i class="fa fa-times-circle-o" aria-hidden="true"></i></a></li>
+    </ul>
+</div>
+</div>
+<script type="text/template" id="request-template">
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+        <div class="three-box hvr-overline-from-center request-box zoomIn animated">
+            <ul data-id="{{RequestId}}">
+                <li><span>Request No</span>:&nbsp;{{RequestNo}}</li>
+                <li><span>Cost Centre</span>:&nbsp;{{CostCentreName}}</li>
+                <li><span>Approved On</span>:&nbsp;{{RequestDate}}</li>
+            </ul>
+            <span class="high-lit">R</span>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    var serviceAction = '<?php echo $this->basePath(); ?>/wpm/labourstrength/service-order';
+    var hireAction = '<?php echo $this->basePath(); ?>/wpm/labourstrength/hire-order';
+    var sel_resource_count = 0;
+    var tmpLocalData = [];
+    var $resourceGrid = $("#resourceGrid");
+    var $searchRequestNo = $('#searchRequestNo');
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            { name: 'Include', type: 'boolean' },
+            { name: 'Desc', type: 'string' },
+            { name: 'Quantity', type: 'string' },
+            { name: 'RequestNo', type: 'string' },
+            { name: 'RequestDate', type: 'string' },
+            { name: 'RequestId', type: 'int' },
+            { name: 'RequestId', type: 'int' }
+        ],
+        id: 'RequestTransId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+    $(function () {
+        $('.div-overallscroll').slimScroll({
+            position: 'right',
+            height: '100%',
+            width: '100%',
+            alwaysVisible: false,
+            railVisible: true,
+            railColor: '#d7dabd',
+            color: '#009688',
+            railOpacity: 1
+        });
+
+        $('#CostCentre').on('change',function(){
+            $searchRequestNo.val('');
+            bindRequests();
+//        bindService();
+        });
+
+        $('#OrderType').on('change',function(){
+            $searchRequestNo.val('');
+
+            if($(this).val() == 'service') {
+                $('#vendorServiceListWrapper').show();
+                $('#vendorServiceList').prop('disabled', false);
+
+                $('#vendorContractListWrapper').hide();
+                $('#vendorContractList').prop('disabled', true);
+            } else {
+                $('#vendorServiceListWrapper').hide();
+                $('#vendorServiceList').prop('disabled', true);
+
+                $('#vendorContractListWrapper').show();
+                $('#vendorContractList').prop('disabled', false);
+            }
+
+            bindRequests();
+//        bindService();
+        });
+
+        $('#WorkType').on('change',function(){
+            $searchRequestNo.val('');
+            bindRequests();
+        });
+        $('#serviceTypeId').on('change',function(){
+            requests();
+        });
+
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            editable: true,
+            columns: [
+                { dataField: 'RequestTransId', hidden: true},
+                { dataField: 'RequestId', hidden: true},
+                { text: '', dataField: 'Include', columntype: 'checkbox', align:'center',width:'5%'},
+                { text: 'Description', dataField: 'Desc',width:'35%', editable:false},
+                { text: 'Qty', dataField: 'Quantity',width:'15%', editable:false},
+                { text: 'Request No.', dataField: 'RequestNo',width:'20%', editable:false},
+                { text: 'Request Date', dataField: 'RequestDate',width:'25%', editable:false}
+            ]
+        });
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            if(args.newvalue === true)
+                sel_resource_count++;
+            else
+                sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+
+        $('#OrderType').on('change', function () {
+            if($(this).val() == 'work') {
+                $('#ServiceTypeWrapper').hide();
+                $('#HireTypeWrapper').hide();
+                $('#WorkTypeWrapper').show();
+            } else if($(this).val() == 'service') {
+                $('#WorkTypeWrapper').hide();
+                $('#HireTypeWrapper').hide();
+                $('#ServiceTypeWrapper').show();
+            } else if($(this).val() == 'hire') {
+                $('#ServiceTypeWrapper').hide();
+                $('#WorkTypeWrapper').hide();
+                $('#HireTypeWrapper').show();
+            }
+            var title = $(this).val()+ ' order';
+            $('#title').html(title);
+        });
+
+        // request check and uncheck
+        $('#requestWrapper').on('click','.request-box', function () {
+            $(this).toggleClass('selected');
+            renderSelectedResources();
+        });
+
+        // search by request no.
+        $searchRequestNo.on('keyup', function () {
+            var requestNo = $.trim($(this).val());
+            if(requestNo.length != 0 && tmpLocalData.length != 0) {
+                var filtered_data = $.grep(tmpLocalData, function (o) {
+                    return new RegExp('^'+requestNo,'gi').test(o.RequestNo);
+                });
+                renderRequests(filtered_data);
+            } else {
+                renderRequests(tmpLocalData);
+            }
+        });
+
+        // vendor select2
+        $(".single_dropdown_vendor").select2({
+            placeholder: "",
+            templateResult: formatState,
+            templateSelection: formatState,
+            allowClear: true
+        });
+    });
+
+    function formatState (state) {
+        if (!state.id) { return state.text; }
+        var $state = $('<span class="img-select"><img src="<?php echo $this->basePath() . '/images/avatar.jpg';?>" class="img-flag" /> ' + state.text + '</span>');
+        return $state;
+    }
+
+function requests(){
+    var costCentreId = $('#CostCentre').val();
+    var orderType = $('#OrderType').val();
+    var workType = $('#WorkType').val();
+    var typeid=0;
+
+    if (orderType =='service') {
+        typeid = $('#serviceTypeId').val();
+    }
+
+    if(orderType == 'work' && workType == '')
+        return;
+    $.ajax({
+        url:getBaseURL()+'wpm/workorder/index',
+        type:"post",
+        data:{'CostCentreId':costCentreId, 'OrderType': orderType, 'WorkType': workType,'Typeid':typeid},
+        dataType:"json",
+        success:function(data, textStatus, jqXHR){
+            if(jqXHR.status == 200) {
+                tmpLocalData = data.requests;
+                renderRequests(data.requests);
+                if(data.resources.length !=0) {
+                    renderRequestResources(data.resources);
+                }
+            }
+        }
+    });
+}
+    function bindRequests() {
+        var costCentreId = $('#CostCentre').val();
+        var orderType = $('#OrderType').val();
+        var workType = $('#WorkType').val();
+        if(orderType == 'work' && workType == '')
+            return;
+        $.ajax({
+            url:getBaseURL()+'wpm/workorder/index',
+            type:"post",
+            data:{'CostCentreId':costCentreId, 'OrderType': orderType, 'WorkType': workType},
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200) {
+                    if(orderType == 'work') {
+                        tmpLocalData = data.requests;
+                        renderRequests(data.requests);
+                        if(data.resources.length !=0) {
+                            renderRequestResources(data.resources);
+                        }
+                    } else if(orderType == 'service') {
+                        $('#serviceTypeId').empty();
+                        $('#serviceTypeId').append('<option value="">Select Order No</option>');
+                        $.each(data.services, function (key, value) {
+                            $('#serviceTypeId')
+                                .append($("<option></option>")
+                                    .attr("value", value.ServiceTypeId)
+                                    .text(value.ServiceTypeName));
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    function renderRequests(data) {
+        var $requestWrapper = $('#requestWrapper');
+        if(data.length == 0) {
+            $requestWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            var template = $('#request-template').html();
+            $requestWrapper.html('');
+            $.each(data, function (i,o) {
+                $requestWrapper.append(template.replace(/\{\{RequestNo\}\}/g,o.RequestNo)
+                    .replace(/\{\{CostCentreName\}\}/g,o.CostCentreName)
+                    .replace(/\{\{RequestDate\}\}/g,o.RequestDate)
+                    .replace(/\{\{RequestId\}\}/g,o.RequestId));
+            });
+        }
+    }
+
+    function renderRequestResources(data) {
+        resourceSource.localdata = data;
+        resourceAdapter.dataBind();
+    }
+
+    function renderSelectedResources() {
+        var $selRequests = $('.request-box.selected');
+        $('#NoOfSelRequest').html($selRequests.length);
+        sel_resource_count=0;
+        // select resources in grid
+        if($selRequests.length != 0) {
+            var arr_requestIds = [];
+            $.each($selRequests, function (i, o) {
+                var requestId = $(this).find('ul[data-id]').attr('data-id');
+                arr_requestIds.push(requestId);
+            });
+            $.each(resourceSource.localdata, function (j, r) {
+                if ($.inArray(r.RequestId, arr_requestIds) != -1) {
+                    r.Include = '1';
+                    sel_resource_count++;
+                    return;
+                }
+
+                r.Include = '0';
+            });
+        } else {
+            $.each(resourceSource.localdata, function (j, r) {
+                r.Include = '0';
+            });
+            sel_resource_count = 0;
+        }
+        $('#NoOfSelResource').html(sel_resource_count);
+        resourceAdapter.dataBind();
+        generateSelResourceInputs();
+    }
+
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for(var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            console.log(row)
+            if (row.Include === true) {
+                $inputs += '<input type="hidden" name="requestTransIds[]" class="requestTransIds" value="' + row.uid + '"/>';
+            }
+        }
+        $('#requestTransInputsWrapper').html($inputs);
+    }
+
+    function validateOnSubmit() {
+        var OrderType = $('#OrderType').val();
+        if($('#CostCentre').val() == '') {
+            alert('Please select Cost Centre');
+            return false;
+        }
+
+        if(OrderType == '') {
+            alert('Please select Order Type');
+            return false;
+        }
+
+        if(OrderType == 'work' && $('#WorkType').val() == '') {
+            alert('Please select Work Type');
+            return false;
+        } else if(OrderType == 'service' && $.trim($('#serviceTypeId').val()) == '') {
+            alert('Please select Service Type');
+            return false;
+        } else  if(OrderType == 'hire' && $('#eHireTypeId').val() == '') {
+            alert('Please select Hire Type');
+            return false;
+        }
+
+        if(OrderType != 'service' && $('#vendorContractList').val() == '') {
+            alert('Please select Vendor');
+            return false;
+        }
+
+        if(OrderType == 'service' && $('#vendorServiceList').val() == '') {
+            alert('Please select Vendor');
+            return false;
+        }
+
+        /*if($('#NoOfSelResource').html() == 0) {
+         alert('Please select resources');
+         return false;
+         }*/
+
+        if(OrderType == 'service') {
+            $("#formWrapper").attr("action", serviceAction);
+        } else if(OrderType == 'hire') {
+            $("#formWrapper").attr("action", hireAction);
+        }
+
+        /*if(OrderType == 'work') {
+            $.post(getBaseURL() + 'wpm/workorder/check-type', {ccId: $('#CostCentre').val()},
+                function (data) {
+                    var chkData = JSON.parse(data);
+                    if (typeof chkData.WOType != 'undefined') {
+                        if (chkData.WOType == $('#WorkType').val()) {
+                            $('#formWrapper').submit();
+                        } else {
+                            alert('Please select correct Work Type');
+                            $('#WorkType').focus();
+                            return false;
+                        }
+                    } else {
+                        $('#formWrapper').submit();
+                    }
+                });
+        } else {*/
+            $('#formWrapper').submit();
+        //}
+    }
+   /* function preferedvendor()
+    {
+        var  mode="preVendor";
+        $.ajax({
+            url: getBaseURL() + 'wpm/workorder/vendors',
+            type: "post",
+            data: "OrderType="+ mode,
+            dataType:"json",
+            success: function (data, status, xhr) {
+                console.log(data);
+                var sdata = data;
+                var escaped="";
+                    if(sdata.length > 0) {
+                        var rowid=0;
+                        $('#prevenmain').html('');
+                        var did=1;
+                        var preresid=0;
+                        var preitemid=0;
+                        $.each(sdata, function (i, v) {
+
+                            var newres="";
+
+                            if(preresid == v.ResourceId && preitemid == v.ItemId && did != 1) {
+
+                            }
+                            else
+                            {
+                                $("<div class='pref_vendor' id=" + did + "></div>").appendTo("#prevenmain");
+
+                            }
+
+                            if(preresid == v.ResourceId && preitemid == v.ItemId && did != 1)
+                            {
+                                did -= 1;
+                            }
+
+
+                            var newadd = $('<p class="tpic" />').text(v.VendorName);
+                            var add1 =  $('<p class="par" />').text(v.RegAddress);
+
+
+                            $('#'+did).append(newres);
+                            $('#'+did).append(newadd);
+                            $('#'+did).append(add1);
+                            did += 1;
+
+
+                        });
+
+
+                    }
+                    else
+                    {
+                        $('#prevenmain').html('');
+
+                    }
+            }
+
+        });
+    }*/
+</script>

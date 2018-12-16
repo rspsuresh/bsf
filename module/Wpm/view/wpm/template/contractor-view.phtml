@@ -1,0 +1,844 @@
+<style>
+    .total-clr {
+        border: 1px solid #063;
+        color: #063;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+    }
+    .rate_pri {
+        color: #e91e63;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .fa.fa-trash-o
+    {
+        display:none;
+    }
+</style>
+<div id="divWithWbs" class="table-responsive top-30 animated fadeInUp" style="display:<?php if ($lsRegister['WBSRequired'] == '1' && $lsRegister['LabourNameWise'] == '0') echo 'block'; else echo 'none'; ?>;">
+    <table class="table" style="margin-bottom:0px;" id="conTable">
+        <thead>
+        <tr>
+            <th>Contractor</th>
+            <th class="text-right">Total Qty</th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">OT Hrs</th>
+            <th class="text-right">OT Amount</th>
+            <th class="text-right">Net Amount</th>
+            <th>&nbsp;</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        if (isset($lsVendorTrans) && count($lsVendorTrans) != 0) {
+            $i = 1;
+            foreach ($lsVendorTrans as $lsvTrans) {
+                $lsvTransId = $lsvTrans['LSVendorTransId'];
+                $conId = $lsvTrans['VendorId'];
+                ?>
+                <tr id="rowId_<?php echo $i; ?>">
+                    <td width="20%">
+                <?php if($conId !=0) { ?>
+                        <input class="parent_text conSuggest" type="text" name="conName_<?php echo $i; ?>" id="conName_<?php echo $i; ?>"  value="<?php echo $lsvTrans['VendorName']; ?>" readonly/>
+                        <input type="hidden" name="conId_<?php echo $i; ?>" id="conId_<?php echo $i; ?>" value="<?php echo $conId; ?>" />
+                       <input type="hidden" name="grpvendortype_<?php echo $i; ?>" id="grpvendortype_<?php echo $i; ?>" value="V" />
+                <?php }
+                else { ?>
+                    <input class="parent_text conSuggest" type="text" name="conName_<?php echo $i; ?>" id="conName_<?php echo $i; ?>"  value="<?php echo $lsvTrans['LabourGroupName']; ?>" readonly/>
+                    <input type="hidden" name="conId_<?php echo $i; ?>" id="conId_<?php echo $i; ?>" value="<?php echo $lsvTrans['GroupId']; ?>" />
+                    <input type="hidden" name="grpvendortype_<?php echo $i; ?>" id="grpvendortype_<?php echo $i; ?>" value="G" />
+                    <?php } ?>
+                    </td>
+                    <td width="15%">
+                        <input class="parent_text text-right" type="text" name="conQty_<?php echo $i; ?>" id="conQty_<?php echo $i; ?>" value="<?php echo $lsvTrans['Qty']; ?>" onchange="return FormatNum(this, 3)" onclick="return showDiv(this, 'm', '');" readonly/>
+                    </td>
+                    <td width="15%">
+                        <input class="parent_text text-right" type="text" name="conAmount_<?php echo $i; ?>" id="conAmount_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['Amount'],2,true); ?>" readonly/>
+                    </td>
+                    <td width="15%">
+                        <input class="parent_text text-right" type="text" name="conOtHrs_<?php echo $i; ?>" id="conOtHrs_<?php echo $i; ?>" value="<?php echo $lsvTrans['OTHrs']; ?>" readonly/>
+                    </td>
+                    <td width="15%">
+                        <input class="parent_text text-right" type="text" name="conOtAmount_<?php echo $i; ?>" id="conOtAmount_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['OTAmount'],2,true); ?>" readonly/>
+                    </td>
+                    <td width="15%">
+                        <input class="parent_text text-right" type="text" name="conNetAmount_<?php echo $i; ?>" id="conNetAmount_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['NetAmount'],2,true); ?>" readonly/>
+                    </td>
+                    <td width="10%" align="center" class="action_btns_td">
+                        <ul class="action_btns">
+                            <li>
+                                <a id="showDivId_<?php echo $i; ?>" href="javascript:void(0);" class="mainTr" onclick="return showDiv(this, 'm', '');"><i
+                                            class="fa fa-chevron-circle-down"
+                                            data-toggle="tooltip" data-placement="left"
+                                            data-original-title="Add lines"></i></a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr id="subRowId_<?php echo $i; ?>" style="display:none;" class="subTr">
+                    <td colspan="7" style="padding:0px !important;">
+                        <div class="subDiv" style="display:none;">
+                            <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive topsp">
+                                    <table class="table" style="margin-bottom:0px;" id="wbsTable_<?php echo $i; ?>">
+                                        <thead>
+                                        <tr>
+                                            <th>WBS Name</th>
+                                            <th class="text-right">Total Qty</th>
+                                            <th class="text-right">Amount</th>
+                                            <th class="text-right">OT Hrs</th>
+                                            <th class="text-right">OT Amount</th>
+                                            <th class="text-right">Net Amount</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        $j = 1;
+                                        foreach ($lsWbsTrans as $lswTrans) {
+                                            if ($lswTrans['LSVendorTransId'] == $lsvTransId) {
+                                                $lswTransId = $lswTrans['LSWBSTransId'];
+                                                $wbsId = $lswTrans['WBSId'];
+                                                ?>
+                                                <tr id="subRowRowId_<?php echo $conId; ?>_<?php echo $j; ?>">
+                                                    <td width="20%">
+                                                        <input class="parent_text wbsSuggest" type="text" name="wbsName_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsName_<?php echo $conId; ?>_<?php echo $j; ?>"  value="<?php echo $lswTrans['WBSName']; ?>" readonly/>
+                                                        <input type="hidden" name="wbsId_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsId_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $wbsId; ?>" />
+                                                    </td>
+                                                    <td width="15%">
+                                                        <input class="parent_text text-right" type="text" name="wbsQty_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsQty_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $lswTrans['Qty']; ?>" onchange="return FormatNum(this, 3)" readonly/>
+                                                    </td>
+                                                    <td width="15%">
+                                                        <input class="parent_text text-right" type="text" name="wbsAmount_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsAmount_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lswTrans['Amount'],2,true); ?>" readonly/>
+                                                    </td>
+                                                    <td width="15%">
+                                                        <input class="parent_text text-right" type="text" name="wbsOtHrs_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsOtHrs_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $lswTrans['OTHrs']; ?>" readonly/>
+                                                    </td>
+                                                    <td width="15%">
+                                                        <input class="parent_text text-right" type="text" name="wbsOtAmount_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsOtAmount_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lswTrans['OTAmount'],2,true); ?>" readonly/>
+                                                    </td>
+                                                    <td width="15%">
+                                                        <input class="parent_text text-right" type="text" name="wbsNetAmount_<?php echo $conId; ?>_<?php echo $j; ?>" id="wbsNetAmount_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lswTrans['NetAmount'],2,true); ?>" readonly/>
+                                                    </td>
+                                                    <td width="10%" align="center" class="action_btns_td">
+                                                        <ul class="action_btns">
+                                                            <li>
+                                                                <a id="showDivSubId_<?php echo $conId; ?>_<?php echo $j; ?>" href="javascript:void(0);" class="mainTr" onclick="return showDiv(this, 's', '<?php echo $conId; ?>');"><i
+                                                                            class="fa fa-chevron-circle-down"
+                                                                            data-toggle="tooltip"
+                                                                            data-placement="left"
+                                                                            data-original-title="Add lines"></i></a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                                <tr id="subRowSubRowId_<?php echo $conId; ?>_<?php echo $j; ?>" style="display:none;" class="subTr">
+                                                    <td colspan="7" style="padding:0px !important;">
+                                                        <div class="subDiv" style="display:none;">
+                                                            <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                            <div class="col-lg-12">
+                                                                <div class="table-responsive topsp">
+                                                                    <table class="table" style="margin-bottom:0px;" id="labTable_<?php echo $conId; ?>_<?php echo $j; ?>">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th>Labour Type Name
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                Qty
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                Rate
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                Amount
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                OT Hrs
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                OT Rate
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                OT Amount
+                                                                            </th>
+                                                                            <th class="text-right">
+                                                                                Total Amount
+                                                                            </th>
+                                                                            <th>&nbsp;</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        <?php
+                                                                        $kk = 1;
+                                                                        foreach ($lsTypeTrans as $lstTrans) {
+                                                                            if ($lstTrans['LSVendorTransId'] == $lsvTransId && $lstTrans['LSWBSTransId'] == $lswTransId) {
+                                                                                ?>
+                                                                                <tr>
+                                                                                    <td width="15%">
+                                                                                        <input type="hidden" name="labId_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labId_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $lstTrans['ResourceId']; ?>" />
+                                                                                        <input class="parent_text labTypeSuggest" type="text" name="labName_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labName_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $lstTrans['ResourceName']; ?>"  readonly/>
+                                                                                    </td>
+                                                                                    <td width="10%">
+                                                                                        <input class="parent_text text-right" type="text" readonly="" name="labQty_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labQty_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $lstTrans['Qty']; ?>" onkeypress="return isDecimal(event,this);" onchange="return pushMainQty(this.id)"   />
+                                                                                    </td>
+                                                                                    <td width="10%">
+                                                                                        <input class="parent_text text-right" type="text" name="labRate_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labRate_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['Rate'],2,true); ?>" onkeypress="return isDecimal(event,this);"  />
+                                                                                        <div id="iow___ewbqty_0" style="display:none;">
+                                                                                            <div class="top-tip top-addtip">
+                                                                                                <span>Estimate Qty : <i
+                                                                                                            name="iow___estimateqty_0"
+                                                                                                            id="iow___estimateqty_0"></i></span>
+                                                                                                <span>Workorder Qty : <i
+                                                                                                            name="iow___workorderqty_0"
+                                                                                                            id="iow___workorderqty_0"></i></span>
+                                                                                                <span>Total Billed Qty : <i
+                                                                                                            name="iow___totbilledqty_0"
+                                                                                                            id="iow___totbilledqty_0"></i></span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td width="13%">
+                                                                                        <input class="parent_text text-right" type="text" name="labAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['Amount'],2,true); ?>" readonly/>
+                                                                                    </td>
+                                                                                    <td width="10%">
+                                                                                        <input class="parent_text text-right" type="text" readonly="" name="labOtHrs_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labOtHrs_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $lstTrans['OTHrs']; ?>" onkeypress="return isDecimal(event,this);" onchange="return pushMainQtyOT(this.id)" />
+                                                                                    </td>
+                                                                                    <td width="10%">
+                                                                                        <input class="parent_text text-right" type="text" name="labOtRate_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labOtRate_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['OTRate'],2,true); ?>" onkeypress="return isDecimal(event,this);"  />
+                                                                                    </td>
+                                                                                    <td width="13%">
+                                                                                        <input class="parent_text text-right" type="text" name="labOtAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labOtAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['OTAmount'],2,true); ?>" readonly/>
+                                                                                    </td>
+                                                                                    <td width="14%">
+                                                                                        <input class="parent_text text-right" type="text" name="labNetAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" id="labNetAmount_<?php echo $conId; ?>_<?php echo $wbsId; ?>_<?php echo $j; ?>_<?php echo $kk; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['NetAmount'],2,true); ?>" readonly/>
+                                                                                    </td>
+                                                                                    <td width="10%" align="center" class="action_btns_td">
+                                                                                        <ul class="action_btns">
+                                                                                        </ul>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <?php
+                                                                                $kk++;
+                                                                            }
+
+                                                                        }
+                                                                        ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <input type="hidden" name="labRows_<?php echo $conId; ?>_<?php echo $j; ?>" id="labRows_<?php echo $conId; ?>_<?php echo $j; ?>" value="<?php echo $kk; ?>" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                                $j++;
+                                            }
+                                        }
+                                        ?>
+                                        <tr id="subRowSubRowId_<?php echo $conId; ?>_<?php echo $j; ?>" style="display:none;" class="subTr">
+                                            <td colspan="7" style="padding:0px !important;">
+                                                <div class="subDiv" style="display:none;">
+                                                    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                    <div class="col-lg-12">
+                                                        <div class="table-responsive topsp">
+                                                            <table class="table" style="margin-bottom:0px;" id="labTable_<?php echo $conId; ?>_<?php echo $j; ?>">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Labour Type </th>
+                                                                    <th class="text-right">Qty
+                                                                    </th>
+                                                                    <th class="text-right">
+                                                                        Rate
+                                                                    </th>
+                                                                    <th class="text-right">
+                                                                        Amount
+                                                                    </th>
+                                                                    <th class="text-right">OT Hrs
+                                                                    </th>
+                                                                    <th class="text-right">OT Rate
+                                                                    </th>
+                                                                    <th class="text-right">OT Amount
+                                                                    </th>
+                                                                    <th class="text-right">Total Amount
+                                                                    </th>
+                                                                    <th>&nbsp;</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <input type="hidden" name="wbsRows_<?php echo $i; ?>" id="wbsRows_<?php echo $i; ?>" value="<?php echo $j; ?>" />
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <?php $i++;
+            }
+        } ?>
+        </tbody>
+    </table>
+    <table class="table" style="margin-bottom:0px;display:none;">
+        <tfoot>
+        <tr>
+            <td width="20%" class="rate_pri">
+                <label>Total</label>
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="totalconqty" readonly="">
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="amtcontractor" readonly="">
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="contractorothrs" readonly="">
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="contractorotamount" readonly="">
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="contractornetamount" readonly="">
+            </td>
+            <td width="10%"></td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <input type="hidden" name="conRows" id="conRows" value="<?php echo (isset($lsVendorTrans) && count($lsVendorTrans) != 0) ? count($lsVendorTrans) : 0; ?>" />
+</div>
+<div id="divWithoutWbs" class="table-responsive top-30 animated fadeInUp"
+     style="display:<?php if ($lsRegister['LabourNameWise'] == '0' &&  $lsRegister['WBSRequired']=='0') echo 'block'; else echo 'none'; ?>;">
+    <table class="table" style="margin-bottom:0px;" id="conTable">
+        <thead>
+        <tr>
+            <th>Contractor</th>
+            <th class="text-right">Total Qty</th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">OT Hrs</th>
+            <th class="text-right">OT Amount</th>
+            <th class="text-right">Net Amount</th>
+            <th>&nbsp;</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        if (isset($lsVendorTrans) && count($lsVendorTrans) != 0) {
+            $i = 1;
+            foreach ($lsVendorTrans as $lsvTrans) {
+                $lsvTransId = $lsvTrans['LSVendorTransId'];
+                $conId = $lsvTrans['VendorId'];
+                ?>
+                <tr id="rowId_<?php echo $i ?>">
+                    <td width="20%">
+                        <?php if($conId !=0) { ?>
+                            <input type="text"  id="conName_<?php echo $i ?>" name="conName_<?php echo $i ?>" value="<?php echo $lsvTrans['VendorName']; ?>" readonly class="parent_text conSuggest" autocomplete="off">
+                            <input type="hidden"  class="conclass"  id="conId_<?php echo $i ?>" name="conId_<?php echo $i ?>" value="<?php echo $conId; ?>" >
+                            <input type="hidden"   id="grpvendortype_<?php echo $i ?>" name="grpvendortype_<?php echo $i ?>" value="V" >
+                        <?php }
+                        else { ?>
+                            <input type="text"  id="conName_<?php echo $i ?>" name="conName_<?php echo $i ?>" value="<?php echo $lsvTrans['LabourGroupName']; ?>" readonly class="parent_text conSuggest" autocomplete="off">
+                            <input type="hidden"  class="conclass"  id="conId_<?php echo $i ?>" name="conId_<?php echo $i ?>" value="<?php echo $lsvTrans['GroupId'] ; ?>" >
+                            <input type="hidden"   id="grpvendortype_<?php echo $i ?>" name="grpvendortype_<?php echo $i ?>" value="G" >
+                        <?php  } ?>
+                    </td>
+                    <td width="10%"><input type="text" readonly="" onclick="return showDiv(this, 'mwbs', '');" id="conQty_<?php echo $i ?>" onchange="return FormatNum(this)"  value="<?php echo $lsvTrans['Qty']; ?>" readonly name="conQty_<?php echo $i ?>" class="parent_text text-right">
+                    </td>
+                    <td width="15%"><input type="text" readonly="" id="conAmount_<?php echo $i ?>" onchange="return FormatNum(this, 2)"  value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['Amount'],2,true); ?>" readonly name="conAmount_<?php echo $i ?>" class="parent_text text-right"></td>
+                    <td width="15%"><input type="text" readonly="" id="conOtHrs_<?php echo $i ?>"  value="<?php echo $lsvTrans['OTHrs']; ?>" readonly name="conOtHrs_1" class="parent_text text-right"></td>
+                    <td width="15%"><input type="text" readonly="" id="conOtAmount_<?php echo $i ?>" onchange="return FormatNum(this, 2)"  value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['OTAmount'],2,true); ?>" name="conOtAmount_<?php echo $i ?>" class="parent_text text-right" readonly></td>
+                    <td width="15%"><input type="text" readonly="" id="conNetAmount_<?php echo $i ?>" onchange="return FormatNum(this, 2)"  value="<?php echo $this->commonHelper()->sanitizeNumber($lsvTrans['NetAmount'],2,true); ?>" name="conNetAmount_<?php echo $i ?>" class="parent_text text-right" readonly></td>
+                    <td align="center" width="10%" class="action_btns_td">
+                        <ul class="action_btns">
+                            <li><a style="" onclick="return showDiv(this, 'mwbs', '');" class="mainTr" href="javascript:void(0);" id="showDivId_<?php echo $i ?>"><i data-original-title="Add lines" data-placement="left" data-toggle="tooltip" class="fa fa-chevron-circle-down"></i></a></li>
+                            <li><a style="" id="deleteConTr_<?php echo $i ?>" onclick="deleteCon(this, event);" class="conDelete_<?php echo $i ?>" href="#"><i data-original-title="Delete" data-placement="top" data-toggle="tooltip" class="fa fa-trash-o"></i></a></li></ul>
+                    </td>
+                </tr>
+                <tr class="subTr" style="" id="subRowRowId_<?php echo $i ?>" >
+                    <td style="padding:0px !important;" colspan="7">
+                        <div style="display:none;" class="subDiv subDiv2"><div style="margin-top:5px;" class="col-lg-12 col-lg-offset-0 rdbt"></div>
+                            <div class="col-lg-12"><div class="table-responsive topsp">
+                                    <table id="labTable_1" style="margin-bottom:0px;" class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>Labour Type Name</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>OT Hrs</th>
+                                            <th class="text-right">OT Rate</th>
+                                            <th class="text-right">OT Amount</th>
+                                            <th class="text-right">Total Amount</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        $kk = 1;
+                                        foreach ($lsTypeTrans as $lstTrans) {
+                                            if ($lstTrans['LSVendorTransId'] == $lsvTransId) {
+                                                ?>
+                                                <tr>
+                                                    <td width="15%">
+
+                                                        <input type="hidden" value="<?php echo $lstTrans['ResourceId']; ?>" id="labId_<?php echo $i ?>_<?php echo $kk ?>" name="labId_<?php echo $i ?>_<?php echo $kk ?>">
+                                                        <input type="text"  id="labName_<?php echo $i ?>_<?php echo $kk ?>"  value="<?php echo $lstTrans['ResourceName']; ?>" name="labName_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text labTypeSuggest">
+                                                    </td>
+                                                    <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs('<?php echo $i ?>', '<?php echo $kk ?>');" value="<?php echo $lstTrans['Qty']; ?>" onkeypress="return isDecimal(event,this);"  id="labQty_<?php echo $i ?>_<?php echo $kk ?>" name="labQty_<?php echo $i ?>_<?php echo $kk ?>" maxlength="5" class="parent_text text-right"></td>
+                                                    <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs(<?php echo $i ?>, <?php echo $kk ?>);" onkeypress="return isDecimal(event,this);" value="<?php echo $lstTrans['Rate']; ?>" onchange="return FormatNum(this, 2)" id="labRate_<?php echo $i ?>_<?php echo $kk ?>" maxlength="5" name="labRate_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"><div style="position:relative;display:none;" id="labtip_<?php echo $i ?>_<?php echo $kk ?>"><div class="top-tip top-addtip top-addtip12"><span>Rate : <i id="tiptext_<?php echo $i ?>_<?php echo $kk ?>"></i></span></div></div><input type="hidden" id="amt_<?php echo $i ?>_<?php echo $kk ?>">
+                                                    </td>
+                                                    <td width="13%"><input type="text" readonly="" id="labAmount_<?php echo $i ?>_<?php echo $kk ?>" onchange="return FormatNum(this, 2)"  value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['Amount'],2,true); ?>" name="labAmount_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"></td>
+                                                    <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs('<?php echo $i ?>', '<?php echo $kk ?>');" onchange="return pushMainQtyOT(this.id)" onkeypress="return isDecimal(event,this);" value="<?php echo $lstTrans['OTHrs']; ?>" id="labOtHrs_<?php echo $i ?>_<?php echo $kk ?>" name="labOtHrs_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"></td>
+                                                    <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs('<?php echo $i ?>', '<?php echo $kk ?>'');" onkeypress="return isDecimal(event,this);" onchange="return FormatNum(this, 2)" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['OTRate'],2,true); ?>" id="labOtRate_<?php echo $i ?>_<?php echo $kk ?>" name="labOtRate_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"></td>
+                                                    <td width="13%"><input type="text" readonly="" id="labOtAmount_<?php echo $i ?>_<?php echo $kk ?>" onchange="return FormatNum(this, 2)" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['OTAmount'],2,true); ?>" name="labOtAmount_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"></td>
+                                                    <td width="14%"><input type="text" readonly="" id="labNetAmount_<?php echo $i ?>_<?php echo $kk ?>" onchange="return FormatNum(this, 2)" value="<?php echo $this->commonHelper()->sanitizeNumber($lstTrans['NetAmount'],2,true); ?>" name="labNetAmount_<?php echo $i ?>_<?php echo $kk ?>" class="parent_text text-right"></td>
+                                                    <td align="center" width="10%" class="action_btns_td">
+                                                        <ul class="action_btns">
+                                                            <li><a style="display:block;" onclick="deleteWbsLab(this, event, <?php echo $i ?>, <?php echo $kk ?>);" id="deleteLabTr_<?php echo $i ?>_<?php echo $kk ?>" class="labDelete_<?php echo $i ?>_<?php echo $kk ?>" href="#"><i data-original-title="Delete" data-placement="top" data-toggle="tooltip" class="fa fa-trash-o"></i>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+
+                                                <?php
+                                                $kk++;
+                                            }
+                                        }
+
+                                        ?>
+                                      <!--  <tr>
+                                            <td width="15%">
+                                                <input type="hidden"  id="labId_<?php /*echo $i */?>_<?php /*echo $kk */?>" name="labId_<?php /*echo $i */?>_<?php /*echo $kk */?>">
+                                                <input type="text"  id="labName_<?php /*echo $i */?>_<?php /*echo $kk */?>"   name="labName_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text labTypeSuggest">
+                                            </td>
+                                            <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs(<?php /*echo $i */?>, <?php /*echo $kk */?>);"  onkeypress="return isDecimal(event,this);" onchange="return pushMainQty(this.id)" id="labQty_<?php /*echo $i */?>_<?php /*echo $kk */?>" name="labQty_<?php /*echo $i */?>_<?php /*echo $kk */?>" maxlength="5" class="parent_text text-right"></td>
+                                            <td width="10%"><input type="text"  onblur="return calSumAmountwithoutwbs(<?php /*echo $i */?>, <?php /*echo $kk */?>);" onkeypress="return isDecimal(event,this);"  onchange="return FormatNum(this, 2)" id="labRate_<?php /*echo $i */?>_<?php /*echo $kk */?>" maxlength="5" name="labRate_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"style="position:relative;"><div style="display:none;" id="labtip_<?php /*echo $i */?>_<?php /*echo $kk */?>"><div class="top-tip top-addtip"><span>Rate : <i id="tiptext_<?php /*echo $i */?>_<?php /*echo $kk */?>"></i></span></div></div><input type="hidden" id="amt_<?php /*echo $i */?>_<?php /*echo $kk */?>">
+                                            </td>
+                                            <td width="13%"><input type="text" readonly="" id="labAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" onchange="return FormatNum(this, 2)"  name="labAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"></td>
+                                            <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs(<?php /*echo $i */?>, <?php /*echo $kk */?>);" onchange="return pushMainQtyOT(this.id)" onkeypress="return isDecimal(event,this);"  id="labOtHrs_<?php /*echo $i */?>_<?php /*echo $kk */?>" name="labOtHrs_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"></td>
+                                            <td width="10%"><input type="text" onblur="return calSumAmountwithoutwbs(<?php /*echo $i */?>, <?php /*echo $kk */?>);" onkeypress="return isDecimal(event,this);" onchange="return FormatNum(this, 2)"  id="labOtRate_<?php /*echo $i */?>_<?php /*echo $kk */?>" name="labOtRate_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"></td>
+                                            <td width="13%"><input type="text" readonly="" id="labOtAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" onchange="return FormatNum(this, 2)"  name="labOtAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"></td>
+                                            <td width="14%"><input type="text" readonly="" id="labNetAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" onchange="return FormatNum(this, 2)"  name="labNetAmount_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="parent_text text-right"></td>
+                                            <td align="center" width="10%" class="action_btns_td">
+                                                <ul class="action_btns">
+                                                    <li><a style="display:none;" onclick="deleteWbsLab(this, event, <?php /*echo $i */?>, <?php /*echo $kk */?>);" id="deleteLabTr_<?php /*echo $i */?>_<?php /*echo $kk */?>" class="labDelete_<?php /*echo $i */?>_<?php /*echo $kk */?>" href="#"><i data-original-title="Delete" data-placement="top" data-toggle="tooltip" class="fa fa-trash-o"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>-->
+                                        <input id="labRows_<?php echo $i ?>" type="hidden" value="<?php echo $kk ?>" name="labRows_<?php echo $i ?>">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <?php $i++;
+            }
+        } ?>
+        </tbody>
+    </table>
+    <table class="table" style="margin-bottom:0px;display:none;">
+        <tfoot>
+        <tr>
+            <td width="20%" class="rate_pri">
+                <label>Total</label>
+            </td>
+            <td width="10%">
+                <input type="text"  class="parent_text text-right total-clr" id="totalconqty" readonly>
+            </td>
+            <td width="15%">
+                <input type="text" class="parent_text text-right total-clr" id="amtcontractor" readonly>
+            </td>
+            <td width="15%">
+                <input type="text"  class="parent_text text-right total-clr" id="contractorothrs" readonly>
+            </td>
+            <td width="15%">
+                <input type="text"  class="parent_text text-right total-clr" id="contractorotamount" readonly>
+            </td>
+            <td width="15%">
+                <input type="text"  class="parent_text text-right total-clr" id="contractornetamount" readonly>
+            </td>
+            <td width="10%"></td>
+        </tr>
+        </tfoot>
+    </table>
+    <input type="hidden" name="conRows" id="conRows"
+           value="<?php echo (isset($lsVendorTrans) && count($lsVendorTrans) != 0) ? count($lsVendorTrans) : 0; ?>"/>
+
+</div>
+<div id="divWithLab" class="table-responsive top-30 animated fadeInUp" style="display:<?php if ($lsRegister['LabourNameWise'] == '1' && $lsRegister['WBSRequired'] == '0') echo 'block'; else echo 'none'; ?>;">
+    <table class="table" style="margin-bottom:0px;">
+        <thead>
+        <tr>
+            <th width="14%">Labour Name</th>
+            <th width="14%" class="hideWbs">WBS Name</th>
+            <th width="8%">In
+                <br/>Time</th>
+            <th width="8%">Out
+                <br/> Time</th>
+            <th width="8%" class="text-right">Day</th>
+            <th width="8%" class="text-right">Rate</th>
+            <th width="8%" class="text-right">Amount</th>
+            <th width="8%" class="text-right">OT
+                <br/> Hrs</th>
+            <th width="8%" class="text-right">OT
+                <br/>Rate</th>
+            <th width="8%" class="text-right">OT
+                <br/> Amount</th>
+            <th width="8%" class="text-right">Net
+                <br/> Amount</th>
+            <th width="8%">&nbsp;&nbsp;</th>
+        </tr>
+        </thead>
+    </table>
+    <div style="min-height:30px;max-height:350px;overflow:auto">
+        <table class="table" id="wlabTable" style="margin-bottom:0">
+            <tbody>
+            <?php
+            if (isset($lsLabourTrans) && count($lsLabourTrans) != 0) {
+                $i = 1;
+                foreach ($lsLabourTrans as $lslTrans) {
+                    ?>
+                    <tr id="labRowId_<?php echo $i; ?>">
+                        <td width="14%">
+                            <input class="parent_text labSuggest" type="text" name="labConName_<?php echo $i; ?>" id="labConName_<?php echo $i; ?>" value="<?php echo $lslTrans['LabourName']; ?>"  readonly/>
+                            <input type="hidden" name="labConId_<?php echo $i; ?>" id="labConId_<?php echo $i; ?>" value="<?php echo $lslTrans['LabourId']; ?>" />
+                            <input type="hidden" name="labConDate_<?php echo $i; ?>" id="labConDate_<?php echo $i; ?>" value="<?php echo date(" d/m/Y ", strtotime($lslTrans['InTime'])); ?>"/>
+                        </td>
+                        <td width="14%" class="hideWbs">
+                            <input class="parent_text" type="text" name="labWbsName_<?php echo $i; ?>" id="labWbsName_<?php echo $i; ?>" value="<?php echo $lslTrans['WBSName']; ?>" />
+                            <input type="hidden" name="labWbsId_<?php echo $i; ?>" id="labWbsId_<?php echo $i; ?>" value="<?php echo $lslTrans['WBSId']; ?>" />
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text time_picker" type="text" name="labConInTime_<?php echo $i; ?>" id="labConInTime_<?php echo $i; ?>" value="<?php echo date('h:i a', strtotime($lslTrans['InTime'])); ?>" onblur="return calInOutTime('roId_<?php echo $i; ?>');" />
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text time_picker" type="text" name="labConOutTime_<?php echo $i; ?>" id="labConOutTime_<?php echo $i; ?>" value="<?php echo date('h:i a', strtotime($lslTrans['OutTime'])); ?>" onblur="return calInOutTime('roId_<?php echo $i; ?>');" />
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConQty_<?php echo $i; ?>" id="labConQty_<?php echo $i; ?>" value="<?php echo $lslTrans['Qty']; ?>" onchange="return FormatNum(this, 3)" onblur="return calLabSumAmount('roId_<?php echo $i; ?>');" readonly/>
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConRate_<?php echo $i; ?>" id="labConRate_<?php echo $i; ?>" value="<?php echo $lslTrans['Rate']; ?>" onchange="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this);" onblur="return calLabSumAmount('roId_<?php echo $i; ?>');" />
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConAmount_<?php echo $i; ?>" id="labConAmount_<?php echo $i; ?>" value="<?php echo $lslTrans['Amount']; ?>" onchange="return FormatNum(this, 2)" onblur="return calLabSumAmount('roId_<?php echo $i; ?>');" readonly/>
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConOtHrs_<?php echo $i; ?>" id="labConOtHrs_<?php echo $i; ?>" value="<?php echo $lslTrans['OTHrs']; ?>" onblur="return calLabSumAmount('roId_<?php echo $i; ?>');" readonly/>
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConOtRate_<?php echo $i; ?>" id="labConOtRate_<?php echo $i; ?>" value="<?php echo $lslTrans['OTRate']; ?>" onchange="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this);" onblur="return calLabSumAmount('roId_<?php echo $i; ?>');" />
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConOtAmount_<?php echo $i; ?>" id="labConOtAmount_<?php echo $i; ?>" value="<?php echo $lslTrans['OTAmount']; ?>" onchange="return FormatNum(this, 2)" readonly/>
+                        </td>
+                        <td width="8%">
+                            <input class="parent_text text-right" type="text" name="labConNetAmount_<?php echo $i; ?>" id="labConNetAmount_<?php echo $i; ?>" value="<?php echo $lslTrans['NetAmount']; ?>" onchange="return FormatNum(this, 2)" readonly/>
+                        </td>
+                    </tr>
+                    <?php $i++;
+                }
+            } else { ?>
+            <?php } ?>
+            </tbody>
+        </table>
+    </div>
+    <table class="table"
+           style="margin-bottom:0px;display:none; ">
+        <tfoot>
+        <tr >
+            <td width="14%" class="rate_pri"><label>Total</label></td>
+            <td width="14%" class="hideWbs"><input class="parent_text text-right total-clr"
+                                                     type="hidden" />
+            </td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                  type="hidden" id="in_time" /></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                  type="hidden" id="out_time" /></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="daytotal"  readonly=""/></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="ratetotal" readonly=""/></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="amttotal" readonly="" /></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="othrstotal" readonly="" /></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="otratetotal" readonly="" /></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="otamttotal" readonly=""/></td>
+            <td width="8%" class="text-right"><input class="parent_text text-right total-clr"
+                                                     type="text" id="netamttotal" readonly="" /></td>
+        </tr>
+        </tfoot>
+    </table>
+    <input type="hidden" name="labConRows" id="labConRows" value="<?php echo (isset($lsLabourTrans) && count($lsLabourTrans) != 0) ? count($lsLabourTrans) : 1; ?>" />
+</div>
+<div class="clearfix"></div>
+<div style="margin-top:0;padding:5px 0 20px 0;border-top:1px solid #ddd;background:#fff" class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 col-xs-12">
+        <label>Narration</label>
+        <textarea id="narration" name="narration" style="height:60px" class="parent_texts"><?php echo $lsRegister['Narration']; ?></textarea>
+    </div>
+</div>
+</div>
+</div>
+</form>
+</div>
+</div>
+<script>
+    $(function () {
+        //caltotalvaluecontractor();
+        callabourtotal();
+    });
+    function showDiv(e, etype, cId) {
+        var $x = $(e),
+            key = $x[0].id.split('_')[1];
+
+        if (etype == 'm') {
+            if ($('#conId_' + key).val() != '') {
+                if (!$('#subRowId_' + key).is(":visible")) {
+                    $('#subRowId_' + key).show();
+                    $('#subRowId_' + key).find(".subDiv").slideDown("slow");
+                    $(e).find("i").addClass("tform");
+                } else {
+                    $('#subRowId_' + key).find(".subDiv").slideUp("slow");
+                    $('#subRowId_' + key).slideUp("slow");
+                    $(e).find("i").removeClass("tform");
+                }
+            }
+        } else {
+            var key2 = $x[0].id.split('_')[2];
+            if (!$('#subRowSubRowId_' + cId + '_' + key2).is(":visible")) {
+                $('#subRowSubRowId_' + cId + '_' + key2).show();
+                $('#subRowSubRowId_' + cId + '_' + key2).find(".subDiv").slideDown("slow");
+                $(e).find("i").addClass("tform");
+            } else {
+                $('#subRowSubRowId_' + cId + '_' + key2).find(".subDiv").slideUp("slow");
+                $('#subRowSubRowId_' + cId + '_' + key2).slideUp("slow");
+                $(e).find("i").removeClass("tform");
+            }
+        }
+    }
+    function callabourtotal()
+    {
+        var $labourdattotal = $('input[id^=labConQty_');
+        var labday=0,labconrate=0,labconamt=0,labconothrs=0,labconotrate=0,labconotamt=0,labconotnetamt=0,labconotnetamttotal=0,
+            labdaytotal=0,labconratetotal=0,labconamttotal=0,labconothrstotal=0,labconotratetotal=0,labconotamttotal=0;
+        $.each($labourdattotal, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+
+            labday=$('#labConQty_'+key1).val();
+            labdaytotal=parseIntVal(labday) +parseIntVal(labdaytotal);
+
+            labconrate=isNullCheck($('#labConRate_'+key1).val(),'number');
+            labconratetotal=parseFloatVal(labconrate) +parseFloatVal(labconratetotal);
+
+            labconamt=isNullCheck($('#labConAmount_'+key1).val(),'number');
+            labconamttotal=parseFloatVal(labconamt) +parseFloatVal(labconamttotal);
+
+            labconothrs=isNullCheck($('#labConOtHrs_'+key1).val(),'number');
+            labconothrstotal=parseFloatVal(labconothrs) +parseFloatVal(labconothrstotal);
+
+            labconotrate=isNullCheck($('#labConOtRate_'+key1).val(),'number');
+            labconotratetotal=parseFloatVal(labconotrate) +parseFloatVal(labconotratetotal);
+
+            labconotamt=isNullCheck($('#labConOtAmount_'+key1).val(),'number');
+            labconotamttotal=parseFloatVal(labconotamt) +parseFloatVal(labconotamttotal);
+
+            labconotnetamt=isNullCheck($('#labConNetAmount_'+key1).val(),'number');
+            labconotnetamttotal=parseFloatVal(labconotnetamt) +parseFloatVal(labconotnetamttotal);
+
+        });
+        $('#netamttotal').val(sanitizeNumber(labconotnetamttotal,2,true));
+        $('#otamttotal').val(sanitizeNumber(labconotamttotal,2,true));
+        $('#otratetotal').val(labconotratetotal);
+        $('#othrstotal').val(labconothrstotal);
+        $('#amttotal').val(sanitizeNumber(labconamttotal,2,true));
+        $('#daytotal').val(labdaytotal);
+        $('#ratetotal').val(labconratetotal);
+    }
+    function caltotalvaluecontractor()
+    {
+       console.log(1);
+        var $conqty = $('input[id^=conQty_');
+        var $conamount= $('input[id^=conAmount_');
+        var $conothrs=$('input[id^=conOtHrs_');
+        var $conotamt=$('input[id^=conOtAmount_');
+        var $connetamt=$('input[id^=conNetAmount_');
+        var cqty=0,camt=0,cothrs=0,cotamt=0,cnetamt=0,
+            contotal=0,
+            conamttotal=0,conothrs=0,conotamt=0,connetamt=0;
+
+        $.each($conqty, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            cqty=$('#conQty_'+key1).val();
+            contotal=parseFloatVal(cqty) +parseFloatVal(contotal);
+            camt=$('#conAmount_'+key1).val();
+            conamttotal=parseFloatVal(camt) +parseFloatVal(conamttotal);
+            alert(conamttotal);
+            cothrs=$('#conOtHrs_'+key1).val();
+            conothrs=parseFloatVal(cothrs) +parseFloatVal(conothrs);
+
+$("#conQty_"+key1).trigger('blur');
+            cotamt=$('#conOtAmount_'+key1).val();
+            conotamt=parseFloatVal(cotamt) +parseFloatVal(conotamt);
+
+            cnetamt=$('#conNetAmount_'+key1).val();
+            connetamt=parseFloatVal(cnetamt) +parseFloatVal(connetamt);
+        });
+        $('#contractornetamount').val(sanitizeNumber(connetamt,2,true)).trigger('change');
+        $('#contractorotamount').val(sanitizeNumber(conotamt,2,true));
+        $('#contractorothrs').val(conothrs);
+        $('#amtcontractor').val(sanitizeNumber(conamttotal,2,true));
+        $('#totalconqty').val(contotal);
+    }
+    function showDiv(e, etype, cId) {
+        var $x = $(e),
+            key = $x[0].id.split('_')[1];
+
+        if (etype == 'm') {
+            if ($('#conId_' + key).val() != '') {
+                if (!$('#subRowId_' + key).is(":visible")) {
+                    $('#subRowId_' + key).show();
+                    $('#subRowId_' + key).find(".subDiv").slideDown("slow");
+                    $(e).find("i").addClass("tform");
+                } else {
+                    $('#subRowId_' + key).find(".subDiv").slideUp("slow");
+                    $('#subRowId_' + key).slideUp("slow");
+                    $(e).find("i").removeClass("tform");
+                }
+            }
+        }
+        else if(etype == 'mwbs')
+        {
+            if (!$('#subRowRowId_'+key).is(":visible")) {
+                $('#subRowRowId_'+key).show();
+                $('#subRowRowId_'+key).find(".subDiv").slideDown("slow");
+                //$(e).find("i").addClass("tform");
+            } else {
+                $('#subRowRowId_'+key).find(".subDiv").slideUp("slow");
+                $('#subRowRowId_'+key).slideUp("slow");
+                //$(e).find("i").removeClass("tform");
+            }
+        }
+
+        else {
+            var key2 = $x[0].id.split('_')[2];
+            if (!$('#subRowSubRowId_' + cId + '_' + key2).is(":visible")) {
+                $('#subRowSubRowId_' + cId + '_' + key2).show();
+                $('#subRowSubRowId_' + cId + '_' + key2).find(".subDiv").slideDown("slow");
+                $(e).find("i").addClass("tform");
+            } else {
+                $('#subRowSubRowId_' + cId + '_' + key2).find(".subDiv").slideUp("slow");
+                $('#subRowSubRowId_' + cId + '_' + key2).slideUp("slow");
+                $(e).find("i").removeClass("tform");
+            }
+        }
+    }
+    function calSumAmountwithoutwbs(conid,labid) {
+
+        var labAmt = 0,
+            labOtAmt = 0,
+            labNetAmt = 0;
+
+
+        if ($('#labQty_' + conid + '_' + labid ).val() != '' && $('#labRate_' + conid + '_' + labid ).val() != '') {
+            var labAmt = parseFloat($('#labQty_' + conid + '_' + labid ).val()) * parseFloat($('#labRate_' + conid + '_' + labid ).val());
+        }
+        $('#labAmount_' + conid + '_' + labid).val(labAmt).trigger('change');
+
+        if ($('#labOtHrs_' + conid + '_' + labid ).val() != '' && $('#labOtRate_' + conid + '_' + labid ).val() != '') {
+            var labOtAmt = parseFloat($('#labOtHrs_' + conid + '_' + labid ).val()) * parseFloat($('#labOtRate_' + conid + '_' + labid ).val());
+        }
+        $('#labOtAmount_' + conid + '_' + labid ).val(labOtAmt).trigger('change');
+
+
+        if ($('#labAmount_' + conid + '_' + labid ).val() != '' && $('#labOtAmount_' + conid + '_' + labid).val() != '') {
+            var labNetAmt = parseFloat($('#labAmount_' + conid + '_'+labid).val()) + parseFloat($('#labOtAmount_' + conid + '_' +labid).val());
+        }
+        $('#labNetAmount_' + conid + '_' + labid).val(labNetAmt).trigger('change');
+
+
+        var $labQty = $('input[id*=labQty_' + conid +'_]');
+        var sumLabQty = 0;
+        $.each($labQty, function () {
+            var lQty = parseFloat($(this).val());
+
+            if (isNaN(lQty))
+                return;
+
+            sumLabQty += lQty;
+        });
+        $('#conQty_'+ conid ).val(sumLabQty).trigger('change');
+
+        var $labAmt1 = $('input[id*=labAmount_' + conid+'_]');
+        var sumLabAmt = 0;
+        $.each($labAmt1, function () {
+            var lAmt = parseFloat($(this).val());
+
+            if (isNaN(lAmt))
+                return;
+
+            sumLabAmt += lAmt;
+        });
+        $('#conAmount_' + conid ).val(sumLabAmt).trigger('change');
+
+        var $labOt = $('input[id*=labOtHrs_' + conid +'_]');
+        var sumLabOt = 0;
+        $.each($labOt, function () {
+            var lOt = parseFloat($(this).val());
+
+            if (isNaN(lOt))
+                return;
+
+            sumLabOt += lOt;
+        });
+        $('#conOtHrs_' + conid ).val(sumLabOt).trigger('change');
+
+
+        var $labOtAmt = $('input[id^=labOtAmount_' + conid +'_]');
+        var sumLabOtAmt = 0;
+        $.each($labOtAmt, function () {
+            var lOtAmt = parseFloat($(this).val());
+
+            if (isNaN(lOtAmt))
+                return;
+
+            sumLabOtAmt += lOtAmt;
+        });
+        $('#conOtAmount_' + conid ).val(sumLabOtAmt).trigger('change');
+
+        var $labNetAmt = $('input[id*=labNetAmount_' + conid + '_]');
+        var sumLabNetAmt = 0;
+        $.each($labNetAmt, function () {
+            var lNetAmt = parseFloat($(this).val());
+
+            if (isNaN(lNetAmt))
+                return;
+
+            sumLabNetAmt += lNetAmt;
+        });
+        $('#conNetAmount_' + conid ).val(sumLabNetAmt).trigger('change');
+        caltotalvaluecontractor();
+    }
+</script>

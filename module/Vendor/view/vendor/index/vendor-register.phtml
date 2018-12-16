@@ -1,0 +1,461 @@
+<!-- INLINE CSS -->
+<style>
+.tr_hot 						{background:#f9eaea;}
+.tr_warm 						{background:#f8f1e4;}
+.tr_cold 						{background:#e8f0f6;}
+.flwup_proimg					{margin-top:12px;}
+#dataTable .jqx-grid-header 	{height:75px !important;}
+</style>
+<?php $this->bsf = new \BuildsuperfastClass();?>
+<!-- INLINE CSS -->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Vendors Details
+            <div class="stgedit_btn req_addbtn brad_50">
+                <a href="<?php echo $this->basePath();?>/vendor/index/basic-detail" class="ripple" data-toggle="tooltip" data-placement="right" title="Add New Vendor"><i class="fa fa-plus"></i></a>
+            </div>
+            </h1>
+        </div>
+<!--            <ul class="float_r cnt_innermenu">-->
+<!--                <li><a href="--><?php //echo $this->url('vendor/default',array('controller'=>'index','action'=>'basic-detail')); ?><!--" class="ripple" data-placement="bottom" data-toggle="tooltip" data-original-title="Add New"><span class="glyphicon glyphicon-plus"></span></a></li>-->
+<!--                <li><a href="--><?php //echo $this->url('vendor/default',array('controller'=>'index','action'=>'unapprove-vendor')); ?><!--" class="ripple" data-placement="bottom" data-toggle="tooltip" data-original-title="Unregistered Vendors"><span class="glyphicon glyphicon-star-empty"></span></a></li>-->
+<!--                <li class="dropdown"><a href="javascript:void(0);" class="ripple dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-cog"></span></a>-->
+<!--                     Link or button to toggle dropdown -->
+<!--                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">-->
+<!--                        <li><a href="#">Action</a></li>-->
+<!--                        <li><a href="#">Another action</a></li>-->
+<!--                        <li><a href="#">Something else here</a></li>-->
+<!--                        <li><a href="#">Another action</a></li>-->
+<!--                        <li><a href="#">Something else here</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
+<!--            </ul>-->
+        <div class="col-lg-12 clear">
+            <div class="table-responsive" id="dataTable">      
+            </div>
+        </div>
+    	<div class="right_lightbox">
+        	<div class="right_lightbox_close">
+                <span class="right_lightbox_closeicon"><i class="fa fa-times"></i></span>
+            </div>
+            <div class="right_lbox_inner lead_register_rbox" id="vendor_details">
+
+            </div>
+        </div>		
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r">
+            <a href="<?php echo $this->basePath();?>/vendor/index/index" class="ripple">Close</a>
+        </li>
+    </ul>
+</div>
+<script>
+
+$(document).ready(function () {
+	var source =
+	{
+		localdata:<?php echo json_encode($vendorList); ?>,
+        dataType: "json",
+		dataFields: [
+			{ name: 'VendorName', type: 'string' },
+			{ name: 'Supply', type: 'string' },
+			{ name: 'Contract', type: 'string' },
+			{ name: 'Service', type: 'string' },
+			{ name: 'RegAddress', type: 'string' },
+			{ name: 'CityName', type: 'string' },
+			{ name: 'Pincode', type: 'string' },
+			{ name: 'Approve', type: 'string' },
+			{ name: 'Registered Vendor', type: 'string' },
+			{ name: 'LogoPath', type: 'string' }
+						
+		],
+		id: 'VendorId'
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source);
+
+	var photorenderer = function (row, column, value, data) {
+		var imgur = '<?php echo $this->basePath(); ?>/images/avatar.jpg';
+		var photo = $('#dataTable').jqxGrid('getrowdata', row).LogoPath;
+		if(photo != ''){
+			imgur = '<?php echo $this->basePath(); ?>/'+photo;
+		}
+		
+		var img = '<div class="flwup_proimg ldrgstr_proimg brad_200">'+
+						'<img src="'+imgur+'" class="brad_200" alt="" title=""/>' +
+					'</div>';
+		return img;
+	}
+	var supplyrenderer = function (row, column, value, data) {
+		var supply = $('#dataTable').jqxGrid('getrowdata', row).Supply;
+		var img ='<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheckno"><i class="fa fa-times"></i></span>' +
+					'</div>';
+		if(supply == 'Yes'){
+			img = '<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheck"><i class="fa fa-check"></i></span>' +
+					'</div>';
+		}
+		return img;
+	}
+	var contractrenderer = function (row, column, value, data) {
+		var contract = $('#dataTable').jqxGrid('getrowdata', row).Contract;
+		var img ='<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheckno"><i class="fa fa-times"></i></span>' +
+					'</div>';
+		if(contract == 'Yes'){
+			img = '<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheck"><i class="fa fa-check"></i></span>' +
+					'</div>';
+		}
+		return img;
+	}
+	var servicerenderer = function (row, column, value, data) {
+		var service = $('#dataTable').jqxGrid('getrowdata', row).Service;
+		var img ='<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheckno"><i class="fa fa-times"></i></span>' +
+					'</div>';
+		if(service == 'Yes'){
+			img = '<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheck"><i class="fa fa-check"></i></span>' +
+					'</div>';
+		}
+		return img;
+	}
+	var approverenderer = function (row, column, value, data) {
+		var approve = $('#dataTable').jqxGrid('getrowdata', row).Approve;
+		var img ='<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheckno"><i class="fa fa-times"></i></span>' +
+					'</div>';
+		if(approve == 'Yes'){
+			img = '<div align="center" style="margin: auto;padding: 20px;">'+
+						'<span class="request_yescheck"><i class="fa fa-check"></i></span>' +
+					'</div>';
+		}
+		return img;
+	}
+    var registeredrenderer = function (row, column, value, data) {
+        var register = $('#dataTable').jqxGrid('getrowdata', row).Approve;
+        var img ='<div align="center" style="margin: auto;padding: 20px;">'+
+            '<span class="request_yescheckno"><i class="fa fa-times"></i></span>' +
+            '</div>';
+        if(register == 'Yes'){
+            img = '<div align="center" style="margin: auto;padding: 20px;">'+
+            '<span class="request_yescheck"><i class="fa fa-check"></i></span>' +
+            '</div>';
+        }
+        return img;
+    }
+	var cellclassname = function (row, column, value, data) {
+		return 'tr_warm';
+	}
+	
+	$("#dataTable").jqxGrid({
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready:function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No vendor to display";
+			$("#dataTable").jqxGrid('localizestrings', localizationobj);			
+		},
+		source:dataAdapter,
+		rendered: function () {
+		},			
+		columns: [
+			{ text: '', datafield: 'Image', width:'5%', cellsrenderer: photorenderer,	cellclassname: cellclassname, filterable: false},
+		 
+			{ text: 'VendorName', dataField: 'VendorName', width:'25%',	cellclassname: cellclassname },
+			{ text: 'Supply', datafield: 'Supply', width:'10%', cellsalign: 'center', align: 'center', cellsrenderer: supplyrenderer, cellclassname: cellclassname, filtertype: 'list',
+				createfilterwidget: function (column, columnElement, widget) {
+					widget.jqxDropDownList({placeHolder: "Select supply", autoOpen:true, dropDownWidth:100,selectedIndex: 0,
+						renderer: function (index, label, value) {
+							var img ='<span class="request_yescheckno"><i class="fa fa-times"></i>&nbsp;No</span>';
+							if(value == 'Yes'){
+								img = '<span class="request_yescheck"><i class="fa fa-check"></i>&nbsp;Yes</span>';
+							}
+							else if(value == ''){
+								img = "Select Suppy";
+							}
+							return img;
+						}
+					});
+				}
+			},
+			{ text: 'Contract', dataField: 'Contract', width: '10%', cellsalign: 'center', align: 'center', cellsrenderer: contractrenderer,	cellclassname: cellclassname, filtertype: 'list' ,
+				createfilterwidget: function (column, columnElement, widget) {
+					widget.jqxDropDownList({placeHolder: "Select contract", autoOpen:true, dropDownWidth:130,
+						renderer: function (index, label, value) {
+							var img ='<span class="request_yescheckno"><i class="fa fa-times"></i>&nbsp;No</span>';
+							if(value == 'Yes'){
+								img = '<span class="request_yescheck"><i class="fa fa-check"></i>&nbsp;Yes</span>';
+							}
+							else if(value == ''){
+								img = "Select Contract";
+							}
+							return img;
+						}
+					});
+				}			
+			},
+			{ text: 'Service', dataField: 'Service', width: '10%', cellsalign: 'center', align: 'center', cellsrenderer: servicerenderer,	cellclassname: cellclassname, filtertype: 'list',
+				createfilterwidget: function (column, columnElement, widget) {
+					widget.jqxDropDownList({placeHolder: "Select service", autoOpen:true, dropDownWidth:120,
+						renderer: function (index, label, value) {
+							var img ='<span class="request_yescheckno"><i class="fa fa-times"></i>&nbsp;No</span>';
+							if(value == 'Yes'){
+								img = '<span class="request_yescheck"><i class="fa fa-check"></i>&nbsp;Yes</span>';
+							}
+							else if(value == ''){
+								img = "Select Service";
+							}
+							return img;
+						}
+					});
+				}
+			},
+            { text: 'Approve', dataField: 'Approve', width: '10%', cellsalign: 'center', align: 'center', cellsrenderer: approverenderer,	cellclassname: cellclassname, filtertype: 'list' ,
+                createfilterwidget: function (column, columnElement, widget) {
+                    widget.jqxDropDownList({placeHolder: "Select register", autoOpen:true, dropDownWidth:130,
+                        renderer: function (index, label, value) {
+                            var img ='<span class="request_yescheckno"><i class="fa fa-times"></i>&nbsp;No</span>';
+                            if(value == 'Yes'){
+                                img = '<span class="request_yescheck"><i class="fa fa-check"></i>&nbsp;Yes</span>';
+                            }
+                            else if(value == ''){
+                                img = "Select Register Vendor";
+                            }
+                            return img;
+                        }
+                    });
+                }
+            },
+            { text: 'Registered Vendor', dataField: 'Regsitered Vendor', width: '10%', cellsalign: 'center', align: 'center', cellsrenderer: registeredrenderer,	cellclassname: cellclassname, filtertype: 'list' ,
+                createfilterwidget: function (column, columnElement, widget) {
+                    widget.jqxDropDownList({placeHolder: "Select register", autoOpen:true, dropDownWidth:130,
+                        renderer: function (index, label, value) {
+                            var img ='<span class="request_yescheckno"><i class="fa fa-times"></i>&nbsp;No</span>';
+                            if(value == 'Yes'){
+                                img = '<span class="request_yescheck"><i class="fa fa-check"></i>&nbsp;Yes</span>';
+                            }
+                            else if(value == ''){
+                                img = "Select Register Vendor";
+                            }
+                            return img;
+                        }
+                    });
+                }
+            },
+			{ text: 'RegAddress', dataField: 'RegAddress', width: '21%',	cellclassname: cellclassname },
+			{ text: 'CityName', dataField: 'CityName', width: '10%',	cellclassname: cellclassname},
+			{ text: 'Pincode', dataField: 'Pincode', width: '9%',	cellclassname: cellclassname},
+			{text: 'Logo path', align: 'left', dataField: 'LogoPath',	cellclassname: cellclassname, hidden:true,	cellclassname: cellclassname},
+		]
+	});	
+	
+	$('#dataTable').on('rowclick', function (event){
+		var args = event.args;
+		// row's bound index.
+		var boundIndex = args.rowindex;
+		var rowData = $('#dataTable').jqxGrid("getrowdata", boundIndex);
+		$.ajax({
+			url:getBaseURL()+"vendor/index/vendor-register",
+			type:"post",
+			data:'vendorId='+rowData.uid+'&mode=getDetails',
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+                var vendorId=(data['data'].VendorId);
+               var sup='',sup1='',sup2=''; var man=[];
+                if(data['data'].Manufacture==1){
+                   sup='Manufracture';
+                    man.push(sup);
+                }
+               if(data['data'].Dealer==1){
+                     sup1='Dealer';
+                   man.push(sup1);
+                }
+               if(data['data'].Distributor==1){
+                     sup2='Distributor';
+                   man.push(sup2);
+                }
+
+
+                  data['encodevendor']
+				$('#vendor_details').html('<div class="right_lbox_inner_cnt">'+
+												'<h2 class="vendordetail_change">Vendor Detail</h2>'+
+												'<div class="col-lg-12 ldrgstr_detail_pro padlr0" style="margin: 10px 0 0 auto !important;padding: 2px 10px 18px;">'+
+                                                '<div class="stgedit_btn topright_6 brad_50"> <a href="'+getBaseURL()+'vendor/index/basic-detail/ '+data['encodevendor']+'" class="ripple"><span><i class="fa fa-pencil"></i></span></a>'+
+                                                '</div>'+
+													'<div class="col-lg-4 flwup_proimg_area">'+
+														'<div class="flwup_proimg brad_200">'+
+															'<img src="<?php echo $this->basePath(); ?>/'+((data['data'].LogoPath != '')?data['data'].LogoPath:"/images/avatar.jpg")+'" class="brad_200" alt="" title=""/>'+
+														'</div>'+
+													'</div>'+
+													'<div class="col-lg-8 col-md-12 flwup_procnt">'+
+														'<h1 class="name">'+data['data'].VendorName+' &nbsp;&nbsp;<a data-placement="right" data-toggle="tooltip" href="'+getBaseURL()+'vendor/index/basic-detail/ '+data['encodevendor']+'"></br>' +
+															'<span>'+data['data'].CreatedDate+'</span>'+
+														'</h1>'+
+														'<p class="rwd_textcenter"><span class="p_label">Registered for :</span> '+man+'</p>'+
+													'</div>'+
+													'<ul class="col-lg-12 ldrgstr_detail_pro_ul clear">'+
+														'<li>'+
+															'<div class="col-lg-6">'+
+																'<h3><a href="#" class="phone"><span><i class="fa fa-phone"></i></span>+'+((data['data'].PhoneNumber != null)?data['data'].PhoneNumber:"")+'</a></h3>'+
+															'</div>'+
+															'<div class="col-lg-6">'+
+																'<h3><a href="#" class="mail"><span><i class="glyphicon glyphicon-envelope"></i></span>'+((data['data'].CompanyMailid != null)?data['data'].CompanyMailid:"")+'</a></h3>'+
+															'</div>'+
+														'</li>'+
+													'</ul>'+
+												'</div>'+
+												'<div class="col-lg-12 padlr0">'+
+													'<div class="form-horizontal stginner_cnt">'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="glyphicon glyphicon-calendar"></i></span>Year Of Establishment</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].EYear != null)?data['data'].EYear:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-location-arrow"></i></span>Register Address</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p style="text-align:left;">'+((data['data'].RegAddress != null)?data['data'].RegAddress:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-map-marker"></i></span>Location</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+                                                                    '<p style="text-align:left;">'+((data['data'].CityName != null)?data['data'].CityName:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-magic"></i></span>Requested Through</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<ul class="flwup_rcnt_inrproject">'+
+																		'<li style="'+((data['data'].WebRegistration == 1)?"":"display:none")+'"><p style="padding: 0 15px;">Online/Designation</p></li>'+
+																		'<li style="'+((data['data'].WebRegistration == 0)?"":"display:none")+'"><p style="padding: 0 15px;">Admin</p></li>'+
+																	'</ul>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-user"></i></span>Contact Person name</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].CPerson1 != null)?data['data'].CPerson1:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="glyphicon  glyphicon-phone-alt"></i></span>Contact Person No.</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].ContactNo1 != null)?data['data'].ContactNo1:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class=" glyphicon glyphicon-envelope"></i></span>Contact Person Mail Id</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].Email1 != null)?data['data'].Email1:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-odnoklassniki-square"></i></span>Firm</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].FirmType != null)?data['data'].FirmType:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-tty"></i></span>PAN No.</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].PANNo != null)?data['data'].PANNo:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+														'<div class="">'+
+															'<div class="col-lg-12">'+
+																'<label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-puzzle-piece"></i></span>TIN No.</label>'+
+																'<div class="col-lg-7 col-md-7 col-sm-7 padlr0">'+
+																	'<p>'+((data['data'].TINNo != null)?data['data'].TINNo:"")+'</p>'+
+																'</div>'+
+															'</div>'+
+														'</div>'+
+													'</div>'+
+												'</div>'+
+											'</div>'+
+											'<p class="rightlbox_btn rightlbox_btnchng ">'+
+												//'<a href="../crm/followup" class="ripple">Register</a>'+
+												'<a href="javascript:void(0);" vid="'+data['data'].VendorId+'" class="ripple blockButton">'+((data['data'].AllowOnline == 1)?"Block Online":"Allow Online")+'</a>'+
+												'<a href="'+getBaseURL()+'vendor/index/vendor-profile/'+vendorId+'" class="ripple">View more details</a>'+ '</p>');
+											
+				$('.blockButton').unbind('click');
+				$('.blockButton').bind('click', function(){
+					var VendorId = $(this).attr('vid');
+					var online=0;
+					if($(this).text() == 'Allow Online')
+						online = 1;
+					
+					var ele = $(this);
+					$.ajax({
+						url:getBaseURL()+"vendor/index/vendor-register",
+						type:"post",
+						data:'vendorId='+vendorId+'&mode=updateOnline&allow_online='+online,
+						dataType:"json",
+						success:function(data, textStatus, jqXHR){
+							if(ele.text() == 'Block Online')
+								ele.text('Allow Online');
+							else
+								ele.text('Block Online');
+						},
+						error:function(jqXHR, textStatus, errorThrown){
+							//$('.right_lightbox').hide();
+							alert(textStatus+"-----"+errorThrown);
+						}
+					});
+				});
+				
+				$('.right_lightbox').show();
+				$('.left-panel').removeClass('collapsed');
+				$('.l_menuicon_nav').removeClass('cross');
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+				//$('.right_lightbox').hide();
+				alert(textStatus+"-----"+errorThrown);
+			}
+		});				
+	});	
+	$('.right_lightbox_close').click(function(){
+		$('.right_lightbox').hide();
+		if ($(window).width() >=980){
+			$('.left-panel').addClass('collapsed');	
+			$('.l_menuicon_nav').addClass('cross');
+		}
+	});
+	
+});
+</script>

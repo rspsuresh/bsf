@@ -1,0 +1,2382 @@
+<style>
+.collpse-btn{width:100%; margin:10px 8px}
+.collpse-btn li{float:left; background:#A2E0F5;padding:6px 16px; margin-right:10px; box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #6CBED9; font-size:14px;margin-bottom:18px;cursor:pointer}
+.collpse-btn li:hover{background:#BED96C;box-shadow:0 0 0 2px #ffffff, 0 0 0 3px #BED96C;}
+</style>
+
+<?php
+function nonZeroNumber( $number )
+{
+    if ( !isset( $number ) || !is_numeric( $number ) || $number <= 0 ) {
+        return '';
+    }
+    else {
+        return round( $number, 2 );
+    }
+}
+
+?>
+
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css"/>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+
+<style>
+    .popover.right > .arrow {
+        border-left-width: 0;
+        border-right-color: rgba(0, 0, 0, 0.1);
+        left: -11px;
+        margin-top: -11px;
+        top: 50%;
+    }
+
+    .popover.right > .arrow::after {
+        border-left-width: 0;
+        border-right-color: #fff;
+        bottom: -10px;
+        content: " ";
+        left: 1px;
+    }
+
+    .popover-content {
+        padding: 9px 14px;
+        display: inline-block;
+    }
+
+    .val-view {
+        position: relative;
+    }
+
+    .unitshows {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 7px;
+    }
+
+    .unitshows .unitshows_toggle p, .unitshows .unitleftshows_toggle p{
+        color: #fff;
+        font-size: 12px;
+    }
+
+    .unitshows .unitshows_toggle p span,.unitshows .unitleftshows_toggle p span {
+        display: inline-block;
+        width: 40%;
+    }
+    .unitleftshows_toggle {
+        left:-177px !important;
+    }
+    .unitshows .unitshows_toggle {
+        background-color: #555;
+        left: 54px;
+        padding: 5px 8px;
+        position: absolute;
+        width: 170px;
+        z-index: 999;
+        display: none;
+    }
+
+    .unitshows:hover .unitshows_toggle,.unitshows:hover .unitshowsleft_toggle {
+        display: block;
+    }
+    .unitleftshows_toggle::after {
+        right:-12px !important;
+        border-color: transparent transparent transparent #555 !important ;
+        left:unset !important;
+    }
+
+    .unitshows .unitshows_toggle::after {
+        -moz-border-bottom-colors: none;
+        -moz-border-left-colors: none;
+        -moz-border-right-colors: none;
+        -moz-border-top-colors: none;
+        border-color: transparent #555 transparent transparent;
+        border-image: none;
+        border-style: solid;
+        border-width: 6px;
+        content: " ";
+        height: 0;
+        left: -5px;
+        margin-left: -7px;
+        position: absolute;
+        top: 5px;
+        width: 0;
+    }
+    .btn-floating {
+        display: inline-block;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        float:right;
+        width: 37px;
+        height: 37px;
+        line-height: 37px;
+        padding: 0;
+        margin-top:8px;
+        margin-bottom:8px;
+        background-color: #26a69a;
+        border-radius: 50%;
+        cursor: pointer;
+        vertical-align: middle;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        text-decoration: none;
+        transition: all .3s ease;
+        -webkit-transition: all .3s ease;
+        -moz-transition: all .3s ease;
+        -o-transition: all .3s ease;
+    }
+    .flt_rit{float:right;}
+    .dif { color:#506faf;}
+    .wd
+</style>
+<form method="post" enctype="multipart/form-data">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid">
+            <?php if ( isset( $unitInfo ) ): ?>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 data-bsfhead="Unit Details">Unit Details</h1>
+                    </div>
+                    <div class="col-lg-12 unitdt_topcnt clear">
+                        <div class="col-lg-4">
+                            <h3 data-bsfhead="UnitNo" class="unitdt_mh3"><img src="<?php echo $this->basePath(); ?>/images/unitbuilding_icon.png" title="" alt=""/>Unit No <?php echo $unitInfo[ 'UnitNo' ]; ?></h3>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-sm-3 col-xs-3 unitdt_topright">
+                            <div class="float_l">
+                                <h3 data-bsfhead="projectNo"><?php echo $unitInfo[ 'ProjectName' ]; ?></h3>
+                                <p>Project Name</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 unitdt_topright">
+                            <span class="float_l"><img class="brad_50 unitdt_img" src="<?php echo $this->basePath(); ?>/images/flat-img2.jpg"></span>
+                            <div class="float_l">
+                                <h3 data-bsfhead="Block Name"><?php echo $unitInfo[ 'BlockName' ]; ?></h3>
+                                <p>Block Name</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 unitdt_topright">
+                        <span class="float_l">
+                            <?php if($unitInfo[ 'BlockedStatus' ] == 'Blocked') {
+                                $buyerAvatar = $unitInfo[ 'BlockedPhoto' ];
+                                $buyerName = $unitInfo[ 'BlockedName' ];
+                            } else {
+                                $buyerAvatar = $unitInfo[ 'BuyerPhoto' ];
+                                $buyerName = $unitInfo[ 'BuyerName' ];
+                            }
+                            if($buyerAvatar != '' && $buyerAvatar != Null) {
+                                $buyerPhoto = $this->basePath()."/".$buyerAvatar;
+                            } else {
+                                $buyerPhoto = $this->basePath()."/images/avatar.jpg";
+                            } ?>
+                            <img class="brad_50 unitdt_img" src="<?php echo $buyerPhoto; ?>"></span>
+
+                            <div class="float_l">
+                                <h3 data-bsfhead="Buyer Name"><?php echo $buyerName; ?></h3>
+
+                                <p>Buyer Name </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 unitdt_topcnt_inner padlr0 clear">
+                        <?php if ( $unitInfo[ 'BookingStatus' ] == 'Sold' ): ?>
+                            <div class="ribbon_wrapper m_top0">
+                                <div class="ribbon_inner ribbon_red">Sold!</div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ( $unitInfo[ 'BlockedStatus' ] == 'Blocked' ): ?>
+                            <div class="ribbon_wrapper m_top0">
+                                <div class="ribbon_inner ribbon_green">Blocked</div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ( $unitInfo[ 'PreStatus' ] == 'PreBooked' ): ?>
+                            <div class="ribbon_wrapper m_top0">
+                                <div class="ribbon_inner ribbon_pre">Pre-Booked!</div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ( $unitInfo[ 'Status' ] == 'R' ): ?>
+                            <div class="ribbon_wrapper m_top0">
+                                <div class="ribbon_inner ribbon_pre">Reserved!</div>
+                            </div>
+                        <?php endif; ?>
+                        <div class="col-lg-2 col-md-6 col-sm-6 padlr0">
+                            <p><span class="brad_50 sp_1"></span>Area</p>
+                            <h3 data-bsfhead="Area"><?php echo $unitInfo[ 'UnitArea' ]; ?><span>sq.ft</span></h3>
+                        </div>
+                        <div class="col-lg-2 col-md-6 col-sm-6 padlr0">
+                            <p><span class="brad_50 sp_2"></span>Facing</p>
+
+                            <h3 data-bsfhead="Block Name"><?php echo ( !is_null( $unitInfo[ 'fac' ] ) && $unitInfo[ 'fac' ] != '' ) ? $unitInfo[ 'fac' ] : '-'; ?></h3>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 padlr0">
+                            <p><span class="brad_50 sp_3"></span>Executive Name</p>
+
+                            <h3 data-bsfhead="ExecutiveName"><?php echo ( !is_null( $unitInfo[ 'ExecutiveName' ] ) && $unitInfo[ 'ExecutiveName' ] != '' ) ? $unitInfo[ 'ExecutiveName' ] : '-'; ?></h3>
+                        </div>
+                        <div class="col-lg-2 col-md-6 col-sm-6 padlr0">
+                            <p><span class="brad_50 sp_4"></span>Gross</p>
+
+                            <h3 data-bsfhead="GrossAmount"><?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'GrossAmount' ], 2, true); ?></h3>
+                        </div>
+                        <div class="col-lg-3 padlr0">
+                            <p><span class="brad_50 sp_5"></span>Rate</p>
+
+                            <h3 data-bsfhead="Rate"><?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'Rate' ], 2, true); ?></h3>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear white_bg">
+                        <section class="cd-horizontal-timeline">
+                            <div class="timeline">
+                                <div class="events-wrapper">
+                                    <div class="events">
+                                        <ul> <?php $data = 0;
+                                            $payCount = count($payStageDetails); ?>
+                                            <li><a href="#heading_0" onclick="timelineOpen(this);" <?php if ( floatval($unitInfo[ 'Rate' ]) > 0 ) { echo "class='older-event'"; } else { echo "class='selected'"; $data = 1; } ?> data-date="10/08/2013" > Unit <br/> created </a></li>
+                                            <li><a href="#heading_0" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else if ( floatval($unitInfo[ 'Rate' ]) > 0 ) { echo "class='older-event'"; } else { echo "class='older-event'"; } ?> data-date="10/11/2013" > Unit <br/> Details <br/> approved</a></li>
+                                            <li><a href="#heading_0" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="10/02/2014" > Booking <br/> Form <br/> Updated</a></li>
+                                            <?php if($unitInfo[ 'BlockedStatus' ]=="Blocked") { ?>
+                                                <li><a href="#heading_0" <?php if($data ==1 ) { echo "class='new-event'"; } else if ( $unitInfo[ 'BookingStatus' ] != 'Sold' ) { echo "class='selected'"; $data = 1; } else { echo "class='older-event'"; } ?> data-date="10/04/2014" > Block </a></li>
+
+                                            <?php } else if($unitInfo[ 'PreStatus' ]=="PreBooked") {?>
+                                                <li><a href="#heading_0" <?php if($data ==1 ) { echo "class='new-event'"; } else if ( $unitInfo[ 'BookingStatus' ] != 'Sold' ) { echo "class='selected'"; $data = 1; } else { echo "class='older-event'"; } ?> data-date="10/04/2014" > Pre Booked </a></li>
+                                            <?php }?>
+                                            <li><a href="#heading_1" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else if ( $unitInfo[ 'BookingStatus' ] == 'Sold' && $unitInfo[ 'Approve' ] =='Y') { echo "class='older-event'"; } else { echo "class='selected'"; $data = 1; } ?> data-date="10/08/2014">Unit Finalized </a></li>
+                                            <li><a href="#heading_1" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else if ( $unitInfo[ 'Approve' ] =='Y' && $advAmt['count'] >0 ) { echo "class='older-event'"; } else { echo "class='selected'"; $data = 1; } ?> data-date="10/12/2014">Finalization <br/> Details <br/> Approved </a></li>
+                                            <li><a href="#heading_7" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="10/04/2015">Advance <br/>  Collected</a></li>
+                                            <li><a href="#heading_1" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="10/08/2015">Allotment <br/>  Letter <br/> Sent</a></li>
+                                            <li><a href="#heading_7" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else if ($payCount==0) { echo "class='selected'"; $data =1; } else { echo "class='older-event'"; } ?> data-date="15/12/2015">Agreement <br/> Prepared <br/> & <br/>Sent</a></li>
+
+                                            <?php $date = "20/04/2016"; for($i=0; $i < $payCount; $i++) { $j=0;$j=$i+1; ?>
+                                                <li><a href="#heading_6" onclick="timelineOpen(this);" <?php if($data==1) { echo "class='new-event'"; } else if(isset($payStageDetails[$j]['StageDetails'])) { if($payStageDetails[$j]['StageDetails']===false)  { echo "class='selected'"; $data = 1; } else { echo "class='older-event'";  } } else { echo "class='selected'"; $data = 1; }?> data-date="<?php echo $date; ?>"><?php echo (isset($payStageDetails[$i])) ? $payStageDetails[$i]['StageName'] : ''; ?></a></li>
+                                                <?php $date=date('d/m/Y', strtotime("+4 month", strtotime(str_replace("/","-",$date)))); } ?>
+                                            <li><a href="#heading_7" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="<?php echo $date; ?>">Unit <br/> registered</a></li>
+                                            <?php $date=date('d/m/Y', strtotime("+4 month", strtotime(str_replace("/","-",$date))));  ?>
+                                            <li><a href="#heading_7" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="<?php echo $date; ?>">Full & final <br/> settlement <br/>done </a></li>
+                                            <?php $date=date('d/m/Y', strtotime("+4 month", strtotime(str_replace("/","-",$date))));  ?>
+
+                                            <li><a href="#heading_7" onclick="timelineOpen(this);" <?php if($data ==1 ) { echo "class='new-event'"; } else { echo "class='older-event'"; } ?> data-date="<?php echo $date; ?>">Original sale deed <br/>handed over </a></li>
+
+                                        </ul>
+                                        <span class="filling-line" aria-hidden="true"></span>
+                                    </div> <!-- .events -->
+                                </div> <!-- .events-wrapper -->
+                                <ul class="cd-timeline-navigation">
+                                    <li><a href="#" class="prev inactive"><span><i class="fa fa-angle-left" aria-hidden="true"></i></span></a></li>
+                                    <li><a href="#" class="next"><span><i class="fa fa-angle-right" aria-hidden="true"></i></span></a></li>
+                                </ul> <!-- .cd-timeline-navigation -->
+                            </div> <!-- .timeline -->
+                        </section>
+                    </div>
+                    <div id="heading_0" class="col-lg-12 clear detail_view white_bg">
+                        <div class="form-horizontal stginner_cnt">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>UDS Land Area</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa" data-bsfshare="UDSLandArea"><?php echo ( $unitInfo[ 'UDSLandArea' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'UDSLandArea' ], 2).' '.$unitInfo[ 'UnitName' ] : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Booking Advance </label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="AdvAmount"> <?php echo ( $adv > 0 ) ? $this->commonHelper()->sanitizeNumber($adv, 2, true) : $this->commonHelper()->sanitizeNumber($unitInfo[ 'AdvAmount' ], 2, true); ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Guideline Value</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="Guideline Value"> <?php echo ( $unitInfo[ 'GuideLinevalue' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'GuideLinevalue' ], 2, true) : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Land Amount</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="LandAmount"> <?php echo ( $unitInfo[ 'LandAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'LandAmount' ], 2, true) : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Carpet Area</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa" data-bsfshare="CarpetArea"><?php echo ( $unitInfo[ 'CarpetArea' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'CarpetArea' ], 3).' '.$unitInfo[ 'UnitName' ] : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Construction Amount(R)</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="ConstructionAmount"> <?php echo ( $unitInfo[ 'ConstructionAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'ConstructionAmount' ], 2, true) : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Car Park Slot</label>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+
+                                        <div data-bsfshare="CarParkSlot" class="semi_b900">
+                                            <p class="fa"><?php echo (isset( $arrCarParks )) ? count($arrCarParks) : '-'; ?></p>
+
+                                            <?php if(isset($arrCarParks)): ?>
+                                                <div class="unitshows">
+                                                    <a class="float_r brad_50 dtl_view_a ripple"><span><i class="fa fa-eye"></i></span> view</a>
+                                                    <div class="unitshows_toggle unitleftshows_toggle">
+                                                        <?php $i= 1; foreach($arrCarParks as $carPark): ?>
+                                                            <p class="fa" >Slot <?php echo $i++; ?> : <?php echo $carPark['SlotNo'];?></p>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-caret-right"></i></span>Base Amount</label>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <div data-bsfshare="Base Amount" class="semi_b900"><p class="fa fa-inr"> <?php echo ( $unitInfo[ 'BaseAmt' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'BaseAmt' ], 2, true) : '-'; ?></p>
+                                            <div class="unitshows">
+                                                <a class="float_r brad_50 dtl_view_a ripple"><span><i class="fa fa-eye"></i></span> view</a>
+
+                                                <div class="unitshows_toggle unitleftshows_toggle">
+                                                    <p data-bsfshare="Area" style="padding:3px 0 !important"><span>Area</span><span class="text-right"><?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'UnitArea' ], 3); ?></span></p>
+
+                                                    <p data-bsfshare="Rate" style="padding:3px 0 !important"><span>Rate</span><span
+                                                            class="select2-selection__clear text-right">&times; <?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'Rate' ], 2, true); ?></span>
+                                                    </p>
+
+                                                    <p data-bsfshare="Amount" style="border-top:1px solid #fff; padding:3px 0 !important;">
+                                                        <span>Amount</span><span class="text-right"><?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'BaseAmt' ], 2, true); ?></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--<div class="col-lg-6 col-md-6">
+                                <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                            class="fa fa-caret-right"></i></span>Advance Amount</label>
+
+                                <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                    <p><?php //echo ( $unitInfo[ 'AdvAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'AdvAmount' ], 2, true) : '-'; ?></p>
+                                </div>
+                            </div>-->
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Market Land Amount</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="MarketLandValue"> <?php echo ( $unitInfo[ 'MarketLandValue' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'MarketLandValue' ], 2, true) : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Other Cost</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr"> <?php echo $this->commonHelper()->sanitizeNumber($unitInfo['OtherCostAmt'],2,true)?>
+                                            <span class="campn_amnt_span" data-placement="top" data-toggle="tooltip" data-html="true"
+                                                  data-original-title="<?php if(isset($arrUnitOtherCost) && count($arrUnitOtherCost) !=0) { foreach($arrUnitOtherCost as $OtherCost):
+                                                      echo $OtherCost['OtherCostName'].' : '.$OtherCost['Amount'].'<br/>';
+                                                  endforeach; } ?> "><i class="fa fa-briefcase" aria-hidden="true"></i></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <?php if ( isset( $unitInfo[ 'DiscountType' ] ) ){ ?>
+                                    <div class="col-lg-6 col-md-6">
+                                        <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                    class="fa fa-caret-right"></i></span><?php if($unitInfo[ 'DiscountType' ]=='L'){ ?> Discount(Lumpsum)<?php } else if($unitInfo[ 'DiscountType' ]=='R'){ ?> Discount(Rate) <?php } else if($unitInfo[ 'DiscountType' ]=='P'){?>Discount(Percentage)<?php } else { ?>Discount<?php }?></label>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                            <p class="fa" data-bsfshare="Discount"><?php echo ( $unitInfo[ 'Discount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'Discount' ], 2, true) : '-'; ?></p>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                                <?php if( $unitInfo[ 'ProposalId' ]>0 ) { ?>
+                                    <div class="col-lg-6 col-md-6">
+                                        <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                    class="fa fa-caret-right"></i></span><?php if($unitInfo[ 'ProDiscountType' ]=='L'){ ?> ProDiscount(Lumpsum)<?php } else if($unitInfo[ 'ProDiscountType' ]=='R'){ ?> ProDiscount(Rate) <?php } else if($unitInfo[ 'ProDiscountType' ]=='P'){?>ProDiscount(Percentage)<?php } else { ?>ProDiscount<?php }?></label>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                            <p class="fa" data-bsfshare="Discount"><?php echo ( $unitInfo[ 'ProDiscount' ] > 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'ProDiscount' ], 2, true) : '-'; ?></p>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+
+
+                                <?php if ( isset($PreDistype) ){ ?>
+                                    <div class="col-lg-6 col-md-6">
+                                        <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                    class="fa fa-caret-right"></i></span><?php if($PreDistype=='L'){ ?> PreBookDiscount(Lumpsum)<?php } else if($PreDistype=='R'){ ?> PreBookDiscount(Rate) <?php } else if($PreDistype=='P'){?>PreBookDiscount(Percentage)<?php } else { ?>PreBookDiscount<?php }?></label>
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                            <p class="fa" data-bsfshare="Discount"><?php echo ( $PreDist != 0 ) ? $this->commonHelper()->sanitizeNumber($PreDist, 2, true) : '-'; ?></p>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Gross Amount</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa fa-inr" data-bsfshare="GrossAmount"> <?php echo ( $unitInfo[ 'GrossAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'GrossAmount' ], 2, true) : '-'; ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Advance Percent</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa" data-bsfshare="AdvPercent"><?php echo ( $unitInfo[ 'AdvPercent' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'AdvPercent' ], 2) : '-'; ?></p>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Statutory Amount</label>
+
+                                    <!--                 <div class="col-lg-6 col-md-6 col-sm-6 padlr0">-->
+                                    <!--                    <p>--><?php //echo ( $unitInfo[ 'QualifierAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'QualifierAmount' ], 2, true) : '-'; ?>
+                                    <!--                            <a class="float_r brad_50 dtl_view_a ripple"><span><i class="fa fa-eye"></i></span> view</a>-->
+                                    <!--                        </p>-->
+                                    <!--                    </div>-->
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <div class="semi_b900">
+                                            <p class="fa fa-inr"> <?php echo ( $unitInfo[ 'QualifierAmount' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'QualifierAmount' ], 2, true) : '-'; ?></p>
+
+                                            <?php if(isset($arrQualifiers)): ?>
+                                                <div class="unitshows">
+                                                    <a class="float_r brad_50 dtl_view_a ripple"><span><i class="fa fa-eye"></i></span> view</a>
+
+                                                    <div class="unitshows_toggle unitleftshows_toggle">
+                                                        <?php foreach($arrQualifiers as $qual): ?>
+                                                            <p style="padding:3px 0 !important"><span><?php echo $qual['QualifierName']; ?></span> &nbsp;&nbsp; <span class="text-right" data-bsfshare="TotAmount"><?php echo $this->commonHelper()->sanitizeNumber($qual[ 'TotAmount' ], 2, true); ?></span></p>
+                                                        <?php endforeach; ?>
+
+                                                        <p style="border-top:1px solid #fff;padding:3px 0 !important;">
+                                                            <span>Total</span> <span data-bsfshare="QualifierAmount" class="text-right"><?php echo $this->commonHelper()->sanitizeNumber($unitInfo[ 'QualifierAmount' ], 2, true); ?></span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Late Interest(Per Annum %)</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa" data-bsfshare="LateInterest"><?php echo ( $unitInfo[ 'IntPercent' ] != 0 ) ? $this->commonHelper()->sanitizeNumber($unitInfo[ 'IntPercent' ], 2) : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Net Amount</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0 semi_b900">
+                                        <?php if ( $unitInfo[ 'NetAmt' ] != 0 ) {
+                                            $netamount=0;
+                                            $netamount= $unitInfo[ 'NetAmt' ];
+                                            $net=$this->commonHelper()->sanitizeNumber($netamount, 2, true);?>
+                                            <p class="fa fa-inr" data-bsfshare="NetAmount"> <?php echo  $net ?></p><?php } ?>
+                                        <input type="hidden" name="netamount" id="netamount" value="<?php echo $netamount; ?>" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Credit Days</label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p class="fa" data-bsfshare="CreditDays"><?php echo ( $unitInfo[ 'CreditDays' ] != 0 ) ? $unitInfo[ 'CreditDays' ] : '-'; ?></p>
+                                    </div>
+                                </div>
+                                <!-- <?php /*if($unitInfo[ 'ValidUpto' ] !='') { */?>
+                                <div class="col-lg-6 col-md-6">
+                                    <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i
+                                                class="fa fa-caret-right"></i></span>Valid Upto
+                                    </label>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 padlr0">
+                                        <p data-bsfshare="ValidUpto"><?php /*echo ( $unitInfo[ 'ValidUpto' ] != 0 ) ?$unitInfo[ 'ValidUpto' ] : '-'; */?></p>
+                                    </div>
+                                </div>
+                                --><?php /*} */?>
+
+                                <!--                        <div class="col-lg-6 col-md-6">-->
+                                <!--                            <label class="col-lg-6 padlr0 col-md-6 col-sm-6 txt_left control-label"><span class="p_lbl_icon"><i class="fa fa-caret-right"></i></span>Remarks</label>-->
+                                <!--                            <div class="col-lg-6 col-md-6 col-sm-6 padlr0">-->
+                                <!--                                <p>-->
+                                <?php //echo ($unitInfo['Remarks'] != 0)?$unitInfo['Remarks']:'-'; ?><!--</p>-->
+                                <!--                            </div>-->
+                                <!--                        </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <?php if ( $unitInfo[ 'Status' ] == 'S' && isset( $unitBooking ) ): ?>
+                                <div id="heading_1" class="panel panel-default">
+                                    <div class="panel-heading accordion_head" role="tab" id="heading1" data-toggle="collapse"
+                                         data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapse1">
+                                        <h4 data-bsfhead="FinalizationDetails">Finalization Details</h4>
+                                    </div>
+                                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading1">
+                                        <div class="panel-body">
+                                            <div class="col-lg-12 padlr0">
+                                                <div class="form-horizontal stginner_cnt">
+                                                    <div class="col-lg-6 col-md-6 padlr0">
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Booking
+                                                                    Date</label>
+
+                                                                <div data-bsfshare="BookingDate" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><?php echo date( 'd-m-Y', strtotime( $unitBooking[ 'BookingDate' ] ) ); ?></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 padlr0">
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Booking
+                                                                    Number</label>
+
+                                                                <div data-bsfshare="BookingNo"  class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><?php echo $unitBooking[ 'BookingNo' ]; ?></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 padlr0">
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Buyer
+                                                                    Name</label>
+
+                                                                <div data-bsfshare="BuyerName" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><?php echo $unitInfo[ 'BuyerName' ]; ?></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 padlr0">
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Registration
+                                                                    Name</label>
+
+                                                                <div data-bsfshare="BookingName" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p><?php echo $unitBooking[ 'BookingName' ]; ?></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 padlr0">
+                                                        <div class="row">
+                                                            <div class="col-lg-12">
+                                                                <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Advance
+                                                                    Payable</label>
+
+                                                                <div data-bsfshare="AdvAmount" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                    <p>Rs. <?php echo $this->commonHelper()->sanitizeNumber($unitBooking[ 'AdvAmount' ], 2, true); ?></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php if ( $unitBooking[ 'PaymentOption' ] == 'L' ): ?>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading accordion_head" role="tab" id="heading2" data-toggle="collapse"
+                                             data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            <h4 data-bsfhead="Loan Details">Loan Details</h4>
+                                        </div>
+                                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading2">
+                                            <div class="panel-body">
+                                                <div class="col-lg-12 padlr0">
+                                                    <div class="form-horizontal stginner_cnt">
+                                                        <div class="col-lg-6 col-md-6 padlr0">
+                                                            <div class="row">
+                                                                <div class="col-lg-12">
+                                                                    <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Loan
+                                                                        Approval Status</label>
+
+                                                                    <div data-bsfshare="ApprovalStatus" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                        <p><?php echo ( $unitBooking[ 'LoanApproval' ] == 1 ) ? 'Approved' : 'Pending'; ?></p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <?php if ( $unitBooking[ 'LoanApproval' ] == 1 ): ?>
+                                                            <div class="col-lg-6 col-md-6 padlr0">
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Loan
+                                                                            Approved On</label>
+
+                                                                        <div data-bsfshare="ApprovalOn" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                            <p><?php echo date( 'd-m-Y', strtotime( $unitBooking[ 'SanctionDate' ] ) ); ?></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6 col-md-6 padlr0">
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Proposal
+                                                                            Number</label>
+
+                                                                        <div data-bsfshare="ProposalNumber" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                            <p><?php echo $unitBooking[ 'LoanProposalNo' ]; ?></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6 col-md-6 padlr0">
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Bank
+                                                                            Name</label>
+
+                                                                        <div data-bsfshare="BankName"  class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                            <p><?php echo $unitBooking[ 'BankName' ]; ?></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6 col-md-6 padlr0">
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <label class="col-lg-5 padlr0 col-md-5 col-sm-5 txt_left control-label">Loan
+                                                                            Amount</label>
+
+                                                                        <div data-bsfshare="LoanAmount" class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                                            <p>Rs. <?php echo $this->commonHelper()->sanitizeNumber($unitBooking[ 'LoanAmt' ], 2, true); ?></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ( isset( $arrExtraItemList ) ): ?>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading accordion_head" role="tab" id="headingThree" data-toggle="collapse"
+                                             data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                            <h4 data-bsfhead="Extra Items">Extra Items</h4>
+                                        </div>
+                                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                                            <div class="panel-body">
+                                                <div class="col-lg-12 commargin_ttop_20">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Decription</th>
+                                                                <th>Code</th>
+                                                                <th>Unit Name</th>
+                                                                <th>Working Quantity</th>
+                                                                <th>Rate</th>
+                                                                <th>Amount</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <?php foreach ( $arrExtraItemList as $extraItem ): ?>
+                                                                <tr>
+                                                                    <td><?php echo $extraItem[ 'ItemDescription' ]; ?></td>
+                                                                    <td><?php echo $extraItem[ 'Code' ]; ?></td>
+                                                                    <td><?php echo $extraItem[ 'UnitName' ]; ?></td>
+                                                                    <td><?php echo $this->commonHelper()->sanitizeNumber( $extraItem[ 'Quantity' ], 3 ); ?></td>
+                                                                    <td><?php echo $this->commonHelper()->sanitizeNumber( $extraItem[ 'Rate' ], 2, true ); ?></td>
+                                                                    <td><?php echo $this->commonHelper()->sanitizeNumber( $extraItem[ 'Amount' ], 2, true ); ?></td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading accordion_head" role="tab" id="headingFour" data-toggle="collapse"
+                                     data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    <h4 data-bsfhead="Check List">Check List</h4>
+                                </div>
+                                <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                                    <div class="panel-body">
+                                        <div class="col-lg-12 commargin_ttop_20">
+                                            <?php if ( isset($arrSelectedCheckLists)&& count( $arrSelectedCheckLists )>0 ): ?>
+                                                <div><h5 data-bsfhead="Check List">Finalisation</h5></div>
+                                                <div class="table-responsive m_btm20" style="min-height:200px;">
+                                                    <table id="check-list-table" class="table table-hover act ch1">
+                                                        <thead>
+                                                        <tr>
+                                                            <th width="4%">Status</th>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Executive Name</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php
+                                                        $count=0;
+                                                        if (isset($arrSelectedCheckLists)):
+                                                            foreach ( $arrSelectedCheckLists as $checkList ):
+
+                                                                $count=$count+1;
+                                                                ?>
+                                                                <tr>
+                                                                    <td class="tbl_input_td">
+                                                                        <div class="radio_check">
+                                                                            <p>
+                                                                                <input
+                                                                                    type="checkbox" checked/>
+                                                                                <label for="check_list_" class="ripple"></label>
+                                                                            </p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td><?php echo $checkList[ 'CheckListName' ]; ?>
+                                                                        <input type="hidden"  name="fCheckListId_<?php echo $count;?>" id="fCheckListId_<?php echo $count;?>" value=" <?php echo ( isset( $checkList[ 'CheckListId' ] ) ) ? $checkList[ 'CheckListId' ] : ''; ?>" />
+                                                                        <input type="hidden"  name="fBookingId" id="fBookingId" value=" <?php  echo $checkList[ 'BookingId' ]; ?>" />
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style="position: relative; width:250px;">
+                                                                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                                            <?php
+                                                                            if(count($checkList)>0){
+                                                                                /* $submittedDate = NULL;
+                                                                                 if(strtotime($checkList['SubmittedDate']) != FALSE) {
+                                                                                     $submittedDate = date('d-m-Y', strtotime($checkList['SubmittedDate']));
+                                                                                     $checkList[ 'SubmittedDate' ] = $submittedDate;
+                                                                                 }*/
+                                                                                ?>
+                                                                                <input type="text" class="form-control datepicker" name="fCheckDate_<?php echo $count;?>" id="CheckDate_<?php echo $count;?>" value="<?php echo $checkList[ 'Date1' ]; ?>" />
+                                                                            <?php
+                                                                            }
+                                                                            else{
+                                                                                ?>
+                                                                                <input type="text" class="form-control datepicker" name="fCheckDate_<?php echo $count;?>" id="CheckDate_<?php echo $count;?>"  onchange="validateDate(this)"/>
+                                                                            <?php
+                                                                            }?>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style="position: relative; width:250px;">
+                                                                            <?php
+                                                                            if(count($checkList)>0){
+                                                                                ?>
+                                                                                <input type="text" class="form-control ExeName fExe" name="fExecutiveName_<?php echo $count;?>" id="fExecutiveName_<?php echo $count;?>" value=" <?php echo $checkList[ 'ExecutiveName' ]; ?>" />
+                                                                                <input type="hidden" class="form-control" name="fExecutiveId_<?php echo $count;?>" id="fExecutiveId_<?php echo $count;?>" value=" <?php echo $checkList[ 'ExecutiveId' ]; ?>" />
+                                                                            <?php
+                                                                            }
+                                                                            else{
+                                                                                ?>
+                                                                                <input type="text" class="form-control ExeName fExe" name="fExecutiveName_<?php echo $count;?>" id="fExecutiveName_<?php echo $count;?>" value=""/>
+                                                                                <input type="hidden" class="form-control" name="fExecutiveId_<?php echo $count;?>" id="fExecutiveId_<?php echo $count;?>" value=""/>
+                                                                            <?php
+                                                                            }?>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach;
+                                                        endif; ?>
+                                                        </tbody>
+                                                        <input type="hidden" name="frowCount" id="frowCount" value="1">
+                                                    </table>
+                                                </div>
+                                            <?php endif; ?>
+                                            <!--HandingOver -->
+                                            <?php  if (isset($arrSelHandCheck) && count( $arrSelHandCheck )>0){ ?>
+                                                <div><h5 data-bsfhead="Check List">HandingOver</h5></div>
+
+                                                <div class="table-responsive m_btm20" style="min-height:200px;">
+                                                    <table id="check-list-table" class="table table-hover act ch2">
+                                                        <thead>
+                                                        <tr>
+                                                            <th width="4%">Status</th>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Executive Name</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php
+                                                        $count=0;
+                                                        foreach ( $arrSelHandCheck as $checkList ):
+                                                            $count=$count+1;
+                                                            ?>
+                                                            <tr>
+                                                                <td class="tbl_input_td">
+                                                                    <div class="radio_check">
+                                                                        <p>
+                                                                            <input
+                                                                                type="checkbox" checked/>
+                                                                            <label for="check_list_" class="ripple"></label>
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                                <td><?php echo $checkList[ 'CheckListName' ]; ?>
+                                                                    <input type="hidden"  name="hCheckListId_<?php echo $count;?>" id="hCheckListId_<?php echo $count;?>" value=" <?php echo ( isset( $checkList[ 'CheckListId' ] ) ) ? $checkList[ 'CheckListId' ] : ''; ?>" />
+                                                                </td>
+                                                                <td>
+                                                                    <div style="position: relative; width:250px;">
+                                                                        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                                        <?php
+                                                                        if(count($checkList)>0){
+                                                                            /*$submittedDate = NULL;
+                                                                            if(strtotime($checkList['Date']) != FALSE) {
+                                                                                $submittedDate = date('d-m-Y', strtotime($checkList['Date']));
+                                                                                $checkList[ 'Date' ] = $submittedDate;
+                                                                            }*/
+                                                                            ?>
+                                                                            <input type="text" class="form-control datepicker" name="hCheckDate_<?php echo $count;?>" id="CheckDate_<?php echo $count;?>" value="<?php echo $checkList[ 'Date1' ]; ?>" />
+                                                                        <?php
+                                                                        }
+                                                                        else{
+                                                                            ?>
+                                                                            <input type="text" class="form-control datepicker" name="hCheckDate_<?php echo $count;?>" id="CheckDate_<?php echo $count;?>"  onchange="validateDate(this)"/>
+                                                                        <?php
+                                                                        }?>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div style="position: relative; width:250px;">
+                                                                        <?php
+                                                                        if(count($checkList)>0){
+                                                                            ?>
+                                                                            <input type="text" class="form-control ExeName hExe" name="hExecutiveName_<?php echo $count;?>" id="ExecutiveName_<?php echo $count;?>" value="<?php echo $checkList[ 'ExecutiveName' ]; ?>" />
+                                                                            <input type="hidden" class="form-control" name="hExecutiveId_<?php echo $count;?>" id="hExecutiveId_<?php echo $count;?>" value=" <?php echo $checkList[ 'ExecutiveId' ]; ?>" />
+                                                                        <?php
+                                                                        }
+                                                                        else{
+                                                                            ?>
+                                                                            <input type="text" class="form-control ExeName hExe" name="hExecutiveName_<?php echo $count;?>" id="ExecutiveName_<?php echo $count;?>" value=""/>
+                                                                            <input type="hidden" class="form-control " name="hExecutiveId_<?php echo $count;?>" id="hExecutiveId_<?php echo $count;?>" value="" />
+
+                                                                        <?php
+                                                                        }?>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                        </tbody>
+                                                        <input type="hidden" name="hrowCount" id="hrowCount" value="1">
+                                                    </table>
+                                                </div>
+                                            <?php } ?>
+                                            <div class="col-lg-12 savebtn_area padlr0 marg0 clear">
+                                                <ul>
+                                                    <li class="save_btn float_r">
+                                                        <a href="javascript:void(0);" id="sub-check" class="ripple carousel-next-btn">Save</a>
+
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default">
+                                <div class="panel-heading accordion_head" role="tab" id="headingFour" data-toggle="collapse"
+                                     data-parent="#accordion" href="#collapseDocuments" aria-expanded="false" aria-controls="collapseFour">
+                                    <h4 data-bsfhead="Documents">Documents</h4>
+                                </div>
+                                <div id="collapseDocuments" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                                    <div class="panel-body">
+                                        <div class="col-lg-12 commargin_ttop_20">
+                                            <div class="table-responsive m_btm20" style="min-height:200px;">
+
+                                                <table id="documents-table" class="table table-hover">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Description</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                                <button type="submit" class="btn btn-primary">Save</button>
+                                                <input type="hidden" name="documentrowid" id="documentrowid"/>
+                                                <input type="hidden" name="documentdeleteids" id="documentdeleteids" value="0"/>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if ( $unitInfo[ 'Status' ] == 'S' ): ?>
+                                <div id="heading_6" class="panel panel-default">
+                                    <div class="panel-heading accordion_head" role="tab" id="heading6" data-toggle="collapse"
+                                         data-parent="#accordion" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                        <h4 data-bsfhead="PaymentSchedule">Payment Schedule</h4>
+                                    </div>
+                                    <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading6">
+                                        <div class="panel-body">
+                                            <?php if ( isset( $arrPaymentScheduleDetails ) ): ?>
+                                                <div id="payment-schedule-wrapper" class="table-responsive m_btm20" style="min-height:200px;">
+                                                    <a class="btn-floating" title="TermSheet" href="<?php echo $this->basePath(); ?>/crm/project/payment-schedule-print/<?php echo (isset($UnitId)) ? $UnitId :''; ?>" id="pdfExport" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Cost">
+                                                        <i class="fa fa-download"></i>
+                                                    </a>
+                                                    <table class="table payment-schedule"
+                                                           data-id="<?php echo $unitBooking[ 'PaymentScheduleId' ]; ?>">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Round Off</th>
+                                                            <th>Schedule %</th>
+                                                            <th>Schedule Amount</th>
+                                                            <th>Tax</th>
+                                                            <th>Net Amount</th>
+                                                            <th></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php $i = 0;
+                                                        $gamtTot =0;
+                                                        $qualamtTot =0;
+                                                        $netamtTot =0;
+                                                        $percnt =0;
+                                                        foreach ( $arrPaymentScheduleDetails as $paymentSchedule ):
+                                                            $isReceiptsFound = isset( $paymentSchedule[ 'arrReceiptTypes' ] ) ? TRUE : FALSE;
+                                                            $gamtTot += (double)$paymentSchedule['Amount'];
+                                                            $qualamtTot += (double)$paymentSchedule['QualAmount'];
+                                                            $netamtTot += (double)$paymentSchedule['NetAmount'];
+                                                            $percnt += (double)$paymentSchedule['Percentage'];
+                                                            ?>
+                                                            <tr class="mainTr">
+                                                                <td><?php if( $paymentSchedule['StageType']=='A' &&  $paymentSchedule['StageName']==''){ echo 'Booking Advance'; } else { echo $paymentSchedule[ 'StageName' ]; } ?></td>
+                                                                <td><?php if(date( 'd-m-Y', strtotime( $paymentSchedule[ 'SchDate' ] ) )=='01-01-1970'){
+                                                                        echo '-';
+                                                                    } else{
+                                                                        echo date( 'd-m-Y', strtotime( $paymentSchedule[ 'SchDate' ] ) );
+                                                                    } ?></td>
+                                                                <td><?php echo nonZeroNumber( $paymentSchedule[ 'RoundOff' ] ); ?></td>
+                                                                <?php if($paymentSchedule[ 'Percentage' ]=='0' || $paymentSchedule[ 'Percentage' ]== ''){ ?>
+                                                                    <td><?php echo '-';?></td> <?php } else { ?>
+                                                                    <td><?php echo nonZeroNumber( $paymentSchedule[ 'Percentage' ]);?>%</td><?php } ?>
+                                                                <td><input type="text" class="tbl_input txt_right"
+                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber($paymentSchedule[ 'Amount' ],2,true); ?>"
+                                                                           disabled="disabled" /></td>
+                                                                <td><input type="text" class="tbl_input sch-tax txt_right"
+                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber($paymentSchedule[ 'QualAmount' ],2,true); ?>"
+                                                                           disabled="disabled" /></td>
+                                                                <td><input type="text" class="tbl_input sch-net-amt txt_right"
+                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber($paymentSchedule[ 'NetAmount' ],2,true); ?>"
+                                                                           disabled="disabled" /></td>
+                                                                <td>
+                                                                    <?php if ( $isReceiptsFound ): ?>
+                                                                        <ul class="action_btns">
+                                                                            <li><a href="#" class="subTr"><i
+                                                                                        class="fa fa-chevron-circle-down"
+                                                                                        data-toggle="tooltip" data-placement="top"
+                                                                                        data-original-title="Expand"></i></a></li>
+                                                                        </ul>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                            </tr>
+                                                            <?php if ( $isReceiptsFound ): ?>
+                                                            <tr style="display: none;" class="subTr">
+                                                                <td colspan="11" style="padding:0px !important; ">
+                                                                    <div class="subDiv" style="display: none;">
+                                                                        <div class="col-lg-12 col-lg-offset-0 rdbt"
+                                                                             style="margin-top:5px;"></div>
+                                                                        <div class="col-lg-12">
+                                                                            <div class="table-responsive topsp">
+                                                                                <table class="table receipt-type-table"
+                                                                                       style="margin-bottom:0px;">
+                                                                                    <thead>
+                                                                                    <tr>
+                                                                                        <th>Receipt Type</th>
+                                                                                        <th>Amount</th>
+                                                                                        <th>Tax</th>
+                                                                                        <th>Net Amount</th>
+                                                                                        <th></th>
+                                                                                    </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                    <?php $j = 0;
+                                                                                    $recAmtTot = 0;
+                                                                                    $recTaxTot = 0;
+                                                                                    foreach ( $paymentSchedule[ 'arrReceiptTypes' ] as $receipt ):
+                                                                                        $recAmtTot += $receipt[ 'Amount' ];
+                                                                                        $recTaxTot += $receipt[ 'QualAmount' ];
+                                                                                        $isHavingQualifier = isset( $receipt[ 'qualHtmlTag' ] ) ? TRUE : FALSE;
+
+                                                                                        if ((double)$receipt['Amount'] !=0) {
+                                                                                            ?>
+                                                                                            <tr>
+                                                                                                <td><?php echo $receipt[ 'ReceiptName' ]; ?></td>
+                                                                                                <td>
+                                                                                                    <input type="text"
+                                                                                                           id="BillAbs_<?php echo $i; ?>_CurAmt_<?php echo $j; ?>"
+                                                                                                           class="sch-amt tbl_input txt_right"
+                                                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber( $receipt[ 'Amount' ],2,true); ?>"
+                                                                                                           disabled="disabled" />
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input type="text"
+                                                                                                           class="sch-tax tbl_input txt_right"
+                                                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber( $receipt[ 'QualAmount' ],2,true); ?>"
+                                                                                                           disabled="disabled" />
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input type="text"
+                                                                                                           class="sch-net-amt tbl_input txt_right"
+                                                                                                           value="<?php echo $this->commonHelper()->sanitizeNumber( $receipt[ 'NetAmount' ],2,true); ?>"
+                                                                                                           disabled="disabled" />
+                                                                                                </td>
+                                                                                                <td width="3%" align="center"
+                                                                                                    class="action_btns_td">
+                                                                                                    <?php if ( $isHavingQualifier ): ?>
+                                                                                                        <ul class="action_btns">
+                                                                                                            <li><a href="#"
+                                                                                                                   class="rqualmainTr"><i
+                                                                                                                        class="fa fa-chevron-circle-down"
+                                                                                                                        data-toggle="tooltip"
+                                                                                                                        data-placement="top"
+                                                                                                                        data-original-title="Expand"></i></a>
+                                                                                                            </li>
+                                                                                                        </ul>
+                                                                                                    <?php endif; ?>
+                                                                                                    <input type="hidden" class="qualRefId"
+                                                                                                           id="BillAbs_<?php echo $i; ?>_QualRefId_<?php echo $j; ?>"
+                                                                                                           disabled="disabled">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <?php if ( $isHavingQualifier ): ?>
+                                                                                                <tr class="subTr qualmainTr"
+                                                                                                    style="display:none;">
+                                                                                                    <td colspan="5">
+                                                                                                        <div
+                                                                                                            class="subDiv"><?php echo $receipt[ 'qualHtmlTag' ]; ?></div>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            <?php endif; ?>
+                                                                                            <?php $j++; }
+                                                                                    endforeach;  ?>
+                                                                                    <tr>
+                                                                                        <td class="text-right rate_pri">Total</td>
+                                                                                        <td><input type="text"
+                                                                                                   class="rec-tot-amt tbl_input txt_right"
+                                                                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($recAmtTot,2,true); ?>" /></td>
+                                                                                        <td><input type="text"
+                                                                                                   class="rec-tot-amt tbl_input txt_right"
+                                                                                                   value="<?php echo $this->commonHelper()->sanitizeNumber($recTaxTot,2,true); ?>" /></td>
+                                                                                        <td><input type="text"
+                                                                                                   class="rec-tot-amt tbl_input txt_right"
+                                                                                                   value="<?php echo($this->commonHelper()->sanitizeNumber($recAmtTot + $recTaxTot,2,true)); ?>" />
+                                                                                        </td>
+                                                                                        <td></td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
+                                                            <?php $i++;
+                                                        endforeach; ?>
+                                                        <tr>
+                                                            <td class="text-right rate_pri">Total</td>
+                                                            <td>&nbsp;</td>
+                                                            <td>&nbsp;</td>
+
+                                                            <td><?php echo $percnt; ?>%</td>
+                                                            <td><input type="text"
+                                                                       class="rec-tot-amt tbl_input txt_right"
+                                                                       value="<?php echo $this->commonHelper()->sanitizeNumber($gamtTot ,2,true); ?>" /></td>
+                                                            <td><input type="text"
+                                                                       class="rec-tot-amt tbl_input txt_right"
+                                                                       value="<?php echo $this->commonHelper()->sanitizeNumber($qualamtTot,2,true); ?>" /></td>
+                                                            <td><input type="text"
+                                                                       class="rec-tot-amt tbl_input txt_right"
+                                                                       value="<?php echo($this->commonHelper()->sanitizeNumber($netamtTot,2,true)); ?>" />
+                                                            </td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php if( isset( $arrBuyerStmt1 ) || isset( $amountadvance1 )|| isset( $receiptAgainst1 )): ?>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading accordion_head" role="tab" id="headingTwelve" data-toggle="collapse"
+                                         data-parent="#accordion" href="#collapseTwelve" aria-expanded="false" aria-controls="collapseTwelve">
+                                        <h4 data-bsfhead="CostSheet">Bill Wise Receivable Statement </h4>
+                                    </div>
+                                    <div id="collapseTwelve" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwelve">
+                                        <div class="panel-body">
+                                            <div class="col-lg-12 commargin_ttop_20">
+                                                <div class="">
+                                                    <ul>
+                                                        <li>
+                                                            <a class="btn-floating" href="<?php echo $this->basePath(); ?>/crm/project/statement-account-print/<?php echo (isset($UnitId)) ? $UnitId :''; ?>" id="statement" download data-toggle="tooltip" data-placement="bottom" data-original-title="Statement Of Account">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                            <div class="table-responsive">
+                                                <a class="btn-floating hide-input-file" id="printpdf" href="<?php echo $this->basePath();?>/crm/project/buyerreceivableabstract/<?php echo (isset($UnitId)) ? $UnitId :''; ?>" data-toggle="tooltip" data-placement="top" data-original-title="Buyer Receivable Abstract Report">
+                                                    <i class="fa fa-print"></i>
+                                                </a>
+
+                                                <table class="table table-hover tbltop_bdr0" id="buyertable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Ref Date</th>
+                                                        <th>Ref No</th>
+                                                        <th>Description</th>
+                                                        <th>Bill Amount</th>
+                                                        <th>Tax</th>
+                                                        <th>Bill Net Amount</th>
+                                                        <th>Paid Amount</th>
+                                                        <th>Payable</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <?php
+                                                    if(isset($amountadvance1['Amount'])){
+                                                        $buyeramt=$amountadvance1['Amount'] ;
+                                                    }
+                                                    else{
+                                                        $buyeramt=$unitadvance1['AdvAmount'] ;}
+                                                    ?>
+
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td>Booking Advance</td>
+                                                        <td><input type="text" name="amountadv" id="amountadv" class="rec-tot-amt tbl_input txt_right bill-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($buyeramt, 2, true ); ?>" readonly /></td>
+                                                        <td><input type="text"  name ="taxadv" id="taxadv" class="rec-tot-amt tbl_input txt_right bill-tax" value="0" readonly /></td>
+                                                        <td><input type="text"  name ="bookingadv" id="bookingadv" class="rec-tot-amt tbl_input txt_right net-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($buyeramt, 2, true ); ?>" readonly /></td>
+                                                        <td><input type="text"  name ="bookingPaid" id="bookingPaid" class="rec-tot-amt tbl_input txt_right paid-amt" value="<?php echo $this->commonHelper()->sanitizeNumber( isset($receiptAgainst1['Amount']) ? $receiptAgainst1['Amount']:'0', 2, true );?>" readonly /></td>
+                                                        <td><input type="text" name="bookingPay" id="bookingPay" class="rec-tot-amt tbl_input txt_right payable-amt" value="<?php if($buyeramt >= $receiptAgainst1['Amount']){ echo $this->commonHelper()->sanitizeNumber( $buyeramt - $receiptAgainst1[ 'Amount' ], 2, true );}
+                                                            else { echo  0 ; }
+                                                            ?>" readonly /></td>
+                                                    </tr>
+                                                    <?php if($extraamt1['BillAmount'] != 0 || 0.00 ||''){?>
+                                                        <tr>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td>Extra Bill</td>
+                                                            <td><input type="text" name="examountadv" id="examountadv" class="rec-tot-amt tbl_input txt_right bill-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($extraamt1['BillAmount'], 2, true ); ?>" readonly /></td>
+                                                            <td><input type="text"  name ="extaxadv" id="extaxadv" class="rec-tot-amt tbl_input txt_right bill-tax" value="<?php echo $this->commonHelper()->sanitizeNumber($extraamt1['QualAmount'], 2, true ); ?>" readonly /></td>
+                                                            <td><input type="text"  name ="exbookingadv" id="exbookingadv" class="rec-tot-amt tbl_input txt_right net-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($extraamt1['NetAmount'], 2, true ); ?>" readonly /></td>
+                                                            <td><input type="text"  name ="exbookingPaid" id="exbookingPaid" class="rec-tot-amt tbl_input txt_right paid-amt" value="<?php echo $this->commonHelper()->sanitizeNumber( isset($extraamt1['PaidAmount']) ? $extraamt1['PaidAmount']:'0', 2, true );?>" readonly /></td>
+                                                            <td><input type="text" name="exbookingPay" id="exbookingPay" class="rec-tot-amt tbl_input txt_right payable-amt" value="<?php if($extraamt['NetAmount'] >= $extraamt1['PaidAmount']){ echo $this->commonHelper()->sanitizeNumber($extraamt1['NetAmount'] - $extraamt1['PaidAmount'], 2, true );}
+                                                                else { echo  0 ; }
+                                                                ?>" readonly /></td>
+                                                        </tr>
+                                                    <?php  }?>
+
+
+                                                    <?php  if(isset($arrBuyerStmt1)){
+                                                        foreach ( $arrBuyerStmt1 as $buyerStmt ) {
+                                                            ?>
+                                                            <tr>
+                                                                <td><?php echo $buyerStmt[ 'BillDate' ]; ?></td>
+                                                                <td><?php echo $buyerStmt[ 'PBNo' ]; ?></td>
+                                                                <td><?php echo $buyerStmt[ 'StageName' ]; ?></td>
+                                                                <td><input type="text" id="amount"  class="rec-tot-amt tbl_input txt_right bill-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($buyerStmt['Amount'], 2, true ); ?>" readonly /></td>
+                                                                <td><input type="text"  class="rec-tot-amt tbl_input txt_right bill-tax" name="taxbill" id="taxbill" value="<?php echo $this->commonHelper()->sanitizeNumber($buyerStmt['QualAmount'], 2, true ); ?>" readonly /></td>
+                                                                <td><input type="text" id="billamt" class="rec-tot-amt tbl_input txt_right net-amt"  id="tax" value="<?php echo $this->commonHelper()->sanitizeNumber($buyerStmt['BillAmount'], 2, true ); ?>" readonly /></td>
+                                                                <td><input type="text"  class="rec-tot-amt tbl_input txt_right paid-amt"  id="paidamt" value="<?php echo $this->commonHelper()->sanitizeNumber($buyerStmt['PaidAmount'], 2, true ); ?>" readonly /></td>
+                                                                <td><input type="text" id="payableamt" class="rec-tot-amt tbl_input txt_right payable-amt" value="<?php echo $this->commonHelper()->sanitizeNumber($buyerStmt['Balance'], 2, true ); ?>" readonly /></td>
+
+                                                            </tr>
+                                                        <?php } }?>
+
+                                                    <tr  id="excessamttr">
+                                                        <td class="text-right rate_pri">Excess Amount</td>
+                                                        <?php if(isset($arrexcess1)) { ?>
+                                                            <td ><input type="text" name="receexcess" id="receiptExcess" class="rec-tot-amt tbl_input txt_right" value="<?php echo  $this->commonHelper()->sanitizeNumber($arrexcess1, 2, true ); ?>" /> </td>
+                                                        <?php } else { ?>
+                                                            <td id="excessamtv"><input type="text" name="excess" id="excess" class="rec-tot-amt tbl_input txt_right" value="" disabled style="width:100%" /></td>
+                                                        <?php } ?>
+                                                        <td class="text-right rate_pri">Total</td>
+                                                        <td><input type="text" name="amounttot" id="amounttot" class="rec-tot-amt tbl_input txt_right" value="" disabled /></td>
+                                                        <td><input type="text" name="taxtot" id="taxtot" class="rec-tot-amt tbl_input txt_right" value="" disabled /></td>
+                                                        <td><input type="text" name="paid" id="paid" class="rec-tot-amt tbl_input txt_right" value="" disabled /></td>
+                                                        <td><input type="text" name="paidamtval" id="paidamtval" class="rec-tot-amt tbl_input txt_right" value="" disabled /></td>
+                                                        <td><input type="text" name="payable" id="payable" class="rec-tot-amt tbl_input txt_right" value="" disabled /></td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+
+
+
+                                <?php if( isset( $extraamt ) || isset( $stageList )): ?>
+                                    <div id="heading_7" class="panel panel-default">
+                                        <div class="panel-heading accordion_head" role="tab" id="heading7" data-toggle="collapse"
+                                             data-parent="#accordion" href="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">
+                                            <h4 data-bsfhead="BuyerStatement">Buyer Statement</h4>
+
+                                        </div>
+                                        <div id="collapseSeven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading7">
+                                            <div class="panel-body">
+                                                <!--                                            <div class="">-->
+                                                <!--                                                <ul>-->
+                                                <!--                                                    <li>-->
+                                                <!--                                                        <a href="--><?php //echo $this->basePath(); ?><!--/crm/bill/receipt/add/--><?php //echo $UnitId;?><!--">receiptentry</a>-->
+                                                <!--                                                       -->
+                                                <!--                                                    </li>-->
+                                                <!--                                                </ul>-->
+                                                <!--                                            </div>-->
+                                                <div id="buyer-statement" class="table-responsive">
+                                                    <ul  class="collpse-btn">
+													   <li>
+														   <span><a style="color:#000;" href="<?php echo $this->basePath(); ?>/crm/bill/receipt/save/<?php echo $UnitId;?>">Receiptentry</a></span>
+													   </li>
+													   <li>
+														   <span><a style="color:#000;" href="<?php echo $this->basePath(); ?>/crm/project/stagecompletion/<?php echo $unitInfo['ProjectId'];?>/<?php echo $unitInfo['UnitId'];?>">Stagecompletion</a></span>
+													   </li>
+												   </ul>
+                                                    <a class="btn-floating" href="<?php echo $this->basePath(); ?>/crm/project/statement-account-print/<?php echo (isset($UnitId)) ? $UnitId :''; ?>" id="statement" download data-toggle="tooltip" data-placement="bottom" data-original-title="Statement Of Account">
+                                                        <i class="fa fa-download"></i>
+                                                    </a>
+                                                    <a class="btn-floating hide-input-file" id="printpdf" href="<?php echo $this->basePath();?>/crm/project/buyerreceivableabstract/<?php echo (isset($UnitId)) ? $UnitId :''; ?>" data-toggle="tooltip" data-placement="top" data-original-title="Buyer Receivable Abstract Report">
+                                                        <i class="fa fa-print"></i>
+                                                    </a>
+
+                                                    <table class="table tbltop_bdr0">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <th style="text-align:right;">Bill Amount</th>
+                                                            <th style="text-align:right;">Tax</th>
+                                                            <th style="text-align:right;">Bill Net Amount</th>
+                                                            <th style="text-align:right;">Paid Amount</th>
+                                                            <th style="text-align:right;">Payable</th>
+                                                            <th>&nbsp;</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php $totBillVal=0;$totQualVal=0;$totStageVal=0; $totAllPaid=0; $totAllDue=0; if(isset($extraamt)) { $totBillVal=$extraamt['BillAmount'];$totQualVal=$extraamt['QualAmount'];$totStageVal=$extraamt['NetAmount']; $totAllPaid=$extraamt['PaidAmount']; $totAllDue=floatval($extraamt['NetAmount'])-floatval($extraamt['PaidAmount']);?>
+                                                            <tr class="mainTr">
+                                                                <td><?php echo "Extra Bill"; ?></td>
+                                                                <td style="text-align: right;" ><?php if($extraamt['BillAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($extraamt['BillAmount'], 2, true); } else { echo 0;}?></td>
+                                                                <td style="text-align: right;" ><?php if($extraamt['QualAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($extraamt['QualAmount'], 2, true); } else { echo 0;}?></td>
+                                                                <td style="text-align: right;" ><?php if($extraamt['NetAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($extraamt['NetAmount'], 2, true); } else { echo $netAmt = 0;}?></td>
+                                                                <td style="text-align: right;" ><?php if($extraamt['PaidAmount']!=0) { echo $PAmt = $this->commonHelper()->sanitizeNumber($extraamt['PaidAmount'], 2, true); } else { echo $PAmt = 0;} ?></td>
+                                                                <td style="text-align: right;" ><?php $totBal = floatval($extraamt['NetAmount'])-floatval($extraamt['PaidAmount']); if($totBal!=0) { echo $this->commonHelper()->sanitizeNumber($totBal, 2, true);} else { echo 0; }?></td>
+                                                                <td> <ul class="action_btns float_r">
+                                                                        <li><a href="#" class="subTr"><i
+                                                                                    class="fa fa-chevron-circle-down"
+                                                                                    data-toggle="tooltip" data-placement="top"
+                                                                                    data-original-title="Expand"></i></a></li>
+                                                                    </ul></td>
+                                                            </tr>
+
+                                                        <tr style="display: none;" class="subTr">
+                                                            <td colspan="12" style="padding:0px !important;">
+                                                                <div class="subDiv" style="display: none;">
+                                                                    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                                    <div class="col-lg-12">
+                                                                        <div class="table-responsive topsp">
+                                                                            <table class="table" style="margin-bottom:0px;">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>&nbsp;</th>
+                                                                                    <th>&nbsp;</th>
+                                                                                    <th>Receipt date</th>
+                                                                                    <th>Transaction Type</th>
+                                                                                    <th>Transaction No</th>
+                                                                                    <th>Paid Gross</th>
+                                                                                    <th>Paid Tax</th>
+                                                                                    <th>Value</th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <?php } if(isset($extraArr)) {
+                                                                                    $totalval = 0;
+                                                                                    foreach ($extraArr as $eArr) {
+                                                                                        foreach ($eArr['Details'] as $eA) { $totalval+=floatval($eA['NetAmount']);?>
+                                                                                            <tr>
+                                                                                                <td>&nbsp;</td>
+                                                                                                <td>&nbsp;</td>
+                                                                                                <td><?php echo date('d-m-Y', strtotime($eA['ReceiptDate'])); ?></td>
+                                                                                                <td><?php echo $eA['ReceiptMode']; ?></td>
+                                                                                                <td><?php echo $eA['TransNo']; ?></td>
+                                                                                                <td><?php if ($eA['Amount'] != 0) {
+                                                                                                        echo $this->commonHelper()->sanitizeNumber($eA['Amount'], 2, true);
+                                                                                                    } else {
+                                                                                                        echo 0;
+                                                                                                    } ?></td>
+                                                                                                <td><?php if ($eA['QualAmount'] != 0) {
+                                                                                                        echo $this->commonHelper()->sanitizeNumber($eA['QualAmount'], 2, true);
+                                                                                                    } else {
+                                                                                                        echo 0;
+                                                                                                    } ?></td>
+                                                                                                <td><?php if ($eA['NetAmount'] != 0) {
+                                                                                                        echo $this->commonHelper()->sanitizeNumber($eA['NetAmount'], 2, true);
+                                                                                                    } else {
+                                                                                                        echo 0;
+                                                                                                    } ?></td>
+                                                                                            </tr>
+                                                                                        <?php }
+
+                                                                                    }
+                                                                                } ?>
+                                                                                <tr>
+                                                                                    <td colspan="6">&nbsp;</td>
+                                                                                    <td class="dif">Total</td>
+                                                                                    <td class="dif"><?php if($totalval!=0) { echo $this->commonHelper()->sanitizeNumber($totalval,2,true); } else { echo 0; } ?></td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+
+
+                                                        <?php if(isset($stageList)) {  $i=1;
+                                                            foreach($stageList as $stage) {
+                                                                $totStageVal += floatval($stage['Type']['DueAmount']);
+                                                                $totBillVal += floatval($stage['Type']['GrossAmount']);
+                                                                $totQualVal += floatval($stage['Type']['QualAmount']);
+                                                                $totAllPaid += floatval($stage['TotPaid']['Amt']);
+                                                                $totAllDue += floatval($stage['Type']['DueAmount'])-floatval($stage['TotPaid']['Amt']);
+                                                                ?>
+                                                                <tr class="mainTr">
+                                                                    <td><?php echo $stage['StageName']; ?></td>
+                                                                    <td style="text-align: right;" ><?php if($stage['Type']['GrossAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($stage['Type']['GrossAmount'], 2, true); } else { echo 0;}?></td>
+                                                                    <td style="text-align: right;" ><?php if($stage['Type']['QualAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($stage['Type']['QualAmount'], 2, true); } else { echo 0;}?></td>
+                                                                    <td style="text-align: right;" ><?php if($stage['Type']['DueAmount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($stage['Type']['DueAmount'], 2, true); } else { echo $netAmt = 0;}?></td>
+                                                                    <td style="text-align: right;" ><?php if($stage['TotPaid']['Amt']!=0) { echo $PAmt = $this->commonHelper()->sanitizeNumber($stage['TotPaid']['Amt'], 2, true); } else { echo $PAmt = 0;} ?></td>
+                                                                    <td style="text-align: right;" ><?php $totBal = floatval($stage['Type']['DueAmount'])-floatval($stage['TotPaid']['Amt']); if($totBal!=0) { echo $this->commonHelper()->sanitizeNumber($totBal, 2, true);} else { echo 0; }?></td>
+                                                                    <td ><ul class="action_btns float_r">
+                                                                            <li><a href="#" class="subTr"><i
+                                                                                        class="fa fa-chevron-circle-down"
+                                                                                        data-toggle="tooltip" data-placement="top"
+                                                                                        data-original-title="Expand"></i></a></li>
+                                                                        </ul></td>
+                                                                </tr>
+                                                                <tr style="display: none;" class="subTr">
+                                                                    <td colspan="12" style="padding:0px !important;">
+                                                                        <div class="subDiv" style="display: none;">
+                                                                           <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                                            <div class="col-lg-12">
+                                                                                <div class="table-responsive topsp">
+                                                                                    <table class="table" style="margin-bottom:0px;">
+                                                                                        <thead>
+                                                                                        <tr>
+                                                                                            <th>&nbsp;</th>
+                                                                                            <th>&nbsp;</th>
+                                                                                            <th>Receipt date</th>
+                                                                                            <th>Transaction Type</th>
+                                                                                            <th>Transaction No</th>
+                                                                                            <th>Paid Gross</th>
+                                                                                            <th>Paid Tax</th>
+                                                                                            <th>Value</th>
+                                                                                        </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                        <?php $totalval = 0; foreach($stage['Details'] as $st) { $totalval+=floatval($st['NetAmount']); ?>
+                                                                                            <tr>
+                                                                                                <td>&nbsp;</td>
+                                                                                                <td>&nbsp;</td>
+                                                                                                <td><?php echo date('d-m-Y', strtotime($st['ReceiptDate'])); ?></td>
+                                                                                                <td><?php echo $st['ReceiptMode']; ?></td>
+                                                                                                <td><?php echo $st['TransNo']; ?></td>
+                                                                                                <td><?php if($st['Amount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['Amount'],2,true); } else { echo 0; }?></td>
+                                                                                                <td><?php if($st['QualAmount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['QualAmount'],2,true); } else { echo 0; } ?></td>
+                                                                                                <td><?php if($st['NetAmount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['NetAmount'],2,true); } else { echo 0; } ?></td>
+                                                                                            </tr>
+                                                                                        <?php  } ?>
+                                                                                        <tr>
+                                                                                            <td colspan="6">&nbsp;</td>
+                                                                                            <td class="dif">Total</td>
+                                                                                            <td class="dif"><?php if($totalval!=0) { echo $this->commonHelper()->sanitizeNumber($totalval,2,true); } else { echo 0; } ?></td>
+                                                                                        </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php  $i++; } } else { ?>
+                                                            <tr><td colspan='8' style='color:#e80f0f;text-align:center;padding-top:20px;padding-bottom:20px;'>No Data Found</td></tr>
+                                                        <?php } ?>
+                                                        <?php if(isset($arrlate) || isset($arrrtrans)) {
+                                                            $totBillVal +=$arrrtrans['Amount'];$totQualVal +=0;$totStageVal+=$arrrtrans['Amount']; $totAllPaid+=$arrlate['Amount']; if(floatval($arrlate['Amount'])<=floatval($arrrtrans['Amount'])){$totAllDue +=floatval($arrrtrans['Amount'])-floatval($arrlate['Amount']); } else{ $totAllDue=0;}?>
+                                                            <tr class="mainTr">
+                                                            <td><?php echo "LateInterest"; ?></td>
+                                                            <td style="text-align: right;" ><?php if($arrrtrans['Amount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($arrrtrans['Amount'], 2, true); } else { echo 0;}?></td>
+                                                            <td style="text-align: right;" >0</td>
+                                                            <td style="text-align: right;" ><?php if($arrrtrans['Amount']!=0) { echo $netAmt = $this->commonHelper()->sanitizeNumber($arrrtrans['Amount'], 2, true); } else { echo $netAmt = 0;}?></td>
+                                                            <td style="text-align: right;" ><?php if($arrlate['Amount']!=0) { echo $PAmt = $this->commonHelper()->sanitizeNumber($arrlate['Amount'], 2, true); } else { echo $PAmt = 0;} ?></td>
+                                                            <td style="text-align: right;" ><?php  if(floatval($arrlate['Amount'])<=floatval($arrrtrans['Amount'])){ echo $totBal = floatval($arrrtrans['Amount'])-floatval($arrlate['Amount']); } else { echo 0; }?></td>
+                                                            <td> <ul class="action_btns float_r">
+                                                                    <li><a href="#" class="subTr"><i
+                                                                                class="fa fa-chevron-circle-down"
+                                                                                data-toggle="tooltip" data-placement="top"
+                                                                                data-original-title="Expand"></i></a></li>
+                                                                </ul></td>
+                                                            </tr>
+                                                            <tr style="display: none;" class="subTr">
+                                                            <td colspan="12" style="padding:0px !important;">
+                                                                <div class="subDiv" style="display: none;">
+                                                                    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                                                    <div class="col-lg-12">
+                                                                        <div class="table-responsive topsp">
+                                                                            <table class="table" style="margin-bottom:0px;">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th>&nbsp;</th>
+                                                                                    <th>&nbsp;</th>
+                                                                                    <th>Receipt date</th>
+                                                                                    <th>Transaction Type</th>
+                                                                                    <th>Transaction No</th>
+                                                                                    <th>Paid Gross</th>
+                                                                                    <th>Paid Tax</th>
+                                                                                    <th>Value</th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                <?php $totalval = 0; foreach($arrrlis as $st) { $totalval+=floatval($st['Amount']); ?>
+                                                                                    <tr>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td>&nbsp;</td>
+                                                                                        <td><?php echo date('d-m-Y', strtotime($st['ReceiptDate'])); ?></td>
+                                                                                        <td><?php echo $st['ReceiptMode']; ?></td>
+                                                                                        <td><?php echo $st['TransNo']; ?></td>
+                                                                                        <td><?php if($st['Amount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['Amount'],2,true); } else { echo 0; }?></td>
+                                                                                        <td><?php if($st['QualAmount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['QualAmount'],2,true); } else { echo 0; } ?></td>
+                                                                                        <td><?php if($st['Amount']!=0) { echo $this->commonHelper()->sanitizeNumber($st['Amount'],2,true); } else { echo 0; } ?></td>
+                                                                                    </tr>
+                                                                                <?php  } ?>
+                                                                                <tr>
+                                                                                    <td colspan="6">&nbsp;</td>
+                                                                                    <td class="dif">Total</td>
+                                                                                    <td class="dif"><?php if($totalval!=0) { echo $this->commonHelper()->sanitizeNumber($totalval,2,true); } else { echo 0; } ?></td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            </tr><?php } ?>
+                                                        </tbody>
+                                                        <?php if(isset($stageList)) { ?>
+                                                            <tr>
+                                                                <?php if(isset($arrexcess)) { ?>
+                                                                    <td><span class="rate_pri" style="padding-top:10px;float:left;">Excess Amount</span><input type="text" name="receexcess " id="receiptExcess" class="tbl_input" style="float:right;width:44% !important;" value="<?php echo  $this->commonHelper()->sanitizeNumber($arrexcess, 2, true ); ?>" /></td>
+                                                                <?php } else { ?>
+                                                                    <td><span class="rate_pri" style="padding-top:10px;float:left;">Excess Amount</span><input type="text" name="receexcess " id="receiptExcess" class="tbl_input" style="float:right;width:44% !important;" value="" /></td>
+                                                                <?php } ?>
+                                                                <td style="text-align: right;" class="rate_pri"><?php echo $this->commonHelper()->sanitizeNumber($totBillVal, 2, true); ?></td>
+                                                                <td style="text-align: right;" class="rate_pri"><?php echo $this->commonHelper()->sanitizeNumber($totQualVal, 2, true); ?></td>
+                                                                <td style="text-align: right;" class="rate_pri"><?php echo $this->commonHelper()->sanitizeNumber($totStageVal, 2, true); ?></td>
+                                                                <td style="text-align: right;" class="rate_pri"><?php echo $this->commonHelper()->sanitizeNumber($totAllPaid, 2, true); ?></td>
+                                                                <td style="text-align: right;" class="rate_pri"><?php echo $this->commonHelper()->sanitizeNumber($totAllDue, 2, true); ?></td>
+                                                                <td>&nbsp;</td>
+                                                            </tr>
+                                                        <?php } ?>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if(isset($arrReceipts)):?>
+                                    <?php if ( count( $arrReceipts ) >0): ?>
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading accordion_head" role="tab" id="headingTen" data-toggle="collapse"
+                                                 data-parent="#accordion" href="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
+                                                <h4 data-bsfhead="PaymentInfo">Payment Info</h4>
+                                            </div>
+                                            <div id="collapseTen" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTen">
+                                                <div class="panel-body">
+                                                    <div class="col-lg-12 commargin_ttop_20">
+                                                        <div class="table-responsive">
+
+                                                            <table class="table table-hover tbltop_bdr0">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>Receipt Date</th>
+                                                                    <th>Receipt No</th>
+                                                                    <th>Against</th>
+                                                                    <th>Receipt Mode</th>
+                                                                    <th>Amount</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                <?php $totReceiptAmt=0; foreach ( $arrReceipts as $receipt ): ?>
+                                                                    <tr>
+                                                                        <td><?php echo $receipt[ 'ReceiptDate' ]; ?></td>
+                                                                        <td><?php echo $receipt[ 'ReceiptNo' ]; ?></td>
+                                                                        <td><?php echo $receipt[ 'ReceiptAgainst' ]; ?></td>
+                                                                        <td><?php echo $receipt[ 'ReceiptMode' ]; ?></td>
+                                                                        <td><?php echo $this->commonHelper()->sanitizeNumber( $receipt[ 'Amount' ], 2, true ); ?></td>
+                                                                    </tr>
+
+                                                                    <?php $totReceiptAmt += (double)$receipt[ 'Amount' ]; endforeach; ?>
+                                                                <tr>
+                                                                    <td>&nbsp;</td>
+                                                                    <td>&nbsp;</td>
+                                                                    <td>&nbsp;</td>
+                                                                    <td class="rate_pri">Total</td>
+                                                                    <td><?php echo $this->commonHelper()->sanitizeNumber($totReceiptAmt,2,true); ?></td>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading accordion_head" role="tab" id="headingElevan" data-toggle="collapse"
+                                         data-parent="#accordion" href="#collapseEleven" aria-expanded="false" aria-controls="collapseEleven">
+                                        <h4 data-bsfhead="CostSheet">Discount </h4>
+                                    </div>
+
+                                    <div id="collapseEleven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingEleven">
+                                        <div class="panel-body">
+                                            <div class="col-lg-12 commargin_ttop_20">
+                                                <div class="table-responsive">
+                                                    <div class="flt_rit">
+                                                        <ul>
+                                                            <li style="float:left;">
+                                                                <?php if($planDiscountValid2 == false) { ?><a href="<?php echo $this->basePath(); ?>/crm/lead/post-sale-discount/<?php echo $unitBooking['BookingId']; ?>">Apply Discount</a><?php } ?>
+                                                            </li>
+                                                            <li style="float:left;margin-left:10px;">
+                                                                <a href="<?php echo $this->basePath(); ?>/crm/project/costsheet/<?php echo $UnitId;?>"  title="CostSheet" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Cost" class="edit-btn edit_al"><i class="fa fa-print reg-icon"></i></a>
+                                                                <input type="hidden" name="csrf" id="csrf" value="<?php echo $csrf;?>">
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <table class="table table-hover tbltop_bdr0">
+                                                        <table class="table table-hover tbltop_bdr0">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Charge</th>
+                                                                <th>Cost Before Discount</th>
+                                                                <th>After Plan Discount</th>
+                                                                <th>After Post Sale Discount</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <?php if(isset($costSheet)) { foreach($costSheet as $key => $cost){ ?>
+                                                                <tr>
+                                                                    <td><?php echo $key; ?></td>
+                                                                    <td><?php echo $cost[0]; ?></td>
+                                                                    <td><?php echo $cost[1]; ?></td>
+                                                                    <td><?php echo $cost[2]; ?></td>
+                                                                </tr>
+                                                            <?php } }?>
+                                                            </tbody>
+                                                        </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            <?php endif; ?>
+
+                            <!--                         todo                <div class="panel panel-default">-->
+                            <!--                    <div class="panel-heading accordion_head" role="tab" id="headingFive" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">-->
+                            <!--                        <h4>Documents</h4>-->
+                            <!--                    </div>-->
+                            <!--                    <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">-->
+                            <!--                        <div class="panel-body">-->
+                            <!--                            <h4>Documents</h4>-->
+                            <!--                        </div>-->
+                            <!--                    </div>-->
+                            <!--                </div>-->
+                            <!--                    <div class="panel panel-default">-->
+                            <!--                        <div class="panel-heading accordion_head" role="tab" id="headingTwelve" data-toggle="collapse" data-parent="#accordion" href="#collapseTwelve" aria-expanded="false" aria-controls="collapseTwelve">-->
+                            <!--                            <h4>Check Reversal</h4>-->
+                            <!--                        </div>-->
+                            <!--                        <div id="collapseTwelve" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwelve">-->
+                            <!--                            <div class="panel-body">-->
+                            <!--                                <h4>Check Reversal</h4>-->
+                            <!--                            </div>-->
+                            <!--                        </div>-->
+                            <!--                    </div>-->
+                            <!--                    <div class="panel panel-default">-->
+                            <!--                        <div class="panel-heading accordion_head" role="tab" id="headingThirteen" data-toggle="collapse" data-parent="#accordion" href="#collapseThirteen" aria-expanded="false" aria-controls="collapseThirteen">-->
+                            <!--                            <h4>Referrel Discount</h4>-->
+                            <!--                        </div>-->
+                            <!--                        <div id="collapseThirteen" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThirteen">-->
+                            <!--                            <div class="panel-body">-->
+                            <!--                                <h4>Referrel Discount</h4>-->
+                            <!--                            </div>-->
+                            <!--                        </div>-->
+                            <!--                    </div>-->
+                        </div>
+                    </div>
+                </div>
+            <?php elseif ( isset( $err ) ): ?>
+                <h1 data-bsfhead="Error" class="text-center" style="margin-top: 150px;">Error: <?php echo $err; ?></h1>
+            <?php endif; ?>
+        </div>
+    </div>
+    <script type="text/template" id="dummy-document">
+        <tr>
+            <input type="hidden" name="docTransId__" id="docTransId__" value="0"/>
+            <td width="15%"><input class="parent_text" type="text" name="docType__" id="docType__" maxlength="155" onchange="addNewDocRow(this)" /></td>
+            <td width="15%"><textarea class="parent_texts" name="docDesc__" id="docDesc__"></textarea></td>
+            <td width="5%" class="action_btns_td">
+                <ul class="action_btns">
+                    <li style="float:left;" class="lft-doc">
+                        <a id="docAttachment__" href="#">
+                        <span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach documents" class="btn-file butclr_imp"> <i class="fa fa-paperclip dcm_atch"></i>
+                            <input type="file" name="docFile__" id="docFile__">
+                        </span>
+                        </a>
+                    </li>
+                    <li style="float:left;"> <a href="#" class="deleteDocTr__" onclick="deleteDoc(this, event);" style="display: none;"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a> </li>
+                </ul>
+            </td>
+        </tr>
+    </script>
+
+    <script>
+        $(function () {
+            $('#buyer-statement').on('click', '.mainTr', function (e) {
+                e.preventDefault();
+                if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                    closeMainTr();
+                    $(this).closest("tr").next(".subTr").show();
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                    $(this).find("i").addClass("tform");
+                }
+                else {
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".subTr").slideUp("slow");
+                    $(this).find("i").removeClass("tform");
+                }
+            });
+            function closeMainTr() {
+                var $mainTr = $(".mainTr");
+                $.each($mainTr, function () {
+                    $(this).find('.tform').removeClass('tform');
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".subTr").slideUp("slow");
+                });
+            }
+            $('.datepicker').datepicker({
+                format: "dd-mm-yyyy",
+                startDate: new Date(),
+                todayBtn: true,
+                orientation: "top auto",
+                autoclose: true
+            });
+
+            // doccument attachements
+            var arr_documents = <?php echo (isset($arrDocuments)) ? json_encode($arrDocuments) : '[]';?>;
+            var arr_kickoff_documents = <?php echo (isset($arrKickoffDocuments)) ? json_encode($arrKickoffDocuments) : '[]';?>;
+            var agreementDoc = <?php echo (isset($agreementDoc)) ? json_encode($agreementDoc) : '[]';?>;
+            var $rowid = $('#documentrowid');
+            var template = $('#dummy-document').html();
+            var rowid = 0;
+            var $tbody = $('#documents-table').find('tbody');
+            if(arr_kickoff_documents.length != 0) {
+                $.each(arr_kickoff_documents, function(i, o) {
+                    var count = rowid + 1;
+                    $tbody.append(template.replace(/__/g, '_kf_' + count));
+                    $rowid.val(count);
+                    $('#docTransId_kf_' + count).remove();
+                    $('#docType_kf_' + count).val(o.DocumentType).removeAttr('name').prop('readonly', true);
+                    $('#docDesc_kf_' + count).val(o.DocumentName).removeAttr('name').prop('readonly', true);
+
+                    //set document download
+                    if (o.URL.trim() != '') {
+                        $('#docAttachment_kf_' + count).attr('href', getBaseURL() + o.URL.substring(1)).addClass('pull-left')
+                            .html('<i class="fa fa-file-o file-do" data-toggle="tooltip" data-placement="left" data-original-title="Download Attachment"></i>')
+                            .attr('target', '_blank').attr('download', '');
+                    }
+                    $('.deleteDocTr_kf_' + count).remove();
+                    rowid = count;
+
+                });
+            }
+            if(agreementDoc.length != 0) {
+                $.each(agreementDoc, function(i, o) {
+                    var count = rowid + 1;
+                    $tbody.append(template.replace(/__/g, '_kf_' + count));
+                    $rowid.val(count);
+                    $('#docTransId_kf_' + count).remove();
+                    $('#docType_kf_' + count).val(o.AgreementTypeName).removeAttr('name').prop('readonly', true);
+                    $('#docDesc_kf_' + count).prop('readonly', true);
+
+                    //set document download
+                    if (o.TemplatePath.trim() != '') {
+                        $('#docAttachment_kf_' + count).attr('href', getBaseURL() +'uploads/crm/agreement/'+ o.UnitId+'/'+ (o.TemplatePath)).addClass('pull-left')
+                            .html('<i class="fa fa-file-o file-do" data-toggle="tooltip" data-placement="left" data-original-title="Download Attachment"></i>')
+                            .attr('target', '_blank').attr('download', '');
+                    }
+                    $('.deleteDocTr_kf_' + count).remove();
+                    rowid = count;
+
+                });
+            }
+            if(arr_documents.length != 0) {
+                $.each(arr_documents, function(i, o) {
+                    var count = rowid + 1;
+                    $tbody.append(template.replace(/__/g, '_' + count));
+                    $rowid.val(count);
+                    $('#docTransId_' + count).val(o.DocumentId);
+                    $('#docType_' + count).val(o.Type);
+                    $('#docDesc_' + count).val(o.Description);
+
+                    //set document download
+                    if (o.URL.trim() != '') {
+                        $('#docAttachment_' + count).attr('href', getBaseURL() + o.URL.substring(1)).addClass('pull-left')
+                            .html('<i class="fa fa-file-o file-do" data-toggle="tooltip" data-placement="left" data-original-title="Download Attachment"></i>'
+                            + '<input type="hidden" name="docFile_'+count+'" id="docFile_'+count+'" value="'+ o.URL+'">')
+                            .attr('target', '_blank').attr('download', '')
+                            .after('<i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>');
+                    }
+                    $('.deleteDocTr_' + count).attr('onclick','deleteDoc(this, event, true);').show();
+                    rowid = count;
+                });
+            }
+
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+            $rowid.val(rowid);
+            bindDocAttached();
+
+            $("[data-toggle = 'popover']").popover();
+        });
+
+        function addNewDocRow(x) {
+            var $tr = $(x).closest('tr');
+            if ($tr.next('tr').length != 0)
+                return;
+
+            var $rowid = $('#documentrowid'),
+                rowid = parseInt($rowid.val());
+
+            $('.deleteDocTr_' + rowid).show();
+            var count = rowid + 1,
+                template = $('#dummy-document').html();
+
+            $tr.parent('tbody').append(template.replace(/__1/g, '_' + count));
+
+            bindDocAttached();
+            $rowid.val(count);
+        }
+
+        function removeAttachment($tarEl) {
+
+            if (!confirm('Do you want to Remove')) {
+                return false;
+            }
+
+            var $tarLi = $tarEl.closest('li');
+            var $tarA = $tarLi.find('a');
+            var $tarI = $tarA.find('i.fa-file-o');
+            var $tarIp = $tarLi.find('input[type="hidden"]');
+
+            $tarIp.attr('type', 'file').removeAttr('value');
+            $tarA.attr('href', '#').removeAttr('download').removeAttr('target');
+            $tarI.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+            $tarA.html('<span class="btn-file butclr_imp">' + $tarA.html() + '</span>');
+            bindDocAttached();
+
+            $tarEl.remove();
+        }
+
+        function deleteDoc(x,e, deleteFlag) {
+            e.preventDefault();
+
+            var $tr = $(x).closest('tr'),
+                $tbody = $tr.parent('tbody');
+
+            if($tr.find('.fa-file-o').length > 0) {
+                alert('Document attached. Remove document and then try!');
+                return false;
+            }
+
+            if (!confirm('Do you want to Delete'))
+                return false;
+
+            if(typeof deleteFlag != 'undefined' && deleteFlag) {
+                var key = $(x)[0].className.split('_')[1];
+                var $ids = $('#documentdeleteids');
+                $ids.val($ids.val() + ',' + $('#docTransId_'+key).val());
+            }
+
+            $tr.remove();
+
+            return false;
+        }
+
+        function bindDocAttached() {
+            var docFiles = $('input[id^=docFile_]');
+            docFiles.unbind('change');
+
+            docFiles.on('change', function() {
+                var $this = $(this);
+                var $tarEl = $(this).siblings('i');
+                var $tooltip = $tarEl.parent('span');
+                var $tarA = $tarEl.closest('a');
+                if($(this).val() != '') {
+                    $tarEl.removeClass('fa-paperclip').addClass('fa-file-o file-do');
+                    $tooltip.attr('data-original-title', 'Document Attached');
+
+                    if($tarA.next('i.brkn').length == 0)
+                        $('<i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>').insertAfter($tarA);
+                } else {
+                    $tarA.next('i.brkn').remove();
+                    $tarEl.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+                    $tooltip.attr('data-original-title', 'Click to attach documents');
+                }
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+
+            var $paymentScheduleWrapper = $('#payment-schedule-wrapper');
+            var  $checklistTable = $('.act');
+
+            var $tarPSTable = $paymentScheduleWrapper.find('.payment-schedule');
+            fillRowRefEditMode();
+            calcNetTotal();
+            calcTaxForPaymentSchedule($tarPSTable);
+
+            $paymentScheduleWrapper.find('input').attr('disabled', true);
+
+            bindExpandMainTr();
+            bindExpandMainTrInput();
+
+            // Qaulifier TR
+            bindRQualExpandTr();
+            bindRQualExpandTrInput();
+            bindQualExpandTr();
+            bindQualExpandTrInput();
+
+            //finalisation checklist- executive
+            bindCheckListExecutiveName_autoComplete();
+
+
+
+            function bindCheckListExecutiveName_autoComplete() {
+
+                $checklistTable.find('tr td .ExeName').autocomplete({
+                    lookup:<?php echo (isset($arrExecutives))?json_encode($arrExecutives):'[]'; ?>,
+                    lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+
+                        if ($.trim(queryLowerCase) == '*') {
+                            return suggestion.value;
+                        } else {
+                            var re = new RegExp($.Autocomplete.utils.escapeRegExChars($.trim(queryLowerCase)), 'gi');
+                            return re.test(suggestion.value);
+                        }
+                    }, onSelect: function (suggestion) {
+                        if (suggestion) {
+
+                            var heId=($(this).attr('id')).split('_')[1];
+                            $('#hExecutiveId_'+ heId).val(suggestion.data);
+                            $('#fExecutiveId_'+ heId).val(suggestion.data);
+
+
+
+                            /* if($('.fExe').hasClass('disable')) {
+                             return;
+                             } else {
+                             $(this).parent().find('input').datepicker('show');
+                             }*/
+                            removeError($(this));
+                        }
+                    }, onSearchStart: function (suggestion) {
+                        // console.log(1);
+                        $('#ExecutiveName').val('');
+                    }, onSearchComplete: function (query, suggestions) {
+                        if (!suggestions.length) {
+                            // console.log(2);
+                            $('#ExecutiveName').val('');
+                            showError($(this), 'Executive Name not found!');
+                        } else {
+                            removeError($(this));
+                        }
+                    }
+                });
+            }
+            $('#sub-check').click(function(){
+                var frowCount = $('.ch1 tbody tr').length;
+                var hRowCount = $('.ch2 tbody tr').length;
+                $('#hrowCount').val(hRowCount);
+                $('#frowCount').val(frowCount);
+                $('form').submit();
+            });
+
+
+            function bindExpandMainTr() {
+                $paymentScheduleWrapper.on('click', '.mainTr', function (e) {
+                    e.preventDefault();
+                    if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                        closeMainTr();
+                        $(this).closest("tr").next(".subTr").show();
+                        $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                        $(this).find("i").addClass("tform");
+                    }
+                    else {
+                        $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                        $(this).closest("tr").next(".subTr").slideUp("slow");
+                        $(this).find("i").removeClass("tform");
+                    }
+                });
+            }
+
+            function bindExpandMainTrInput() {
+                $paymentScheduleWrapper.on('focus', '.mainTrInput', function () {
+                    if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                        closeMainTr();
+                        $(this).closest("tr").next(".subTr").show();
+                        $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                    }
+                });
+            }
+
+            function closeMainTr() {
+                var $mainTr = $(".mainTr");
+                $.each($mainTr, function () {
+                    $(this).find('.tform').removeClass('tform');
+                    $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".subTr").slideUp("slow");
+                });
+            }
+
+
+            function bindRQualExpandTr() {
+                $paymentScheduleWrapper.on('click', '.rqualmainTr', function (e) {
+                    e.preventDefault();
+                    if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                        closeRQualTr();
+                        $(this).closest("tr").next(".qualmainTr").show();
+                        $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+                        $(this).find("i").addClass("tform");
+                    }
+                    else {
+                        $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                        $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+                        $(this).find("i").removeClass("tform");
+                    }
+                });
+            }
+
+            function bindRQualExpandTrInput() {
+                $paymentScheduleWrapper.on('focus', '.rqualmainTrInput', function (e) {
+                    if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                        closeRQualTr();
+                        $(this).closest("tr").next(".qualmainTr").show();
+                        $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+                    }
+                });
+            }
+
+            function closeRQualTr() {
+                var $mainTr = $(".rqualmainTr");
+                $.each($mainTr, function () {
+                    $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+                });
+            }
+
+
+            function bindQualExpandTr() {
+                $paymentScheduleWrapper.on('click', '.qualmainExp', function (e) {
+                    e.preventDefault();
+                    if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                        closeQualTr();
+                        $(this).closest("tr").next(".qualsubTr").show();
+                        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+                        $(this).find("i").addClass("tform");
+                    }
+                    else {
+                        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                        $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+                        $(this).find("i").removeClass("tform");
+                    }
+                });
+            }
+
+            function bindQualExpandTrInput() {
+                $paymentScheduleWrapper.on('focus', '.qualmainTrInput', function (e) {
+                    if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                        closeQualTr()
+                        $(this).closest("tr").next(".qualsubTr").show();
+                        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+                    }
+                });
+            }
+
+            function closeQualTr() {
+                var $mainTr = $(".qualmainExp");
+                $.each($mainTr, function () {
+                    $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                    $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+                });
+            }
+
+
+            function calcTaxForPaymentSchedule($tarPaySchTable) {
+
+                $tarPaySchTable.find('> tbody > tr.mainTr').each(function () {
+                    var $tarReceiptTr = $(this),
+                        $recSubTr = $tarReceiptTr.next('.subTr');
+                    if ($recSubTr.length <= 0) {
+                        return true;
+                    }
+
+                    var $tarReceiptTab = $recSubTr.find('.receipt-type-table');
+                    $tarReceiptTab.find('.qualmainTr').each(function () {
+                        var sch_amt = parseFloat($(this).prev('tr').find('.sch-amt').val());
+                        if (isNaN(sch_amt)) {
+                            sch_amt = 0;
+                        }
+
+                        var $tarQualTab = $(this).find(' > td > .subDiv > table');
+                        $tarQualTab.find('> tbody > tr').each(function () {
+                            var $tarBaseIp = $(this).find('>td:eq(4) input.qualmainTrInput');
+                            $tarBaseIp.val(sch_amt);
+                            $(this).find('>td:eq(3) input.qualChange').trigger('change');
+                        });
+
+                    });
+                });
+            }
+
+            function bindTaxCalculation() {
+                $paymentScheduleWrapper.on('change', '.qualChange', function () {
+                    CalculateTax($(this)[0].id);
+                });
+            }
+
+            function CalculateTax(id) {
+
+                //if (bReady==false) return;
+                var key1 = id.split('_')[1],
+                    key2 = id.split('_')[3];
+
+                var sname = $('#QualRowRef_' + key1).val();
+                var dbaseAmt = parseFloatVal($('#' + sname).val());
+
+                CalculateQualifier(dbaseAmt, key1);
+                var dTaxAmt = parseFloatVal(isNullCheck($('#QualTotalAmt_' + key1).val(), 'number'));
+
+                var k1 = sname.split('_')[1],
+                    k2 = sname.split('_')[3];
+
+                $('#BillAbs_' + k1 + '_TaxAmt_' + k2).val(dTaxAmt);
+                $('#BillAbs_' + k1 + '_NetAmt_' + k2).val(dTaxAmt + dbaseAmt);
+
+//    calcTotal();
+            }
+
+            function fillRowRefEditMode() {
+                var $mainTr = $paymentScheduleWrapper.find(".qualmainTr"),
+                    iTotalCount = 0,
+                    ikey = 0;
+                $.each($mainTr, function () {
+                    var $x = $(this),
+                        $y = $x.prev(),
+                        akey1 = 0,
+                        akey2 = 0;
+                    $y.find(".qualRefId").each(function () {
+                        var $z = $(this);
+                        akey1 = parseFloatVal($z[0].id.split('_')[1]);
+                        akey2 = parseFloatVal($z[0].id.split('_')[3]);
+                    });
+                    $x.find(".qualTypeId").each(function () {
+                        var $n = $(this),
+                            key1 = parseFloatVal($n[0].id.split('_')[1]);
+                        if (iTotalCount < key1) {
+                            iTotalCount = key1;
+                        }
+                        if (ikey != key1) {
+                            ikey = key1;
+                            var sname = 'BillAbs_' + akey1 + '_CurAmt_' + akey2;
+                            $('#QualRowRef_' + key1).val(sname);
+                            $('#BillAbs_' + akey1 + '_QualRefId_' + akey2).val(key1);
+                        }
+                    });
+                });
+                $('#QualTotalRowId').val(iTotalCount);
+            }
+
+
+            function CalculateQualifier(baseValue, key1) {
+
+                var rows = $('#QualRowId_' + key1).val();
+                var sformula = "";
+                var sname = $('#QualRowRef_' + key1).val();
+                var dbaseAmt = $('#' + sname).val();
+                var dTotalQualAmt = 0;
+
+                for (i = 1; i <= rows; i++) {
+                    var sRef = $('#Qual_' + key1 + '_Ref_' + i).val().trim();
+                    var sFormula = $('#Qual_' + key1 + '_Exp_' + i).val();
+
+                    var dPer = isNullCheck($('#Qual_' + key1 + '_ExpPer_' + i).val(), 'number');
+                    var sbaseRef = 'R0';
+                    if (parseFloatVal(dPer) == 0) dPer = 100;
+                    sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+
+                    var fvaule = computeEval(sFormula);
+                    $('#Qual_' + key1 + '_ExpValue_' + i).val(numberFormat(fvaule, 'C'));
+
+                    var iQualTypeid = $('#Qual_' + key1 + '_TypeId_' + i).val();
+                    if (iQualTypeid == 1 || iQualTypeid == 2) {
+                        var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(), 'number'));
+                        var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(), 'number'));
+                        var dCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_CessPer_' + i).val(), 'number'));
+                        var dEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_EduCessPer_' + i).val(), 'number'));
+                        var dHEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_HEduCessPer_' + i).val(), 'number'));
+                        var dNetPer = dTaxPer + (dTaxPer * (dCess + dEDCess + dHEDCess)) / 100;
+                        $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+
+                        $('#Qual_' + key1 + '_NetPer_' + i).val(numberFormat(dNetPer, 'C'));
+                        $('#Qual_' + key1 + '_ExpPer_' + i).val(numberFormat(dNetPer, 'C'));
+
+                        var dTaxableAmt = fvaule * (dTaxablePer / 100);
+                        var dTaxAmt = dTaxableAmt * (dTaxPer / 100);
+                        var dCessAmt = dTaxAmt * (dCess / 100);
+                        var dEDAmt = dTaxAmt * (dEDCess / 100);
+                        var dHEDAmt = dTaxAmt * (dHEDCess / 100);
+                        var dNetAmt = dTaxAmt + dCessAmt + dEDAmt + dHEDAmt;
+
+                        $('#Qual_' + key1 + '_TaxableAmt_' + i).val(numberFormat(dTaxableAmt, 'C'));
+                        $('#Qual_' + key1 + '_TaxPerAmt_' + i).val(numberFormat(dTaxAmt, 'C'));
+                        $('#Qual_' + key1 + '_CessAmt_' + i).val(numberFormat(dCessAmt, 'C'));
+                        $('#Qual_' + key1 + '_EduCessAmt_' + i).val(numberFormat(dEDAmt, 'C'));
+                        $('#Qual_' + key1 + '_HEduCessAmt_' + i).val(numberFormat(dHEDAmt, 'C'));
+                        $('#Qual_' + key1 + '_NetAmt_' + i).val(numberFormat(dNetAmt, 'C'));
+
+                        dAmt = dNetAmt;
+                    } else {
+                        var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+                    }
+                    $('#Qual_' + key1 + '_Amount_' + i).val(numberFormat(dAmt, 'C'));
+                    if ($('#Qual_' + key1 + '_YesNo_' + i).is(':checked') == true) dTotalQualAmt = dTotalQualAmt + parseFloatVal(dAmt);
+                    for (j = i; j <= rows; j++) {
+                        var sFormula = $('#Qual_' + key1 + '_Exp_' + i).val();
+                        sFormula = sFormula.replace(new RegExp(sRef, 'g'), dAmt);
+                    }
+                }
+                $('#QualTotalAmt_' + key1).val(numberFormat(dTotalQualAmt, 'C')).trigger('change');
+            }
+
+            bindQualTot_onChange();
+            function bindQualTot_onChange() {
+                $paymentScheduleWrapper.on('change', '[id^="QualTotalAmt_"]', function () {
+                    var $tarReceiptTr = $(this).closest('.qualmainTr').prev('tr');
+
+                    $tarReceiptTr.find('.sch-tax').val($(this).val());
+
+                    calcReceiptTotal($tarReceiptTr.closest('tbody'));
+                });
+            }
+
+            function calcReceiptTotal($tarTbody) {
+                var totAmt = 0,
+                    totTax = 0;
+                $tarTbody.find('tr').each(function () {
+                    var $tarSchAmt = $(this).find('.sch-amt');
+                    if ($tarSchAmt.length > 0) {
+                        var amt = parseFloat($tarSchAmt.val());
+                        if (!isNaN(amt)) {
+                            totAmt += amt;
+                        }
+                        var tax = parseFloat($(this).find('.sch-tax').val());
+                        if (!isNaN(tax)) {
+                            totTax += tax;
+                        }
+
+                        netAmt = amt + tax;
+                        if (!isNaN(netAmt)) {
+                            $(this).find('.sch-net-amt').val(netAmt.toFixed(2));
+                        }
+                    }
+                });
+
+                var $totTr = $tarTbody.find('tr:last-of-type');
+                $totTr.find('.rec-tot-amt').val(totAmt.toFixed(2));
+                $totTr.find('.rec-tot-tax').val(totTax.toFixed(2));
+                var netAmt = totAmt + totTax;
+                $totTr.find('.rec-tot-net').val(netAmt.toFixed(2));
+
+                var $tarReceiptTr = $tarTbody.closest('.subTr').prev('.mainTr');
+                $tarReceiptTr.find('.sch-tax').val(totTax.toFixed(2));
+                $tarReceiptTr.find('.sch-net-amt').val(netAmt.toFixed(2));
+            }
+
+            function computeEval(formula) {
+                with (document.forms) {
+                    with (Math) {
+                        A = eval((formula));
+                    }
+                }
+                return A;
+            }
+
+            function signChange(x) {
+                var $this = $(x);
+                if ($this.hasClass("fa-plus")) {
+                    $this.removeClass('fa-plus clr-gre');
+                    $this.addClass('fa-minus clr-red');
+                    var key1 = $this[0].id.split('_')[1],
+                        key2 = $this[0].id.split('_')[3];
+                    $('#Qual_' + key1 + '_Sign_' + key2).val('-');
+                } else {
+                    $this.removeClass('fa-minus clr-red');
+                    $this.addClass('fa-plus clr-gre');
+                    var key1 = $this[0].id.split('_')[1],
+                        key2 = $this[0].id.split('_')[3];
+                    $('#Qual_' + key1 + '_Sign_' + key2).val('+');
+                }
+            }
+        });
+        function timelineOpen(val){
+            var id = $(val).attr('href').split('_');
+            $('#heading'+id[1]).trigger('click');
+
+        }
+
+        function calcNetTotal() {
+            var totAmt = 0,
+                totAmount = 0,
+                totAdvt = 0,
+                tottax = 0,
+                paidamt = 0,
+                excess= 0,
+                advamount=parseFloatVal($("#bookingadv").val()),
+                exadvamount=parseFloatVal($("#exbookingadv").val()),
+                advpaidamount=parseFloatVal($("#bookingPaid").val()),
+                exadvpaidamount=parseFloatVal($("#exbookingPaid").val()),
+                $extraBillTable = $('#buyertable');
+            $extraBillTable.find('tr').each(function () {
+                var    $tarAmt = $(this).find('.bill-amt'),
+                    $tarTax = $(this).find('.bill-tax'),
+                    $tarNet = $(this).find('.net-amt'),
+                    $tarPaid = $(this).find('.paid-amt'),
+                    $tarpay = $(this).find('.payable-amt');
+                if ($tarAmt.length > 0) {
+                    var amt = parseFloatVal($tarAmt.val());
+                    if (!isNaN(amt)) {
+                        totAdvt += amt;
+                    }}
+                if ($tarTax.length > 0) {
+                    var amt = parseFloatVal($tarTax.val());
+                    if (!isNaN(amt)) {
+                        tottax += amt;
+                    }}
+                if ($tarNet.length > 0) {
+                    var amt = parseFloatVal($tarNet.val());
+                    if (!isNaN(amt)) {
+                        totAmt += amt;
+                    }}
+                if ($tarPaid.length > 0) {
+                    var amt = parseFloatVal($tarPaid.val());
+                    if (!isNaN(amt)) {
+                        paidamt += amt;
+                    }}
+                if ($tarpay.length > 0) {
+                    var amt = parseFloatVal($tarpay.val());
+                    if (!isNaN(amt)) {
+                        totAmount += amt;
+                    }}
+            });
+            $("#amounttot").val(sanitizeNumber(totAdvt, 2, true));
+            $("#paid").val(sanitizeNumber(totAmt, 2, true));
+            $("#paidamtval").val(sanitizeNumber(paidamt, 2, true));
+            $("#payable").val(sanitizeNumber(totAmount, 2, true));
+            $("#taxtot").val(sanitizeNumber(tottax, 2, true));
+//        var rexcess=parseFloatVal($("#receiptExcess").val());
+//        var pay=parseFloatVal($("#payable").val());
+//        if(rexcess!=0||rexcess!=''&& pay!=0||pay!=''){
+//        if(pay>rexcess){
+//          var excess= pay-rexcess;
+//            $("#receiptExcess").val(sanitizeNumber(excess, 2, true));
+//        }
+//            else{
+//            var excess=rexcess-pay;
+//            $("#receiptExcess").val(sanitizeNumber(excess, 2, true));
+//        }
+//        }
+
+            if(advpaidamount > advamount){
+
+                excess=advpaidamount-advamount;
+            }
+
+            $("#excess").val(sanitizeNumber(excess, 2, true));
+        }
+
+        function costSheet(val){
+
+            var arrUnitDetails = <?php echo json_encode($unitInfo);?>;
+            var csrf = $('#csrf').val();
+            arrUnitDetails = JSON.stringify(arrUnitDetails);
+            $.ajax({
+                url:getBaseURL()+"crm/project/unit-fulldetails",
+                type:"post",
+                data:{'arrUnitDetails':arrUnitDetails,'csrf':csrf},
+                success:function(data,textStatus,jqXHR){
+                    $('#excelExport').attr('href','localhost/bsf_v1.1/'+data);
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                }
+            });
+
+        }
+    </script>
+    <script src="<?php echo $this->basePath(); ?>/js/horizontal-timeline.js"></script>

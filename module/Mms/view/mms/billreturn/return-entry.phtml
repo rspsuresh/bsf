@@ -1,0 +1,1804 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<!--STYLE-->
+<style type="text/css">
+    .pan_box{height:125px !important;}
+    .sub_tbl1 {color:#424141;font-weight: 600; background:#edefe2 !important;border-bottom: 2px solid #9c793b !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+    .sub_tbl2{color: #424141;font-weight: 600; background: #efe2e2 !important;border-bottom: 2px solid #5d9bb6 !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+    .sub_tbl3{color: #424141;font-weight: 600; background: #ceefe5 !important;border-bottom: 2px solid #18abc4 !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+	.lbl_ptb {padding-top: 5px!important;padding-bottom:5px !important;}
+    .bar1, .bar2, .bar3 {width: 18px;height: 3px;background-color: #009688;margin: 3px 0;transition: 0.4s;}
+    .change .bar1 {-webkit-transform: rotate(-45deg) translate(-6px, 5px);transform: rotate(-45deg) translate(-6px,5px);}
+    .change .bar2 {opacity: 0;}
+    .change .bar3 {-webkit-transform: rotate(45deg) translate(-3px, -3px);transform: rotate(45deg) translate(-3px, -3px);}
+    .flip0{float:right;margin-top:5px;cursor:pointer;}
+</style>
+
+<!--content-->
+<div class="content_wrapper padlr0">
+<div class="container-fluid">
+<div class="row">
+<form method="post"  id="formWrapper" action="<?php echo $this->basePath(); ?>/mms/billreturn/return-save">
+<input type="hidden" id="CostCentre" name="CostCentre" value="<?php echo (isset($costcenterid)) ? $costcenterid : '';?>">
+<input type="hidden" name="Supplier" id="Supplier" value="<?php echo (isset($supplierid)) ? $supplierid :  '';?>">
+<input type="hidden" name="PRRegisterId" value="<?php echo (isset($PRRegisterId)) ? $PRRegisterId : 0;?>">
+<input type="hidden" id="gridtype" name="gridtype" value="<?php echo (isset($gridtype)) ? $gridtype : 0;?>">
+
+<input type="hidden" name="closingstock">
+<div class="col-lg-12">
+    <h1 class="col-lg-3">BillReturn Entry 
+		<div class="flip0">
+			<div class="click" onclick="myFunction(this)">
+				<div class="bar1"></div>
+				<div class="bar2"></div>
+				<div class="bar3"></div>
+			</div>
+		</div>
+	</h1>
+</div>
+<div class="col-lg-12">
+	<div class="pane0">
+		<div class="col-lg-6">
+			<div class="pan_box zoomIn animated">
+				<ul>
+					<li id="CostCentre" class="lbl_ptb">
+						<label>CostCentre</label>
+						<span class="mgic"><?php echo (isset($costcenter)) ? $costcenter : '';?></span>
+					</li>
+					<li class="lbl_ptb">
+						<label>Supplier</label>
+						<span class="mgic"><?php echo (isset($supplier)) ? $supplier : '';?></span>
+					</li>
+					<li class="lbl_ptb">
+						<label>PRDate</label>
+						<span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" name="PRDate" style="cursor:pointer;" value="<?php echo (isset($PRDate)) ? $PRDate : date('d-m-Y');?>" readonly/></span>
+
+					</li>
+					<li class="lbl_ptb">
+						<label>BillDate</label>
+						<span><input type="text" placeholder="DD-MM-YYYY" class="date_picker" name="BillDate" style="cursor:pointer;" value="<?php echo (isset($BillDate)) ? $BillDate : date('d-m-Y');?>" readonly/></span>
+
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="pan_box zoomIn animated">
+				<ul>
+					<li class="lbl_ptb">
+						<label>PR No</label>
+						<span><input type="text" placeholder="xxxxx"  name="PRNo" value="<?php echo (isset($vNo)) ? $vNo : ''; ?> "readonly /></span>
+					</li>
+					<li class="lbl_ptb">
+						<label>BillNo</label>
+						<span><input type="text" placeholder="xxxxx" name="BillNo" value="<?php echo (isset($BillNo)) ? $BillNo : '';?>"/></span>
+					</li>
+					<li class="lbl_ptb">
+						<label>CCPR NO</label>
+						<?php if((((isset($PRRegisterId)) ? $PRRegisterId : 0) >0  || $CCPR['genType']==0)){?>
+							<span><input type="text" placeholder="xxxxx" name="CCPRNo" value="<?php echo (isset($CCPRNo)) ? $CCPRNo : '';?>"  /></span>
+						<?php }else{ ?>
+							<span><input type="text" placeholder="xxxxx" name="CCPRNo" value="<?php echo (isset($CCPRNo)) ? $CCPRNo : '';?>" readonly /></span>
+						<?php } ?>
+					</li>
+					<li class="lbl_ptb">
+						<label>CPR NO</label>
+						<?php if((((isset($PRRegisterId)) ? $PRRegisterId : 0) >0  || $CPR['genType']==0)){?>
+							<span><input type="text" placeholder="xxxxx" name="CPRNo" value="<?php echo (isset($CPRNo)) ? $CPRNo : '';?>"  /></span>
+						<?php }else{ ?>
+							<span><input type="text" placeholder="xxxxx" name="CPRNo" value="<?php echo (isset($CPRNo)) ? $CPRNo : '';?>" readonly /></span>
+						<?php } ?>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" name="frm_index" value="1"/>
+<div class="clearfix"></div>
+<div class="col-lg-12 clear top-20">
+    <div id="accordion" class="panel-group">
+        <div class="panel panel-info">
+            <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1" onclick="panel1click();">
+                <h4 class="panel-title accordion-toggle defa_panels">Enter Return Quantity</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapseOne" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                    <div class="col-lg-12">
+                        <div class="table-responsive top-30">
+                            <table class="table" style=" margin-bottom:0px;" id="workorderTable">
+                                <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Resource</th>
+                                    <th>Unit</th>
+                                    <th>Qty</th>
+                                    <th>BaseRate</th>
+                                    <th>QRate</th>
+                                    <th>BaseAmount</th>
+                                    <th>Amount</th>
+                                    <th>Purchase A/C</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main"></tbody>
+                                <tbody class="total">
+                                <tr>
+                                    <td colspan="6"></td>
+                                    <td align="right" class="rate_pri">Total Amount</td>
+                                    <td><input class="parent_text border-none" type="text" name="total" value="<?php echo (isset($BillAmount)) ? $BillAmount : '';?>" id="total" onkeypress="return isNumberKey(event,this);" readonly/></td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="rowid" id="rowid" value="0"/>
+                        </div>
+                        <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                            <ul>
+                                <li><a href="javascript:void(0);" onclick="calQualList();">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-------------------------------Bill of Quantities end------------------------------->
+        <div class="panel panel-info">
+            <div data-target="#collapseTwo"  data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+                <h4 class="panel-title accordion-toggle defa_panels">Qualifier Details</h4>
+            </div>
+            <div class="panel-collapse collapse collapseTwo" id="" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="table-responsive clear">
+                                <table class="table table-hover clear">
+                                    <thead>
+                                    <tr>
+                                        <th>Qualifier Name</th>
+                                        <th>Account Name</th>
+                                        <th>Sign</th>
+                                        <th>%</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="main" id="QualifierAccTable"></tbody>
+                                    <tbody class="total">
+                                    <tr>
+                                        <td colspan="3"></td>
+                                        <td class="rate_pri">Total Amount</td>
+                                        <td width="30%" ><input class="parent_text border-none " type="text" name="qutotal" id="qutotal" style="text-align:right;" onkeypress="return isNumberKey(event,this);" readonly/></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" name="Qrowid" id="Qrowid" value="0"/>
+                            </div>
+                            <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-5">
+                                <ul>
+
+                                    <li><a href="javascript:void(0);" onclick="submitForm();">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-------------------------------Terms and Condition------------------------------->
+        <div class="panel panel-info">
+            <div data-target="#collapseThree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-3">
+                <h4 class="panel-title accordion-toggle defa_panels">Other Details</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapseThree" style="height: 0px;">
+                <div class="panel-body bgcolr">
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <ul class="nav nav-tabs">
+                                <li><a href="#Note" aria-controls="settings" role="tab" data-toggle="tab">Narration</a></li>
+                            </ul>
+                            <div class="tab-pane" id="Note">
+                                <p>
+                                <div class="col-lg-12">
+                                    <?php
+                                    if(isset($Narration)){
+                                        ?>
+                                        <textarea class="exp-tex" name="Notes" id="Notes"> <?php echo (isset($Narration)) ? $Narration : '';?> </textarea>
+                                    <?php }else{ ?>
+                                        <textarea class="exp-tex" name="Notes" id="Notes" placeholder="Enter your Notes..."></textarea>
+                                    <?php } ?>
+                                </div>
+                                </p>
+                            </div>
+                            <div id="Question"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-------------------------------Terms and Condition------------------------------->
+        <!-------------------------------start of qualMODEL------------------------------->
+
+        <!--        <div class="modal fade"  id="QualaccModal" role="dialog" data-backdrop="static">-->
+        <!--            <div class="modal-dialog">-->
+        <!--                <div class="modal-content" style="width:750px !important;">-->
+        <!--                    <div class="modal-header">-->
+        <!--                        <button data-dismiss="modal" aria-hidden="true" class="close"></button>-->
+        <!--                        <h4 class="modal-title" style="color:#18439d;">Qualifier Account</h4>-->
+        <!--                    </div>-->
+        <!--                    <div class="modal-body">-->
+        <!--                        <div class="row">-->
+        <!--                            <div class="container-fluid">-->
+        <!--                                <div class="col-lg-12">-->
+        <!--                                    <div class="table-responsive clear">-->
+        <!--                                        <table class="table table-hover clear">-->
+        <!--                                            <thead>-->
+        <!--                                            <tr>-->
+        <!--                                                <th>Qualifier Name</th>-->
+        <!--                                                <th>Account Name</th>-->
+        <!--                                                <th>Sign</th>-->
+        <!--                                                <th>%</th>-->
+        <!--                                                <th>Amount</th>-->
+        <!--                                            </tr>-->
+        <!--                                            </thead>-->
+        <!--                                            <tbody class="main" id="QualifierAccTable"></tbody>-->
+        <!--                                            <tbody class="total">-->
+        <!--                                            <tr>-->
+        <!--                                                <td colspan="3"></td>-->
+        <!--                                                <td class="rate_pri">Total Amount</td>-->
+        <!--                                                <td width="30%" ><input class="parent_text border-none " type="text" name="qutotal" id="qutotal" style="text-align:right;" onkeypress="return isNumberKey(event,this);" readonly/></td>-->
+        <!--                                            </tr>-->
+        <!--                                            </tbody>-->
+        <!--                                        </table>-->
+        <!--                                        <input type="hidden" name="Qrowid" id="Qrowid" value="0"/>-->
+        <!--                                    </div>-->
+        <!--                                </div>-->
+        <!--                            </div>-->
+        <!--                        </div>-->
+        <!--                    </div>-->
+        <!--                    <div class= "modal-footer">-->
+        <!--                        <div class="col-lg-12 savebtn_area no_border">-->
+        <!--                            <ul>-->
+        <!--                                <li class="dropdown save_btn float_r"><a onclick="submitForm()" data-toggle=model" title="submit"> Submit</a> </li>-->
+        <!--                                <li class="cancel_btn float_r"><a href="javascript:void(0);" data-dismiss="modal" class="ripple">Close</a></li>-->
+        <!--                            </ul>-->
+        <!--                        </div>-->
+        <!--                        <div class="clear"></div>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+        <!------------------------------ end of qualmodel ----------------------------------->
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r"><a onclick="validateForm()" data-toggle="model" id="sub1" title="submit"> Submit</a> </li>
+        <li class="cancel_btn float_r">
+            <?php if(isset($Approve) && $Approve=="N"): ?>
+                <a href="<?php echo $this->basePath();?>/mms/billreturn/returnbill-register" data-toggle="tooltip" class="ripple" title="Go to Register!">Close</a>
+            <?php elseif (isset($Approve) && $Approve=='P'): ?>
+                <a href="<?php echo $this->basePath();?>/mms/billreturn/returnbill-register" data-toggle="tooltip" class="ripple" title="Go to Register!">Back</a>
+            <?php else: ?>
+                <a href="<?php echo $this->basePath();?>/mms/billreturn/return-wizard" data-toggle="tooltip" class="ripple" title="Close!">Close</a>
+            <?php endif; ?>
+        </li>
+    </ul>
+</div>
+</div>
+</form>
+</div>
+<!--<script id="Qual-template"  type="text/template" class="hide">-->
+<!--    <tr>-->
+<!--        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="qualifiername__7" id="qualifiername__8" />-->
+<!--            <input type="hidden" name="QualifierExist___qu_0_per__9" id="QualifierExist___qu_0_per__9" value=""/>-->
+<!--            <input type="hidden" name="QualifierId__7" id="QualifierId__8" value=""/>-->
+<!--        </td>-->
+<!--        <td width="30%"><select data-placeholder="" class="form-control single_dropdown lbl_move sortoption qchk " tabindex="7"  name="accountname__7" id="accountname__8">-->
+<!--            </select></td>-->
+<!--        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="sign__7" id="sign__8" /></td>-->
+<!--        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="percentage__7" id="percentage__8" /></td>-->
+<!--        <td width="30%"><input class="parent_text red-non qualmainTrInput qualpop qualamount" type="text" name="qualamount__7" id="qualamount__8" /></td>-->
+<!--    </tr>-->
+<!--</script>-->
+<script id="Qual-template" type="text/template" class="hide">
+    <tr>
+        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="qualifiername__7" id="qualifiername__8" value="" readonly/>
+            <input type="hidden" name="QualifierExist___qu__0_per__9" id="QualifierExist___qu__0_per__9" value=""/>
+            <input type="hidden" name="QualifierId__7" id="QualifierId__8" value=""/>
+        </td>
+        <td width="30%"><select data-placeholder="" class="form-control single_dropdown lbl_move sortoption qchk " tabindex="7" onchange="getAccountData(this);"  name="accountname__7" id="accountname__8">
+            </select></td>
+        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="sign__7" id="sign__8" value="" readonly /></td>
+        <td width="15%"><input class="parent_text red-non qualmainTrInput qualpop" type="text" name="percentage__7" id="percentage__8" value="" readonly /></td>
+        <td width="30%"><input class="parent_text red-non qualmainTrInput qualpop qualamount" type="text" name="qualamount__7" id="qualamount__8" style="text-align:right;" value="" readonly /></td>
+    </tr>
+</script>
+<script id="resource-template"  type="text/template" class="hide">
+    <?php
+    $displayscreen="display:show";
+    $displaymaintr="";
+    if($gridtype==1)
+    {
+        $displayscreen="display:none";
+        $displaymaintr="mainTr";
+    }  ?>
+    <tr id="click__" onclick="clickTr(this);" class="count-tr">
+        <td class="mar_20" width="9%"><input class="parent_text border-none" type="text" name="code__" id="code__" readonly/></td>
+        <td width="15%">
+            <input class="parent_text resourceSuggest" type="text" name="desc__" id="desc__" onfocus="checkResourceUsed(this);"/>
+            <input type="hidden" name="resourceid__" id="resourceid__"/>
+            <input type="hidden" name="itemid__" id="itemid__"/>
+        </td>
+        <td width="8%">
+            <input class="parent_text border-none" type="text" name="unitname__" id="unitname__" readonly/>
+            <input type="hidden" name="unitid__" id="unitid__"/>
+        </td>
+        <td width="10%" style="margin-bottom:5px;"><textarea class="expnd_box <?php echo $displaymaintr; ?> ta" name="qty__" id="qty__" onkeypress="return isqtyDecimal(event,this)" onchange="calcResQuantity(this);" style="text-align:right;" ></textarea><span id="stock__"  data-stock="" class="qty"></span></td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="rate__" id="rate__"  style="text-align:right;" onkeypress="return isDecimal(event,this)" onchange="rateChange(this.id)"/></td>
+        <td width="10%"><input class="parent_text border-none" type="text" name="qrate__" id="qrate__" style="text-align:right;" onkeypress="return isDecimal(event,this)" readonly/></td>
+        <td width="12%"><input class="parent_text border-none" type="text" name="baseamount__" id="baseamount__" style="text-align:right;" readonly/></td>
+        <td width="20%"><input class="parent_text border-none" type="text" name="amount__" id="amount__" style="text-align:right;" readonly/></td>
+        <td width="12%"><select data-placeholder="" class="form-control single_dropdown lbl_box sortoption tbl_input changeVal" name="PurchaseAccount__" id="PurchaseAccount__">
+            </select></td>
+        <td width="3%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="deleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+                <li> <a class="mainTr" id="expandTr__" style="display:none;"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+
+    <tr id="subTr__" style="<?php echo $displayscreen; ?>;" class="subTr count-tr">
+        <td colspan="9" style="padding:0px !important; ">
+            <div class="subDiv" style="<?php echo $displayscreen; ?>;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;">
+                    <div class="card">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a class="ripple has-ripple" id="wbsTabLink__" onclick="showtabs('wbs',this.id,event)" style="position: relative; overflow: hidden;cursor:pointer;"> Wbs<span class="ripple-wrapper animated" style="width: 89px; height: 89px; top: -41.5px; left: 22.9531px;"></span></a></li>
+                            <li class=""><a class="ripple has-ripple" id="qualifierTabLink__" onclick="showtabs('qualifier',this.id,event)" style="position: relative; overflow: hidden;cursor:pointer;"> Qualifier<span class="ripple-wrapper animated" style="width: 105px; height: 105px; top: -29.5px; left: 16.9531px;"></span></a></li>
+                            <li class="" style="display:none;"><a class="ripple has-ripple" id="whTabLink__" onclick="showtabs('wh',this.id,event)" style="position: relative; overflow: hidden;cursor:pointer;"> Ware House<span class="ripple-wrapper animated" style="width: 105px; height: 105px; top: -29.5px; left: 16.9531px;"></span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="scrl">
+                        <div class="table-responsive topsp">
+                            <table class="table" style="margin-bottom:0px;" id="iowTable__">
+                                <thead>
+                                <tr>
+                                    <th width="50%" class="sub_tbl3">WBS Name</th>
+                                    <th width="50%" class="sub_tbl3">WBS Qty</th>
+                                    <th class="sub_tbl3" >&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main">
+                                </tbody>
+                                <tbody class="total">
+                                <tr>
+                                    <td width="10%"><input class="parent_text border-none" type="hidden" name="totalqty__" id="totalqty__" readonly/></td>
+                                </tr>
+                                </tbody>
+                                <input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+                            </table>
+                            <table class="table" style="margin-bottom:0px; display: none;" id="qualifierTable__" onchange="CalculateRate(this.id)">
+
+                            </table>
+                            <table class="table" style="margin-bottom:0px; <?php echo $displayscreen; ?>;" id="whTable__">
+                                <thead>
+                                <tr>
+                                    <th class="worktype-activity sub_tbl2">Warehouse Name </th>
+                                    <th class="worktype-activity sub_tbl2">Description </th>
+                                    <th class="worktype-activity sub_tbl2">ClosingStock </th>
+                                    <th class="worktype-activity sub_tbl2">Qty </th>
+                                    <th class="sub_tbl2" style="display: none;">&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main"></tbody>
+                                <tbody class="total">
+                                </tbody>
+                                <input type="hidden" name="wh___rowid" id="wh___rowid" value="0"/>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="iow-template"  type="text/template" class="hide">
+    <?php
+    $displayscreen="display:show";
+    $displaymaintr="";
+    if($gridtype==1)
+    {
+        $displayscreen="display:none";
+        $displaymaintr="mainTr";
+    }  ?>
+    <tr class="dont-hide">
+        <td width="30%">
+            <input type="hidden"  name="iow___wbsid_0" id="iow___wbsid_0" readonly/>
+            <input class="parent_text border-none" type="text" name="iow___wbsname_0" id="iow___wbsname_0" readonly/>
+        </td>
+        <td width="25%"><input class="parent_text <?php echo $displaymaintr; ?>" type="text" name="iow___qty_0" id="iow___qty_0"  style="text-align:right;" onkeypress="return isDecimal(event,this)" onfocus="checkWarehouse(this);" readonly/></td>
+    </tr>
+    <tr id="warech__" style="<?php echo $displayscreen; ?>;" class="subTr dont-hide">
+        <td colspan="9" style="padding:0px !important;">
+            <div class="subDiv all" style="<?php echo $displayscreen; ?>;">
+                <div class="table-responsive topsp">
+                    <table class="table" style="margin-bottom:0px; <?php echo $displayscreen; ?>;" id="whTable___wbs_0_whreqno">
+                        <thead>
+                        <tr>
+                            <th class="worktype-activity sub_tbl2">Warehouse Name </th>
+                            <th class="worktype-activity sub_tbl2">Description </th>
+                            <th class="worktype-activity sub_tbl2">ClosingStock </th>
+                            <th class="worktype-activity sub_tbl2">Qty </th>
+                            <th class="sub_tbl2" style="display: none;">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody class="ware"></tbody>
+                        <tbody class="total">
+                        </tbody>
+
+                    </table>
+                    <input type="hidden" name="wh___wbs_0_wrowid" id="wh___wbs_0_wrowid" value="0"/>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script id="iow-warehouse"  type="text/template" class="hide">
+    <tr class="subTr dont-hide">
+        <td width="20%">
+            <input  type="text" name="wh___wbs_0_warehousename__7" id="wh___wbs_0_warehousename__7" />
+            <input type="hidden" name="wh___wbs_0_warehouseid__7" id="wh___wbs_0_warehouseid__7"/>
+            <input  type="hidden" name="wh___wbs_0_stockid__7" id="wh___wbs_0_stockid__7" />
+        </td>
+        <td width="20%">
+            <input  type="text" name="wh___wbs_0_desc__7" id="wh___wbs_0_desc__7" readonly/>
+        </td>
+        <td width="20%">
+            <input  type="text" name="wh___wbs_0_closingstock__7" id="wh___wbs_0_closingstock__7" readonly/>
+        </td>
+        <td width="20%">
+            <input class="parent_text chqty" type="text" name="wh___wbs_0_qty__7" id="wh___wbs_0_qty__7" style="text-align:right;" onkeypress="return isDecimal(event,this);" onchange="checkWHQuantity(this);" />
+            <input type="hidden" name="wh___wbs_0_hiddenqty__7" id="wh___wbs_0_hiddenqty__7" value="0"/>
+        </td>
+    </tr>
+</script>
+<script id="request-warehouse"  type="text/template" class="hide">
+    <tr class="subTr dont-hide">
+        <td width="20%">
+            <input  type="text" name="wh___warehousename_0" id="wh___warehousename_0" />
+            <input type="hidden" name="wh___warehouseid_0" id="wh___warehouseid_0"/>
+            <input  type="hidden" name="wh___stockid_0" id="wh___stockid_0" />
+        </td>
+        <td width="20%">
+            <input  type="text" name="wh___desc_0" id="wh___desc_0" readonly/>
+        </td>
+        <td width="20%">
+            <input  type="text" name="wh___closingstock_0" id="wh___closingstock_0" readonly/>
+        </td>
+        <td width="20%">
+            <input class="parent_text chqty" type="text" name="wh___qty_0" id="wh___qty_0" style="text-align:right;" onkeypress="return isDecimal(event,this);" onchange="calcWHQty(this);" />
+            <input type="hidden" name="iow__hiddenqty_0" id="iow__hiddenqty_0" value="0"/>
+        </td>
+    </tr>
+</script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/paging.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/paging.js"></script>
+<script type="text/javascript">
+$('#sub1').hide();
+document.getElementById('panelheading-2').style.pointerEvents = 'none';
+var arr_requestResources = <?php echo (isset($arr_requestResources)) ? json_encode($arr_requestResources) : '[]';?>;
+var arr_sel_warehouse = <?php echo (isset($arr_sel_warehouse)) ? json_encode($arr_sel_warehouse) : '[]';?>;
+var WarehouseCheck = <?php echo (isset($WarehouseCheck)) ? json_encode($WarehouseCheck) : '[]';?>;
+var arr_warehouseQty = <?php echo (isset($arr_warehouseQty)) ? json_encode($arr_warehouseQty) : '[]';?>;
+var arr_resources = <?php echo (isset($arr_resources)) ? json_encode($arr_resources) : '[]';?>;
+var arr_accountType = <?php echo (isset($arr_accountType)) ? json_encode($arr_accountType) : '[]';?>;
+var arr_resource_iows = <?php echo (isset($arr_resource_iows)) ? json_encode($arr_resource_iows) : '[]';?>;
+var qualiferHTML = <?php echo (isset($qualHtml)) ? json_encode($qualHtml) : '[]';?>;
+var qual_Acc = <?php echo (isset($Qual_Acc)) ? json_encode($Qual_Acc) : '[]';?>;
+var qualList = <?php echo (isset($qualList)) ? json_encode($qualList) : '[]';?>;
+var arr_wbs = <?php echo (isset($arr_res_wbs)) ? json_encode($arr_res_wbs) : '[]';?>;
+var arr_res_selwbs = <?php echo (isset($arr_res_selwbs)) ? json_encode($arr_res_selwbs) : '[]';?>;
+var arr_sel_wbswarehouse = <?php echo (isset($arr_sel_wbswarehouse)) ? json_encode($arr_sel_wbswarehouse) : '[]';?>;
+var arr_sels_wbswarehouse = <?php echo (isset($arr_sels_wbswarehouse)) ? json_encode($arr_sels_wbswarehouse) : '[]';?>;
+var qualAccList = <?php echo (isset($qualAccList)) ? json_encode($qualAccList) : '[]';?>;
+var arr_resource_closingstock = <?php echo (isset($arr_resource_closingstock)) ? json_encode($arr_resource_closingstock) : '[]';?>;
+var sampleQual = [];
+
+$.each(qualAccList, function (k, j) {
+    var sign = 0;
+    if(j.Sign == '+'){
+        sign = 1;
+    } else{
+        sign = 2;
+    }
+    var aId = j.AccountId;
+    var qId = j.QualifierId;
+    var arrKey = qId +'AA'+ sign ;
+    sampleQual[arrKey] = aId;
+});
+
+
+$(function () {
+    var $rowid = $('#rowid');
+    var template = $('#resource-template').html();
+    var iowtemplate = $('#iow-template').html();
+    var waretemplate = $('#iow-warehouse').html();
+    var requestwarehouse = $('#request-warehouse').html();
+    var rowid = 0;
+    var $tbody = $('#workorderTable').find('> tbody.main');
+
+    if (arr_requestResources.length != 0) {
+        $.each(arr_requestResources, function (i, o) {
+            rowid += 1;
+            $tbody.append(template.replace(/__/g, '_' + rowid));
+            var opt = '<option></option>';
+            if (arr_accountType.length > 0) {
+                $.each(arr_accountType, function (j, p) {
+                    opt += '<option value="' + p.TypeId + '">' + p.Typename + '</option>';
+                });
+            }
+            $('#PurchaseAccount_' + rowid).html(opt);
+            if (<?php echo (isset($PRRegisterId)) ? $PRRegisterId : 0;?> >0)
+            {
+                $('#PurchaseAccount_' + rowid).val(o.PurchaseTypeId);
+            }
+            $('#code_' + rowid).val(o.Code).addClass('border-none').prop('disabled', false);
+            $('#desc_' + rowid).val(o.ResourceName).addClass('border-none').prop('disabled', true);
+            $('#resourceid_' + rowid).val(o.ResourceId);
+            $('#itemid_' + rowid).val(o.ItemId);
+            $('#qty_' + rowid).val(o.Qty);
+            $('#unitname_' + rowid).val(o.UnitName);
+            $('#unitid_' + rowid).val(o.UnitId);
+            $('#rate_' + rowid).val(o.Rate);
+            $('#qrate_' + rowid).val(o.QRate);
+            $('#amount_' + rowid).val(o.QAmount);
+            $('#baseamount_' + rowid).val(o.Amount);
+            $('#expandTr_' + rowid).show();
+            $('#deleteTr_' + rowid).show();
+
+            //ClosingStock
+
+            if(arr_resource_closingstock.length != 0) {
+                var findClstock = arr_resource_closingstock.filter(function(obj) {
+                    return (obj.ResourceId === o.ResourceId && obj.ItemId === o.ItemId);
+                });
+
+                if(findClstock.length > 0) {
+
+                    $.each(arr_resource_closingstock, function (s, t) {
+                        if (o.ResourceId != t.ResourceId || o.ItemId != t.ItemId) {
+                            return;
+                        }
+
+                        $('#qty_' + rowid).next('span').html('closing Stock: ' + sanitizeNumber(t.Qty,3,true));
+                        $('#qty_' + rowid).next('span').attr('data-stock', sanitizeNumber(t.Qty,3,true));
+                    });
+                }
+            }
+            //
+
+
+            var whsCount = 0;
+            if (arr_sel_warehouse.length != 0) {
+                $.each(arr_sel_warehouse, function (m, n) {
+                    if (o.ResourceId != n.ResourceId || o.ItemId != n.ItemId) {
+                        return;
+                    }
+                    whsCount = whsCount+1;
+                    var whrowid = parseInt($('#wh_' + rowid + '_rowid').val()) + 1;
+                    $('#whTable_' + rowid).find('> tbody.main').append(requestwarehouse
+                        .replace(/__/g, '_' + rowid)
+                        .replace(/_0/g, '_' + whrowid));
+
+                    $('#wh_' + rowid + '_rowid').val(whrowid);
+                    $('#wh_' + rowid + '_warehouseid_' + whrowid).val(n.WareHouseId);
+                    $('#wh_' + rowid + '_warehousename_' + whrowid).val(n.WareHouseName);
+                    $('#wh_' + rowid + '_stockid_' + whrowid).val(n.StockId);
+                    $('#wh_' + rowid + '_desc_' + whrowid).val(n.Description);
+                    $('#wh_' + rowid + '_qty_' + whrowid).val(n.Qty);
+                    $('#wh_' + rowid + '_closingstock_' + whrowid).val(n.ClosingStock);
+                    $('#wh_' + rowid + '_hiddenqty_' + whrowid).val(n.Qty);
+//                    $.each(arr_warehouseQty, function (s, t) {
+//                        console.log("success");
+//                        if (n.WareHouseId == t.WareHouseId && o.ResourceId == t.ResourceId && o.ItemId == t.ItemId && t.Qty > 0) {
+//                            $('#wh_' + rowid + '_qty_' + whrowid).val(t.Qty);
+//                        }
+//                    });
+                });
+            }
+            //////////////////////////Qualifier-start /////////////////////////////
+            if (<?php echo (isset($PRRegisterId)) ? $PRRegisterId : 0;?> >0)
+            {
+                var RId = o.ResourceId;
+                var ItId = o.ItemId;
+                var poId =<?php echo (isset($PRRegisterId)) ? $PRRegisterId : 0;?>;
+                $.ajax({
+                    url: getBaseURL() + 'mms/billreturn/return-entry',
+                    type: "post",
+                    data: "ResourceId=" + RId + "&Type=getqualdetails&ItemId=" + ItId + "&poId=" + poId + "",
+                    async: false,
+                    success: function (data, textStatus, jqXHR) {
+                        if (jqXHR.status == 200) {
+                            data = JSON.parse(data);
+                            $('#qualifierTable_' + rowid).html(data.replace(/__1/g, '_' + rowid));
+                        }
+                        $('.loading_area').hide();
+                    }, error: function (jqXHR, textStatus, errorThrown) {
+                        $('.loading_area').hide();
+                    }
+                });
+            }
+            else
+            {
+                $('#qualifierTable_' + rowid).html(qualiferHTML.replace(/__1/g, '_' + rowid));
+            }
+            ////////////// Qualifier - end /////////////////////////////////////
+
+            var wbsCount = 0;
+            //wbs start
+            if(arr_resource_iows.length != 0){
+                $.each(arr_resource_iows, function (j, l) {
+                var findRes = arr_wbs.filter(function (obj) {
+                    return (obj.ResourceId === o.ResourceId && obj.WBSId === l.WBSId);
+                });
+                if (findRes.length != 0) {
+                        wbsCount = wbsCount+1;
+                        $('#wbsTabLink_' + rowid).closest("li").addClass('active');
+                        $('#whTabLink_' + rowid).hide();
+                        $('#whTable_' + rowid).hide();
+                        var iowrowid = parseInt($('#iow_' + rowid + '_rowid').val()) + 1;
+                        $('#iowTable_' + rowid).find('tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                        $('#iow_' + rowid + '_rowid').val(iowrowid);
+                        $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+                        $('#iow_' + rowid + '_wbsname_' + iowrowid).val(l.WbsName);
+                        $('#iow_' + rowid + '_qty_' + iowrowid).val(l.Qty);
+                        $.each(arr_res_selwbs, function (h, j) {
+                            var resoid = parseInt(j.ResourceId);
+                            var itmid = parseInt(j.ItemId);
+                            if (o.ResourceId == resoid && o.ItemId == itmid && l.WBSId == j.WBSId) {
+                                $('#iow_' + rowid + '_qty_' + iowrowid).val(j.Qty);
+                            }
+                        });
+
+                        //start of warehouse
+                        if (<?php echo (isset($PRRegisterId)) ? $PRRegisterId : 0;?> >0)
+                        {
+                            if (arr_sel_wbswarehouse.length != 0) {
+                                $.each(arr_sel_wbswarehouse, function (m, n) {
+
+                                    var findWHH = arr_sel_wbswarehouse.filter(function (obj) {
+                                        return (obj.ResourceId === o.ResourceId && obj.ItemId === o.ItemId);
+                                    });
+                                    if (findWHH.length != 0) {
+                                        var whrowid = parseInt($('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val()) + 1;
+                                        $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').find('> tbody.ware').append(waretemplate
+                                            .replace(/__7/g, '_' + whrowid)
+                                            .replace(/_0/g, '_' + iowrowid)
+                                            .replace(/__/g, '_' + rowid));
+
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val(whrowid);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehouseid_' + whrowid).val(n.WareHouseId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehousename_' + whrowid).val(n.WareHouseName);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_stockid_' + whrowid).val(n.StockId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_desc_' + whrowid).val(n.Description);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_qty_' + whrowid).val(n.Qty).attr('data-find', n.WareHouseId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_closingstock_' + whrowid).val(n.ClosingStock);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_hiddenqty_' + whrowid).val(n.Qty);
+                                        $.each(arr_sels_wbswarehouse, function (s, t) {
+                                            if (n.WareHouseId == t.WareHouseId && t.AnalysisId == l.WBSId && o.ResourceId == t.ResourceId && o.ItemId == t.ItemId && t.Qty > 0) {
+                                                $('#wh_' + rowid + '_wbs_' + iowrowid + '_qty_' + whrowid).val(t.Qty);
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                $('.all').hide();
+                                $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').hide();
+                                $('#iow_' + rowid + '_qty_' + iowrowid).attr('onchange', 'calcQuantity(this)');
+                                $('#iow_' + rowid + '_qty_' + iowrowid).prop("readonly", false);
+                            } //end of warehouse
+                        } else{
+                            if (arr_sel_warehouse.length != 0) {
+                                $.each(arr_sel_warehouse, function (m, n) {
+                                    var findWH = arr_sel_warehouse.filter(function (obj) {
+                                        return (obj.ResourceId === o.ResourceId && obj.ItemId === o.ItemId);
+                                    });
+
+                                    if (findWH.length != 0) {
+                                        var whrowid = parseInt($('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val()) + 1;
+                                        $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').find('> tbody.ware').append(waretemplate
+                                            .replace(/__7/g, '_' + whrowid)
+                                            .replace(/_0/g, '_' + iowrowid)
+                                            .replace(/__/g, '_' + rowid));
+
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val(whrowid);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehouseid_' + whrowid).val(n.WareHouseId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehousename_' + whrowid).val(n.WareHouseName);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_stockid_' + whrowid).val(n.StockId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_desc_' + whrowid).val(n.Description);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_qty_' + whrowid).val(n.Qty).attr('data-find', n.WareHouseId);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_closingstock_' + whrowid).val(n.ClosingStock);
+                                        $('#wh_' + rowid + '_wbs_' + iowrowid + '_hiddenqty_' + whrowid).val(n.Qty);
+                                    }
+                                });
+                            } else {
+                                $('.all').hide();
+                                $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').hide();
+                                $('#iow_' + rowid + '_qty_' + iowrowid).attr('onchange', 'calcQuantity(this)');
+                                $('#iow_' + rowid + '_qty_' + iowrowid).prop("readonly", false);
+                            } //end of warehouse
+                        }
+
+                } else{
+                    $('#iowTable_' + rowid).hide();
+                    $('#wbsTabLink_' + rowid).closest("li").removeClass('active');
+                    $('#whTabLink_' + rowid).closest("li").addClass('active').show();
+                    $('#whTable_' + rowid).show();
+                }
+                });
+            } // wbs end
+            if(wbsCount == 0){
+                $('#wbsTabLink_' + rowid).hide();
+            }
+            //no wbs and no warehouse
+            if(whsCount == 0 && wbsCount == 0) {
+                $('#expandTr_' + rowid).hide();
+                $('#qty_' + rowid).attr('onkeypress','return isDecimal(event,this);');
+                $('#qty_' + rowid).attr('onchange','calcResQuantity(this)');
+                $('.subDiv').hide();
+            } else {
+                $('#qty_' + rowid).attr('readOnly','readOnly');
+            }
+            if(wbsCount > 0) {
+                $('#iowTable_' + rowid).show();
+            }
+        });
+    }
+    rowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + rowid));
+
+    bindResourceAutocomplete();
+    var opt = '<option></option>';
+    if (arr_accountType.length > 0) {
+        $.each(arr_accountType, function (j, p) {
+            opt += '<option value="' + p.TypeId + '">' + p.Typename + '</option>';
+        });
+    }
+    $('#PurchaseAccount_' + rowid).html(opt);
+    $('#issueAccount_' + rowid).html(opt);
+    var rowIdval = parseInt(arr_requestResources.length + 1);
+    $('#rowid').val(rowIdval);
+
+    $('.content_wrapper').on('click', '.mainTr', function (e) {
+        e.preventDefault();
+        if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        }
+        else {
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+    nextAccordian(1);
+    if('<?php echo (isset($gridtype)) ? $gridtype : 0;?>' == 0) {
+        $('#workorderTable').paging({limit: 2});
+        $('.paging-nav').children('a[data-page=0]').trigger('click');
+    }
+});
+$(document).ready(function(){
+        $(".flip0").click(function(){
+            $(".pane0").slideToggle("slow");
+        });
+    });
+    function myFunction(x) {
+        x.classList.toggle("change");
+    }
+function bindResourceAutocomplete() {
+    // bind resource autocomplete
+    $('#workorderTable .resourceSuggest').autocomplete({
+        lookup: arr_resources,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                var reskeyid = $('input[id*=resourceid_] ') ;
+                var bRet=false;
+                $.each(reskeyid, function (i, obj) {
+                    var $this = $(this),
+                        name = $this[0].id;
+                    var arrname = name.split('_');
+                    var key1 = arrname[1];
+
+                    if (key1 != rowid) {
+                        if ($this.val() == suggestion.data && $('#itemid_' + key1).val() == suggestion.ItemId) {
+                            bRet = true;
+                        }
+                    }
+                });
+                if(bRet == false) {
+                $this.prop('readonly', true).addClass('border-none');
+                $('#resourceid_' + rowid).val(suggestion.data);
+                $('#unitname_' + rowid).val(suggestion.UnitName);
+                $('#code_' + rowid).val(suggestion.Code);
+                $('#unitid_' + rowid).val(suggestion.UnitId);
+                $('#itemid_' + rowid).val(suggestion.ItemId);
+                $('#rate_' + rowid).val(suggestion.Rate);
+                $('#qrate_' + rowid).val(suggestion.Rate);
+                $('#expandTr_' + rowid).show();
+                $('#deleteTr_' + rowid).show();
+                bindResourceIOW($this);
+                addNewResourceRow($this);
+                }
+                else
+                {
+                    alert('Already added in list');
+                    $('#desc_' + rowid).val('');
+                    return;
+                }
+            }
+        }, onSearchStart: function (suggestion) {
+            var rowid = $(this)[0].id.split('_')[1];
+            $('#unitname_' + rowid).val('');
+            $('#rate_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                var rowid = $(this)[0].id.split('_')[1];
+                $('#unitname_' + rowid).val('');
+                $('#rate_' + rowid).val('');
+            }
+        }
+    });
+}
+
+function bindResourceIOW(x) {
+    var rowid = $(x)[0].id.split('_')[1];
+    var $iowrowid = $('#iow_' + rowid + '_rowid');
+    var resourceId = $('#resourceid_' + rowid).val();
+    var itemid = $('#itemid_' + rowid).val();
+    var costcentre = $('#CostCentre').val();
+    var waretemplate = $('#iow-warehouse').html();
+    $('.loading_area').show();
+    $.ajax({
+        url: getBaseURL() + 'mms/billreturn/return-entry',
+        type: "post",
+        data: {'Type': 'getwbsdetails', 'ResourceId': resourceId,'ItemId': itemid, 'CostCentre': costcentre},
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if (jqXHR.status == 200) {
+                data = JSON.parse(data);
+                var iowtemplate = $('#iow-template').html();
+                $.each(data, function (i, l) {
+                    $('#qualifierTable_' + rowid).html(qualiferHTML.replace(/__1/g, '_' + rowid));
+                    var findRes = arr_wbs.filter(function(obj) {
+                        return (obj.ResourceId === resourceId && obj.WBSId === l.WBSId);
+                    });
+                    if(findRes.length > 0) {
+                        var iowrowid = parseInt($iowrowid.val()) + 1;
+                        $('#iowTable_' + rowid).find('tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+                        $iowrowid.val(iowrowid);
+                        $('#iow_' + rowid + '_wbsname_' + iowrowid).val(l.WbsName);
+                        $('#iow_' + rowid + '_wbsid_' + iowrowid).val(l.WBSId);
+                        $('#iow_' + rowid + '_qty_' + iowrowid).val(l.Qty);
+                        //start-warehouse
+                        if (arr_sel_warehouse.length != 0) {
+                            $.each(arr_sel_warehouse, function (m, n) {
+                                var findWH = arr_sel_warehouse.filter(function (obj) {
+                                    return (obj.ResourceId === resourceId && obj.ItemId === itemid);
+                                });
+                                if (findWH.length != 0) {
+                                    var whrowid = parseInt($('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val()) + 1;
+                                    $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').find('> tbody.ware').append(waretemplate
+                                        .replace(/__7/g, '_' + whrowid)
+                                        .replace(/_0/g, '_' + iowrowid)
+                                        .replace(/__/g, '_' + rowid));
+
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_wrowid').val(whrowid);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehouseid_' + whrowid).val(n.WareHouseId);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_warehousename_' + whrowid).val(n.WareHouseName);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_stockid_' + whrowid).val(n.StockId);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_desc_' + whrowid).val(n.Description);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_qty_' + whrowid).val(n.Qty).attr('data-find', n.WareHouseId);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_closingstock_' + whrowid).val(n.ClosingStock);
+                                    $('#wh_' + rowid + '_wbs_' + iowrowid + '_hiddenqty_' + whrowid).val(n.Qty);
+                                }
+                            });
+                        }
+                        //end-warehouse
+                    }
+                });
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+
+    $.ajax({
+        url: getBaseURL() + 'mms/billreturn/return-entry',
+        type: "post",
+        data: {'Type': 'getwhdetails', 'ResourceId': resourceId,'ItemId': itemid, 'CostCentre': costcentre},
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if (jqXHR.status == 200) {
+                data = JSON.parse(data);
+                if(data.length != 0) {
+                    var waretemplate = $('#iow-warehouse').html();
+                    $.each(data, function (i, l) {
+                        var whrowid = parseInt($('#wh_' + rowid + '_rowid').val()) + 1;
+                        $('#whTable_' + rowid).find('> tbody.main').append(waretemplate
+                            .replace(/__/g, '_' + rowid)
+                            .replace(/_0/g, '_' + whrowid));
+                        $('#wh_' + rowid + '_rowid').val(whrowid);
+                        $('#wh_' + rowid + '_warehouseid_' + whrowid).val(l.WareHouseId);
+                        $('#wh_' + rowid + '_warehousename_' + whrowid).val(l.WareHouseName);
+                        $('#wh_' + rowid + '_stockid_' + whrowid).val(l.StockId);
+                        $('#wh_' + rowid + '_desc_' + whrowid).val(l.Description);
+                        $('#wh_' + rowid + '_qty_' + whrowid).val(l.Qty);
+                        $('#wh_' + rowid + '_closingstock_' + whrowid).val(l.ClosingStock);
+                        $('#wh_' + rowid + '_hiddenqty_' + whrowid).val(l.Qty);
+                    });
+                }
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+}
+
+function addNewResourceRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $rowid = $('#rowid'),
+        rowid = parseInt($rowid.val()),
+        $tbody = $('#workorderTable').find('> tbody.main');
+
+    $('#deleteTr_' + rowid).show();
+    var count = rowid + 1,
+        template = $('#resource-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+    $('#qualifierTable_' + rowid).html(qualiferHTML.replace(/__1/g, '_' + rowid));
+    $rowid.val(count);
+
+    var opt;
+    if (arr_accountType.length > 0) {
+        opt +='<option value =""></option>';
+        $.each(arr_accountType, function (j, p) {
+            opt += '<option value="' + p.TypeId + '">' + p.Typename + '</option>';
+        });
+    }
+    $('#PurchaseAccount_' + rowid).html(opt);
+    $('#issueAccount_' + rowid).html(opt);
+
+    bindResourceAutocomplete();
+    if('<?php echo (isset($gridtype)) ? $gridtype : 0;?>' == 0) {
+        var f = parseInt($(".paging-nav").find('.selected-page').html()) - 1;
+        $('.paging-nav').remove();
+        thisVal._getNavBar($('#workorderTable').find('> tbody.main >tr'));
+        setTimeout(function () {
+            $('.paging-nav').children('a[data-page=' + f + ']').trigger('click');
+        }, 100);
+    }
+}
+function checkResourceUsed(x) {
+    var id = $(x)[0].id.split('_')[1];
+    var reskeyid = $('input[id*=resourceid_]');
+    var itemkeyid=$('input[id*=itemid_]');
+    tmp_arr_resources = arr_resources;
+    tmp_arr_resources = $.grep(arr_resources, function (element, index) {
+        var is_selected = true;
+        $.each(reskeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val() && itemkeyid[0].value == element.ItemId) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindResourceAutocomplete();
+}
+errorFlag=0;
+function calcQuantity(x) {
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowrowid = ids[3];
+    var whrowid = 1;
+    var name=ids[0];
+    if(name == 'iow') {
+        // calc total qty
+
+        var totalQty=0;
+        $.each($('input[id^=iow_'+rowid+'_qty_'), function (i,o) {
+            var qty = parseFloatVal($(this).val());
+            if(isNaN(qty))
+                qty = 0;
+            totalQty += qty;
+        });
+
+        var ssVal = parseInt($('#stock_' + rowid).attr('data-stock'));
+
+        if (totalQty > ssVal) {
+            showError($('#qty_' + rowid), "Greater than Closing Stock");
+            errorFlag = 1;
+        } else {
+            removeError($('#qty_' + rowid));
+            errorFlag = 0;
+        }
+        $('#qty_'+rowid).val(parseFloatVal(totalQty,0));
+
+
+        // calc total amount
+        var rate = parseInt($('#rate_' + rowid).val());
+        var qrate = parseInt($('#rate_' + rowid).val());
+
+        $('#amount_' + rowid).val(parseInt(totalQty * qrate));
+        $('#qrate_' + rowid).val(parseFloatVal(qrate));
+        $('#baseamount_' + rowid).val(parseInt(totalQty * rate));
+        calcTotal();
+        var vname = '#qualifierTable_' + rowid;
+        CalculateRate(vname);
+    }
+}
+function calcResQuantity(x){
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var name=ids[0];
+
+    if(name == 'qty') {
+
+        var totalQty=parseFloatVal($('#qty_'+rowid).val());
+
+
+        var ssVal = parseInt($('#stock_' + rowid).attr('data-stock'));
+
+        if (totalQty > ssVal) {
+            showError($('#qty_' + rowid), "Greater than Closing Stock");
+            errorFlag = 1;
+        } else {
+            removeError($('#qty_' + rowid));
+            errorFlag = 0;
+        }
+
+        // calc total amount
+        var rate = parseInt($('#rate_' + rowid).val());
+        var qrate = parseInt($('#rate_' + rowid).val());
+
+        $('#amount_' + rowid).val(parseInt(totalQty * qrate));
+        $('#qrate_' + rowid).val(parseFloatVal(qrate));
+        $('#baseamount_' + rowid).val(parseInt(totalQty * rate));
+        calcTotal();
+        var vname = '#qualifierTable_' + rowid;
+        CalculateRate(vname);
+    }
+}
+function calcWHQty(x) {
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var whrowid = ids[3];
+    var whqty = 0;
+
+    var closingstock=parseFloat($('#wh_'+ rowid + '_closingstock_' + whrowid).val());
+    var assoc = parseFloat($('#wh_'+ rowid + '_qty_' + whrowid).val());
+    if (!isNaN(assoc) && !isNaN(closingstock) && assoc > closingstock) {
+        alert('WareHouse Qty is exceed from closingstock');
+        $('#wh_'+ rowid + '_qty_' + whrowid).val(000).trigger('change');
+    } else{
+        $.each($('input[id^=wh_'+rowid+'_qty_'), function (i,o) {
+            var qty = parseFloatVal($(this).val());
+            if(isNaN(qty))
+                qty = 0;
+            whqty += qty;
+        });
+        var ssVal = parseInt($('#stock_' + rowid).attr('data-stock'));
+        if (whqty > ssVal) {
+            showError($('#qty_' + rowid), "Greater than Closing Stock");
+            errorFlag = 1;
+        } else {
+            removeError($('#qty_' + rowid));
+            errorFlag = 0;
+        }
+        $('#qty_'+rowid).val(parseFloatVal(whqty,0));
+
+        // calc total amount
+        var rate = parseInt($('#rate_' + rowid).val());
+        var qrate = parseInt($('#qrate_' + rowid).val());
+
+        $('#amount_' + rowid).val(parseInt(whqty * qrate));
+        $('#baseamount_' + rowid).val(parseInt(whqty * rate));
+        calcTotal();
+        var vname = '#qualifierTable_' + rowid;
+        CalculateRate(vname);
+        TermsAutoRefresh();
+    }
+}
+function rateChange(x)
+{
+    var iFocusRowId= x.split("_")[1];
+    var bRate=parseFloatVal($('#rate_' + iFocusRowId).val());
+    var bQty=parseFloatVal($('#qty_' + iFocusRowId).val());
+    $('#qrate_' + iFocusRowId).val(parseFloatVal(bRate));
+    $('#baseamount_' + iFocusRowId).val(sanitizeNumber(parseFloatVal(bQty)*parseFloatVal(bRate),2,true));
+    $('#amount_' + iFocusRowId).val(sanitizeNumber(parseFloatVal(bQty)*parseFloatVal(bRate),2,true));
+    var vname = '#qualifierTable_' + iFocusRowId;
+    CalculateRate(vname);
+}
+function calcTotal() {
+    var total = 0;
+    $.each($('input[id^=amount_]'), function (i,o) {
+        total += parseFloatVal($(this).val());
+    });
+    $('#total').val(sanitizeNumber(total));
+}
+function clickTr(val) {
+    var id = ($(val).attr('id')).split('_');
+    var resourceId = $('#resourceid_' + id[1]).val();
+    var itemId = $('#itemid_' + id[1]).val();
+    var CostCentre = $('#CostCentre').val();
+    if(resourceId > 0){
+        $.ajax({
+            url: getBaseURL() + "mms/billreturn/return-entry",
+            type: "post",
+            data: "resourceId=" + resourceId + "&itemId=" + itemId + "&CostCentre=" + CostCentre + "&mode=Questions",
+            success: function (data, textStatus, jqXHR) {
+                if (data != 'false') {
+                    var valu = JSON.parse(data);
+//                    $('#qty_' + id[1]).closest('td').append('closing Stock: '+valu['ClosingStock']);
+                    $('#qty_' + id[1]).next('span').html('closing Stock: ' + valu['ClosingStock']);
+                    $('#qty_' + id[1]).next('span').attr('data-stock', valu['ClosingStock']);
+                } else {
+//                    $('#qty_' + id[1]).closest('td').append('closing Stock: 0');
+                    $('#qty_' + id[1]).next('span').html('closing Stock: 0');
+                    $('#qty_' + id[1]).next('span').attr('data-stock', 0);
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(textStatus + "-----" + errorThrown);
+            }
+        });
+    }
+}
+function showtabs(type,id,event) {
+    event.preventDefault();
+    $('#' + id).parent('li').addClass('active').siblings('li').removeClass('active');
+    var rowid = id.split('_')[1];
+
+    if (type=="wbs") {
+        $('#qualifierTable_'+rowid).hide();
+        $('#whTable_' + rowid).hide();
+        $('#iowTable_'+rowid).show();
+    } else if (type=="qualifier"){
+        $('#qualifierTable_'+rowid).show();
+        $('#iowTable_'+rowid).hide();
+        $('#whTable_' + rowid).hide();
+    }
+    else{
+        $('#whTable_' + rowid).show();
+        $('#qualifierTable_'+rowid).hide();
+        $('#iowTable_'+rowid).hide();
+    }
+    return false;
+}
+function deleteRow(x,e) {
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1];
+    if (!confirm('Do you want to Delete'))
+        return false;
+    var $tr = $x.closest('tr');
+    $tr.next('.subTr').remove();
+    $tr.remove();
+    if('<?php echo (isset($gridtype)) ? $gridtype : 0;?>' == 0) {
+        var f = parseInt($(".paging-nav").find('.selected-page').html()) - 1;
+        $('.paging-nav').remove();
+        thisVal._getNavBar($('#workorderTable').find('> tbody.main >tr'));
+        setTimeout(function () {
+            $('.paging-nav').children('a[data-page=' + f + ']').trigger('click');
+        }, 100);
+    }
+    return false;
+
+}
+//qualifier
+function CalculateRate(x) {
+    var iFocusRowId=x.split("_")[1],
+        name = '#desc_' + iFocusRowId,
+        iRows = $('#rowid_' + iFocusRowId).val(),
+        sname = x.split("_")[0],
+        sQualName = "Qual";
+    sUnit =isNullCheck($('#unitid_' + iFocusRowId).val(),'string');
+
+
+    if (sname.substr(sname.length-1) ==  "R") {
+        name = '#rateanalR_' + iFocusRowId;
+        iRows = $('#rowinfoidR_' + iFocusRowId).val();
+        sQualName = "QualR";
+    }
+
+    var qty=$('#qty_'+iFocusRowId).val();
+    var dbaseAmt=$('#baseamount_'+iFocusRowId).val();
+    var dQAmt =  CalculateQualifier(dbaseAmt,iFocusRowId,sQualName);
+    $('#amount_' + iFocusRowId).val(sanitizeNumber(parseFloatVal(dbaseAmt)+parseFloatVal(dQAmt),2,true));
+    $('#qrate_' + iFocusRowId).val(sanitizeNumber((parseFloatVal(dbaseAmt)+parseFloatVal(dQAmt))/parseFloatVal(qty)),2,true);
+    calcTotal();
+}
+
+var abc;
+var aSign=0;
+function CalculateQualifier(baseValue, key1,sQualName) {
+    var sQName = sQualName + '_';
+    var rows = $('#' + sQualName +  'RowId_' + key1).val();
+    var sformula="";
+    var dbaseAmt=parseFloatVal(isNullCheck(baseValue,'number'));
+    var dTotalQualAmt=0;
+
+    for (i = 1; i <= rows; i++) {
+        var sRef = $('#' + sQName + key1 + '_Ref_' + i).val().trim();
+        var sFormula = isNullCheck($('#' + sQName + key1 + '_Exp_'+ i).val(),'string');
+        var dPer = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_ExpPer_'+ i).val(),'number'));
+        var sbaseRef = 'R0';
+        if (parseFloatVal(dPer) ==0) dPer=100;
+        sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+        for (j = 1; j <= rows; j++) {
+            var sFRef = $('#' + sQName + key1 + '_Ref_' + j).val().trim();
+            var dFamt = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_Amount_'+ j).val(),'number'));
+            sFormula = sFormula.replace(new RegExp(sFRef, 'g'), dFamt);
+        }
+        var fvaule = computeEval(sFormula);
+        $('#' + sQName + key1 + '_ExpValue_' + i).val(numberFormat(fvaule,'C'));
+
+        var iQualTypeid = $('#' + sQName + key1 + '_TypeId_' + i).val();
+
+        if (iQualTypeid==1 || iQualTypeid==2) {
+            var dTaxablePer = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_TaxablePer_' + i).val(),'number'));
+            var dTaxPer = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_TaxPer_' + i).val(),'number'));
+            var dCess = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_CessPer_' + i).val(),'number'));
+            var dEDCess = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_EduCessPer_' + i).val(),'number'));
+            var dHEDCess = parseFloatVal(isNullCheck($('#' + sQName + key1 + '_HEduCessPer_' + i).val(),'number'));
+            var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+            $('#' + sQName + key1 + '_NetPer_' + i).val(dNetPer);
+
+            $('#' + sQName + key1 + '_NetPer_' + i).val(numberFormat(dNetPer,'C'));
+            $('#' + sQName + key1 + '_ExpPer_'+ i).val(numberFormat(dNetPer,'C'));
+
+            var dTaxableAmt =  fvaule* (dTaxablePer/100);
+            var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+            var dCessAmt =  dTaxAmt* (dCess/100);
+            var dEDAmt =  dTaxAmt* (dEDCess/100);
+            var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+            var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+            $('#' + sQName + key1 + '_TaxableAmt_'+ i).val(numberFormat(dTaxableAmt,'C'));
+            $('#' + sQName + key1 + '_TaxPerAmt_'+ i).val(numberFormat(dTaxAmt,'C'));
+            $('#' + sQName + key1 + '_CessAmt_'+ i).val(numberFormat(dCessAmt,'C'));
+            $('#' + sQName + key1 + '_EduCessAmt_'+ i).val(numberFormat(dEDAmt,'C'));
+            $('#' + sQName + key1 + '_HEduCessAmt_'+ i).val(numberFormat(dHEDAmt,'C'));
+            $('#' + sQName + key1 + '_NetAmt_'+ i).val(numberFormat(dNetAmt,'C'));
+
+            dAmt = dNetAmt;
+        } else {
+
+            var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+        }
+
+        $('#' + sQName + key1 + '_Amount_' + i).val(numberFormat(dAmt,'C'));
+        if ($('#' + sQName + key1 + '_YesNo_' + i).is(':checked') == true) {
+            sSign = isNullCheck($('#' + sQName + key1 + '_Sign_' + i).val(),'string');
+            if (sSign =="-") dTotalQualAmt = dTotalQualAmt - parseFloatVal(dAmt);
+            else dTotalQualAmt = dTotalQualAmt + parseFloatVal(dAmt);
+        }
+    }
+
+    $('#'+ sQualName + 'TotalAmt_' + key1).val(numberFormat(dTotalQualAmt,'C'));
+    return dTotalQualAmt;
+}
+
+function calQualList() {
+    var qual1 =0;
+    $('#qualClick').attr("disabled", false);
+    $('#QualifierAccTable').html('');
+    var totalQualRows = $('#rowid').val();
+    var Qtemplate = $('#Qual-template').html();
+    var qualCheck=0;
+
+    for (var i = 1; i < totalQualRows; i++) {
+        $.each(qualList,function(m,o) {
+            var qualRowCount = m+1;
+            if ($('#Qual_'+i+'_YesNo_'+qualRowCount).is(':checked') == true) {
+                var vatAmt = $('#Qual_'+i+'_Amount_'+qualRowCount).val();
+                var QualName = $('#Qual_'+i+'_Desc_'+qualRowCount).val();
+                var percent = $('#Qual_'+i+'_ExpPer_'+qualRowCount).val();
+                var qId = $('#Qual_'+i+'_Id_'+qualRowCount).val();
+                var dot = sanitizeNumber(percent,2,true).replace('.','_');
+                var sSign = isNullCheck($('#Qual_'+i+'_Sign_'+qualRowCount).val(), 'string');
+                if (sSign == '+') {
+                    aSign = 1;
+                } else {
+                    aSign = 2;
+                }
+                var commonVar = 'QualifierExist_'+ qId +'_qu_' + aSign + '_per_'+ dot;
+                abc = $('#QualifierExist_'+ qId +'_qu_' + aSign +'_per_'+ dot);
+                if (abc.length) {
+                    var prevAmt= $('#qualamount_' + commonVar).val();
+                    var newAmt=parseFloat(prevAmt)+parseFloat(vatAmt);
+                    $('#qualamount_' + commonVar).val(sanitizeNumber(newAmt,3,true));
+                }
+                else{
+                    $('#QualifierAccTable').append(Qtemplate
+                            .replace(/__8/g, '_' + commonVar)
+                            .replace(/__7/g, '_' + qualCheck)
+                            .replace(/__9/g, '_' + dot)
+                            .replace(/__0/g, '_' + aSign)
+                            .replace(/__/g, '_' + qId)
+                    );
+                    $(".single_dropdown1").select2({
+                    });
+                    abc.val('QualifierExist_'+ qId +'_qu_' + aSign);
+                    $('#qualifiername_' + commonVar).val(QualName);
+                    $('#QualifierId_' + commonVar).val(qId);
+                    $('#percentage_' + commonVar).val(sanitizeNumber(percent,2,true));
+                    $('#sign_' + commonVar).val(sSign);
+                    $('#qualamount_' + commonVar).val(sanitizeNumber(vatAmt,3,true));
+                    var arrkey =  qId + 'AA' + aSign;
+                    var opt = '<option value=""></option>';
+                    if (qual_Acc.length > 0) {
+                        $.each(qual_Acc, function (j, p) {
+                            if(sampleQual[arrkey]== p.AccountId) {
+                                opt += '<option selected value="' + p.AccountId + '">' + p.AccountName + '</option>';
+                            } else {
+                                opt += '<option value="' + p.AccountId + '">' + p.AccountName + '</option>';
+                            }
+                        });
+                    }
+                    $('#accountname_' + commonVar).html(opt).trigger('change');
+                    qualCheck++;
+                    $('#Qrowid').val(qualCheck);
+                }
+            }
+        });
+    }
+    $('.qualamount').each(function (i, o) {
+        var curId = $(this).attr('id');
+        var signId = curId.replace('qualamount','sign');
+        var aSignVal = $('#'+signId).val();
+        if(aSignVal == '-'){
+            qual1 -= parseFloat($(this).val());
+        }
+        else{
+            qual1 += parseFloat($(this).val());
+        }
+    });
+    $('#qutotal').val(sanitizeNumber(qual1, 2));
+
+    nextAccordian(2,1);
+}
+
+function bindTaxCalculation() {
+    var $mainTr = $(".qualChange");
+    $mainTr.change(function (e) {
+        CalculateTax($(this)[0].id);
+    });
+}
+
+function signChange(x) {
+    var $this = $(x);
+    if ($this.hasClass( "fa-plus" )) {
+        $this.removeClass('fa-plus clr-gre');
+        $this.addClass('fa-minus clr-red');
+        var sname= $this[0].id.split('_')[0],
+            key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('-');
+    } else {
+        $this.removeClass('fa-minus clr-red');
+        $this.addClass('fa-plus clr-gre');
+        var sname= $this[0].id.split('_')[0],
+            key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#' +  sname + '_' + key1 + '_Sign_' + key2).val('+');
+    }
+    CalculateQualifier($this[0].id);
+}
+
+function CalculateTax(id) {
+    //if (bReady==false) return;
+    var sname = id.split('_')[0],
+        key1 = id.split('_')[1],
+        key2 = id.split('_')[3];
+
+    var name = '#rateanal_' + key1;
+    if (sname == "QualR")  name = '#rateanalR_' + key1;
+
+    CalculateRate(name);
+}
+
+function bindQualTot_onChange() {
+    $paymentScheduleWrapper.on('change', '[id^="QualTotalAmt_"]', function() {
+        var $tarReceiptTr = $(this).closest('.qualmainTr').prev('tr');
+
+        $tarReceiptTr.find('.sch-tax').val($(this).val());
+
+        calcReceiptTotal($tarReceiptTr.closest('tbody'));
+    });
+}
+function signChange(x) {
+    var $this = $(x);
+    if ($this.hasClass( "fa-plus" )) {
+        $this.removeClass('fa-plus clr-gre');
+        $this.addClass('fa-minus clr-red');
+        var key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#Qual_' + key1 + '_Sign_' + key2).val('-');
+    } else {
+        $this.removeClass('fa-minus clr-red');
+        $this.addClass('fa-plus clr-gre');
+        var key1 = $this[0].id.split('_')[1],
+            key2 = $this[0].id.split('_')[3];
+        $('#Qual_' + key1 + '_Sign_' + key2).val('+');
+    }
+    CalculateTax($this[0].id);
+}
+function computeEval(formula) {
+    with (document.forms){
+        with (Math) {
+            A = eval((formula));
+        }
+    } return A;
+}
+function CalculateTax(id) {
+    var sname= id.split('_')[0],
+        key1 = id.split('_')[1],
+        key2 = id.split('_')[3];
+
+    var name = '#qualifierTable_' + key1;
+    if (sname == "QualR")  name = '#qualifierTable_' + key1;
+    CalculateRate(name);
+}
+
+function nextAccordian(id,s) {
+    if(id==2 && s==1){
+        $(".collapseTwo").attr('id','collapseTwo');
+    }
+    $('#panelheading-' + id).trigger('click');
+}
+
+
+function checkWHQuantity(x){
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowrowid = ids[3];
+    var whrowid = ids[5];
+    var totalQty=0;
+    var add=0;
+    var sub =0;
+
+    var wareCheck = parseInt($x.data('find'));
+    var closingstock=parseFloat($('#wh_' + rowid + '_wbs_' + iowrowid + '_closingstock_' + whrowid).val());
+    var assoc = parseInt($('#wh_' + rowid + '_wbs_' + iowrowid + '_qty_' + whrowid).val());
+    var desc = $('#wh_' + rowid + '_wbs_' + iowrowid + '_desc_' + whrowid).val();
+
+    if (!isNaN(assoc) && !isNaN(closingstock)) {
+        $('input[data-find='+wareCheck+']').each(function() {
+            var cVal = parseFloat($(this).val());
+            if(cVal!=false) {
+                sub+=cVal || 0;
+            }
+        });
+        if(closingstock<sub) {
+            $x.val('');
+            showError($x, 'Kindly Check your Closing-Stock  of'+ desc + '');
+
+        } else {
+            removeError($x);
+        }
+
+        $.each($('input[id*=wh_' + rowid + '_wbs_' + iowrowid + '_qty_'), function (i, o) {
+            add += parseFloatVal($(this).val()) || 0;
+        });
+        $('#iow_' + rowid + '_qty_' + iowrowid).val(add,00);
+        $('#qty_' + rowid).val(add,00);
+
+        $.each($('input[id^=iow_'+rowid+'_qty_'), function (i,o) {
+            var qty = parseFloatVal($(this).val());
+            if(isNaN(qty))
+                qty = 0;
+            totalQty += qty;
+        });
+        var sVal = parseInt($('#stock_' + rowid).attr('data-stock'));
+        if (totalQty > sVal) {
+            showError($('#qty_' + rowid), "Greater than Closing Stock");
+            errorFlag = 1;
+        } else {
+            removeError($('#qty_' + rowid));
+            errorFlag = 0;
+        }
+        $('#qty_'+rowid).val(parseFloatVal(totalQty,0));
+        // calc total amount
+        var rate = parseInt($('#rate_' + rowid).val());
+        var qrate = parseInt($('#rate_' + rowid).val());
+
+        $('#amount_' + rowid).val(parseInt(totalQty * qrate));
+        $('#qrate_' + rowid).val(parseFloatVal(qrate));
+        $('#baseamount_' + rowid).val(parseInt(totalQty * rate));
+        calcTotal();
+        var vname = '#qualifierTable_' + rowid;
+        CalculateRate(vname);
+    }
+}
+function TotAmtValidation(argAdv,argADel,argAWork,argABill,argACer)
+{
+    var bRet=false;
+    var dTot=parseFloat(isNullCheck(argAdv,'number')) + parseFloat(isNullCheck(argADel,'number')) + parseFloat(isNullCheck(argABill,'number')) + parseFloat(isNullCheck(argACer,'number')) + parseFloat(isNullCheck(argAWork,'number'));
+    if(dTot > 100)
+    {
+        bRet = true;
+    }
+    return bRet;
+}
+
+function AmtCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+{
+    var Val,TotPer = 0.0;
+    TotPer = parseFloat(isNullCheck(argAgaDel,'number')) + parseFloat(isNullCheck(argAgaBill,'number')) + parseFloat(isNullCheck(argAgaCer,'number')) + parseFloat(isNullCheck(argAgaWork,'number'));
+    Val = AmountToPer(parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(TotPer,'number')));
+    $('#per_'+key).val(Val);
+}
+function PerCalc(argAdv,argAgaDel,argAgaWork,argAgaBill,argAgaCer,argPer,argTotAmt,key)
+{
+    var Val,TotPer=0.0;
+    TotPer = parseFloat(isNullCheck(argAgaDel,'number'))+parseFloat(isNullCheck(argAgaBill,'number'))+parseFloat(isNullCheck(argAgaCer,'number'))+parseFloat(isNullCheck(argAgaWork,'number'));
+    Val = PerToAmount(parseFloat(isNullCheck(argPer,'number')),parseFloat(isNullCheck(argTotAmt,'number')),parseFloat(isNullCheck(TotPer,'number')));
+    $('#value_'+key).val(Val);
+}
+function PerToAmount(argPer,argAmt,argTotPer)
+{
+    if(parseFloat(isNullCheck(argAmt,'number'))>0 && parseFloat(isNullCheck(argPer,'number')) > 0)
+    {
+        argPer = (parseFloat(isNullCheck(argPer,'number')) / 100) * parseFloat(isNullCheck(argAmt,'number'));
+    }
+    return argPer;
+}
+function AmountToPer(argAmt,argPer,argTotPer)
+{
+    if(parseFloat(isNullCheck(argAmt,'number')) > 0 && parseFloat(isNullCheck(argPer,'number')) >0)
+    {
+        argAmt = ((parseFloat(isNullCheck(argPer,'number')) / parseFloat(isNullCheck(argAmt,'number'))) * 100)
+    }
+    return argAmt;
+}
+function TermsAutoRefresh() {
+    var netAmt = parseFloat(isNullCheck($('#total').val(), 'number'));
+    var iKey = 0;
+    var dFAmt = 0.0;
+    var sTerms = '';
+    $.each($('input[id^=terms_]'), function (i, o) {
+        iKey = iKey + 1;
+        sTerms = $(this).val();
+
+        if (sTerms == 'Advance' || sTerms == 'Against Delivery' || sTerms == "Against Work" || sTerms == "Against Bill" || sTerms == "Against Certification") {
+            dCurPer = parseFloat(isNullCheck($('#per_' + iKey).val(), 'number'));
+            if (parseFloat(isNullCheck(netAmt, 'number')) > 0 && parseFloat(isNullCheck(dCurPer, 'number')) > 0) {
+                dFAmt = (parseFloat(isNullCheck(dCurPer, 'number')) / 100) * parseFloat(isNullCheck(netAmt, 'number'));
+            }
+            $('#value_' + iKey).val(dFAmt);
+        }
+    });
+    var tCount =  $('#termsTable tbody tr').length;
+
+    if(tCount > 1){
+        $('#valuefrom').attr("disabled", true);
+    }
+    else
+    {
+        $('#valuefrom').attr("disabled", false);
+    }
+
+}
+
+function validateForm() {
+
+    //submitForm();
+    if($('.error').length != 0){
+        alert('Kindly Notice the Error Notifications');
+        return false;
+    }
+
+    var tCount =  $('#workorderTable tbody tr').length;
+    if(tCount == 6){
+        alert('Add Resource');
+        return false;
+    }
+
+    var rowCountqty=$('#rowid').val()-1;
+    for (var d = 1; d <= rowCountqty; d++) {
+        var q1 = $.trim($('#qty_' + d).val());
+        var desc1 = $('#desc_' + d).val();
+        if((q1 == 0 || q1 == '') && desc1 != ''){
+            alert('Kindly enter the Quantity or delete the unwanted resource');
+            return false;
+        }
+    }
+
+    if(($('#rate_'+rowCountqty).val()) == 0 && ($('#rate_'+rowCountqty).val()) == '' ){
+        alert('Enter the Rate or delete unwanted Resources');
+        return false;
+    }
+    if(($('#PurchaseAccount_'+rowCountqty).val()) == 0 && ($('#PurchaseAccount_'+rowCountqty).val()) == '' ){
+        alert('Enter the Purchase Account or delete unwanted Resources');
+        return false;
+    }
+
+
+//    if(WarehouseCheck.length > 0) {
+//        for (var i = 1; i <= rowCountqty; i++) {
+//            var whrow = $('#wh_' + i + '_rowid').val();
+//
+//            var rqty = parseFloatVal($('#qty_' + i).val());
+//            var add = 0.0;
+//            for (j = 1; j <= whrow; j++) {
+//                add += parseFloatVal($('#wh_' + i + '_qty_' + j).val());
+//            }
+//            if (parseFloatVal(rqty) != parseFloatVal(add)) {
+//                alert('Kindly adjust the WareHouse Qty');
+//                return false;
+//            }
+//        }
+//    }
+
+//    if(WarehouseCheck.length > 0) {
+//        for (var i = 1; i <= rowCountqty; i++) {
+//            var rqty = 0.0;
+//            var finalQty = parseFloatVal($('#qty_' + i).val());
+//            $.each($('input[id*=iow_' + i + '_qty_'), function (i, o) {
+//                 rqty += parseFloatVal($(this).val()) || 0;
+//            });
+//            if (parseFloatVal(finalQty) != parseFloatVal(rqty)) {
+//                alert('Kindly adjust the WareHouse Qty');
+//                return false;
+//            }
+//        }
+//    }
+    $('#formWrapper').submit();
+    $('#valuefrom').attr("disabled", false);
+}
+$('textarea').focus(function(){
+    $(this).removeAttr('placeholder');
+});
+
+function submitForm() {
+    var checkSubmit = 0;
+    $('select[name*=accountname_]').each(function (i, o) {
+        var id = $(this).attr('name').split('_')[1];
+        var accName = $.trim($(this).val());
+        var qualAmt = parseFloat($('input[name=qualamount_'+id+']').val());
+        if(accName == '' && qualAmt > 0) {
+            checkSubmit = 1;
+        }
+    });
+    if(checkSubmit == '1'){
+        alert('Select Qualifier Account');
+        return false;
+    }
+    else{
+        nextAccordian(3);
+        if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'Y')
+        {
+            $('#sub1').hide();
+        }
+        else if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'P')
+        {
+            $('#sub1').hide();
+        }
+        else{
+            $('#sub1').show();
+        }
+    }
+}
+function checkWarehouse(x){
+    var $x = $(x);
+    var ids = $x[0].id.split('_');
+    var rowid = ids[1];
+    var iowrowid = ids[3];
+
+    $('#whTable_' + rowid + '_wbs_' + iowrowid + '_whreqno').show();
+}
+function isqtyDecimal(evt, x) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (evt.key =="%") charCode=0;
+    if (evt.key =="#") charCode=0;
+    if (
+        (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // �.� CHECK DOT, AND ONLY ONE.
+        (charCode < 48 || charCode > 57) && charCode!=39 && charCode!=37 && charCode!=8 && charCode!=35 && charCode!=9)
+        return false;
+
+    var rowid = $(x)[0].id.split('_')[1];
+
+    var iowrowid=0;
+    var reqDec = parseInt($('#iow_'+ rowid +'_rowid').val());
+
+    if(reqDec > 0){
+        $('#qty_' + rowid).attr('readonly',true);
+    }
+    else{
+        $('#qty_' + rowid).attr('readonly',false);
+    }
+
+    return true;
+}
+$( document ).ready(function() {
+    if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'Y')
+    {
+        $('#sub1').hide();
+    }
+    else if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'P')
+    {
+        $('#sub1').hide();
+    }
+    else{
+        $('#sub1').hide();
+    }
+
+});
+function panel1click()
+{
+    if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'Y')
+    {
+        $('#sub1').hide();
+    }
+    else if('<?php echo (isset($Approve)) ? $Approve : '';?>' == 'P')
+    {
+        $('#sub1').hide();
+    }
+    else{
+        $('#sub1').show();
+    }
+}
+
+function getAccountData(x){
+    if($(x).val() != ''){
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[2];
+        var iowrowid = ids[4];
+        var qper = ids[6];
+        var fa=ids[7];
+
+        var accId = $('#accountname_' + 'QualifierExist_' + rowid + '_qu_' + iowrowid + '_per_' + qper + '_' + fa).val();
+        var arrkey = rowid + 'AA' + iowrowid;
+        sampleQual[arrkey]=accId;
+    }
+}
+</script>

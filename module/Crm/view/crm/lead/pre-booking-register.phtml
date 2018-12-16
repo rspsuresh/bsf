@@ -1,0 +1,213 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style type="text/css">
+    .fixed-action-btn ul			{top:5px;}
+    /*--------------Jqx Grid jqx All-------------------*/
+    #treeGrid									{min-height:200px !important;}
+    #treeGrid .jqx-grid-header 					{height:60px !important;}
+    .jqx-grid-groups-row						{padding-left:5px !important;}
+    .jqx-grid-pager-input						{padding: 2px; text-align: center !important; width: 35px;}
+    .jqx-dropdownlist-state-normal				{display: block;  height: 16px !important;margin-top: 0;  padding-bottom: 2px !important;padding-top: 2px !important; width: 40px;}
+    /*.jqx-button									{cursor: pointer;float: right;margin-right: 3px !important;margin-top: 0 !important;padding: 0 !important;width: 20px !important;}*/
+    .jqx-button > .jqx-icon-arrow-left,
+    .jqx-button >.jqx-icon-arrow-right			{height: 21px !important;margin-left: 0 !important;width: 20px !important;}
+    .jqx-listitem-element						{height: 25px !important;}
+    /*.jqx-input									{height: 25px !important; margin:2px 4px !important;}*/
+    .jqx-grid-pager .jqx-grid-pager-input		{height:20px !important; margin:0px 4px !important;}
+    #treeGrid .jqx-grid-cell-right-align 		{text-align:right !important; padding-right:8px;}
+    #treeGrid .jqx-grid-cell-left-align 		{padding-left:8px;}
+    .jqx-grid-column-menubutton::after			{left:4px;top:10px;}
+    .jqx-dropdownlist-content span				{top:-1px !important;}
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="col-lg-12 padlr0">
+                <h1>Unit PreBooking</h1>
+                <div class="fixed-action-btn padtop0">
+                    <a class="btn-floating btn-large"><i class="fa fa-paperclip"></i></a>
+                    <ul>
+                        <li>
+                            <a class="btn-floating" href="javascript:void(0);" id="excelExport" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Sample">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 padlr0 clear">
+                <div class="col-lg-3 padlr0">
+                    <div class="radio_check">
+                        <p>
+                            <input type="checkbox" id="cfilter" value="filter" onchange="changeGrid()"/>
+                            <label for="cfilter" class="ripple ">Conditional Filter</label>
+                        </p>
+                    </div>
+                </div>
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="mdlDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Please provide a reason for deleting data</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDelete" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function() {
+        var $treeGrid = $('#treeGrid');
+        var source = {
+            localdata:<?php echo (isset($jsonPreBookings))?$jsonPreBookings:'[]'; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'PreBookingId', type: 'number' },
+                { name: 'BookingNo', type: 'string' },
+                { name: 'BookingDate', type: "date", format: 'MM/dd/yyyy' },
+                { name: 'UnitNo', type: 'string' },
+                { name: 'UnitId', type: 'string' },
+                { name: 'LeadName', type: 'string' },
+                { name: 'PRate', type: 'number' },
+                { name: 'LeadId', type: 'number' },
+                { name: 'NetAmount', type: 'string' },
+                { name: 'ProjectName', type: 'string' }
+
+
+                ],
+                id: 'PreBookingId'
+            };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $treeGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            //rowsheight:60,
+            autorowheight: true,
+            filterable: true,
+            sortable: true,
+            //filtermode: 'advanced',
+            columnsResize: true,
+            showfilterrow: true,
+            ready:function(){
+                var localizationobj = {};
+                localizationobj.emptydatastring = "No Unit Transfers found!";
+                $treeGrid.jqxGrid('localizestrings', localizationobj);
+            },
+            source:dataAdapter,
+            columns: [
+                { text: 'PreBookingId', dataField: 'PreBookingId',hidden: true, filterable: false},
+                { text: 'LeadId', dataField: 'LeadId',hidden: true, filterable: false},
+                { text: 'BookingNo', dataField: 'BookingNo',width:'10%'},
+                { text: 'BookingDate', filtertype: 'date', dataField: 'BookingDate',hidden: true, cellsformat: 'dd-MM-yyyy' },
+                { text: 'UnitName', dataField: 'UnitNo',width:'10%'},
+                { text: 'UnitId', dataField: 'UnitId',width:'10%',hidden: true},
+                { text: 'Buyer Name', dataField: 'LeadName',width:'20%'},
+                { text: 'Project Name', dataField: 'ProjectName',width:'20%'},
+                { text: 'Rate', dataField: 'PRate',width:'10%'},
+                { text: 'Net Amount', dataField: 'NetAmount'},
+
+                { text: 'Action', sortable: false, filterable: false,width:'10%',align: 'left',
+                    cellsrenderer: function (row) {
+                        var preBooklingId = $treeGrid.jqxGrid('getCellValue', row, 'PreBookingId'),
+                            leadId = $treeGrid.jqxGrid('getCellValue', row, 'LeadId'),
+                            unit = $treeGrid.jqxGrid('getCellValue', row, 'UnitId');
+                           // booking = $treeGrid.jqxGrid('getCellValue', row, 'BookingDate');
+                        var btn_str = '<a title="Edit" href="'+ getBaseURL() + 'crm/lead/unit-pre-booking/'+leadId+'/'+unit+'/'+0+'/'+0+'/'+preBooklingId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        btn_str += '<a title="Delete" onclick="payRowDelete(' + row + ');return false;"><i class="fa fa-times reg-icon"></i></a>';
+                        return btn_str;
+
+                    }
+                }
+            ]
+        });
+    });
+
+    $('#btnDelete').on('click', function () {
+        //alert("1");
+        var remarks = $("#remarks").val();
+        if(remarks.length == 0) {
+            showError($("#remarks"), 'Required!');
+            return;
+        } else{
+            removeError($("#remarks"));
+
+        $('#mdlDelete').modal('hide');}
+        var rowData =$('#treeGrid').jqxGrid('getrowdata', $('#mdlDelete').data('row'));
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/preBookDelete',
+            type: 'POST',
+            async: false,
+            data: {"RegisterId": rowData.PreBookingId, "Remarks": remarks,"UnitId": rowData.UnitId},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $('#treeGrid').jqxGrid("deleterow", rowData.PreBookingId);
+                else
+                    alert('Failed to delete!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete!');
+            }
+        });
+        $("#remarks").val('');
+    });
+    function payRowDelete(row) {
+        var rowData =$('#treeGrid').jqxGrid('getrowdata', row);
+        $('#mdlDelete').data('row', row).modal('show');
+        $("#remarks").val('');
+    }
+    $("#excelExport").click(function () {
+        $("#treeGrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+    });
+    function changeGrid()
+    {
+        if($("#cfilter").is(':checked')) {
+            $("#treeGrid").jqxGrid({
+                showfilterrow: false
+            });
+            $("#treeGrid .jqx-grid-header").css("cssText", "height: 40px !important;");
+        } else {
+            $("#treeGrid").jqxGrid({
+                showfilterrow: true
+            });
+
+        }
+    }
+
+</script>

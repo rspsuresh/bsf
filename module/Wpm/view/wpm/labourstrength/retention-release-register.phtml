@@ -1,0 +1,169 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/highcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basepath(); ?>/library/Highcharts-4.2.3/js/modules/exporting.js"></script>
+<style>
+.pagination-lg > li > a, .pagination-lg > li > span {font-size:15px !important;padding:5px 15px !important;}
+#treeGrid .jqx-grid-header 							{height:75px !important;}
+.text-right 										{color:#666;font-size: 15px;}
+</style>
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/pie.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Retention Release Register</h1>
+                <div class="col-lg-6">
+                    <form method="post" id="formWrapper">
+                    </form>
+                </div>
+                <div class="col-lg-12">
+                    <div class="col-lg-12 col-lg-offset-0">
+                        <div class="table-responsive clear animated fadeInUp">
+                            <div id="treeGrid"> </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $treeGrid = $("#treeGrid");
+
+    $(document).ready(function () {
+        var data = <?php echo (isset($rrRegister)) ? json_encode($rrRegister) : ''; ?>;
+        var source =
+        {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                { name: 'RRRegisterId', type: 'number' },
+                { name: 'RRNo', type: 'string' },
+                { name: 'RRDate', type: 'date' },
+                { name: 'CostCentreName', type: 'string' },
+                { name: 'VendorName', type: 'string' },
+                { name: 'OrderNo', type: 'string' },
+                { name: 'OrderType', type: 'string' },
+                { name: 'NetAmount', type: 'string' },
+                { name: 'Approve', type: 'string' },
+            ],
+            id: 'RRRegisterId'
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.RRRegisterId));
+        };
+        $treeGrid.jqxGrid(
+            {
+                width: '100%',
+                theme: 'bootstrap',
+                pagerButtonsCount: 6,
+                source: dataAdapter,
+                pageable: true,
+                sortable: true,
+                filterable:true,
+                altrows: true,
+                enabletooltips: true,
+                autoheight: true,
+                editable: false,
+                selectionmode: 'singlerow',
+                showfilterrow: true,
+                rowdetails: true,
+                initrowdetails: initrowdetails,
+                rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:2px solid #5bc0de;'></div>", rowdetailsheight:400},
+                columns: [
+                    { text: 'RRRegisterId', datafield: 'RRRegisterId', hidden: true, filterable: false},
+                    { text: 'RR Date', datafield: 'RRDate', width: '10%', editable: false ,filtertype:'date', cellsformat: 'dd-MM-yyyy'},
+                    { text: 'RR No', datafield: 'RRNo', width: '10%', editable: false },
+                    { text: 'Cost Centre', datafield: 'CostCentreName', width: '15%', editable: false },
+                    { text: 'Vendor', datafield: 'VendorName', width: '15%', editable: false },
+                    { text: 'Order No', datafield: 'OrderNo', width: '10%', editable: false },
+                    { text: 'Order Type', datafield: 'OrderType', width: '10%', editable: false },
+                    { text: 'Amount', datafield: 'NetAmount', width: '10%', editable: false, align:'right',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-right" style="margin: 6px 10px 0 0;">' +sanitizeNumber($('#treeGrid').jqxGrid('getCellValue', row, 'NetAmount'),2, true) + '</div>';
+                        }
+                    },
+                    { text: 'Approve', datafield: 'Approve', width: '10%', editable: false, align:'center',
+                        cellsrenderer: function (row) {
+                            return '<div class="text-center" style="margin: 6px 10px 0 0;">' +$('#treeGrid').jqxGrid('getCellValue', row, 'Approve') + '</div>';
+                        }
+                    },
+                    { text: 'Action', sortable: false, filterable: false, align: 'left', width: '10%',
+                        cellsrenderer: function (row) {
+                            var rrRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'RRRegisterId'),
+                                approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve'),
+                                editLink = '<a title="Edit" href="'+ getBaseURL() + 'wpm/labourstrength/retention-release/'+rrRegisterId+'" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                            if(approve == 'No') {
+                                editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="deleteRR(event,' + row + ')"><i class="fa fa-trash-o reg-icon"></i></button>';
+                            }
+                            return editLink;
+                        }
+                    }
+                ]
+            });
+    });
+    $('#treeGrid').on('rowexpand', function (event) {
+        var prev_row = $('#treeGrid').jqxGrid('selectedrowindexes');
+        if (prev_row != '') {
+            for (var i = 0; i < prev_row.length; i++) {
+                $('#treeGrid').jqxGrid('hiderowdetails', prev_row[i]);
+            }
+        };
+        var index = $('#treeGrid').jqxGrid('getrowboundindex', event.args.rowindex);
+        $('#treeGrid').jqxGrid({selectedrowindexes: [index]});
+    });
+
+    $('#treeGrid').on('rowcollapse', function (event) {
+        $('#treeGrid').jqxGrid('clearselection');
+    });
+
+    function deleteRR(event, row)
+    {
+        event.preventDefault();
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        if (confirm("Do you want to delete?")) {
+            $.ajax({
+                url: getBaseURL() + 'wpm/labourstrength/delete-rr',
+                type: 'POST',
+                data: "rrRegId="+ rowData.RRRegisterId,
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the request!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        }
+    }
+    function renderRowDetail(id) {
+        $.ajax({
+            url: getBaseURL()+'wpm/template/get-retention-release',
+            type: 'POST',
+            data: {RRId: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+
+</script>

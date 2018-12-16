@@ -1,0 +1,684 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css'; ?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/wpm.css'; ?>"/>
+<style>
+    .back-img .item h2 {
+        color: #333;
+        font-size: 16px !important;
+    }
+
+    .top-conts span {
+        color: #ff0000;
+        font-size: 14px !important;
+        padding-left: 6px;
+        font-weight: 600
+    }
+
+    .top-conts {
+        margin: 0
+    }
+
+    .ad-btn {
+        background: #3399ff;
+        text-shadow: 0 0 1px #546082;
+        right: 4px;
+        text-align: center;
+        padding-top: 2px;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px #3399ff;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        color: #fff;
+        position: absolute
+    }
+    .jqx-checkbox-check-indeterminate{background:none !important; }
+    #resourceGrid .jqx-grid-header {
+        height: 75px !important;
+        font-size: 12px;
+    }
+    #newlabgrid .jqx-grid-header {
+        height: 75px !important;
+        font-size: 12px;
+    }
+    #prelabgrid .jqx-grid-header {
+        height: 75px !important;
+        font-size: 12px;
+    }
+    #ltypepickgrid .jqx-grid-header {
+        height: 75px !important;
+        font-size: 12px;
+    }
+
+    #ltypepickgrid .jqx-checkbox {
+        border: 1px solid;
+    }
+
+    #ltypepickgrid .jqx-grid-header {
+        height: 75px !important;
+        font-size: 12px;
+    }
+
+    #ltypepickgrid .jqx-checkbox {
+        border: 1px solid;
+    }
+
+    .lab-natt textarea {
+        height: 100px
+    }
+
+    ;
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="col-lg-12 clear">
+            <div class="row">
+                <form method="post"   id="formWrapper">
+                    <div id="stageOne"
+                         class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider back-img">
+                        <div class="col-lg-4 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8">
+                            <div class="col-lg-8 col-lg-offset-4">
+                                <span class="date_icon wmp-date"><i class="fa fa-calendar"></i></span>
+                                <input type="text"  id="TransferDate" name="TransferDate" class="date_picker parnt-text"
+                                       value="<?php echo date("d-m-Y"); ?>" readonly/>
+                                <div id="resourceInputsWrapper" class="hide"></div>
+                            </div>
+                        </div>
+                        <?php
+                        if(isset($labourres) && count($labourres) >0)
+                        {
+                            foreach($labourres as $result)
+                            { ?>
+                                <input type="hidden" name="resourceIds[]" id="listresourse" class="resourceIds" value="<?php echo $result['LabourId']; ?>"/>
+                            <?php  }
+                        }
+                        ?>
+                        <div class="clearfix"></div>
+                        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" role="listbox">
+                                <div class="item active">
+                                    <div class="col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-12 top-sl-10">
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input class="parent_text form-control lbl_move" type="text"
+                                                   name="fromcostCentreName" id="fromcostCentreName"
+                                                   label="Select From CostCentre"/>
+                                            <input type="hidden" id="fromcostCentreId" name="fromcostCentreId" value="<?php if(isset($transferregister)){
+                                                echo $transferregister->FCostCentreIId;
+                                            } ?>"/>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <input class="parent_text form-control lbl_move" type="text"
+                                                   name="tocostCentreName" id="tocostCentreName"
+                                                   label="Select To CostCentre"/>
+                                            <input type="hidden" id="tocostCentreId" name="tocostCentreId" value="<?php if(isset($transferregister)){
+                                                echo $transferregister->TCostCentreId;
+                                            } ?>"/>
+                                            <input type="hidden" name="tranferlabour" id="tranferlabour">
+                                            <input type="hidden" name="tranferlabourcount" id="tranferlabourcount">
+                                            <input type="hidden" name="transferid" value="<?php echo $transferId; ?>">
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group">
+                                            <select class="form-control single_dropdown lbl_move"
+                                                    label="Select Transfer Type" style="width:100%;" name="transfertype"
+                                                    id="CType"
+                                                    onchange="Transfertypechange(this)">
+                                                <option value=""></option>
+                                                <option value="P">Permanent</option>
+                                                <option value="T">Temporarily</option>
+                                            </select>
+                                            <div class="error_message"><p>Required</p></div>
+                                        </div>
+                                        <div class="col-lg-8 col-lg-offset-0 col-md-8 col-md-offset-0 col-sm-8 col-sm-offset-0 col-xs-12 form-group"
+                                             id="temporary" style="display:none;">
+                                            <div style="padding-left:0px !important;"
+                                                 class="col-lg-6 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                <div class="polymer-form"><input type="text" id="FromDate"
+                                                                                 name="FromDate" label="From Date"
+                                                                                 class="form-control lbl_move date_picker">
+                                                    <div class="bar"
+                                                         style="background-color: rgb(204, 204, 204); height: 2px;">
+                                                        <div class="bar-in"
+                                                             style="background-color: rgb(26, 90, 148); height: 2px;"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="error_message"><p>Required</p></div>
+                                            </div>
+                                            <div style="padding-right:0px !important;"
+                                                 class="col-lg-6 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                                                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                <div class="polymer-form"><input type="text" id="ToDate" name="ToDate"
+                                                                                 label="To Date"
+                                                                                 class="form-control lbl_move date_picker">
+                                                    <div class="bar"
+                                                         style="background-color: rgb(204, 204, 204); height: 2px;">
+                                                        <div class="bar-in"
+                                                             style="background-color: rgb(26, 90, 148); height: 2px;"></div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="error_message"><p>Required</p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="item min_h550" style="margin-top:0">
+                                    <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-12 top-sl-10"
+                                         style="margin-top:0">
+                                        <div class="col-lg-6 row">
+                                            <div class="top-conts animated fadeInRight col-lg-12">
+                                                <h2 style="padding-left:0px;">From CostCentre Name</h2>
+                                                <span id="fromnameofcostcentre"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 row">
+                                            <div class="top-conts animated fadeInRight col-lg-12">
+                                                <h2 style="padding-left:0px;">To CostCentre Name</h2>
+                                                <span id="tonameofcostcentre"></span>
+                                            </div>
+                                        </div>
+                                        <div id="resourceGrid"></div>
+                                    </div>
+                                </div>
+                                <ul class="prev_next wpm-next col-lg-7 col-lg-offset-5 col-md-7 col-md-offset-5 col-sm-7 col-sm-offset-5 col-xs-7 col-xs-offset-3">
+                                    <li id="backPrev"><a href="javascript:void(0);" onclick="return goBack();"><span><i
+                                                    class="fa fa-arrow-left"></i></span> Back</a></li>
+                                    <li><a href="javascript:void(0);" role="button" onclick="return validateLabStg();">Next
+                                            <span><i class="fa fa-arrow-right"></i></span></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+                <div class="col-lg-12 clear animated fadeInUp">
+                    <div class="col-lg-4" style="float:right;" id="newlabgrid"></div>
+                    <div class="col-lg-4" style="float:left;" id="prelabgrid">
+                    </div>
+                    <div class="clearfix"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="submitDiv" class="col-lg-12 savebtn_area" style="display:none;">
+    <ul>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" data-toggle="tooltip" class="ripple"
+                                                 title="Submit" onclick="return submitForm();">Submit</a>
+        <li class="cancel_btn float_r"><a href="<?php echo $this->basePath() . '/wpm/labourstrength/labourtransfer'; ?>"
+                                          data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+<script>
+    var arrCostCentre = <?php echo (isset($CostCentre)) ? json_encode($CostCentre) : '[]'; ?>;
+    var prelablist=[];
+    var newlablist=[];
+    bindFromCostCentreAutoComplete();
+    $("#backPrev").hide();
+
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    var sel_resource_count = 0;
+    var $resourceGrid = $("#resourceGrid");
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            {name: 'LabourId', type: 'number'},
+            {name: 'LabourName', type: 'string'},
+            {name: 'Contractor', type: 'string'},
+            {name: 'ResourceName', type: 'string'},
+            {name: 'IsCheck', type: 'bool'},
+        ],
+        id: 'LabourId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+    $(function () {
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight: true,
+            source: resourceAdapter,
+            filterable: true,
+            showfilterrow: true,
+            editable: true,
+            columns: [
+                {dataField: 'LabourId', hidden: true},
+                {
+                    text: '',
+                    dataField: 'IsCheck',
+                    columntype: 'checkbox',
+                    filterable: false,
+                    align: 'center',
+                    width: '10%'
+                },
+                {text: 'Labour Name', dataField: 'LabourName', width: '90%', editable: false},
+            ]
+        });
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            if (args.newvalue === true)
+                sel_resource_count++;
+            else
+                sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+    });
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.IsCheck === true) {
+                $inputs += '<input type="hidden" name="resourceIds[]" id="listresourse" class="resourceIds" value="' + row.uid + '"/>';
+            }
+        }
+        $('#resourceInputsWrapper').html($inputs);
+    }
+
+    $(function () {
+        $('.ripple').materialripple();
+    });
+
+    var $fromcostCentreId = $('#fromcostCentreId'),
+        $tocostCentreId = $('#tocostCentreId'),
+        $fromcostcentrename = $('#fromcostCentreName'),
+        $tocostcentrename = $('#tocostCentreName'),
+        $transType=$('#CType'),
+        $fromdateform=$('#FromDate'),
+        $todateform=$('#ToDate');
+
+
+    function validateLabStg() {
+        //$('.error_message').hide();
+        var FromCostCentreId = isNullCheck($fromcostCentreId.val(), 'number');
+        var ToCostCentreId = isNullCheck($tocostCentreId.val(), 'number');
+        var FromCostCentreName = isNullCheck($fromcostcentrename.val(), 'string');
+        var ToCostCentreName = isNullCheck($tocostcentrename.val(), 'string');
+        var CType = isNullCheck($('#CType').val(), 'string');
+        var currentIndex = $('#carousel-example-generic .item.active').index();
+        var projName = isNullCheck($('#costCentreName').val(), 'string');
+        var frmdate=isNullCheck($fromdateform.val(), 'string');
+        var todate=isNullCheck($todateform.val(), 'string');
+        $("#nameofproject").text(projName);
+        if (currentIndex == 0) {
+            if (FromCostCentreId == 0) {
+                $fromcostCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            }
+            else if (ToCostCentreId == 0) {
+                $tocostCentreId.closest('.form-group').find(".error_message").show();
+                return;
+            }
+            else if(CType =='')
+            {
+                alert('Please Select Transfer Type');
+                $transType.closest('.form-group').find(".error_message").show();
+                return;
+            }
+            else if(CType =='T')
+            {
+                if(frmdate=='')
+                {
+                    $fromdateform.closest('.form-group').find(".error_message").show();
+                    return;
+                }
+                else if(todate =='')
+                {
+                    $todateform.closest('.form-group').find(".error_message").show();
+                    return;
+                }
+            }
+
+            getValueOfSlider('next');
+            $('#carousel-example-generic').carousel({
+                slide: "next"
+            });
+            $('#fromnameofcostcentre').text(FromCostCentreName);
+            $('#tonameofcostcentre').text(ToCostCentreName);
+            bindLabournames(FromCostCentreId);
+
+        }
+        else if (currentIndex == 1) {
+            var resourceIds = '';
+            $('.resourceIds').each(function () {
+                resourceIds += $(this).val() + ',';
+            });
+            $.post(getBaseURL() + 'wpm/labourstrength/labourtransfer', {
+                    ccId: FromCostCentreId,
+                    resourceIds: resourceIds,
+                    type: 'reslabour'
+                },
+                function (data) {
+                    prelablist=data;
+                    prelablistgridshow(prelablist,FromCostCentreId,resourceIds);
+                });
+            showBack("e");
+            $('#fromcostname').text(FromCostCentreName);
+            $('#tocostname').text(ToCostCentreName);
+            $('#ctype').text(CType);
+            if ($('#ctype').text() == 'P') {
+                $('#ctype').text('Permanent');
+                $('.temporarydate').hide();
+            }
+            else {
+                $('#ctype').text('Temporary');
+                $('#fromDate').val($fromdateform.val());
+                $('#toDate').val($todateform.val());
+            }
+        }
+
+    }
+    function prelablistgridshow(prelablist,costcentreid,resourceIds)
+    {
+
+        var sel_resource_count = 0;
+        var $resourceGrid = $("#prelabgrid");
+        var resourceSource = {
+            localdata:prelablist,
+            dataType: "json",
+            dataFields: [
+                {name: 'LabourId', type: 'number'},
+                {name: 'LabourName', type: 'string'},
+            ],
+            id: 'LabourId'
+        };
+        var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+        $(function () {
+            $resourceGrid.jqxGrid({
+                width: '100%',
+                pageable: true,
+                rowsheight: 35,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight: true,
+                source: resourceAdapter,
+                filterable: true,
+                showfilterrow: true,
+                editable: true,
+                columns: [
+                    {dataField: 'LabourId', hidden: true},
+                    {text: 'Labour Transfer List ', dataField: 'LabourName',filtertype: 'textbox', width: '100%', editable: false},
+                    {text: 'Lab', dataField: 'LabourName',filtertype: 'textbox', width: '100%', editable: false},
+                ]
+            });
+        });
+        $.post(getBaseURL() + 'wpm/labourstrength/labourtransfer', {
+                ccId: costcentreid,
+                resourceIds: resourceIds,
+                type: 'newlabour'
+            },
+            function (data) {
+                newlablist=data;
+                newlablistgridshow(newlablist);
+            });
+    }
+    function newlablistgridshow(newlablist)
+    {
+        var sel_resource_count = 0;
+        var $resourceGrid = $("#newlabgrid");
+        var resourceSource = {
+            localdata:newlablist,
+            dataType: "json",
+            dataFields: [
+                {name: 'LabourId', type: 'number'},
+                {name: 'LabourName', type: 'string'},
+            ],
+            id: 'LabourId'
+        };
+        var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+        $(function () {
+            $resourceGrid.jqxGrid({
+                width: '47%',
+                pageable: true,
+                rowsheight: 35,
+                selectionMode: 'singleRow',
+                pagerButtonsCount: 6,
+                autoheight: true,
+                source: resourceAdapter,
+                filterable: true,
+                showfilterrow: true,
+                editable: true,
+                columns: [
+                    {dataField: 'LabourId', hidden: true},
+                    {
+                        text: '',
+                        dataField: 'IsCheck',
+                        columntype: 'checkbox',
+                        filterable: false,
+                        align: 'center',
+                        width: '10%'
+                    },
+                    {text: 'Labour Available In '+$('#fromcostname').text(), dataField: 'LabourName', width: '90%', editable: false}
+                ]
+            });
+
+            $resourceGrid.bind('cellvaluechanged', function (event) {
+                var column = args.datafield;
+                var row = args.rowindex;
+                var value = args.newvalue;
+                if (value == true) {
+                    var rowData = $resourceGrid.jqxGrid('getrowdata', row);
+                    var arr = [];
+                    arr.push({
+                        LabourId: rowData.LabourId,
+                        LabourName: rowData.LabourName
+                    });
+                    $("#prelabgrid").jqxGrid('addrow', null, arr);
+                    $resourceGrid.jqxGrid("deleterow", rowData.uid);
+                }
+            });
+        });
+    }
+
+    function deleteLabour(event, row) {
+        event.preventDefault();
+        if (confirm("Do you want to delete?")) {
+            var rowData = $("#prelabgrid").jqxGrid('getrowdata', row);
+
+            var arr = [];
+            arr.push({
+                LabourId: rowData.LabourId,
+                LabourName: rowData.LabourName
+            });
+            $("#newlabgrid").jqxGrid('addrow', null, arr);
+            if($('input[class=resourceIds][value='+rowData.uid+']').remove())
+            {
+                deletedata(rowData.uid);
+            }
+        }
+    }
+    function deletedata(rowuid)
+    {
+        var result = prelablist.filter(function(x){return x.LabourId !==  rowuid });
+        prelablist=result;
+        $("#prelabgrid").jqxGrid("deleterow", rowuid);
+    }
+
+    function bindLabournames(cid) {
+        $('.loading_area').show();
+        $.ajax({
+            url: getBaseURL() + 'wpm/labourstrength/labourtransfer',
+            type: "post",
+            data: {ccId: cid, type: 'labourlist'},
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                if (jqXHR.status == 200) {
+                    resourceSource.localdata = data;
+                    resourceAdapter.dataBind();
+                    $('#NoOfSelResource').html(0);
+                    /*$('#carousel-example-generic').carousel({
+                     slide: "next"
+                     });*/
+                    $('.loading_area').hide();
+                }
+            }, error: function () {
+                $('.loading_area').hide();
+            }
+        });
+    }
+
+    function goBack() {
+        $('#carousel-example-generic').carousel({
+            slide: "prev"
+        });
+        getValueOfSlider('prev');
+    }
+
+    function getValueOfSlider(slType) {
+        var curIndex = $('#carousel-example-generic .item.active').index();
+        if (slType == 'next') {
+            $("#backPrev").show();
+        }
+        if (curIndex == 1 && slType == 'prev') {
+            $("#backPrev").hide();
+        } else {
+            $("#backPrev").show();
+        }
+    }
+
+    function showBack(sbType) {
+        if (sbType == 'a') {
+            $('#submitDiv').hide();
+            $('#stageTwo').hide();
+            $('#stageOne').show();
+            $('#titleTag').addClass('text-center');
+        } else {
+            $('#stageOne').hide();
+            $('#stageTwo').show();
+            $('#submitDiv').show();
+            $('#titleTag').removeClass('text-center');
+        }
+    }
+
+
+    function bindFromCostCentreAutoComplete() {
+        $('#fromcostCentreName').autocomplete({
+            lookup: arrCostCentre,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $this = $(this);
+                    $('#fromcostCentreId').val(suggestion.data);
+                    //bindTypeList();
+                    bindToCostCentreAutoComplete();
+                    $(this).removeClass('error');
+                }
+
+            }, onSearchStart: function (suggestion) {
+                $('#fromcostCentreId').val('');
+                $(this).removeClass('error');
+
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $('#costCentreId').val('');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+    function bindToCostCentreAutoComplete() {
+        var fromcostcenterid = $('#fromcostCentreId').val();
+        var arrCostCentrenew = $.grep(arrCostCentre, function (element, index) {
+            return element.data != fromcostcenterid;
+        });
+        $('#tocostCentreName').autocomplete({
+            lookup: arrCostCentrenew,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }, onSelect: function (suggestion) {
+                if (suggestion) {
+                    var $this = $(this);
+                    $('#tocostCentreId').val(suggestion.data);
+                    //bindTypeList();
+                    bindToCostCentreAutoComplete();
+                    $(this).removeClass('error');
+                }
+
+            }, onSearchStart: function (suggestion) {
+                $('#tocostCentreId').val('');
+                $(this).removeClass('error');
+
+            }, onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $('#tocostCentreId').val('');
+                } else $(this).removeClass('error');
+            }
+        });
+    }
+
+
+    // new lines
+    function Transfertypechange(temp) {
+        if (temp.value == 'T') {
+            $('#temporary').show();
+        }
+        else {
+            $('#temporary').hide();
+        }
+    }
+
+    function submitForm()
+    {
+
+        var rows = $('#prelabgrid').jqxGrid('getrows');
+        var param = [];
+        for(var i = 0; i < rows.length; i++)
+        {
+            var rowData = $("#prelabgrid").jqxGrid('getrowdata', i);
+            param.push({
+                LabourId:rowData.LabourId ,
+                LabourName:rowData.LabourName
+            });
+        }
+
+        var strvalue=JSON.stringify(param);
+        $('#tranferlabour').val(strvalue);
+        $('#formWrapper').submit();
+
+    }
+
+    /* For Type */
+    <!---->
+    <?php if(isset($transferregister)) { ?>
+
+    $('#stageOne').hide();
+    $('#stageTwo').show();
+    $('#submitDiv').hide();
+    $("#newlabgrid").hide();
+
+    prelablist= <?php echo (isset($updateprelablist)) ? json_encode($updateprelablist) : '[]'; ?>;
+
+    var FromcostCentreid=$fromcostCentreId.val();
+    var resourceIds = '';
+    $('.resourceIds').each(function () {
+        resourceIds += $(this).val() + ',';
+    });
+    prelablistgridshow(prelablist,FromcostCentreid,resourceIds);
+    <?php }?>
+</script>

@@ -1,0 +1,252 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+    	<div class="row">
+			<!-- newly addind Div-->
+			<form action="" method="post" id="ExtraForm" name="ExtraForm">
+                <div id="Step1">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Request Extra Items</h1>
+                    </div>
+                    <div class="col-lg-12 clear padlr0">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <div class="col-lg-offset-3">
+                                <label for="booking_no" class="bk_lbl bk_lbl_inpt">ExtraItem Request No <span class="colon_r">:</span></label>
+                                <input type="text" class="bk_lbl_inpt inputbg_ef bk_inpt1" <?php if ($arrVNo["genType"] == true){ ?> readonly <?php } ?> name="ExtraRequestNo" id="booking_no" value="<?php if ($arrVNo["genType"] == true){ echo $arrVNo['voucherNo']; } else { echo "";}?>" /> 
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 col-lg-pull-1 col-md-pull-1 col-sm-pull-1">
+                            <div class="col-lg-offset-5">
+                                <label for="request_date" class="bk_lbl bk_lbl_inpt"><span class="bkspan_calendar"><i class="fa fa-calendar-o"></i></span> Extra Bill Date <span class="colon_r">:</span></label>
+                                <input type="text" class="date_picker bk_lbl_inpt bk_inpt inputbg_ef" name="request_date" id="request_date" value="<?php echo date('d-m-Y'); ?>" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 clear">
+                        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                            <div class="row form-group">   
+                                <div class="form-group col-lg-12 m3_auto padtop20">
+                                    <input type="text" name="unitname" id="unitname" class="form-control lbl_move" label="Project/Unit/Buyer" value="" />
+                                    <input type="hidden" name="unitId" id="unitid" value=""/>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 savebtn_area no_border">
+                                <ul>
+                                    <li class="save_btn m_auto">
+                                        <a href="javascript:void(0);" class="ripple" onclick="show_step2();">Continue</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="Step2">
+                    <div class="col-lg-12">
+                        <h1 class="txt_center">Select Required ExtraItems</h1>
+                    </div>
+                    <div class="col-lg-12 clear">
+						<div class="table-responsive">
+						<!--div id='jqxWidget'-->
+							<div id="extra-item-table"></div>
+							<input type="hidden" value="" id="hiddenTypeId" name="ExtraItemId"/>
+						<!--/div-->
+						</div>
+					</div>
+                    <div class="col-lg-12 savebtn_area clear">
+                        <ul>
+                            <li class="dropdown save_btn float_l">
+                                <a href="javascript:void(0);" onclick="$('#Step1').show(); $('#Step2').hide();" class="ripple">back</a>
+                            </li>
+                            <li class="dropdown save_btn float_r">
+                            	<input name="submiting" class="ripple" type="button" id="finalsubmit" value="Add Extraitems"/>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+		  	</form>
+        </div>
+	</div>
+</div>
+<script>
+function validate(){
+	if($('#finalCount').val()==0){
+		alert("Atlease one Extra Item Must be Selected");
+		return false
+	}
+}
+
+$(document).ready(function() {
+	$('#Step1').show();
+	$('#Step2').hide();
+});
+$(document).ready(function() {
+	$(".multiple_dropdown").select2({
+	});
+});
+var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+var $unitname = $('#unitname'),$UnitId = $('#unitid');
+$unitname.autocomplete({
+  lookup: arr_Units,
+  showNoSuggestionNotice: false,
+  lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+      if (queryLowerCase == '*') {
+          return suggestion.value;
+      } else {
+          var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+          return re.test(suggestion.value);
+      }
+  }, onSelect: function (suggestion) {
+      if (suggestion) {
+          $UnitId.val(suggestion.data);
+          $(this).removeClass('error');
+      }
+  }, onSearchStart: function (suggestion) {
+      $UnitId.val(0);
+  }, onSearchComplete: function (query, suggestions) {
+      if (!suggestions.length) {
+          $UnitId.val(0);
+          $(this).addClass('error');
+      } else $(this).removeClass('error');
+  }
+});
+  
+function show_step2() {	
+	if($('#booking_no').val()==0){
+		alert("Please Enter Bill Number");
+		return false
+	}
+	if($('#unitid').val()!=""){
+		load_extraItemList(function(isSuccess) {
+			if(isSuccess){
+				$('#Step1').hide();
+				$('#Step2').show();
+			}
+		});
+		} else {
+		alert("Please Select Project/unit/buyer");
+		}
+}
+
+function load_extraItemList(callback) {
+
+    var unit_id = $UnitId.val();
+    if (/^\d+$/.test(unit_id) === false) {
+        return;
+    }
+
+    $.ajax({
+        url: getBaseURL() + 'crm/extraitem/projectextraitem',
+        data: {csrf: "<?php echo isset($csrf)?$csrf:''; ?>", UnitId: unit_id},
+        type: 'POST',
+        success: function (data, status, xhr) {
+            if (data.extra_item_list.length > 0) {
+			//newly adding
+				var source = {
+					localdata: data.extra_item_list,
+					datafields: [{
+						name: 'isAlloted',
+						type: 'bool'
+					},{
+						name: 'ExtraItemId',
+						type: 'number'
+					},{
+						name: 'ItemDescription',
+						type: 'string'
+					},{
+						name: 'Rate',
+						type: 'number'
+					},{
+						name: 'UnitName',
+						type: 'String'
+					}],
+					datatype: "json"
+				};
+
+				 var adapter = new $.jqx.dataAdapter(source);
+				 $("#extra-item-table").jqxGrid({
+					 width: '100%',
+					 theme: 'energyblue',
+					 source: adapter,
+					 editable: true,
+					 sortable: true,
+					 selectionmode: 'singlecell',
+					 columns: [
+					 { text: 'Alloted', dataField: 'isAlloted', columntype: 'checkbox', width: 100, editable: true, resizable: false, type: 'bool'},
+					 {
+						 text: 'Extra ItemName',
+						 datafield: 'ItemDescription',
+						 columngroup: 'Name',
+						 editable: false,
+					 }, {
+						 text: 'Rate',
+						 datafield: 'Rate',
+						 editable: false,
+					 }, {
+						 text: 'UnitName',
+						 datafield: 'UnitName',
+						 editable: false,
+					 }, {
+						 text: 'ExtraItemId',
+						 datafield: 'ExtraItemId',
+						 editable: false,
+						 hidden:true
+					 }]
+				 });
+
+			 /*$("#finalsubmit").jqxButton({
+				 theme: 'energyblue',
+				 width: 200,
+				 height: 30
+			 })*/;
+
+			 $('#finalsubmit').click(function () {
+				 var rows = $('#extra-item-table').jqxGrid('getboundrows');
+				 var result = "";
+				 for (var i = 0; i < rows.length; i++) {
+					 var row = rows[i];
+					 if(row.isAlloted == true){
+						
+						
+						result += row.ExtraItemId+",";
+					 }
+				 }
+				 $('#hiddenTypeId').val(result);
+				 //alert(result);
+				 $('#ExtraForm').submit();
+			 });
+			
+			//ending
+                
+            } else {
+				alert("No Extra Items Found");
+				if (callback) {
+					callback(false);
+					return false;
+				}
+			}
+			if (callback) {
+					callback(true);
+					return true;
+				}
+            
+        },
+        error: function (xhr, status, error) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+
+</script>
+<script>
+$(document).ready(function() {
+	$(".single_dropdown").select2({
+		placeholder: "",
+		allowClear: true
+	});
+
+});
+</script>

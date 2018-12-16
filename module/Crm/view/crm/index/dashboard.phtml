@@ -1,0 +1,991 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/funnel.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/dark.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/Highcharts-4.2.3/js/highcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basepath(); ?>/library/Highcharts-4.2.3/js/modules/exporting.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/slimscroll.js"></script>
+<style>
+    #total_cost_chartdiv {
+        width		: 100%;
+        height		: 350px;
+        font-size	: 11px;
+    }
+.select2-container .select2-selection--single, 
+.select2-container .select2-selection--multiple	{font-size:14px !important; height:32px !important; min-height:26px !important; }
+.select2-container .select2-selection--single .select2-selection__rendered			{padding-top:2px !important;}
+.select2-container--default .select2-selection--single .select2-selection__arrow	{top:3px !important;}
+.newlead_notifi									{color:#1f1f20; border:1px solid #f6e39e; background-color:#f7eecb; margin-top:3px; margin-bottom:15px;font-size:14px; padding:2px 10px 2px 4px !important;}
+.newlead_notifi span 							{padding:2px 8px; margin-right:5px; color:#fff; display:inline-block; background-color:#58a756;}
+</style>
+<div class="content_wrapper padlr0">
+    <?php if(isset($data)): ?>
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+            	<div class="col-lg-4 col-md-4 col-sm-4 padlr0">
+                    <h1 class="float_l">Dashboard <?php if(isset($projectId)) { ?> of  <?php } ?>
+                        <div class="btn-group proname_btn">
+                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php if(isset($projectId)) { echo ucfirst($projectDetail['ProjectName']);  } ?> <span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;project"><i class="fa fa-caret-down "></i></span></a>
+                            <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                                <ul>
+                                    <?php foreach($projects as $project){?>
+                                        <li><a href="<?php echo $this->basePath(); ?>/crm/index/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo $project['ProjectId']; ?>"><?php echo ucfirst($project['ProjectName']);?></a></li>
+                                    <?php }	?>
+                                </ul>
+                            </div>
+                        </div>
+                    </h1>
+                </div>
+                <input type="hidden" name="pId" id="pId" value="<?php echo (isset($projectId)) ? $projectId : '0'; ?>" />
+                <input type="hidden" name="cId" id="cId" value="<?php echo (isset($cId)) ? $cId : '0'; ?>" />
+                <input type="hidden" name="csrf" id="csrf" value="<?php echo (isset($csrf)) ? $csrf : ''; ?>" />
+                
+				<?php if(count($ControlUserList) >1) { ?>
+                <div class="col-lg-5 col-md-8 col-sm-8 col-xs-12 pull-right padlr0 m_btm10">
+                    <label class="col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 control-label text-right">Filter</label>
+                    <div class="col-lg-6 col-md-6 col-sm-6 m_btm10">
+                        <select name="currentUserControll" id="currentUserControll" class="form-control single_dropdown lbl_move" style="width:100%;" onchange="executiveFilter(this);" title="Executive list">
+                            <option value="">All</option>
+                            <?php if(isset($ControlUserList)) { foreach($ControlUserList as $userList) { ?>
+                                <option <?php if(isset($curUserId) && in_array($userList['UserId'], $curUserId)) {  echo "selected"; }  ?> value="<?php echo $userList['UserId']; ?>"><?php echo $userList['EmployeeName']; ?></option>
+                            <?php  }
+                            }?>
+                        </select>
+                    </div>
+                </div>
+                <?php } ?>
+                
+                <div class="col-lg-3 col-lg-offset-0 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-11 animated fadeInDown newlead_notifi">
+					<?php if(isset($data['NewLeads'])) { ?>
+                    	<span><?php echo $data['NewLeads'];?></span> Newly Assigned Leads
+                    <?php }?>
+				</div>
+                <div class="clear"></div>
+            </div>
+            <div  class="col-lg-12">
+                <?php if(!isset($projectId)) { ?>
+                    <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                        <div class="pnl pnl-overflow" style=" border-left:2px solid #0b9395;">
+                        	<!--<a href="<?php //echo $this->basePath() . '/crm/project/unit-grid/1';?>" >-->
+                                <div style="padding-left: 15px !important;">
+                                    <div class="icon-bg"><i class="fa fa-suitcase i-text-one"></i></div>
+                                    <h2 class="comtex tet-clr1 comnelips">Total Project</h2>
+                                    <h5 class="tet-muted tet-mutedclr1 comnelips" ><?php echo (isset($data['NoOfProjects']))?$data['NoOfProjects']:''; ?></h5>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                <?php } ?>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                    <div class="pnl pnl-overflow" style=" border-left:2px solid #d38241;">
+                        <a href="<?php echo $this->basePath() . '/crm/lead/register';?>" >
+
+                        <div style="padding-left: 15px !important;">
+                            <div class="icon-bg"><i class="fa fa-tasks i-text-two"></i></div>
+                            <h2 class="comtex tet-clr2 comnelips">Total Leads</h2>
+                            <h5 class="tet-muted tet-mutedclr2	comnelips"><?php echo (isset($data['NoOfLeads']))?$data['NoOfLeads']:''; ?></h5>
+                        </div>
+                            </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                    <div class="pnl pnl-overflow " style=" border-left:2px solid #788d5a;">
+                      <a href="<?php echo $this->basePath() . '/crm/lead/followup-register';?>" >
+
+                        <div style="padding-left: 15px !important;">
+                            <div class="icon-bg" style="z-index:9;"><i class="fa fa-tag i-text-thr"></i></div>
+                            <h2 class="comtex tet-clr3 comnelips">No of Followups</h2>
+                            <h5 class="tet-muted tet-mutedclr3	comnelips"><?php echo (isset($data['CurLeadCnt']))?$data['CurLeadCnt']:''; ?></h5>
+                        </div>
+                            </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                    <div class="pnl pnl-overflow " style=" border-left:2px solid #528ea8 ;">
+                      <a href="<?php echo $this->basePath() . '/crm/lead/block-register';?>" >
+
+                        <div style="padding-left: 15px !important;">
+                            <div class="icon-bg"><i class="fa fa-ban i-text-six "></i></div>
+                            <h2 class="comtex tet-clr4 comnelips">Blocked</h2>
+                            <h5 class="tet-muted crmbrdrclrhed7 comnelips"><?php echo (isset($data['blockedLeadCnt']))?$data['blockedLeadCnt']:''; ?></h5>
+                        </div>
+                            </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                    <div class="pnl pnl-overflow " style=" border-left:2px solid #685788;">
+                       <a href="<?php echo $this->basePath() . '/crm/buyer/register';?>" >
+
+                        <div style="padding-left: 15px !important;">
+                            <div class="icon-bg"><i class="fa fa-gavel i-text-four"></i></div>
+                            <h2 class="comtex tet-clr4 comnelips">Finalized</h2>
+                            <h5 class="tet-muted tet-mutedclr4 comnelips"><?php echo (isset($data['FinalizedLeadCnt']))?$data['FinalizedLeadCnt']:''; ?></h5>
+                        </div>
+                            </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 mnimumwidthres  ">
+                    <div class="pnl pnl-overflow " style="border-left:2px solid #bd86a6 ;">
+                    <a href="#pendingFollowups"  class="scroller" >
+                        <div style="padding-left: 15px !important;">
+                            <div class="icon-bg"><i class="fa fa-ban i-text-five "></i></div>
+                            <h2 class="comtex tet-clr4 comnelips">Pending Followups</h2>
+                            <h5 class="tet-muted tet-mutedclr5 comnelips"><?php echo (isset($data['UnFollowedLeadCnt']))?$data['UnFollowedLeadCnt']:''; ?></h5>
+                        </div>
+                            </a>
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+        <div class="col-lg-12">
+            <div class="col-lg-12">
+                <section class="pnnal">
+                    <div class="pnnal-heading">
+                    	<i class="fa fa-area-chart"></i> Status
+                        <div class="btn-group pull-right">
+                            <div class="col-lg-4">
+                            	<label style="padding-top:0px !important;" class="control-label">Filter : </label>
+                            </div>
+                            <div class="col-lg-8 col-lg-pull-1">
+                            	<select class="form-control single_dropdown" id="cfilter" onchange="onChangeClient(this);" data-placeholder="" style="width:100%;">
+                                    <option value="1">Last 7 Days</option>
+                                    <option value="2">Last 30 Days</option>
+                                    <option value="3">Last 6 Months</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pnnal-body">
+                        <div id="firstchartdiv"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="col-lg-12 ">
+            <div class="col-lg-12">
+                <div class="flowptxt"> Today Followups
+                    <span class="badge flowplabl"><span title="Completed Followups"><?php echo (isset($data['TodayCompletedLeadFollowupCnt']))?$data['TodayCompletedLeadFollowupCnt']:''; ?></span> / <span title="Total No.of Followups on Today"><?php echo (isset($data['TotTodayLeadFollowupCnt']))?$data['TotTodayLeadFollowupCnt']:''; ?></span></span>
+                </div>
+                <!--            <div class="flowptxt" style="float:right;"> Unfollowed <span class=" badge flowplabl">29<span>/100</span></span></div>-->
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="#idtableone" class="scroller">
+                    <div class="pnl1 tet-cllr1" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-ticket "></i>
+                        </div>
+                        <div class="value" style="width: 65%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($data['TotCPCnt']))?$data['TotCPCnt']:''; ?></h1>
+                            <p>Followup</p>
+                        </div>
+                        <div style="width: 32%; margin-top: 6px;" >
+                            <div class="pie_loader piebg1 pieload_cntsmall">
+                                <div class="pieload_cnt pieload_cnt_w60 " id="note_0" data-note="<?php echo (isset($data['ComCPPercentage']))?$data['ComCPPercentage']:''; ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="#idtabletw" class="scroller">
+                    <div class="pnl1 tet-cllr2" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-eye "></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($data['TotSiteVisitCnt'])) ? $data['TotSiteVisitCnt'] : ''; ?></h1>
+                            <p>Site Visit</p>
+                        </div>
+                        <div style="width: 32%; margin-top: 6px;">
+                            <div class="pie_loader piebg1 pieload_cntsmall">
+                                <div class="pieload_cnt pieload_cnt_w60 " id="note_1" data-note="<?php echo (isset($data['ComSiteVisitPercentage']))?$data['ComSiteVisitPercentage']:''; ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres ">
+                <a href="#idtablethr" class="scroller">
+                    <div class="pnl1 tet-cllr3" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-gavel"></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($data['TotFinalizedCnt']))?$data['TotFinalizedCnt']:''; ?></h1>
+                            <p>Finalized</p>
+                        </div>
+                        <div style="width: 32%; margin-top: 6px;">
+                            <div class="pie_loader piebg1 pieload_cntsmall">
+                                <div class="pieload_cnt pieload_cnt_w60 " id="note_2" data-note="<?php echo (isset($data['ComFinalizedPercentage']))?$data['ComFinalizedPercentage']:''; ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 mnimumwidthres">
+                <a href="#idtablefour" class="scroller">
+                    <div class="pnl1 tet-cllr4" style="display: inline-flex">
+                        <div class="symbl" style="width: 20%">
+                            <i class="fa fa-magic"></i>
+                        </div>
+                        <div class="value" style="width: 60%">
+                            <h1 style="font-weight: 600 !important;font-size: 21px !important; color:#fff !important;line-height: 1.1; padding-bottom:4px;padding-top: 8px;"><?php echo (isset($data['TotOthersCnt']))?$data['TotOthersCnt']:''; ?></h1>
+                            <p>Others</p>
+                        </div>
+                        <div style="width: 32%; margin-top: 6px;">
+                            <div class="pie_loader piebg1 pieload_cntsmall">
+                                <div class="pieload_cnt pieload_cnt_w60 " id="note_3" data-note="<?php echo (isset($data['ComOthersPercentage']))?$data['ComOthersPercentage']:''; ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div style="clear:both;"></div>
+        <div class="col-lg-12 commargin_ttop_20">
+            <div class="col-lg-6">
+                <section class="pnnal">
+                    <header class="pnnal-heading"><i class="fa fa-pie-chart"></i> Lead Status</header>
+                    <div class="pnnal-body">
+                        <div id="secchartdiv"></div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-6">
+                <section class="pnnal">
+                    <header class="pnnal-heading"><i class="fa fa-bar-chart"></i> Monthly sale Variance</header>
+                    <div class="pnnal-body">
+                        <div id="thrdchartdiv"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="col-lg-12 commargin_ttop_20">
+            <div class="col-lg-6">
+                <section class="pnnal">
+                    <header class="pnnal-heading"><i class="fa fa-bar-chart"></i> Pre-Sales to Sales lifecycle</header>
+                    <div class="pnnal-body">
+                        <div id="total_cost_chartdiv"></div>
+                    </div>
+                </section>
+            </div>
+            <!--div class="col-lg-6">
+                <section class="pnnal">
+                    <header class="pnnal-heading">Target Vs Acheived</header>
+                    <div class="pnnal-body clscrmht" style="padding:0 10px 10px!important; min-height: 129px;">
+                        <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6 mnimumwidthres commargin_top">
+                            <div class="pnal pnl-clr  dashboard-stats rounded">
+                                <p  class="sparkline transit reswidth50 comnelips" ><span style="font-weight:600 !important;"><?php echo (isset($data['PrevMonthTarget']))?$this->commonHelper()->sanitizeNumber($data['PrevMonthTarget'],2,true):''; ?></span><br><span class="text-muted" title="Last Month Target">Last Month Target<?php echo (isset($data['PrevMonthTarget']))?$data['PrevMonthTarget']:''; ?></span></p>
+
+                                <i class="fa fa-money bg-clrcrm transit stats-icon"></i>
+                                <h3 class="transit clspstn comnelips"><?php echo (isset($data['CurMonthTarget']))?$this->commonHelper()->sanitizeNumber($data['CurMonthTarget'],2,true):''; ?>
+                                    <br><small class="text-green">
+                                        <i class="fa fa-caret-<?php echo (isset($data['TargetVariationStatus']))?$this->commonHelper()->sanitizeNumber($data['TargetVariationStatus'],2,true):''; ?>"></i>
+                                        <?php echo (isset($data['TargetVariation']))?$data['TargetVariation']:''; ?>%
+                                    </small>
+                                </h3>
+                                <p class="text-muted transit clspstn comnelips" title="Target Amount">Target Amount</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6 mnimumwidthres commargin_top">
+                            <div class="pnal pnl-clr1 dashboard-stats rounded ">
+                                <p  class="sparkline transit reswidth50 comnelips"><span class="" style="font-weight:600 !important;"><?php echo (isset($data['PrevMonthAcheived']))?$this->commonHelper()->sanitizeNumber($data['PrevMonthAcheived'],2,true):''; ?></span><br><span class="text-muted" title="Last Month Target">Last Month Acheived<?php echo (isset($data['PrevMonthTarget']))?$data['PrevMonthTarget']:''; ?></span></p>
+                                <i class="fa fa-money bg-clrcrm1 transit stats-icon"></i>
+                                <h3 class="transit clspstn comnelips"><?php echo (isset($data['CurMonthAcheived']))?$this->commonHelper()->sanitizeNumber($data['CurMonthAcheived'],2,true):''; ?>
+                                    <br><small class="text-green">
+                                        <i class="fa fa-caret-<?php echo (isset($data['AcheivedVariationStatus']))?$this->commonHelper()->sanitizeNumber($data['AcheivedVariationStatus'],2,true):''; ?>"></i>
+                                        <?php echo (isset($data['AcheivedVariation']))?$data['AcheivedVariation']:''; ?>%
+                                    </small>
+                                </h3>
+                                <p class="text-muted transit clspstn comnelips" title="Achieved Amount">Achieved Amount</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div-->
+            <div class="col-lg-6">
+                <section class="pnnal">
+                    <header class="pnnal-heading"> To Do List <span class="ng-binding" style="font-size:12px !important; font-weight:normal !important; color: #878484;">(<?php echo (isset($data['TotTodayLeadFollowupCnt']))?$data['TotTodayLeadFollowupCnt']:''; ?> of <?php echo (isset($data['TodayRemaingLeadFollowupCnt']))?$data['TodayRemaingLeadFollowupCnt']:''; ?> remaining)</span></header>
+                    <div class="pnnal-body scrlcrm" style="height:380px; width:100%;">
+                        <ul class="todo-list-item" id="todo-list">
+                            <?php if(isset($arrTodayLeadFollowups)): ?>
+                                <?php foreach($arrTodayLeadFollowups as $leadFollowup): ?>
+                                    <li class="clearfix <?php echo ($leadFollowup['Completed'] == 1)?'checked':''; ?>">
+                                        <div class="rdochck_subscrbone radio_check">
+                                            <a href="<?php echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId']; ?>">
+                                                <p style="padding:0px !important;">
+                                                    <input type="checkbox" <?php echo ($leadFollowup['Completed'] == 1)?'checked':''; ?>/>
+                                                    <!--                                                <label class="ripple">--><?php //echo  $leadFollowup['LeadName'] . $leadFollowup['CallTypeDec'] . $leadFollowup['Remarks']; ?><!--</label>-->
+                                                    <label class="ripple"><?php echo $leadFollowup['LeadName']; ?> - <?php echo $leadFollowup['ExecuName']; ?> - <?php echo $leadFollowup['NextFollowupRemarks']; ?></label>
+                                                </p>
+                                            </a>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <?php if(isset($arrClientPlaceFollowups)): ?>
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <section class="pnnal" id="idtableone">
+                        <header class="pnnal-heading">Today Status - Followup</header>
+                        <div class="pnnal-body">
+                            <div class="table-responsive clear">
+                                <table class="table table-hover clear" style="border:1px solid #ccc;">
+                                    <thead>
+                                    <tr>
+                                        <th>Previous Call Date</th>
+                                        <th>Previous Call Type</th>
+                                        <th>Nature</th>
+                                        <th>Lead Name</th>
+                                        <th>Executive Name</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($arrClientPlaceFollowups as $leadFollowup): ?>
+                                        <tr style="cursor:pointer;" data-url="<?php echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId']; ?>">
+                                            <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowUpDate'])); ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallTypeDec']; ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                            <td><?php echo $leadFollowup['LeadName']; ?></td>
+                                            <td><?php echo $leadFollowup['ExecuName']; ?></td>
+                                            <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php if(isset($arrSiteVisitFollowups)): ?>
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <section class="pnnal" id="idtabletw">
+                        <header class="pnnal-heading">Today Status - Site Visit</header>
+                        <div class="pnnal-body">
+                            <div class="table-responsive clear">
+                                <table class="table table-hover  clear" style="border:1px solid #ccc;">
+                                    <thead>
+                                    <tr>
+                                        <th>Previous Call Date</th>
+                                        <th>Previous Call Type</th>
+                                        <th>Nature</th>
+                                        <th>Lead Name</th>
+                                        <th>Executive Name</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($arrSiteVisitFollowups as $leadFollowup): ?>
+                                        <tr style="cursor:pointer;" data-url="<?php echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId']; ?>">
+                                            <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowUpDate'])); ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallTypeDec']; ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                            <td><?php echo $leadFollowup['LeadName']; ?></td>
+                                            <td><?php echo $leadFollowup['ExecuName']; ?></td>
+                                            <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php if(isset($arrFinalizationFollowups)): ?>
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <section class="pnnal" id="idtablethr">
+                        <header class="pnnal-heading">Today Status - Finalised</header>
+                        <div class="pnnal-body">
+                            <div class="table-responsive clear">
+                                <table class="table table-hover  clear" style="border:1px solid #ccc;">
+                                    <thead>
+                                    <tr>
+                                        <th>Previous Call Date</th>
+                                        <th>Previous Call Type</th>
+                                        <th>Nature</th>
+                                        <th>Lead Name</th>
+                                        <th>Executive Name</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($arrFinalizationFollowups as $leadFollowup): ?>
+                                        <tr style="cursor:pointer;" data-url="<?php echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId']; ?>">
+                                            <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowUpDate'])); ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallTypeDec']; ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                            <td><?php echo $leadFollowup['LeadName']; ?></td>
+                                            <td><?php echo $leadFollowup['ExecuName']; ?></td>
+                                            <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php if(isset($arrOtherFollowups)): ?>
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <section class="pnnal" id="idtablefour">
+                        <header class="pnnal-heading">Today's Status</header>
+                        <div class="pnnal-body">
+                            <div class="table-responsive clear">
+                                <table class="table table-hover clear" style="border:1px solid #ccc;">
+                                    <thead>
+                                    <tr>
+                                        <th>Previous Call Date</th>
+                                        <th>Previous Call Type</th>
+                                        <th>Nature</th>
+                                        <th>Lead Name</th>
+										<th>Executive Name</th>
+										<th>Project</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($arrOtherFollowups as $leadFollowup): ?>
+                                        <tr style="cursor:pointer;" data-url="<?php if($leadFollowup['LeadConvert']==1){ echo $this->basePath() . '/crm/buyer/followup/' . $leadFollowup['LeadId']; } else{ echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId'];  }?>">
+                                            <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowUpDate'])); ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallTypeDec']; ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                            <td><?php echo $leadFollowup['LeadName']; ?></td>
+											<td><?php echo $leadFollowup['ExecuName']; ?></td>
+											<td><?php echo $leadFollowup['Projects']; ?></td>
+                                            <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php if($data['UnFollowedLeadCnt']!=0 && $data['UnFollowedLeadCnt'] != ''): ?>
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <section class="pnnal" id="pendingFollowups">
+                        <header class="pnnal-heading">Pending Followup</header>
+                        <div class="pnnal-body">
+                            <div class="table-responsive clear">
+                                <table id="EditTable" class="table table-hover clear" style="border:1px solid #ccc;">
+                                    <thead>
+                                    <tr>
+                                        <th>Previous Call Date</th>
+                                        <th>Previous Call Type</th>
+                                        <th>Nature</th>
+                                        <th>Lead Name</th>
+                                        <th>Executive Name</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($pendingFollowup as $leadFollowup): ?>
+                                        <tr style="cursor:pointer;" data-url="<?php if($leadFollowup['LeadConvert']==1){ echo $this->basePath() . '/crm/buyer/followup/' . $leadFollowup['LeadId']; } else{ echo $this->basePath() . '/crm/lead/followup/' . $leadFollowup['LeadId'];  }?>">
+                                            <td><?php echo date('d-m-Y', strtotime($leadFollowup['FollowUpDate'])); ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallTypeDec']; ?></td>
+                                            <td><?php echo $leadFollowup['PrevCallNatureDec']; ?></td>
+                                            <td><?php echo $leadFollowup['LeadName']; ?></td>
+                                            <td><?php echo $leadFollowup['ExecuName']; ?></td>
+                                            <td><?php echo ($leadFollowup['Completed'] == 1)?'Completed':'Waiting'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php elseif(isset($err)): ?>
+        <h1 class="text-center" style="margin: 150px auto;">Error: <?php echo $err; ?></h1>
+    <?php endif; ?>
+</div>
+<div id="back-top" data-toggle="tooltip" data-placement="left" title="Lift Top"><a href="#top"><i class="fa fa fa-arrow-up"></i></a></div>
+
+<script>
+    $("#EditTable tbody").on('click','td',function () {
+        var id = $(this).closest('tr').attr('data-url');
+        if(typeof id === 'undefined' || id.length <= 0) {
+            return;
+        }
+        console.log(id);
+        window.location.href = id;
+    });
+$(document).ready(function() {
+    $('#cfilter').trigger('change');
+
+    $("#back-top").fadeOut();
+    $(window).scroll(function(){
+        if ($(this).scrollTop() > 100) {
+            $("#back-top").fadeIn();
+        } else {
+            $("#back-top").fadeOut();
+        }
+    });
+    $("#back-top").click(function(){
+        $("html, body").animate({ scrollTop: 0 }, 1000);
+        return false;
+    });
+});
+    function executiveFilter(id) {
+        var val = $(id).val();
+        var pId = $('#pId').val();
+        if($.trim(pId)=="") {
+            pId=0;
+        }
+        if($.trim(val)=="") {
+            val=0;
+        }
+        $(location).attr('href',"<?php echo $this->basePath(); ?>/crm/index/dashboard/"+pId+"/"+val);
+
+    }
+
+    $(function () {
+        var $backTop = $("#back-top");
+
+       // init();
+        bindLeadStatusMonthlyChart();
+        bindBackToTopBtn();
+        bindFollowUpLink();
+
+//        function init() {
+//
+//            $backTop.fadeOut();
+//            $('a[href^="#"].scroller').on('click',function (e) {
+//                e.preventDefault();
+//                var target = this.hash,
+//                    $target = $(target);
+//
+//                if($target.length <= 0) {
+//                    return;
+//                }
+//
+//                $('html, body').stop().animate({
+//                    'scrollTop': $target.offset().top - 80
+//                }, 900, 'swing');
+//            });
+//
+//        }
+
+        function bindFollowUpLink() {
+            $('#idtabletw,#idtablefour,#idtablethr,#idtableone').on('click', 'table tr', function() {
+                var url = $(this).attr('data-url');
+                if(typeof url === 'undefined' || url.length <= 0) {
+                    return;
+                }
+
+                window.location.href = url;
+            });
+        }
+
+        function bindBackToTopBtn() {
+
+            $(window).scroll(function(){
+                if ($(this).scrollTop() > 100) {
+                    $backTop.fadeIn();
+                } else {
+                    $backTop.fadeOut();
+                }
+            });
+
+            $backTop.click(function(){
+                $("html body").animate({ scrollTop: 0 }, 1000);
+                return false;
+            });
+        }
+
+        function bindLeadStatusMonthlyChart() {
+            var chart = AmCharts.makeChart( "secchartdiv", {
+                "type": "funnel",
+                "theme": "light",
+                "dataProvider": [ {
+                    "title": "Cold Case",
+                    "value": <?php echo (isset($data['coldCase']))?$data['coldCase']:0; ?>
+                }, {
+                    "title": "Warm Case",
+                    "value": <?php echo (isset($data['warmCase']))?$data['warmCase']:0; ?>
+                }, {
+                    "title": "Hot Case",
+                    "value": <?php echo (isset($data['hotCase']))?$data['hotCase']:0; ?>
+                }],
+                "balloon": {
+                    "fixedPosition": true
+                },
+                "valueField": "value",
+                "titleField": "title",
+                "marginRight": 240,
+                "marginLeft": 50,
+                "startX": -500,
+                "depth3D": 100,
+                "angle": 40,
+                "outlineAlpha": 1,
+                "outlineColor": "#FFFFFF",
+                "outlineThickness": 2,
+                "labelPosition": "right",
+                "colors":[ "#62d5ce", "#bdb3d2", "#d4e3bd", "#fddcc1"],
+                "balloonText": "[[title]]: [[value]]n[[description]]",
+                "export": {
+                    "enabled": true
+                }
+            } );
+        }
+
+
+        jQuery( '.chart-input' ).off().on( 'input change', function() {
+            var property = jQuery( this ).data( 'property' );
+            var target = chart;
+            var value = Number( this.value );
+            chart.startDuration = 0;
+
+            if ( property == 'innerRadius' ) {
+                value += "%";
+            }
+
+            target[ property ] = value;
+            chart.validateNow();
+        } );
+
+        var chart = AmCharts.makeChart("thrdchartdiv", {
+            "type": "serial",
+            "theme": "light",
+            "categoryField": "Month",
+            "rotate": true,
+            "startDuration": 1,
+            "colors":["#40c8e4 ", "#849bf6  "],
+            "categoryAxis": {
+                "gridPosition": "start",
+                "position": "left"
+            },
+            "trendLines": [],
+            "graphs": [
+                {
+                    "balloonText": "Target: [[value]]",
+                    "fillAlphas":0.5,
+                    "id": "AmGraph-1",
+                    "lineAlpha": 0.2,
+                    "title": "Target",
+                    "type": "column",
+                    "valueField": "Target",
+                    "balloonFunction": function(graphDataItem, graph) {
+                        var val = graphDataItem.values.value;
+                        return "Target: "+sanitizeNumber(val,0,true);
+                    }
+
+                },
+                {
+                    "balloonText": "Sold:[[value]]",
+                    "fillAlphas": 0.8,
+                    "id": "AmGraph-2",
+                    "lineAlpha": 0.2,
+                    "title": "Sold",
+                    "type": "column",
+                    "valueField": "Sold",
+                    "balloonFunction": function(graphDataItem, graph) {
+                        var val = graphDataItem.values.value;
+                        return "Sold: "+sanitizeNumber(val,0,true);
+                    }
+                }
+            ],
+            "guides": [],
+            "valueAxes": [
+                {
+                    "id": "ValueAxis-1",
+                    "position": "top",
+                    "axisAlpha": 0
+                }
+            ],
+            "allLabels": [],
+            "balloon": {},
+            "titles": [],
+            "dataProvider": <?php echo (isset($data['JsonMonthVariationData']))?$data['JsonMonthVariationData']:'[]'; ?>,
+            "export": {
+                "enabled": true
+            }
+
+        });
+
+        var chart = AmCharts.makeChart("total_cost_chartdiv", {
+            "theme": "light",
+            "type": "serial",
+            "startDuration": 1,
+            "dataProvider": <?php echo (isset($arrUnitLists)) ? json_encode($arrUnitLists) : '[]';?>,
+            "valueAxes": [{
+                "position": "left",
+                "title": "Days"
+            }],
+            "graphs": [{
+                "balloonText": "[[category]]: <b>[[value]]</b>",
+                "fillColorsField": "color",
+                "fillAlphas": 1,
+                "lineAlpha": 0.1,
+                "type": "column",
+                "valueField": "Days"
+            }],
+            "depth3D": 20,
+            "angle": 30,
+            "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": true
+            },
+            "categoryField": "ExecutiveName",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "labelRotation": 90
+            },
+            "export": {
+                "enabled": true
+            },
+            "mouseWheelZoomEnabled": true
+
+        });
+        jQuery('.chart-input').off().on('input change',function() {
+            var property	= jQuery(this).data('property');
+            var target		= chart;
+            chart.startDuration = 0;
+
+            if ( property == 'topRadius') {
+                target = chart.graphs[0];
+                if ( this.value == 0 ) {
+                    this.value = undefined;
+                }
+            }
+
+            target[property] = this.value;
+            chart.validateNow();
+        });
+
+//        AmCharts.ready(function () {
+//            // column chart with different negative colors
+//            var chart = new AmCharts.AmSerialChart();
+//            chart.dataProvider = [{
+//                day: 1,
+//                value: -5
+//            }, {
+//                day: 2,
+//                value: 3
+//            }, {
+//                day: 3,
+//                value: 7
+//            }, {
+//                day: 4,
+//                value: -3
+//            }, {
+//                day: 5,
+//                value: 3
+//            }, {
+//                day: 6,
+//                value: 4
+//            }, {
+//                day: 7,
+//                value: 6
+//            }, {
+//                day: 8,
+//                value: -3
+//            }, {
+//                day: 9,
+//                value: -2
+//            }, {
+//                day: 10,
+//                value: 6
+//            }];
+//            chart.categoryField = "day";
+//            chart.autoMargins = false;
+//            chart.marginLeft = 0;
+//            chart.marginRight = 0;
+//            chart.marginTop = 0;
+//            chart.marginBottom = 0;
+//            chart.columnWidth=1;
+//
+//            var graph = new AmCharts.AmGraph();
+//            graph.valueField = "value";
+//            graph.type = "column";
+//            graph.fixedColumnWidth=4;
+//            graph.fillAlphas = 1;
+//            graph.negativeLineColor = "#6dbee3";
+//            graph.lineColor = "#99cce3 ";
+//            graph.showBalloon = true;
+//            chart.addGraph(graph);
+//
+//            var valueAxis = new AmCharts.ValueAxis();
+//            valueAxis.gridAlpha = 0;
+//            valueAxis.axisAlpha = 0;
+//            chart.addValueAxis(valueAxis);
+//
+//            var categoryAxis = chart.categoryAxis;
+//            categoryAxis.gridAlpha = 0;
+//            categoryAxis.axisAlpha = 0;
+//            chart.write("fourthchartdiv");
+//        });
+
+//        AmCharts.ready(function () {
+//            // column chart with different negative colors
+//            var chart = new AmCharts.AmSerialChart();
+//            chart.dataProvider = [{
+//                day: 1,
+//                value: -5
+//            }, {
+//                day: 2,
+//                value: 3
+//            }, {
+//                day: 3,
+//                value: 7
+//            }, {
+//                day: 4,
+//                value: -3
+//            }, {
+//                day: 5,
+//                value: 3
+//            }, {
+//                day: 6,
+//                value: 4
+//            }, {
+//                day: 7,
+//                value: 6
+//            }, {
+//                day: 8,
+//                value: -3
+//            }, {
+//                day: 9,
+//                value: -2
+//            }, {
+//                day: 10,
+//                value: 6
+//            }];
+//            chart.categoryField = "day";
+//            chart.autoMargins = false;
+//            chart.marginLeft = 0;
+//            chart.marginRight = 0;
+//            chart.marginTop = 0;
+//            chart.marginBottom = 0;
+//            chart.columnWidth=1;
+//
+//            var graph = new AmCharts.AmGraph();
+//            graph.valueField = "value";
+//            graph.type = "column";
+//            graph.fixedColumnWidth=4;
+//            graph.fillAlphas = 1;
+//            graph.negativeLineColor = "#9b8fb5";
+//            graph.lineColor = "#bdb3d2  ";
+//            graph.showBalloon = true;
+//            chart.addGraph(graph);
+//
+//            var valueAxis = new AmCharts.ValueAxis();
+//            valueAxis.gridAlpha = 0;
+//            valueAxis.axisAlpha = 0;
+//            chart.addValueAxis(valueAxis);
+//
+//            var categoryAxis = chart.categoryAxis;
+//            categoryAxis.gridAlpha = 0;
+//            categoryAxis.axisAlpha = 0;
+//            chart.write("fivchartdiv");
+//        });
+
+
+
+    });
+
+    function onChangeClient(val) {
+        var choose = $(val).val();
+
+        if(choose!="") {
+            var prId=$('#pId').val();
+            var usId=$('#cId').val();
+            $.ajax({
+                url:getBaseURL()+'crm/index/dashboard/'+prId+'/'+usId,
+                type:'POST',
+                data:{"choose":choose,"mode":"filter","projectId":prId,'csrf':$('#csrf').val()},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status != 200) {
+                        alert('Failed !!!!');
+                        return false;
+                    }
+                    else
+                    {
+                        var chartData = JSON.parse(data);
+                        bindWeekChart(JSON.parse(chartData.arrWeekDays),JSON.parse(chartData.weekLeadCount),JSON.parse(chartData.weekFollowupCount));
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed !!!!');
+                }
+            });
+        }
+
+    }
+    function bindWeekChart(c1,c2,c3) {
+
+        Highcharts.setOptions({
+            colors: ['#62d5ce', '#D6D23A', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4']
+        });
+        $('#firstchartdiv').highcharts({
+            chart: {
+                type: 'areaspline'
+            },
+            title: {
+                text: 'Status'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                verticalAlign: 'top',
+                x: 150,
+                y: 100,
+                floating: true,
+                borderWidth: 1,
+                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            xAxis: {
+                min: 0.5,
+                categories: c1
+            },
+            yAxis: {
+                gridLineWidth: 0,
+                title: {
+                    text: 'No. of Leads'
+                }
+            },
+            tooltip: {
+                shared: true,
+                valueSuffix: ' leads'
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                areaspline: {
+                    fillOpacity: 0.5
+                }
+            },
+            series: [{
+                name: 'Leads Assigned',
+                data: c2
+            }, {
+                name: 'Followup Done',
+                data: c3
+            }]
+        });
+    }
+</script>

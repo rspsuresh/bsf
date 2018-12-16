@@ -1,0 +1,197 @@
+<!--STYLE-->
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+    #jqxGrid .jqx-grid-header {
+        height:75px !important;
+    }
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 top-btm">
+                <h1>Journal Type Master
+                    <div class="stgedit_btn req_addbtn brad_50">
+                        <a href="javascript:void(0)" onclick="addCashBank()" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Journal Type Master"><i class="fa fa-plus"></i></a>
+                    </div>
+                </h1>
+            </div>
+            <div class="col-lg-12 top_ct">
+                <div class="clearfix"></div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="jqxGrid"> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="right_lightbox">
+                <div class="right_lightbox_close">
+                    <span class="right_lightbox_closeicon"><i class="fa fa-times"></i></span>
+                </div>
+                <div class="right_lbox_inner lead_register_rbox" id="journaltypeentry">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var data = <?php echo (isset($journaldetList)) ? json_encode($journaldetList) : '[]'?>,
+        $jqxGrid = $("#jqxGrid");
+
+    $(function () {
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            minimumResultsForSearch: -1
+        });
+        $(".multiple_dropdown").select2({
+        });
+        bindGrid(data);
+
+    });
+
+    $('.right_lightbox').on('change', function () {
+        if($('.right_lightbox').attr('pageRefresh') != 1)
+            return;
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/journaltypemaster",
+            type:"post",
+            //async:false,
+            data:{},
+            success:function(data, textStatus, jqXHR){
+                bindGrid(JSON.parse(data));
+                $jqxGrid.jqxGrid('refresh');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    });
+
+    function bindGrid(gridData){
+        var source = {
+            localdata:gridData,
+            async: false,
+            dataType: "json",
+            dataFields: [
+                { name: 'JournalId', type: 'number' },
+                { name: 'JournalName', type: 'string' },
+                { name: 'JournalType', type: 'string' },
+                { name: 'IsDefault', type: 'number' },
+                { name: 'ShortName', type: 'string' }
+            ],
+            id: 'JournalId'
+            //JournalId,JournalName,JournalType,IsDefault,ShortName
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $jqxGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            autoheight: true,
+            filterable: true,
+            pagerButtonsCount: 6,
+            showfilterrow: true,
+            sortable: true,
+            pageable:true,
+            rowDetails: true,
+            columns: [
+                { text: 'JournalId', datafield: 'JournalId', hidden: true, filterable: false},
+                { text: 'IsDefault', datafield: 'IsDefault', hidden: true, filterable: false},
+                { text: 'ShortName', datafield: 'ShortName', hidden: true, filterable: false},
+                { text: 'JournalName', datafield: 'JournalName', width:'50%'},
+                { text: 'JournalType', dataField: 'JournalType', width:'40%'},
+                { text: 'Action', sortable: false, filterable: false, align: 'left', width:'10%',
+                    cellsrenderer: function (row) {
+                        var editLink = '<a title="Cheque Detail" href="#" onclick="billEdit('+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        //return editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="billDelete('+row+'); return false;"><i class="fa fa-trash-o reg-icon"></i></button>';
+                        return editLink;
+                        //return editLink += "&nbsp;&nbsp;" + '<a title="Report" href="#" onclick="billReport('+row+'); return false;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                    }
+                }
+                /*{ text: 'Action', sortable: false, filterable: false, align: 'left', width:'20%',
+                 cellsrenderer: function (row) {
+                 var editLink = '<a title="Edit" href="#" onclick="billEdit('+row+'); return false;" style="padding-left: 15px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                 return editLink;
+                 //return editLink += "&nbsp;&nbsp;" + '<button style="background: transparent;" title="Delete" onclick="billDelete(this,'+row+'); return false;"><i class="fa fa-trash-o reg-icon"></i></button>';
+                 //return editLink += "&nbsp;&nbsp;" + '<a title="Report" href="#" onclick="billReport('+row+'); return false;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                 }
+                 }*/
+            ]
+        });
+        $jqxGrid.on('celldoubleclick', function (event){//cellclick
+            var args = event.args;
+            var rowBoundIndex = args.rowindex;
+            var dataField = args.datafield;
+            var data = $jqxGrid.jqxGrid("getrowdata", rowBoundIndex);
+            if(dataField != '') {
+                $.ajax({
+                    url:"<?php echo $this->basePath(); ?>/fa/index/journaltypeentry",
+                    type:"post",
+                    //async:false,
+                    data:{"journalId":data.JournalId,'type':'getLoadDetails'},
+                    success:function(data, textStatus, jqXHR){
+                        $('#journaltypeentry').html(data);
+                        $('.right_lightbox').show();
+                        $('.left-panel').removeClass('collapsed');
+                        $('.l_menuicon_nav').removeClass('cross');
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                    }
+                });
+            }
+        });
+    }
+
+    function addCashBank(){
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/journaltypeentry",
+            type:"post",
+            //async:false,
+            data:{"journalId":'0','type':'getLoadDetails'},
+            success:function(data, textStatus, jqXHR){
+                $('#journaltypeentry').html(data);
+                $('.right_lightbox').show();
+                $('.left-panel').removeClass('collapsed');
+                $('.l_menuicon_nav').removeClass('cross');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    function billEdit(row) {
+        var JournalId = $jqxGrid.jqxGrid('getCellValue', row, 'JournalId');
+        $.ajax({
+            url:"<?php echo $this->basePath(); ?>/fa/index/journaltypeentry",
+            type:"post",
+            //async:false,
+            data:{"journalId":JournalId,'type':'getLoadDetails'},
+            success:function(data, textStatus, jqXHR){
+                $('#journaltypeentry').html(data);
+                $('.right_lightbox').show();
+                $('.left-panel').removeClass('collapsed');
+                $('.l_menuicon_nav').removeClass('cross');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    }
+
+    /*function billEdit(row) {
+     var CashBankId = $jqxGrid.jqxGrid('getCellValue', row, 'CashBankId');
+     window.location = getBaseURL() + 'fa/index/cashbankdetailentry/'+CashBankId;
+     }*/
+    $(function(){
+        $('.right_lightbox_close').click(function(){
+            $('.right_lightbox').hide();
+            if ($(window).width() >=980){
+                $('.left-panel').addClass('collapsed');
+                $('.l_menuicon_nav').addClass('cross');
+            }
+        });
+    });
+</script>

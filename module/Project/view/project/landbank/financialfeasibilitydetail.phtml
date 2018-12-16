@@ -1,0 +1,729 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<?php echo $this->headScript()
+    ->appendFile($this->basePath() . '/library/amcharts/amcharts.js')
+    ->appendFile($this->basePath() . '/library/amcharts/serial.js')
+    ->appendFile($this->basePath() . '/library/amcharts/themes/light.js');
+?>
+<style>
+.panel      {border-radius:0px !important;}
+.panel-info {border:none;border-top:none;}
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+<div class="container-fluid">
+  <div class="row">
+    <form  onsubmit="return entryValidate()"  method="post" id="formWrapper">
+      <div class="col-lg-12">
+        <h1>Land Bank - Financial Feasibility</h1>
+      </div>
+      <!--form start-->
+      <div class="col-lg-12 top_ct" >
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+          <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            <input type="text" readonly name="RefDate" id="RefDate" class="form-control date_picker lbl_move" label="Reference Date"  value="<?php if ($financialId != 0) { echo date("d-m-Y", strtotime($landFinancial['RefDate'])); } else { echo date("d-m-Y"); } ?>" />
+          </div>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+          <div class="form-group">
+            <input type="text" name="RefNo" id="RefNo" class="form-control lbl_move" label="Reference No" value="<?php if ($financialId != 0 && $landFinancial['RefNo'] != '') { echo $landFinancial['RefNo']; } else { echo $svNo; } ?>" readonly />
+          </div>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+          <div class="form-group">
+            <input type="text" name="PropertyName" class="form-control lbl_move" label="Name of Property" readonly value="<?php echo (isset($enquiry)) ? $enquiry['PropertyName'] : ''; ?>" />
+            <input type="hidden" id="EnquiryId" name="EnquiryId" value="<?php echo $enquiryId; ?>" />
+            <input type="hidden" id="BusinessFeasibilityId" name="BusinessFeasibilityId" value="<?php echo $feasibilityId; ?>" />
+            <input type="hidden" id="FinancialFeasibilityId" name="FinancialFeasibilityId" value="<?php if ($financialId !=0) { echo $financialId; } else { echo ''; } ?>" />
+              <input type="hidden" id="pageUrl" name="pageUrl" value="<?php if ($page != '') { echo $page; } else { echo ''; } ?>" />
+          </div>
+        </div>
+      </div>
+      <?php if(isset($feasibility)): ?>
+      <div class="col-lg-12 col-lg-offset-0">
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+             <span class="listed-other">
+          <label>Option Name</label>
+          <p><?php echo $feasibility['OptionName'];?></p>
+          <i class="fa fa-file-text-o list-icons"></i>
+          </span>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+             <span class="listed-other">
+          <label>Project Type</label>
+          <p><?php echo $feasibility['ProjectTypeName']; ?></p>
+          <i class="fa fa-files-o list-icons"></i>
+          </span>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+             <span class="listed-other">
+          <label>Total Area</label>
+          <p><?php echo $feasibility['TotalArea'].' '.$feasibility['TotalAreaUnitName']; ?></p>
+          <i class="fa fa-line-chart list-icons"></i>
+          </span>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+             <span class="listed-other">
+          <label>Saleable Area</label>
+          <p><?php echo $feasibility['PropSaleableArea'].' '.$feasibility['PropSaleableAreaUnitName']; ?></p>
+          <i class="fa fa-area-chart list-icons"></i>
+          </span>
+        </div>
+        <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <span class="listed-other">
+          <label>Project Duration</label>
+          <p><?php echo round($feasibility['PropProjectDuration'],2).' '.$feasibility['PropProjectDurationUnitName']; ?></p>
+          <i class="fa fa-clock-o list-icons"></i>
+          </span>
+        </div>
+      </div>
+      <?php endif; ?>
+      
+      <!--accordion start-->
+      <div class="col-lg-12 clear">
+        <div id="accordion" class="panel-group">
+          <div class="panel panel-info">
+            <div data-target="#collapseOnes" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-1">
+              <h4 class="panel-title accordion-toggle defa_panels">Proposal Project Cost</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapseOnes" style="height: 0px;">
+              <div class="panel-body bgcolr">
+                <div class="col-lg-10 col-lg-offset-1 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                  <div class="table-responsive topsp" style="margin-top:10px;">
+                    <table class="table tableWithFloatingHeader" style=" margin-bottom:0px;">
+                      <thead>
+                        <tr>
+                          <th>Particular</th>
+                          <th>Amount</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php if(isset($landFinancialExp) && count($landFinancialExp) != 0): $i=1;
+								foreach($landFinancialExp as $financialExp): ?>
+                        <tr>
+                          <td width="10%"><input class="parent_text" type="text" name="pcostparticular_<?php echo $i; ?>" id="pcostparticular_<?php echo $i; ?>" value="<?php echo $financialExp['Particular']; ?>" /></td>
+                          <td width="5%"><input class="parent_text text-right" type="text" name="pcostamount_<?php echo $i; ?>" id="pcostamount_<?php echo $i; ?>" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addPCostRow(this)" value="<?php echo $this->commonHelper()->sanitizeNumber($financialExp['Amount'],2,true);  ?>" /></td>
+                          <td width="3%"><ul class="action_btns">
+                              <li style="float:left;"> <a href="#" onclick="deletePCostRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                            </ul></td>
+                        </tr>
+                        <?php $i++; endforeach; else: ?>
+                        <tr>
+                          <td width="10%"><input class="parent_text" type="text" name="pcostparticular_1" id="pcostparticular_1" /></td>
+                          <td width="5%"><input class="parent_text text-right" type="text" name="pcostamount_1" id="pcostamount_1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addPCostRow(this)" /></td>
+                          <td width="3%"><ul class="action_btns">
+                              <li style="float:left;"> <a href="#" onclick="deletePCostRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                            </ul></td>
+                        </tr>
+                        <?php endif; ?>
+                        <tr class="total">
+                          <td width="10%" align="right" class="rate_pri">Total Proposal Cost</td>
+                          <td width="5%"><input class="parent_text text-right total-clr" type="text" id="TotalProposalCost" name="TotalProposalCost" value="<?php echo (isset($landFinancial)) ? $landFinancial['ProposalCost'] : ''; ?>" readonly /></td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <input type="hidden" name="pcostrowid" id="pcostrowid" value="<?php echo (isset($landFinancialExp) && count($landFinancialExp) != 0) ? count($landFinancialExp) : 1; ?>" />
+                  </div>
+                </div>
+                <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-3 col-xs-7 col-xs-offset-4">
+                  <ul>
+                    <li style="margin-top:5px;"><a href="javascript:nextAccordian(2)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div data-target="#collapseOne" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-2">
+              <h4 class="panel-title accordion-toggle defa_panels">Source of Fund</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapseOne">
+              <div class="panel-body bgcolr">
+                <div class="deft_act">
+                  <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                    <div class="col-lg-4 col-sm-6">
+                      <div class="form-group">
+                        <input type="text" name="CapitalAmount" class="form-control lbl_move" label="Initial Capital Amount"onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($landFinancial)) ? $landFinancial['CapitalAmount'] : ''; ?>" />
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                      <div class="form-group">
+                        <input type="text" name="InvestorAmount" class="form-control lbl_move" label="Amount from Investors" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($landFinancial)) ? $landFinancial['InvestorAmount'] : ''; ?>" />
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                      <div class="form-group">
+                        <input type="text" name="c" class="form-control lbl_move" label="Loan from Banker" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($landFinancial)) ? $landFinancial['InvestorAmount'] : ''; ?>" />
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                      <div class="form-group">
+                        <input type="text" name="InterestRate" class="form-control lbl_move" label="Interest Rate" onchange="return isPercentage(this)" onblur="return FormatNum(this, 2)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($landFinancial)) ? $landFinancial['InterestRate'] : ''; ?>" />
+                      </div>
+                    </div>
+                      <div class="col-lg-4 col-sm-6">
+                          <div class="form-group">
+                              <?php  if($enquiry['SaleTypeId']==2){?>
+                              <input type="text" name="JVAmount" class="form-control lbl_move" label="Joint Venture Share Value" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" value="<?php echo (isset($landFinancial)) ? $landFinancial['JVAmount'] : ''; ?>" />
+                              <?php }?>
+                          </div>
+                      </div>
+                    <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-3 col-xs-7 col-xs-offset-4">
+                      <ul>
+                        <li style="margin-top:5px;"><a href="javascript:nextAccordian(3)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div data-target="#collapseTwo" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-3">
+              <h4 class="panel-title accordion-toggle defa_panels">Expected Income</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapseTwo" style="height: 0px;">
+              <div class="panel-body bgcolr">
+                <div class="col-lg-10 col-lg-offset-1 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                  <div class="table-responsive topsp" style="margin-top:10px;">
+                    <table class="table tableWithFloatingHeader" style=" margin-bottom:0px;">
+                      <thead>
+                        <tr>
+                          <th>Particular</th>
+                          <th>Amount</th>
+                          <th>&nbsp;</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php if(isset($landFinancialInc) && count($landFinancialInc) != 0): $i=1;
+								foreach($landFinancialInc as $financialInc): ?>
+                        <tr>
+                          <td width="10%"><input class="parent_text" type="text" name="exparticular_<?php echo $i; ?>" id="exparticular_<?php echo $i; ?>" value="<?php echo $financialInc['Particular']; ?>" /></td>
+                          <td width="5%"><input class="parent_text text-right" type="text" name="examount_<?php echo $i; ?>" id="examount_<?php echo $i; ?>" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addExIncomeRow(this)" value="<?php echo $this->commonHelper()->sanitizeNumber($financialInc['Amount'],2,true);?>" /></td>
+                          <td width="3%"><ul class="action_btns">
+                              <li style="float:left;"> <a href="#" onclick="deleteExIncomeRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                            </ul></td>
+                        </tr>
+                        <?php $i++; endforeach; else: ?>
+                        <tr>
+                          <td width="10%"><input class="parent_text" type="text" name="exparticular_1" id="exparticular_1" /></td>
+                          <td width="5%"><input class="parent_text text-right" type="text" name="examount_1" id="examount_1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addExIncomeRow(this)" /></td>
+                          <td width="3%"><ul class="action_btns">
+                              <li style="float:left;"> <a href="#" onclick="deleteExIncomeRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                            </ul></td>
+                        </tr>
+                        <?php endif; ?>
+                        <tr class="total">
+                          <td width="10%" align="right" class="rate_pri">Total Expected Income</td>
+                          <td width="5%"><input class="parent_text text-right total-clr" type="text" id="TotalExpectedIncome" name="TotalExpectedIncome" value="<?php echo (isset($landFinancial)) ? $landFinancial['ExpectedIncome'] : ''; ?>" readonly /></td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <input type="hidden" name="exincomerowid" id="exincomerowid" value="<?php echo (isset($landFinancialInc) && count($landFinancialInc) != 0) ? count($landFinancialInc) : 1; ?>" />
+                  </div>
+                </div>
+                <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-3 col-xs-7 col-xs-offset-4">
+                  <ul>
+                    <li style="margin-top:5px;"><a href="javascript:nextAccordian(4)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div data-target="#collapsethree" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-4">
+              <h4 class="panel-title accordion-toggle defa_panels">Project Schedule & Fund Flow</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapsethree" style="height: 0px;">
+              <div class="panel-body bgcolr">
+                <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                  <div class="col-lg-6">
+                    <h1 class="sq_tl">Construction Schedule</h1>
+                    <div style="margin-top:10px;" class="table-responsive topsp">
+                      <table style=" margin-bottom:0px;" class="table tableWithFloatingHeader">
+                        <thead>
+                          <tr>
+                            <th>Year</th>
+                            <th>Amount</th>
+                            <th>&nbsp;</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if(isset($landFinancialSch) && count($landFinancialSch) != 0): $i=1;
+								foreach($landFinancialSch as $financialSch): ?>
+                          <tr>
+                            <td width="3%"><input type="text" class="parent_text date_picker_year" name="constructionyear_<?php echo $i; ?>" id="constructionyear_<?php echo $i; ?>" onblur="addConstructionRow(this)" value="<?php echo $financialSch['ShYear']; ?>" ></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" name="constructionamount_<?php echo $i; ?>" id="constructionamount_<?php echo $i; ?>" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="updateFundFlowChart()" value="<?php echo $financialSch['Amount']; ?>" ></td>
+                            <td width="3%"><ul class="action_btns">
+                                <li style="float:left;"> <a href="#" onclick="deleteConstructionRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                              </ul></td>
+                          </tr>
+                          <?php $i++; endforeach; else: ?>
+                          <tr>
+                            <td width="3%"><input type="text" class="parent_text date_picker_year" name="constructionyear_1" id="constructionyear_1" onchange="addConstructionRow(this)"></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" name="constructionamount_1" id="constructionamount_1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="updateFundFlowChart()"></td>
+                            <td width="3%"><ul class="action_btns">
+                                <li style="float:left;"> <a href="#" onclick="deleteConstructionRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+                              </ul></td>
+                          </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                      <input type="hidden" name="constructionrowid" id="constructionrowid" value="<?php echo (isset($landFinancialSch) && count($landFinancialSch) != 0) ? count($landFinancialSch) : 1; ?>" />
+                    </div>
+                    <!--chat--> 
+                    <!--chat end--> 
+                  </div>
+                  <div class="col-lg-6">
+                    <h1 class="sq_tl">Fund Flow</h1>
+                    <div class="col-lg-12 cht" style="margin-top:10px; height:350px;" id="fundFlowChart"></div>
+                  </div>
+                  <div class="cont_bt col-lg-5 col-lg-offset-7 col-md-9 col-md-offset-3 col-sm-7 col-sm-offset-3 col-xs-7 col-xs-offset-4">
+                    <ul>
+                      <li style="margin-top:5px;"><a href="javascript:nextAccordian(5)">Continue &nbsp;<i class="fa fa-chevron-circle-right"></i></a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div data-target="#collapsefour" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-5">
+              <h4 class="panel-title accordion-toggle defa_panels">Feasibility Ratio</h4>
+            </div>
+            <div class="panel-collapse collapse" id="collapsefour" style="height: 0px;">
+              <div class="panel-body bgcolr">
+                <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                  <div class="col-lg-6">
+                    <h1 class="sq_tl">Cost Summary</h1>
+                    <div class="deft_act" style="margin: 10px 0 0 0;">
+                      <div class="data-boxs">
+                        <p>Proposal Cost</p>
+                        <span id="summary-proposalcost">0</span> <b><i class="fa fa-money"></i></b> </div>
+                      <div class="data-boxs">
+                        <p>Expected Income</p>
+                        <span id="summary-expectedincome">0</span> <b class="count"><i class="fa fa-line-chart"></i></b> </div>
+                      <div class="data-boxs">
+                        <p id="summary-profitloss-title">Profit</p>
+                        <span id="summary-profitloss">0</span> <b class="count"><i class="fa fa-pie-chart"></i></b> </div>
+                      <div class="data-boxs">
+                        <p>Project Duration</p>
+                        <span><?php echo round($feasibility['PropProjectDuration'],2).' '.$feasibility['PropProjectDurationUnitName']; ?></span> <b class="count"><i class="fa fa-clock-o"></i></b> </div>
+                    </div>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="col-lg-6">
+                    <h1 class="sq_tl">Ratio</h1>
+                    <div class="cht" id="feasibilityRatioChart" style="margin-top:10px; height:350px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--accordion end-->
+    </form>
+  </div>
+</div>
+
+<!--footer-->
+<div class="col-lg-12 savebtn_area">
+  <ul>
+    <li class="dropdown save_btn float_r" id="submit-btn" ><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a></li>
+        <form class="form-horizontal" action="<?php echo $this->basePath() . '/project/landbank/followup';?>" method="post" id="frmfollowup">
+            <input type="hidden" name="EnquiryId" value="<?php echo (isset($enquiryId)) ? $enquiryId  : 0; ?>"/>
+            <input type="hidden" id="formfrom" name="formfrom"/>
+            <input type="hidden" id="EnquiryName" name="EnquiryName" value = "<?php echo  $enquiry['PropertyName']; ?>"/>
+            <li class="cancel_btn float_l goback-foll"><a onclick="backfn(); return false;" data-toggle="tooltip" class="ripple" title="Go back"><i class="fa fa-chevron-circle-left"></i> Cancel</a></li>
+        </form>  </ul>
+</div>
+<table id="dummy-construction-schedule" style="display: none;">
+  <tbody>
+    <tr>
+      <td width="3%"><input type="text" class="parent_text date_picker_year" name="constructionyear__1" id="constructionyear__1" onchange="addConstructionRow(this)"></td>
+      <td width="5%"><input type="text" class="parent_text text-right" name="constructionamount__1" id="constructionamount__1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="updateFundFlowChart()"></td>
+      <td width="3%"><ul class="action_btns">
+          <li style="float:left;"> <a href="#" onclick="deleteConstructionRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+        </ul></td>
+    </tr>
+  </tbody>
+</table>
+<table id="dummy-proposalcost" style="display: none;">
+  <tbody>
+    <tr>
+      <td width="10%"><input class="parent_text" type="text" name="pcostparticular__1" id="pcostparticular__1" /></td>
+      <td width="5%"><input class="parent_text text-right" type="text" name="pcostamount__1" id="pcostamount__1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addPCostRow(this)" /></td>
+      <td width="3%"><ul class="action_btns">
+          <li style="float:left;"> <a href="#" onclick="deletePCostRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+        </ul></td>
+    </tr>
+  </tbody>
+</table>
+<table id="dummy-exincome" style="display: none;">
+  <tbody>
+    <tr>
+      <td width="10%"><input class="parent_text" type="text" name="exparticular__1" id="exparticular__1" /></td>
+      <td width="5%"><input class="parent_text text-right" type="text" name="examount__1" id="examount__1" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" maxlength="18" onchange="addExIncomeRow(this)" /></td>
+      <td width="3%"><ul class="action_btns">
+          <li style="float:left;"> <a href="#" onclick="deleteExIncomeRow(this, event);"> <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span> </a> </li>
+        </ul></td>
+    </tr>
+  </tbody>
+</table>
+<script type="text/javascript">
+    var arr_proposalCostParticulars = <?php echo json_encode($arr_proposalCostParticulars);?>;
+    var arr_expectedincomeParticulars = <?php echo json_encode($arr_expectedincomeParticulars);?>;
+
+    var fundFlowChart = null,
+        feasibilityRatioChart = null,
+        summaryProposalCost = 0,
+        summaryExpectedIncome = 0;
+
+    $(function(){
+        // expand first accordian
+        $('#panelheading-1').trigger('click');
+
+        bindDatepicker();
+        bindPCostAutocomplete(1);
+        bindEIncomeAutocomplete(1);
+        updateFeasibilityRatioChart();
+
+        var pcostrowid = $('#pcostrowid').val();
+        $('#pcostamount_'+pcostrowid).triggerHandler('change');
+
+        var exincomerowid = $('#exincomerowid').val();
+        $('#examount_'+pcostrowid).triggerHandler('change');
+
+        var constructionrowid = $('#constructionrowid').val();
+        $('#constructionyear_'+constructionrowid).triggerHandler('blur');
+    });
+
+    function updateFeasibilityRatioChart() {
+        var chartData = [
+            {'Year' : 2015, 'Rate': 100}
+        ];
+
+        if (feasibilityRatioChart != null) {
+            feasibilityRatioChart.dataProvider = chartData;
+            feasibilityRatioChart.validateData();
+            return;
+        }
+
+        feasibilityRatioChart = AmCharts.makeChart("feasibilityRatioChart", {
+            "theme": "light",
+            "type": "serial",
+            "marginRight": 80,
+            "autoMarginOffset": 20,
+            "marginTop":20,
+            "dataProvider": chartData,
+            "valueAxes": [{
+                "id": "v1",
+                "axisAlpha": 0.1
+            }],
+            "graphs": [{
+                "useNegativeColorIfDown": true,
+                "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#FFFFFF",
+                "hideBulletsCount": 50,
+                "lineThickness": 2,
+                "lineColor": "#fdd400",
+                "negativeLineColor": "#67b7dc",
+                "valueField": "Rate"
+            }],
+            "chartCursor": {
+                "valueLineEnabled": true,
+                "valueLineBalloonEnabled": true
+            },
+            "categoryField": "Year",
+            "categoryAxis": {
+                "axisAlpha": 0,
+                "minHorizontalGap": 60
+            }
+        });
+    }
+
+    function bindPCostAutocomplete(rowId) {
+        $('#pcostparticular_' + rowId).autocomplete({
+            lookup: arr_proposalCostParticulars,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }
+        });
+    }
+
+    function bindEIncomeAutocomplete(rowId) {
+        $('#exparticular_' + rowId).autocomplete({
+            lookup: arr_expectedincomeParticulars,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            }
+        });
+    }
+
+    function nextAccordian(id) {
+        $('#panelheading-' + id).trigger('click');
+    }
+
+    function submitForm() {
+        $('#formWrapper').submit();
+    }
+
+    function entryValidate() {
+        return true;
+    }
+
+    function bindDatepicker() {
+        $('.date_picker_year').datepicker( {
+            format: "yyyy",
+            startView: "years",
+            minViewMode: "years"
+        });
+    }
+    $(".content_wrapper").on('change', '.date_picker_year',function(){
+        $('.datepicker-dropdown').hide();
+    });
+
+    function addConstructionRow(x) {
+        var $tr = $(x).closest('tr');
+        if ($tr.next('tr').length != 0)
+            return;
+
+        var $rowid = $('#constructionrowid'),
+            count = parseInt($rowid.val()) + 1,
+            template = $('#dummy-construction-schedule tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.parent('tbody').append(template);
+        $rowid.val(count);
+
+        bindDatepicker();
+    }
+
+    function deleteConstructionRow(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr').length == 1) {
+            var template = $('#dummy-construction-schedule tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#constructionrowid').val(1);
+
+            bindDatepicker();
+        }
+
+        $tr.remove();
+        updateFundFlowChart();
+        return false;
+    }
+
+    function updateFundFlowChart() {
+        var $rate = $('input[id^=constructionamount_]');
+        var chartData = [];
+        $.each($rate, function() {
+            var $this = $(this),
+                name = $this[0].id;
+            if (name.indexOf('__') != -1) return;
+
+            var key = name.split('_')[1],
+                name = $('#constructionyear_'+key).val(),
+                rate =  parseFloat(isNullCheck($this.val(),'number'));
+
+            if (isNaN(parseFloat(rate)) || name == '')
+                return;
+
+            chartData.push({
+                'Year': name,
+                'Rate': rate
+            });
+        });
+
+        if (fundFlowChart != null) {
+            fundFlowChart.dataProvider = chartData;
+            fundFlowChart.validateData();
+            return;
+        }
+
+        fundFlowChart = AmCharts.makeChart("fundFlowChart", {
+            "theme": "light",
+            "type": "serial",
+            "marginRight": 80,
+            "autoMarginOffset": 20,
+            "numberFormatter":{precision:-1, decimalSeparator:'.', thousandsSeparator:''},
+            "marginTop":20,
+            "dataProvider": chartData,
+            "valueAxes": [{
+                "id": "v1",
+                "axisAlpha": 0.1
+            }],
+            "graphs": [{
+                "useNegativeColorIfDown": true,
+                "balloonText": "[[category]]<br><b>value: [[value]]</b>",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletBorderColor": "#FFFFFF",
+                "hideBulletsCount": 50,
+                "lineThickness": 2,
+                "lineColor": "#fdd400",
+                "negativeLineColor": "#67b7dc",
+                "valueField": "Rate"
+            }],
+            "chartCursor": {
+                "valueLineEnabled": true,
+                "valueLineBalloonEnabled": true
+            },
+            "categoryField": "Year",
+            "categoryAxis": {
+                "axisAlpha": 0,
+                "minHorizontalGap": 60
+            }
+        });
+    }
+
+    function addPCostRow(x) {
+        calcTotalPropCost();
+
+        var $tr = $(x).closest('tr');
+        if ($tr.next('tr:not(.total)').length != 0)
+            return;
+
+        var $rowid = $('#pcostrowid'),
+            count = parseInt($rowid.val()) + 1,
+            template = $('#dummy-proposalcost tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.after(template);
+        $rowid.val(count);
+
+        bindPCostAutocomplete(count);
+    }
+
+    function deletePCostRow(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr:not(.total)').length == 1) {
+            var template = $('#dummy-proposalcost tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tr.after(template);
+            $('#pcostrowid').val(1);
+        }
+
+        $tr.remove();
+        calcTotalPropCost();
+
+        return false;
+    }
+
+    function calcTotalPropCost() {
+        var $amt = $('input[id^=pcostamount_]');
+        summaryProposalCost = 0;
+        $.each($amt, function() {
+            var amt = parseFloatVal($(this).val());
+            summaryProposalCost += amt;
+            console.log(summaryProposalCost);
+        });
+        $('#TotalProposalCost').val(sanitizeNumber(summaryProposalCost,2,true));
+        calcCostSummary();
+    }
+
+    function addExIncomeRow(x) {
+        calcExIncomeCost();
+
+        var $tr = $(x).closest('tr');
+        if ($tr.next('tr:not(.total)').length != 0)
+            return;
+
+        var $rowid = $('#exincomerowid'),
+            count = parseInt($rowid.val()) + 1,
+            template = $('#dummy-exincome tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.after(template);
+        $rowid.val(count);
+        bindEIncomeAutocomplete(count);
+    }
+
+    function deleteExIncomeRow(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr:not(.total)').length == 1) {
+            var template = $('#dummy-exincome tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tr.after(template);
+            $('#exincomerowid').val(1);
+        }
+
+        $tr.remove();
+        calcExIncomeCost();
+
+        return false;
+    }
+
+    function calcExIncomeCost() {
+        var $amt = $('input[id^=examount_]');
+        summaryExpectedIncome = 0;
+        $.each($amt, function() {
+            var amt = parseFloatVal($(this).val());
+            summaryExpectedIncome += amt;
+        });
+        $('#TotalExpectedIncome').val(sanitizeNumber(summaryExpectedIncome,2,true));
+        calcCostSummary();
+    }
+
+    function calcCostSummary(){
+        $('#summary-proposalcost').html(sanitizeNumber(summaryProposalCost,2,true));
+        $('#summary-expectedincome').html(sanitizeNumber(summaryExpectedIncome,2,true));
+        var amt = summaryExpectedIncome - summaryProposalCost ;
+        if(amt > 0)
+            $('#summary-profitloss-title').html('Profit');
+        else
+            $('#summary-profitloss-title').html('Loss');
+
+            $('#summary-profitloss').html(sanitizeNumber(Math.abs(amt),2,true));
+    }
+
+    function backfn() {
+        $('#formfrom').val("title");
+        $('#frmfollowup').submit();
+    }
+	
+	<?php if ($financialId !=0 ) { ?>
+	updateFundFlowChart();
+	calcTotalPropCost();
+	calcExIncomeCost();
+	calcCostSummary();
+	<?php } ?>
+</script>

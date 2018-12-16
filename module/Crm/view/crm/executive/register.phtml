@@ -1,0 +1,91 @@
+<style>
+    .pagination-lg > li > a, .pagination-lg > li > span {
+        font-size:15px !important;
+        padding:5px 15px !important;
+    }
+    #jqxGrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="float_l">Target Register</h1>
+        </div>
+        <div class="col-lg-12 commargin_top clear">
+            <div class="table-responsive clear">
+                <div id="jqxGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var data = <?php echo (isset($targetDetails)) ? json_encode($targetDetails) : ''?>,
+        $jqxGrid = $("#jqxGrid");
+    $(function () {
+        var source = {
+            localdata: data,
+            dataType: "json",
+            dataFields: [
+                {name: 'TargetId', type: 'int'},
+                {name: 'MonthDivide', type: 'string'},
+                {name: 'ProjectId', type: 'int'},
+                {name: 'TargetFrom', type: 'string'},
+                {name: 'CreatedDate', type: 'string'},
+                {name: 'ProjectName', type: 'string'}
+            ],
+            id: 'TargetId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+        $jqxGrid.jqxGrid({
+            width: "100%",
+            source: dataAdapter,
+            sortable: true,
+            pagerButtonsCount: 6,
+            filterable: true,
+            pageable: true,
+            rowDetails: true,
+            autoheight: true,
+            showfilterrow: true,
+            editable: false,
+            altrows: true,
+            enabletooltips: true,
+            columns: [
+                {text: 'TargetId', datafield: 'TargetId', hidden: true, filterable: false},
+                {text: 'ProjectId', datafield: 'ProjectId', hidden: true, filterable: false},
+                {text: 'Project Name', datafield: 'ProjectName', width: '23%'},
+                {text: 'Target From', datafield: 'TargetFrom', width: '19%'},
+                {text: 'Created Date', datafield: 'CreatedDate', width: '23%'},
+                { text: 'Target Period', dataField: 'MonthDivide', width:'23%'},
+                {text: 'Action', sortable: false, filterable: false, align: 'left', width: '12%',
+                    cellsrenderer: function (row) {
+                        var TargetId = $jqxGrid.jqxGrid('getCellValue', row, 'TargetId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/executive/edit/'+TargetId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" onclick="executiveDelete(' + row + ');return false;"><i class="fa fa-trash-o reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+    });
+
+    function executiveDelete(row) {
+        var rowData = $jqxGrid.jqxGrid('getrowdata', row);
+        var val = confirm("Do you want to delete this Target ?");
+        if(val==true) {
+            $.ajax({
+                url: getBaseURL() + 'crm/executive/delete',
+                type: 'POST',
+                data: {"TargetId": rowData.TargetId},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $jqxGrid.jqxGrid("deleterow", rowData.TargetId);
+                    else
+                        alert('Failed to delete the Executive Entry !');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to delete the Executive Entry !');
+                }
+            });
+
+        }
+    }
+</script>

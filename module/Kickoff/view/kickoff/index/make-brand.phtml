@@ -1,0 +1,425 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<style type="text/css">
+    .table-responsive table.table tr td.td_prnt_text	{padding:4px 0px !important; border-top:0px !important;}
+    .td_prnt_text .action_btns li a						{padding-top:3px;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1>Project Kickoff</h1>
+        </div>
+        <form onsubmit="return entryValidate()" method="post" id="formWrapper">
+            <div class="col-lg-12 flwup_topcnt fmg_topcnt clear">
+                <div class="col-lg-3 form-group">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" value="<?php if ($kickoffRes['RefDate'] != NULL) { echo date("d-m-Y", strtotime($kickoffRes['RefDate'])); } else { echo date("d-m-Y"); } ?>" label="Ref Date" onkeypress="return isDate(event);" />
+                </div>
+                <div class="col-lg-3 form-group">
+                    <input type="text" name="refNo" id="refNo" class="form-control lbl_move" value="<?php if (trim($kickoffRes['RefNo']) != '') { echo $kickoffRes['RefNo']; } else { echo $svNo; } ?>" label="Ref No" />
+                </div>
+                <div class="col-lg-6 form-group">
+                    <input type="text" name="propertyName" id="propertyName" class="form-control lbl_move" value="<?php echo $kickoffRes['ProjectName']; ?>" label="Name of the Property" />
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <ul class="breadcrumb_area">
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/conception/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Conception</a></li>
+                    <li><a href="<?php echo $this->basePath().$unitUrl; ?>">Unit</a></li>
+                    <!--					<li><a href="--><?php //echo $this->basePath(); ?><!--/kickoff/index/wbs/--><?php //if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?><!--">WBS</a></li>-->
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/turnaround/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Turnaround Cost & Schedule</a></li>
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/team/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Team</a></li>
+                    <li><a href="#" class="active">Make/Brand</a></li>
+                    <!--					<li><a href="--><?php //echo $this->basePath(); ?><!--/kickoff/index/documents/--><?php //if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?><!--">Documents</a></li>-->
+                    <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/setup/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Setup</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="col-lg-12 clear">
+                    <div class="kickoff_area col-lg-12 clear">
+                        <div class="col-lg-12 padlr0">
+                            <div class="col-lg-10 col-lg-offset-1 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 clear">
+                                <div class="table-responsive">
+                                    <?php
+                                    $resourceId = array();
+                                    $brdId = array();
+                                    ?>
+                                    <table class="table" id="materialTable">
+                                        <thead>
+                                        <tr>
+                                            <th width="15%">Material</th>
+                                            <th width="12%">Make / Brand</th>
+                                            <th width="2%">Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        if(isset($kfMakeBrand) && count($kfMakeBrand) != 0) {
+                                            $i = 1;
+                                            foreach($kfMakeBrand as $makeBrand) { ?>
+                                                <tr>
+                                                    <td>
+                                                        <input class="auto-complete parent_text" type="text" name="MaterialName_<?php echo $i; ?>" id="MaterialName_<?php echo $i; ?>" tagname="MaterialName" value="<?php echo $makeBrand['ResourceName']; ?>" onblur="addMakeBrand(this);" />
+                                                        <input type="hidden" name="MaterialId_<?php echo $i; ?>" id="MaterialId_<?php echo $i; ?>" tagname="MaterialId" value="<?php echo $makeBrand['ResourceId']; ?>" />
+                                                    </td>
+                                                    <td>
+                                                        <input class="auto-complete-brd parent_text" type="text" name="BrandName_<?php echo $i; ?>" id="BrandName_<?php echo $i; ?>" tagname="BrandName" value="<?php echo $makeBrand['BrandName']; ?>" />
+                                                        <input type="hidden" name="BrandId_<?php echo $i; ?>" id="BrandId_<?php echo $i; ?>" tagname="BrandId" value="<?php echo $makeBrand['BrandId']; ?>" />
+                                                    </td>
+                                                    <td>
+                                                        <ul class="action_btns">
+                                                            <li style="float:left;">
+                                                                <a class="makebrandDelete_<?php echo $i; ?>" href="javascript:void(0);" onclick="deleteMakeBrandDetail(this, event);">
+                                                                    <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                                <?php $i++;
+                                            }
+                                        } else { ?>
+                                            <tr>
+                                                <td>
+                                                    <input class="auto-complete parent_text" type="text" name="MaterialName_1" id="MaterialName_1" tagname="MaterialName" onblur="addMakeBrand(this);" />
+                                                    <input type="hidden" name="MaterialId_1" id="MaterialId_1" tagname="MaterialId" />
+                                                </td>
+                                                <td>
+                                                    <input class="auto-complete-brd parent_text" type="text" name="BrandName_1" id="BrandName_1" tagname="BrandName" />
+                                                    <input type="hidden" name="BrandId_1" id="BrandId_1" tagname="BrandId" />
+                                                </td>
+                                                <td>
+                                                    <ul class="action_btns">
+                                                        <li style="float:left;">
+                                                            <a class="makebrandDelete_1" href="javascript:void(0);" onclick="deleteMakeBrandDetail(this, event);" style="display: none;">
+                                                                <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                        </tbody>
+                                    </table>
+                                    <input type="hidden" name="makebrandRowId" id="makebrandRowId" value="<?php echo (isset($kfMakeBrand) && count($kfMakeBrand) != 0) ? count($kfMakeBrand) : 1; ?>" />
+                                    <input type="hidden" name="kickOffId" id="kickOffId" value="<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cont_bt-list">
+                            <ul>
+                                <li><a href="<?php echo $this->basePath(); ?>/kickoff/index/team/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" class="steps_btn"><i class="fa fa-chevron-circle-left"></i> Back</a></li>
+                                <li><a href="javascript:submitForm();" class="cbtn">Continue <i class="fa fa-check-circle"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table id="dummy-makebrand" style="display: none;">
+    <tbody>
+    <tr>
+        <td>
+            <input class="auto-complete parent_text" type="text" name="MaterialName__1" id="MaterialName__1" tagname="MaterialName" onblur="addMakeBrand(this);" />
+            <input type="hidden" name="MaterialId__1" id="MaterialId__1" tagname="MaterialId" />
+        </td>
+        <td>
+            <input class="auto-complete-brd parent_text" type="text" name="BrandName__1" id="BrandName__1" tagname="BrandName" />
+            <input type="hidden" name="BrandId__1" id="BrandId__1" tagname="BrandId" />
+        </td>
+        <td>
+            <ul class="action_btns">
+                <li style="float:left;">
+                    <a class="makebrandDelete__1" href="javascript:void(0);" onclick="deleteMakeBrandDetail(this, event);" style="display: none;">
+                        <span data-toggle="tooltip" data-placement="left" data-original-title="Delete"><i class="fa fa-trash-o"></i></span>
+                    </a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+/*material autocomplete start*/
+var matArr = <?php echo json_encode($resourceMaster); ?>;
+var matArrCopy = [];
+var matId = <?php echo json_encode($resourceId); ?>;
+
+bindMatAutoComplete();
+function sliceJson(curVal)
+{
+    var material = [];
+    $("#materialTable tbody tr").each(function(){
+        var val = $(this).find(".auto-complete").val().trim();
+        if(val != "")
+            material.push($(this).find(".auto-complete").val());
+    });
+
+    matArrCopy = $.grep(matArr, function(element, index) {
+        if($.inArray(element.value, material) != -1 && element.value != curVal)
+            return false;
+        return true;
+    });
+}
+/*function addMatTr(invoker)
+ {
+ var table = $("#materialTable tbody");
+ if($(invoker).closest("tr").index() == table.find("tr:last").index()) {
+ table.append(table.find("tr:first").clone());
+ table.find("tr:last").each(function(){
+ $(this).find("input:text, input:hidden").each(function(){
+ if($(this).prop("tagName").toLowerCase() == 'input')
+ $(this).val("");
+
+ $(this).attr("name", $(this).attr("tagname"));
+ $(this).attr("id", $(this).attr("tagname"));
+ });
+ });
+ var todc = $('#makebrandRowId').val();
+ var ntodc = (parseInt(todc) + parseInt(1));
+ $('#makebrandRowId').val(ntodc);
+ bindMatAutoComplete();
+ bindBrdAutoComplete();
+ }
+ }*/
+function fillMat(json, invoker, mode)
+{
+    var tr = $(invoker).closest("tr");
+    if(mode == 1) {
+        if($.inArray(json.data, matId) == -1) {
+            matId.push(json.data);
+            var todc = $('#makebrandRowId').val();
+            tr.find("input:text, input:hidden").each(function(){
+                $(this).attr("name", $(this).attr("tagname")+'_'+todc);
+                $(this).attr("id", $(this).attr("tagname")+'_'+todc);
+            });
+        }
+        tr.find("td:nth-child(1) input:hidden").val(json.data);
+    } else {
+        var hidVal = tr.find("td:nth-child(1) input:hidden").val();
+        if(hidVal != '') {
+            matId.splice($.inArray(hidVal, matId),1);
+        }
+        tr.find("td:nth-child(1) input:hidden").val('');
+    }
+}
+function bindMatAutoComplete()
+{
+    $('.auto-complete').unbind();
+    $('.auto-complete').autocomplete({
+        lookup: <?php echo json_encode($resourceMaster); ?>,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+            if (queryLowerCase =='*') return suggestion.value;
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function(suggestion){
+            if(suggestion) {
+                fillMat(suggestion, this, 1);
+                //addMatTr(this);
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function(suggestion) {
+
+        },
+        onSearchComplete: function (query, suggestion){
+            if(!suggestion.length) {
+                fillMat('', this, 2);
+                $(this).addClass('error');
+            } else {
+                $(this).removeClass('error');
+            }
+        }
+    });
+
+    $('.auto-complete').bind("focus", function(){
+        sliceJson($(this).val().trim());
+        $(this).autocomplete().setOptions({
+            lookup: matArrCopy
+        });
+    });
+
+    /*$('.auto-complete').bind("blur", function(){
+     if($.inArray($(this).val(), matArr) == -1){
+     fillMat('', this, 2);
+     $(this).addClass("error");
+     }
+     });*/
+}
+/*material autocomplete end*/
+
+/*brand autocomplete start*/
+var brdArr = <?php echo json_encode($brandMaster); ?>;
+var brdArrCopy = [];
+var brdId = <?php echo json_encode($brdId); ?>;
+
+bindBrdAutoComplete();
+function sliceBrdJson(curVal)
+{
+    var makebrand = [];
+    $("#materialTable tbody tr").each(function(){
+        var val = $(this).find(".auto-complete-brd").val().trim();
+        if(val != "")
+            makebrand.push($(this).find(".auto-complete-brd").val());
+    });
+
+    brdArrCopy = $.grep(brdArr, function(element, index) {
+        if($.inArray(element.value, makebrand) != -1 && element.value != curVal)
+            return false;
+        return true;
+    });
+}
+function fillBrd(json, invoker, mode)
+{
+    var tr = $(invoker).closest("tr");
+    if(mode == 1) {
+        if($.inArray(json.data, brdId) == -1) {
+            brdId.push(json.data);
+            /*var todc = $('#makebrandRowId').val();
+             tr.find("input:text, input:hidden").each(function(){
+             $(this).attr("name", $(this).attr("tagname")+'_'+todc);
+             $(this).attr("id", $(this).attr("tagname")+'_'+todc);
+             });*/
+        }
+        tr.find("td:nth-child(2) input:hidden").val(json.data);
+    } else {
+        var hidVal = tr.find("td:nth-child(2) input:hidden").val();
+        if(hidVal != '') {
+            brdId.splice($.inArray(hidVal, brdId),1);
+        }
+        tr.find("td:nth-child(2) input:hidden").val('');
+    }
+}
+function bindBrdAutoComplete()
+{
+    $('.auto-complete-brd').unbind();
+    $('.auto-complete-brd').autocomplete({
+        lookup: <?php echo json_encode($brandMaster); ?>,
+        lookupFilter: function(suggestion, originalQuery, queryLowerCase){
+            if (queryLowerCase =='*') return suggestion.value;
+            else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        },
+        onSelect: function(suggestion){
+            if(suggestion) {
+                fillBrd(suggestion, this, 1);
+                $(this).removeClass('error');
+            }
+        },
+        onSearchStart: function(suggestion) {
+
+        },
+        onSearchComplete: function (query, suggestion){
+            if(!suggestion.length) {
+                fillBrd('', this, 2);
+                $(this).addClass('error');
+            } else {
+                $(this).removeClass('error');
+            }
+        }
+    });
+
+    $('.auto-complete-brd').bind("focus", function(){
+        sliceBrdJson($(this).val().trim());
+        $(this).autocomplete().setOptions({
+            lookup: brdArrCopy
+        });
+    });
+
+    /*$('.auto-complete-brd').bind("blur", function(){
+     if($.inArray($(this).val(), brdArr) == -1){
+     fillBrd('', this, 2);
+     $(this).addClass("error");
+     }
+     });*/
+}
+/*brand autocomplete end*/
+
+function addMakeBrand(x)
+{
+    var $x = $(x),
+        $tr = $x.closest('tr'),
+        key = $x[0].id.split('_')[1];
+
+    if ($tr.next('tr').length != 0)
+        return;
+
+    if ($('#MaterialName_' + key).val().length == 0)
+        return;
+
+    var $rowid = $('#makebrandRowId'),
+        count = parseInt($rowid.val()) + 1,
+        template = $('#dummy-makebrand tbody').html();
+
+    template = template.replace(/__1/g, '_' + count);
+    $tr.parent('tbody').append(template);
+    $rowid.val(count);
+    $('.makebrandDelete_' + key).show();
+    bindMatAutoComplete();
+    bindBrdAutoComplete();
+}
+/*function deleteMakeBrandDetail(x,e)
+ {
+ e.preventDefault();
+ if (!confirm('Do you want to Delete'))
+ return false;
+
+ var $tr = $(x).closest('tr');
+
+ var frid = $(x).closest("tr").find("td:nth-child(1) input:hidden").val();
+ var srid = $(x).closest("tr").find("td:nth-child(2) input:hidden").val();
+ if(frid != '')
+ matId.splice($.inArray(frid, matId),1);
+ if(srid != '')
+ brdId.splice($.inArray(srid, brdId),1);
+
+ $tr.next('tr.subTr').remove();
+ $tr.remove();
+ return false;
+ }*/
+function deleteMakeBrandDetail(x,e)
+{
+    e.preventDefault();
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $(x).closest('tr'),
+        $tbody = $tr.parent('tbody');
+
+    var frid = $(x).closest("tr").find("td:nth-child(1) input:hidden").val();
+    var srid = $(x).closest("tr").find("td:nth-child(2) input:hidden").val();
+    if(frid != '')
+        matId.splice($.inArray(frid, matId),1);
+    if(srid != '')
+        brdId.splice($.inArray(srid, brdId),1);
+
+    if ($tbody.find('> tr').length == 1) {
+        var template = $('#dummy-makebrand tbody').html();
+        template = template.replace(/__1/g, '_' + 1);
+        $tbody.append(template);
+        $('#makebrandRowId').val(1);
+    }
+
+    $tr.next('tr.subTr').remove();
+    $tr.remove();
+    return false;
+}
+
+function submitForm()
+{
+    $('#formWrapper').submit();
+}
+
+function entryValidate()
+{
+    return true;
+}
+</script>

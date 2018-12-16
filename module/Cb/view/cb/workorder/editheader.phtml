@@ -1,0 +1,182 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.bootstrap-responsive-tabs.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>" />
+
+<style>
+    .form-control {
+        box-shadow: none !important
+    }
+    
+    .seld {
+        border: 1px solid #c2c2c2 !important;
+        display: block !important;
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+    
+    .opt-listed ul li p {
+        height: 25px !important;
+        padding-top: 0px !important;
+    }
+    
+    .opt-listed ul {
+        width: 100% !important;
+        margin-left: 0% !important;
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="formWrapper" method="post">
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                <input type="hidden" name="WorkOrderId" id="WorkOrderId" value="<?php echo (isset($woregister)) ? $woregister['WorkOrderId']  : 0; ?>" />
+
+                <div id="indexWrapper">
+                    <div class="col-lg-12">
+                        <h1 class="text-center">Work Order</h1>
+                    </div>
+                    <!--form start-->
+                    <div class="col-lg-12">
+                        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                            <div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                                <div class="form-horizontal">
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <label class="control-label">Client Name</label>
+                                                <input type="text" name="ClientName" id="ClientName" class="form-control" disabled value="<?php echo (isset($woregister))?$woregister['ClientName']:''; ?>"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <label class="control-label">Project Name</label>
+                                                <input type="text" name="ProjectName" id="ProjectName" class="form-control" disabled value="<?php echo (isset($woregister))?$woregister['ProjectName']:''; ?>"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <label class="control-label">Work Order No.</label>
+                                                <input type="text" name="WONo" id="WONo" class="form-control" maxlength="100" onchange="CheckWONo(this, this.value)" value="<?php echo (isset($woregister))?$woregister['WONo']:''; ?>" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                <input type="text" name="WODate" id="WODate" class="form-control date_picker lbl_move" readonly="readonly" label="Work Order Date" onchange="validateDate(this)" value="<?php echo (isset($woregister)) ? $woregister['WODate'] : date('d-m-Y');?>" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <label class="control-label">Project Description</label>
+                                                <textarea class="form-control" name="ProjectDescription" id="ProjectDescription" disabled><?php echo (isset($woregister))?$woregister['ProjectDescription']:''; ?></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-12">
+                                                <label class="control-label">Project Type</label>
+                                                <input type="text" name="ProjectTypeName" id="ProjectTypeName" class="form-control" disabled value="<?php echo (isset($woregister))?$woregister['ProjectTypeName']:''; ?>"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="next-bt"><a onclick="return submitForm();">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $WONo = $('#WONo'),
+        $WODate = $('#WODate'),
+        $ProjectName = $('#ProjectName'),
+        $ProjectId = $('#ProjectId'),
+        $WorkOrderId = $('#PWorkOrderId'),
+        $ProjectDescription = $('#ProjectDescription'),
+        $ProjectTypeName = $('#ProjectTypeName'),
+        $ProjectTypeId = $('#ProjectTypeId'),
+        $ClientName = $('#ClientName'),
+        $ClientId = $('#ClientId'),
+        $newProject = $('#newProject'),
+        $newProjectType = $('#newProjectType');
+
+    function submitForm() {
+
+        validateIndex(function() {
+            $.ajax({
+                type: 'POST',
+                url: getBaseURL() + "cb/workorder/editheader/<?php echo (isset($woregister)) ? $woregister['WorkOrderId']:0; ?>",
+                data: $('#formWrapper').serialize(),
+                success: function(data, status, xhr) {
+                    window.location.replace(getBaseURL() + "cb/workorder/index/" + <?php echo (isset($woregister)) ? $woregister['WorkOrderId']:''; ?> + '/edit');
+                },
+                error: function(xhr, status, error) {
+                    alert('Failed!');
+                }
+            });
+        });
+
+
+    }
+
+    function validateIndex(callback) {
+        var projectName = $ProjectName.val(),
+            projectDesc = $ProjectDescription.val(),
+            workOrderNo = $WONo.val(),
+            workOrderDate = $WODate.val();
+
+        if (workOrderNo.length == 0) {
+            alert('Work Order No. is required!');
+            $WONo.focus();
+            return false;
+        } else if ($WONo.hasClass('error')) {
+            alert('Invalid Work Order No.!');
+            $WONo.focus();
+            return false;
+        } else if (workOrderDate.length == 0) {
+            alert('Work Order Date is required!');
+            $WODate.focus();
+            return false;
+        } else if ($WODate.val().length == 0) {
+            alert('Work Order Date is required!');
+            $WODate.focus();
+            return false;
+        } else {
+            callback();
+        }
+    }
+
+    function CheckWONo(x, value) {
+        var $el = $(x);
+        
+        if (value == '') {
+            alert('Work Order No. is required!');
+            showError($el, 'Work Order No. is required!');
+            $WONo.focus();
+            return false;
+        } else {
+            removeError($el);
+            $.ajax({
+                url: getBaseURL() + "cb/workorder/index/" + value,
+                data: {
+                    rtype: 'orderno',
+                    csrf: "<?php echo isset($csrf)?$csrf:''; ?>"
+                },
+                async: false,
+                type: 'post',
+                success: function (data, status) {
+                    if (data == "Y") {
+                        alert('Work Order No. already exists!');
+                        showError($el, 'Work Order No. already exists!');
+                    }
+                }
+            });
+        }
+    }
+
+</script>

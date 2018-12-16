@@ -1,0 +1,366 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+<script src="<?php echo $this->basePath(); ?>/js/slimscroll.js"></script>
+<!--content-->
+<style>
+    .mar_20{margin-top:20px;}
+    .jqx-grid-header {height:75px !important;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post" action="<?php echo $this->basePath(); ?>/mms/minconversion/conversionentry" id="formWrapper">
+            <h1 class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">MIN Conversion</h1>
+            <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                <select data-placeholder="Cost Centre" class="form-control single_dropdown lbl_move sortoption" name="costCentre" id="costCentre" style="width:100%;">
+                    <option value=""></option>
+                    <?php if(isset($arr_costcenter)):
+                        foreach($arr_costcenter as $costcenter): ?>
+                            <option value="<?php echo $costcenter['CostCentreId'];?>"> <?php echo $costcenter['CostCentreName']; ?> </option>
+                        <?php endforeach;
+                    endif; ?>
+                </select>
+            </div>
+            <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group" id="vendorContractListWrapper">
+                <select data-placeholder="Vendor" select class="form-control single_dropdown lbl_move sortoption single_dropdown_vendor" name="vendor" id="vendor"  style="width:100%;">
+                    <option value=""></option>
+                    <?php if(isset($arr_vendors)):
+                        foreach($arr_vendors as $vendor): ?>
+                            <option data-image='<?php echo $vendor['LogoPath'];?>' value='<?php echo $vendor['VendorId'];?>'><?php echo $vendor['VendorName'];?></option>
+                            echo $vendor; die;
+                        <?php endforeach;
+                    endif;?>
+                </select>
+            </div>
+            <div class="col-lg-3 form-group">
+                <select class="form-control selectpicker show-tick" name="gridtype" id="gridtype" >
+                    <!--                        <option value="-1" selected>Select Priority</option>-->
+                    <option value="0" selected="true">Sequentival View</option>
+                    <option value="1">List View</option>
+                </select>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 feed-bg">
+                <div class="top-conts animated fadeInLeft col-lg-8 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+                    <h2 class="h1-head">List of Min`s.</h2>
+                    <p>Selected Min`s </p>
+                    <span id="NoOfSelRequest">0</span>
+                </div>
+                <div class="col-lg-4 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0 col-xs-12 col-xs-offset-0 form-group">
+                    <div class="cf search-wrapper ">
+                        <input type="text" class="search-btns"  placeholder="Search by Min no." id="searchRequestNo" style="width:100%;">
+<!--                        <button type="submit"><i class="fa fa-search"></i></button>-->
+                    </div>
+                </div>
+                <div class="div-overallscroll">
+                    <div id="requestWrapper">
+                        <p style="text-align: center;padding: 88px;">No data to display</p>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12 feed-bg">
+                <div class="fil-til top-count">
+                    <h2 class="h1-head">List of resources from the pending MIN`s.</h2>
+                    <p>Selected Resources</p>
+                    <span id="NoOfSelResource">0</span>
+                </div>
+                <div class="col-lg-12 mar_20">
+                    <div id="resourceGrid" class="animated fadeInUp"></div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="clearfix"></div>
+            <div id="requestTransInputsWrapper" class="hide"></div>
+            <input type="hidden" name="frm_index" value="1"/>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li id="continueButton" class="dropdown save_btn float_r"> <a onclick="validateOnSubmit();" class="ripple">Continue</a></li>
+        <!--<li class="cancel_btn cancel_btn_bluecolor float_l"><input type="reset" value="Reset" id="cancel" class="ripple"></li>-->
+
+    </ul>
+</div>
+
+<script type="text/template" id="request-template">
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0">
+        <div class="three-box hvr-overline-from-center request-box zoomIn animated">
+            <ul data-id="{{DCRegisterId}}">
+                <li><span>MIN No</span>:&nbsp;{{MINNo}}</li>
+                <li><span>MIN Date</span>:&nbsp;{{MINDate}}</li>
+                <li><span>Site MIN No</span>:&nbsp;{{SiteMINNo}}</li>
+                <li><span>Site MIN Date</span>:&nbsp;{{SiteMINDate}}</li>
+            </ul>
+            <span class="high-lit">M</span>
+        </div>
+    </div>
+</script>
+
+
+
+<script>
+    $('#cancel').on('click', function()
+    {
+        $('#formWrapper').find('input:text, input:password, select, textarea').val('');
+        $('#formWrapper').find('input:radio, input:checkbox').prop('checked', false);
+    });
+
+function validateOnSubmit() {                // from submit validation
+
+    if($('#costCentre').val() == '') {
+        alert('Please select Cost Centre');
+        return false;
+    }
+
+    if($('#vendor').val() == '') {
+        alert('Please select vendor');
+        return false;
+    }
+    if($('#NoOfSelResource').html() == 0) {
+        alert('Please select resources');
+        return false;
+    }
+
+    $('#formWrapper').submit();
+}
+
+    function bindRequests() {
+        var costCentreId = $('#costCentre').val();
+        var vendorId = $('#vendor').val();
+
+        if(costCentreId == '' && vendorId == '') {
+            return;
+        } else {
+            if(costCentreId != '' && vendorId != ''){
+                $.ajax({
+                    url:getBaseURL()+'mms/minconversion/conversion',
+                    type:"post",
+                    data:{'CostCentreId':costCentreId, 'VendorId':vendorId },
+                    dataType:"json",
+                    success:function(data, textStatus, jqXHR){
+                        if(jqXHR.status == 200) {
+                            $resourceGrid.jqxGrid('clear');
+                            tmpLocalData = data.requests;
+                            renderRequests(data.requests);
+                            renderRequestResources(data.resources);
+                        }
+                    }
+                });
+            } else {
+                $('#requestWrapper').html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+                $resourceGrid.jqxGrid('clear');
+            }
+        }
+    }
+    var sel_resource_count = 0;
+    var tmpLocalData = [];
+    var arr_poregIds = [];
+    var $resourceGrid = $("#resourceGrid");
+    var $searchRequestNo = $('#searchRequestNo');
+    var seletedGrid=0;
+    $resourceGrid.jqxGrid('clear');
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+
+            { name: 'MinNo', type: 'string' },
+            { name: 'MinDate', type: 'date' },
+            { name: 'Description', type: 'string' },
+            { name: 'Quantity', type: 'string' },
+            { name: 'MinQty', type: 'string' },
+            { name: 'AcceptQty', type: 'string' },
+            { name: 'BalQty', type: 'string'},
+            { name: 'DCRegisterId', type: 'int' }
+        ],
+        id: 'DCGroupId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+
+    $(function () {
+
+        $('.div-overallscroll').slimScroll({
+            position: 'right',
+            height: '100%',
+            width: '100%',
+            alwaysVisible: false,
+            railVisible: true,
+            railColor: '#d7dabd',
+            color: '#009688',
+            railOpacity: 1
+        });
+
+        $('#costCentre').on('change',function(){
+            $searchRequestNo.val('');
+            $('#requestWrapper').val('');
+            $('#NoOfSelRequest').html(0);
+            $('#NoOfSelResource').html(0);
+            bindRequests();
+        });
+
+        $('#vendor').on('change',function(){
+            $searchRequestNo.val('');
+            $('#requestWrapper').val('');
+            $('#NoOfSelRequest').html(0);
+            $('#NoOfSelResource').html(0);
+
+            if($(this).val() == 'service') {
+                $('#vendorContractListWrapper').hide();
+                $('#SupplierList').prop('disabled', true);
+            } else {
+                $('#vendorContractListWrapper').show();
+                $('#SupplierList').prop('disabled', false);
+            }
+
+            bindRequests();
+        });
+
+        var cellsrenderer = function (row, column, value) {
+            return '<div style="text-align: right; margin-top: 5px;">' + value + '</div>';
+        };
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            pagerMode: 'advanced',
+            pagerHeight: 40,
+            sortable: true,
+            altrows: false,
+            selectionMode: 'checkbox',
+            enabletooltips: true,
+            showaggregates: true,
+            keyboardnavigation: true,
+            autorowheight: true,
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            editable: true,
+            filterable: true,
+            showfilterrow: true,
+            columns: [
+                { dataField: 'DCRegisterId', hidden: true},
+                { dataField: 'DCGroupId', hidden: true},
+                { text: 'MIN No', dataField: 'MinNo',width:'10%', editable:false},
+                { text: 'MIN Date', dataField: 'MinDate',width:'10%', editable:false, filtertype: 'date',cellsformat: 'dd-MM-yyyy'},
+                { text: 'Resource', dataField: 'Description',width:'35%', editable:false},
+                { text: 'MIN Qty', dataField: 'MinQty',width:'15%',cellsrenderer: cellsrenderer,align: 'center',cellsalign: 'right', editable:false},
+                { text: 'Accept Qty', dataField: 'AcceptQty',width:'15%',cellsrenderer: cellsrenderer,cellsalign: 'left', editable:false,align: 'center'},
+                { text: 'Bal Qty', dataField: 'BalQty',width:'15%',cellsrenderer: cellsrenderer,cellsalign: 'left',editable:false,align: 'center'}
+
+            ]
+        });
+        $resourceGrid.on('rowselect', function (event) {
+            var args = event.args;
+            var row = args.rowindex;
+            if(row.length){
+                $('#NoOfSelResource').html(row.length);
+            } else if(row.length == 0 ) {
+                $('#NoOfSelResource').html(row.length);
+            } else {
+                sel_resource_count++;
+                $('#NoOfSelResource').html(sel_resource_count);
+            }
+            generateSelResourceInputs();
+        });
+        $resourceGrid.on('rowunselect', function (event) {
+            sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+
+        $('#Supplier').on('change', function () {
+            if($(this).val() == 'work') {
+                $('#WorkTypeWrapper').show();
+            } else {
+                $('#WorkTypeWrapper').hide();
+            }
+        });
+
+        // request check and uncheck
+        $('#requestWrapper').on('click','.request-box', function () {
+            $(this).toggleClass('selected');
+            renderSelectedResources($(this));
+        });
+
+        // search by request no.
+        $searchRequestNo.on('keyup', function () {
+            var DCNo = $.trim($(this).val());
+            if(DCNo.length != 0 && tmpLocalData.length != 0) {
+                var filtered_data = $.grep(tmpLocalData, function (o) {
+                    return new RegExp('^.*'+DCNo+'.*$','gi').test(o.MINNo);
+                });
+                renderRequests(filtered_data);
+            } else {
+                renderRequests(tmpLocalData);
+            }
+        });
+    });
+
+    function renderRequests(data) {
+
+        var $requestWrapper = $('#requestWrapper');
+        if(data.length == 0) {
+            $requestWrapper.html('<p style="text-align: center;padding: 88px;">No data to display</p>');
+        } else {
+            var template = $('#request-template').html();
+            $requestWrapper.html('');
+            $.each(data, function (i,o) {
+                $requestWrapper.append(template.replace(/\{\{MINNo\}\}/g,o.MINNo)
+                    .replace(/\{\{MINDate\}\}/g,o.MINDate)
+                    .replace(/\{\{SiteMINNo\}\}/g,o.SiteMINNo)
+                    .replace(/\{\{SiteMINDate\}\}/g,o.SiteMINDate)
+                    .replace(/\{\{DCRegisterId\}\}/g,o.DCRegisterId));
+                if($.inArray(parseInt(o.DCRegisterId) , arr_poregIds) != -1){
+                    $('ul[data-id='+o.DCRegisterId+']').parent().addClass('selected');
+                }
+            });
+        }
+    }
+
+    function renderRequestResources(data) {
+        resourceSource.localdata = data;
+        resourceAdapter.dataBind();
+    }
+    function renderSelectedResources(el) {
+        var dcregId = el.find('ul[data-id]').attr('data-id');
+        var displayedRows = $resourceGrid.jqxGrid("getboundrows");
+
+        if(el.hasClass('selected')) {
+            seletedGrid++;
+            $.each(displayedRows, function (i, o) {
+                if(parseInt(o.DCRegisterId)==parseInt(dcregId)) {
+                    $resourceGrid.jqxGrid('selectrow', o.boundindex);
+                    if ($.inArray(o.DCRegisterId, arr_poregIds) == -1) {
+                        arr_poregIds.push(o.DCRegisterId);
+                    }
+                }
+            });
+        } else {
+            seletedGrid--;
+            $.each(displayedRows, function (i, o) {
+                if(parseInt(o.DCRegisterId)==parseInt(dcregId)) {
+                    $resourceGrid.jqxGrid('unselectrow', o.boundindex);
+                    var key1 = $.inArray(o.DCRegisterId,arr_poregIds);
+                    arr_poregIds.splice(key1);
+                }
+            });
+        }
+        $('#NoOfSelRequest').html(seletedGrid);
+        resourceAdapter.dataBind();
+        generateSelResourceInputs();
+    }
+
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getselectedrowindexes');
+        var $inputs = '';
+        for (var rowId in rows) {
+            getRowData = $resourceGrid.jqxGrid('getrowdata', rows[rowId]);
+            $inputs += '<input type="hidden" name="DCGroupIds[]" class="DCGroupIds" value="' + getRowData.uid + '"/>';
+        }
+        $('#requestTransInputsWrapper').html($inputs);
+    }
+</script>

@@ -1,0 +1,175 @@
+<style>
+#treeGrid .jqx-grid-header 	{height:75px !important;}
+.edit_al                        {background:rgba(158, 158, 158, 0.25);padding:5px !important;font-size:14px; font-weight:600; transition: all 0.4s ease 0s; border: 1px solid rgba(158, 158, 158, 0.55);color:#795548;}
+.edit_al:hover					{border:1px solid #8FB5D9;color:#4088CC; background:#fff;}
+</style>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid padlr0">
+    <div class="col-lg-12">
+        <h1 class="float_l">Progress Bill
+            <div class="stgedit_btn req_addbtn brad_50">
+                <a href="<?php echo $this->basePath();?>/crm/project/stagecompletion" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New"><i class="fa fa-plus"></i></a>
+            </div>
+        </h1>
+        <div class="col-lg-12 padlr0 clear">
+            <div class="table-responsive clear">
+            	<div id="treeGrid"> </div>
+            </div>
+        </div>
+  </div>
+</div>
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times"></i></button>
+                <h1>Why do you want to delete Progress Bill No : <span id="delEntryName" class="bld-txt"></span>?</h1>
+            </div>
+            <div class="modal-body">
+                <div class="padlr0">
+                    <div class="container-fluid">
+                        <div class="">
+                            <div class="col-lg-12 commargin_top_20">
+                                <form class="form-horizontal">
+                                    <div class="row">
+                                        <div class="form-group req_flds">
+                                            <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Remarks"/>
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="commargin_top commargin_bottom">
+                    <a href="#" data-dismiss="modal" aria-hidden="true" class="md_cance">Cancel</a>
+                    <a href="#" id="btnDeleteYes" class="md_ok">Delete</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+	$treeGrid = $("#treeGrid"),
+	$deleteModal = $('#DeleteModal'),
+        $remarks = $('#remarks');
+	var source =
+	{	
+		localdata:<?php echo json_encode($gridResult); ?>,
+		dataType: "json",
+		dataFields: [
+
+			{ name: 'ProjectId', type: 'number' },
+			{ name: 'BillDate' , type: "date", format: 'DD-MM-yyyy'  },
+			{ name: 'ProjectName', type: 'string' },
+			{ name: 'BlockName', type: 'string' },
+			{ name: 'ProgressNo', type: 'string' },
+			{ name: 'ProgressBillId', type: 'string' }
+		],
+		id: 'StageCompletionId'
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source);
+
+	$("#treeGrid").jqxGrid(
+	{
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready:function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No request to display";
+			$("#treeGrid").jqxGrid('localizestrings', localizationobj);
+		},
+		source:dataAdapter,
+		columns: [
+		 
+		  { text: 'Progress Bill No', dataField: 'ProgressNo',width:'22%'},
+		  { text: 'ProgressBillId', dataField: 'ProgressBillId',hidden: true, filterable: false},
+		  { text: 'ProjectName', dataField: 'ProjectName', cellsalign: 'center', align: 'center',width:'21%' },
+		  { text: 'BlockName', dataField: 'BlockName', cellsalign: 'center', align: 'center',width:'21%'},
+		  { text: 'BillDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'BillDate', cellsalign: 'center', align: 'center',width:'21%' },
+		  { text: 'Action', sortable: false, filterable: false,width:'15%',align: 'left',
+                    cellsrenderer: function (row) {
+                        var ProgressBillId = $("#treeGrid").jqxGrid('getCellValue', row, 'ProgressBillId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/bill/progress-edit/'+ProgressBillId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: progresstDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>'+
+						'<a title="print" href="'+ getBaseURL() + 'crm/bill/progress-print/'+ProgressBillId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-print reg-icon"></i></a>';
+                    }
+                }
+	  ]
+	});
+	$('#btnDeleteYes').on('click', function () {
+            var remarks = $remarks.val();
+            if(remarks.length == 0) {
+                showError($remarks, 'Required!');
+                return;
+            } else
+                removeError($remarks);
+
+            $deleteModal.modal('hide');
+            var rowData = $treeGrid.jqxGrid('getrowdata', $deleteModal.data('row'));
+            $.ajax({
+                url: getBaseURL() + 'crm/bill/deleteprogress',
+                type: 'POST',
+                data: {"ProgressBillId": rowData.ProgressBillId, "Remarks": remarks},
+                success:function(data, textStatus, jqXHR){
+                    if (jqXHR.status == 200)
+                        $treeGrid.jqxGrid("deleterow", rowData.uid);
+                    else
+                        alert('Failed to delete the receipt!');
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+            $remarks.val('');
+        });
+	/*$("#treeGrid").bind('rowselect', function (event) {
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		location.replace('request-detailed/'+rowData.uid);
+	});*/
+});
+function progresstDelete(row) {
+        var rowData = $treeGrid.jqxGrid('getrowdata', row);
+        var bAns = false;
+        $.ajax({
+            url: getBaseURL() + 'crm/bill/checkProgressBillUsed',
+            async: false,
+            type: 'POST',
+            data: {"ProgressBillId": rowData.ProgressBillId},
+            success:function(data, textStatus, jqXHR){
+                if (data =='Y') bAns=true;
+            }
+        });
+
+        if (bAns==true)
+        {
+            alert ("Progress Bill Used in Receipt, Do not Delete");
+            return;
+        }
+        $deleteModal.data('row', row).modal('show');
+        $('#delEntryName').html(rowData.ProgressNo);
+        $("#remarks").val('');
+    }
+</script>

@@ -1,0 +1,446 @@
+<style>
+.iconla{
+	font-size: 150%;
+	font-family: times, serif;
+	position: relative;
+	text-align: center;
+	color: #000;
+	padding: 0.5em;
+}
+/* centered columns styles */
+.row-centered {
+    text-align:center;
+}
+.col-centered {
+    display:inline-block;
+    float:none;
+    /* reset the text-align */
+    text-align:left;
+    /* inline-block space fix */
+    margin-right:-4px;
+}
+</style>
+<div id="page-wrapper">
+	<div class="container-fluid">
+		<form method="post" action="../feeds-entry-edit/<?php echo $iPOregId; ?>" role="form"  enctype="multipart/form-data" class="form-horizontal">
+			<input type="hidden" name="mode" id="mode" value="firstStep">
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">
+						Register Decision
+					</h1>
+				</div>
+			</div>
+			<div class="row row-centered visible" id="firstStep">
+				<div class="col-xs-4 col-centered">
+				<input type="hidden" name="poregId" id="poregId" value="<?php echo $iPOregId; ?>">
+					<div class="form-group" style="">
+						<input type="text" id="VoucherNo" name="VoucherNo" placeholder="VoucherNo" value="<?php echo $VoucherNo; ?>" class="form-control" >					
+					</div>	
+					<div class="form-group" style="">
+						<input type="text" id="decision_date" name="decision_date" placeholder="decision date" value="<?php echo $EntryDate ; ?>" class="form-control" >
+					</div>					
+				</div>	
+			</div>
+			<div class="row row-centered visible" id="secondStep" style="display:none;">
+				<!-- Page Heading -->
+				<div class="form-group">
+					<div id="decision"></div>	
+				</div>	
+				<div class="row">
+					<div class="col-lg-12">
+						<h1 class="page-header">
+							Resource
+						</h1>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-6">
+						<div id="resource"></div>
+					</div>
+					<div class="col-lg-6">
+						<div id="project"></div>					
+					</div>					
+				</div>	
+			</div>	
+			<input type="text" name="hidDecisionId" id="hidDecisionId">
+			<input type="text" name="hidResourceId" id="hidResourceId">
+			<input type="text" name="hidProjectId" id="hidProjectId">
+		</form>	
+	</div>
+	<div class="row" >
+		<div class="col-lg-12">		
+			<div class="form-group" style="margin-top:20px;" id="lastSubmit">
+				<input class="btn btn-primary" id="backButton" type="button" value="Back" style="float:left;display:none;">
+				<input class="btn btn-primary" id="continueButton" type="button" value="Continue" style="float:right;">
+			</div>			
+		</div>
+	</div>	
+</div>
+<script>
+
+	$.ajax({
+		url:"feeds",
+		type:"post",
+		data:"mode=feedSelect",
+		dataType:"json",
+		success:function(data, textStatus, jqXHR){	
+			//alert(JSON.stringify(data))
+			var source =
+				{
+					localData: data,
+					dataType: "json",
+					updaterow: function (rowid, rowdata, commit) {
+						//alert(JSON.stringify(rowdata))
+						// synchronize with the server - send update command
+						// call commit with parameter true if the synchronization with the server is successful 
+						// and with parameter false if the synchronization failed.
+						commit(true);
+					},					
+					dataFields:
+					[
+						{ name: 'RDecisionNo', type: 'string' },
+						{ name: 'DecDate', type: 'string' },
+					],
+					id:'DecisionId'
+				};
+				
+				var dataAdapter = new $.jqx.dataAdapter(source);
+
+
+				$("#decision").jqxGrid({
+					width: '100%',
+					filterable: true,
+					sortable: true,
+					editable: true,		
+					pageable: true,
+					autoheight: true,
+					columnsresize: true,						
+					source: dataAdapter,
+					ready: function(){
+						$("#decision .jqx-grid-column-header [role='checkbox']").on('mousedown', function (event) {
+							if($(this).find("input:hidden").val() == 'true'){
+								$("#resource").jqxGrid('clear');
+								$("#project").jqxGrid('clear');
+								var decsId = new Array();
+								var rowid = $('#decision').jqxGrid('getrows');
+								//alert(JSON.stringify(rowid))
+								for(var i = 0; i<rowid.length; i++){
+									decsId.push(rowid[i].uid)
+								}
+								
+								$.ajax({
+									url:"feeds",
+									type:"post",
+									data:"decId="+decsId+"&mode=firstStep",
+									dataType:"json",
+									success:function(data, textStatus, jqXHR){
+										//alert(JSON.stringify(data));
+										$.each(data['resource'], function(i,v){
+											$("#resource").jqxGrid('addrow', null, v);
+										});
+										
+										$.each(data['project'], function(i,v){
+											$("#project").jqxGrid('addrow', null, v);
+										});											
+									},
+									error:function(jqXHR, textStatus, errorThrown){
+										alert(textStatus+"-----"+errorThrown);
+									}
+								});	
+								
+							}
+							else{
+								$("#resource").jqxGrid('clear');
+								$("#project").jqxGrid('clear');
+							}
+						});							
+					},
+					selectionmode: 'checkbox',
+					columns: [
+							  { text: 'Decision no', editable: false,datafield: 'RDecisionNo'},
+							  { text: 'Decision date', editable: false,datafield: 'DecDate'},
+					]
+				});
+				
+					
+		},
+		error:function(jqXHR, textStatus, errorThrown){
+			alert(textStatus+"-----"+errorThrown);
+		}
+	});										
+	
+
+			var resSource ={
+							localData: [],
+							dataType: "json",
+							updaterow: function (rowid, rowdata, commit) {
+								alert(JSON.stringify(rowdata))
+								// synchronize with the server - send update command
+								// call commit with parameter true if the synchronization with the server is successful 
+								// and with parameter false if the synchronization failed.
+								commit(true);
+							},					
+							dataFields:
+							[
+								{ name: 'ResourceName', type: 'string' },
+								{ name: 'Quantity', type: 'string' },
+								{ name: 'RDecisionNo', type: 'string' },
+								{ name: 'ResourceId', type: 'string' },
+								{ name: 'CostcentreId', type: 'string' },
+							],
+							id:'DecisionId'
+						};
+
+				var resDataAdapter = new $.jqx.dataAdapter(resSource);
+
+				$("#resource").jqxGrid({
+					width: '100%',
+					filterable: true,
+					sortable: true,
+					editable: true,		
+					pageable: true,
+					autoheight: true,
+					columnsresize: true,						
+					source: resDataAdapter,
+					selectionmode: 'checkbox',
+					columns: [
+							  { text: 'Resource Name', editable: false,datafield: 'ResourceName'},
+							  { text: 'Quantity', editable: false,datafield: 'Quantity'},
+							  { text: 'Decision No', editable: false,datafield: 'RDecisionNo'},
+					]
+				});
+				
+            $("#resource").bind('rowselect', function (event){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row; 
+            });	
+
+			$('#resource').on('rowunselect', function (event){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row;
+			});	
+			
+			
+			
+			var costSource ={
+							localData: [],
+							dataType: "json",
+							updaterow: function (rowid, rowdata, commit) {
+								alert(JSON.stringify(rowdata))
+								// synchronize with the server - send update command
+								// call commit with parameter true if the synchronization with the server is successful 
+								// and with parameter false if the synchronization failed.
+								commit(true);
+							},					
+							dataFields:
+							[
+								{ name: 'CostCentreName', type: 'string' }
+							],
+							id:'CostCentreId'
+						};
+
+				var costDataAdapter = new $.jqx.dataAdapter(costSource);
+
+				$("#project").jqxGrid({
+					width: '100%',
+					filterable: true,
+					sortable: true,
+					editable: true,		
+					pageable: true,
+					autoheight: true,
+					columnsresize: true,						
+					source: costDataAdapter,
+					selectionmode: 'checkbox',
+					columns: [
+							  { text: 'Project Name', editable: false,datafield: 'CostCentreName'}
+					]
+				});
+				
+            $("#project").bind('rowselect', function (event){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row; 
+            });	
+
+			$('#project').on('rowunselect', function (event){
+				// event arguments.
+				var args = event.args;
+				// row's bound index.
+				var rowBoundIndex = args.rowindex;
+				// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+				var rowData = args.row;
+			});
+
+			
+			//Selected Item
+			$.ajax({
+				url:"feeds-edit",
+				type:"post",
+				data:"mode=SelectItemResource&poregId="+$("#poregId").val(),
+				dataType:"json",
+				success:function(data, textStatus, jqXHR){	
+						//decsion
+						$.each(data['decision'], function(i,v){
+							var rid1 = v.DecisionId;
+							if(v.Sel == 1){
+								var mindex = $('#decision').jqxGrid('getrowboundindexbyid', rid1);
+								if(mindex!=-1)
+									$('#decision').jqxGrid('selectrow', mindex);
+							}
+						});
+						//alert(JSON.stringify(data['resourcefull']))
+						resSource.localdata = data['resourcefull'];
+						resDataAdapter.dataBind();	
+
+						costSource.localdata = data['projectfull'];
+						costDataAdapter.dataBind();							
+						//Resource 
+						$.each(data['resource'], function(i,v){
+							var rid1 = v.DecisionId;
+							var mindex = $('#resource').jqxGrid('getrowboundindexbyid', rid1);
+							if(mindex!=-1)
+								$('#resource').jqxGrid('selectrow', mindex);
+						});
+						//Costcentre 
+						$.each(data['project'], function(i,v){
+							var rid1 = v.CostCentreId;
+							var mindex = $('#project').jqxGrid('getrowboundindexbyid', rid1);
+							if(mindex!=-1)
+								$('#project').jqxGrid('selectrow', mindex);
+						});
+						
+				},
+				complete:function(data){
+					$("#decision").bind('rowselect', function (event){
+						// event arguments.
+						var args = event.args;
+						// row's bound index.
+						var rowBoundIndex = args.rowindex;
+						// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+						var rowData = args.row; 
+						//alert(JSON.stringify(rowData))
+						var uid = rowData.uid;
+						
+						$.ajax({
+							url:"feeds",
+							type:"post",
+							data:"decId="+uid+"&mode=firstStep",
+							dataType:"json",
+							success:function(data, textStatus, jqXHR){
+								//alert(JSON.stringify(data));
+								$.each(data['resource'], function(i,v){
+									$("#resource").jqxGrid('addrow', null, v);
+								});
+								$.each(data['project'], function(i,v){
+									var rowid = $('#project').jqxGrid('getrows');
+									//alert(JSON.stringify(rowid))
+									var bool = true;
+									for(var i = 0; i<rowid.length; i++){
+										if(rowid[i].CostCentreId == v.CostCentreId){
+											bool=false;
+										}
+									}					
+									if(bool){		
+										$("#project").jqxGrid('addrow', null, v);
+									}
+								});						
+							},
+							error:function(jqXHR, textStatus, errorThrown){
+								alert(textStatus+"-----"+errorThrown);
+							}
+						});					
+					});	
+
+					$('#decision').on('rowunselect', function (event){
+						// event arguments.
+						var args = event.args;
+						// row's bound index.
+						var rowBoundIndex = args.rowindex;
+						// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+						var rowData = args.row;
+						var uid = rowData.uid;
+
+						var rowid = $('#resource').jqxGrid('getrows');
+						//alert(JSON.stringify(rowid))
+						var array = new Array();
+						for(var i = 0; i<rowid.length; i++){
+							if(rowid[i].DecisionId == uid){
+								array.push(rowid[i].uid);
+							}
+						}
+						$("#resource").jqxGrid('deleterow', array);
+					});									
+					
+				},				
+				error:function(jqXHR, textStatus, errorThrown){
+					alert(textStatus+"-----"+errorThrown);
+				}
+			});	
+			///
+			
+								
+$("#backButton").click(function(){
+	$("#firstStep").show();
+	$("#secondStep").hide();
+	$("#backButton").hide();
+});	
+$("#continueButton").click(function(){
+	if($("#firstStep").is(":visible")){
+		bool=true;
+		if($("#VoucherNo").val().trim().length==0){
+			bool=false;
+			$("#VoucherNo").focus();
+			alert("Please Enter Request Voucher No");		
+		}
+		else if($("#decision_date").val().length == 0){
+			bool=false;
+			$("#decision_date").focus();
+			alert("Please Select the valid date");
+		}
+		if(bool){
+			$("#firstStep").hide();
+			$("#secondStep").show();
+			$("#backButton").show();
+		}
+	}
+	else{
+		var obj1 = [];
+		var obj2 = [];
+		var obj3 = [];
+		var decision = $("#decision").jqxGrid('getselectedrowindexes');
+		var resource = $("#resource").jqxGrid('getselectedrowindexes');
+		var project = $("#project").jqxGrid('getselectedrowindexes');
+		$.each(resource, function(i,v){
+			//alert(JSON.stringify($("#resource").jqxGrid('getrowdata', v)));
+			var dat = $("#resource").jqxGrid('getrowdata', v);
+			obj1.push(dat.ResourceId);
+		});
+		$.each(decision, function(i,v){
+			var dat = $("#decision").jqxGrid('getrowdata', v);
+			obj2.push(dat.uid);
+			//alert(JSON.stringify($("#resource").jqxGrid('getrowdata', v)));
+		});	
+		$.each(project, function(i,v){
+			var dat = $("#project").jqxGrid('getrowdata', v);
+			obj3.push(dat.uid);
+			//alert(JSON.stringify($("#project").jqxGrid('getrowdata', v)));
+		});			
+		$("#hidResourceId").val(obj1);
+		$("#hidDecisionId").val(obj2);
+		$("#hidProjectId").val(obj3);
+		$("form").submit();
+	}
+});
+</script>

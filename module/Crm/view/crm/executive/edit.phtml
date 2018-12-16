@@ -1,0 +1,238 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script src="<?php echo $this->basePath(); ?>/js/modernizr.js"></script> <!-- Modernizr -->
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/component.css" />
+<form  method="post"  autocomplete="off">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+                <h1 data-bsfhead="Executive Target" >Executive Target</h1>
+            </div>
+            <div class="col-lg-12 flwup_topcnt fmg_topcnt clear" id="target">
+                <div class="col-lg-4 form-group" id="period">
+                    <input name="periodId " id="periodId" data-bsfshare="Period" label="Choose Period" class="form-control lbl_move" readonly value="<?php echo (isset($targetDetails)) ? $targetDetails['MonthDivide'] : ''; ?>" style="width:100%;" >
+                    <input type="hidden" name="projId" id="projId" value="<?php echo (isset($targetDetails)) ? $targetDetails['ProjectId'] : ''; ?>" />
+                </div>
+
+                <div class="col-lg-4 form-group" id="project">
+                    <input name="projectId " id="targetprojectId" data-bsfshare="ProjectName" label="Choose Project" class="form-control lbl_move" readonly value="<?php echo (isset($targetDetails)) ? $targetDetails['ProjectName'] : ''; ?>" style="width:100%;" >
+                </div>
+
+                <div class="col-lg-4 form-group" id="from">
+                    <input type="text" name="target_from" id="target_from" data-bsfshare="Target From" readonly class="form-control lbl_move" value="<?php echo (isset($targetDetails['TargetFrom'])) ? $targetDetails['TargetFrom'] : ''; ?>" label="Target From"/>
+                </div>
+                <div>
+                    <input type="hidden" name="Target_Id" id="Target_Id"  value="<?php echo (isset($targetDetails)) ? $targetDetails['TargetId'] : ''; ?>"/>
+                </div>
+                <div class="col-lg-4 form-group" id="count">
+                    <input type="text" name="target_count" id="target_count" data-bsfshare="Target Count" readonly class="form-control lbl_move" value="<?php echo (isset($targetDetails)) ? $targetDetails['Terms'] : ''; ?>" label="No of Terms"/>
+                </div>
+<!--                <div class="col-lg-4 form-group" id="unit">-->
+<!--                    <input type="text" name="target_unit" id="target_unit" onChange = "stepsFormData();" onKeyPress="return isDecimal(event);" class="form-control lbl_move" value="" label="Target Unit"/>-->
+<!--                </div>-->
+<!--                <div class="col-lg-4 form-group" id="amount">-->
+<!--                    <input type="text" name="target_amt" id="target_amt" onChange = "stepsFormData();" onblur="return FormatNum(this, 2);" onKeyPress="return isDecimal(event);" class="form-control lbl_move"  value="" label="Target Amount"/>-->
+<!--                </div>-->
+            </div>
+            <div class="col-lg-12 clear">
+                <a class="agreement_preview_a m_btm20" href="javascript:void(0);" onclick="return treeView();"><span><i class="fa fa-sitemap" aria-hidden="true"></i></span> Tree View</a>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear col-lg-12" id="dataTable">
+                    <div class="matrix_table_area">
+                        <table class="table matrix_table clear" >
+                            <thead>
+
+                            <tr>
+                                <th class="headcol_l headcol_l1">Target Period</th>
+                                <?php
+                                foreach($executiveList as $ExeLoad){
+                                    ?>
+                                    <th colspan="2" id="Executive" class="txt_center" style="border-bottom:0px !important;"><span data-placement="bottom" data-toggle="tooltip" data-original-title=""><input type="hidden" name="ExeId[]" value="<?php echo $ExeLoad['ExecutiveId']?>"><?php echo $ExeLoad['UserName']?></span></th>
+                                <?php } ?>
+                                <th colspan="2" class="txt_center" style="border-bottom:0px !important;"><span data-placement="bottom" data-toggle="tooltip" data-original-title="">Total</span></th>
+                            </tr>
+                            <tr>
+                                <th class="headcol_l headcol_l1">&nbsp;</th>
+                                <?php
+                                foreach($executiveList as $ExeLoad){?>
+                                    <th class="txt_center">Amount</th>
+                                    <th class="txt_center">unit</th>
+                                <?php } ?>
+                                <th class="txt_center">Amount</th>
+                                <th class="txt_center">unit</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!--loop-->
+                                <?php
+                                $totTargetAmount=0;
+                                $totTargetUnit=0;
+                                $c=0;
+                                foreach($arrUnitLists as $arrList){
+                                    ?>
+                                    <tr>
+                                        <td class="headcol_l" id="monthval"><?php echo $arrList['Description'];?></td>
+                                        <?php
+                                            if($targetDetails['TargetPeriod']!=1){
+                                            $data= explode("-",$arrList['Description']);
+                                            $data1=trim($data[0]);
+                                            $data2=trim($data[1]);?>
+                                            <input type="hidden" name="targetFromPeriod[]" value="<?php echo $data1;?>">
+                                            <input type="hidden" name="targetToPeriod[]" value="<?php echo $data2;?>">
+                                            <?php
+                                        } else { ?>
+                                                <input type="hidden" name="targetFromPeriod[]" value="<?php echo $arrList['Description'];?>">
+                                                <input type="hidden" name="targetToPeriod[]" value="<?php echo $arrList['Description'];?>">
+                                        <?php }
+                                        foreach($executiveList as $ExeLoad){
+                                            $targetAmount=$arrList['Amount_'.$ExeLoad['ExecutiveId']];
+                                            $targetUnit=$arrList['Unit_'.$ExeLoad['ExecutiveId']];
+                                            $totTargetAmount+=$targetAmount;
+                                            $totTargetUnit+=$targetUnit;
+                                            ?>
+                                            <td class="tbl_input_td">
+                                                <input type="text" id="targetAmount" class="txt_right columnamt_<?php echo $ExeLoad['ExecutiveId']; ?> rowamt_<?php echo $c; ?> amount special" name="targetAmount_<?php echo $c; ?>_<?php echo $ExeLoad['ExecutiveId']; ?>" onchange=" calculateAmountUnit(this); " onblur="return FormatNum(this, 2);" value="<?php echo number_format((float)$targetAmount, 2, '.', '');  ?>" />
+                                            </td>
+                                            <td class="tbl_input_td">
+                                                <input type="text" id="tarUnt" class="txt_right columnunt_<?php echo $ExeLoad['ExecutiveId']; ?> rowunt_<?php echo $c; ?> unit specialDecimal" name="targetUnit_<?php echo $c; ?>_<?php echo $ExeLoad['ExecutiveId']; ?>" onchange=" calculateAmountUnit(this); " value="<?php echo $targetUnit ?>"/>
+                                            </td>
+                                            <?php
+                                        }?>
+                                        <td class="tbl_input_td"><input type="text"  class="txt_right semi_b padr12 rowamt_amount_<?php echo $c; ?> totamount"  onKeyPress="return isDecimal(event)" onChange="calculateTotalAmtUnt(this);" value="<?php echo number_format((float)$arrList['Amount'], 2, '.', '');?>" readonly /> </td>
+                                        <td class="tbl_input_td"><input type="text"  class="txt_right semi_b padr12 rowunt_unit_<?php echo $c; ?> totunit" onKeyPress="return isDecimal(event)" onChange="calculateTotalAmtUnt(this);" value="<?php echo $arrList['Unit'] ?>" readonly /> </td>
+                                    </tr>
+                                <?php
+                                    $c++;
+                                }?>
+                                <tr>
+                                    <td class="headcol_l semi_b" value="Total">Total</td>
+                                    <?php
+                                    foreach($executiveList as $ExeLoad) {
+                                        $tot=0;
+                                        $tunt=0;
+                                        foreach ($arrUnitLists as $arrList) {
+                                            $tot += $arrList['Amount_' . $ExeLoad['ExecutiveId']];
+                                            $tunt += $arrList['Unit_' . $ExeLoad['ExecutiveId']];
+                                        }?>
+                                        <td class="tbl_input_td"><input type="text"  class="txt_right semi_b padr12 columnamt_amount_<?php echo $ExeLoad['ExecutiveId']; ?>" onKeyPress="return isDecimal(event)" value="<?php echo number_format((float)$tot, 2, '.', '');?>" readonly /> </td>
+                                        <td class="tbl_input_td"><input type="text"  class="txt_right semi_b padr12 columnunt_unit_<?php echo $ExeLoad['ExecutiveId']; ?>" onKeyPress="return isDecimal(event)"  value="<?php echo $tunt ?>" readonly /> </td>
+                                    <?php }?>
+                                    <td class="tbl_input_td"><input type="text" id="total_totamount" class="txt_right semi_b" onKeyPress="return isDecimal(event)" value="<?php echo number_format((float)$totTargetAmount, 2, '.', '');?>" readonly /> </td>
+                                    <td class="tbl_input_td"><input type="text" id="total_totunit"  class="txt_right semi_b" onKeyPress="return isDecimal(event)" value="<?php echo $totTargetUnit ?>" readonly /> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--button-->
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+            <li class="save_btn float_r" style="width:inherit !important;">
+                <input type="submit" value="save" class="ripple continue" style="width:120px !important;" >
+            </li>
+            <li class="cancel_btn float_r">
+                <a href="<?php echo $this->basePath();?>/crm/executive/register" class="ripple">cancel</a>
+            </li>
+        </ul>
+    </div>
+</form>
+<script>
+
+$(document).ready(function() {
+    $(".special").keydown(function (e) {
+        var key = e.which || e.keyCode;
+        if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+                // numbers
+            key >= 48 && key <= 57 ||
+                // Numeric keypad
+            key >= 96 && key <= 105 ||
+                // Backspace and Tab and Enter
+            key == 8 || key == 9 || key == 13 ||
+                // Home and End
+            key == 35 || key == 36 ||
+                // left and right arrows
+            key == 37 || key == 39 || (key == 190 &&  this.value.split('.').length === 1) ||
+                // Del and Ins
+            key == 46 || key == 45){
+            return true;
+        }
+        else{
+            return false;
+        }
+
+    });
+    $(".specialDecimal").keydown(function (e) {
+        var key = e.which || e.keyCode;
+        if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+                // numbers
+            key >= 48 && key <= 57 ||
+                // Numeric keypad
+            key >= 96 && key <= 105 ||
+                // Backspace and Tab and Enter
+            key == 8 || key == 9 || key == 13 ||
+                // Home and End
+            key == 35 || key == 36 ||
+                // left and right arrows
+            key == 37 || key == 39 ||
+                // Del and Ins
+            key == 46 || key == 45){
+            return true;
+        }
+        else{
+            return false;
+        }
+
+    });
+});
+function calculateAmountUnit(ele) {
+    var strClass = $(ele).attr('class');
+    var arr = strClass.split(' ');
+    var arr1 = arr[1].split('_');
+    var arr2 = arr[2].split('_');
+    var colTot = 0;
+    var rowTot = 0;
+    $.each($("."+arr1[0]+"_"+arr1[1]), function() {
+        colTot += parseFloatVal($(this).val());
+    });
+    $.each($("."+arr2[0]+"_"+arr2[1]), function() {
+        rowTot += parseFloatVal($(this).val());
+    });
+    if(arr[3] == 'amount') {
+        $("." + arr1[0] + "_" + arr[3] + "_" + arr1[1]).val(sanitizeNumber(colTot, 2));
+        $("." + arr2[0] + "_" + arr[3] + "_" + arr2[1]).val(sanitizeNumber(rowTot, 2)).trigger('change');
+        return;
+    }
+    $("." + arr1[0] + "_" + arr[3] + "_" + arr1[1]).val(colTot);
+    $("." + arr2[0] + "_" + arr[3] + "_" + arr2[1]).val(rowTot).trigger('change');
+
+}
+
+//change in total amount and total unit calculation in table
+function calculateTotalAmtUnt(tot) {
+    var strClass = $(tot).attr('class');
+
+    var arr = strClass.split(' ');
+    var colTot = 0;
+    $.each($("." + arr[4]), function () {
+        colTot += parseFloatVal($(this).val());
+    });
+    if(arr[4] == 'totamount') {
+        $("#total_" + arr[4]).val(sanitizeNumber(colTot, 2));
+        return;
+    }
+    $("#total_" + arr[4]).val(colTot);
+}
+
+function treeView()
+{
+    var projId = $("#projId").val();
+    window.location.href= getBaseURL() + "crm/executive/tree-view/"+projId;
+}
+</script>
+
+

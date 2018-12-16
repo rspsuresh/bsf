@@ -1,0 +1,98 @@
+<style type="text/css">
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="col-lg-12 padlr0">
+                <h1>Post Sale Discount Register</h1>
+            </div>
+            <div class="col-lg-12 padlr0 tmss commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function() {
+        var $treeGrid = $('#treeGrid');
+        var source = {
+            localdata:<?php echo (isset($jsonUnitpostsale))?$jsonUnitpostsale:'[]'; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'PostSaleDiscountId', type: 'number' },
+                { name: 'BookingId', type: 'number' },
+                { name: 'VocherDate', type: "date", format: 'dd/MM/yyyy' },
+                { name: 'LeadName', type: 'string' },
+                { name: 'UnitName', type: 'string' },
+                { name: 'DiscountType', type: 'string' },
+                { name: 'PostDiscount', type: 'number' },
+                { name: 'PrevNetAmount', type: 'number' },
+                { name: 'NetAmount', type: 'number' }
+            ],
+            id: 'PostSaleDiscountId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $treeGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            //rowsheight:60,
+            autorowheight: true,
+            filterable: true,
+            sortable: true,
+            //filtermode: 'advanced',
+            columnsResize: true,
+            showfilterrow: true,
+            ready:function(){
+                var localizationobj = {};
+                localizationobj.emptydatastring = "No Unit Transfers found!";
+                $treeGrid.jqxGrid('localizestrings', localizationobj);
+            },
+            source:dataAdapter,
+            columns: [
+                { text: 'PostSaleDiscountId', dataField: 'PostSaleDiscountId',hidden: true, filterable: false},
+                { text: 'BookingId', dataField: 'BookingId',hidden: true, filterable: false},
+                { text: 'VocherDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', dataField: 'VocherDate',width:'10%'},
+                { text: 'Buyer Name', dataField: 'LeadName',width:'20%'},
+                { text: 'UnitName', dataField: 'UnitName',width:'15%'},
+                { text: 'DiscountType By', dataField: 'DiscountType',width:'10%'},
+                { text: 'Discount Value', dataField: 'PostDiscount',width:'10%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'PostDiscount'),2,true) + '</div>';
+                    }
+                },
+                { text: 'Prev NetAmount', dataField: 'PrevNetAmount',width:'15%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'PrevNetAmount'),2,true) + '</div>';
+                    }
+                },
+                { text: 'Discounted NetAmount', dataField: 'NetAmount',width:'15%',
+                    cellsrenderer: function (row) {
+                        return '<div class="text-right">' + sanitizeNumber($treeGrid.jqxGrid('getCellValue', row, 'NetAmount'),2,true) + '</div>';
+                    }
+                },
+                { text: 'Action', sortable: false, filterable: false,width:'5%',align: 'left',
+                    cellsrenderer: function (row) {
+                        var postsaleId = $treeGrid.jqxGrid('getCellValue', row, 'PostSaleDiscountId'),
+                            bookingId = $treeGrid.jqxGrid('getCellValue', row, 'BookingId'),
+                            editLink = '<a title="Edit" href="'+ getBaseURL() + 'crm/lead/post-sale-discount/'+bookingId+'/'+postsaleId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        return editLink;
+//                        return editLink + "&nbsp;&nbsp;" + '<a title="Delete" href="javascript: receiptDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+                    }
+                }
+            ]
+        });
+    });
+</script>

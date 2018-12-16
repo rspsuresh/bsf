@@ -1,0 +1,121 @@
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <form id="costCenterForm" method="post">
+            <div class="col-lg-12">
+                <h1 class="txt_center">Account Balanced Cost Center Based</h1>
+                <input type="hidden"  name="accountId" id="accountId" value="<?php echo (isset($accountId)?$accountId : 0); ?>"
+                <input type="hidden" id="g_lCNYearId" name="g_lCNYearId" value="<?php echo $g_lCNYearId; ?>"/>
+                <div class="row" id="divAccount" >
+                    <div class="col-lg-12">
+                        <div class="table-responsive top-20 mar_btm">
+                            <table class="table" style=" margin-bottom:0px;">
+                                <thead>
+                                <tr>
+                                    <th>CostCenter Name</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                </tr>
+                                </thead>
+                                <tbody class="main" id="accountTable">
+
+                                </tbody>
+                                <tbody class="total">
+                                    <tr>
+                                        <td align="right" class="t_amt">Total</td>
+                                        <td width="25%">
+                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="totDebit" id="totDebit" value="0.0" readonly>
+                                        </td>
+                                        <td width="25%">
+                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="totCredit" id="totCredit" value="0.0" readonly>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right" class="t_amt">Overall Total</td>
+                                        <td width="25%">
+                                            <input class="parent_text border-none" style="text-align:right;" type="text" name="totAmount" id="totAmount" value="0.0" readonly>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="rowid" id="rowid" value="0"/>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <a class="ripple has-ripple" href="<?php echo $this->basePath(); ?>/fa/index/companyaccountdet/<?php echo $curFYearId; ?>/<?php echo $curCompanyId; ?>" style="cursor:pointer;" button type="button" id="backBtn" class="ripple">Back<span class="ripple-wrapper"></span></a>
+        <li id="continue" class="dropdown save_btn float_r"><a href="javascript:void(0);" onclick="submitForm()" class="ripple">submit</a></li>
+    </ul>
+</div>
+<script id="template-account"  type="text/template" class="hide">
+    <tr>
+        <td width="50%">
+            <input class="parent_text border-none" type="text" id="costCenterName__" name="costCenterName__" value=""  />
+            <input type="hidden" name="costCenterId__" id="costCenterId__" value="0">
+        </td>
+        <td width="25%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="debit__" name="debit__" value="0" onchange="calcAmount();" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)"/>
+        </td>
+        <td width="25%">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="credit__" name="credit__" value="0" onchange="calcAmount();" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)"/>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    var costCenterList=<?php echo (isset($costCenterList)) ? json_encode($costCenterList) : '[]';?>;
+
+    $(function () {
+        var template = $('#template-account').html();
+        var sno= 0,
+            debitSum = 0,
+            creditSum = 0;
+
+        if(costCenterList.length !=0){
+            $('#divAccount').fadeIn();
+            $.each(costCenterList, function (i,o) {
+                sno += 1;
+                $('#accountTable').append(template.replace(/__/g, '_' + sno));
+                $('#costCenterName_'+sno).val(o.CostCentreName).attr('readonly', true);
+                $('#costCenterId_'+sno).val(o.CostCentreId);
+                $('#debit_'+sno).val(o.Debit);
+                $('#credit_'+sno).val(o.Credit);
+                debitSum = parseFloatVal(debitSum) + parseFloatVal(o.Debit);
+                creditSum = parseFloatVal(creditSum) + parseFloatVal(o.Credit);
+            });
+            $('#totDebit').val(debitSum);
+            $('#totCredit').val(creditSum);
+            var overAllSum = debitSum-creditSum;
+            $('#totAmount').val(overAllSum);
+        }else{
+            $('#accountTable').html("No data to display");
+        }
+        $('#rowid').val(sno);
+    });
+
+    function submitForm(){
+        $("#costCenterForm").submit();
+    }
+    function calcAmount(){
+        var totDebitAmount= 0,
+            id = 0,
+            totCreditAmount= 0;
+        $.each($('input[id^=debit_]'),function(){
+            id = $(this).attr('id').split('_')[1];
+            if($("#costCenterId_"+id).val() != 0){
+                totDebitAmount=parseFloatVal(totDebitAmount)+ parseFloatVal($('#debit_'+id).val());
+                totCreditAmount=parseFloatVal(totCreditAmount)+ parseFloatVal($('#credit_'+id).val());
+            }
+        });
+
+        $('#totDebit').val(totDebitAmount);
+        $('#totCredit').val(totCreditAmount);
+        var overAllAmnt = totDebitAmount-totCreditAmount;
+        $('#totAmount').val(overAllAmnt);
+    }
+</script>

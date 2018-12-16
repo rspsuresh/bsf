@@ -1,0 +1,453 @@
+<style>
+    .handsontable {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .rfc_met {
+        margin-top:20px;
+        margin-bottom:10px;
+    }
+    .rfc_met ul li input[type="text"] {
+        width:130px !important;
+    }
+    .jqx-grid-content {
+        z-index:11!important;
+    }
+</style>
+<div class='col-lg-12'>
+<form class='form-horizontal'>
+<div class='table-responsive'>
+<table class='table' style=' margin-bottom:0px;  background:#DAEAFF !important; border:1px solid hsl(214, 60%, 84%) !important;''>
+<tbody>
+<tr>
+<td colspan='9' style='padding:0px !important; border:none;'>
+<div class='subDiv' style="overflow-y:scroll; min-height:100%; max-height:350px;">
+<div class='col-lg-12' style=' margin-top:10px;'>
+    <ul class='nav nav-tabs navs-tabs'>
+        <li class='active'><a data-toggle='tab' href='#analysis-<?php echo $details['IOWTransId'];?>'>Analysis</a></li>
+        <li><a data-toggle='tab' href="#measurementsheet-<?php echo $details['IOWTransId'];?>"><i class="fa fa-angle-double-right"></i> Measurement Sheet</a></li>
+        <li><a data-toggle='tab' href="#iowresource-<?php echo $details['IOWTransId'];?>"><i class="fa fa-angle-double-right"></i> IOW Resource</a></li>
+        <?php if (!empty($wbsabstract)) { ?>
+        <li><a data-toggle='tab' href="#wbsabstract-<?php echo $details['IOWTransId'];?>"><i class="fa fa-angle-double-right"></i> WBS Abstract</a></li>
+        <?php } ?>
+    </ul>
+</div>
+<div class='tab-content'>
+<div id='analysis-<?php echo $details['IOWTransId'];?>' class='tab-pane fade in active'>
+    <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;">
+        <!-- Nav tabs -->
+        <div class="darkmenu"  <?php echo $details['ConcreteMix']==0 ? 'style="display:none;"' : ''; ?>>
+            <ul>
+                <li class="active"><a data-toggle='tab' href="#sitemix-tab-<?php echo $details['IOWTransId'];?>"><i class="fa fa-angle-double-right"></i> Sitemix</a></li>
+                <li><a data-toggle='tab' href="#readymix-tab-<?php echo $details['IOWTransId'];?>"><i class="fa fa-angle-double-right"></i> Readymix</a></li>
+            </ul>
+        </div>
+        <div class='tab-content col-lg-12 clear'>
+            <div id="sitemix-tab-<?php echo $details['IOWTransId'];?>" class='tab-pane fade in active'>
+                <div class="lstate">
+                    <ul  id="raworktable_<?php echo $i;?>">
+                        <li>
+                            <label class="lbl_style">Working Qty</label>
+                            <input type="text" class="col-lg-2 parent_texters text-right" title="Working Qty" value="<?php if (isset($details['WorkingQty'])) echo $this->commonHelper()->sanitizeNumber($details['WorkingQty'],3); else echo 1; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"/>
+                        </li>
+                        <li <?php echo $details['Cement']==0 ? 'style="display:none;"' : ''; ?>>
+                            <label>Cement<span align="center" class="wrktype_label_span">(C)</span></label>
+                            <input type="text" class="col-lg-2 parent_texters text-right" title="Cement (C)" value="<?php if (isset($details['CementRatio'])) echo $details['CementRatio']; else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"/>
+                        </li>
+                        <li <?php echo $details['Sand']==0 ? 'style="display:none;"' : ''; ?>>
+                            <label>Sand<span align="center" class="wrktype_label_span">(S)</span></label>
+                            <input type="text" class="col-lg-2 parent_texters text-right"  title="Sand (S)" value="<?php if (isset($details['SandRatio'])) echo $details['SandRatio']; else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"/>
+                        </li>
+                        <li <?php echo $details['Metal']==0 ? 'style="display:none;"' : ''; ?>>
+                            <label>Aggregate<span align="center" class="wrktype_label_span">(A)</span></label>
+                            <input type="text" class="col-lg-2 parent_texters text-right" title="Aggregate (A)" value="<?php if (isset($details['MetalRatio'])) echo $details['MetalRatio']; else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"/>
+                        </li>
+                        <li <?php echo $details['Thickness']==0 ? 'style="display:none;"' : ''; ?>>
+                            <label>Thickness (mm)<span align="center" class="wrktype_label_span">(T)</span></label>
+                            <input type="text" class="col-lg-2 parent_texters text-right" title="Thickness (mm) (T)" value="<?php if (isset($details['ThickQty'])) echo $details['ThickQty']; else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"/>
+                        </li>
+                    </ul>
+                </div>
+                <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+                    <!-- Sitemix tabs -->
+                    <table class="table" style="margin-bottom:0px;">
+                        <thead>
+                        <tr>
+                            <th class="bg_clo">RefNo</th>
+                            <th class="bg_clo">Resource</th>
+                            <th class="bg_clo">Coefficient</th>
+                            <th class="bg_clo">Unit</th>
+                            <th class="bg_clo">Rate</th>
+                            <th class="bg_clo">Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody class="sorting">
+                        <?php $j=1; $total=0;
+                        foreach($analysis as $ratrans):
+                            if($ratrans['MixType'] != 'S')
+                                continue; ?>
+                            <tr <?php echo ($ratrans['IncludeFlag'] == 0) ? 'class="tr_excluded"' : '';?>>
+                                <td width="3%"><label for ="rateanal_<?php echo $i; ?>_ref_<?php echo $j; ?>" > R<?php echo $ratrans['ReferenceId']; ?></label></td>
+                                <td width="15%">
+                                    <input class="parent_text" name="rateanal_<?php echo $i; ?>_resid_<?php echo $j; ?>" value="<?php echo $ratrans['Code'] . ' ' .$ratrans['ResourceName']?>" readonly/>
+                                    <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>">Wastage %</label>
+                                    <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>">Weightage %</label>
+                                </td>
+                                <td width="3%">
+                                    <input class="parent_text text-right" type="text" name="rateanal_<?php echo $i; ?>_resqty_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Qty'],3)?>" readonly/>
+                                    <div class="short-spic">
+                                        <input style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Wastage'],3); ?>" align="right" readonly/>
+                                        <input style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Weightage'],2); ?>" align="right" readonly/>
+                                    </div>
+                                </td>
+                                <td width="5%"><label><?php echo $ratrans['UnitName']?></label></td>
+                                <td width="5%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Rate'],2,true) ?>" align="right"  readonly/></td>
+                                <td width="8%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Amount'],2,true) ?>" align="right"  readonly/></td>
+                            </tr>
+                            <?php $j=$j+1; $total +=  $ratrans['Amount'];
+                        endforeach; ?>
+                        </tbody>
+                        <tbody class="total" style="border: none;">
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;" align="right" class="rate_pri"><label>Wastage Amount</label></td>
+                            <td style="border-right:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['WastageAmt'])) echo $this->commonHelper()->sanitizeNumber($details['WastageAmt'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Base Rate</label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['BaseRate'])) echo $this->commonHelper()->sanitizeNumber($details['BaseRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Value</label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" totqualrate" value = "<?php if (isset($details['QualifierValue'])) echo $this->commonHelper()->sanitizeNumber($details['QualifierValue'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Rate for <?php echo $details['WorkingQty'] .' ' .$details['UnitName'];?></label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['TotalRate'])) echo $this->commonHelper()->sanitizeNumber($details['TotalRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Net Rate per <?php echo $details['UnitName'];?></label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['NetRate'])) echo $this->commonHelper()->sanitizeNumber($details['NetRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="readymix-tab-<?php echo $details['IOWTransId'];?>" class='tab-pane fade'>
+                <div class="lstate">
+                    <ul>
+                        <li>
+                            <label class="lbl_style">Working Qty</label>
+                            <input type="text" class="col-lg-2 parent_texters text-right" title="Working Qty" value="<?php if (isset($details['RWorkingQty'])) echo $this->commonHelper()->sanitizeNumber($details['RWorkingQty'],3); else echo 1; ?>"/>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+                    <table class="table" style="margin-bottom:0px;">
+                        <thead>
+                        <tr>
+                            <th class="bg_clo">RefNo</th>
+                            <th class="bg_clo">Resource</th>
+                            <th class="bg_clo">Coefficient</th>
+                            <th class="bg_clo">Unit</th>
+                            <th class="bg_clo">Rate</th>
+                            <th class="bg_clo">Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody class="sorting">
+                        <?php $j=1; $total=0;
+                        foreach($analysis as $ratrans):
+                            if($ratrans['MixType'] != 'R')
+                                continue; ?>
+                            <tr <?php echo ($ratrans['IncludeFlag'] == 0) ? 'class="tr_excluded"' : '';?>>
+                                <td width="3%"><label>R<?php echo $ratrans['ReferenceId']; ?></label></td>
+                                <td width="15%">
+                                    <input class="parent_text" value="<?php echo $ratrans['Code'] . ' ' .$ratrans['ResourceName']?>" readonly/>
+                                    <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>">Wastage %</label>
+                                    <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>">Weightage %</label>
+                                </td>
+                                <td width="3%">
+                                    <input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Qty'],3)?>" align="right" readonly/>
+                                    <div class="short-spic">
+                                        <input style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Wastage'],3); ?>" align="right" readonly/>
+                                        <input style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Weightage'],2); ?>" align="right" readonly/>
+                                    </div>
+                                </td>
+                                <td width="5%"><label><?php echo $ratrans['UnitName']?></label></td>
+                                <td width="5%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Rate'],2,true) ?>" align="right" readonly/></td>
+                                <td width="8%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Amount'],2,true) ?>" align="right"  readonly/></td>
+                            </tr>
+                            <?php $j=$j+1; $total +=  $ratrans['Amount'];
+                        endforeach; ?>
+                        </tbody>
+                        <tbody class="total" style="border: none;">
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;" align="right" class="rate_pri"><label>Wastage Amount</label></td>
+                            <td style="border-right:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['RWastageAmt'])) echo $this->commonHelper()->sanitizeNumber($details['RWastageAmt'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Base Rate</label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['RBaseRate'])) echo $this->commonHelper()->sanitizeNumber($details['RBaseRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Value</label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" totqualrate" value = "<?php if (isset($details['RQualifierValue'])) echo $this->commonHelper()->sanitizeNumber($details['RQualifierValue'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Rate for <?php echo $details['RWorkingQty'] .' ' .$details['UnitName'];?></label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['RTotalRate'])) echo $this->commonHelper()->sanitizeNumber($details['RTotalRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td colspan="5" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label>Net Rate per <?php echo $details['UnitName'];?></label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php if (isset($details['RNetRate'])) echo $this->commonHelper()->sanitizeNumber($details['RNetRate'],2,true); else echo '0.00'; ?>" readonly/></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id='measurementsheet-<?php echo $details['IOWTransId'];?>' class='tab-pane fade'>
+    <!--Handson Table-->
+    <div class="col-lg-12 HandsonWrapper">
+        <div class="md-popup">
+            <h1>Measurement Sheet</h1>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                <div class="tabs-content" style="margin-top:20px;">
+                    <div id="HandsonTableWrapper-<?php echo $details['IOWTransId'];?>" class="hot handsontable"></div>
+                    <input type="hidden" id="Measurement_<?php echo $details['IOWTransId']; ?>" value="<?php echo htmlentities($details['Measurement']);?>"/>
+                    <input type="hidden" id="CellName_<?php echo $details['IOWTransId']; ?>" value="<?php echo $details['CellName'];?>"/>
+                    <input type="hidden" id="SelectedColumns_<?php echo $details['IOWTransId']; ?>" value="<?php echo $details['SelectedColumns'];?>"/>
+                </div>
+            </div>
+            <div class="col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0 col-sm-12 col-sm-offset-0">
+                <div class="btn-group toal-disgr" data-toggle="buttons" id="summationColumnsWrapper-<?php echo $details['IOWTransId'];?>"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id='iowresource-<?php echo $details['IOWTransId'];?>' class='tab-pane fade'>
+    <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+        <table class="table" style="margin-bottom:0px;">
+            <thead>
+            <tr>
+                <th class="bg_clo">Code</th>
+                <th class="bg_clo">Resource</th>
+                <th class="bg_clo">Unit</th>
+                <th class="bg_clo">Qty</th>
+                <th class="bg_clo">Rate</th>
+                <th class="bg_clo">Amount</th>
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=1; $total=0;
+            foreach($iowresource as $ratrans):
+                $dRate = 0;
+                $dQty = floatval($ratrans['Qty']);
+                $dAmt = floatval($ratrans['Amount']);
+                if ($dQty !=0) $dRate = $dAmt/$dQty;?>
+                <tr>
+                    <td width="5%"><input class="parent_text" value="<?php echo $ratrans['Code']?>" readonly/></td>
+                    <td width="15%"><input class="parent_text" value="<?php echo $ratrans['ResourceName']?>" readonly/></td>
+                    <td width="5%"><label><?php echo $ratrans['UnitName']?></label></td>
+                    <td width="3%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($dQty,3)?>" readonly/></td>
+                    <td width="5%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($dRate,2,true) ?>" align="right"  readonly/></td>
+                    <td width="8%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($dAmt,2,true) ?>" align="right"  readonly/></td>
+                </tr>
+                <?php $j=$j+1; $total +=  $dAmt;
+            endforeach; ?>
+            </tbody>
+            <tbody class="total" style="border: none;">
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;"></td>
+                <td style="border-right:none;border-top:none;" align="right" class="rate_pri">Total</td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php echo $this->commonHelper()->sanitizeNumber($total,2,true);?>" align="right" readonly/></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id='wbsabstract-<?php echo $details['IOWTransId'];?>' class='tab-pane fade'>
+    <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+        <table class="table" style="margin-bottom:0px;">
+            <thead>
+            <tr>
+                <th class="bg_clo">WBS Name</th>
+<!--                <th class="bg_clo">Rate</th>-->
+                <th class="bg_clo">Qty</th>
+<!--                <th class="bg_clo">Amount</th>-->
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=1; $total=0; $total_qty=0;
+            foreach($wbsabstract as $ratrans):
+                $sWBSName = $ratrans['ParentText'];
+                if ($sWBSName != "") $sWBSName = $sWBSName . '->' .  $ratrans['WBSName'];
+                else $sWBSName = $ratrans['WBSName'];
+                ?>
+                <tr>
+                    <td width="15%"><label><?php echo $sWBSName;?></label></td>
+<!--                    <td width="5%"><input class="parent_text text-right" type="text" value = "--><?php //echo $this->commonHelper()->sanitizeNumber($ratrans['Rate'],2,true) ?><!--" align="right"  readonly/></td>-->
+                    <td width="3%"><input class="parent_text text-right" type="text" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Qty'],3)?>" readonly/></td>
+<!--                    <td width="8%"><input class="parent_text text-right" type="text" value = "--><?php //echo $this->commonHelper()->sanitizeNumber($ratrans['Amount'],2,true) ?><!--" align="right"  readonly/></td>-->
+                </tr>
+                <?php $j=$j+1; $total +=  $ratrans['Amount']; $total_qty += $ratrans['Qty'];
+            endforeach; ?>
+            </tbody>
+            <tbody class="total" style="border: none;">
+            <tr style="border-bottom:none;">
+                <td style="border-right:none;border-top:none;"></td>
+<!--                <td style="border-right:none;border-top:none;" align="right" class="rate_pri">Total</td>-->
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "<?php echo $this->commonHelper()->sanitizeNumber($total_qty,3);?>" align="right" readonly/></td>
+<!--                <td style="border-right:none;border-top:none;"><input class="parent_text text-right" type="text" placeholder="00.0" value = "--><?php //echo $this->commonHelper()->sanitizeNumber($total,2,true);?><!--" align="right" readonly/></td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</form>
+</div>
+<script type="text/javascript">
+    var $summationColumnsWrapper = $('#summationColumnsWrapper-<?php echo $details['IOWTransId'];?>');
+    var $measurement = $('#Measurement_<?php echo $details['IOWTransId'];?>');
+    var $CellName = $('#CellName_<?php echo $details['IOWTransId'];?>');
+    var $SelectedColumns = $('#SelectedColumns_<?php echo $details['IOWTransId'];?>');
+    <!--Handson Script-->
+    var handsonTableData =  [[]],
+        handsonTable = null,
+        $HandsonTableWrapper = document.getElementById('HandsonTableWrapper-<?php echo $details['IOWTransId'];?>'),
+        HandsonTableSettings = {
+            colHeaders:true,
+            rowHeaders: true,
+            contextMenu: true,
+            minRows: 15,
+            minCols: 10,
+            minSpareRows: 1,
+            stretchH: 'all',
+            formulas: true,
+            manualColumnResize: true,
+            fixedRowsTop: 1,
+            fixedRowsBottom: 1,
+            manualRowResize: true,
+            fillHandle: true,
+            data: handsonTableData,
+            afterRender: function() {
+                summationColumns();
+            },
+            cells: function (row, col, prop) {
+                var cellProperties = {};
+                cellProperties.readOnly=true;
+                if (row === 0) {
+                    cellProperties.renderer = firstRowRenderer;
+                }
+                return cellProperties;
+            }
+        };
+
+    function firstRowRenderer(instance, td, row, col, prop, value, cellProperties) {
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
+        td.style.fontWeight = 'bold';
+    }
+
+    var summationColumn = '',
+        selColumns = [],
+        tempSelectedCol = [];
+
+    $(function () {
+        handsonTable = new Handsontable($HandsonTableWrapper, HandsonTableSettings);
+
+        var measurement = $.trim($measurement.val());
+        if(measurement == '')
+            handsonTableData = [[]];
+        else
+            handsonTableData = $.parseJSON(measurement);
+
+        summationColumn = $.trim($CellName.val());
+        selColumns = ($.trim($SelectedColumns.val())).split(',');
+        tempSelectedCol = [];
+        renderHandsonTable();
+    });
+
+    function renderHandsonTable() {
+        if(typeof handsonTableData != 'object')
+            handsonTableData  = [[]];
+
+        handsonTable.loadData(handsonTableData);
+        handsonTable.render();
+
+        summationColumns();
+    }
+
+    function summationColumns(calcOnly) {
+        if(handsonTable == null)
+            return;
+
+        var rowCount = handsonTable.countRows();
+        var arr_columns = [];
+        if(typeof calcOnly == 'undefined') {
+            $.each(handsonTable.getDataAtRow (0), function (i, obj) {
+                var value = $.trim(obj),
+                    sel = '';
+                if (value.length == 0 || value == "" || value.indexOf('=') != -1)
+                    return;
+
+                var colName = handsonTable.getColHeader(i);
+                if($.inArray(colName, tempSelectedCol) != -1 || $.inArray(colName, selColumns) != -1)
+                    arr_columns.push({'col': colName, 'value':  value});
+            });
+        }
+
+        // calculate columns
+        if(arr_columns.length == 0) {
+            $summationColumnsWrapper.html('');
+            return;
+        }
+
+        // selected summation columns
+        tempSelectedCol = [];
+        var totalLabels = '';
+        $.each(arr_columns, function(i, obj) {
+            var col = obj.col,
+                columnData = handsonTable.plugin.helper.cellRangeValue(col+'1',col+ rowCount),
+                total = 0;
+
+            // push to temp sel col
+            tempSelectedCol.push(col);
+
+            // selected columns datas
+            $.each(columnData[0], function(j, val) {
+                if(/^[0-9\.]+$/.test(val) == false)
+                    return;
+
+                total += parseFloatVal(val);
+            });
+
+            if(total == '')
+                total = 0;
+
+            if(col == summationColumn) {
+                totalLabels += '<label class="btn btn-primary tot-dis active el_checked">'
+                + '<label>'+ obj.value +' </label><p>'+total+'</p>'
+                + '</label>';
+            } else {
+                totalLabels += '<label class="btn btn-primary tot-dis">'
+                + '<label>'+ obj.value +' </label><p>'+total+'</p>'
+                + '</label>';
+            }
+        });
+        $summationColumnsWrapper.html(totalLabels);
+    }
+</script>

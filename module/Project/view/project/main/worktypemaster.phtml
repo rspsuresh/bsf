@@ -1,0 +1,130 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Work Type Library</h1>
+                <div class="col-md-5"></div>
+                <div class="dropdown nav-list"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print print-icon-img" aria-hidden="true"></i></a>
+                    <ul class="dropdown-menu drp-list arrow-right">
+                        <li><a href="<?php echo $this->basePath(); ?>/project/report/worktypelist">WorkType List</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 edit_del">
+                <ul>
+                    <li>
+                    <a href="<?php echo $this->basePath(); ?>/project/rfc/rfcworktype" class="edit-btn edit_al"><i class="fa fa-pencil"></i> Edit Work Type</a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <!--table Jq Gride start-->
+            <div class="col-lg-12 col-lg-offset-0 tmss">
+                <div class="table-responsive clear">
+                    <div id="grid"></div>
+                </div>
+            </div>
+            <!--table Jq Gride end-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var $grid = $("#grid");
+    $(function () {
+        var url1 = getBaseURL() + "project/main/getworktypemaster";
+        var ressource = {
+            dataType: "json",
+            dataFields: [
+                { name: 'WorkTypeId', type: 'number' },
+                { name: 'WorkType', type: 'string' },
+            ],
+            id: 'WorkTypeId',
+            url: url1
+        };
+
+        var resdata = new $.jqx.dataAdapter(ressource);
+        var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.WorkTypeId));
+        };
+
+        $grid.jqxGrid({
+            width: "100%",
+            source: resdata,
+            pageable: true,
+            autoheight: true,
+            sortable: true,
+            enabletooltips: true,
+            rowdetails: true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'WorkTypeId', datafield: 'WorkTypeId', hidden: true  },
+                { text: 'WorkTypeName', datafield: 'WorkType',},
+                { text: 'Action',sortable: false, filterable: false, align: 'center',
+                    cellsrenderer: function (row) {
+                        var workTypeId = $grid.jqxGrid('getCellValue', row, 'WorkTypeId');
+
+                        return '<div class="text-center" style="vertical-align: middle;"><a href="'+ getBaseURL() + 'project/rfc/rfcworktype/0/edit/'+workTypeId+'"><i class="fa fa-pencil-square-o reg-icon"></i></a></div>';
+                    }
+                }
+            ]
+        });
+
+        $grid.on('rowexpand', function (event) {
+            var prev_row = $grid.jqxGrid('selectedrowindexes');
+            if (prev_row != '') {
+                for (var i = 0; i < prev_row.length; i++) {
+                    $grid.jqxGrid('hiderowdetails', prev_row[i]);
+                }
+            };
+            var index = $grid.jqxGrid('getrowboundindex', event.args.rowindex);
+            $grid.jqxGrid({selectedrowindexes: [index]});
+        });
+
+        $grid.on('rowcollapse', function (event) {
+            $grid.jqxGrid('clearselection');
+        });
+
+    });
+
+    function renderRowDetail(id) {
+        var dataValue = '';
+        $.ajax({
+            url: getBaseURL() + 'project/main/getworktypedetails',
+            type: 'POST',
+            data: {resId: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+
+    function printGrid(){
+        var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>jQWidgets Grid</title>\n' +
+                '</head>\n' +
+                '<body>\n' + gridContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+    }
+</script>
+<!--hover open list--> 
+<script>$('.nav-list').hover(function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500);
+}, function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500);
+});</script>

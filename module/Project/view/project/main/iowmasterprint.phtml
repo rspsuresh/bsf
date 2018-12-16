@@ -1,0 +1,408 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css'; ?>" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<style>
+    <style>
+    .chevron {
+        color: #6897c0;
+        cursor: pointer;
+        display: block;
+        font-size: 15px;
+        left: -7px;
+        line-height: 0 !important;
+        position: relative;
+        top: 10px;
+    }
+    .subDiv::before {
+        right:38.5%
+    }
+    .user-icon::before {
+        background: rgba(0, 0, 0, 0.1) none repeat scroll 0 0;
+        border-radius: 0.15em 0 0 0.15em;
+        box-shadow: 1px 0 0 rgba(0, 0, 0, 0.5), 2px 0 0 rgba(255, 255, 255, 0.5);
+        float: left;
+        font-size: 1.5em;
+        margin: 0 1em 0 -1em;
+        padding: 0 0.2em;
+        pointer-events: none;
+        text-align: center;
+        width: 1em;
+    }
+    .user-icon{float:right; display:block}
+    .work-group ul li a, .user-icon {
+        background-color: #dddddd;
+        background-image: -moz-linear-gradient(center top, #eeeeee, #cccccc);
+        border: 1px solid #777777;
+        border-radius: 0.2em;
+        box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.8) inset, 0 1px 0 rgba(0, 0, 0, 0.3);
+        color: #333333;
+        display: inline-block;
+        font: bold 1em/2em Arial, Helvetica;
+        margin: 0.5em 0.2em;
+        position:relative;
+        padding:3px 14px;
+        text-decoration: none;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+        white-space: nowrap;
+    }
+    .fa-icons, .fa-user {
+
+        margin-left:-2px;
+        font-size:14px;
+        color:#000; display:block; padding:5px;
+    }
+    .user-icon:hover .work-group {
+        display:block;
+        transition:all 0.3s ease 0s;
+    }
+    .work-group {
+        width:165px;
+        height:40px;
+        display:none;
+        position:absolute;
+        top:-7px;
+        right:50px;
+        z-index:999
+    }
+    .work-group ul li { font-size:11px; float:left; color:#333}
+    @media only screen and (min-width : 320px) and (max-width : 767px) {
+        .show_hide5 {
+            width:130px !important
+        }
+    }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+<!--            <li class="float_r"><a href="#" class="ripple crmcmnbtn crmcmnbtn1 "  id="print"><i class="fa fa-print"></i> Print</a></li>-->
+            <div class="fixed-action-btn active rf-fixed"> <a class="btn-floating btn-large"> <i class="fa fa-print"></i> </a>
+                <ul>
+                    <li> <a class="btn-floating hide-input-file" id="print" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Print Report"> <i class="fa fa-print"></i> </a> </li>
+                    <li> <a class="btn-floating" id="excelExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Download Excel"> <i class="fa fa-download"></i> </a> </li>
+                    <li> <a class="btn-floating" id="csvExport" href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Export CSV"> <i class="fa fa-file-archive-o"></i> </a> </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 coll-top clear">
+            <div class="col-lg-4 col-sm-4 form-group">
+                <select  name="wg_id" id="wg_id" class="form-control single_dropdown lbl_move" label="WorkGroup" onchange="changeWG()" style="width:100%;">
+                    <option value="0" <?php if ($wgid==0) {?>selected <?php }?>>All</option>
+                    <?php foreach($wglists as $project) { ?>
+                        <option value="<?php echo $project['WorkGroupId']; ?>" <?php if($project['WorkGroupId']==$wgid) { ?>selected<?php } ?>><?php echo $project[ 'WorkGroupName' ]; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-lg-offset-0 form-group col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 col-xs-12 col-xs-offset-0"><a href="#" class="show_hide5"><i class="fa fa-filter" aria-hidden="true"></i> Show Filter</a> </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="bgs show-hi">
+                <form id="formWrapper" method="post" action="<?php echo $this->basePath(); ?>/project/main/iowmasterview/<?php echo $wgid; ?>">
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Serial No</label>
+                        <input type="text" id="serialNo" name="serialNo" class="form-control lbl_move"  value="<?php if(count($search) > 0) { echo $search['serialNo']; } ?>" />
+                        <input type="hidden"  id="wgid" name="wgid" value="<?php echo $wgid; ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Description</label>
+                        <input type="text" id="specification" class="form-control lbl_move" name="specification" value="<?php if(count($search) > 0) { echo $search['specification']; } ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">Rate</label>
+                        <input type="text" id="rate" name="rate" class="text-right form-control lbl_move" onkeypress="return isDecimal(event,this)" value="<?php if(count($search) > 0) { echo $search['rate']; } ?>" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 form-group">
+                        <label class="text-lab">&nbsp;</label>
+                        <button type="button" class="ripple has-ripple appfilter" onclick="return submitForm()"><i class="fa fa-filter" aria-hidden="true"></i> Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 clear">
+            <div class="table-responsive">
+                <table border="1" class="table-transform table table-striped table-bordered table-hover" width="100%" data-toolbar="#transform-buttons">
+                    <thead>
+                    <tr>
+                        <th width="7%" data-field="serialno">Serial No</th>
+                        <th width="35%" data-field="name">Description</th>
+                        <th width="8%" data-field="unit">Unit</th>
+                        <th width="8%" data-field="rate">Rate</th>
+<!--                        <th width="8%">&nbsp;</th>-->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    if(!empty($projboq)) {
+                        $rows = count($projboq['Type']);
+//                        $perPage = 10;
+//                        $pages = ceil( $rows / $perPage );
+//
+//                        $page = isset( $gpage ) ? $gpage : 0;
+//                        $page == 0 ? $start = 0 : $start = ( $page - 1 ) * $perPage;
+//                        $curpag = ( $start == 0 ) ? 1 : ( $start / $perPage ) + 1 ;
+//
+//                        $stopVal = $start + $perPage;
+                        for($i=0;$i<$rows;$i++) {
+                            $class = '';
+//                            if($i == $stopVal) {
+//                                break;
+//                            }
+                            if($projboq['Type'][$i] == 2) {
+                                $class = 'float:left; text-align:left; font-size:14px; color:#000; font-weight:bold';
+                            } else if($projboq['Type'][$i] == 3) {
+                                $class = 'float:left; text-align:left; font-size:13px; color:#000;';
+                            }
+                            ?>
+                            <tr>
+                                <?php if($projboq['Type'][$i] == 1) { ?>
+                                    <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                    <td colspan="7"><span style="text-decoration:underline; float:left; text-align:left; font-size:16px; color:#000; font-weight:bold"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                <?php } else { ?>
+                                    <?php if($projboq['Unit'][$i] != '') { ?>
+                                        <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                        <td><span style="<?php echo $class; ?>"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                        <td><?php echo $projboq['Unit'][$i]; ?></td>
+                                        <td><i id="<?php echo $projboq['IOWId'][$i]; ?>" class="fa fa-chevron-circle-down show_hide chevron" data-original-title="Expand" data-toggle="tooltip"></i>&nbsp;&nbsp;<?php echo $projboq['Rate'][$i]; ?></td>
+<!--                                        <td>-->
+<!--                                            <div class="ed-dl">-->
+<!--                                                <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfciow/0/edit/--><?php //echo $projboq['IOWId'][$i];?><!--" class="pull-left"><i class="fa fa-pencil-square-o reg-icon"></i></a>-->
+<!--                                                <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfciowdelete/0/--><?php //echo $projboq['IOWId'][$i];?><!--" class="pull-left"><i class="fa fa-trash-o reg-icon"></i></a>-->
+<!--                                                <div class="clearfix"></div>-->
+<!--                                            </div>-->
+<!--                                        </td>-->
+                                    <?php } else { ?>
+                                        <td><?php echo $projboq['SerialNo'][$i]; ?></td>
+                                        <td colspan="8"><span style="<?php echo $class; ?>"><?php echo $projboq['Name'][$i]; ?></span></td>
+                                    <?php } ?>
+                                <?php } ?>
+                            </tr>
+                            <?php if($projboq['IOWId'][$i] != '') { ?>
+                                <tr>
+                                    <td colspan="9"><div id="iowId_<?php echo $projboq['IOWId'][$i]; ?>" class="subDiv slidingDiv animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                            <div class="col-lg-12 clear" id="iowCon_<?php echo $projboq['IOWId'][$i]; ?>"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        <?php } ?>
+                    <?php } else { ?>
+                        <tr>
+                            <td colspan="9" style="text-align:center;">No data to display!</td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-offset-md-6">
+                <ul id="pagination-demo" class="pagination-sm">
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.twbsPagination.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/jquery.twbsPagination.min.js"></script>
+<script type="text/javascript">
+    var $serialSearch = $('#serialNo'),
+        $specSearch = $('#specification'),
+        $rate = $('#rate');
+
+    $(function(){
+        $(".slidingDiv").hide();
+        $('.show_hide').click(function(){
+            //$(".slidingDiv").hide();
+            var iowId = $(this).attr("id");
+            $("#iowId_"+iowId).slideToggle();
+            $.ajax({
+                url: getBaseURL() + 'project/main/getiowdetails',
+                type: 'POST',
+                data: {resId: iowId},
+                async: false,
+                success: function(data,status, xhr) {
+                    if(xhr.status == 200) {
+                        $("#iowId_"+iowId).html(data);
+                    }
+                }, error: function(xhr, status, errorThrown) {
+                }
+            });
+        });
+    });
+
+//    var pages = '<?php //echo $pages; ?>//';
+//    var wgid = $('#wgid').val();
+//    $('#pagination-demo').twbsPagination({
+//        totalPages: pages,
+//        visiblePages: 3,
+//        href: getBaseURL() + 'project/main/iowmasterprint/'+wgid+'/{{number}}'
+//        /*onPageClick: function (event, page) {
+//         $('#page-content').text('Page ' + page);
+//         }*/
+//    });
+
+    var arr_specifications = <?php echo json_encode($specifications); ?>;
+    var $specification = $('#specification');
+
+    $(function () {
+        // bind property name autocomplete
+        $specification.autocomplete({
+            lookup: arr_specifications,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    //$enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                //$enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    //$enquiryId.val(0);
+                } else {
+                    $(this).removeClass('error');
+                }
+            }
+        });
+    });
+
+    var arr_serialnos = <?php echo json_encode($serialNos); ?>;
+    var $serialNo = $('#serialNo');
+
+    $(function () {
+        // bind property name autocomplete
+        $serialNo.autocomplete({
+            lookup: arr_serialnos,
+            showNoSuggestionNotice: false,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') {
+                    return suggestion.value;
+                } else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    //$enquiryId.val(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                //$enquiryId.val(0);
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    //$enquiryId.val(0);
+                } else {
+                    $(this).removeClass('error');
+                }
+            }
+        });
+    });
+
+    function submitForm()
+    {
+        var formFlag = 0;
+        if($serialSearch.val() != '') {
+            formFlag = 1;
+        } else if($specSearch.val() != '') {
+            formFlag = 1;
+        } else if($rate.val() != '') {
+            formFlag = 1;
+        }
+
+        if(formFlag == 1) {
+            $('#formWrapper').submit();
+        }
+    }
+
+    function changeWG() {
+        var iWGId= isNullCheck($('#wg_id').val(),'number');
+        window.location.href = getBaseURL() + "project/main/iowmasterprint/" + iWGId;
+    }
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+
+        $(".show-hi").hide();
+        $(".show_hide5").show();
+
+        $('.show_hide5').click(function(){
+            $(".show-hi").slideToggle();
+
+        });
+    });
+</script>
+<script type="text/javascript">
+
+
+    $("#excelExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+    });
+    $("#csvExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+    });
+    $("#htmlExport").click(function () {
+        $("#grid").jqxGrid('exportdata', 'html', 'jqxGrid');
+    });
+
+    $("#print").click(function () {
+//    var gridContent = $("#grid").jqxGrid('exportdata', 'html');
+        var tableContent = $('.table')[0].outerHTML;
+        //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+        var newWindow = window.open('', '', 'width=800, height=500'),
+            document = newWindow.document.open(),
+            pageContent =
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '<meta charset="utf-8" />\n' +
+                '<title>Register - Project Bill Of Quantity</title>\n' +
+                '<h1>Register - Project Bill Of Quantity</h1>\n' +
+                '</head>\n' +
+                '<body>\n' + tableContent + '\n</body>\n</html>';
+        document.write(pageContent);
+        document.close();
+        newWindow.print();
+
+        /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+    });
+
+
+    //    $("#print").click(function () {
+    //        var wgid = <?php //if(isset($wgid)) echo $wgid; else echo '""'; ?>//;
+    //        //var TypeId = <?php //if(isset($type)) echo json_encode($type); else echo ''; ?>//;
+    //
+    //        window.location.href = getBaseURL() + "project/rfc/projboq-print/" + wgid +"/"+TypeId;
+    //
+    //        /*
+    //         var tableContent = $('.table')[0].outerHTML;
+    //         var newWindow = window.open('', '', 'width=800, height=500'),
+    //         document = newWindow.document.open(),
+    //         pageContent =
+    //         '<!DOCTYPE html>\n' +
+    //         '<html>\n' +
+    //         '<head>\n' +
+    //         '<meta charset="utf-8" />\n' +
+    //         '<title>Register - Project Bill Of Quantity</title>\n' +
+    //         '<h1>Register - Project Bill Of Quantity</h1>\n' +
+    //         '</head>\n' +
+    //         '<body>\n' + tableContent + '\n</body>\n</html>';
+    //         document.write(pageContent);
+    //         document.close();
+    //         newWindow.print();
+    //         */
+    //    });
+</script>

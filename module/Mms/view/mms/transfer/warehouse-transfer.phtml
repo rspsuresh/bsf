@@ -1,0 +1,318 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css'; ?>" />
+
+<form class="" method="post" action="<?php echo $this->basePath(); ?>/mms/transfer/warehousetransfer-entry" id="formWrapper" enctype="">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid">
+            <div class="col-lg-12" style="margin-top: 10px;">
+                <h1 class="txt_center">Warehouse Transfer</h1>
+            </div>
+            <!--<step-1>-->
+            <div class="visible showdiv" id="wareentry_1">
+                <div class="row">
+                    <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" style="margin-top: 35px;">
+
+                        <div class="form-group col-lg-12 clear req_flds">
+                            <select name="project" id="project" class=" lbl_move single_dropdown select2-hidden-accessible" data-size="5"
+                                    title="Project" style="width:100%;" label="Project" tabindex="-1" aria-hidden="true" >
+                                <option value=""> </option>
+                                <?php if(isset($arr_project)):
+                                    foreach($arr_project as $costcenter): ?>
+                                        <option value="<?php echo $costcenter['CostCentreId'];?>"> <?php echo $costcenter['CostCentreName']; ?> </option>
+                                    <?php endforeach;
+                                endif; ?>
+                            </select>
+                                                        <div class="error_message"><p>Please select Project...</p> </div>
+                        </div>
+
+                        <div class="form-group col-lg-12 clear req_flds">
+                            <select name="fWarehouse" id="fWarehouse" class=" lbl_move single_dropdown ware" data-size="5" data-bsfshare="fWarehouse"
+                                    style="width:100%;" label="From Warehouse" tabindex="-1" aria-hidden="true" >
+
+                            </select>
+                            <div class="error_message"><p>Please select From Warehouse...</p> </div>
+
+                        </div>
+
+
+                        <div class="form-group col-lg-12 clear req_flds">
+                            <select name="tWarehouse" id="tWarehouse" class="lbl_move single_dropdown ware" data-size="5"
+                                    title="To Warehouse" style="width:100%;" label="To Warehouse" tabindex="-1" aria-hidden="true" >
+
+                            </select>
+                            <div class="error_message"><p>Please select To WareHouse...</p> </div>
+
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="date" id="date"  value="<?php echo date("d-m-Y"); ?>" readonly class="form-control lbl_move datepickerinput" />
+                            <!--                            <div class="error_message"><p>Please select Min Date...</p> </div>-->
+                        </div>
+
+                        <div class="form-group col-lg-12">
+                            <input type="text" name="wtno" id="wtno"  class="lbl_move mtrl_txt" label="WT No" placeholder="WTNo" <?php if ($genType==true){ echo "readonly"; }?>  value="<?php echo $vNo['voucherNo'];?>">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-----------------------------step1---------------------------------------->
+
+            <!----------------------------step2 ---------------------------------------->
+            <div class="visible showdiv" id="wareentry_2" style="display:none;">
+                <div class="col-lg-12 feed-bg">
+                    <div class="col-lg-8">
+                        <div class="fil-til mar_btm">
+                            <h2 class="h1-head ">List of resources from the selected project.</h2>
+                            <p>Selected Resources </p>
+                            <span id="NoOfSelResource">0</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 form-group mar-tp">
+                        <select class="form-control selectpicker show-tick" name="gridtype" id="gridtype">
+                            <option value="0" selected="true">Sequentival View</option>
+                            <option value="1">List View</option>
+                        </select>
+                        <div class="error_message"><p>Please select the priority...</p></div>
+                    </div>
+                    <div class="mar_btm" id="dataTable"></div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <!--------------------step2 --------------------------------------------------->
+            <div id="requestTransInputsWrapper" class="hide"></div>
+            <input type="hidden" name="frm_index" value="1"/>
+        </div>
+    </div>
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+            <li class="cancel_btn cancel_btn_bluecolor float_l"><a class="ripple has-ripple" style="position: relative; overflow: hidden; cursor:pointer;" button type="button" onclick="backsample(this)"
+                                                                   data-rid="1" id="backRid" class="ripple">back<span class="ripple-wrapper"></span></a></li>
+            </li>
+            <li id="Continue" class="save_btn float_r">
+                <a class="ripple><button type="button" onclick="sample(this);" data-rid="1" id="continueRid" class="ripple">continue</button></a>
+            </li>
+        </ul>
+    </div>
+</form>
+
+<script type="text/javascript">
+
+    function sample(val){
+        var dt = parseInt($(val).data('rid'));
+        if(dt==1) {
+            var projectId = $("#project option:selected").val();
+            var fwId = $("#fWarehouse option:selected").val();
+            var twId = $("#tWarehouse option:selected").val();
+            if(projectId == '' || projectId == null  || projectId == 0){
+                $("#project").closest(".req_flds").find(".error_message").show();
+                $("#project").focus();
+                return false;
+            } else{
+                $(".error_message").hide();
+            }
+            if(fwId == '' || fwId == null || fwId ==0){
+                $("#fWarehouse").closest(".req_flds").find(".error_message").show();
+                $("#fWarehouse").focus();
+                return false;
+            } else{
+                $(".error_message").hide();
+            }
+            if(twId == '' || twId == null || twId ==0){
+                $("#tWarehouse").closest(".req_flds").find(".error_message").show();
+                $("#tWarehouse").focus();
+                return false;
+            } else{
+                $(".error_message").hide();
+//                $("#project").closest(".req_flds").find(".error_message").hide();
+//                $("#fWarehouse").closest(".req_flds").find(".error_message").hide();
+//                $("#tWarehouse").closest(".req_flds").find(".error_message").hide();
+                $('#wareentry_1').hide();
+                $('#wareentry_2').show();
+                $('#backRid').data('rid',2);
+                $('#continueRid').data('rid',2);
+
+            }
+        } else if(dt==2) {
+            if ($('#NoOfSelResource').html() == 0) {
+                alert('Please select resources');
+                return false;
+            }
+            $('#formWrapper').submit();
+        }
+    }
+    function backsample(val){
+        var dt = parseInt($(val).data('rid'));
+        if(dt==1){
+            return;
+        }else if(dt==2){
+            $('#backRid').data('rid',1);
+            $('#continueRid').data('rid',1);
+            $('#wareentry_1').show();
+            $('#wareentry_2').hide();
+        }
+    }
+    $('#project').change(function() {
+        var projectId = $(this).val();
+        if(projectId != '' && projectId != null && projectId != 0){
+            $.ajax({
+                type: "POST",
+                url: getBaseURL()+'mms/transfer/warehouseTransfer',
+                data: "projectId="+projectId+"&Type=warehouse",
+                success: function(data){
+                    $('#fWarehouse').html(' ');
+                    var opHtml = '<option value=""></option>';
+                    var valu = JSON.parse(data);
+                    $.each(valu,function(i,o){
+                        opHtml += '<option value="'+o.data+'">' +o.value+'</option>';
+                    });
+                    $('#fWarehouse').html(opHtml);
+                    $('#tWarehouse').html(opHtml);
+                }
+            });
+        }else{
+            $("#fwarehouse").html("<option value='0'>Select From WareHouse</option>");
+            $("#fwarehouse").val(0).trigger('change');
+            $("#twarehouse").html("<option value='0'>Select To WareHouse</option>");
+            $("#twarehouse").val(0).trigger('change');
+        }
+    });
+    $('.datepickerinput').datepicker({
+        format: "dd-mm-yyyy",
+        startDate: new Date(),
+        todayBtn: true,
+        orientation: "top auto",
+        autoclose: true
+    }).on("changeDate", function(e){
+        $("#dateSpan").text($(this).val());
+    });
+    $('.date_icon').click(function() {
+        var input = $(this).parent().find('input').datepicker('show');
+    });
+
+    $('.ware').on('change', function () {
+        var fWH = $('#fWarehouse').val();
+        var tWH = $('#tWarehouse').val();
+        if(fWH == tWH){
+            alert("check your Warehouse");
+            $('#tWarehouse').val('');
+            return false;
+        }
+    });
+
+    //Resource GridList
+    var sel_resource_count = 0;
+    var tmpLocalData = [];
+    var $resourceGrid = $("#dataTable");
+    var resourceSource = {
+        localdata: [],
+        dataType: "json",
+        dataFields: [
+            { name: 'ResourceId', type: 'int' },
+            { name: 'ItemId', type: 'int' },
+            { name: 'Code', type: 'string' },
+            { name: 'ResourceName', type: 'string' },
+            { name: 'Include', type: 'boolean' },
+            { name: 'ResourceGroupName', type: 'string' },
+            { name: 'RequestNo', type: 'number' }
+        ],
+        id: 'CostCentreId'
+    };
+    var resourceAdapter = new $.jqx.dataAdapter(resourceSource);
+    $(function () {
+        bindRequests();
+        $resourceGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            rowsheight: 35,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            source: resourceAdapter,
+            editable: true,
+            columns: [
+                { dataField: 'CostCentreId', hidden: true},
+                { dataField: 'ResourceId', hidden: true},
+                { text: '', dataField: 'Include', columntype: 'checkbox', align:'center',width:'15%'},
+                { text: 'ResourceName', dataField: 'ResourceName',width:'85%', editable:false}
+            ]
+        });
+        $resourceGrid.on('cellvaluechanged', function (event) {
+            var args = event.args;
+            var datarow = $resourceGrid.jqxGrid('getrowdata', args.rowindex);
+            if(args.newvalue === true)
+                sel_resource_count++;
+            else
+                sel_resource_count--;
+            $('#NoOfSelResource').html(sel_resource_count);
+            generateSelResourceInputs();
+        });
+
+    });
+    function bindRequests() {
+        var target = $('#project').val();
+        var fWarehouse = $('#fWarehouse').val();
+        var tWarehouse = $('#tWarehouse').val();
+        $.ajax({
+            url:getBaseURL()+"mms/transfer/warehouseTransfer",
+            type:"post",
+            data:"CostCentreId="+target+"&Type=Grid",
+            //dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                if(jqXHR.status == 200) {
+                    var data = JSON.parse(data);
+                   renderRequestResources(data.resources);
+                }
+            }
+        });
+    }
+    function renderRequestResources(data) {
+        resourceSource.localdata = data;
+        resourceAdapter.dataBind();
+    }
+    function renderSelectedResources() {
+        var $selRequests = $('.request-box.selected');
+        $('#NoOfSelRequest').html($selRequests.length);
+
+        // select resources in grid
+        if($selRequests.length != 0) {
+            var arr_requestIds = [];
+            $.each($selRequests, function (i, o) {
+                var requestId = $(this).find('ul[data-id]').attr('data-id');
+                arr_requestIds.push(requestId);
+            });
+
+            $.each(resourceSource.localdata, function (j, r) {
+                if ($.inArray(r.RequestId, arr_requestIds) != -1) {
+                    r.Include = '1';
+                    sel_resource_count++;
+                    return;
+                }
+
+                r.Include = '0';
+            });
+        } else {
+            $.each(resourceSource.localdata, function (j, r) {
+                r.Include = '0';
+            });
+            sel_resource_count = 0;
+        }
+        $('#NoOfSelResource').html(sel_resource_count);
+        resourceAdapter.dataBind();
+        generateSelResourceInputs();
+    }
+    function generateSelResourceInputs() {
+        var rows = $resourceGrid.jqxGrid('getrows');
+        var $inputs = '';
+        for(var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.Include === true) {
+                $inputs += '<input type="hidden" name="resourceTransIds[]" class="resourceTransIds" value="' + row.ResourceId + '"/>';
+                $inputs += '<input type="hidden" name="itemTransIds[]" class="itemTransIds" value="' + row.ItemId + '"/>';
+            }
+        }
+
+        $('#requestTransInputsWrapper').html($inputs);
+    }
+
+</script>

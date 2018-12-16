@@ -1,0 +1,143 @@
+<style type="text/css">
+    .jqx-grid-header {height:75px !important;}
+    .reg-icon-file{color:hsl(208, 41%, 58%) !important;margin-top:10px; }
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <h1>WareHouse Transfer Register
+                    <div class="stgedit_btn req_addbtn brad_50">
+                        <a href="<?php echo $this->basePath();?>/mms/transfer/warehouse-transfer" class="ripple" data-toggle="tooltip" data-placement="right" title="Add New Min"><i class="fa fa-plus"></i></a>
+                    </div>
+                </h1>
+            </div>
+            <div class="col-lg-12">
+                <div id="subGrid"></div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:50px;">
+            <div class="col-lg-12">
+                <div id="jqxgrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r">
+            <a href="<?php echo $this->basePath();?>/mms/master/resourceview" class="ripple">Close</a>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function (){
+        $.ajax({
+            url:getBaseURL()+"mms/transfer/warehouse-transfer-register",
+            type:"post",
+            data:"mode=register",
+            dataType:"json",
+            success:function(data, textStatus, jqXHR){
+                //alert(JSON.stringify(data))
+                var $treeGrid = $("#subGrid");
+                var source =
+                {
+                    dataFields: [
+                        { name: 'WTRegisterId', type: 'number'},
+                        { name: 'WTDate', type: 'string'},
+                        { name: 'WTNo', type: 'number' },
+                        { name: 'Project', type: 'string' },
+                        { name: 'FromWareHouse', type: 'string' },
+                        { name: 'ToWareHouse', type: 'string' },
+                        { name: 'Approve', type: 'string' }
+                    ],
+                    localdata:data,
+                    id: 'WTRegisterId',
+                    datatype: "json",
+                    async: false
+                };
+
+                var wtAdapter = new $.jqx.dataAdapter(source);
+
+                // create jqxgrid
+                $("#subGrid").jqxGrid({
+                    width: '100%',
+                    autoheight:true,
+                    source: wtAdapter,
+                    sortable: true,
+                    filterable: true,
+                    pageable: true,
+                    showfilterrow: true,
+                    ready: function () {
+                        //$("#subGrid").jqxGrid('showrowdetails', 1);
+                    },
+                    columns: [
+                        { text: 'WTRegisterId', datafield: 'WTRegisterId',  hidden: true, filterable: false},
+                        { text: 'WTDate', dataField: 'WTDate'},
+                        { text: 'WTNo', dataField: 'WTNo'},
+                        { text: 'Project', dataField: 'Project'},
+                        { text: 'FromWareHouse', dataField: 'FromWareHouse'},
+                        { text: 'ToWareHouse', dataField: 'ToWareHouse'},
+                        { text: 'Approve', dataField: 'Approve',cellsalign: 'center',align: 'center'},
+                        { text: 'Action', sortable: false, filterable: false, cellsalign: 'center',width:'12%',
+                            cellsrenderer: function (row) {
+                                var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+                                var WTRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'WTRegisterId');
+                                var Approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve');
+                                if(Approve == "Yes" || Approve == "Partial") {
+                                    var editLink = '<a title="Detailed" href="' + getBaseURL() + 'mms/transfer/warehouse-transfer-detailed/' + rowData.uid + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                    return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/min/minreport/' + WTRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                                }
+                                else {
+                                    var editLink = '<a href="' + getBaseURL() + '/mms/transfer/warehousetransfer-entry/' + WTRegisterId + '" "javascript:void(0);" title="Edit" onclick="wareEdit(' + WTRegisterId + ',' + row + ');return false;""><i class="fa fa-pencil-square-o reg-icon"></i></a>' + //<a title="Edit" href="'+ getBaseURL() + 'mms/transfer/warehousetransfer-entry/'+WTRegisterId+'" style="padding-left: 15px; margin-top:8px;">
+                                        "&nbsp;&nbsp;" + '<a href="' + getBaseURL() + '/mms/transfer/warehouse-transfer-delete/' + WTRegisterId + '" "javascript:void(0);" title="Delete" onclick="wareDelete(' + WTRegisterId + ',' + row + ');return false;""><i class="fa fa-trash-o reg-icon"></i></a>' +
+                                        '<a title="Detailed" href="' + getBaseURL() + 'mms/transfer/warehouse-transfer-detailed/' + rowData.uid + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                    return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/min/minreport/' + WTRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                                }
+                            }
+                        }
+                    ]
+                });
+                // $("#").on('rowselect', function(event){
+                //event arguments.
+                // var args = event.args;
+                //row's bound index.
+                // var rowBoundIndex = args.rowindex;
+                //row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+                // var rowData = args.row;
+                // location.replace("detailed/"+rowData.uid);
+                // });
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    });
+
+    function wareDelete(x,row) {
+        var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+
+        if(rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial")
+        {
+            alert("Can't Delete Already Approved");
+            return;
+        }
+        var val = confirm("Do you want to delete this WareHouseTransfer?");
+        if(val==true) {
+            location.replace('warehouse-transfer-delete/'+x);
+        }
+    }
+    function wareEdit(x,row) {
+        var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+
+        if (rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial") {
+            alert("Can't Edit Already Approved");
+            return;
+        }
+        location.replace('warehousetransfer-entry/'+x);
+    }
+
+
+</script>
+

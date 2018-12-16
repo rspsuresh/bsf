@@ -1,0 +1,923 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/workorder.css"/>
+<style type="text/css">
+    .totalright{font-weight:600; color:green; font-size:14px;}
+	.table > tbody > tr > td.tbl_input_td{padding:8px !important}
+</style>
+<form method="post" action="" id="progress-bill">
+    <div class="content_wrapper padlr0">
+        <div class="container-fluid padlr0">
+            <div class="col-lg-12">
+                <h1>Progress Bill</h1>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="tagcrd">
+                    <ul>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr4">
+                                <h2 class="comtex tet-mutedclr1" style="font-weight:600 !important;">Bill Date</h2>
+                                <input type="text" name="BillDate" id="target_period" class="form-control datepickerinput" value="<?php echo date('d-m-Y');?>" style="width:100%;cursor:pointer;"/>
+                                <input type="hidden" name="datebill" id="datebill" class="form-control" value="<?php echo $stage['CompletionDate'];?>" style="width:100%;cursor:pointer;"/>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr2">
+                                <h2 class="comtex tet-mutedclr2" style="font-weight:600 !important;">Generation No.</h2>
+                                <input class="form-control"  name="ProgressNo"  id="ProgressNo" <?php if ($arrVNo["genType"] == true){ ?> readonly <?php } ?> label="Generation No" value="<?php if ($arrVNo["genType"] == true){ echo $arrVNo['voucherNo']; } else { echo "";}?> " style="width:100%;cursor:pointer;" />
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr3">
+                                <div class="icon-bg"><i class="fa fa-suitcase i-text-111"></i></div>
+                                <h2 class="comtex i-text-3 commargin_bottom_5" style="font-weight:600 !important;">Project</h2>
+                                <h5 class="tetmuted tet-clr11"><?php echo $stage['ProjectName'];?></h5>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr1">
+                                <div class="icon-bg"><i class="fa fa-tasks i-text-111"></i></div>
+                                <h2 class="comtex tet-mutedclr4 commargin_bottom_5" style="font-weight:600 !important;">Stage Name</h2>
+                                <h5 class="tetmuted tet-clr11"><?php echo $stage['StageName'];?></h5>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr5">
+                                <div class="icon-bg"><i class="fa fa-ban  i-text-111"></i></div>
+                                <h2 class="comtex tet-mutedclr5 commargin_bottom_5" style="font-weight:600 !important;">Block Name</h2>
+                                <h5 class="tetmuted tet-clr11"><?php  if($stage['BlockName']!="") { echo $stage['BlockName']; } else { echo "--"; } ?></h5>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr6">
+                                <div class="icon-bg"><i class="fa fa-building i-text-111"></i></div>
+                                <h2 class="comtex i-text-16 commargin_bottom_5" style="font-weight:600 !important;">Floor Name</h2>
+                                <h5 class="tetmuted tet-clr11"><?php if($stage['FloorName']!="") { echo $stage['FloorName']; } else { echo "--"; }?></h5>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="tagcardhdng pnl-overflow crmbrdrclr7">
+                                <div class="icon-bg"><i class="fa fa-gavel i-text-111"></i></div>
+                                <h2 class="comtex i-text-17 commargin_bottom_5" style="font-weight:600 !important;">Stage Type</h2>
+                                <h5 class="tetmuted tet-clr11"><?php echo $stage['Stage'];?></h5>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <input value="<?php echo $stage['ProjectId'];?>" type="hidden" name="ProjectId" />
+            <input value="<?php echo $stage['BlockId'];?>" type="hidden" name="BlockId" />
+            <input value="<?php echo $stage['FloorId'];?>" type="hidden" name="FloorId" />
+            <input value="<?php echo $stage['StageType'];?>" type="hidden" name="StageType"/>
+            <input value="<?php echo $stage['StageId'];?>" type="hidden" name="StageId"/>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive animated fadeInUp">
+                    <table id="units-table" class="table tbltop_bdr0">
+                        <thead>
+                        <tr>
+                            <th width="3%">Unit No</th>
+                            <th width="8%">PB No</th>
+                            <th width="16%">Description</th>
+                            <th width="10%">Buyer Name</th>
+                            <th width="12%">Amount</th>
+                            <th width="10%">Tax Amount</th>
+                            <th width="10%">Paid Amount</th>
+                            <th width="10%">LateFee Amount</th>
+                            <th width="13%">Net Amount</th>
+                            <th width="3%">&nbsp; </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        $i=1;
+                        $cnt = 0;
+                        foreach($unit as $Unit):
+                          // Print_r($latefee['LateFee']); die;
+                            $vN = $this->CommonHelper()->getVoucherTransNo(803, date('Y-m-d'), 0, 0, $adp, "",$cnt);
+                            $j=1; ?>
+                            <tr>
+                                <td><?php echo $Unit['UnitNo'];?></td>
+                                <input type="hidden" name="UnitId[<?php echo $i;?>]" value="<?php echo $Unit['UnitId'];?>" >
+                                <input type="hidden" name="LeadId" value="<?php echo $Unit['LeadId'];?>" >
+                                <td><input class="tbl_input" style="border:none;padding:0 !important" type="text" name="PBNo[<?php echo $i;?>]"  <?php if($vN['genType'] == true){ echo "readonly"; }  ?> value="<?php if($vN['genType'] == true){ echo $vN['voucherNo']; } else { echo $vN['voucherNo']; }  ?>"/> </td>
+                                <td><?php echo $Unit['Stage'];?><input type="hidden" name="StageTransId[<?php echo $i;?>]" value="<?php echo $Unit['StageType'];?>" ></td>
+                                <td class="tbl_input_td"><input class="tbl_input" type="text" value="<?php echo $Unit['BuyerName'];?>" readonly /></td>
+                                <td class="tbl_input_td"><input class="tbl_input txt_right unit-amt" type="text" id="CurAmt_<?php echo $i;?>" name="Amount[<?php echo $i;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($Unit['Amount'],2,true);?>" /></td>
+                                <td class="tbl_input_td"><input class="tbl_input txt_right unit-qual-amt" type="text" id="TaxAmt_<?php echo $i;?>" name="QualAmount[<?php echo $i;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($Unit['QualAmount'],2,true);?>" /></td>
+                                <td class="tbl_input_td"><input class="tbl_input txt_right unit-paid-amt" type="text" id="PaidAmt_<?php echo $i;?>" name="PaidAmt[<?php echo $i;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($Unit['PaidAmount'],2,true);?>" /></td>
+                                <td class="tbl_input_td"><input class="tbl_input txt_right unit-late-amt" type="text" id="interestAmt_<?php echo $i;?>" name="interestAmt[<?php echo $i;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($latefee['LateFee'],2,true);?>" /></td>
+                                <td class="tbl_input_td"><input class="tbl_input txt_right unit-net-amt" type="text" id="NetAmt_<?php echo $i;?>" name="NetAmount[<?php echo $i;?>]" readonly value="<?php $net=$Unit['NetAmount'] + $latefee['LateFee']; echo $this->commonHelper()->sanitizeNumber($net,2,true);?>" /></td>
+                                <input class="tbl_input txt_right unit-paid-amt" type="hidden" id="paidamt_<?php echo $i;?>" name="paidamt[<?php echo $i;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($Unit['PaidAmount'],2,true);?>" />
+                                <input class="tbl_input txt_right" type="hidden" id="creditDays_<?php echo $i;?>" name="creditDays[<?php echo $i;?>]" readonly value="<?php echo $Unit['CreditDays'];?>" />
+                                <input class="tbl_input txt_right " type="hidden" id="InctPercent_<?php echo $i;?>" name="InctPercent[<?php echo $i;?>]" readonly value="<?php echo $Unit['IntPercent'];?>" />
+
+                                <td align="center" class="action_btns_td">
+                                    <ul class="action_btns">
+                                        <!--li>
+                                            <a href="#"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a>
+                                        </li-->
+                                        <li>
+                                            <a href="#" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Expand"></i></a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <!--Add lines table-->
+
+                            <tr style="display:none;" class="subTr">
+                                <td colspan="9" style="padding:0px !important; ">
+                                    <div class="subDiv" style="display:none;">
+                                        <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive topsp">
+                                                <table class="table receipt-type-table" style="margin-bottom:0px;">
+                                                    <thead>
+                                                    <tr>
+                                                        <th width="20%">Receipt Type</th>
+                                                        <!--th>Percentage</th-->
+                                                        <th width="10%">Amount</th>
+                                                        <th width="10%">Tax</th>
+                                                        <th width="10%">Net Amount</th>
+                                                        <th width="3%"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    <?php foreach($Unit['ReceiptTypeTrans'] as $ReceiptTypeTrans): ?>
+
+                                                        <tr>
+                                                            <input type="hidden" name="ReceiptTypeId[<?php echo $i;?>][<?php echo $j;?>]" value="<?php echo $ReceiptTypeTrans['ReceiptTypeId'];?>"/>
+                                                            <input type="hidden" name="ReceiptType[<?php echo $i;?>][<?php echo $j;?>]" value="<?php echo $ReceiptTypeTrans['ReceiptType'];?>"/>
+                                                            <td><p class="dec-ptr"><?php echo $ReceiptTypeTrans['ReceiptTypeName'];?></p></td>
+                                                            <!--td width="1%" class="tbl_input_td percntg_input"><input class="tbl_input" type="text" name="ReceiptTypePercentage[</?php echo $i;?>][</?php echo $j;?>]" readonly value="</?php echo $ReceiptTypeTrans['Percentage'];?>"/><span><i class="fa fa-percent"></i></span></td-->
+                                                            <td  class="tbl_input_td"><input id="BillAbs_<?php echo $i;?>_CurAmt_<?php echo $j ;?>" class="tbl_input txt_right amount" type="text" name="ReceiptTypeAmount[<?php echo $i;?>][<?php echo $j;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($ReceiptTypeTrans['Amount'],2,true);?>" /></td>
+                                                            <td class="tbl_input_td"><input id="BillAbs_<?php echo $i;?>_TaxAmt_<?php echo $j;?>" class="tbl_input txt_right qual-amount" type="text" name="ReceiptTypeQualAmount[<?php echo $i;?>][<?php echo $j;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($ReceiptTypeTrans['QualAmount'],2,true);?>" /></td>
+                                                            <td class="tbl_input_td"><input id="BillAbs_<?php echo $i;?>_NetAmt_<?php echo $j;?>" class="tbl_input txt_right net-amount" type="text" name="ReceiptTypeNetAmount[<?php echo $i;?>][<?php echo $j;?>]" readonly value="<?php echo $this->commonHelper()->sanitizeNumber($ReceiptTypeTrans['Amount'],2,true);?>" /></td>
+                                                            <td align="center" class="action_btns_td">
+                                                                <ul class="action_btns">
+                                                                    <li><a href="#" class="mainTr rqualmainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand"></i></a></li>
+                                                                </ul>
+                                                            </td>
+                                                            <input type="hidden" class="qualRefId" name="BillAbs_<?php echo $i;?>_QualRefId_<?php echo $j;?>" id="BillAbs_<?php echo $i;?>_QualRefId_<?php echo $j;?>" value="0"/>
+                                                        </tr>
+                                                        <tr style="display:none;" class="subTr qualmainTr">
+                                                            <td colspan="8" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+                                                                    <?php echo $ReceiptTypeTrans['HtmlTag'];?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                        $j++;
+                                                    endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                            $i++;
+                            $cnt++;
+                        endforeach; ?>
+                        <tr>
+                            <td align="right" colspan="4" class="rate_pri">Total</td>
+                            <td class="tbl_input_td"><input class="tbl_input txt_right totalright total_input" id="BillCurTotal" type="text" value="" /></td>
+                            <td class="tbl_input_td"><input class="tbl_input txt_right totalright total_input" id="BillTaxTotal" type="text" value="" /></td>
+                            <td class="tbl_input_td"><input class="tbl_input txt_right totalright total_input" id="BillPaidTotal" type="text" value="" /></td>
+                            <td class="tbl_input_td"><input class="tbl_input txt_right totalright interest_input" id="BilllateTotal" type="text" value="" /></td>
+                            <td class="tbl_input_td"><input class="tbl_input txt_right totalright total_input" id ="BillNetTotal" type="text" value="" /></td>
+
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="rowid" id="rowid" value="<?php echo $i-1;?>"/>
+                </div>
+                <div class="form-group col-lg-12">
+                    <p class="col-lg-6 col-md-6 col-sm-6 radio_label" style="padding-top:7px;">
+                        <label for="uds">Do you want to send demand letter on approval</label>
+                    </p>
+                    <div class="radio_check col-lg-4 col-md-4 col-sm-4">
+                        <p>
+                            <input type="radio" checked="checked" value="1" id="yes" name="DemandApproval">
+                            <label for="yes" class="ripple">Yes</label>
+                        </p>
+                        <p>
+                            <input type="radio" value="0" id="no" name="DemandApproval">
+                            <label for="no" class="ripple">No</label>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--button-->
+    <div class="col-lg-12 savebtn_area clear">
+        <ul>
+            <li class="dropdown save_btn float_r">
+                <a href="#" onclick="return validate();" id="submitId" data-toggle="tooltip" class="ripple" title="Submit">Generate Bill</a>
+              <div id="submit-loader" class="post_loader ask_post_loader brad_50">
+                    <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+                </div>
+            </li>
+        </ul>
+    </div>
+</form>
+<script>
+    var dt=$("#datebill").val();
+
+    $('.datepickerinput').datepicker({
+        format: "dd-mm-yyyy",
+        startDate: dt,
+        todayBtn: true,
+        orientation: "top auto",
+        autoclose: true
+    }).on("changeDate", function(e){
+        $("#target_period").text($(this).val());
+    });
+    $('.date_icon').click(function() {
+        var input = $(this).parent().find('input').datepicker('show');
+    });
+
+    $(document).ready(function() {
+        $(".multiple_dropdown").select2({
+        });
+
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+
+        bindExpandMainTr();
+        bindExpandMainTrInput();
+
+        bindRQualExpandTr();
+        bindRQualExpandTrInput();
+
+        bindQualExpandTr();
+        bindQualExpandTrInput();
+        fillRowRefEditMode();
+        bindTaxCalculation();
+        calcTotal();
+      //  calcIntCalc();
+
+
+
+    });
+
+</script>
+<!--table Add lines start-->
+<script>
+    $(".mainTr").click(function(e){
+        e.preventDefault();
+        if(!$(this).closest("tr").next(".subTr").is(":visible")){
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        }
+        else{
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+
+//    function calculateTotal(){
+//        var totamount=0,totqual=0,totnetamount=0;
+//        $('.receipt-type-table').find('> tbody > tr').each(function(){
+//            if($(this).find('.amount').length > 0){
+//                totamount += parseFloatVal(isNullCheck($(this).find('.amount').val(),'number'));
+//                totqual += parseFloatVal(isNullCheck($(this).find('.qual-amount').val(),'number'));
+//                totnetamount += parseFloatVal(isNullCheck($(this).find('.net-amount').val(),'number'));
+//                var $tar_receiptTable = $(this).closest('.receipt-type-table');
+//                $tar_receiptTable.find('.total-amount').val(sanitizeNumber(totamount,2,true));
+//                $tar_receiptTable.find('.total-qual-amount').val(sanitizeNumber(totqual,2,true));
+//                $tar_receiptTable.find('.total-net-amount').val(sanitizeNumber(totnetamount,2,true));
+//            }
+//        });
+//    }
+
+
+    //Expanse/Collapse
+    function bindExpandMainTr() {
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                closeMainTr();
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindExpandMainTrInput() {
+        var $mainTr = $(".mainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                closeMainTr();
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+//        $(this).closest("tr").find(".mainTr").trigger('click');
+        });
+    }
+
+    function closeMainTr() {
+        var $mainTr = $(".mainTr");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+        });
+    }
+
+    function bindRQualExpandTr() {
+        var $mainTr = $(".rqualmainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                closeRQualTr();
+                $(this).closest("tr").next(".qualmainTr").show();
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindRQualExpandTrInput() {
+        var $mainTr = $(".rqualmainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                closeRQualTr();
+                $(this).closest("tr").next(".qualmainTr").show();
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+            }
+        });
+    }
+
+    function closeRQualTr() {
+        var $mainTr = $(".rqualmainTr");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+        });
+    }
+
+
+
+    function bindQualExpandTr() {
+        var $mainTr = $(".qualmainExp");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr();
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindQualExpandTrInput() {
+        var $mainTr = $(".qualmainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr()
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+        });
+    }
+
+    function closeQualTr() {
+        var $mainTr = $(".qualmainExp");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        });
+    }
+    function bindTaxCalculation() {
+        $(".qualChange").each(function () {
+            CalculateTax($(this)[0].id);
+        });
+
+
+
+//    alert('kk');
+//    var $mainTr = $(".qualChange");
+//    $mainTr.change(function (e) {
+//        CalculateTax($(this)[0].id);
+//        alert('0kk');
+//    });
+    }
+    //Calculation
+    function calcTotal() {
+        var totAmt = 0,
+            totAmount = 0,
+            totAdvt = 0,
+            tottax = 0,
+            paidamt = 0,
+            totlate= 0,
+            excess= 0,
+            $extraBillTable=$("#units-table")
+
+        $extraBillTable.find('tr').each(function () {
+            var    $tarAmt = $(this).find('.unit-amt'),
+                $tarTax = $(this).find('.unit-qual-amt'),
+                $tarNet = $(this).find('.unit-net-amt'),
+                $tarPaid = $(this).find('.unit-paid-amt'),
+                $tarlate = $(this).find('.unit-late-amt');
+
+            if ($tarAmt.length > 0) {
+                var amt = parseFloatVal($tarAmt.val());
+                if (!isNaN(amt)) {
+                    totAdvt += amt;
+                }}
+            if ($tarTax.length > 0) {
+                var amt = parseFloatVal($tarTax.val());
+                if (!isNaN(amt)) {
+                    tottax += amt;
+                }}
+            if ($tarlate.length > 0) {
+                var amt = parseFloatVal($tarlate.val());
+                if (!isNaN(amt)) {
+                    totlate += amt;
+                }}
+            if ($tarNet.length > 0) {
+                var amt = parseFloatVal($tarNet.val());
+                if (!isNaN(amt)) {
+                    totAmt += amt;
+                }}
+            if ($tarPaid.length > 0) {
+                var amt = parseFloatVal($tarPaid.val());
+                if (!isNaN(amt)) {
+                    paidamt += amt;
+                }}
+
+        });
+        $('#BillCurTotal').val(sanitizeNumber(totAdvt,2,true));
+        $('#BillTaxTotal').val(sanitizeNumber(tottax,2,true));
+        $('#BillNetTotal').val(sanitizeNumber(totAmt,2,true));
+        $('#BilllateTotal').val(sanitizeNumber(totlate,2,true));
+        $('#BillPaidTotal').val(sanitizeNumber(paidamt,2,true));
+    }
+//    function calcTotal() {
+//        var $curAmt = $('input[id^=CurAmt_]'),
+//            gcurTotal = 0,
+//            gtaxTotal= 0,
+//            gnetTotal= 0;
+//        $.each($curAmt, function () {
+//            var acurTotal = 0,
+//                ataxTotal= 0,
+//                anetTotal= 0;
+//
+//            var $this = $(this),
+//                name = $this[0].id,
+//                key = name.split('_')[1];
+//            if (name.indexOf('__') != -1 || name.indexOf('_CurAmt_') != -1 || name.indexOf('excel') != -1) return;
+//
+//
+//            $acurAmt = $('input[id*=BillAbs_'+key+'_CurAmt_]'),
+//                $.each($acurAmt, function () {
+//                    var $x = $(this),
+//                        name = $x[0].id,
+//                        key1 = name.split('_')[1],
+//                        key2 = name.split('_')[3];
+//
+//                    if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+//
+//                    var curAmt = parseFloat(isNullCheck($x.val(),'number')),
+//                        taxAmt = parseFloat(isNullCheck($('#BillAbs_' + key1 + '_TaxAmt_' + key2).val(),'number'));
+//
+//                    var netAmt = curAmt+taxAmt;
+//
+//                    $('#BillAbs_' + key1 + '_NetAmt_' + key2).val(sanitizeNumber(netAmt,2,true));
+//
+//                    acurTotal = acurTotal+ curAmt;
+//                    ataxTotal = ataxTotal+ taxAmt;
+//                    anetTotal = anetTotal+ netAmt;
+//                });
+//
+//
+//            $('#CurAmt_' + key).val(sanitizeNumber(acurTotal,2,true));
+//            $('#TaxAmt_' + key).val(sanitizeNumber(ataxTotal,2,true));
+//           // $('#NetAmt_' + key).val(sanitizeNumber(anetTotal,2,true));
+//
+//            gcurTotal = gcurTotal+ acurTotal;
+//            gtaxTotal = gtaxTotal+ ataxTotal;
+//            gnetTotal = gnetTotal+ anetTotal;
+//
+//        });
+//
+//        $('#BillCurTotal').val(sanitizeNumber(gcurTotal,2,true));
+//        $('#BillTaxTotal').val(sanitizeNumber(gtaxTotal,2,true));
+//        $('#BillNetTotal').val(sanitizeNumber(gnetTotal,2,true));
+//        //$MW_Amount.val(sanitizeNumber(gnetTotal,2,true));
+//        //$('#Amount').val(sanitizeNumber(gnetTotal,2,true));
+//    }
+
+    function calcAbsTotal(x) {
+        var key1 = $(x)[0].id.split('_')[1],
+            $curAmt = $('input[id*=BillAbs_'+key1+'_CurAmt_]'),
+            cTotal = 0,
+            taxTotal = 0,
+            nTotal=0;
+
+        $.each($curAmt, function () {
+            var $this = $(this),
+                name = $this[0].id,
+                keys = name.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+
+
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+
+            var iRefId = $('#BillAbs_' + rowid + '_QualRefId_' + key).val();
+
+            var sname = $('#QualRowRef_' + iRefId).val();
+            var dbaseAmt= parseFloat($('#' + sname).val());
+
+            CalculateQualifier(dbaseAmt,iRefId);
+
+            var dTaxAmt = parseFloat(isNullCheck($('#QualTotalAmt_' + iRefId).val(),'number'));
+            $('#BillAbs_' + rowid + '_TaxAmt_' + key).val(sanitizeNumber(dTaxAmt,2,true));
+            $('#BillAbs_' + rowid + '_NetAmt_' + key).val(sanitizeNumber(dTaxAmt+dbaseAmt,2,true));
+
+            calcTotal();
+            //CalculateTax(name);
+
+//        var total = parseFloatVal($this.val()),
+//            balAmt = parseFloatVal($('#BillAbs_'+rowid+'_BalAmt_' + key).val()),
+//            baseAmt = parseFloatVal($('#BillAbs_'+rowid+'_BaseAmt_' + key).val()),
+//            adjAmt = parseFloatVal($('#BillAbs_'+rowid+'_AdjAmt_' + key).val()),
+//            txtAmt = parseFloatVal($('#BillAbs_'+rowid+'_TaxAmt_' + key).val());
+//
+//        if(total > balAmt)
+//            showError($this, 'Amount should be less or equal to Balance Amount!');
+//        else
+//            removeError($this);
+//
+//        cTotal += total;
+//        taxTotal += txtAmt;
+//        nTotal = cTotal+taxTotal;
+//        var nAmt = total+txtAmt;
+//
+//        ($('#BillAbs_'+rowid+'_NetAmt_' + key).val(sanitizeNumber(nAmt,2,true))),
+//        $('#TotalCurAmt_' + rowid).val(sanitizeNumber(cTotal,2,true));
+//        $('#TotalTaxAmt_' + rowid).val(sanitizeNumber(taxTotal,2,true));
+//        $('#TotalNetAmt_' + rowid).val(sanitizeNumber(cTotal+taxTotal,2,true));
+
+            // update to bill curAmt
+        });
+
+        var $billCurAmt = $('#CurAmt_' + key1);
+        $billCurAmt.val(sanitizeNumber(cTotal,2,true));
+
+        $('#TaxAmt_' + key1).val(sanitizeNumber(taxTotal,2,true));
+        $('#NetAmt_' + key1).val(sanitizeNumber(nTotal,2,true));
+
+        $billCurAmt.trigger('change');
+    }
+
+    function CalculateTax(id) {
+        //if (bReady==false) return;
+        var key1 = id.split('_')[1],
+            key2 = id.split('_')[3];
+
+        var sname = $('#QualRowRef_' + key1).val();
+        var dbaseAmt= parseFloatVal(isNullCheck($('#' + sname).val(),'number'));
+
+        CalculateQualifier(dbaseAmt,key1);
+        var dTaxAmt = parseFloatVal(isNullCheck($('#QualTotalAmt_' + key1).val(),'number'));
+
+        var k1 = sname.split('_')[1],
+            k2 = sname.split('_')[3];
+
+        $('#BillAbs_' + k1 + '_TaxAmt_' + k2).val(sanitizeNumber(dTaxAmt,2,true));
+        $('#BillAbs_' + k1 + '_NetAmt_' + k2).val(sanitizeNumber(dTaxAmt+dbaseAmt,2,true));
+
+        calcTotal();
+    }
+
+    function CalculateQualifier(baseValue, key1) {
+
+        var rows = $('#QualRowId_' + key1).val();
+        var sformula="";
+        var sname = $('#QualRowRef_' + key1).val();
+        var dbaseAmt= parseFloatVal(isNullCheck($('#' + sname).val(),'number'));
+        var dTotalQualAmt=0;
+
+        for (i = 1; i <= rows; i++) {
+            var sRef = $('#Qual_' + key1 + '_Ref_' + i).val().trim();
+            var sFormula = $('#Qual_' + key1 + '_Exp_'+ i).val();
+
+            var dPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_ExpPer_'+ i).val(),'number'));
+            var sbaseRef = 'R0';
+            if (parseFloatVal(dPer) ==0) dPer=100;
+            sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+
+            for (j = 1; j <= rows; j++) {
+                var sFRef = $('#Qual_' + key1 + '_Ref_' + j).val().trim();
+                var dFamt = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_Amount_'+ j).val(),'number'));
+                sFormula = sFormula.replace(new RegExp(sFRef, 'g'), dFamt);
+            }
+
+            var fvaule = computeEval(sFormula);
+            $('#Qual_' + key1 + '_ExpValue_' + i).val(sanitizeNumber(fvaule,2,true));
+
+            var iQualTypeid = $('#Qual_' + key1 + '_TypeId_' + i).val();
+            if (iQualTypeid==1) {
+                var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(),'number'));
+                var dCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_CessPer_' + i).val(),'number'));
+                var dEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_EduCessPer_' + i).val(),'number'));
+                var dHEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_HEduCessPer_' + i).val(),'number'));
+                var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+                $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+
+                $('#Qual_' + key1 + '_NetPer_' + i).val(sanitizeNumber(dNetPer,2,true));
+                $('#Qual_' + key1 + '_ExpPer_'+ i).val(sanitizeNumber(dNetPer,2,true));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dCessAmt =  dTaxAmt* (dCess/100);
+                var dEDAmt =  dTaxAmt* (dEDCess/100);
+                var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+                var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+                $('#Qual_' + key1 + '_TaxableAmt_'+ i).val(sanitizeNumber(dTaxableAmt,2,true));
+                $('#Qual_' + key1 + '_TaxPerAmt_'+ i).val(sanitizeNumber(dTaxAmt,2,true));
+                $('#Qual_' + key1 + '_CessAmt_'+ i).val(sanitizeNumber(dCessAmt,2,true));
+                $('#Qual_' + key1 + '_EduCessAmt_'+ i).val(sanitizeNumber(dEDAmt,2,true));
+                $('#Qual_' + key1 + '_HEduCessAmt_'+ i).val(sanitizeNumber(dHEDAmt,2,true));
+                $('#Qual_' + key1 + '_NetAmt_'+ i).val(sanitizeNumber(dNetAmt,2,true));
+
+                dAmt = dNetAmt;
+            } else if (iQualTypeid==2){
+
+                var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(),'number'));
+                var dKKCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_KKCessPer_' + i).val(),'number'));
+                var dSBCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_SBCessPer_' + i).val(),'number'));
+                var dNetPer = dTaxPer + dKKCess + dSBCess;
+
+                $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+                $('#Qual_' + key1 + '_NetPer_' + i).val(sanitizeNumber(dNetPer,2,true));
+                $('#Qual_' + key1 + '_ExpPer_'+ i).val(sanitizeNumber(dNetPer,2,true));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dKKCessAmt = dTaxableAmt * (dKKCess / 100);
+                var dSBCessAmt = dTaxableAmt * (dSBCess / 100);
+
+                var dNetAmt = dTaxAmt + dKKCessAmt + dSBCessAmt;
+
+                $('#Qual_' + key1 + '_TaxableAmt_'+ i).val(sanitizeNumber(dTaxableAmt,2,true));
+                $('#Qual_' + key1 + '_TaxPerAmt_'+ i).val(sanitizeNumber(dTaxAmt,2,true));
+                $('#Qual_' + key1 + '_KKCessAmt_' + i).val(sanitizeNumber(dKKCessAmt, 2, true));
+                $('#Qual_' + key1 + '_SBCessAmt_' + i).val(sanitizeNumber(dSBCessAmt, 2, true));
+                $('#Qual_' + key1 + '_NetAmt_'+ i).val(sanitizeNumber(dNetAmt,2,true));
+
+                dAmt = dNetAmt;
+
+            } else {
+                var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+            }
+
+            $('#Qual_' + key1 + '_Amount_' + i).val(sanitizeNumber(dAmt,2,true));
+            if ($('#Qual_' + key1 + '_YesNo_' + i).is(':checked') == true) dTotalQualAmt = dTotalQualAmt+ parseFloatVal(dAmt);
+        }
+        $('#QualTotalAmt_' + key1).val(sanitizeNumber(dTotalQualAmt,2,true));
+
+        qualTotal();
+
+    }
+    function computeEval(formula) {
+        with (document.forms){
+            with (Math) {
+                A = eval((formula));
+            }
+        } return A;
+    }
+
+    function signChange(x) {
+        var $this = $(x);
+        if ($this.hasClass( "fa-plus" )) {
+            $this.removeClass('fa-plus clr-gre');
+            $this.addClass('fa-minus clr-red');
+            var key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#Qual_' + key1 + '_Sign_' + key2).val('-');
+        } else {
+            $this.removeClass('fa-minus clr-red');
+            $this.addClass('fa-plus clr-gre');
+            var key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#Qual_' + key1 + '_Sign_' + key2).val('+');
+        }
+    }
+
+    function rowSelect() {
+        var $rBody = $('table[id*=EntryTable] tbody.main');
+        $.each($rBody, function(i, obj){
+            if ($(this).parent('table')[0].id.indexOf('__') != -1) {
+                $rBody.splice(i, 1);
+            }
+        });
+        var $sRTable = $rBody.find('tr');
+        if (typeof reset !== 'undefined' && reset === true) {
+            $sRTable.unbind('click', 'dblclick', 'select', 'sortable');
+            $rBody.unbind('sortable');
+        }
+        $sRTable.on( 'dblclick', function () {
+            var $this = $(this);
+            if ($this.hasClass('selected') == true) $this.toggleClass('selected', false);
+            else $this.toggleClass('selected', true);
+        });
+        $sRTable.on( 'click', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $sRTable.on( 'select', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+    }
+
+
+    function qualTotal() {
+        var iRows = $('#QualTotalRowId').val();
+        var arrQual =[];
+        for (i = 1; i <= iRows; i++) {
+            $qualrows = $('input[id*=Qual_'+i+'_Ref_]'),
+                $.each($qualrows, function () {
+                    var $this = $(this),
+                        name = $this[0].id,
+                        keys = name.split('_'),
+                        key1 = keys[1],
+                        key2 = keys[3];
+
+                    var sQualName = $('#Qual_' + key1 + '_Desc_' + key2).val();
+                    var iQualifierId = $('#Qual_' + key1 + '_Id_' + key2).val();
+                    var dAmt =  parseFloat(isNullCheck($('#Qual_' + key1 + '_Amount_' + key2).val(),'number'));
+                    var sSign = $('#Qual_' + key1 + '_Sign_' + key2).val();
+                    if (sSign =="") sSign ="+";
+
+                    if (sSign =="-") { dAmt = dAmt*(-1); }
+
+                    if (dAmt !=0) {
+                        arrQual.push({QualifierId:iQualifierId, QualName: sQualName, Amount: dAmt});
+                    }
+                });
+        }
+
+        var result = [];
+        arrQual.reduce(function (res, value) {
+            if (!res[value.QualifierId]) {
+                res[value.QualifierId] = {
+                    Amount: 0,
+                    QualName: value.QualName,
+                    QualifierId: value.QualifierId
+                };
+                result.push(res[value.QualifierId])
+            }
+            res[value.QualifierId].Amount += value.Amount
+            return res;
+        }, {});
+
+        var iCount=0;
+
+        $("#totaltaxTable tbody").empty();
+        $('#billqualrowid').val(iCount);
+        $.each(result,function(index,element){
+            iCount = +iCount+1;
+            var $tbody = $('#totaltaxTable tbody');
+            var template = $('#dummy-totaltaxTable tbody').html();
+            $tbody.append(template.replace(/__1/g, '_' + iCount));
+
+            $('#QualName_' + iCount).val(element.QualName);
+            $('#QualAmt_' + iCount).val(sanitizeNumber(element.Amount,2,true));
+            $('#QualifierId_' + iCount).val(element.QualifierId);
+
+            $('#billqualrowid').val(iCount);
+        });
+    }
+
+    function showQualExpandButton() {
+        var $mainTr = $(".qualExpandbut");
+        $.each($mainTr, function () {
+            if ($(this).closest("tr").find(".qualTypeId").val() == 1 || $(this).closest("tr").find(".qualTypeId").val() ==2) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    function fillRowRefEditMode() {
+        var $mainTr = $(".qualmainTr"),
+            iTotalCount= 0,
+            ikey =0;
+        $.each($mainTr, function () {
+            var $x =$(this),
+                $y = $x.prev(),
+                akey1 = 0,
+                akey2 = 0;
+            $y.find(".qualRefId").each(function () {
+                var $z =$(this);
+                akey1 = parseInt($z[0].id.split('_')[1]);
+                akey2 = parseInt($z[0].id.split('_')[3]);
+            });
+            $x.find(".qualTypeId").each(function () {
+                var $n =$(this),
+                    key1 = parseInt($n[0].id.split('_')[1]);
+                if (iTotalCount < key1) iTotalCount = key1;
+                if (ikey != key1) {
+                    ikey = key1;
+                    var sname = 'BillAbs_' + akey1 + '_CurAmt_' + akey2;
+                    $('#QualRowRef_' + key1).val(sname);
+                    $('#BillAbs_' + akey1 + '_QualRefId_' + akey2).val(key1);
+                }
+            });
+        });
+        $('#QualTotalRowId').val(iTotalCount);
+    }
+
+    bindUpdateReceiptTax_onChange();
+    bindUpdateReceiptTaxTotal_onChange();
+    bindUpdateNetAmount_onChange();
+
+    function bindUpdateReceiptTax_onChange() {
+        $('.receipt-type-table').on('change', 'input[id^="QualTotalAmt_"]', function() {
+            var $this = $(this),
+                curTax = parseFloatVal($this.val());
+
+            var $tarTr = $this.closest('table').closest('tr').prev('tr');
+            var curAmt = parseFloatVal($tarTr.find('.amount').val()),
+                netAmt = curAmt + curTax;
+            $tarTr.find('.net-amount').val(netAmt.toFixed(2));
+            $tarTr.find('.qual-amount').val(curTax.toFixed(2)).trigger('change');
+        });
+    }
+
+    function bindUpdateReceiptTaxTotal_onChange() {
+        $('.receipt-type-table').on('change', 'input.qual-amount', function() {
+
+            var $tarTable = $(this).closest('table'),
+                totAmt = 0;
+
+            $tarTable.find('.qual-amount').each(function() {
+                totAmt += parseFloatVal($(this).val());
+            });
+
+            var curAmt =  parseFloatVal($tarTable.find('.total-amount').val()),
+                netAmt = curAmt + totAmt;
+            $tarTable.find('.total-net-amount').val(sanitizeNumber(netAmt,2,true));
+            $tarTable.find('.total-qual-amount').val(sanitizeNumber(totAmt,2,true)).trigger('change');
+        });
+    }
+
+    function bindUpdateNetAmount_onChange() {
+        $('.receipt-type-table').on('change', 'input.total-qual-amount', function() {
+
+            var $tarTable = $(this).closest('table');
+            var totTax = 0;
+            $tarTable.find('input.total-qual-amount').each(function() {
+                totTax += parseFloatVal(isNullCheck($(this).val(),'number'));
+            });
+
+            var $tarTaxTr = $tarTable.closest('tr').prev('tr');
+            $tarTaxTr.find('.unit-qual-amt').val(sanitizeNumber(totTax,2,true));
+
+            var unitAmt = parseFloatVal($tarTaxTr.find('.unit-amt').val()),
+                netAmt = unitAmt + totTax;
+
+            $tarTaxTr.find('.unit-net-amt').val(sanitizeNumber(netAmt,2,true));
+
+        });
+    }
+
+    function validate(){
+       // alert("1");
+        $('#submitId').hide();
+        $('#submit-loader').show();
+        $('#progress-bill').submit();
+    }
+
+</script>

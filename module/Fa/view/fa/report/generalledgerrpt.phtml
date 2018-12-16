@@ -1,0 +1,184 @@
+<style>
+    #jqxgrid .jqx-grid-header 	{height:75px !important;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <h1>General Ledger<?php echo (isset($companyName)) ? ' - '.$companyName : '';?>
+                </h1>
+            </div>
+            <div class="form-group col-lg-12 clear padtop20 commargin_ttop_20 commargin_bottom">
+                <div class=" col-lg-4" style="display: none;">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="fromDate" id="fromDate" class="form-control lbl_move datepickerinput" onchange="loadTransfers()" label="From Date" value="<?php echo (isset($fromDate)) ? $fromDate : $prevMonth;?>" />
+                </div>
+                <div class="col-lg-4">
+                    <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                    <input type="text" name="toDate" id="toDate" class="form-control lbl_move datepickerinput" onchange="loadTransfers()" label="As on Date" value="<?php echo (isset($toDate)) ? $toDate: $curDate;?>" />
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <div class="table-responsive clear">
+
+                    <div id="jqxgrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var generalLedgerList=<?php echo (isset($generalLedgerList)) ? json_encode($generalLedgerList): '[]'; ?>;
+    var startDate="<?php echo (isset($fiscalfromDate)) ? $fiscalfromDate : '';?>";
+    var endDate="<?php echo (isset($fiscaltoDate)) ? $fiscaltoDate : '';?>";
+    var start_date =startDate.split('-');
+    var end_date =endDate.split('-');
+
+    $('.datepickerinput').datepicker({
+        'format': 'dd-mm-yyyy',
+        startDate: new Date(start_date[2],start_date[1]-1,start_date[0]),
+        endDate: new Date(end_date[2],end_date[1]-1,end_date[0])
+    }).on('changeDate', function() {
+        $('.datepicker').hide();
+    }).data('datepicker');
+
+    function loadTransfers(){
+        window.location = getBaseURL() + 'fa/report/generalledgerrpt/'+$('#fromDate').val()+'/'+$('#toDate').val();
+    }
+
+    $(document).ready(function () {
+        source = {
+            localdata: generalLedgerList,
+            datatype: "json",
+            pagesize: 10,
+            dataFields: [
+                { name: 'AccountId', type: "number"},
+                { name: 'AccountName', type: "string"},
+                { name: 'Debit', type: "number"},
+                { name: 'Credit', type: 'number'},
+                { name: 'TypeId', type: 'number' }
+
+            ],
+            dataType: "json",
+            id: 'AccountId'
+        };
+
+        var resdata = new $.jqx.dataAdapter(source);
+        var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+
+            $tabsdiv.append(renderRowDetail(datarecord.AccountId,datarecord.TypeId,datarecord.AccountName));
+
+        };
+        dataAdapter = new $.jqx.dataAdapter(source);
+        $("#jqxgrid").jqxGrid(
+            {
+                width: "100%",
+                source: dataAdapter,
+                pageable: true,
+                pagerMode: 'advanced',
+                pagerHeight: 40,
+                rowsheight:40,
+                columnsresize: true,
+                autoheight: true,
+                sortable: true,
+                altrows: true,
+                enabletooltips: true,
+                showfilterrow: true,
+                filterable: true,
+                groupable: true,
+                showstatusbar: true,
+                statusbarheight: 35,
+                showaggregates: true,
+                autorowheight: true,
+                groupsexpandedbydefault: true,
+                rowdetails:true,
+                initrowdetails: initrowdetails,
+                rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:2px solid #5bc0de;'></div>", rowdetailsheight:400},
+
+                columns: [
+                    { text: 'AccountId', dataField: 'AccountId',hidden:true },
+                    { text: 'TypeId', dataField: 'TypeId',hidden:true },
+                    { text: 'AccountName', dataField: 'AccountName', width:'40%' },
+                    { text: 'Debit', dataField: 'Debit', width:'30%' },
+                    { text: 'Credit', dataField: 'Credit',width:'30%'}
+                    /*{ text: 'Action', sortable: false, filterable: false,align:'left', width: '10%',
+                     cellsrenderer: function (row) {
+                     var AccountId = $("#jqxgrid").jqxGrid('getCellValue', row, 'AccountId');
+                     var editLink = '<a title="Detailed" href="' + getBaseURL() + 'fa/index/generlaledger/' + AccountId + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                     return editLink ;
+                     var editLink = '<a title="Edit" href="'+ getBaseURL() + 'fa/index/generlaledger/1/'+AccountId+'" title="Edit" onclick="desedit(' + DecisionId + ');return false;" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>' +
+                     "&nbsp;&nbsp;" + '<a href="javascript:void(0);"title="Delete" onclick="desdelete(' + AccountId + ');return false;""><i class="fa fa-trash-o reg-icon"></i></a>' +
+                     '<a title="Detailed" href="' + getBaseURL() + 'fa/index/generlaledger/' + AccountId + '" style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                     return editLink + "&nbsp;&nbsp;";
+                     }
+                     }*/
+                ],
+                //groups: ['ResourceGroup'],
+                groupsrenderer: function (defaultText, group, state, params) {
+                    return "<div style='margin: 5px;' ><b>" + group +  "</b></div>";
+                }
+            });
+        $("#jqxgrid").jqxGrid('showgroupsheader', false);
+        //Print option
+        $("#excelExport").click(function () {
+            $("#jqxgrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+        });
+        $("#csvExport").click(function () {
+            $("#jqxgrid").jqxGrid('exportdata', 'csv', 'jqxGrid');
+        });
+        $("#htmlExport").click(function () {
+            $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid');
+        });
+
+        $("#print").click(function () {
+            var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html');
+            //var gridContent = $("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);
+            var newWindow = window.open('', '', 'width=800, height=500'),
+                document = newWindow.document.open(),
+                pageContent =
+                    '<!DOCTYPE html>\n' +
+                    '<html>\n' +
+                    '<head>\n' +
+                    '<meta charset="utf-8" />\n' +
+                    '<title>Pending Po</title>\n' +
+                    '<h1>Pending Po</h1>\n' +
+                    '</head>\n' +
+                    '<body>\n' + gridContent + '\n</body>\n</html>';
+            document.write(pageContent);
+            document.close();
+            newWindow.print();
+
+            /*$("#jqxgrid").jqxGrid('exportdata', 'html', 'jqxGrid', true, null, false);*/
+        });
+
+        $("#jqxgrid").bind('rowselect', function (event) {
+            var row = event.args.rowindex;
+            var datarow = $("#jqxgrid").jqxGrid('getrowdata', row);
+
+        });
+
+    });
+    function renderRowDetail(accountId,typeId,accountName) {
+        var dataValue = '';
+        //var asOn=$('#ason').val();
+        $.ajax({
+            url: getBaseURL() + 'fa/report/glaccountdet',
+            type: 'POST',
+            data: {'accountId':accountId,'accountName':accountName,'typeId':typeId,'fromDate': $('#fromDate').val(),'toDate':$('#toDate').val()},
+            async: false,
+            virtualmode: true,
+
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+</script>

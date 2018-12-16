@@ -1,0 +1,797 @@
+<div class="col-lg-12">
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 top-css">
+        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+        <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" readonly label="Reference Date"  value="<?php  echo date("d-m-Y", strtotime($rfcregister['RefDate']))?>"/>
+    </div>
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0 top-css">
+        <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo $rfcregister['RefNo']; ?>" readonly/>
+    </div>
+</div>
+
+<!--table Jq Gride start-->
+<div class="table-responsive topsp">
+<table class="table" style=" margin-bottom:0px;" id="sample12">
+<thead>
+<tr>
+    <th>Parent</th>
+    <th>SerialNo</th>
+    <th>RefNo</th>
+    <th>Specification</th>
+    <th>Unit</th>
+    <th class="text-right">Rate</th>
+    <th>&nbsp;</th>
+</tr>
+</thead>
+<tbody>
+<?php $i=0;
+if (isset($rfctrans)):
+    foreach($rfctrans as $trans):
+        $i=$i+1;
+        $rfctransid = $trans['RFCTransId'];
+        ?>
+        <tr id="IOWiRowId_<?php echo $i; ?>">
+            <td width="10%"><input type="text" class="parent_text" name="parentid_<?php echo $i; ?>" id="parentid_<?php echo $i; ?>" value="<?php echo $trans['ParentText'];?>" readonly</td>
+            <td width="3%"><input class="parent_text srl_no" type="text" name="serialno_<?php echo $i; ?>" value="<?php echo $trans['SerialNo'];?>" id="serialno_<?php echo $i; ?>" readonly/></td>
+            <td width="3%"><input class="parent_text" type="text" name="refserialno_<?php echo $i; ?>" id="refserialno_<?php echo $i; ?>"  readonly value="<?php echo $trans['RefSerialNo'];?>"/></td>
+            <td width="15%">
+                <div class="on-focus clearfix" style="position:relative;overflow: hidden;">
+                    <div class="docu-spc">
+                        <textarea class="parent_texts" name="spec_<?php echo $i; ?>" id="spec_<?php echo $i; ?>" readonly><?php echo $trans['Specification'];?></textarea>
+                        <label>Short Spec</label>
+                        <textarea class="parent_texts" name="shortspec_<?php echo $i; ?>" id="shortspec_<?php echo $i; ?>" readonly><?php echo $trans['ShortSpec'];?></textarea>
+                    </div>
+                </div>
+            </td>
+            <td width="5%"><input type="text" class="parent_text" name="unitid_<?php echo $i; ?>" id="unitid_<?php echo $i; ?>" value="<?php echo $trans['UnitName'];?>" readonly></td>
+            <td width="5%"><input class="parent_text text-right" type="text" maxlength="15" name="rate_<?php echo $i; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'],2,true);?>" id="rate_<?php echo $i; ?>" onblur="return FormatNum(this, 2,true)"  onfocus="return clickbut(this.id)" onkeypress="return isDecimal(event,this)" readonly /></td>
+            <input type="hidden" name="iowid_<?php echo $i; ?>" id="iowid_<?php echo $i; ?>" value = "<?php echo $rfctransid;?>">
+            <input type="hidden" name="unitkeyid_<?php echo $i; ?>" id="unitkeyid_<?php echo $i; ?>" value = "<?php echo $trans['UnitId'];?>">
+            <input type="hidden" name="parentkeyid_<?php echo $i; ?>" id="parentkeyid_<?php echo $i; ?>" value = "<?php echo $trans['WorkGroupId'];?>">
+            <input type="hidden" name="rowrefid_<?php echo $i; ?>" id="rowrefid_<?php echo $i; ?>" value = "<?php echo $i;?>">
+            <input type="hidden" name="headerrow_<?php echo $i; ?>" id="headerrow_<?php echo $i; ?>" value = "0">
+            <input type="hidden" name="sortid_<?php echo $i; ?>" id="sortid_<?php echo $i; ?>" value = "<?php echo $i; ?>">
+            <input type="hidden" name="newworkgroupname_<?php echo $i; ?>" id="newworkgroupname_<?php echo $i; ?>" value = "<?php echo $trans['WorkGroupName']; ?>">
+            <input type="hidden" name="worktypeid_<?php echo $i; ?>" id="worktypeid_<?php echo $i; ?>" value = "<?php echo $trans['WorkTypeId'];?>">
+            <!--<td width="3%"><a href="#" class="mainTrDelete_<?php echo $i; ?>" style="margin-right: 10px;"><i class="fa fa-trash ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a> <a href="#" class="mainTr_<?php echo $i; ?>"><i class="fa fa-chevron-circle-down ctls" data-toggle="tooltip" data-placement="top" data-original-title="Expand" ></i></a></td>-->
+            <td width="4%" class="action_btns_td">
+                <ul class="action_btns">
+                    <li>
+                        <a href="#" class="mainTr_<?php echo $i; ?>">
+                            <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                        </a>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <!--expand table-->
+        <tr style="display:none;" class="subTr_<?php echo $i; ?> paintTr">
+        <td colspan="9"><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:350px;">
+        <div class="col-lg-12">
+            <!-- Nav tabs -->
+            <div  <?php echo $trans['ConcreteMix']==0 ? 'style="display:none;"' : ''; ?>  class="darkmenu" id="mixtab_<?php echo $i; ?>">
+                <ul>
+                    <li class="active"><a href="#" name="analtype_<?php echo $i; ?>" class="ripple" id="analtype_<?php echo $i; ?>" onclick="showmix('sitemix',this.id,event)"><span><i class="fa fa-caret-right"></i></span> Sitemix</a></li>
+                    <li><a href="#" name="analtypeR_<?php echo $i; ?>" class="ripple" id="analtypeR_<?php echo $i; ?>" onclick="showmix('readymix',this.id,event)"><span><i class="fa fa-caret-right"></i></span> Readymix</a></li>
+                </ul>
+                <div class="manual_seletc">
+                    <label>Rate Type</label>
+                    <div class="select-style select-inline">
+                        <select name="ratetype_<?php echo $i; ?>" id ="ratetype_<?php echo $i; ?>" readonly>
+                            <option value="">Default Rate Type</option>
+                            <option value="S" <?php echo ($trans['MixType'] == 'S') ? 'selected' : '';?>>SiteMix</option>
+                            <option value="R" <?php echo ($trans['MixType'] == 'R') ? 'selected' : '';?>>ReadyMix</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab panes
+            <div class="col-lg-12">
+                <span class="butclr btn-file" id="copyformat_<?php echo $i;?>" onclick="refreshFromWorkGroup(this.id)" style="margin: 10px 0 0 0;> <i class="fa fa-folder-open sap"></i>
+                <p class="sam-up" >From WorkGroup</p>
+                </span>
+            </div> -->
+            <div class="lstate">
+                <ul  id="raworktable_<?php echo $i;?>">
+                    <li>
+                        <label class="lbl_style">Working Qty</label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_AnalQty" id="rateanal_<?php echo $i; ?>_AnalQty" title="Working Qty" value="<?php if (isset($trans['WorkingQty'])) echo $this->commonHelper()->sanitizeNumber($trans['WorkingQty'],3); else echo 1; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                    </li>
+                    <li <?php echo $trans['Cement']==0 ? 'style="display:none;"' : ''; ?> id="rateanal_<?php echo $i; ?>AQty_li">
+                        <label>Cement<span align="center" class="wrktype_label_span">(C)</span></label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_AQty" id="rateanal_<?php echo $i; ?>_AQty" title="Cement (C)" value="<?php if (isset($trans['CementRatio'])) echo $this->commonHelper()->sanitizeNumber($trans['CementRatio'],3); else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                    </li>
+                    <li <?php echo $trans['Sand']==0 ? 'style="display:none;"' : ''; ?> id="rateanal_<?php echo $i; ?>BQty_li">
+                        <label>Sand<span align="center" class="wrktype_label_span">(S)</span></label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_BQty" id="rateanal_<?php echo $i; ?>_BQty" title="Sand (S)" value="<?php if (isset($trans['SandRatio'])) echo $this->commonHelper()->sanitizeNumber($trans['SandRatio'],3); else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"  readonly/>
+                    </li>
+                    <li <?php echo $trans['Metal']==0 ? 'style="display:none;"' : ''; ?> id="rateanal_<?php echo $i; ?>CQty_li">
+                        <label>Aggregate<span align="center" class="wrktype_label_span">(A)</span></label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_CQty" id="rateanal_<?php echo $i; ?>_CQty" title="Aggregate (A)" value="<?php if (isset($trans['MetalRatio'])) echo $this->commonHelper()->sanitizeNumber($trans['MetalRatio'],3); else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                    </li>
+                    <li <?php echo $trans['Thickness']==0 ? 'style="display:none;"' : ''; ?> id="rateanal_<?php echo $i; ?>thick_li">
+                        <label>Thickness (mm)<span align="center" class="wrktype_label_span">(T)</span></label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanal_<?php echo $i; ?>_thick" id="rateanal_<?php echo $i; ?>_thick" title="Thickness (mm) (T)" value="<?php if (isset($trans['ThickQty'])) echo $this->commonHelper()->sanitizeNumber($trans['ThickQty'],3); else echo ''; ?>" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                    </li>
+                    <!--            <li>-->
+                    <!--                <a href="javascript:void(0);" data-original-title="From WorkGroup" data-placement="left" data-toggle="tooltip" class="from_work_btn" id="copyformat_--><?php //echo $i;?><!--" onclick="refreshFromWorkGroup(this.id)" ><i class="fa fa-window-restore" aria-hidden="true"></i></a>-->
+                    <!--            </li>-->
+                </ul>
+                <ul  style="display: none;" id="raworkRtable_<?php echo $i;?>">
+                    <li>
+                        <label class="lbl_style">Working Qty</label>
+                        <input type="text" class="col-lg-2 parent_texters text-right" maxlength="15" name="rateanalR_<?php echo $i; ?>_AnalQty" id="rateanalR_<?php echo $i; ?>_AnalQty" title="Working Qty" value="<?php if (isset($trans['RWorkingQty'])) echo $this->commonHelper()->sanitizeNumber($trans['RWorkingQty'],3); else echo 1; ?>" onkeypress="return isDecimal(event,this)" readonly/>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12">
+        <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+        <!-- Sitemix tabs -->
+        <table class="table" style="margin-bottom:0px;" id="rateanal_<?php echo $i; ?>_restable">
+            <thead>
+            <tr>
+                <th class="bg_clo">Inc/Exc</th>
+                <th class="bg_clo">RefNo</th>
+                <th class="bg_clo">Resource</th>
+                <th class="bg_clo">Coefficient</th>
+                <th class="bg_clo">Unit</th>
+                <th class="bg_clo text-right">Rate</th>
+                <th class="bg_clo text-right">Amount</th>
+                <th class="bg_clo text-center">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=1; $total=0; $wastetotal=0;$iRefId=1;$weightagetotal=0;
+            foreach($rfcrateanal as $ratrans):
+                if($ratrans['MixType'] != 'S' || $ratrans['RFCTransId'] != $trans['RFCTransId'])
+                    continue;
+                ?>
+                <tr id="rateanal_<?php echo $i; ?>_RowId_<?php echo $j; ?>" <?php if($ratrans['TransType'] == 'H') { echo 'class="row_header"'; } ?>>
+                    <?php if($ratrans['TransType'] == 'H'):?>
+                        <td colspan="7">
+                            <input type="text" class="parent_text"  style="font-weight:bold" name="rateanal_<?php echo $i; ?>_resdes_<?php echo $j ?>" id="rateanal_<?php echo $i; ?>_resdes_<?php echo $j ?>" value="<?php echo $ratrans['Description'];?>" readonly>
+                        </td>
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_rowrefid_<?php echo $j ?>" id="rateanal_<?php echo $i; ?>_rowrefid_<?php echo $j ?>" value="<?php echo $j;?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_type_<?php echo $j; ?>" value="<?php echo $ratrans['TransType'] ?>" id="rateanal_<?php echo $i; ?>_type_<?php echo $j; ?>">
+                        <!--                        <input type="hidden" name="rateanal_--><?php //echo $i; ?><!--_refid_--><?php //echo $j; ?><!--" value = "--><?php //echo $ratrans['ReferenceId']; ?><!--" id="rateanal_--><?php //echo $i; ?><!--_refid_--><?php //echo $j; ?><!--">-->
+                        <td width="4%" class="action_btns_td">
+                            <!--                    <ul class="action_btns">-->
+                            <!--                        <li>-->
+                            <!--                            <a href="#" name="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" id="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" onclick="javascript:DeleteResource(this.id, event)">-->
+                            <!--                                <span data-original-title="Delete" data-placement="left" data-toggle="tooltip"><i class="fa fa-trash-o"></i></span>-->
+                            <!--                            </a>-->
+                            <!--                        </li>-->
+                            <!--                    </ul>-->
+                        </td>
+                    <?php else: ?>
+                        <td width="1%"><label>
+                                <input type="checkbox" name="rateanal_<?php echo $i; ?>_inc_<?php echo $j; ?>" value ="<?php echo ($ratrans['IncludeFlag']==1) ? true : false; ?>" id="rateanal_<?php echo $i; ?>_inc_<?php echo $j; ?>" class="ios_checkbox inc_exc" onchange="return ValueChange(this.id)" <?php echo ($ratrans['IncludeFlag'] == '1') ? 'checked' : '';?> readonly/>
+                                <div class="ios_switch"><span></span></div>
+                            </label></td>
+                        <td width="3%"><label for ="rateanal_<?php echo $i; ?>_ref_<?php echo $j; ?>" > R<?php echo $ratrans['ReferenceId']; ?></label></td>
+                        <td width="15%">
+                            <input class="parent_text" data-toggle="popover" name="rateanal_<?php echo $i; ?>_resid_<?php echo $j; ?>" value="<?php if($ratrans['SubIOWId']!=0) {echo $ratrans['SerialNo'] . ' ' .$ratrans['Specification'];}else {echo $ratrans['Code'] . ' ' .$ratrans['ResourceName'];}?>" id="rateanal_<?php echo $i; ?>_resid_<?php echo $j; ?>" disabled/>
+                            <label class="lab-Wastage" id="rateanal_<?php echo $i; ?>_lblWastage_<?php echo $j; ?>" style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>">Wastage %</label>
+                            <label class="lab-Wastage" id="rateanal_<?php echo $i; ?>_lblWeightage_<?php echo $j; ?>" style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>">Weightage %</label>
+                        </td>
+                        <td width="3%">
+                            <input class="parent_text text-right" type="text" maxlength="15" name="rateanal_<?php echo $i; ?>_resqty_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Qty'],3,true,true);?>" id="rateanal_<?php echo $i; ?>_resqty_<?php echo $j; ?>" align="right" onfocus="return showformula(this.id)" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" readonly/>
+                            <div class="short-spic">
+                                <input style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>" maxlength="15" class="parent_text text-right" type="text" name="rateanal_<?php echo $i; ?>_Wastage_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Wastage'],2)?>" id="rateanal_<?php echo $i; ?>_Wastage_<?php echo $j; ?>"  <?php echo ($ratrans['TypeId']!=2) ? 'readonly' : ''; ?> onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"  readonly/>
+                                <input style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>" maxlength="15" class="parent_text text-right" type="text" name="rateanal_<?php echo $i; ?>_Weightage_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Weightage'],2)?>" id="rateanal_<?php echo $i; ?>_Weightage_<?php echo $j; ?>" <?php echo ($ratrans['TypeId']!=4) ? 'readonly' : ''; ?> onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                            </div>
+                        </td>
+                        <td width="5%"><label for ="rateanal_<?php echo $i; ?>_resunit_<?php echo $j; ?>" ><?php if($ratrans['SubIOWId']!=0) { echo $ratrans['IOWUnitName'];} else { echo $ratrans['UnitName'];}?></label></td>
+                        <td width="8%"><input class="parent_text text-right" type="text" maxlength="15" name="rateanal_<?php echo $i; ?>_resrate_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Rate'],2,true) ?>" id="rateanal_<?php echo $i;?>_resrate_<?php echo $j; ?>" onfocus="return showAnalysis(this.id)" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2,true)" readonly/></td>
+                        <td width="10%"><input class="parent_text text-right" type="text" maxlength="15" name="rateanal_<?php echo $i; ?>_resamt_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Amount'],2,true) ?>" id="rateanal_<?php echo $i; ?>_resamt_<?php echo $j; ?>" readonly onkeypress="return isDecimal(event,this)"/></td>
+                        <!--                                    <td width="4%"><a href="#" name="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" id="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" onclick="javascript:DeleteResource(this.id, event)"><i class="fa fa-trash-o ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a></td>-->
+                        <td width="4%" class="action_btns_td">
+                            <!--                    <ul class="action_btns">-->
+                            <!--                        <li>-->
+                            <!--                            <a href="#" name="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" id="rateanal_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" onclick="javascript:DeleteResource(this.id, event)">-->
+                            <!--                                <span data-original-title="Delete" data-placement="left" data-toggle="tooltip"><i class="fa fa-trash-o"></i></span>-->
+                            <!--                            </a>-->
+                            <!--                        </li>-->
+                            <!--                    </ul>-->
+                        </td>
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_WastageQty_<?php echo $j; ?>" id="rateanal_<?php echo $i; ?>_WastageQty_<?php echo $j; ?>" value="<?php echo $ratrans['WastageQty'] ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_WastageAmount_<?php echo $j; ?>" id="rateanal_<?php echo $i; ?>_WastageAmount_<?php echo $j; ?>" value="<?php echo $ratrans['WastageAmount'] ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_reskeyid_<?php echo $j; ?>" id="rateanal_<?php echo $i; ?>_reskeyid_<?php echo $j; ?>" value="<?php echo $ratrans['ResourceId'] ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_iowkeyid_<?php echo $j; ?>" id="rateanal_<?php echo $i; ?>_iowkeyid_<?php echo $j; ?>" value="<?php echo $ratrans['SubIOWId'] ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_formula_<?php echo $j; ?>" value = "<?php echo $ratrans['Formula'] ?>" id="rateanal_<?php echo $i; ?>_formula_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="rateanal_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_type_<?php echo $j; ?>" value="<?php echo $ratrans['TransType'] ?>" id="rateanal_<?php echo $i; ?>_type_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_refid_<?php echo $j; ?>" value = "<?php echo $ratrans['ReferenceId']; ?>" id="rateanal_<?php echo $i; ?>_refid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_restypeid_<?php echo $j; ?>" value="<?php echo $ratrans['TypeId'] ?>" id="rateanal_<?php echo $i; ?>_restypeid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_ratetype_<?php echo $j; ?>" value = "<?php echo $ratrans['RateType'] ?>" id="rateanal_<?php echo $i; ?>_ratetype_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanal_<?php echo $i; ?>_newresname_<?php echo $j; ?>" value = "<?php echo $ratrans['ResourceName'] ?>" id="rateanal_<?php echo $i; ?>_newresname_<?php echo $j; ?>">
+                    <?php endif; ?>
+                </tr>
+                <?php $j=$j+1; $total +=  $ratrans['Amount']; $wastetotal +=  $ratrans['WastageAmount']; $weightagetotal +=  $ratrans['Weightage']; if(intval($ratrans['ReferenceId']) >= $iRefId) {$iRefId = intval($ratrans['ReferenceId'])+1; }
+            endforeach;?>
+            </tbody>
+            <tbody class="total" style="border: none;">
+            <tr style="border-bottom:none;">
+                <td colspan="3" class="rate_pri text-right" >Total Weightage %</td>
+                <td><input type="text" class="parent_text total-clr text-right" id="rateanal_<?php echo $i; ?>_totweightage" value="<?php echo $this->commonHelper()->sanitizeNumber($weightagetotal,2,true); ?>" readonly/></td>
+                <td>&nbsp;</td>
+                <td style="border-right:none;none;" align="right" class="rate_pri"><label>Wastage Amount</label></td>
+                <td style="border-right:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanal_<?php echo $i; ?>_totwastage" value = "<?php if (isset($trans['WastageAmt'])) echo $this->commonHelper()->sanitizeNumber($trans['WastageAmt'],2,true); else echo '0.00'; ?>" id="rateanal_<?php echo $i; ?>_totwastage" readonly/></td>
+                <td style="border-right:none;">
+                    <ul class="action_btns">
+                        <li>
+                            <a href="#" class="wasteTr_<?php echo $i; ?>">
+                                <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="display:none;" class="wastemainTr_<?php echo $i; ?>">
+                <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                        <div id="divwaste_<?php echo $i; ?>"></div>
+                </td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Base Rate</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanal_<?php echo $i; ?>_totbaserate" value = "<?php if (isset($trans['BaseRate'])) echo $this->commonHelper()->sanitizeNumber($trans['BaseRate'],2,true); else echo '0.00'; ?>" id="rateanal_<?php echo $i; ?>_totbaserate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Value</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanal_<?php echo $i; ?>_totqualrate" value = "<?php if (isset($trans['QualifierValue'])) echo $this->commonHelper()->sanitizeNumber($trans['QualifierValue'],2,true); else echo '0.00'; ?>" id="rateanal_<?php echo $i; ?>_totqualrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">
+                    <ul class="action_btns">
+                        <li>
+                            <a href="#" class="qualTr_<?php echo $i; ?>">
+                                <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="display:none;" class="qualmainTr_<?php echo $i; ?>">
+                <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                        <?php if (!empty($arrqual)) { $textHtml =  $arrqual[$rfctransid] ; $textHtml = str_replace('__1','_'.$i,$textHtml); } else { $textHtml=''; }  echo $textHtml;?>
+                </td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanal_<?php echo $i; ?>_lbltotrate">Rate for</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanal_<?php echo $i; ?>_totrate" value = "<?php if (isset($trans['TotalRate'])) echo $this->commonHelper()->sanitizeNumber($trans['TotalRate'],2,true); else echo '0.00'; ?>" id="rateanal_<?php echo $i; ?>_totrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanal_<?php echo $i; ?>_lbltotnetrate">Net Rate per</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanal_<?php echo $i; ?>_totnetrate" value = "<?php if (isset($trans['NetRate'])) echo $this->commonHelper()->sanitizeNumber($trans['NetRate'],2,true); else echo '0.00'; ?>" id="rateanal_<?php echo $i; ?>_totnetrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="rowinfoid_<?php echo $i; ?>" id="rowinfoid_<?php echo $i; ?>" value="<?php echo $j; ?>">
+        <!-- Readymix tabs -->
+        <table class="table" style="display: none;margin-bottom:0px;" id="rateanalR_<?php echo $i; ?>_restable">
+            <thead>
+            <tr>
+                <th class="bg_clo">Inc/Exc</th>
+                <th class="bg_clo">RefNo</th>
+                <th class="bg_clo">Resource</th>
+                <th class="bg_clo">Coefficient</th>
+                <th class="bg_clo">Unit</th>
+                <th class="bg_clo text-right">Rate</th>
+                <th class="bg_clo text-right">Amount</th>
+                <th class="bg_clo text-center">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody class="sorting">
+            <?php $j=1; $total=0; $wastetotal=0;$iRefId=1; $weightagetotal=0;
+            foreach($rfcrateanal as $ratrans):
+                if($ratrans['MixType'] != 'R' || $ratrans['RFCTransId'] != $trans['RFCTransId'])
+                    continue;
+                ?>
+                <tr id="rateanalR_<?php echo $i; ?>_RowId_<?php echo $j; ?>" <?php if($ratrans['TransType'] == 'H') { echo 'class="row_header"'; } ?>>
+                    <?php if($ratrans['TransType'] == 'H'):?>
+                        <td colspan="7">
+                            <input type="text" class="parent_text"  style="font-weight:bold" name="rateanalR_<?php echo $i; ?>_resdes_<?php echo $j ?>" id="rateanalR_<?php echo $i; ?>_resdes_<?php echo $j ?>" value="<?php echo $ratrans['Description'];?>" readonly>
+                        </td>
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_rowrefid_<?php echo $j ?>" id="rateanalR_<?php echo $i; ?>_rowrefid_<?php echo $j ?>" value="<?php echo $j;?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_type_<?php echo $j; ?>" value="<?php echo $ratrans['TransType'] ?>" id="rateanalR_<?php echo $i; ?>_type_<?php echo $j; ?>">
+                        <!--                        <input type="hidden" name="rateanalR_--><?php //echo $i; ?><!--_refid_--><?php //echo $j; ?><!--" value = "--><?php //echo $ratrans['ReferenceId']; ?><!--" id="rateanalR_--><?php //echo $i; ?><!--_refid_--><?php //echo $j; ?><!--">-->
+                        <td width="4%" class="action_btns_td">
+                            <!--                    <ul class="action_btns">-->
+                            <!--                        <li>-->
+                            <!--                            <a href="#" name="rateanalR_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" id="rateanalR_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" onclick="javascript:DeleteResourceR(this.id,event)">-->
+                            <!--                                <span data-original-title="Delete" data-placement="left" data-toggle="tooltip"><i class="fa fa-trash-o"></i></span>-->
+                            <!--                            </a>-->
+                            <!--                        </li>-->
+                            <!--                    </ul>-->
+                        </td>
+                    <?php else: ?>
+                        <td width="1%"><label>
+                                <input type="checkbox" name="rateanalR_<?php echo $i; ?>_inc_<?php echo $j; ?>" value = "<?php if ($ratrans['IncludeFlag']==1) true; else false; ?>" id="rateanalR_<?php echo $i; ?>_inc_<?php echo $j; ?>" class="ios_checkbox inc_exc" onchange="return ValueChange(this.id)" <?php echo ($ratrans['IncludeFlag'] == '1') ? 'checked' : '';?> readonly/>
+                                <div class="ios_switch"><span></span></div>
+                            </label></td>
+                        <td width="3%"><label for ="rateanalR_<?php echo $i; ?>_ref_<?php echo $j; ?>" >R<?php echo $ratrans['ReferenceId']; ?></label></td>
+                        <td width="15%">
+                            <input class="parent_text" data-toggle="popover" name="rateanalR_<?php echo $i; ?>_resid_<?php echo $j; ?>" value="<?php if($ratrans['SubIOWId']!=0) {echo $ratrans['SerialNo'] . ' ' .$ratrans['Specification'];}else {echo $ratrans['Code'] . ' ' .$ratrans['ResourceName'];}?>" id="rateanalR_<?php echo $i; ?>_resid_<?php echo $j; ?>" disabled/>
+                            <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>" id="rateanalR_<?php echo $i; ?>_lblWastage_<?php echo $j; ?>">Wastage %</label>
+                            <label class="lab-Wastage" style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>" id="rateanalR_<?php echo $i; ?>_lblWeightage_<?php echo $j; ?>">Weightage %</label>
+                        </td>
+                        <td width="3%">
+                            <input class="parent_text text-right" type="text" maxlength="15" name="rateanalR_<?php echo $i; ?>_resqty_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Qty'],3)?>" id="rateanalR_<?php echo $i; ?>_resqty_<?php echo $j; ?>" onblur="return FormatNum(this, 3)" onfocus="return showformulaR(this.id)" onkeypress="return isDecimal(event,this)" onkeydown="return showFR(this.id,event)" readonly/>
+                            <div class="short-spic">
+                                <input style="<?php if ($ratrans['TypeId'] !=2) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" maxlength="15" type="text" name="rateanalR_<?php echo $i; ?>_Wastage_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Wastage'],3)?>" id="rateanalR_<?php echo $i; ?>_Wastage_<?php echo $j; ?>"  <?php echo ($ratrans['TypeId']!=2) ? 'readonly' : ''; ?> onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)"  readonly/>
+                                <input style="<?php if ($ratrans['TypeId'] !=4) { echo 'display: none'; } else  { echo ''; } ?>" class="parent_text text-right" maxlength="15" type="text" name="rateanalR_<?php echo $i; ?>_Weightage_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Weightage'],3)?>" id="rateanalR_<?php echo $i; ?>_Weightage_<?php echo $j; ?>"  <?php echo ($ratrans['TypeId']!=4) ? 'readonly' : ''; ?> onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" readonly/>
+                            </div>
+                        </td>
+                        <td width="5%"><label for ="rateanalR_<?php echo $i; ?>_resunit_<?php echo $j; ?>" ><?php if($ratrans['SubIOWId']!=0) { echo $ratrans['IOWUnitName'];} else { echo $ratrans['UnitName'];}?></label></td>
+                        <td width="8%"><input class="parent_text text-right" type="text" maxlength="15" name="rateanalR_<?php echo $i; ?>_resrate_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Rate'],2,true) ?>" id="rateanalR_<?php echo $i;?>_resrate_<?php echo $j; ?>" onfocus="return showAnalysis(this.id,'R')" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" readonly/></td>
+                        <td width="10%"><input class="parent_text text-right" type="text" maxlength="15" name="rateanalR_<?php echo $i; ?>_resamt_<?php echo $j; ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($ratrans['Amount'],2,true) ?>" id="rateanalR_<?php echo $i; ?>_resamt_<?php echo $j; ?>" readonly onkeypress="return isDecimal(event,this)"/></td>
+                        <!--<td width="3%"><a href="#" name="rateanalR_<?php echo $i;?>_resdel_<?php echo $j;?>" id="rateanalR_<?php echo $i;?>_resdel_<?php echo $j;?>" onclick="javascript:DeleteResource(this.id,event)"><i class="fa fa-trash-o ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a></td>-->
+                        <td width="4%" class="action_btns_td">
+                            <ul class="action_btns">
+                                <!--                        <li>-->
+                                <!--                            <a href="#" name="rateanalR_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" id="rateanalR_--><?php //echo $i;?><!--_resdel_--><?php //echo $j;?><!--" onclick="javascript:DeleteResourceR(this.id,event)">-->
+                                <!--                                <span data-original-title="Delete" data-placement="left" data-toggle="tooltip"><i class="fa fa-trash-o"></i></span>-->
+                                <!--                            </a>-->
+                                <!--                        </li>-->
+                            </ul>
+                        </td>
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_WastageQty_<?php echo $j; ?>" id="rateanalR_<?php echo $i; ?>_WastageQty_<?php echo $j; ?>" value="<?php echo $ratrans['WastageQty'] ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_WastageAmount_<?php echo $j; ?>" id="rateanalR_<?php echo $i; ?>_WastageAmount_<?php echo $j; ?>" value="<?php echo $ratrans['WastageAmount'] ?>">
+
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_reskeyid_<?php echo $j; ?>" id="rateanalR_<?php echo $i; ?>_reskeyid_<?php echo $j; ?>" value="<?php echo $ratrans['ResourceId'] ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_iowkeyid_<?php echo $j; ?>" id="rateanalR_<?php echo $i; ?>_iowkeyid_<?php echo $j; ?>" value="<?php echo $ratrans['SubIOWId'] ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_formula_<?php echo $j; ?>" value = "<?php echo $ratrans['Formula'] ?>" id="rateanalR_<?php echo $i; ?>_formula_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="rateanalR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_type_<?php echo $j; ?>" value = "<?php echo $ratrans['TransType']; ?>" id="rateanalR_<?php echo $i; ?>_type_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_refid_<?php echo $j; ?>" value = "<?php echo $ratrans['ReferenceId']; ?>" id="rateanalR_<?php echo $i; ?>_refid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_restypeid_<?php echo $j; ?>" value="<?php echo $ratrans['TypeId'] ?>" id="rateanalR_<?php echo $i; ?>_restypeid_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_ratetype_<?php echo $j; ?>" value = "<?php echo $ratrans['RateType'] ?>" id="rateanalR_<?php echo $i; ?>_ratetype_<?php echo $j; ?>">
+                        <input type="hidden" name="rateanalR_<?php echo $i; ?>_newresname_<?php echo $j; ?>" value = "<?php echo $ratrans['ResourceName'] ?>" id="rateanalR_<?php echo $i; ?>_newresname_<?php echo $j; ?>">
+                    <?php endif; ?>
+                </tr>
+                <?php $j=$j+1; $total +=  $ratrans['Amount'];$wastetotal +=  $ratrans['WastageAmount'];$weightagetotal +=  $ratrans['Weightage']; if(intval($ratrans['ReferenceId']) >= $iRefId) {$iRefId = intval($ratrans['ReferenceId'])+1;}
+            endforeach;?>
+            </tbody>
+            <tbody class="total" style="border: none;">
+            <tr style="border-bottom:none;">
+                <td colspan="3" class="rate_pri text-right" >Total Weightage %</td>
+                <td><input type="text" class="parent_text total-clr text-right" id="rateanalR_<?php echo $i; ?>_totweightage" value="<?php echo $this->commonHelper()->sanitizeNumber($weightagetotal,2,true); ?>" readonly/></td>
+                <td>&nbsp;</td>
+                <td style="border-right:none;none;" align="right" class="rate_pri"><label>Wastage Amount</label></td>
+                <td style="border-right:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanalR_<?php echo $i; ?>_totwastage" value = "<?php if (isset($trans['RWastageAmt'])) echo $this->commonHelper()->sanitizeNumber($trans['RWastageAmt'],2,true); else echo '0.00'; ?>" id="rateanalR_<?php echo $i; ?>_totwastage" readonly/></td>
+                <td style="border-right:none;">
+                    <ul class="action_btns">
+                        <li>
+                            <a href="#" class="wasteRTr_<?php echo $i; ?>">
+                                <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="display:none;" class="wastemainRTr_<?php echo $i; ?>">
+                <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                        <div id="divwasteR_<?php echo $i; ?>"></div>
+                </td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Base Rate</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanalR_<?php echo $i; ?>_totbaserate" value = "<?php if (isset($trans['RBaseRate'])) echo $this->commonHelper()->sanitizeNumber($trans['RBaseRate'],2,true); else echo '0.00'; ?>" id="rateanalR_<?php echo $i; ?>_totbaserate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;none;border-top:none;" align="right" class="rate_pri"><label>Qualifier Value</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanalR_<?php echo $i; ?>_totqualrate" value = "<?php if (isset($trans['RQualifierValue'])) echo $this->commonHelper()->sanitizeNumber($trans['RQualifierValue'],2,true); else echo '0.00'; ?>" id="rateanalR_<?php echo $i; ?>_totqualrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">
+                    <ul class="action_btns">
+                        <li>
+                            <a href="#" class="qualTr_<?php echo $i; ?>">
+                                <span data-original-title="Add lines" data-placement="left" data-toggle="tooltip"><i class="fa fa-chevron-circle-down"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="display:none;" class="qualmainTr_<?php echo $i; ?>">
+                <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;overflow-y:scroll; min-height:100%; max-height:250px;">
+                        <?php if (!empty($arrRqual)) { $textHtml =  $arrRqual[$rfctransid] ; $textHtml = str_replace('__1','_'.$i,$textHtml);} else { $textHtml=''; }  echo $textHtml;?>
+                </td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanalR_<?php echo $i; ?>_lbltotrate">Rate for</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanalR_<?php echo $i; ?>_totrate" value = "<?php if (isset($trans['RTotalRate'])) echo $this->commonHelper()->sanitizeNumber($trans['RTotalRate'],2,true); else echo '0.00'; ?>" id="rateanalR_<?php echo $i; ?>_totrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            <tr style="border-bottom:none;">
+                <td colspan="6" style="border-right:none;border-top:none;" align="right" class="rate_pri"><label id="rateanalR_<?php echo $i; ?>_lbltotnetrate">Net Rate per</label></td>
+                <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="rateanalR_<?php echo $i; ?>_totnetrate" value = "<?php if (isset($trans['RNetRate'])) echo $this->commonHelper()->sanitizeNumber($trans['RNetRate'],2,true); else echo '0.00'; ?>" id="rateanalR_<?php echo $i; ?>_totnetrate" readonly/></td>
+                <td style="border-right:none;border-top:none;">&nbsp;</td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="hidden" name="rowinfoidR_<?php echo $i; ?>" id="rowinfoidR_<?php echo $i; ?>" value="<?php echo $j; ?>">
+        </div>
+        </div>
+        </div>
+        </td>
+        </tr>
+        <!--expand end-->
+    <?php endforeach; endif;?>
+</tbody>
+</table>
+</div>
+<script>
+$(function () {
+    expandTrFn();
+    expandQualTrFn();
+    expandwasteTrFn();
+    expandwbsTrFn();
+    bindQualExpandTr();
+    bindResourceChange();
+    bindPopOver();
+});
+
+function showmix(x,y,event)
+{
+    $('#' + y).parent('li').addClass('active').siblings('li').removeClass('active');
+
+    iFocusRowId = y.split('_')[1];
+    event.preventDefault();
+    if (x=="readymix") {
+        $('#ramixtable_'+iFocusRowId).show();
+        $('#raworktable_'+iFocusRowId).hide();
+        $('#rabuttable_'+iFocusRowId).hide();
+        $('#rateanal_'+ iFocusRowId + '_restable').hide();
+
+
+        $('#raworkRtable_'+iFocusRowId).show();
+        $('#rabutRtable_'+iFocusRowId).show();
+        $('#rateanalR_'+ iFocusRowId + '_restable').show();
+
+        $('#analtypeRS_'+iFocusRowId).prop("checked", false);
+        $('#analtypeSR_'+iFocusRowId).prop("checked", false);
+        $('#analtypeRR_'+iFocusRowId).prop("checked", true);
+
+        bSiteMix=false;
+    } else {
+        $('#raworkRtable_'+iFocusRowId).hide();
+        $('#rabutRtable_'+iFocusRowId).hide();
+        $('#rateanalR_'+ iFocusRowId + '_restable').hide();
+
+        $('#ramixtable_'+iFocusRowId).show();
+        $('#raworktable_'+iFocusRowId).show();
+        $('#rabuttable_'+iFocusRowId).show();
+        $('#rateanal_'+ iFocusRowId + '_restable').show();
+
+        $('#analtypeSR_'+iFocusRowId).prop("checked", false);
+        $('#analtypeRS_'+iFocusRowId).prop("checked", false);
+        $('#analtypeSS_'+iFocusRowId).prop("checked", true);
+    }
+    bSiteMix=true;
+}
+function expandTrFn(reset) {
+    var $mainTRs = $("a[class*=mainTr_]");
+
+    if (typeof reset !== 'undefined' && reset === true)
+        $mainTRs.unbind('click');
+
+    $mainTRs.click(function(e){
+        e.preventDefault();
+
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+
+        if (validateRow(name) == false)
+            return false;
+
+        var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+            $('rateanal_'+ key +'_restable').show();
+
+            iFocusRowId = key;
+            closedetails(name);
+        }
+        else{
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function expandQualTrFn(reset) {
+    var $mainTRs = $("a[class*=qualTr_]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+        if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".qualmainTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closeQualdetails(key);
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function closeQualdetails(key) {
+    var $mainTRs = $("a[class*=qualTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+
+function expandwbsTrFn(reset) {
+    var $mainTRs = $("a[class*=wbsTr_]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+        if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".wbsmainTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closewbsdetails(key);
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function closewbsdetails(key) {
+    var $mainTRs = $("a[class*=wbsTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+
+function expandwasteTrFn(reset) {
+    var $mainTRs = $("a[class*=wasteTr_]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+        if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".wastemainTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+            showWastage(name);
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closewastedtails(key);
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function closewastedtails(key) {
+    var $mainTRs = $("a[class*=wasteTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+
+
+function expandwasteRTrFn(reset) {
+    var $mainTRs = $("a[class*=wasteRTr_]");
+    if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+    $mainTRs.click(function(e){
+        e.preventDefault();
+        var name = $(this)[0].className,
+            key = name.split('_')[1];
+        if (validateRow(name) == false) return false;
+        var $subTr = $(this).closest("tr").nextAll(".wastemainRTr_" + key),
+            $i = $(this).find("i");
+        if(!$subTr.is(":visible")){
+            $subTr.show();
+            $subTr.find(".subDiv").slideDown("slow");
+            $i.removeClass("fa-chevron-circle-down");
+            $i.addClass("fa-chevron-circle-up");
+            showWastage(name);
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+            closewasteRdtails(key);
+        } else {
+            $subTr.find(".subDiv").slideUp("slow");
+            $subTr.slideUp("slow");
+            $i.removeClass("fa-chevron-circle-up");
+            $i.addClass("fa-chevron-circle-down");
+        }
+        return false;
+    });
+}
+
+function closewasteRdtails(key) {
+    var $mainTRs = $("a[class*=wasteRTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this),
+            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+        if($mainTr.length != 0) $mainTr.trigger('click');
+    });
+}
+
+function bindQualExpandTr() {
+    var $mainTr = $(".qualmainExp");
+    $mainTr.unbind('click');
+    $mainTr.click(function (e) {
+        e.preventDefault();
+        if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+            closeQualTr();
+            $(this).closest("tr").next(".qualsubTr").show();
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+        }
+        else {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        }
+    });
+}
+function closeQualTr() {
+    var $mainTr = $(".qualmainExp");
+    $.each($mainTr, function () {
+        $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+        $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+    });
+}
+function bindPopOver() {
+    var $inputs =  $('input[data-toggle="popover"]');
+    $inputs.unbind('popover');
+    $inputs.popover({
+        placement : 'auto left',
+        trigger : 'hover'
+    });
+}
+
+function bindResourceChange() {
+    var $resnames = $('input[id*=_resid_]');
+    $.each($resnames, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1) return;
+        $('#'+ name).attr('data-content', $('#'+ name).val());
+        $this.blur(function () {
+            if (isNullCheck($('#'+ name).val(),'string') =="") $this.removeClass('error')
+            $('#'+ name).attr('data-content', $('#'+ name).val());
+        });
+        $this.change(function () {
+            $('#'+ name).attr('data-content', $('#'+ name).val());
+        });
+    });
+}
+
+function showWBS(x) {
+    var ikey1 = x.split("_")[1];
+//    if ($('.wbsmainTr_' + ikey1).is(':visible'))
+//        return;
+    $('.wbsmainTr_' + ikey1).show();
+}
+
+function clickbut(x) {
+    iARowId = x.split("_")[1];
+    if ($('.subTr_' + iARowId).is(':visible'))
+        return;
+
+    $('.mainTr_' + iARowId).trigger('click');
+}
+
+function validateRow(x) {
+    iFocusRowId = x.split("_")[1];
+    var scurId = "_" + iFocusRowId,
+        sparentId = $('#parentkeyid' + scurId).val(),
+        $sparentId = $('#parentid' + scurId),
+        $sserialno = $('#refserialno' + scurId),
+        sUnit = $('#unitkeyid' + scurId).val();
+
+//    if (sparentId.length==0) {
+//        alert("Parent Not Selected");
+//        $sparentId.focus();
+//        return false;
+    if($sserialno.val().length==0) {
+        alert("Serial No is Empty");
+        $sserialno.focus();
+        return false;
+    } else if(sUnit.length==0 || sUnit==0) {
+        alert("Unit Not Selected");
+        $('#unitid' + scurId).focus();
+        return false;
+    }
+
+    $sparentId.prop('readonly', true);
+    bSiteMix = true;
+    CheckShowDetails();
+    //CalculateFull();
+    return true;
+}
+
+function CheckShowDetails() {
+    if ($('#concrete_' + iFocusRowId).is(':checked') == false)
+        $('#ramixtable'+'_'+iFocusRowId).hide();
+    else
+        $('#ramixtable_'+'_'+iFocusRowId).show();
+}
+
+function closedetails(name) {
+    var $mainTRs = $("a[class*=mainTr_]");
+    $.each($mainTRs, function (i, obj) {
+        var $this = $(this);
+        if (name != $this[0].className) {
+            key = $this[0].className.split('_')[1];
+            var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                $i = $(this).find("i");
+            if ($subTr.is(":visible")) {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("fa-chevron-circle-up");
+                $i.addClass("fa-chevron-circle-down");
+            }
+        }
+    });
+}
+
+//function closedetails(key) {
+//    var $mainTRs = $("a[class*=mainTr_]");
+//
+//    $.each($mainTRs, function (i, obj) {
+//        var $this = $(this),
+//            $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//
+//        if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1)
+//            return;
+//
+//        if($mainTr.length != 0)
+//            $mainTr.trigger('click');
+//    });
+//}
+</script>

@@ -1,0 +1,538 @@
+<style type="text/css">
+    .cst_pre{text-align:center;color:#8724b9;font-size:15px;display:block;margin-bottom:5px;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/bootstrap-datetimepicker.min.css';?>"/>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<form class="form-horizontal" method="post" id="entry-edit">
+    <div class="content_wrapper padlr0 content-all-sub">
+        <div class="container-fluid padlr0">
+            <?php if ( !isset( $err ) ){ ?>
+                <div class="col-lg-12 clear">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="txt_center form_main_h1">Lead Details</h1>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['LeadName']==1) ? 'req_flds' : ''; ?>">
+                                <input type="text" name="LeadName" id="LeadName" tabindex="1" class="form-control lbl_move" data-bsfshare="LeadName" label="Lead Name" value="<?php echo (isset($resultEditVal)) ? $resultEditVal['LeadName'] : ''; ?>"/>
+                                <input type="hidden" name="LeadId" id="LeadId" value="<?php echo (isset($leadId)) ? $leadId : 0; ?>" />
+                                <input type="hidden" name="CallSid" id="CallSid" value="<?php echo (isset($callSid)) ? $callSid : ''; ?>" />
+                                <div class="error_message"><p>enter lead name...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['LeadType']==1) ? 'req_flds' : ''; ?>">
+                                <select name="LeadType" id="LeadType" tabindex="2" data-bsfshare="LeadType" label="Lead Type" class="single_dropdown lbl_move" style="width:100%;" >
+                                    <option value="">Choose Lead Type</option>
+                                    <?php if(isset($resultsLead)) {
+                                        foreach($resultsLead as $type){
+                                            if(isset($resultEditVal)) {?>
+                                                <option <?php echo ($resultEditVal['LeadType']==$type['LeadTypeId'] ) ? 'selected' : ''; ?> value="<?php echo $type['LeadTypeId']; ?>" > <?php echo $type['LeadTypeName']; ?></option>
+                                            <?php } else { ?>
+                                                <option <?php echo (1==$type['LeadTypeId'] ) ? 'selected' : ''; ?> value="<?php echo $type['LeadTypeId']; ?>" > <?php echo $type['LeadTypeName']; ?></option>
+                                            <?php }
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <div class="error_message"><p>please select lead type...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="leaseType" <?php if(isset($resultEditVal) && $resultEditVal['LeadType']==2) { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; }?>>
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                <div class="radio_check">
+                                    <p>
+                                        <input type="radio" name="LeaserType" tabindex="3" id="individual" value="Individual" <?php if(isset($resultEditVal)) { if(trim($resultEditVal['LeaserType'])=="Individual") { echo "checked"; } } else { echo "checked"; } ?> />
+                                        <label for="individual">Individual</label>
+                                    </p>
+                                    <p>
+                                        <input type="radio" name="LeaserType" id="company" tabindex="4" value="Company" <?php if(isset($resultEditVal)) { if(trim($resultEditVal['LeaserType'])=="Company") { echo "checked"; } } ?> />
+                                        <label for="company">Company</label>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['Mobile']==1) ? 'req_flds' : ''; ?>">
+                                <div class="mob_ccode">
+                                    <input type="text" name="CountryCode" tabindex="5"  id="CountryCode" data-bsfshare="Country Code" class="form-control lbl_move mobval" maxlength="6" onKeyPress="return isNumberKey(event)" placeholder="+91" label=""  value="<?php echo (isset($resultEditVal)) ? $resultEditVal['CountryCode'] : '91'; ?>"/>
+                                </div>
+                                <div class="mob_no">
+                                    <input type="text" name="MobileNo" tabindex="6"  id="MobileNo" data-bsfshare="Mobile No" class="form-control lbl_move mobval" maxlength="10" onKeyPress="return isNumberKey(event)" label="Mobile No" value="<?php if(isset($resultEditVal)) { echo $resultEditVal['Mobile']; } else if(isset($to) && trim($to)!="") { echo $to; } else { echo ''; } ?>" onchange="checkData();"/>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="error_message"><p>please enter valid mobile number with country code...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['Email']==1) ? 'req_flds' : ''; ?>">
+                                <input type="text" name="Email" id="Email" tabindex="7" data-bsfshare="Email" class="form-control lbl_move mobval" label="Email" value="<?php echo (isset($resultEditVal)) ? $resultEditVal['Email'] : ''; ?>"/>
+                                <div class="error_message"><p>please enter valid email...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['Campaign']==1) ? 'req_flds' : ''; ?>">
+                                <select name="Campaign" id="Campaign" tabindex="8"  class="single_dropdown lbl_move" style="width:100%;" data-bsfshare="Campaign"  onchange="getProjects($(this).val());" label="Campaign" data-size="5" >
+                                    <option value="">Choose Campaign</option>
+                                    <?php if(isset($campaign)) {
+                                        foreach($campaign as $cam){
+                                            if(isset($resultEditVal)){
+                                                echo "<option ".($resultEditVal['CampaignId']==$cam['Id']? 'selected':'')." value='".$cam['Id']."' >".$cam['Name']."</option>";
+                                            }
+                                            else if(isset($selectCampaign)) {
+                                                echo "<option ".($selectCampaign['Id']==$cam['Id']? 'selected':'')." value='".$cam['Id']."' >".$cam['Name']."</option>";
+
+                                            } else {
+                                                echo "<option value='".$cam['Id']."' >".$cam['Name']."</option>";
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <div class="error_message"><p>please select Campaign...</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['Project']==1) ? 'req_flds' : ''; ?>">
+                                <select name="Project[]" id="Project" tabindex="9"  class="multiple_dropdown lbl_move" style="width:100%;" data-bsfshare="Project"  label="Project Name" data-size="5" multiple >
+                                    <?php if(isset($resultsLeadProjects)) {
+                                        foreach($resultsLeadProjects as $proj){
+                                            if(isset($projectVal) && count($projectVal) >0) { ?>
+                                                <option <?php foreach($projectVal as $ci) { if($ci['ProjectId']==$proj['ProjectId']) { echo "selected"; } } ?> value="<?php echo $proj['ProjectId']; ?>" > <?php echo $proj['ProjectName'];?></option>
+                                            <?php }
+                                            else if(isset($selectProjects) && count($selectProjects)>0) {
+                                                echo "<option ".(((in_array($proj['ProjectId'], $selectProjects)))? 'selected':'')." value='".$proj['ProjectId']."' >".$proj['ProjectName']."</option>";
+
+                                            } else {
+                                                echo "<option value='".$proj['ProjectId']."' >".$proj['ProjectName']."</option>";
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <div class="error_message"><p>please select Project...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <label class="cst_pre">Choose Cost Prefrence</label>
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['CostPreference']==1) ? 'req_flds' : ''; ?>">
+                                <div class="costFrom col-lg-5 col-md-5 col-sm-5 padlr0">
+                                    <select name="costPreferenceFrom" tabindex="10" id="costPreferenceFrom" data-bsfshare="costPreferenceFrom" class="single_dropdown lbl_move" label="From" style="width:100%;" data-size="5" >
+                                        <option value="">From</option>
+                                        <?php if(isset($resultsCost)) {
+                                            foreach($resultsCost as $type){
+                                                if(isset($resultEditVal)){
+                                                    echo "<option ".($this->commonHelper()->sanitizeNumber($resultEditVal['CostPreferenceFrom'],2,true)==$this->commonHelper()->sanitizeNumber($type['CostPreferenceFrom'],2,true)? 'selected':'')." value='".$this->commonHelper()->sanitizeNumber($type['CostPreferenceFrom'],2,true)."' >".$this->commonHelper()->sanitizeNumber($type['CostPreferenceFrom'],2,true)."</option>";
+                                                }
+                                                else{
+                                                    echo "<option value='".$this->commonHelper()->sanitizeNumber($type['CostPreferenceFrom'],2,true)."' >".$this->commonHelper()->sanitizeNumber($type['CostPreferenceFrom'],2,true)."</option>";
+                                                }
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                    <!--                                    <div class="error_message"><p>please select cost preference...</p></div>-->
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 form-group" style="padding-top:5px;">
+                                    <span class="input-group-addon" style="border: 1px solid #cccccc ;"><i class="fa fa-arrows-h" style="font-size:18px !important;"></i></span>
+                                </div>
+                                <div class="costTo col-lg-5 col-md-5 col-sm-5 padlr0">
+                                    <select name="costPreferenceTo" id="costPreferenceTo" tabindex="11"  data-bsfshare="costPreferenceTo" label="To" class="single_dropdown lbl_move" style="width:100%;" data-size="5" >
+                                        <option value="">To</option>
+                                        <?php if(isset($resultsCostT)) {
+                                            foreach($resultsCostT as $type){
+                                                if(isset($resultEditVal)){
+                                                    echo "<option ".($this->commonHelper()->sanitizeNumber($resultEditVal['CostPreferenceTo'],2,true)==$this->commonHelper()->sanitizeNumber($type['CostPreferenceTo'],2,true)? 'selected':'')." value='".$this->commonHelper()->sanitizeNumber($type['CostPreferenceTo'],2,true)."' >".$this->commonHelper()->sanitizeNumber($type['CostPreferenceTo'],2,true)."</option>";
+                                                }
+                                                else{
+                                                    echo "<option value='".$this->commonHelper()->sanitizeNumber($type['CostPreferenceTo'],2,true)."' >".$this->commonHelper()->sanitizeNumber($type['CostPreferenceTo'],2,true)."</option>";
+                                                }
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                    <div class="error_message"><p>please select cost preference...</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['PreferredLocation']==1) ? 'req_flds' : ''; ?>">
+                                <select name="PreCityId[]" id="PreferredLocation" tabindex="12" data-bsfshare="Preferred Location" class="multiple_dropdown_1 lbl_move" multiple="multiple" data-size="5" label="Choose Preferred Location" style="width:100%;">
+                                    <?php if(isset($resultsCity)) {
+                                        foreach($resultsCity as $type){ ?>
+                                            <option <?php if(isset($cityVal)) { foreach($cityVal as $city) { if($city['CityId']==$type['CityId']) { echo "selected"; } } }?> value="<?php echo $type['CityId']; ?>" > <?php echo $type['CityName'];?></option>
+                                        <?php  }
+                                    }
+                                    ?>
+                                </select>
+                                <div class="error_message"><p>please select prefered location...</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['TeleCaller']==1) ? 'req_flds' : ''; ?>">
+                                <select name="TeleCaller" id="TeleCaller" tabindex="13" class="single_dropdown lbl_move" style="width:100%;" data-bsfshare="TeleCaller" label="Tele Caller" data-size="5" >
+                                    <option value="">Executive Name</option>
+                                    <?php if(isset($resultsExecutive)) {
+                                        foreach($resultsExecutive as $type){
+                                            if(isset($resultEditVal)){
+                                                echo "<option ".($resultEditVal['TeleCaller']==$type['UserId']? 'selected':'')." value='".$type['UserId']."' >".$type['EmployeeName']."</option>";
+                                            }
+                                            else if(isset($exeCall)) {
+                                                echo "<option ".($exeCall['UserId']==$type['UserId']? 'selected':'')." value='".$type['UserId']."' >".$type['EmployeeName']."</option>";
+
+                                            } else if(isset($cTeleCaller)) {
+                                                echo "<option ".($cTeleCaller==$type['UserId']? 'selected':'')." value='".$type['UserId']."' >".$type['EmployeeName']."</option>";
+
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                                <div class="error_message"><p>please select TeleCaller name...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if(isset($leadId) && $leadId==0) { ?>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['NextFollowupType']==1) ? 'req_flds' : ''; ?>">
+                                    <select name="NextFollowupType" id="NextFollowupType" class="single_dropdown lbl_move" style="width:100%;" data-size="5" data-bsfshare="Call Type" label="Next Followup Type">
+                                        <option value="">Choose Call Type</option>
+                                        <option value="1">Followup</option>
+                                        <option value="2">Transfer</option>
+                                        <option value="3">Drop</option>
+                                    </select>
+                                    <div class="error_message"><p>please select Next Followup Type...</p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['NextFollowupDate']==1) ? 'req_flds' : ''; ?>">
+                                    <div class="datetimepicker">
+                                        <span class="add-on datetimepicker_icon"><i class="fa fa-calendar"></i></span>
+                                        <input type="text" data-format="dd/MM/yyyy HH:mm:ss PP" name="NextFollowupDate" id="NextFollowupDate" readonly="readonly" data-bsfshare="Next Call Date and Time" class="form-control lbl_move date_time_icon" label="Next Followup Date and Time" />
+                                    </div>
+                                    <div class="error_message"><p>please select Next Followup Date And Time...</p></div>
+                                    <script type="text/javascript">
+                                        $('.date_time_icon').click(function() {
+                                            $('.datetimepicker_icon').trigger('click');
+                                        });
+                                        var dt=new Date();
+                                        $(function() {
+                                            $('.datetimepicker').datetimepicker({
+                                                language: 'en',
+                                                pick12HourFormat: true,
+                                                startDate:dt,
+                                                todayBtn: true
+                                            }).on('changeDate', function() {
+                                                //$('.bootstrap-datetimepicker-widget').hide();
+                                            });
+                                        });
+
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 <?php echo (isset($reqFields) && $reqFields['Remarks']==1) ? 'req_flds' : ''; ?>">
+                                <textarea id="Remarks" name="Remarks" tabindex="14" class="form-control lbl_move" label="Remarks"><?php echo (isset($resultEditVal)) ? $resultEditVal['Remarks'] : ''; ?></textarea>
+                                <div class="error_message"><p>please enter remarks...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div align="center" class="col-lg-12 commargin_top commargin_bottom" id="divsubmit" >
+                            <div class="save_btn" id="savebt"><a href="#" onclick="submitLead(); return false;"><?php echo (isset($leadId) && $leadId>0) ? 'Update' : 'Submit'; ?><i class="ripple"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            <?php } else {?>
+                <h1 data-bsfhead="Error" class="text-center" style="margin-top: 150px;">Error: <?php echo $err; ?></h1>
+            <?php } ?>
+        </div><!-- container-fluid -->
+    </div><!-- content_wrapper -->
+</form>
+<!--PAGE SCRIPTS -->
+<script>
+
+    var tabPressed = false;
+    $(document).keypress(function (e) {
+        // Listening tab button.
+        tabPressed = false;
+        if (e.which == 0) {
+            tabPressed = true;
+        }
+
+    });
+
+    $(document).on('focus', '.select2', function() {
+        var df =$(this);
+        if (tabPressed) {
+            tabPressed = false;
+            df.siblings('select').select2('open');
+        }
+    });
+
+    $(document).keydown(function (e) {
+        var key = e.which;
+        if(key == 13)  {
+            e.preventDefault();
+            submitLead();
+            return false;
+        }
+    });
+
+    $(document).ready(function() {
+        reqFields= <?php echo (isset($reqFields) && !empty($reqFields)) ? json_encode($reqFields) : '[]'; ?>;
+
+        $LeadName=$('#LeadName');
+        $LeadType=$('#LeadType');
+        $CountryCode=$('#CountryCode');
+        $MobileNo=$('#MobileNo');
+        $Email=$('#Email');
+        $costPreferenceFrom=$('#costPreferenceFrom');
+        $costPreferenceTo=$('#costPreferenceTo');
+        $PreferredLocation=$('#PreferredLocation');
+        $TeleCaller=$('#TeleCaller');
+        $Remarks=$('#Remarks');
+        $Campaign=$('#Campaign');
+        $Project=$('#Project');
+        <?php if(isset($leadId) && $leadId==0) { ?>
+        $NextFollowupType=$('#NextFollowupType');
+        $NextFollowupDate=$('#NextFollowupDate');
+        <?php } ?>
+        $(".multiple_dropdown").select2({
+        });
+
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        $(".multiple_dropdown_1").select2({
+            tags: true
+        });
+
+        $LeadType.on('change', function() {
+            var stype = $("#LeadType").val();
+            if(stype==2){
+                $('#leaseType').show();
+            }
+            else{
+                $('#leaseType').hide();
+            }
+        });
+
+        //cost preference onchange//
+        $costPreferenceFrom.on('change',function(){
+            var formData = parseFloat(isNullCheck($costPreferenceFrom.val().replace(/[^0-9\.]+/g,"") ,'number'));
+            var target = 'CostFrom=' + formData;
+            $.ajax({
+                url:getBaseURL()+"telecaller/index/lead",
+                type:"post",
+                data:target,
+                success:function(data,textStatus,jqXHR){
+
+                    $costPreferenceTo.html('');
+                    var toAppend = '<option value=""></option>';
+                    var valu = JSON.parse(data);
+                    $.each(valu,function(i,o){
+                        toAppend += '<option value="'+ sanitizeNumber(o.CostPreferenceTo,2,true)+'">'+sanitizeNumber(o.CostPreferenceTo,2,true)+'</option>';
+
+                    });
+
+                    $costPreferenceTo.append(toAppend);
+                    $costPreferenceTo.select2();
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        });
+
+    });
+
+    function getProjects(cval) {
+        $('#Project').select2("val", "");
+        //$('#Project').trigger('change');
+        $('#Project').html('');
+        var resultsLeadProjects = <?php echo (isset($resultsLeadProjects)) ? json_encode($resultsLeadProjects) : ''?>;
+
+        if(cval!="") {
+            $.ajax({
+                url: getBaseURL() + "telecaller/index/lead",
+                type: "post",
+                data: {'mode': 'project', 'CampaignVal': cval},
+                success: function (data, textStatus, jqXHR) {
+                    var dataLs = JSON.parse(data);
+                    if (dataLs.length>0) {
+                        var bindData='';
+                        $.each(dataLs,function(i,o) {
+                            bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+                        });
+                        $('#Project').html(bindData);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    callback(false);
+                    alert(textStatus + "-----" + errorThrown);
+                }
+            });
+        } else {
+
+            var bindData='';
+            $.each(resultsLeadProjects,function(i,o) {
+                bindData+='<option value="'+ o.ProjectId+'">'+o.ProjectName+'</option>'
+            });
+            $('#Project').html(bindData);
+        }
+    }
+    function checkData() {
+        checkMobile(function (isSuccess) {
+            if (!isSuccess) {
+                return false;
+            }
+        });
+    }
+    function submitLead() {
+        $(".error_message").hide();
+        if($.trim($LeadName.val())=="" && parseInt(reqFields.LeadName)==1) {
+            $LeadName.closest('.form-group').find(".error_message").show();
+            $LeadName.focus();
+            return false;
+        }
+        if(($.trim($LeadType.val())=="" || $.trim($LeadType.val())==null) && parseInt(reqFields.LeadType)==1) {
+            $LeadType.closest('.form-group').find(".error_message").show();
+            $LeadType.focus();
+            return false;
+        }
+        var filter= /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+        if(($.trim($CountryCode.val())=="" || !/^[0-9]{1,6}$/.test($CountryCode.val())) && parseInt(reqFields.Mobile)==1) {
+            $CountryCode.closest('.form-group').find(".error_message").show();
+            $CountryCode.focus();
+            return false;
+        }
+        if(($.trim($MobileNo.val())=="" || !filter.test($MobileNo.val())) && parseInt(reqFields.Mobile)==1) {
+            $MobileNo.closest('.form-group').find(".error_message").show();
+            $MobileNo.focus();
+            return false;
+        }
+        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        if(($.trim($Email.val())=="" || !emailReg.test($Email.val())) && parseInt(reqFields.Email)==1) {
+            $Email.closest('.form-group').find(".error_message").show();
+            $Email.focus();
+            return false;
+        }
+
+        if(($.trim($Campaign.val())=="" || $.trim($Campaign.val())==null) && parseInt(reqFields.Campaign)==1) {
+            $Campaign.closest('.form-group').find(".error_message").show();
+            $Campaign.focus();
+            return false;
+        }
+        if(($.trim($Project.val())=="" || $.trim($Project.val())==null) && parseInt(reqFields.Project)==1) {
+            $Project.closest('.form-group').find(".error_message").show();
+            $Project.focus();
+            return false;
+        }
+        if(($.trim($costPreferenceFrom.val())=="" || $.trim($costPreferenceFrom.val())==null) && parseInt(reqFields.CostPreference)==1) {
+            $costPreferenceFrom.closest('.form-group').find(".error_message").show();
+            $costPreferenceFrom.focus();
+            return false;
+        }
+        if(($.trim($costPreferenceTo.val())=="" || $.trim($costPreferenceTo.val())==null) && parseInt(reqFields.CostPreference)==1) {
+            $costPreferenceTo.closest('.form-group').find(".error_message").show();
+            $costPreferenceTo.focus();
+            return false;
+        }
+        if(($PreferredLocation.val()==null || $PreferredLocation.val().length<=0) && parseInt(reqFields.PreferredLocation)==1) {
+            $PreferredLocation.closest('.form-group').find(".error_message").show();
+            $PreferredLocation.focus();
+            return false;
+        }
+        if(($.trim($TeleCaller.val())=="" || $.trim($TeleCaller.val())==null) && parseInt(reqFields.TeleCaller)==1) {
+            $TeleCaller.closest('.form-group').find(".error_message").show();
+            $TeleCaller.focus();
+            return false;
+        }
+        <?php if(isset($leadId) && $leadId==0) { ?>
+        if(($.trim($NextFollowupType.val())=="" || $.trim($NextFollowupType.val())==null) && parseInt(reqFields.NextFollowupType)==1) {
+            $NextFollowupType.closest('.form-group').find(".error_message").show();
+            $NextFollowupType.focus();
+            return false;
+        }
+
+        if(($.trim($NextFollowupDate.val())=="" || $.trim($NextFollowupDate.val())==null) && parseInt(reqFields.NextFollowupDate)==1) {
+            $NextFollowupDate.closest('.form-group').find(".error_message").show();
+            $NextFollowupDate.focus();
+            return false;
+        }
+        <?php } ?>
+        if(($.trim($Remarks.val())=="" || $.trim($Remarks.val())==null) && parseInt(reqFields.Remarks)==1) {
+            $Remarks.closest('.form-group').find(".error_message").show();
+            $Remarks.focus();
+            return false;
+        }
+        checkMobile(function (isSuccess) {
+            if (isSuccess) {
+                $('#entry-edit').submit();
+            }
+        });
+
+    }
+
+    function checkMobile(callback) {
+        var mobile = $MobileNo.val();
+        if (mobile != "") {
+            $.ajax({
+                url: getBaseURL() + "telecaller/index/lead",
+                type: "post",
+                data: {'mode': 'Mobile', 'mobile': mobile,'LeadId' : $('#LeadId').val()},
+                success: function (data, textStatus, jqXHR) {
+                    var dataLs = JSON.parse(data);
+                    if (dataLs != false) {
+                        var mobile1 = dataLs.Mobile;
+                        var name = dataLs.LeadName;
+                        if (mobile1.length != 0) {
+                            alert(name + " has same mobile number");
+                            $MobileNo.focus();
+                            callback(false);
+                        }
+                    } else {
+                        callback(true);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    callback(false);
+                    alert(textStatus + "-----" + errorThrown);
+                }
+            });
+        }
+
+    }
+</script>

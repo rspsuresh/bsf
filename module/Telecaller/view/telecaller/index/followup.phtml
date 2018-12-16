@@ -1,0 +1,697 @@
+<?php
+$url = $this->serverUrl(true);
+$url = array_pop(explode("/", $url));
+$url1 = array_pop(explode("/", $url));
+?>
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/vertical-timeline.css">
+<!-- vertical timeline css -->
+<script src="<?php echo $this->basePath(); ?>/js/vertical-timeline.js"></script>
+<!-- vertical timeline js-->
+<script src="<?php echo $this->basePath(); ?>/js/modernizr.js"></script>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+
+<style type="text/css">
+    .proname_btn .select2-container{ background-color:#efefef;color:#244996;}
+    .proname_btn .select2-container .select2-selection--single .select2-selection__rendered{padding-top:0px; padding-bottom:5px;}
+    .proname_btn .select2-container--default .select2-selection--single{font-size:26px; line-height:28px;}
+	.mkeflwup_btn{width:170px;float:left;}
+	.rjct_btn{width:160px;float:right;}
+	.mkeflwup_btn a {display: block;font-size: 16px;color: #fff;background-color: #38bd8b;padding: 8px 25px;text-align: center;}
+	.rjct_btn a {display: block;font-size: 16px;color: #fff;background-color: #f57268;padding: 8px 25px;text-align: center;}
+	.rjct_btn a:hover {background-color: #e4493e;}
+	.mkeflwup_btn a:hover {background-color: #2d946d;}
+	.calling_content_inner img {padding: 9% 0% 7% 0% !important;}
+</style>
+
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/bootstrap-datetimepicker.min.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+
+<div class="uploading_area" style="display: none;">
+    <div class="uploading_text"><p id="loadingArea">Uploading Files...</p></div>
+</div>
+
+<form name="followup-details" class="form-horizontal stginner_cnt" method="post">
+    <div>
+        <input type="hidden" name="entryId" id="EntryId" value="<?php echo $responseFollow['EntryId']?>"/>
+        <input type="hidden" name="leadId" id="leadId" value="<?php echo $leadId ; ?>"/>
+        <div class="showDiv" id="Details">
+            <div class="content_wrapper padlr0">
+                <div class="container-fluid padlr0">
+                    <div class="col-lg-12">
+                        <h1 data-bsfhead="Followup Details">Followup Details
+                            <div class="btn-group proname_btn">
+                                <select name="project_filter" id="project_filter" onchange="pFilterSearch($(this).val());" class="form-control single_dropdown" style="width:auto; min-width:150px !important;max-width:200px !important;">
+                                    <?php if(isset($resultsLeadData)) {
+                                        foreach($resultsLeadData as $leadData) { ?>
+                                            <option <?php if(isset($leadId) && $leadId==$leadData['LeadId']) { echo 'selected'; } ?> value="<?php echo $leadData['LeadId']; ?>"><?php echo ucfirst($leadData['LeadName']);?></option>
+                                        <?php }
+                                    } ?>
+                                </select>
+                            </div>
+                        </h1>
+                    </div>
+                    <div class="col-lg-12 flwup_topcnt clear" id="followDetails">
+                        <div class="col-lg-6 col-md-6 col-sm-12 padlr0">
+                            <div class="col-lg-4 flwup_proimg_area">
+                                <div class="flwup_proimg brad_200">
+                                    <?php
+//                                    if( $responseLead['Photo'] != '') {
+//                                        $photo="../".$responseLead['Photo'];
+//                                        ?>
+<!--                                        <img src="--><?php //echo $this->basePath(); ?><!--/--><?php //echo $photo;?><!--" class="brad_200" alt="" title=""/>-->
+<!--                                    --><?php //} else { ?>
+                                        <img src="<?php echo $this->basePath(); ?>/images/avatar.jpg" class="brad_200" alt="" title=""/>
+<!--                                    --><?php //} ?>
+                                </div>
+                                <p class="txt_center" data-bsfshare="Type"><span class="p_label">Type :</span> <?php if(!empty($responseLead['LeadTypeName'])){echo $responseLead['LeadTypeName'];}else{echo"-";}?></p>
+                                <input type="hidden" name="leaserType" id="leaserType" value="<?php if(!empty($responseLead['LeaserType'])){echo $responseLead['LeaserType'];}else{echo"-";}?>"/>
+                                <input type="hidden" name="leadTypeName" id="leadTypeName" value="<?php if(!empty($responseLead['LeadTypeName'])){echo $responseLead['LeadTypeName'];}else{echo"-";}?>"/>
+                                <input type="hidden" name="leadId" id="leadId" value="<?php echo (isset($leadId)) ? $leadId : 0; ?>"/>
+                                <input type="hidden" name="curLeadExe" id="curLeadExe" value="<?php echo (isset($responseLead['TeleCaller'])) ? $responseLead['TeleCaller'] : 0; ?>"/>
+                                <input type="hidden" name="projectId" id="projectId" value="<?php echo (isset($projectId)) ? $projectId : 0; ?>"/>
+                            </div>
+                            <div class="col-lg-8 col-md-12 flwup_procnt">
+                                <h1 data-bsfhead="Lead"><?php if(!empty($responseLead['LeadName'])){echo ucfirst($responseLead['LeadName']);}else{echo"-";}?><br />
+                                    <span><?php if(isset($responseLead) && count($responseLead)>0){ if(date( 'd-m-Y', strtotime(  $responseLead['LeadDate']) )=='01-01-1970'||'01-01-1900'){
+                                            echo '-';
+                                        }
+                                        else{
+                                            echo $responseLead['LeadDate'];
+                                        }}?>
+                                   </span>
+
+                                </h1>
+                                <p data-bsfshare="Executive Name"><span class="p_label">Executive Name :</span> <?php if(!empty($responseLead['UserName'])){echo $responseLead['UserName'];}else{echo"-";}?></p>
+                                <ul>
+<!--                                    <li><a href="javascript:void(0);" class="fullDetails" data-index="--><?php //echo $responseLead['LeadId'];?><!--"><span><i class="fa fa-search-plus"></i></span> View Details</a></li>-->
+                                    <li><a href="javascript:void(0);" class="editId" data-index="<?php echo $responseLead['LeadId'];?>"><span><i class="fa fa-edit"></i></span> View History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 flwup_rightcnt">
+                            <h2 data-bsfhead="Contact Details">Contact Details
+                                <div class="stgedit_btn h2_circle brad_50"><span><i class="fa fa-book"></i></span></div>
+                            </h2>
+                            <div class="clr_bbdr"></div>
+                            <div class="flwup_rightcnt_inner">
+                                <ul class="flwup_rcnt_inrdetail">
+                                    <li><a href="javascript:void(0);" onclick="callModal('<?php echo $responseLead['Mobile']; ?>');" style="color:#3f4c5e;">+91<span data-bsfshare="Mobile" class="flwup_rcnt_num"><?php if(!empty($responseLead['Mobile'])){echo $responseLead['Mobile'];}else{echo"-";}?></span><span class="inner_ricon inr_ri_mt7 float_r"><i class="fa fa-phone"></i></span></a></li>
+                                    <li onclick="return getMail('<?php echo $responseLead['Email'];?>');"><span class="flwup_rcnt_mail" id="flwup_mail"> </span><?php if(!empty($responseLead['Email'])){echo $responseLead['Email'];}else{echo"-";}?><a href="javascript:void(0);" ><span class="inner_ricon float_r"><i class="fa fa-envelope"></i></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-sm-6 flwup_rightcnt">
+                            <h2 data-bsfhead="Projects">Projects
+                                <div class="stgedit_btn h2_circle brad_50"><span><i class="fa fa-briefcase"></i></span></div>
+                            </h2>
+                            <div class="clr_bbdr"></div>
+                            <div class="flwup_rightcnt_inner">
+                                <?php if(!empty($resultMultiProject) > 0){?>
+                                    <ul class="flwup_rcnt_inrproject">
+                                        <?php
+                                        foreach($resultMultiProject as $resuCC){?>
+                                            <li class="white_inner">
+                                                <span class="pad_t3"><?php echo ucfirst($resuCC['ProjectName']['0']);?></span><p><?php echo $resuCC['ProjectName'];?></p>
+                                            </li>
+                                        <?php }	?>
+                                    </ul>
+                                <?php }else{echo'-';}?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right_lightbox">
+                        <div class="right_lightbox compose_rightbox">
+                            <div class="right_lightbox_close">
+                                <span class="right_lightbox_closeicon"><i class="fa fa-times"></i></span>
+                            </div>
+                            <div class="right_lbox_inner lead_register_rbox" id="lead_short_detail"></div>
+                        </div>
+                    </div>
+                    <div id="back-top" data-toggle="tooltip" data-placement="left" title="Lift Top"><a href="#top"><i class="fa fa fa-arrow-up"></i></a></div>
+                    <div class="col-lg-12 clear">
+                        <div class="col-lg-6 m_tb10">
+                            <div class="col-lg-8 col-lg-offset-2">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text"  name="leadDate" id="LeadDate" readonly="readonly" class="form-control lbl_move datepickerlead" data-bsfshare="Lead Date" value="<?php  echo (isset($CallDate)) ?   $CallDate : date('d-m-Y');?>" label="Date" />
+                                            <!--<div class="error_message"><p>please enter date...</p></div>-->
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <select data-bsfshare="CallType" name="callType" id="callTypeId" class="single_dropdown2 lbl_move" style="width:100%;" data-size="5" data-bsfshare="Call Type" label="Call Type">
+                                                <option value="">Choose Call Type</option>
+<!--                                                --><?php
+//
+//                                                foreach($resultsCall as $type){ ?>
+                                                     <option value="1">Followup</option>
+                                                     <option value="2">Transfer</option>
+                                                     <option value="3">Drop</option>
+<!--                                                --><?php //} ?>
+                                            </select>
+                                            <div class="error_message"><p>please select call type...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <select data-bsfshare="Projects_name" name="Projects_name[]" id="Projects_name" class="multiple_dropdown lbl_move" style="width:100%;" data-size="5" data-bsfshare="Projects_name" label="Project Name" multiple>
+                                                <?php
+                                                if(isset($resultMultiProject)) {
+                                                    $pId=array();
+                                                    foreach ($resultMultiProject as $fl) {
+                                                        array_push($pId,$fl['ProjectId']);
+                                                    }
+                                                }
+                                                foreach($resultsLeadProjects as $type){ ?>
+
+                                                    <option <?php echo (isset($pId) && in_array($type['ProjectId'],$pId) ==1) ? 'selected' :''; ?> value="<?php echo $type['ProjectId'] ?>"><?php echo $type['ProjectName'] ?></option>
+
+                                                <?php } ?>
+                                            </select>
+                                            <div class="error_message"><p>please select Project Name...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <select data-bsfshare="StatusId" name="statusId" id="StatusId" class="single_dropdown2 lbl_move" style="width:100%;" data-size="5" data-bsfshare="Status" label="Status">
+                                                <option value="">Choose Status</option>
+                                                <?php
+                                                foreach($resultsStatus as $type){ ?>
+                                                    <option value="<?php echo $type['StatusId'] ?>"><?php echo $type['Description'] ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="error_message"><p>please select status...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <select data-bsfshare="NatureId" name="natureId" id="natureId" class="single_dropdown2 lbl_move" data-bsfshare="Nature" style="width:100%;" data-size="5" label="Nature">
+                                                <option value="">Choose Nature</option>
+                                                <?php
+                                                foreach($resultsNature as $type){ ?>
+                                                    <option value="<?php echo $type['NatureId'] ?>" ><?php echo $type['Description'] ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="error_message"><p>please select Nature...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <div class="datetimepicker">
+                                                <span class="add-on datetimepicker_icon"><i class="fa fa-calendar"></i></span>
+                                                <input type="text" data-format="dd/MM/yyyy HH:mm:ss PP" name="nextCallDate" id="nextCallDate" readonly="readonly" data-bsfshare="Next Call Date and Time" class="form-control lbl_move date_time_icon" label="Next Followup Date and Time" />
+                                            </div>
+                                            <style type="text/css">
+                                                /*---------------DateTimePicker-------------*/
+
+                                            </style>
+                                            <script type="text/javascript">
+
+
+                                                $('.date_time_icon').click(function() {
+                                                    $('.datetimepicker_icon').trigger('click');
+                                                });
+                                                var dt=new Date();
+                                                $(function() {
+                                                    $('.datetimepicker').datetimepicker({
+                                                        language: 'en',
+                                                        pick12HourFormat: true,
+                                                        startDate:dt,
+                                                        todayBtn: true
+                                                    }).on('changeDate', function() {
+                                                        //$('.bootstrap-datetimepicker-widget').hide();
+                                                    });
+                                                });
+
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="caller_sid" id="caller_sid" value="<?php echo (isset($callSid)) ? $callSid : ''?>" />
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <select data-bsfshare="NextFollowUpTypeId" name="nextFollowUpTypeId" id="FollowUp" class="single_dropdown2 lbl_move" style="width:100%;" data-bsfshare="Next FollowUp Type" data-size="5" label="Next Followup Type">
+                                                <option value="">Choose Next Followup Type</option>
+                                                    <option value="1">Followup</option>
+                                                    <option value="2">Transfer</option>
+                                                    <option value="3">Drop</option>
+                                            </select>
+                                            <div class="error_message"><p>please select next followup type...</p></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <textarea data-bsfshare="NextFollowRemarks" name="nextfollowremarks" id="nextfollowremarks" style="width:100%;" class="form-control lbl_move" data-bsfshare="Next Followup Remarks" label="Next Followup Remarks"></textarea>
+                                            <div class="error_message"><p>please enter some remarks...</p></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group drophide">
+                                        <div class="col-lg-12">
+                                            <select name="actionRequiredBy" id="ActionRequiredBy" style="width:100%;" class="single_dropdown2 lbl_move" data-bsfshare="Next Followup Executive" data-size="5" label="Choose Next Followup Executive">
+                                                <option value="">Choose Next Followup Executive</option>
+                                                <?php
+                                                foreach($resultsExecutive as $type){
+                                                    if(count($responseLead)>0){
+                                                        echo "<option ".($responseLead['TeleCaller']==$type['UserId']? 'selected':'')." value='".$type['UserId']."' >".$type['UserName']."</option>";
+                                                    }
+                                                    else{
+                                                        echo "<option value='".$type['UserId']."' >".$type['UserName']."</option>";
+                                                    }
+                                                }
+                                                ?>
+
+                                            </select>
+                                            <div class="error_message"><p>please select executive name...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none;">
+                                        <div class="col-lg-12">
+                                            <select name="transferTo" id="transferTo" style="width:100%;" class="single_dropdown2 lbl_move" data-size="5" label="Transfer To">
+                                                <option value="">Transfer To</option>
+                                                <?php
+                                                foreach($resultsTransUser as $type){
+                                                        echo "<option value='".$type['UserId']."' >".$type['UserName']."</option>";
+                                                }
+                                                ?>
+
+                                            </select>
+                                            <div class="error_message"><p>please select executive name...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <textarea data-bsfshare="Remarks" id="remarks" name="remarks" class="form-control lbl_move" data-bsfshare="Remarks" label="Remarks"></textarea>
+                                            <div class="error_message"><p>please enter some remarks...</p></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 savebtn_area m3_auto no_border">
+                                        <ul>
+
+                                            <li>
+                                                <div class="next-bt">
+                                                    <a  href="<?php echo $this->basePath(); ?>/telecaller/index/followup-entry"  id="back-btn" class="pull-left"><i class="fa fa-times-circle"></i> Close</a>
+                                                    <a id="save-btn" href="javascript:void(0);" class="pull-right continue">Proceed <i class="fa fa-chevron-circle-right"></i></a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 m_tb10">
+                            <div class="form-group">
+                                <div class="col-lg-12">
+                                    <div class="stginner_h5">
+                                        <h5 data-bsfhead="Last Followup Details">Last Followup Details
+                                            <?php if(isset($responseFollow) && $responseFollow!="") { ?>
+                                            <div class="stgedit_btn brad_50"><a href="javascript:void(0);" class="ripple personal" data-index="<?php echo $responseFollow['EntryId'];?>"><span><i class="fa fa-pencil"></i></span></a></div>
+                                        <?php } ?>
+                                        </h5>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name" class="col-lg-4 padlr0 col-md-4 txt_left control-label">Executive Name</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0" >
+                                                <p data-bsfshare="UserName" ><?php if(!empty($responseFollow['UserName'])){echo $responseFollow['UserName'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Call Type</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="Call Type"><?php if(!empty($responseFollow['CallTypeId'])){ if($responseFollow['CallTypeId']==1) { echo 'Followup'; } else if($responseFollow['CallTypeId']==2) { echo 'Transfer'; }  else if($responseFollow['CallTypeId']==3) { echo 'Drop'; } else { echo 'Fresh'; }  } else { echo"-"; }?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Status</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="Status"><?php if(!empty($responseFollow['state'])){echo $responseFollow['state'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Nature Type</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="NatureType"><?php if(!empty($responseFollow['Nat'])){echo $responseFollow['Nat'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Followup Date</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="NextCallDate"><?php if(!empty($responseFollow['FollowUpDate'])){echo $responseFollow['FollowUpDate'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Followup Type</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="Followup Type"><?php if(!empty($responseFollow['NextFollowUpTypeId'])){ if($responseFollow['NextFollowUpTypeId']==1) { echo 'Followup'; } else if($responseFollow['NextFollowUpTypeId']==2) { echo 'Transfer'; }  else if($responseFollow['NextFollowUpTypeId']==2) { echo 'Drop'; }  } else { echo"-"; }?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Followup Remarks</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="Followup Remarks"><?php if(!empty($responseFollow['NextFollowupRemarks'])){echo $responseFollow['NextFollowupRemarks'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <label for="first_name"  class="col-lg-4 padlr0 col-md-4 txt_left control-label">Remarks</label>
+                                            <div class="col-lg-7 col-md-7 col-sm-7 padlr0">
+                                                <p data-bsfshare="Remarks"><?php if(!empty($responseFollow['Remarks'])){echo $responseFollow['Remarks'];}else{echo"-";}?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div id="msgBoxSuccess" class="modal fade" role="dialog">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 id="myModalLabel">Success Message</h1>
+            </div>
+            <div class="modal-body modal_body_min_h200">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <div class="success_box animated fadeIn">
+                        <div class="icon icon-success svg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="72px" height="72px">
+                                <g fill="none" stroke="#8EC343" stroke-width="2">
+                                    <circle cx="36" cy="36" r="35" style="stroke-dasharray:240px, 240px; stroke-dashoffset: 480px;"></circle>
+                                    <path d="M17.417,37.778l9.93,9.909l25.444-25.393" style="stroke-dasharray:50px, 50px; stroke-dashoffset: 0px;"></path>
+                                </g>
+                            </svg>
+                        </div>
+                        <h1 class="txt_center animated fadeInDown clear">
+                            Your Mail has been Sent
+                        </h1>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" class="ripple saves_ok" onclick="return closePop();">Ok</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="msgBoxError" class="modal fade" role="dialog">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 id="myModalLabel">Error Message</h1>
+            </div>
+            <div class="modal-body modal_body_min_h200">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <div class="success_box animated fadeIn">
+                        <div class="icon icon-success svg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="72px" height="72px">
+                                <g fill="none" stroke="#8EC343" stroke-width="2">
+                                    <circle cx="36" cy="36" r="35" style="stroke-dasharray:240px, 240px; stroke-dashoffset: 480px;"></circle>
+                                    <path d="M17.417,37.778l9.93,9.909l25.444-25.393" style="stroke-dasharray:50px, 50px; stroke-dashoffset: 0px;"></path>
+                                </g>
+                            </svg>
+                        </div>
+                        <h1 class="txt_center animated fadeInDown clear">
+                            Failed to Send Mail
+                        </h1>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" class="ripple saves_ok" onclick="return closePop();">Ok</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+
+
+    $('.datepickerlead').datepicker({
+        format: "dd-mm-yyyy",
+        endDate: new Date(),
+        todayBtn: true,
+        autoclose: true
+    });
+//    $('.date_icon').click(function() {
+//        var input = $(this).parent().find('input').datepicker('show');
+//    });
+    });
+    $("#LeadDate").change(function(){
+        var dt=$("#LeadDate").val();
+    });
+
+    var arrFiles = [];
+
+    $(".showDiv").hide();
+    $("#Details").show();
+    $("#LeadId").hide();
+
+    $('#ProjectsId').on('change', function() {
+        //alert("hi");
+        var id = $(this).val();
+        if(id !=-1){
+            $('#LeadId').show();
+        }
+        else{
+            $('#LeadId').hide();
+        }
+    });
+    function pFilterSearch(pId) {
+        if(pId!=0 && pId!="") {
+            $(location).attr('href',"<?php echo $this->basePath(); ?>/telecaller/index/followup/"+pId+"/"+$('#projectId').val());
+        }
+    }
+    $(document).ready(function() {
+        $(document).on('click','.right_lightbox_close',function(e){
+            e.preventDefault();
+            $('.right_lightbox').hide();
+            if ($(window).width() >=980){
+                $('.left-panel').addClass('collapsed');
+                $('.l_menuicon_nav').addClass('cross');
+            }
+        });
+
+        $(".single_dropdown").select2({
+            placeholder: ""
+        });
+    });
+
+    /* Page Validate and others */
+    $(".continue").click(function(){
+        $('.error_message').hide();
+        var ele = $(".showDiv:visible");
+        $(".error").text("");
+        var bool = true;
+        ele.find("input,select,textarea").each(function(){
+            var tagname = $(this).prop("tagName").toLowerCase();
+            if(tagname == 'input'){
+                var type = $(this).attr("type");
+                if(type == 'text'){
+                    if($(this).is(":visible") && $(this).val().trim() == ''){
+                        bool=false;
+                        $(this).closest('.polymer-form').next(".error_message").show();
+                        $(this).focus();
+                        return false;
+                    }
+                }  else if(type == 'radio'){
+                    if($(this).is(":visible") && $(this).val().trim() == ''){
+                        bool=false;
+                        $(this).closest('.polymer-form').next(".error_message").show();
+                        $(this).focus();
+                        return false;
+                    }
+                }
+            } else if(tagname == 'select'){
+                if($(this).is(":visible")){
+                    if ($(this).val() == ""){
+                        bool = false;
+                        $(this).closest('.form-group').find(".error_message").show();
+                        $(this).focus();
+                        return false;
+
+                    }}
+            } else if(tagname == 'textarea'){
+                if($(this).is(":visible")){
+                    if($(this).val().trim().length == 0){
+                        bool = false;
+                        $(this).closest("div").next(".error_message").text($(this).attr("error_message"));
+                        $(this).focus();
+                        return false;
+                    }
+                }
+            } else {
+                $(".error_message").remove();
+            }
+        });
+        if(bool){
+            if($(".showDiv:visible").index() != $(".showDiv:last").index()){
+                $(".showDiv:visible").next(".showDiv").show();
+                ele.hide();
+                if($(".showDiv:Visible").index()){
+                    $(this).text("submit");
+                }
+            }
+            else{
+                $('form').submit();
+            }
+        }
+    });
+
+    $('#callTypeId').on('change', function() {
+
+        var cname = $("#callTypeId option:selected").text();
+        var nameId = $('#callTypeId').val();
+        var dat = $('#LeadDate').val();
+        var call = $('#caller_sid').val();
+        var leadId = $('#leadId').val();
+
+        if(cname=='Drop'){
+            $('.drophide').hide();
+            $('#transferTo').closest('.form-group').hide();
+
+        } else if(cname=='Transfer') {
+            $('.drophide').hide();
+            $('#transferTo').closest('.form-group').show();
+        } else {
+            $('.drophide').show();
+            $('#transferTo').closest('.form-group').hide();
+        }
+    });
+
+
+
+
+    $(document).ready(function() {
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            allowClear: true
+        });
+    });
+
+//    $('.fullDetails').on('click',function(){
+//        var urlId = $(this).attr('data-index');
+//        location.replace("<?php //echo $this->basePath(); ?>///crm/lead/full-details/"+urlId);
+//    });
+    $('.editId').on('click',function(){
+        var urlId = $(this).attr('data-index');
+        location.replace("<?php echo $this->basePath(); ?>/telecaller/index/followup-history/"+urlId+"/"+$("#projectId").val());
+    });
+    $('.personal').on('click',function(){
+        var urlId = $(this).attr('data-index');
+        location.replace("<?php echo $this->basePath(); ?>/telecaller/index/followup-details/"+urlId+"/"+$("#projectId").val());
+    });
+
+
+    function closePop(){
+        $('#msgBoxSuccess').modal('hide');
+        $('#msgBoxError').modal('hide');
+        location.reload();
+    }
+
+
+    function getMail(x) {
+        $('#loadingArea').text('Getting Mail Box...');
+        $('.uploading_area').show();
+        $.ajax({
+            url: getBaseURL() + "crm/lead/mail-comman",
+            type: "post",
+            data: {'mail': x},
+            success:function(data, textStatus, jqXHR) {
+
+                $('#lead_short_detail').html(data);
+                $('.right_lightbox').show();
+                $('.left-panel').removeClass('collapsed');
+                $('.l_menuicon_nav').removeClass('cross');
+
+                $('.toolbar_ddown ul,.recentlist_area ul,.chat_area ul,.navigation,.card-body,.vendor_subscriber,.right_lbox_inner,.scrlcrm ul').slimScroll({
+                    height : '100%',
+                    alwaysVisible: false,
+                    railVisible: true,
+                    railColor: '#cececd',
+                    railOpacity: 1
+                });
+                tinymce.init({
+                    selector: "#compose-textarea"
+//        file_browser_callback : 'myFileBrowser'
+                });
+                $('.uploading_area').hide();
+            },
+            error: function(xhr, status, errorThrown) {
+
+                $('.uploading_area').hide();
+                $('#msgBoxError').modal('show');
+            }
+        });
+    }
+
+
+
+    $(document).ready(function(){
+        $('a[href^="#"]').on('click',function (e) {
+            e.preventDefault();
+            var target = this.hash,
+                $target = $(target);
+
+            $('html, body').stop().animate({
+                'scrollTop': $target.offset().top - 80
+            }, 900, 'swing', function () {
+                if (windscroll > 80)
+                    window.location.hash = target;
+            });
+        });
+    });
+    $(document).ready(function(){
+        $("#back-top").fadeOut();
+        $(window).scroll(function(){
+            if ($(this).scrollTop() > 100) {
+                $("#back-top").fadeIn();
+            } else {
+                $("#back-top").fadeOut();
+            }
+        });
+        $("#back-top").click(function(){
+            $("html, body").animate({ scrollTop: 0 }, 1000);
+            return false;
+        });
+    });
+
+</script>

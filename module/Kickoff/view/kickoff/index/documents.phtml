@@ -1,0 +1,388 @@
+<link rel="stylesheet" type="text/css" href="<?php echo $this->basePath(); ?>/css/project.css" />
+<style type="text/css">
+.table-responsive table.table tr td.td_prnt_text	{padding:4px 0px !important; border-top:0px !important;}
+.td_prnt_text .action_btns li a						{padding-top:3px;}
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid padlr0">
+		<div class="col-lg-12">
+			<h1>Project Kickoff</h1>
+		</div>
+		<form onsubmit="return entryValidate()" method="post" id="formWrapper" enctype="multipart/form-data">
+			<div class="col-lg-12 flwup_topcnt fmg_topcnt clear">
+				<div class="col-lg-3 form-group">
+					<span class="date_icon"><i class="fa fa-calendar"></i></span>
+					<input type="text" name="refDate" id="refDate" class="form-control date_picker lbl_move" value="<?php if ($kickoffRes['RefDate'] != NULL) { echo date("d-m-Y", strtotime($kickoffRes['RefDate'])); } else { echo date("d-m-Y"); } ?>" label="Ref Date" onkeypress="return isDate(event);" />
+				</div>
+				<div class="col-lg-3 form-group">
+					<input type="text" name="refNo" id="refNo" class="form-control lbl_move" value="<?php if (trim($kickoffRes['RefNo']) != '') { echo $kickoffRes['RefNo']; } else { echo $svNo; } ?>" label="Ref No" />
+				</div>
+				<div class="col-lg-6 form-group">
+					<input type="text" name="propertyName" id="propertyName" class="form-control lbl_move" value="<?php echo $kickoffRes['ProjectName']; ?>" label="Name of the Property" />
+				</div>
+			</div>
+			<div class="col-lg-12 clear">
+				<ul class="breadcrumb_area">
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/conception/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Conception</a></li>
+					<li><a href="<?php echo $this->basePath().$unitUrl; ?>">Unit</a></li>
+<!--					<li><a href="--><?php //echo $this->basePath(); ?><!--/kickoff/index/wbs/--><?php //if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?><!--">WBS</a></li>-->
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/turnaround/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Turnaround Cost & Schedule</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/team/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Team</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/make-brand/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Make/Brand</a></li>
+					<li><a href="#" class="active">Documents</a></li>
+					<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/setup/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>">Setup</a></li>
+				</ul>
+			</div>
+			<div class="col-lg-12 clear">
+				<div class="col-lg-12 clear">
+					<div class="kickoff_area col-lg-12 clear">
+						<div class="col-lg-12 padlr0">
+							<div class="col-lg-6 col-md-12">
+								<h1>Documents</h1>
+								<div class="table-responsive">
+									<table class="table">
+										<thead>
+											<tr>
+												<th width="8%">Type</th>
+												<th width="15%">Name</th>
+												<th width="4%">Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php
+											if(isset($kfDocuments) && count($kfDocuments) != 0) {
+												$i = 1;
+												foreach($kfDocuments as $document) { ?>
+											<tr>
+												<td><input class="parent_text" type="text" id="documentType_<?php echo $i; ?>" name="documentType_<?php echo $i; ?>" onblur="addDocumentRow(this)" value="<?php echo $document['DocumentType']; ?>" /></td>
+												<td>
+													<input class="parent_text" type="text" id="documentName_<?php echo $i; ?>" name="documentName_<?php echo $i; ?>" value="<?php echo $document['DocumentName']; ?>" />
+													<input type="hidden" id="documentUrl_<?php echo $i; ?>" name="documentUrl_<?php echo $i; ?>" value="<?php echo $document['URL']; ?>" />
+												</td>
+												<td class="action_btns_td">
+													<ul class="action_btns">
+														<li style="float:left;">
+															<?php if(trim($document['URL']) != '') { ?>
+																<a href="<?php echo $this->basePath(); ?><?php echo $document['URL']; ?>">
+																	<span data-toggle="tooltip" data-placement="left" data-original-title="Documents Views"><i class="fa fa-eye"></i></span>
+																</a>
+															<?php } else { ?>
+																<a href="javascript:void(0);">
+																	<span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach document" class="btn-file butclr_imp"><i class="fa fa-paperclip dcm_atch"></i><input type="file" name="docFile_<?php echo $i; ?>" id="docFile_<?php echo $i; ?>" /></span>
+																</a>
+															<?php } ?>
+														</li>
+														<li style="float:left;"><a href="javascript:void(0);" class="docDelete_<?php echo $i; ?>" onclick="deleteDocument(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+													</ul>
+												</td>
+											</tr>
+											<?php $i++;
+												}
+											} else { ?>
+											<tr>
+												<td><input class="parent_text" type="text" id="documentType_1" name="documentType_1" onchange="addDocumentRow(this)" /></td>
+												<td>
+													<input class="parent_text" type="text" id="documentName_1" name="documentName_1" />
+													<input type="hidden" id="documentUrl_1" name="documentUrl_1" />
+												</td>
+												<td class="action_btns_td">
+													<ul class="action_btns">
+														<li style="float:left;">
+															<a href="javascript:void(0);">
+																<span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach document" class="btn-file butclr_imp"><i class="fa fa-paperclip dcm_atch"></i><input type="file" name="docFile_1" id="docFile_1" /></span>
+															</a>
+														</li>
+														<li style="float:left;"><a href="javascript:void(0);" class="docDelete_1" onclick="deleteDocument(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+													</ul>
+												</td>
+											</tr>
+											<?php } ?>
+										</tbody>
+									</table>
+									<input type="hidden" name="documentRowId" id="documentRowId" value="<?php echo (isset($kfDocuments) && count($kfDocuments) != 0) ? count($kfDocuments) : 1; ?>" />
+									<input type="hidden" name="kickOffId" id="kickOffId" value="<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" />
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-12">
+								<h1>Notes</h1>
+								<div class="table-responsive">
+									<table class="table">
+										<thead>
+											<tr>
+												<th width="8%">Title</th>
+												<th width="15%">Notes</th>
+												<th width="4%">Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											<?php
+											if(isset($kfNotes) && count($kfNotes) != 0) {
+												$i = 1;
+												foreach($kfNotes as $notes) { ?>
+											<tr>
+												<td><input class="parent_text" type="text" id="title_<?php echo $i; ?>" name="title_<?php echo $i; ?>" onblur="addNotesRow(this)" value="<?php echo $notes['Title']; ?>" /></td>
+												<td>
+													<input class="parent_text" type="text" id="notes_<?php echo $i; ?>" name="notes_<?php echo $i; ?>" value="<?php echo $notes['Notes']; ?>" />
+													<input type="hidden" id="notesUrl_<?php echo $i; ?>" name="notesUrl_<?php echo $i; ?>" value="<?php echo $notes['URL']; ?>" />
+												</td>
+												<td class="action_btns_td">
+													<ul class="action_btns">
+														<!--li style="float:left;">
+															<a href="</?php echo $notes['URL']; ?>">
+																<span data-toggle="tooltip" data-placement="left" data-original-title="Documents Views"><i class="fa fa-eye"></i></span>
+															</a>
+														</li-->
+														<li style="float:left;"><a href="javascript:void(0);" class="noteDelete_<?php echo $i; ?>" onclick="deleteNotes(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+													</ul>
+												</td>
+											</tr>
+											<?php $i++;
+												}
+											} else { ?>
+											<tr>
+												<td><input class="parent_text" type="text" id="title_1" name="title_1" onchange="addNotesRow(this)" /></td>
+												<td>
+													<input class="parent_text" type="text" id="notes_1" name="notes_1" />
+													<input type="hidden" id="notesUrl_1" name="notesUrl_1" />
+												</td>
+												<td class="action_btns_td">
+													<ul class="action_btns">
+														<!--li style="float:left;">
+															<a href="javascript:void(0);">
+																<span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach document" class="btn-file butclr_imp"><i class="fa fa-paperclip dcm_atch"></i><input type="file" name="noteFile_1" id="noteFile_1" /></span>
+															</a>
+														</li-->
+														<li style="float:left;"><a href="javascript:void(0);" class="noteDelete_1" onclick="deleteNotes(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+													</ul>
+												</td>
+											</tr>
+											<?php } ?>
+										</tbody>
+									</table>
+									<input type="hidden" name="noteRowId" id="noteRowId" value="<?php echo (isset($kfNotes) && count($kfNotes) != 0) ? count($kfNotes) : 1; ?>" />
+								</div>
+							</div>
+						</div>
+						<div class="cont_bt-list">
+							<ul>
+								<li><a href="<?php echo $this->basePath(); ?>/kickoff/index/make-brand/<?php if ($kickoffId != 0) { echo $kickoffId; } else { echo ''; } ?>" class="steps_btn"><i class="fa fa-chevron-circle-left"></i> Back</a></li>
+								<li><a href="javascript:submitForm();" class="cbtn">Continue <i class="fa fa-check-circle"></i></a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<table id="dummy-document" style="display: none;">
+	<tbody>
+		<tr>
+			<td><input class="parent_text" type="text" id="documentType__1" name="documentType__1" onchange="addDocumentRow(this)" /></td>
+			<td>
+				<input class="parent_text" type="text" id="documentName__1" name="documentName__1" />
+				<input type="hidden" id="documentUrl__1" name="documentUrl__1" />
+			</td>
+			<td class="action_btns_td">
+				<ul class="action_btns">
+					<li style="float:left;">
+						<a href="javascript:void(0);"><span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach document" class="btn-file butclr_imp"><i class="fa fa-paperclip dcm_atch"></i><input type="file" name="docFile__1" id="docFile__1" /></span></a>
+					</li>
+					<li style="float:left;"><a class="docDelete__1" href="javascript:void(0);" onclick="deleteDocument(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+				</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<table id="dummy-notes" style="display: none;">
+	<tbody>
+		<tr>
+			<td><input class="parent_text" type="text" id="title__1" name="title__1" onchange="addNotesRow(this)" /></td>
+			<td>
+				<input class="parent_text" type="text" id="notes__1" name="notes__1" />
+				<input type="hidden" id="notesUrl__1" name="notesUrl__1" />
+			</td>
+			<td class="action_btns_td">
+				<ul class="action_btns">
+					<!--li style="float:left;">
+						<a href="javascript:void(0);">
+							<span data-toggle="tooltip" data-placement="left" data-original-title="Click to attach document" class="btn-file butclr_imp"><i class="fa fa-paperclip dcm_atch"></i><input type="file" name="noteFile__1" id="noteFile__1" /></span>
+						</a>
+					</li-->
+					<li style="float:left;"><a href="javascript:void(0);" class="noteDelete__1" onclick="deleteNotes(this, event);"><span data-toggle="tooltip" data-placement="left" data-original-title="Document Delete"><i class="fa fa-trash-o"></i></span></a></li>
+				</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<script type="text/javascript">
+var docNameList = <?php echo (isset($kfDocName)) ? json_encode($kfDocName) : '[]'; ?>;
+var docTypeList = <?php echo (isset($kfDocType)) ? json_encode($kfDocType) : '[]'; ?>;
+var noteList = <?php echo (isset($kfNoteTitle)) ? json_encode($kfNoteTitle) : '[]'; ?>;
+
+bindDocAttached();
+bindDocNameAutoComplete(1);
+bindDocTypeAutoComplete(1);
+bindNoteAutoComplete(1);
+
+function addDocumentRow(x)
+{
+	var $tr = $(x).closest('tr');
+	if ($tr.next('tr').length != 0)
+		return;
+	
+	var $rowid = $('#documentRowId'),
+		count = parseInt($rowid.val()) + 1,
+		template = $('#dummy-document tbody').html();
+	
+	template = template.replace(/__1/g, '_' + count);
+	$tr.parent('tbody').append(template);
+	$rowid.val(count);
+	bindDocAttached();
+	bindDocNameAutoComplete(count);
+	bindDocTypeAutoComplete(count);
+}
+
+function deleteDocument(x,e)
+{
+	e.preventDefault();
+	if (!confirm('Do you want to Delete'))
+		return false;
+	
+	var $tr = $(x).closest('tr'),
+		$tbody = $tr.parent('tbody');
+	
+	if ($tbody.find('> tr').length == 1) {
+		var template = $('#dummy-document tbody').html();
+		template = template.replace(/__1/g, '_' + 1);
+		$tbody.append(template);
+		$('#documentRowId').val(1);
+	}
+	
+	$tr.next('tr.subTr').remove();
+	$tr.remove();
+	return false;
+}
+
+function addNotesRow(x)
+{
+	var $tr = $(x).closest('tr');
+	if ($tr.next('tr').length != 0)
+		return;
+	
+	var $rowid = $('#noteRowId'),
+		count = parseInt($rowid.val()) + 1,
+		template = $('#dummy-notes tbody').html();
+	
+	template = template.replace(/__1/g, '_' + count);
+	$tr.parent('tbody').append(template);
+	$rowid.val(count);
+	bindNoteAutoComplete(count);
+}
+
+function deleteNotes(x,e)
+{
+	e.preventDefault();
+	if (!confirm('Do you want to Delete'))
+		return false;
+	
+	var $tr = $(x).closest('tr'),
+		$tbody = $tr.parent('tbody');
+	
+	if ($tbody.find('> tr').length == 1) {
+		var template = $('#dummy-notes tbody').html();
+		template = template.replace(/__1/g, '_' + 1);
+		$tbody.append(template);
+		$('#noteRowId').val(1);
+	}
+	
+	$tr.next('tr.subTr').remove();
+	$tr.remove();
+	return false;
+}
+
+function bindDocAttached()
+{
+	var docFiles = $('input[id^=docFile_]');
+		docFiles.unbind('change');
+	
+	docFiles.on('change', function() {
+		var $this = $(this);
+		var $tarEl = $(this).siblings('i');
+		var $tooltip = $tarEl.parent('span');
+		var $tarA = $tarEl.closest('a');
+		if($(this).val() != '') {
+			$tarA.addClass('pull-left');
+			$tarEl.removeClass('fa-paperclip').addClass('fa-file-o file-do');
+			$tooltip.attr('data-original-title', 'Document Attached');
+			
+			if($tarA.next('i.brkn').length == 0)
+				$('<i class="fa fa-chain-broken brkn" onclick="removeAttachment($(this));"></i>').insertAfter($tarA);
+		} else {
+			$tarA.next('i.brkn').remove();
+			$tarEl.addClass('fa-paperclip').removeClass('fa-file-o file-do');
+			$tooltip.attr('data-original-title', 'Click to attach documents');
+		}
+	});
+}
+
+function bindDocNameAutoComplete(rowId)
+{
+	$('#documentName_' + rowId).autocomplete({
+		lookup: docNameList,
+		showNoSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		}
+	});
+}
+
+function bindDocTypeAutoComplete(rowId)
+{
+	$('#documentType_' + rowId).autocomplete({
+		lookup: docTypeList,
+		showNoSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		}
+	});
+}
+
+function bindNoteAutoComplete(rowId)
+{
+	$('#title_' + rowId).autocomplete({
+		lookup: noteList,
+		showNoSuggestionNotice: false,
+		lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+			if (queryLowerCase == '*') {
+				return suggestion.value;
+			} else {
+				var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+				return re.test(suggestion.value);
+			}
+		}
+	});
+}
+
+function submitForm()
+{
+	$('#formWrapper').submit();
+}
+
+function entryValidate()
+{
+	return true;
+}
+</script>

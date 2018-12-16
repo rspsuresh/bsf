@@ -1,0 +1,293 @@
+<style>	
+.fileupload-buttonbar .btn,
+.fileupload-buttonbar .toggle {
+  margin-bottom: 5px;
+}
+.progress-animated .progress-bar,
+.progress-animated .bar {
+  background: url("../img/progressbar.gif") !important;
+  filter: none;
+}
+.fileupload-process {
+  float: right;
+  display: none;
+}
+.fileupload-processing .fileupload-process,
+.files .processing .preview {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url("../img/loading.gif") center no-repeat;
+  background-size: contain;
+}
+.files audio,
+.files video {
+  max-width: 300px;
+}
+
+@media (max-width: 767px) {
+  .fileupload-buttonbar .toggle,
+  .files .toggle,
+  .files .btn span {
+    display: none;
+  }
+  .files .name {
+    width: 80px;
+    word-wrap: break-word;
+  }
+  .files audio,
+  .files video {
+    max-width: 80px;
+  }
+  .files img,
+  .files canvas {
+    max-width: 100%;
+  }
+}
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+}
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px;
+  direction: ltr;
+  cursor: pointer;
+}
+
+/* Fixes for IE < 8 */
+@media screen\9 {
+  .fileinput-button input {
+    filter: alpha(opacity=0);
+    font-size: 100%;
+    height: 100%;
+  }
+}
+
+</style>
+	<!--<div class="row">
+		<div class="col-lg-12">
+			<div class="panel panel-default">
+				<div data-toggle="collapse" data-parent="#accordion" href="#technical" class="panel-heading" style="cursor:pointer">
+					<h4 class="panel-title">
+						<a >Excel Reader</a>
+					</h4>
+				</div>
+				<div id="technical" class="panel-collapse collapse in">
+					<div class="panel-body">
+						<div class='row'>
+							<div class='col-md-5 col-md-offset-5'>
+								<div class="form-group">
+									<div class="row fileupload-buttonbar">
+										
+										<span class="btn btn-success fileinput-button">
+											<i class="glyphicon glyphicon-plus"></i>
+											<span>Add files...</span>
+											<input type="file" name="files" id="files">
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<input class="btn btn-primary" type="submit" id="submitData" value="Submit">
+								</div>										
+							</div>
+						</div>					
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>	-->
+	<div class="row">
+		<div class="col-lg-12">
+			<div class='col-md-5 col-md-offset-5'>
+				<div class="form-group">
+					<form enctype="multipart/form-data" method="post">
+						<div class="row fileupload-buttonbar">
+							<span class="btn btn-success fileinput-button">
+								<i class="glyphicon glyphicon-plus"></i>
+								<span>Add files...</span>
+								<input type="file" name="files" id="files">
+							</span>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>	
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel panel-default">
+				<div data-toggle="collapse" data-parent="#accordion" href="#output" class="panel-heading" style="cursor:pointer">
+					<h4 class="panel-title">
+						<a >Excel Output</a>
+					</h4>
+				</div>
+				<div id="output" class="panel-collapse collapse in">
+					<div class="panel-body">
+						<div class='row'>
+							<div class='col-lg-12'>
+								<div class="form-group">
+									<form method="post" enctype="multipart/form-data">
+										<input type="hidden" name="len" id="len">
+										<table id="excelTable" class="table table-bordered table-hover" style="margin-top:20px;">
+											<thead>
+												<tr>
+													<th>Sl no</th>
+													<th>Vendor name</th>
+													<th>Address</th>
+													<th>ContactNo</th>
+													<th>EmailId</th>
+													<th>CSTNo</th>
+													<th>TNGST</th>
+													<th>TIN</th>
+													<th>PAN</th>
+													<th>Supply</th>
+													<th>Contractor</th>
+													<th>Service provider</th>
+													<th>Valid</th>
+													<th>Action</th>
+												</tr>
+											</thead>
+											<tbody>	
+											<?php
+												if(isset($files)){
+													$inputFileName = $files['files']['tmp_name'];
+													//  Read your Excel workbook
+													try {
+														$inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+														$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+														$objPHPExcel = $objReader->load($inputFileName);
+													} catch (Exception $e) {
+														die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME) 
+														. '": ' . $e->getMessage());
+													}
+
+													//  Get worksheet dimensions
+													$count = $objPHPExcel->getSheetCount() - 1;
+
+													foreach(range(0, $count) as $data){
+														$sheet = $objPHPExcel->getSheet($data);
+														$highestRow = $sheet->getHighestRow();
+														$highestColumn = $sheet->getHighestColumn();
+														
+														if($data == 0){
+														//  Loop through each row of the worksheet in turn
+															for ($row = 1; $row <= $highestRow; $row++) {
+																if($row != 1){
+																	//  Read a row of data into an array
+																	$rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, 
+																	NULL, TRUE, FALSE);
+																	echo "<tr id='tr_".($row-1)."'>";
+																	echo "<td>".($row-1)."</td>";
+																	$valid=0;
+																	$name='';
+																	foreach($rowData[0] as $k=>$v){
+																		//echo "Row: ".$row."- Col: ".($k+1)." = ".$v."<br />";
+																		if($k==0){
+																			$name = $v;
+																			if(in_array(strtolower($v), $vendorName)){
+																				$valid=1;
+																			}																			
+																		}
+																		if($k<=7){
+																			echo "<td><input type='text' class='form-control' name='vendor_".($row-1)."_".($k+1)."' value='".$v."'></td>";
+																		}
+																		else if($k<=10){
+																			echo "<td><input type='checkbox' name='vendor_".($row-1)."_".($k+1)."' value='1' ".(($v==1)? 'checked':'')."></td>";
+																		}
+																	}
+																	
+																	echo "<td><input type='checkbox' disabled name='vendor_".$row."' value='".$valid."' ".(($valid==0)? 'checked':'')."></td>";
+																	echo "<td><input type='button' value='Remove' class='btn btn-primary removeTr'></td>";
+																	echo "</tr>";
+																}
+															}
+														}
+													}
+												}
+												if(isset($error)){
+													echo "<td colspan=14>".$error."</td>";
+												}	
+											?>
+											</tbody>
+										</table>
+										
+									</form>
+								</div>
+							</div>
+						</div>	
+						<div class="form-group">
+							<input class="btn btn-primary" type="button" id="submitData" value="Submit" style="float:right;">
+						</div>										
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>		
+<script>
+	$("input:file").change(function(){
+		var ext = $('#files').val().split('.').pop().toLowerCase();
+		if($.inArray(ext, ['xlsx','xls','ods']) == -1) {
+			alert("Please upload an XLSX, XLS, ODS file");
+		}
+		else{
+			$("form:first").submit();
+		}
+	});
+	$(".removeTr").click(function(){
+		$(this).closest("tr").remove();
+		$("#excelTable tbody tr").each(function(){
+			var trIndex = $(this).index() + 1;
+			$(this).attr("id", "tr_"+trIndex);
+			$(this).find("td:first").text(trIndex);
+			$(this).find("input:text, input:checkbox").each(function(){
+				var tdIndex = $(this).closest("td").index();
+				$(this).attr("name", "vendor_"+trIndex+"_"+tdIndex);
+				$(this).attr("id", "vendor_"+trIndex+"_"+tdIndex);
+			});
+		});		
+	});
+	$("#submitData").click(function(){
+		$("#len").val($("#excelTable tbody tr").length);
+		var formData = $("form:last").serializeArray();
+		$("input:checkbox").each(function(){
+			if(!$(this).is(":checked"))
+				formData.push({name:$(this).attr("name"),value:'0'});
+		});
+		
+		//alert(JSON.stringify(formData));
+		$.ajax({
+			url:getBaseURL()+"vendor/index/uploadxl",
+			type:"post",
+			data:formData,
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				//alert(data);
+				$.each(data, function(i,v){
+					$("#tr_"+v).remove();
+				});
+				if($("#excelTable tbody tr").length > 0){
+					$("#excelTable tbody tr").each(function(){
+						var trIndex = $(this).index() + 1;
+						$(this).attr("id", "tr_"+trIndex);
+						$(this).find("td:first").text(trIndex);
+						$(this).find("input:text, input:checkbox").each(function(){
+							var tdIndex = $(this).closest("td").index();
+							$(this).attr("name", "vendor_"+trIndex+"_"+tdIndex);
+							$(this).attr("id", "vendor_"+trIndex+"_"+tdIndex);
+						});
+					});
+					alert("Please change the Vendor name for the remaining");
+				}
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"-----"+errorThrown);
+			}
+		});
+	});
+</script>

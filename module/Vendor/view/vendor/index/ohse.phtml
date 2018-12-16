@@ -1,0 +1,436 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<style>
+    .panel {
+        border-radius:0px !important;
+    }
+    .input-grouping > .polymer-form {
+        width: 70%;
+        float: left;
+    }
+    .input-grouping > .input-group-btn {
+        width: 30%;
+        top: 2px;
+    }
+    .input-grouping > .input-group-btn > select.parent_text {
+        padding: 5px 4px 6px 4px;
+    }
+    .input-grouping  > input.parent_text {
+        width: 60%;
+        float: left;
+    }
+</style>
+<!--content-->
+<div class="content_wrapper padlr0">
+<div class="container-fluid">
+<div class="row">
+<form  onsubmit="return entryValidate()"  method="post" id="formWrapper">
+
+<div class="col-lg-12">
+    <h1>Vendor OHSE Details</h1>
+</div>
+<!--accordion start-->
+
+<div class="col-lg-12 clear">
+<div class="panel panel-info">
+<div data-target="#collapsefour" data-parent="#accordion" data-toggle="collapse" class="panel-heading collapsed panel_heads" id="panelheading-4">
+    <h4 class="panel-title defa_panels">OHSE Details</h4>
+</div>
+<div class="panel-body bgcolr">
+<div class="table-responsive topsp">
+<table class="table tableWithFloatingHeader checkemptyrow" style=" margin-bottom:0px;">
+    <thead>
+    <tr>
+        <th>OHSE Name</th>
+		<th>Remarks</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php $i=1; if(isset($transDetail) && !empty($transDetail)): 
+        foreach($transDetail as $transDet): ?>
+        <tr>
+            <td width="10%">
+                <input class="parent_text" type="text" name="ohseName_<?php echo $i;?>" id="ohseName_<?php echo $i;?>" maxlength="50" value="<?php echo $transDet['Description'];?>" onfocus="checkOhseFocus(this.id)"/>
+                <input type="hidden" name="ohseRegId_<?php echo $i;?>" id="ohseRegId_<?php echo $i;?>" value="<?php echo $transDet['VendorOhseRegId'];?>">
+            </td>
+			<td width="10%">
+                <input class="parent_text" type="text" name="remarks_<?php echo $i;?>" id="remarks_<?php echo $i;?>" maxlength="5000" value="<?php echo $transDet['Remarks'];?>"/>
+            </td>
+            <td width="3%" align="center">
+				<ul class="action_btns">
+				<li><a href="#" class="mainTrDelete_<?php echo $i;?>" style="margin-right: 10px; display: none;" onclick="deleteMainTr(this, event);"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a></li>
+			</td>
+        </tr>
+    <?php $i++;
+		endforeach; else: ?>
+        <tr>
+            <td width="10%">
+                <input class="parent_text" type="text" name="ohseName_1" id="ohseName_1" maxlength="50" onfocus="checkOhseFocus(this.id)"/>
+                <input type="hidden" name="ohseRegId_1" id="ohseRegId_1">
+            </td>
+			<td width="10%">
+                <input class="parent_text" type="text" name="remarks_1" id="remarks_1" maxlength="5000"/>
+            </td>
+            <td width="3%" align="center"><ul class="action_btns">
+            <li><a href="#" class="mainTrDelete_1" style="margin-right: 10px; display: none;" onclick="deleteMainTr(this, event);"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a> </li>
+        </tr>
+       
+    <?php endif; ?>
+    </tbody>
+    </tbody>
+</table>
+<input type="hidden" name="ownerdetailid" id="ownerdetailid" value="<?php echo (isset($transDetail)) ? count($transDetail) : '1';?>">
+</div>
+</div>
+</div><!--accordion end-->
+</div>
+</form>
+</div>
+</div>
+</div>
+
+<!--footer-->
+<div class="col-lg-12 savebtn_area">
+    <ul>
+        <li class="dropdown save_btn float_r" id="submit-btn" ><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="back-btn"><a href="<?php echo $this->basePath() . '/project/landbank/enquiry';?>" data-toggle="tooltip" class="ripple" title="Cancel!">Cancel</a></li>
+    </ul>
+</div>
+
+<!--Dummy Main Tr-->
+<table id="dummy-ohsedetails" style="display: none;">
+    <tbody>
+    <tr>
+        <td width="10%">
+            <input class="parent_text" type="text" name="ohseName__1" id="ohseName__1" maxlength="50" onfocus="checkOhseFocus(this.id)">
+            <input type="hidden" name="ohseRegId__1" id="ohseRegId__1">
+        </td>
+		<td width="10%">
+            <input class="parent_text" type="text" name="remarks__1" id="remarks__1" maxlength="5000">
+        </td>
+        <td width="3%" align="center">
+        <ul class="action_btns">
+        <li><a href="#" class="mainTrDelete__1" style="margin-right: 10px; display: none;" onclick="deleteMainTr(this, event);"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a></li>
+    </tr>
+    <!--expand end-->
+    </tbody>
+</table>
+
+
+<div id="ohsemodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle-o clpot"></i></button>
+                <h1>New OHSE</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <label style="margin-bottom: 10px;">OHSE Name</label>
+                        <input type="text" class="parent_text tex-po" name="MOhseName" id="MOhseName">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <div class="col-lg-12"> <a href="#" class="md_cance" data-dismiss="modal" style="position: relative; overflow: hidden;">Cancel<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a>
+                    <button type="button" id="btn-newohse" class="md_ok" onclick="return NewOhseUpdate()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var arr_ohse = <?php echo (isset($arr_ohse)) ? json_encode($arr_ohse) : '[]';?>;
+    var arr_ohselist = <?php echo (isset($arr_ohse)) ? json_encode($arr_ohse) : '[]';?>;
+    $(function(){
+        bindExpandTr();
+        bindOhseAutoComplete();
+
+        // expand first accordian
+        $('#panelheading-1').trigger('click');
+    });
+
+    function bindOhseAutoComplete() {
+        var $ohseName = $('input[id^=ohseName_]');
+        $ohseName.unbind('autocomplete');
+        $.each($ohseName, function () {
+            var $this = $(this),
+                name = $this[0].id;
+
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            checkOhseUsed(key1);
+
+            $this.autocomplete({
+                lookup: arr_ohselist,
+                showNoSuggestionNotice:true,
+                noSuggestionNotice: 'Do you want to Create New <input type="button" style="font-weight:bold" class="btn btn-link" id="ohsenew_' + key1+'" value="OHSE" onclick="return AddNewOhse(this.id)">',
+                lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                    if (queryLowerCase == '*') {
+                        return suggestion.value;
+                    } else {
+                        var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                        return re.test(suggestion.value);
+                    }
+                }, onSelect: function(suggestion) {
+                    if(suggestion) {
+                        $("#ohseRegId_" + key1).val(suggestion.data);
+                        addMainTr($(this));
+                        removeError($(this));
+                    }
+                }, onSearchStart: function(suggestion) {
+                    $("#ohseRegId_" + key1).val(0);
+                }, onSearchComplete: function (query, suggestions) {
+                    if(!suggestions.length){
+                        showError($(this), 'Required');
+                        $("#ohseRegId_" + key1).val(0);
+                    } else
+                        removeError($(this));
+                }
+            });
+        });
+    }
+
+    function checkOhseFocus(x) {
+        var arrname = x.split('_');
+        var key1 = arrname[1];
+        checkOhseUsed(key1);
+    }
+
+    function checkOhseUsed(id) {
+        var reskeyid = $('input[id*=ohseRegId_]');
+        arr_ohselist = arr_ohse;
+
+        arr_ohselist = $.grep(arr_ohse, function (element, index) {
+            var is_selected = true;
+            $.each(reskeyid, function (i, obj) {
+                var $this = $(this),
+                    name = $this[0].id;
+                var arrname = name.split('_');
+                var key1 = arrname[1];
+
+                if (key1 != id) {
+                    if (element.data == $this.val()) {
+                        is_selected = false;
+                        return false;
+                    }
+                }
+            });
+            return is_selected;
+        });
+    }
+
+    function AddNewOhse(x) {
+        var key=x.split('_')[1];
+		alert(key);
+        $('#MOhseName').val($('#ohseName_' + key).val());
+        $('.autocomplete-suggestions').hide();
+        $('#ohsemodal').data('input','#ohseName_' + key).modal('show');
+    }
+
+    function NewOhseUpdate () {
+        var ohseName = $('#MOhseName').val();
+        if(ohseName.length == 0) {
+            alert('OHSE Name is required!');
+            return false;
+        } else {
+            removeError($('#MOhseName'));
+        }
+
+
+        var isFoundInLocal = false;
+        $.each(arr_ohse, function (i, obj) {
+            if(obj.value == ohseName) {
+                isFoundInLocal = true;
+                return false;
+            }
+        });
+
+        if (isFoundInLocal) {
+            alert('OHSE Name Already Exists!');
+            return false;
+        }
+
+        // check for new OHSE name if its new
+        var isNameValid = true;
+        $.ajax({
+            url: getBaseURL()+ 'vendor/index/checkohsefound',
+            type: "post",
+            data: {'ohseName': ohseName},
+            async: false,
+            success: function (data, textStatus, jqXHR) {
+                if(data == 'Y')
+                    isNameValid = false;
+                else
+                    isNameValid = true;
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                isNameValid = false;
+            }
+        });
+
+        if (!isNameValid) {
+            alert('OHSE Name Already Exists!');
+            return false;
+        }
+
+        arr_ohse.push({
+            data: 'new',
+            value: ohseName
+        });
+
+        bindOhseAutoComplete();
+
+        $($('#ohsemodal').data('input')).val(ohseName).triggerHandler('focus');
+        $('#ohsemodal').modal('hide');
+    }
+
+    function bindExpandTr() {
+        var $tr = $(".mainTr");
+        $tr.unbind('click');
+        $tr.click(function(e){
+            e.preventDefault();
+            var $subtr = $(this).closest("tr").next(".subTr"),
+                $i = $(this).find("i");
+
+            if(!$subtr.is(":visible")){
+                $subtr.show();
+                $subtr.find(".subDiv").slideDown("slow");
+                $i.addClass("tform");
+            } else{
+                $subtr.find(".subDiv").slideUp("slow");
+                $subtr.slideUp("slow");
+                $i.removeClass("tform");
+            }
+        });
+    }
+
+    function submitForm() {
+        $('#formWrapper').submit();
+    }
+
+    function entryValidate() {
+        var $error = $('.error');
+        if($error.length != 0) {
+            alert('Kindly notice the error notifications!');
+
+            $error.parents('.collapse:not(.in)').siblings('.panel-heading').trigger('click');
+            return false;
+        }
+
+        return true;
+    }
+
+    function changeSourceName(x) {
+        var $el = $(x),
+            name = 'Source Name';
+
+        if ($el.val() != "")
+            name = $el.find('option:selected').html() + ' Name';
+
+        $('#SourceName').attr('label', name).nextAll('label.placeholder').html(name);
+    }
+
+    function validateEmail(x) {
+        var $el = $(x);
+        if(!/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test($el.val()))
+            $el.addClass('error');
+        else
+            $el.removeClass('error');
+
+    }
+
+    function validateContactNo(x) {
+        var $el = $(x);
+        if(!/^[0-9\-\.\+]+$/.test($el.val()))
+            $el.addClass('error');
+        else
+            $el.removeClass('error');
+    }
+
+    function contactKeyPress(event,x) {
+        var charCode = (event.which) ? event.which : event.keyCode,
+            value = $(x).val();
+        if ((charCode != 43 || value.indexOf('+') != -1 || value.length != 0) &&
+            (charCode < 48 || charCode > 57) && charCode !=37 && charCode!=39 && charCode!=8 && charCode!=35 && charCode!=36 && charCode!=9)
+            return false;
+
+        return true;
+    }
+
+
+    function deleteMainTr(x,e) {
+        e.preventDefault();
+        if (!confirm('Do you want to Delete'))
+            return false;
+
+        var $tr = $(x).closest('tr'),
+            $tbody = $tr.parent('tbody');
+
+        if ($tbody.find('> tr:not(.subTr)').length == 1) {
+            var template = $('#dummy-ohsedetails tbody').html();
+            template = template.replace(/__1/g, '_' + 1);
+            $tbody.append(template);
+            $('#ownerdetailid').val(1);
+
+            bindExpandTr();
+        }
+
+        $tr.next('tr.subTr').remove();
+        $tr.remove();
+        return false;
+    }
+
+    function bindDatePicker() {
+        $('.date_picker').datepicker({
+            'format': 'dd-mm-yyyy'
+        }).on('changeDate', function() {
+            $('.datepicker').hide();
+        }).data('datepicker');
+    }
+
+    function addMainTr(x) {
+        var $x = $(x),
+            rowid  = $x[0].id.split('_')[1],
+            $tr = $x.closest('tr'),
+			emp = 0;
+			
+		$('.checkemptyrow').find('input[id^=ohseName_]').each(function( index ) {
+		if($( this ).val()==""){
+			emp++;
+			}
+		});
+
+		if(emp >0)
+			return;
+		
+
+        if ($('#ohseName_' + rowid).val().length == 0 )
+            return;
+
+        var $ownerdetailid = $('#ownerdetailid'),
+            count = parseInt($ownerdetailid.val()) + 1,
+            template = $('#dummy-ohsedetails tbody').html();
+
+        template = template.replace(/__1/g, '_' + count);
+        $tr.parent('tbody').append(template);
+
+        $ownerdetailid.val(count);
+        $('.mainTrDelete_' + rowid).show();
+        bindDatePicker();
+        bindOhseAutoComplete();
+    }
+
+    $(function() {
+        $(".single_dropdown2").select2({
+            placeholder: "",
+            minimumResultsForSearch: -1
+        });
+    });
+</script>

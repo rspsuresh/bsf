@@ -1,0 +1,163 @@
+<!-- Script Tags -->
+<link rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/tree.css"> <!-- Jquery Horizontal tree css -->
+<script src="<?php echo $this->basePath(); ?>/js/jquery-migrate-1.2.1.min.js"></script> <!-- Jquery Horizontal tree migrate js -->
+<script src="<?php echo $this->basePath(); ?>/js/activity-tree.js"></script> <!-- Jquery Horizontal tree js-->
+<script>
+$(document).ready(function() {
+	$('.tree').tree_structure();
+	activityPopover(".tree_div");
+});
+
+function activityPopover(_this) {
+	 $(_this).popover({ 
+		trigger: "manual" , 
+		html: true, 
+		animation:false,
+		content: function() {
+			return $(".tree_controls_content").html();
+		}
+	}).on("mouseenter", function () {
+        var _this = this;
+        $(this).popover("show");
+        $(".popover").on("mouseleave", function () {
+            $(_this).popover('hide');
+        });
+    }).on("mouseleave", function () {
+		var _this = this;
+		setTimeout(function () {
+			if (!$(".popover:hover").length) {
+				$(_this).popover("hide");
+			}
+		}, 100);
+	});
+}
+</script>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 data-bsfhead="Activity">Activity</h1>
+        </div> 
+        <div class="col-lg-12 clear">
+            <div class="row" id="back_btn">
+                <div class="overflow">
+                    <div>
+                        <?php echo $this->ActivityHelper()->activityDisplay(0, $store_all_id, '');?>
+                    </div>
+                    <!---Popover Tree_controls_content--->
+                    <div class="tree_controls_content disp_none">
+                        <div class="tree_controls">
+							<a data-bsfshare="Add Activity" href="javascript:void(0);" class="add_action" title="Click for Add"><span><i class="fa fa-plus"></i></span> Add Activity</a>
+                            <a data-bsfshare="Edit Activity" href="javascript:void(0);" class="edit_action" title="Click for Edit"><span><i class="fa fa-edit"></i></span> Edit Activity</a>
+                            <a data-bsfshare="Add Task" href="javascript:void(0);" onclick="return addDataModel('addTask',$(this));"><span><i class="fa fa-tasks"></i></span> Add Task</a>
+<!--                            <a data-bsfshare="Add Roles" href="javascript:void(0);" onclick="return addDataModel('addRole',$(this));"><span><i class="fa fa-plus-circle"></i></span> Add Roles</a>-->
+							<a data-bsfshare="Assign User" href="javascript:void(0);" onclick="return addDataModel('assignUser',$(this));"><span><i class="fa fa-user"></i></span> Assign User</a>
+                        </div>
+                    </div>
+                </div><!---jquery horizontal Tree End-->                
+             </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="addtask" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="modelContent">
+            
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+function addDataModel(type,_this) {
+	var id = _this.closest('li').find('div').first().attr('id');
+	$.ajax({
+        url: getBaseURL() + 'workflow/activity/index',
+        type: 'POST',
+        data: {'action': type, 'activityId':id },
+        success: function (data, textStatus, jqXHR) {
+            $('#modelContent').html('');
+			$('#modelContent').html(data);
+			$('#addtask').modal('show');
+			$("#modelContent .lbl_move").polymerForm();	
+			$("#modelContent .multiple_dropdown").select2({});
+            $(".lbl_move").trigger('change');
+
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+        }
+    });
+}
+function submitModal() {
+	$.ajax({
+        url: getBaseURL() + 'workflow/activity/index',
+        type: 'POST',
+        data: $('#modalAddForm').serialize(),
+        success: function (data, textStatus, jqXHR) {
+			if(data == 'success') {
+				$('#addtask').modal('hide');
+				alert('Added Successfully');
+			} else {
+				alert("Request Failed");
+			}
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+        }
+    });
+}
+$(document).on('click','#select_all_task',function() {
+    if($("#select_all_task").is(':checked') ){
+        $("#select_task > option").prop("selected","selected");
+        $("#select_task").trigger("change");
+    }else{
+        $("#select_task > option").removeAttr("selected");
+        $("#select_task").trigger("change");
+    }
+});
+$(document).on('change','#select_task',function() {
+    if($('#select_task option:selected').length != $('#select_task option').length) {
+        $("#select_all_task").prop('checked',false);
+    } else {
+        $("#select_all_task").prop('checked',true);
+    }
+});
+$(document).on('click','#select_all_role',function() {
+    if($("#select_all_role").is(':checked') ){
+        $("#select_role > option").prop("selected","selected");
+        $("#select_role").trigger("change");
+    }else{
+        $("#select_role > option").removeAttr("selected");
+        $("#select_role").trigger("change");
+    }
+});
+$(document).on('change','#select_role',function() {
+    if($('#select_role option:selected').length != $('#select_role option').length) {
+        $("#select_all_role").prop('checked',false);
+    } else {
+        $("#select_all_role").prop('checked',true);
+    }
+});
+$(document).on('click','#select_all_user',function() {
+    if($("#select_all_user").is(':checked') ){
+        $("#select_user > option").prop("selected","selected");
+        $("#select_user").trigger("change");
+    }else{
+        $("#select_user > option").removeAttr("selected");
+        $("#select_user").trigger("change");
+    }
+});
+$(document).on('change','#select_user',function() {
+    if($('#select_user option:selected').length != $('#select_user option').length) {
+        $("#select_all_user").prop('checked',false);
+    } else {
+        $("#select_all_user").prop('checked',true);
+    }
+});
+</script>

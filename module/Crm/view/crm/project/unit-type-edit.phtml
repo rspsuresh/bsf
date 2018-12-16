@@ -1,0 +1,1909 @@
+<?php
+$bsf = new \BuildsuperfastClass();
+$url = $this->serverUrl(true);
+$url = array_pop(explode("/", $url));
+?>
+
+<style>
+    .mar_2{margin-left: 5px;}
+    .flt_rt{float:right;margin-top:5px;}
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<?php if(isset($projectDetail) && isset($unitTypeInfo)): ?>
+    <form method="post" role="form" id="unit-type-generation-form" enctype="multipart/form-data">
+        <input type="hidden" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+        <input type="hidden" name="ProjectId" id="ProjectId" value="<?php echo isset($projectDetail['ProjectId']) ? $projectDetail['ProjectId'] : ''; ?>">
+        <input type="hidden" name="UnitTypeId" id="UnitTypeId" value="<?php echo isset($unitTypeInfo['UnitTypeId']) ? $unitTypeInfo['UnitTypeId'] : ''; ?>">
+        <input type="hidden" name="include" id="include" value="<?php echo isset($resultDetail['Include']) ? $resultDetail['Include'] : ''; ?>">
+        <input type="hidden" name="lReg" id="lReg" value="<?php echo isset($resultDetail['LRegistrationValue']) ? $resultDetail['LRegistrationValue'] : ''; ?>">
+        <input type="hidden" name="cReg" id="cReg" value="<?php echo isset($resultDetail['CRegistrationValue']) ? $resultDetail['CRegistrationValue'] : ''; ?>">
+        <input type="hidden" name="lcAreaBase" id="lcAreaBase" value="<?php echo isset($resultDetail['LCAreaBasedon']) ? $resultDetail['LCAreaBasedon'] : ''; ?>">
+        <input type="hidden" name="lcRateBase"  id="lcRateBase" value="<?php echo isset($resultDetail['LCRateBasedon']) ? $resultDetail['LCRateBasedon'] : ''; ?>">
+        <input type="hidden" name="redirectUrl" id="redirectUrl" value="">
+        <div class="content_wrapper padlr0">
+            <div class="container-fluid padlr0">
+                <div class="col-lg-12">
+                    <h1 class="float_l">Project Info of
+                        <div class="btn-group proname_btn">
+                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php echo ucfirst($projectDetail['ProjectName']);?> <span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;project"><i class="fa fa-caret-down "></i></span></a>
+                            <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                                <ul>
+                                    <?php foreach($projects as $project){?>
+                                        <li><a href="<?php echo $this->basePath(); ?>/crm/project/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo $bsf->encode($project['ProjectId']); ?>"><?php echo ucfirst($project['ProjectName']);?></a></li>
+                                    <?php }	?>
+                                </ul>
+                            </div>
+                        </div>
+                    </h1>
+                    <div class="promote_social float_r">
+                        <ul>
+                            <span>Promote Project</span>
+                            <li><a href="#" class="fb_c ripple"><i class="fa fa-facebook-square"></i></a></li>
+                            <li><a href="#" class="twt_c ripple"><i class="fa fa-twitter-square"></i></a></li>
+                            <li><a href="#" class="g_c ripple"><i class="fa fa-google-plus-square"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-12 clear">
+                    <div>
+                        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="step_by_liner animated slideInDown"></div>
+                                    <ul class="step_by stepby_mb60">
+                                        <li>
+                                            <div class="step_by_sep animated_0_4s slideInRight"><p>5</p></div>
+                                            <p class="stepli_p1">Payment Schedule</p>
+                                        </li>
+                                        <li>
+                                            <div class="step_by_sep stepsep_active animated slideInRight"><p>6</p></div>
+                                            <p class="stepli_p2">Unit Type</p>
+                                        </li>
+                                        <li>
+                                            <div class="step_by_sep animated_1_5s slideInRight"><p>7</p></div>
+                                            <p class="stepli_p3">Facility Management</p>
+                                        </li>
+
+                                        <!-- <li class="opacity_08">
+                                             <div class="step_by_sep animated_1_5s slideInRight"><p>3</p></div>
+                                             <p class="stepli_p3">Car Park management</p>
+                                         </li>-->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 cnt_slider">
+                            <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                <!-- Wrapper for slides -->
+                                <div class="carousel-inner" role="listbox">
+                                    <div class="item active" data-id="1">
+                                        <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                            <h1 class="txt_center form_main_h1">Unit Type Area Details</h1>
+                                            <?php if(count($arrExistingUnitTypes)>0) {?>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <select name="copy_unit" id="copy_unit" class="form-control single_dropdown lbl_move" data-size="5" style="width:100%;" onchange="copyUnitType($(this).val());" label="To Copy Existing UnitType...">
+                                                            <option value="">Select UnitType</option>
+                                                            <?php if(isset($arrExistingUnitTypes)):
+                                                                foreach($arrExistingUnitTypes as $existingUnitTypes): ?>
+                                                                    <option value="<?php echo $existingUnitTypes['UnitTypeId']; ?>"><?php echo $existingUnitTypes['UnitTypeName']; ?></option>
+                                                                <?php endforeach;
+                                                            endif;?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
+                                            <div class="row">
+                                                <div class="form-group col-lg-12 req_flds">
+                                                    <input type="text" id="UnitTypeName" name="UnitTypeName"
+                                                           class="form-control lbl_move" label="Unit Type" value="<?php echo $unitTypeInfo['UnitTypeName']; ?>">
+                                                    <div class="error_message"><p>Please Enter Unit Type Name...</p></div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-lg-12 req_flds">
+                                                    <input type="text" class="form-control lbl_move" name="Area" id="Area"
+                                                           label="Saleable  Area" onblur="return FormatNum(this, 3)" onkeyup="UDSAreaCalc($(this).val())" onKeyPress="return isDecimal(event,this)"
+                                                           value="<?php echo $unitTypeInfo['Area']; ?>">
+                                                    <input type="hidden" id="buidType" value="<?php echo $resultsinfo['BusinessTypeId']; ?>" />
+                                                    <input type="hidden" id="BuildUpArea" value="<?php echo $unitTypeInfo['BuildupArea']; ?>" />
+                                                    <input type="hidden" id="LandArea" value="<?php echo $unitTypeInfo['LandArea']; ?>" />
+                                                    <div class="error_message"><p>Please type the Area...</p></div>
+                                                </div>
+                                            </div>
+                                            <?php if(isset($resultsinfo) && $resultsinfo['BusinessTypeId']!=3){ ?>
+                                                <div class="row">
+                                                <div class="form-group col-lg-12 req_flds">
+                                                    <input type="text" class="form-control lbl_move"  name="UDSLandArea" id="UDSLandArea" onblur="return FormatNum(this, 3)"
+                                                           onKeyPress="return isDecimal(event,this)" label="UDS Land Area"
+                                                           value="<?php  if($unitTypeDetails['UDSLandArea'] > 0){ echo $this->commonHelper()->sanitizeNumber($unitTypeDetails['UDSLandArea'],3,false);} else { echo $unitTypeInfo['UDSLandArea']; } ?>" >
+                                                    <div class="error_message"><p>Please type the UDS Land Area...</p></div>
+                                                </div>
+                                                </div><?php } ?>
+                                            <div class="row">
+                                                <?php if ($resultDetail['LCAreaBasedon'] == 'C') { ?>
+                                                <div class="form-group col-lg-12 req_flds">
+                                                    <?php } else  { ?>
+                                                    <div class="form-group col-lg-12">
+                                                        <?php } ?>
+                                                        <input type="text" class="form-control lbl_move"  name="CarpetArea" id="CarpetArea"
+                                                               onblur="return FormatNum(this, 3)" onKeyPress="return isDecimal(event,this)" label="Carpet Area"
+                                                               value="<?php echo $unitTypeInfo['CarpetArea']; ?>">
+                                                        <div class="error_message"><p>Please type the Carpet Area...</p></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="item" data-id="2">
+                                            <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                                <h1 class="txt_center form_main_h1"><span class="unittype-name"></span> - Unit Type Cost Details</h1>
+                                                <div class="row">
+                                                    <div class=" col-lg-12 req_flds">
+                                                        <input type="text" name="Rate" id ="Rate" class="form-control lbl_move"
+                                                               label="Rate" onKeyPress="return isNumberKey(event)"
+                                                               value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['Rate'],2,true); ?>">
+                                                        <div class="error_message"><p>Please Enter the Rate...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-12">
+                                                        <label for="floor_wise_yes" class="col-lg-12 txt_left control-label">Floor wise rate required ?</label>
+                                                        <div class="col-lg-12">
+                                                            <div class="radio_check">
+                                                                <p>
+                                                                    <input type="radio" value="1" id="floor_wise_yes" name="floor_wise_yes_no" <?php if(isset($unitTypeInfo)) { if($unitTypeInfo['FloorWiseRequired']=='1') { echo 'checked'; } } ?> />
+                                                                    <label for="floor_wise_yes" class="ripple">Yes</label>
+                                                                </p>
+                                                                <p>
+                                                                    <input type="radio" value="0" id="floor_wise_no" name="floor_wise_yes_no" <?php if(isset($unitTypeInfo)) { if($unitTypeInfo['FloorWiseRequired']=='0') { echo 'checked'; } } ?> />
+                                                                    <label for="floor_wise_no" class="ripple">No</label>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row floor_wise_check" <?php if(isset($unitTypeInfo)) { if($unitTypeInfo['FloorWiseRequired']=='1') { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; } } ?> >
+                                                    <div class="col-lg-12 form-group">
+                                                        <div class="col-lg-12 radio_check">
+                                                            <p>
+                                                                <input type="checkbox" id="IncrementRise" name="IncrementRise" />
+                                                                <label for="IncrementRise" class="IncrementRise_label ripple">Incremental Rate Floor Wise</label>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 form-group">
+                                                        <div class="col-lg-12">
+                                                            <select name="RateBlockName" id="RateBlockName" class="form-control RateBlockName_label single_dropdown lbl_move" onchange="showFloors()" label="Block Name" style="width:100%;">
+                                                                <option value="0" selected>Select block name...</option>
+                                                                <?php if(isset($arrBlockName) && count($arrBlockName!=0)){
+                                                                    foreach($arrBlockName as $Block) :?>
+                                                                        <option value="<?php echo $Block['BlockId'];?>"><?php echo $Block['BlockName'];?></option>
+                                                                    <?php endforeach;} ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 form-group rateBlock" style="display: none">
+                                                        <div class="col-sm-6">
+                                                            <select name="floorFrom" id="floorFrom" onchange="showFloorTo()" class="form-control single_dropdown lbl_move floorFrom_label" label="From Floor" style="width:100%;">
+                                                                <option value="0" ></option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <select name="floorTo" class="form-control single_dropdown lbl_move floorTo_label" id="floorTo" label="To Floor" style="width:100%;">
+                                                                <option value="0"></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-4 form-group col-lg-offset-2 rateBlock" style="display: none">
+                                                        <label for="overall_rate_rise" class="overall_rate_rise_label">Overall Rate Rise</label>
+                                                    </div>
+                                                    <div class="col-lg-6 rateBlock" style="display: none">
+                                                        <input class="tbl_input overall_rate_rise_input" type="text"  id="overall_rate_rise" name="rate" value="0" onkeypress="return isDecimal(event,this);" placeholder="">
+                                                        <a id="hidePerTag" class="apply_btn" onclick="overAllRateRise()" href="javascript:void(0);" ><span><i class="fa fa-check-square"></i></span> Apply</a>
+                                                        <span id="hide_all" class="close hide_span"><a href="#">(hide)</a></span>
+                                                    </div>
+                                                </div>
+                                                <div <?php if(isset($unitTypeInfo)) { if($unitTypeInfo['FloorWiseRequired']=='1') { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; } } ?> class="row floor_wise_check" id="blockMultipleRowHide">
+                                                    <div class="form-group block_wise_area col-lg-12" id="block_wrapper"></div>
+                                                </div>
+
+
+                                                <!--									<div class="row">   -->
+                                                <!--										<div class="form-group col-lg-12">-->
+                                                <!--											<select name="LevelwiseRate" id="LevelwiseRate" class="single_dropdown lbl_move" data-size="5" style="width:100%;" label="Select Level...">-->
+                                                <!--											   <option value="">Select Level</option>-->
+                                                <!--											   --><?php
+                                                //											   foreach($resultsLevel as $level){
+                                                //											   echo "<option value='".$level['LevelId']."'>".$level['LevelName']."</option>";
+                                                //										}?>
+                                                <!--											</select>-->
+                                                <!--											<div class="error_message"><p>Please Select the LevelwiseRate...</p></div>-->
+                                                <!--										</div>-->
+                                                <!--									</div> -->
+                                                <div class="row m_top20 padtop10">
+                                                    <div class="form-group col-lg-12">
+                                                        <input type="text" name="BaseAmount" id="BaseAmount"class="form-control lbl_move" value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['BaseAmt'],2,true); ?>" label="Calculated Base Amount" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 req_flds">
+                                                        <input type="text" name="GuideLineValue" id="GuideLineValue"
+                                                               class="gross form-control lbl_move" onKeyPress="return isNumberKey(event)"
+                                                               label="GuideLineValue" value="<?php echo $unitTypeInfo['GuideLineValue']; ?>">
+                                                        <div class="error_message"><p>Please Enter the GuideLineValue...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 req_flds">
+                                                        <input type="text" name="MarketLandValue" id="MarketLandValue"
+                                                               class="gross form-control lbl_move" onKeyPress="return isNumberKey(event)"
+                                                               label="MarketLandValue" value="<?php echo $unitTypeInfo['MarketLandValue']; ?>">
+                                                        <div class="error_message"><p>Please Enter the MarketLandValue...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="radio_check flt_rt">
+                                                    <p>
+                                                        <input type="checkbox" id="oSelectAll" name="oSelectAll" />
+                                                        <label for="oSelectAll" class="IncrementRise_label ripple">Select All</label>
+                                                    </p>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 clear">
+                                                        <select name="OtherCost[]" id="OtherCost" class="form-control multiple_dropdown lbl_move" multiple="multiple" style="width:100%;" label="Select OtherCost">
+                                                            <?php if(isset($arrOtherCosts)):
+                                                                foreach($arrOtherCosts as $otherCost): ?>
+                                                                    <option value="<?php echo $otherCost['OtherCostId']; ?>"
+                                                                        <?php echo (in_array($otherCost['OtherCostId'], $arrExistOtherCostIds))?'selected':''; ?>
+                                                                            data-amt="<?php echo $otherCost['Amount']; ?>" data-area="<?php echo $otherCost['Area']; ?>" data-rate="<?php echo $otherCost['Rate']; ?>"> <?php echo $otherCost['OtherCostName']; ?>
+
+                                                                    </option>
+                                                                <?php endforeach;
+                                                            endif; ?>
+                                                        </select>
+                                                        <div class="error_message"><p>Please Select the OtherCost...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div id="other-cost-details-wrapper" class="form-group col-lg-12 <?php echo (empty($arrExistingOtherCosts))?'hide':''; ?>">
+                                                        <div class="stginner_h5 m_btm20">
+                                                            <h5>Other Cost Items</h5>
+                                                        </div>
+                                                        <?php if(isset($arrExistingOtherCosts)):
+                                                            foreach($arrExistingOtherCosts as $otherCost): ?>
+                                                                <div class="form-group penality_int_area col-lg-12 req_flds" data-id="<?php echo $otherCost['OtherCostId']; ?>">
+                                                                    <!--                                                        <div class="col-lg-4 col-lg-offset-4 col-md-5 col-sm-5 col-xs-4 padlr0">-->
+                                                                    <p style="padding-top:3px;color:#000;"><?php echo $otherCost['OtherCostName']; ?></p>
+                                                                    <!--                                                        </div>-->
+                                                                    <div class="col-lg-3 col-md-3 col-sm-5 col-xs-5 padlr0">
+                                                                        <input type="text" class="lbl_move other-cost-amt noValid" id="selectedOtherCostArea_<?php echo $otherCost['OtherCostId']; ?>" onchange="calcArea(<?php echo $otherCost['OtherCostId'];?>)"  name="selectedOtherCostArea_<?php echo $otherCost['OtherCostId']; ?>"
+                                                                               value="<?php echo (isset($otherCost['Area']) && floatval($otherCost['Area'])>0) ? $this->commonHelper()->sanitizeNumber($otherCost['Area'],2) : ''; ?>" placeholder="Area" onkeypress="return isDecimal(event, this)">
+                                                                    </div>
+                                                                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 padlr0 mar_2">
+                                                                        <input type="text" class="lbl_move other-cost-amt noValid" id="selectedOtherCostRate_<?php echo $otherCost['OtherCostId']; ?>" onchange="calcArea(<?php echo $otherCost['OtherCostId'];?>)" name="selectedOtherCostRate_<?php echo $otherCost['OtherCostId']; ?>"
+                                                                               value="<?php echo (isset($otherCost['Rate']) && floatval($otherCost['Rate'])>0) ? $this->commonHelper()->sanitizeNumber($otherCost['Rate'],2,true) : ''; ?>" placeholder="Rate" onkeypress="return isDecimal(event, this)">
+                                                                    </div>
+                                                                    <div class="col-lg-5 col-md-5 col-sm-7 col-xs-7 padlr0 mar_2">
+                                                                        <input type="text" class="lbl_move other-cost-amt other-cost-tot" id="selectedOtherCostValue_<?php echo $otherCost['OtherCostId']; ?>" onchange="calcOCAmount(<?php echo $otherCost['OtherCostId'];?>)"  name="selectedOtherCostValue_<?php echo $otherCost['OtherCostId']; ?>"
+                                                                               value="<?php echo (isset($otherCost['Amount']) && floatval($otherCost['Amount'])>0) ? $this->commonHelper()->sanitizeNumber($otherCost['Amount'],2,true) : ''; ?>" placeholder="Amount" onkeypress="return isDecimal(event, this)">
+                                                                        <div class="error_message"><p></p></div>
+                                                                    </div>
+
+                                                                </div>
+                                                            <?php endforeach;
+                                                        endif;
+                                                        ?>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <select name="ExtraItem[]" id="ExtraItem" class="form-control multiple_dropdown lbl_move" multiple="multiple" style="width:100%;" label="Select Extra Items">
+                                                            <?php if(isset($arrExtraItems)):
+                                                                foreach($arrExtraItems as $extraItem): ?>
+                                                                    <option value="<?php echo $extraItem['ExtraItemId']; ?>"
+                                                                        <?php echo (in_array($extraItem['ExtraItemId'], $arrExistExtraItemIds))?'selected':''; ?>
+                                                                        > <?php echo $extraItem['ItemDescription']; ?></option>
+                                                                <?php endforeach;
+                                                            endif; ?>
+                                                        </select>
+                                                        <div class="error_message"><p>Please Select the Extra Item...</p></div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <input type="text" name="LandAmount" id="LandAmount" class="form-control lbl_move"
+                                                               onKeyPress="return isNumberKey(event)" value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['LandAmount'],2,true); ?>"
+                                                               label="Calculated LandAmount" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <input type="text" name="ConstructionAmount" id="ConstructionAmount"
+                                                               class="form-control lbl_move" onKeyPress="return isNumberKey(event)"
+                                                               value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['ConstructionAmount'],2,true); ?>"
+                                                               label="Calculated Construction Amount" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <input type="text" name="GrossAmount" id="GrossAmount" class="form-control lbl_move"
+                                                               value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['GrossAmt'],2,true); ?>"
+                                                               onKeyPress="return isNumberKey(event)" label="Calculated Gross Amount" data-gross="<?php echo $unitTypeInfo['GrossAmt']; ?>" readonly>
+                                                        <div class="error_message"><p>Please Enter the GrossAmount...</p></div>
+                                                    </div>
+                                                </div>
+                                                <?php if($resultDetail['Include']==1) { ?>
+                                                    <div class="row">
+                                                        <div class="form-group col-lg-12">
+                                                            <input type="text" name="landReg" id="landReg" class="form-control lbl_move"
+
+                                                                   onKeyPress="return isNumberKey(event)" label="LandRegistration Amount"  value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['LandRegAmount'],2,true); ?>" readonly>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="form-group col-lg-12">
+                                                            <input type="text" name="constructionReg" id="constructionReg" class="form-control lbl_move"
+
+                                                                   onKeyPress="return isNumberKey(event)" label="constructionRegistration Amount"  value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['ConsRegAmount'],2,true); ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                <?php } ?>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <input type="text" name="NetAmt" id="NetAmt" class="form-control lbl_move"
+                                                               value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['NetAmt'],2,true); ?>"
+                                                               onKeyPress="return isNumberKey(event)" label="Calculated Gross Amount" readonly>
+                                                        <div class="error_message"><p>Please Enter the NetAmount...</p></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="item" data-id="3">
+                                            <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                                <h1 class="txt_center form_main_h1"><span class="unittype-name"></span> - Payable Amount Details</h1>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 req_flds">
+                                                        <input type="text" name="AdvanceAmount" id="AdvanceAmount" class="Percent form-control lbl_move"
+                                                               onKeyPress="return isNumberKey(event)" label="Advance Amount"
+                                                               value="<?php echo $this->commonHelper()->sanitizeNumber($unitTypeInfo['AdvAmount'],2,true); ?>">
+                                                        <div class="error_message"><p>Please Enter the AdvanceAmount...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 req_flds">
+                                                        <input type="text" name="AdvancePercent" id="AdvancePercent" class="Percent form-control lbl_move"
+                                                               onKeyPress="return isNumberKey(event)" label="Advance Percent"
+                                                               value="<?php echo $unitTypeInfo['AdvPercent']; ?>">
+                                                        <div class="error_message"><p>Please Enter the AdvancePercent...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12 req_flds">
+                                                        <input type="text" name="LateInterest" id="LateInterest" class="form-control lbl_move"
+                                                               onKeyPress="return isNumberKey(event)" label="Late Interest % (Per Annum)"
+                                                               value="<?php echo $unitTypeInfo['IntPercent']; ?>">
+                                                        <div class="error_message"><p>Please Enter Late Interest...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <select name="PaymentSchedule" id="PaymentSchedule" class="single_dropdown lbl_move" data-size="5" style="width:100%;"
+                                                                label="Select the PaymentSchedule...">
+                                                            <option value=""></option>
+                                                            <?php if(isset($arrPaymentSchedules)):
+                                                                foreach($arrPaymentSchedules as $paymentSchedule): ?>
+                                                                    <option value="<?php echo $paymentSchedule['PaymentScheduleId']; ?>"
+                                                                        <?php echo ($paymentSchedule['PaymentScheduleId'] == $unitTypeInfo['PaymentScheduleId'])?'selected':''; ?>>
+                                                                        <?php echo $paymentSchedule['PaymentSchedule']; ?>
+                                                                    </option>
+                                                                <?php endforeach;
+                                                            endif; ?>
+                                                        </select>
+                                                        <div class="error_message"><p>Please Select the paymentschedule...</p></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-12">
+                                                        <input name="CreditDays" id="CreditDays" type="text" class="form-control lbl_move"
+                                                               label="Credit Days" onKeyPress="return isNumberKey(event)"
+                                                               value="<?php echo $unitTypeInfo['CreditDays']; ?>">
+                                                        <!--div class="error_message"><p>Please Enter Credit Days...</p></div-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="item" data-id="4">
+                                            <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2">
+                                                <h1 class="txt_center form_main_h1"><span class="unittype-name"></span> - Project Image</h1>
+
+
+
+                                                 <?php if(count($arrPhotos)>0) {?>
+                                                <div class="upload_area">
+                                                     <p class="txt_center upld_icon" ><span><i class="fa fa-upload"></i></span></p>
+                                                     <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2">
+                                                    <a href="#upload_photo" class="file_link ripple brad_50" data-toggle="tab">
+                                                        Choose a file from computer
+                                                       </a><input type="file" class="file_input" id="files" name="files[]" multiple />
+
+                                                   <div id="upload_photo" class="upld_photo pload_area_photo tab-pane" <?php if(count($arrPhotos)>0) { echo 'style="display:block;"'; } else { echo 'style="display:none;"'; }?>>
+                                                       <p class="strm_loader txt_center clear" style="display:none;"><span></span>Loading...</p>
+                                                       <div id="upload_photos" class="upload_photos">
+                                                           <?php if(isset($arrPhotos)) { foreach($arrPhotos as $stgImg) {?>
+                                                               <span>
+                                                        <img class="thumb_photos" title="images.jpeg" src="<?php echo $this->basePath(); ?>/<?php echo $stgImg['ImageUrl']; ?>">
+                                                    </span>
+                                                           <?php } }?>
+                                                       </div>
+                                                   </div>
+                                                   </div>
+                                                   </div>
+                                               <?php } else { ?>
+                                                    <div class="upload_area">
+                                                        <p class="txt_center upld_icon" ><span><i class="fa fa-upload"></i></span></p>
+                                                        <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2">
+                                                            <a href="#upload_photo" class="file_link ripple brad_50" data-toggle="tab">
+                                                                Choose a file from computer
+                                                            </a><input type="file" class="file_input" id="files" name="files[]" multiple />
+                                                        </div>
+                                                    </div>
+                                                    <div id="upload_photo" class="upload_area_photo tab-pane upld_photo">
+                                                        <p class="strm_loader txt_center clear" style="display:none;"><span></span>Loading...</p>
+                                                        <div id="upload_photos" class="upload_photos"></div>
+                                                    </div>
+                                                        <?php } ?>
+
+                                        </div>
+                                        </div>
+                                <!-- Indicators -->
+                                        <!---- <ol class="carousel-indicators">
+                                             <li data-target="#carousel-example-generic" data-index="0" class="active"></li>
+                                             <li data-target="#carousel-example-generic" data-index="1"></li>
+                                             <li data-target="#carousel-example-generic" data-index="2"></li>
+                                             <!----<li data-target="#carousel-example-generic" data-slide-to="3"></li>---->
+                                        <!---- </ol>---->
+                                        <!-- Controls -->
+                                        <ul class="prev_next next-bt">
+                                            <li style="position: relative; right: 44%;top: 3px">
+                                                <a href="javascript:void(0)" class="prevSlide hide" id="back-btn">
+                                                    <i class="fa fa-chevron-circle-left"></i> Back
+                                                </a>
+                                            </li>
+                                            <li style="position: relative;left: 42%;bottom: 8px;">
+                                                <a href="javascript:void(0)" class="nextSlide" role="button" id="back-btn">Continue <i class="fa fa-chevron-circle-right"></i>
+                                                </a>
+                                            </li>
+                                            <div style="clear:both;"></div>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-12 savebtn_area">
+                <ul>
+                    <li class="save_btn m_right10 float_r hide"><input type="button" name="saveExit" class="ripple continue" value="Save &amp; Exit"/></li>
+                    <li class="save_btn m_right10 float_r hide"><input type="button" name="saveNext" class="ripple continue save-next" value="Save &amp; Next"/></li>
+                    <li class="goto">
+                        <label for="go_to" class="float_l">Go to</label>
+                        <select id="projectSteps" name="go_to" class="float_l goto_select">
+                            <option value="general" <?php if($this->currentRequest()->get('action') == 'general') { echo 'selected'; } ?>>General</option>
+                            <option value="land-area" <?php if($this->currentRequest()->get('action') == 'land-area') { echo 'selected'; } ?>>Area Details</option>
+                            <option value="land-cost" <?php if($this->currentRequest()->get('action') == 'land-cost') { echo 'selected'; } ?>>Land Cost Calculation</option>
+                            <option value="other-cost" <?php if($this->currentRequest()->get('action') == 'other-cost') { echo 'selected'; } ?>>Other Cost Details</option>
+                            <option value="payment" <?php if($this->currentRequest()->get('action') == 'payment-schedule' || $this->currentRequest()->get('action') == 'payment-schedule-edit' || $this->currentRequest()->get('action') == 'payment-schedule-register' || $this->currentRequest()->get('action') == 'payment') { echo 'selected'; } ?>>Payment Schedule</option>
+                            <option value="unit-type-register" <?php if($this->currentRequest()->get('action') == 'unit-type-register' || $this->currentRequest()->get('action') == 'unit-type' || $this->currentRequest()->get('action') == 'unit-type-edit') { echo 'selected'; } ?>>Unit Type</option>
+                            <option value="facility" <?php if($this->currentRequest()->get('action') == 'facility' || $this->currentRequest()->get('action') == 'car-park' || $this->currentRequest()->get('action') == 'other-facility') { echo 'selected'; } ?>>Facility Management</option>
+                            <option value="checklist" <?php if($this->currentRequest()->get('action') == 'checklist') { echo 'selected'; } ?>>Check List Management</option>
+                            <option value="penality-interestrate" <?php if($this->currentRequest()->get('action') == 'penality-interestrate') { echo 'selected'; } ?>>Penality & Interest Rate</option>
+                            <option value="incentive-register" <?php if($this->currentRequest()->get('action') == 'incentive-register') { echo 'selected'; } ?>>Incentive Management</option>
+                            <option value="property-management" <?php if($this->currentRequest()->get('action') == 'property-management') { echo 'selected'; } ?>>Property Management</option>
+                        </select>
+                        <p class="donecngs_p hide">Done With Your Changes ?</p>
+                    </li>
+                </ul>
+            </div>
+    </form>
+<?php endif; ?>
+<script id="blockTemplate" type="text/template" class="hide">
+    <div class="block_wise_box">
+        <div class="stginner_h5">
+            <h5 id="blockName__"></h5>
+            <input type="hidden" id="blockid__" name="blockid__"  />
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover tbltop_bdr0">
+                <tbody id="floorDetails__"></tbody>
+            </table>
+            <input type="hidden" id="floorrowid__" name="floorrowid__" value="0" />
+        </div>
+    </div>
+</script>
+<script id="floorTemplate" type="text/template" class="hide">
+    <tr>
+        <input type="hidden" id="block__0_floor_id__" name="block__0_floor_id__"/>
+        <td id="block__0_floor_name__" width="35%"></td>
+        <td class="tbl_input_td"><input id="block__0_floor_rise__" class="tbl_input floor_rate_change_all" type="text" name="block__0_floor_rise__" value="" onkeypress="return isDecimal(event,this);" placeholder="Floor rise rate" /></td>
+        <td class="tbl_input_td"><input id="block__0_floor_rate__" class="tbl_input" type="text" name="block__0_floor_rate__" value="" onkeypress="return isDecimal(event,this);" placeholder="Rate" readonly /></td>
+    </tr>
+</script>
+<script type="text/javascript">
+    $('.cnt_slider .carousel').carousel({
+        interval: false
+    });
+
+    $(document).on("click","#oSelectAll",function(){
+        var $opt =$("#OtherCost");
+        var $OtherOption =$("#OtherCost > option");
+        if($("#oSelectAll").is(':checked') ){ //select all
+            $OtherOption.prop("selected","selected");// Select All Options
+
+        } else { //deselect all
+            $OtherOption.removeAttr("selected");
+        }
+        $opt.trigger('change');
+        var optOther=[];
+        if($opt.val()!=null) {
+            optOther = $opt.val();
+        }
+
+        $('#other-cost-details-wrapper').html('');
+        if(optOther.length>0) {
+            $.each(optOther,function(i,o) {
+                var tr = $("#OtherCost option[value=" + o + "]"),
+                    selOtherCostId = o,
+                    selOtherCostName = tr.html(),
+                    amt="",
+                    area="",
+                    rate="";
+                    if(parseFloat(tr.attr('data-amt'))>0 && parseFloat(tr.attr('data-amt'))!=false) {
+                        amt=sanitizeNumber(parseFloat(tr.attr('data-amt')),2,true);
+                    }
+                    if(parseFloat(tr.attr('data-area'))>0 && parseFloat(tr.attr('data-area'))!=false) {
+                        area=sanitizeNumber(parseFloat(tr.attr('data-area')),2,false);
+                    }
+                    if(parseFloat(tr.attr('data-rate'))>0 && parseFloat(tr.attr('data-rate'))!=false) {
+                        rate=sanitizeNumber(parseFloat(tr.attr('data-rate')),2,false);
+                    }
+
+
+                var otherCostAmtHtml = '<div class="form-group penality_int_area col-lg-12 req_flds" data-id="'+ selOtherCostId+'">'
+
+                    + '<p style="padding-top:3px;color:#000;">'+ selOtherCostName+'</p>'
+
+                    + '<div class="col-lg-3 col-md-3 col-sm-5 col-xs-5 padlr0">'
+                    + '<input type="text" class="lbl_move other-cost-amt noValid"  onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostArea_'+selOtherCostId+'" name="selectedOtherCostArea_'+selOtherCostId+'" placeholder="Area" value="'+area+'" onkeypress="return isDecimal(event, this)">'
+                    + '</div>'
+                    + '<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 padlr0 mar_2">'
+                    + '<input type="text" class="lbl_move other-cost-amt noValid" onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostRate_'+selOtherCostId+'" name="selectedOtherCostRate_'+selOtherCostId+'" placeholder="Rate" value="'+rate+'" onkeypress="return isDecimal(event, this)">'
+                    + '</div>'
+                    + '<div class="col-lg-5 col-md-5 col-sm-7 col-xs-7 padlr0 mar_2">'
+                    + '<input type="text" class="lbl_move other-cost-amt other-cost-tot" onchange="calcOCAmount('+selOtherCostId+');" id="selectedOtherCostValue_'+selOtherCostId+'"  name="selectedOtherCostValue_'+selOtherCostId+'" placeholder="Amount" value="'+amt+'" onkeypress="return isDecimal(event, this)">'
+                    + '<div class="error_message"><p></p></div>'
+                    + '</div>';
+
+
+                $('#other-cost-details-wrapper').append(otherCostAmtHtml);
+                $('#other-cost-details-wrapper').removeClass('hide');
+                var $tarOtherCostDetail = $('#other-cost-details-wrapper').find('> div[data-id="'+selOtherCostId+'"]');
+                var $tarIp = $tarOtherCostDetail.find('input.lbl_move');
+
+                $tarIp.polymerForm();
+                $tarIp.each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+                $("#GrossAmount").trigger('change');
+            });
+        }
+
+
+    });
+
+    $(document).ready(function () {
+
+        $("#OtherCost").on('change',function() {
+            var count = this.selectedOptions.length; // how options selected
+            var opt = this.length; // how options total
+            if (count===opt) {
+                // all selected
+                $("#oSelectAll").prop('checked', true);
+            } else {
+                // not all selected
+                $("#oSelectAll").prop('checked', false);
+            }
+        });
+
+    });
+    $('input[type=radio][name=floor_wise_yes_no]').on('change',function() {
+        if($(this).val()==1) {
+            $('.floor_wise_check').show();
+        } else {
+            $('.floor_wise_check').hide();
+
+        }
+    });
+    $('#hide_all').on('click',function() {
+        $('#blockMultipleRowHide').toggle();
+    });
+
+    //$('.carousel-indicators li').click(function(){
+    //
+    //
+    //});
+
+    $("#projectSteps").change(function(){
+        if(this.value=="unit-type-generation"){
+            window.location.href= getBaseURL() + "crm/index/"+this.value+"/<?php echo $bsf->encode($projectId); ?>";
+        } else {
+            window.location.href= getBaseURL() + "crm/project/"+this.value+"/<?php echo $bsf->encode($projectId); ?>";
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $(function() {
+
+        var BlockDetail = <?php echo (isset($BlockDetail)) ? json_encode($BlockDetail) :'[]' ?>,
+            FloorDetail = <?php echo (isset($FloorDetail)) ? json_encode($FloorDetail) :'[]' ?>;
+        var blocKTemplate = $('#blockTemplate').html();
+        var floorTemplate = $('#floorTemplate').html();
+        var $block_wrapper = $('#block_wrapper');
+        $block_wrapper.html('<input type="hidden" id="blockrowid" name="blockrowid" value="0"/>');
+        var h=0;
+
+        $.each(BlockDetail,function(j,p) {
+            h++;
+            $block_wrapper.append(blocKTemplate.replace(/__/g, '_' + h));
+            $('#blockName_' + h).html(p.BlockName);
+            $('#blockid_' + h).val(p.BlockId);
+            $('#blockrowid').val(h);
+
+            var f=0;
+            $.each(FloorDetail,function(i,o) {
+                if(p.BlockId != o.BlockId)
+                    return;
+                f++;
+                $('#floorDetails_' + h).append(floorTemplate.replace(/__0/g, '_' + h)
+                    .replace(/__/g, '_' + f));
+                $('#block_'+h+'_floor_id_' + f).val(o.FloorId);
+                $('#block_'+h+'_floor_name_' + f).html(o.FloorName);
+                if($.trim(o.FloorRate)=="" || parseFloat(o.FloorRate)==0) {
+                    $('#block_'+h+'_floor_rate_' + f).val(sanitizeNumber($('#Rate').val() ,2,true));
+                } else {
+                    $('#block_'+h+'_floor_rate_' + f).val(sanitizeNumber(o.FloorRate,2,true));
+                }
+                if($.trim(o.FloorRiseRate)=="" || parseFloat(o.FloorRiseRate)==0) {
+                    $('#block_'+h+'_floor_rise_' + f).val(0);
+                } else {
+                    $('#block_'+h+'_floor_rise_' + f).val(sanitizeNumber(o.FloorRiseRate,2,true));
+                }
+                $('#floorrowid_' + h).val(f);
+            });
+        });
+
+    });
+    var FloorListFrom = [];
+    var FloorListTo = [];
+    function showFloors() {
+        $('#floorFrom').val('').trigger('change');
+        $('#floorTo').val('').trigger('change');
+
+        var RateBlockName = $('#RateBlockName').val();
+        if(RateBlockName != ''){
+            $('.rateBlock').show();
+
+            $.ajax({
+                url: getBaseURL() + 'crm/project/unit-type-edit',
+                type: 'post',
+                data: {'BlockId':RateBlockName,'type':'fromFloor',csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+                async: true,
+                success : function(data) {
+                    var FloorNamesList = JSON.parse(data);
+                    $('#floorFrom').html('');
+                    $('#floorFrom').append('<option value=""></option>');
+                    $.each(FloorNamesList,function(i,o){
+                        $('#floorFrom').append('<option value="'+ o.FloorId +'" data-index="'+i+'" data-sortId="'+ o.SortId+'"> '+ o.FloorName+'</option>');
+                    });
+                    FloorListFrom= FloorNamesList;
+                },
+                error : function(request) {
+                }
+            });
+
+        } else {
+            $('.rateBlock').hide();
+        }
+
+    }
+    function showFloorTo(){
+        var RateBlockName = $('#RateBlockName').val();
+        var SortId =$('#floorFrom').find('option:selected');
+        if(SortId.length==0) {
+            return;
+        }
+        if(RateBlockName != '') {
+            $.ajax({
+                url: getBaseURL() + 'crm/project/unit-type-edit',
+                type: 'post',
+                data: {'BlockId': RateBlockName,'fromFloorId':$('#floorFrom').val(),'SortId':SortId.attr('data-sortId'),'type': 'toFloor', csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+                async: true,
+                success: function (data) {
+                    var FloorNamesList = JSON.parse(data);
+                    $('#floorTo').html('');
+                    $('#floorTo').append('<option value=""></option>');
+                    $.each(FloorNamesList, function (i, o) {
+                        $('#floorTo').append('<option value="' + o.FloorId + '"data-index="'+i+'"> ' + o.FloorName + '</option>');
+                    });
+                    FloorListTo = FloorNamesList;
+                },
+                error: function (request) {
+                }
+            });
+        }
+    }
+    function overAllRateRise() {
+        var RateBlockName = $('#RateBlockName').val(),
+            floorFrom = $('#floorFrom').val(),
+            floorTo = $('#floorTo').val();
+
+        if(RateBlockName == null || RateBlockName.length == 0 ) {
+            alert("Select Block Name to Apply Rate Rise");
+            $('#RateBlockName').focus();
+            return;
+        }
+        if(floorFrom == null || floorFrom.length == 0 ) {
+            alert("Select From Floor to Apply Rate Rise");
+            $('#floorFrom').focus();
+            return;
+        }
+
+        var fromIndex =$('#floorFrom').find('option:selected');
+        if(fromIndex.length==0) {
+            return;
+        }
+        fromIndex = fromIndex.attr('data-index');
+        var toIndex;
+        $.each(FloorListFrom,function(i,o){
+            if(o.FloorId == floorTo){
+                toIndex = i;
+            }
+        });
+        var temp = $('input[id^=blockid_][value="'+RateBlockName+'"]');
+        var floorId = temp[0].id.split('_')[1];
+        if (typeof toIndex === "undefined") {
+            toIndex=parseInt(fromIndex);
+        }
+        toIndex++;
+        if($("#IncrementRise").is(':checked')){
+            var OverallTempValue = $('#overall_rate_rise').val();
+            var OverallValue = $('#overall_rate_rise').val();
+            if (confirm('Do you Want apply this Incremental rate to Selected Floors...? ')) {
+                for(var i=++fromIndex;i<=toIndex ;i++) {
+                    $('#block_'+floorId+'_floor_rise_'+i+'').val(OverallValue);
+                    OverallValue =parseInt(OverallValue)+parseInt(OverallTempValue);
+                }
+                $('.floor_rate_change_all').trigger('change');
+            }
+        } else {
+            if (confirm('Do you Want apply this rate to Selected Floors...? ')) {
+                for(var i=++fromIndex;i<=toIndex ;i++) {
+                    var OverallValue = $('#overall_rate_rise').val();
+                    $('#block_'+floorId+'_floor_rise_'+i+'').val(OverallValue);
+                }
+                $('.floor_rate_change_all').trigger('change');
+            }
+        }
+    }
+    $(function() {
+        $('.floor_rate_change_all').on('change',function() {
+            var id= ($(this).attr('id')).split('_');
+            var tot = parseFloatVal($(this).val()) + parseFloatVal($('#Rate').val());
+            $('#block_'+id[1]+'_floor_rate_'+id[4]).val(sanitizeNumber(tot,2,true));
+        });
+        var $unitTypeName = $('#UnitTypeName'),
+            arrExistingUnitTypeNames = <?php echo (isset($jsonExistingUnitTypeNames))?$jsonExistingUnitTypeNames:'[]' ?>,
+            $carousel = $('#carousel-example-generic'),
+            $Area = $('#Area'),
+            $CarpetArea = $('#CarpetArea'),
+            $UDSLandArea = $('#UDSLandArea'),
+            $BaseAmt = $("#BaseAmount"),
+            $GrossAmt = $("#GrossAmount"),
+            $NetAmt = $("#NetAmt"),
+            $MarketLandValue = $("#MarketLandValue"),
+            $GuideLineValue = $("#GuideLineValue"),
+            $OtherCost = $("#OtherCost"),
+            $ConstAmt = $("#ConstructionAmount"),
+            $LandAmt = $("#LandAmount"),
+            $Rate = $('#Rate'),
+            $nextSlide = $('.nextSlide'),
+            $prevSlide = $('.prevSlide'),
+            $advanceAmt = $('#AdvanceAmount'),
+            $advancePercent = $('#AdvancePercent'),
+            $LateInt = $('#LateInterest'),
+            $PaymentSchedule = $('#PaymentSchedule'),
+            $buildtype=$("#buidType"),
+        //$CreditDays = $('#CreditDays'),
+            $otherCostDetailsWrapper = $('#other-cost-details-wrapper'),
+            $saveBtnArea = $('.savebtn_area'),
+            $extraItem = $('#ExtraItem');
+
+        init();
+        bindUnitTypeName_onChange();
+        bindContinue_onClick();
+        bindPrev_onClick();
+        bindCalculation_onChange();
+        bindSaveBtn_onClick();
+        bindOtherCost_onChange();
+
+
+      //  var currVal = $('files').val();
+
+     //  var currValue= currVal.toUpperCase();
+
+
+
+
+//        if(files!=null || files !='' || files!='undefined') {
+//
+//            document.getElementById('files').addEventListener('change', handleFileSelect, false);
+//        }
+        function handleFileSelect(evt) {
+            $('.upld_photo').hide();
+            $('#upload_photos').html('');
+            var files = evt.target.files; // FileList object
+            // Loop through the FileList and render image files as thumbnails.
+          //  if(files !== 'undefined' && elem !== null){
+                for (var i = 0, f; f = files[i]; i++) {
+                    // Only process image files.
+                    if (!f.type.match('image.*')) {
+                        continue;
+                    }
+                    var reader = new FileReader();
+                    // Closure to capture the file information.
+                    reader.onload = (function(theFile) {
+                        return function(e) {
+                            // Render thumbnail.
+                            var span = document.createElement('span');
+                            span.innerHTML = ['<img class="thumb_photos" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
+                            document.getElementById('upload_photos').insertBefore(span, null);
+                        };
+                    })(f);
+                    // Read in the image file as a data URL.
+                    reader.readAsDataURL(f);
+                }
+            $('.upld_photo').show();
+                //}
+        }
+        var el = document.getElementById('files');
+        if(el){
+            el.addEventListener('change', handleFileSelect, false);
+        }
+        function init() {
+            $(".single_dropdown").select2({
+                placeholder: "",
+                allowClear: true
+            });
+
+            $OtherCost.select2({
+                tags: true
+            });
+
+            $extraItem.select2({
+                tags: true
+            });
+        }
+
+        function bindOtherCost_onChange() {
+            // select
+            $OtherCost.on("select2:select", function (e) {
+                //Gets the last selected item
+                var $tarOpt = $(e.params.data.element),
+                    selOtherCostId = e.params.data.id,
+                    selOtherCostName = e.params.data.text.trim(),
+                    amt="",
+                    area="",
+                    rate="";
+                if(parseFloat($tarOpt.attr('data-amt'))>0 && parseFloat($tarOpt.attr('data-amt'))!=false) {
+                    amt=sanitizeNumber(parseFloat($tarOpt.attr('data-amt')),2,true);
+                }
+                if(parseFloat($tarOpt.attr('data-area'))>0 && parseFloat($tarOpt.attr('data-area'))!=false) {
+                    area=sanitizeNumber(parseFloat($tarOpt.attr('data-area')),2,false);
+                }
+                if(parseFloat($tarOpt.attr('data-rate'))>0 && parseFloat($tarOpt.attr('data-rate'))!=false) {
+                    rate=sanitizeNumber(parseFloat($tarOpt.attr('data-rate')),2,false);
+                }
+
+                var otherCostAmtHtml = '<div class="form-group penality_int_area col-lg-12 req_flds" data-id="'+ selOtherCostId+'">'
+
+                    + '<p style="padding-top:3px;color:#000;">'+ selOtherCostName+'</p>'
+
+                    + '<div class="col-lg-3 col-md-3 col-sm-5 col-xs-5 padlr0">'
+                    + '<input type="text" class="lbl_move other-cost-amt noValid"  onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostArea_'+selOtherCostId+'" name="selectedOtherCostArea_'+selOtherCostId+'" placeholder="Area" value="'+area+'" onkeypress="return isDecimal(event, this)">'
+                    + '</div>'
+                    + '<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 padlr0 mar_2">'
+                    + '<input type="text" class="lbl_move other-cost-amt noValid" onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostRate_'+selOtherCostId+'" name="selectedOtherCostRate_'+selOtherCostId+'" placeholder="Rate" value="'+rate+'" onkeypress="return isDecimal(event, this)">'
+                    + '</div>'
+                    + '<div class="col-lg-5 col-md-5 col-sm-7 col-xs-7 padlr0 mar_2">'
+                    + '<input type="text" class="lbl_move other-cost-amt other-cost-tot" onchange="calcOCAmount('+selOtherCostId+');" id="selectedOtherCostValue_'+selOtherCostId+'"  name="selectedOtherCostValue_'+selOtherCostId+'" placeholder="Amount" value="'+amt+'" onkeypress="return isDecimal(event, this)">'
+                    + '<div class="error_message"><p></p></div>'
+                    + '</div>';
+
+
+
+                $otherCostDetailsWrapper.append(otherCostAmtHtml);
+                $otherCostDetailsWrapper.removeClass('hide');
+                var $tarOtherCostDetail = $otherCostDetailsWrapper.find('> div[data-id="'+selOtherCostId+'"]');
+                var $tarIp = $tarOtherCostDetail.find('input.lbl_move');
+
+                $tarIp.polymerForm();
+                $tarIp.each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+                $GrossAmt.trigger('change');
+            });
+
+            // unselect
+            $OtherCost.on("select2:unselect", function (e) {
+
+                //Gets the last selected item
+                var selOtherCostId = e.params.data.id;
+                var $tarOtherCostDetail = $otherCostDetailsWrapper.find('> div[data-id="'+selOtherCostId+'"]');
+                $tarOtherCostDetail.remove();
+
+                if($otherCostDetailsWrapper.find('>div').length <= 1) {
+                    $otherCostDetailsWrapper.addClass('hide');
+                }
+
+                $GrossAmt.trigger('change');
+            });
+        }
+
+        function bindUnitTypeName_onChange() {
+            $unitTypeName.on('change', function() {
+                validateUnitTypeName(function(){});
+            });
+        }
+
+        function validateUnitTypeName(callback) {
+            var unitTypeName = $unitTypeName.val().trim();
+            removeErrorMsg($unitTypeName);
+            if(unitTypeName === '') {
+                showErrorMsg($unitTypeName, 'Please Enter Unit Type Name...');
+                callback(false);
+                return false;
+            } else if($.inArray(unitTypeName.toLowerCase(), arrExistingUnitTypeNames) >= 0) {
+                showErrorMsg($unitTypeName, 'Unit Type Name already exists...');
+                callback(false);
+                return false;
+            } else {
+                callback(true);
+                return true;
+            }
+        }
+
+        function showErrorMsg($tarIp, msg) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text(msg);
+            $tarErrorMsg.show();
+        }
+
+        function removeErrorMsg($tarIp) {
+            var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+            $tarErrorMsg.find('p').text('Please Enter ' + $tarIp.attr('label') + '...');
+            $tarErrorMsg.hide();
+        }
+
+        function bindContinue_onClick() {
+            $nextSlide.click(function() {
+                var $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                switch (curItemId) {
+                    case '1':
+                        validate_step1(function(isSuccess) {
+                            if(isSuccess) {
+                                $carousel.carousel('next');
+
+                                var unittypeName = $unitTypeName.val().trim();
+                                $('.unittype-name').text(unittypeName);
+
+                                $prevSlide.removeClass('hide');
+                            }
+                        });
+                        break;
+                    case '2':
+                        validate_step2(function(isSuccess) {
+                            if(isSuccess) {
+                                $carousel.carousel('next');
+
+                                $nextSlide.removeClass('hide');
+
+                                $saveBtnArea.find('.save_btn').removeClass('hide');
+                                $saveBtnArea.find('.donecngs_p').removeClass('hide');
+                            }
+                        });
+                        break;
+                    case '3':
+                        validate_step3(function(isSuccess) {
+                            if(isSuccess) {
+                                $carousel.carousel('next');
+
+                                $nextSlide.addClass('hide');
+
+                                $saveBtnArea.find('.save_btn').removeClass('hide');
+                                $saveBtnArea.find('.donecngs_p').removeClass('hide');
+                            }
+                        });
+                        break;
+                    default :
+                        $carousel.carousel('next');
+                }
+            });
+        }
+
+        function bindPrev_onClick() {
+            $prevSlide.click(function() {
+                var $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                if(curItemId == '2') {
+                    $prevSlide.addClass('hide');
+                } else if(curItemId == '3') {
+                    $saveBtnArea.find('.save_btn').addClass('hide');
+                    $saveBtnArea.find('.donecngs_p').addClass('hide');
+                }
+
+
+                $nextSlide.removeClass('hide');
+                $carousel.carousel('prev');
+            });
+        }
+
+        function validate_step1(callback) {
+
+
+            validateUnitTypeName(function(isSuccess) {
+                var Area = $Area.val().trim(),
+
+                    CarpetArea = $CarpetArea.val().trim();
+
+                var buildtype=$("#buidType").val().trim();
+                if(buildtype !=3){
+                    var UDSLandArea = $UDSLandArea.val().trim();
+                    if(UDSLandArea.length < 0) {
+                        showErrorMsg($UDSLandArea, 'Please Enter UDS Land Area...');
+                        isSuccess = false;
+                    } else {
+                        removeErrorMsg($UDSLandArea);
+                    }
+
+                }else{
+                    var UDSLandArea= 0,
+                        sSuccess = true;
+                }
+
+                if(Area.length <= 0) {
+                    showErrorMsg($Area, 'Please Enter Area...');
+                    isSuccess = false;
+                } else {
+                    removeErrorMsg($Area);
+                }
+
+                if ($('#lcAreaBase').val() == "C") {
+                    if (CarpetArea.length <= 0) {
+                        showErrorMsg($CarpetArea, 'Please Enter Carpet Area...');
+                        isSuccess = false;
+                    } else {
+                        removeErrorMsg($CarpetArea);
+                    }
+                }
+
+
+
+                callback(isSuccess);
+                return isSuccess;
+
+            });
+        }
+
+        function validate_step2(callback) {
+            var rate = parseFloatVal($Rate.val()),
+                guideLineVal = parseFloatVal($GuideLineValue.val()),
+                marketLandVal = parseFloatVal($MarketLandValue.val()),
+                isSuccess = true;
+
+            if(isNaN(rate)) {
+                showErrorMsg($Rate, 'Please Enter Rate...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($Rate);
+            }
+            if(isNaN(guideLineVal)) {
+                showErrorMsg($GuideLineValue, 'Please Enter Guide Line Value...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($GuideLineValue);
+            }
+            if(isNaN(marketLandVal)) {
+                showErrorMsg($MarketLandValue, 'Please Enter Market Land Value...');
+                isSuccess = false;
+            } else {
+                removeErrorMsg($MarketLandValue);
+            }
+
+            // check other cost details
+            if($OtherCost.val() != '') {
+                $otherCostDetailsWrapper.find('input').each(function() {
+                    if($(this).hasClass('noValid')) {
+                        return;
+                    }
+                    var otherCostAmt = parseFloat($(this).val());
+                    if(isNaN(otherCostAmt) || otherCostAmt == 0) {
+                        showErrorMsg($(this), 'Invalid Amount...');
+                        isSuccess = false;
+                    } else {
+                        removeErrorMsg($(this));
+                    }
+                });
+            }
+
+            callback(isSuccess);
+            return isSuccess;
+        }
+
+        function validate_step4(callback) {
+            var isSuccess = true;
+            var len= $('#files').prop("files");
+            var formData = new FormData();
+            var length = len.length;
+            var imgCount=0;
+            if(length==0) {
+                //$('#upload_photo').addClass('red_bdr');
+                //return false;
+            } else {
+                $('#upload_photo').removeClass('red_bdr');
+                $.each(len, function (key, input) {
+                    var extension = (input.name).split('.').pop().toUpperCase();
+                    if (extension != "PNG" && extension != "JPG" && extension != "GIF" && extension != "JPEG") {
+                        imgCount = +1;
+                    } else {
+                        formData.append("file" + key, input);
+                    }
+                });
+                if(imgCount==length) {
+                    isSuccess = false;
+                    alert('Invalid File Selection');
+                    //return false;
+                } else if(imgCount>0) {
+                    isSuccess = false;
+                    alert(imgCount+'Image Upload Failed');
+                }
+                //formData.append('mode','image');
+                //formData.append('photoStatus',photoStatus);
+                //$('#photo_status').attr('readonly', true);
+                $('#image_post').hide();
+                $('#strm_loader').show();
+            }
+            callback(isSuccess);
+            return isSuccess;
+        }
+
+        function bindCalculation_onChange() {
+            calcGrossAmt();
+//base amount calculation//
+            $Area.on('change', function() {
+                $Rate.trigger('change');
+            });
+
+            // Rate
+            $Rate.on('change', function() {
+                var BaseAmt = 0,
+                    Rate = parseFloatVal($Rate.val()),
+                    Area = parseFloatVal($Area.val());
+                var buildtype=$("#buidType").val();
+             //landsale calc//
+                if(!isNaN(buildtype) && buildtype==3) {
+                    if(!isNaN(Rate) && !isNaN(Area)) {
+                        BaseAmt = Area * Rate;
+                        $ConstAmt.val('0');
+                        $LandAmt.val(sanitizeNumber(BaseAmt,2,true));
+                        $GrossAmt.val(sanitizeNumber(BaseAmt,2,true));
+                        $NetAmt.val(sanitizeNumber(BaseAmt,2,true));
+                    }
+
+                       }
+                else{
+
+                    if(!isNaN(Rate) && !isNaN(Area)) {
+                        BaseAmt = Area * Rate;
+                        $GrossAmt.val(sanitizeNumber(BaseAmt,2,true));
+                        $NetAmt.val(sanitizeNumber(BaseAmt,2,true));
+                        calcConsAmt()
+                     }}
+
+                $BaseAmt.val(sanitizeNumber(BaseAmt,2,true));
+
+                $GrossAmt.trigger('change');
+
+
+
+
+            });
+
+            // UDS Land
+            $CarpetArea.on('change', function() {
+
+                var buildtype=$buildtype.val();
+                if(!isNaN(buildtype) && buildtype==3) {
+                    $ConstAmt.val('0');
+                    $ConstAmt.hide();
+                    calcGrossAmt();
+
+                }
+                else{
+                    calcConsAmt();
+                    calcGrossAmt();
+
+                }
+            });
+
+            // Carpet Area
+            $UDSLandArea.on('change', function() {
+                var buildtype=$buildtype.val();
+                if(!isNaN(buildtype) && buildtype==3) {
+                    $ConstAmt.val('0');
+                    $ConstAmt.hide();
+                    calcGrossAmt();
+
+
+                }
+                else{
+                    calcConsAmt();
+                    calcGrossAmt();
+
+                }
+            });
+
+            // Market value
+            $MarketLandValue.on('change', function () {
+                var buildtype=$buildtype.val();
+                if(!isNaN(buildtype) && buildtype==3) {
+                    $ConstAmt.val('0');
+                   //calcConsAmt();
+                    calcGrossAmt();
+
+
+                }
+                else{
+                    calcConsAmt();
+                    calcGrossAmt();
+
+                }
+            });
+
+            // Guide line
+            $GuideLineValue.on('change', function() {
+                var buildtype=$buildtype.val();
+                if(!isNaN(buildtype) && buildtype==3) {
+                    $ConstAmt.val('0');
+                    //$ConstAmt.hide();
+                    //calcConsAmt();
+                    calcGrossAmt();
+
+
+                }
+                else{
+                    calcConsAmt();
+                    calcGrossAmt();
+
+
+                }
+            });
+
+            $OtherCost.on('change', function() {
+                var buildtype=$buildtype.val();
+                if(!isNaN(buildtype) && buildtype==3) {
+                    $ConstAmt.val('0');
+                    //$ConstAmt.hide();
+                    calcGrossAmt();
+
+
+                }
+                else{
+                 calcConsAmt();
+                 calcGrossAmt();
+
+                }
+            });
+
+            function calcConsAmt() {
+                var GuideLineVal = parseFloatVal(isNullCheck($GuideLineValue.val(),'number')),
+                    MarketVal = parseFloatVal(isNullCheck($MarketLandValue.val(),'number')),
+                    UDSLandArea = parseFloatVal(isNullCheck($UDSLandArea.val(),'number')),
+                    dCarpetLandArea = parseFloatVal(isNullCheck($CarpetArea.val(),'number')),
+                    LandAmt= 0,
+                    dArea= 0 ,
+                    dRate= 0,
+                dContAmt=0;
+                var buildtype=$buildtype.val();
+
+                if ($('#lcAreaBase').val() == "C") {  dArea =dCarpetLandArea;}
+                else {  dArea = UDSLandArea;}
+
+                if ($('#lcRateBase').val() == "M"){ dRate = MarketVal;}
+                else { dRate = GuideLineVal;}
+
+                LandAmt = dArea * dRate;
+
+                $LandAmt.val(LandAmt.toFixed(2));
+
+                if(!isNaN(buildtype) && buildtype==3) {
+                    dContAmt=0;
+                }
+                else {
+
+                    var dBaseAmt = parseFloatVal(isNullCheck($BaseAmt.val(), 'number'));
+                     dContAmt = dBaseAmt - LandAmt;
+                }
+
+                if (dContAmt < 0 ) { dContAmt = 0; }else{
+                    $ConstAmt.val(sanitizeNumber(dContAmt,2,true));}
+               // valreg();
+            }
+            function valreg(){
+
+                var includereg=$('#include').val(),
+                    lreg= parseFloatVal($("#lReg").val()),
+                    creg= parseFloatVal($("#cReg").val()),
+                    landamount= parseFloatVal($("#LandAmount").val()),
+                    constructionAmount= parseFloatVal($("#ConstructionAmount").val()),
+                    cregamount= 0,
+                    lregamt= 0,
+                    cregamt= 0,
+                    net= 0,
+                    netGross= 0,
+                    creg= parseFloatVal($("#cReg").val()),
+                    constructionAmount= parseFloatVal($("#ConstructionAmount").val()),
+                    NetAmt =  parseFloatVal($("#NetAmt").val()),
+                    GrossAmt =  parseFloatVal($("#GrossAmount").val());
+
+                if(includereg==1){
+                    lregamt=((landamount ) * (lreg/100));
+                    cregamt=((constructionAmount) * (creg/100));
+
+
+                    $("#landReg").val(sanitizeNumber(lregamt,2,true));
+                    $("#landReg").addClass('lbl_move').trigger('change');
+                    $("#constructionReg").val(sanitizeNumber(cregamt,2,true));
+                    $("#constructionReg").addClass('lbl_move').trigger('change');
+
+                        net=parseFloatVal(NetAmt)+parseFloatVal(lregamt)+parseFloatVal(cregamt);
+
+
+             }
+                else{
+                    net =NetAmt;
+                    netGross =GrossAmt;
+                }
+
+                $("#NetAmt").val(sanitizeNumber(net,2,true));
+                $("#GrossAmt").val(sanitizeNumber(netGross,2,true));
+
+
+            }
+
+            function calcGrossAmt() {
+
+                var LandAmt = parseFloatVal(isNullCheck($LandAmt.val(),'number')),
+                    ConstAmt = parseFloatVal(isNullCheck($ConstAmt.val(),'number'));
+
+                var totOtherCostAmt=0;
+                $('#other-cost-details-wrapper').find('input.other-cost-tot').each(function() {
+                    var amt = parseFloatVal($(this).val());
+                    if(!isNaN(amt)) {
+                        totOtherCostAmt += amt;
+                    }
+                });
+
+                if(isNaN(LandAmt)) {
+                    LandAmt = 0;
+                }
+
+                if(isNaN(ConstAmt)) {
+                    ConstAmt = 0;
+                }
+
+                var GrossAmt = LandAmt + ConstAmt;
+
+                var totGross=totOtherCostAmt+GrossAmt;
+                $('#GrossAmount').val(sanitizeNumber(totGross,2,true)).attr("data-gross",GrossAmt.toFixed(2)).trigger('change');
+                $('#NetAmt').val(sanitizeNumber(totGross,2,true));
+
+                valreg();
+            }
+
+            $advanceAmt.on('change', function() {
+                var BaseAmt = parseFloatVal(isNullCheck($BaseAmt.val(),'number')),
+                    advAmt = parseFloatVal(isNullCheck($advanceAmt.val(),'number')),
+                    advPercentage = 0;
+
+                if(BaseAmt < advAmt) {
+                    showErrorMsg($advanceAmt, 'Advance Amount cannot exceed Base Amount...');
+                } else {
+                    removeErrorMsg($advanceAmt);
+                    if(!isNaN(BaseAmt) && !isNaN(advAmt) && BaseAmt != 0) {
+                        advPercentage = (advAmt / BaseAmt) * 100;
+                    }
+                }
+
+                $advancePercent.val(sanitizeNumber(advPercentage,3,false));
+            });
+
+            $advancePercent.on('change', function() {
+                var BaseAmt = parseFloatVal($BaseAmt.val()),
+                    advAmt = 0,
+                    advPercentage = parseFloatVal(isNullCheck($advancePercent.val(),'number'));
+
+                if (advPercentage > 100) {
+                    showErrorMsg($advancePercent, 'Advance Percent cannot exceed 100...');
+                } else {
+                    removeErrorMsg($advancePercent);
+                    if (!isNaN(BaseAmt) && !isNaN(advPercentage)) {
+                        advAmt = (BaseAmt * advPercentage) / 100;
+                    }
+                }
+
+                $advanceAmt.val(sanitizeNumber(advAmt,2,true));
+            });
+
+            // calculate net amount
+            $otherCostDetailsWrapper.on('change', 'input.other-cost-amt',function(){
+                $GrossAmt.trigger('change');
+
+            });
+
+            $GrossAmt.on('change', function() {
+                var landreg= 0,
+                    consreg= 0,
+                    totreg= 0,
+                    totOtherCostAmt = parseFloatVal($GrossAmt.attr('data-gross'));
+
+                landreg=  parseFloatVal($("#landReg").val());
+                consreg= parseFloatVal( $("#constructionReg").val());
+                    totreg=landreg+consreg;
+                totOtherCostAmt = parseFloatVal($GrossAmt.attr('data-gross')) +  parseFloatVal(totreg)
+
+                $otherCostDetailsWrapper.find('input.other-cost-tot').each(function() {
+                    var amt = parseFloatVal($(this).val());
+                    if(!isNaN(amt)) {
+                        totOtherCostAmt += amt;
+                    }
+                });
+               $GrossAmt.val(sanitizeNumber(totOtherCostAmt,2,true));
+               $NetAmt.val(sanitizeNumber(totOtherCostAmt,2,true));
+                //construction Othercostload//
+                var sum = 0;
+                var includereg=$('#include').val(),
+                    lreg= parseFloatVal($("#lReg").val()),
+                    creg= parseFloatVal($("#cReg").val()),
+                    landamount= parseFloatVal($("#LandAmount").val()),
+                    constructionAmount= parseFloatVal($("#ConstructionAmount").val()),
+                    cregamount= 0,
+                    lregamt= 0,
+                    cregamt= 0,
+                    net= 0,
+                    netGross= 0,
+                    creg= parseFloatVal($("#cReg").val()),
+                    constructionAmount= parseFloatVal($("#ConstructionAmount").val());
+
+               if(includereg==1) {
+                   $('.otherextra').each(function () {
+                       sum += parseFloatVal($(this).val());  // Or this.innerHTML, this.innerText
+                   });
+                   if (sum != 0) {
+                       cregamount = parseFloatVal((constructionAmount + sum) * (creg / 100));
+                       net = parseFloatVal($NetAmt.val()) - parseFloatVal($("#constructionReg").val());
+                       $("#constructionReg").val(sanitizeNumber(cregamount,2,true));
+                       net = parseFloatVal(net) + parseFloatVal(cregamount);
+                      // netGross = parseFloatVal($GrossAmt.val()) - parseFloatVal(creg);
+                       $GrossAmt.val(sanitizeNumber(net,2,true));
+                       $NetAmt.val(sanitizeNumber(net,2,true));
+                   }
+
+               }
+
+            });
+
+        }
+
+
+        function bindSaveBtn_onClick() {
+            $('.continue').on('click', function(ev) {
+                ev.preventDefault();
+
+                var $this = $(this),
+                    $unitTypeGenForm = $('#unit-type-generation-form'),
+                    $curActiveItem = $carousel.find('.item.active'),
+                    curItemId = $curActiveItem.attr('data-id');
+
+                validate_step1(function(isStep1Success) {
+                    if(isStep1Success) {
+                        validate_step2(function(isStep2Success) {
+                            if(isStep2Success) {
+                                validate_step3(function(isSuccess) {
+                                    if(isSuccess) {
+                                        var $redirectUrl = $('#redirectUrl');
+                                        if($this.hasClass('save-next')) {
+                                            $redirectUrl.val('car-park');
+                                        } else {
+                                            $redirectUrl.val('');
+                                        }
+
+                                        //$unitTypeGenForm.submit();
+                                        validate_step4(function(isSuccess) {
+                                            if(isSuccess) {
+                                                $unitTypeGenForm.submit();
+                                            } /*else {
+                                             $nextSlide.trigger('click');
+                                             }*/
+                                        });
+                                    } else {
+                                        $nextSlide.trigger('click');
+                                    }
+                                });
+                            } else {
+                                $nextSlide.trigger('click');
+                            }
+                        })
+                    }
+                });
+
+
+            });
+        }
+
+        function validate_step3(callback) {
+            var advAmt = parseFloatVal($advanceAmt.val()),
+                advPer = parseFloatVal($advancePercent.val()),
+                LateInt = parseFloatVal($LateInt.val()),
+                PaymentSchedule = $PaymentSchedule.val(),
+            //CreditDays = parseInt($CreditDays.val()),
+                isSuccess = true;
+
+            if (isNaN(advAmt)) {
+                isSuccess = false;
+                showErrorMsg($advanceAmt, 'Please Enter Advance Amount...');
+            } else {
+                removeErrorMsg($advanceAmt);
+            }
+
+            if (isNaN(advPer)) {
+                isSuccess = false;
+                showErrorMsg($advancePercent, 'Please Enter Advance Percentage...');
+            } else {
+                removeErrorMsg($advancePercent);
+            }
+
+            if (isNaN(LateInt)) {
+                isSuccess = false;
+                showErrorMsg($LateInt, 'Please Enter Late Interest...');
+            } else {
+                removeErrorMsg($LateInt);
+            }
+
+            /*if (PaymentSchedule.length <= 0) {
+             isSuccess = false;
+             showErrorMsg($PaymentSchedule, 'Please Select Payment Schedule...');
+             } else {
+             removeErrorMsg($PaymentSchedule);
+             }*/
+
+            /*if (isNaN(CreditDays)) {
+             isSuccess = false;
+             showErrorMsg($CreditDays, 'Please Enter Credit Days...');
+             } else {
+             removeErrorMsg($CreditDays);
+             }*/
+
+            callback(isSuccess);
+            return isSuccess;
+
+        }
+
+    });
+ function uploadMultiImage() {
+        //var photoStatus = $('#photo_status').val();
+        var len= $('#files').prop("files");
+        var formData = new FormData();
+        var length = len.length;
+        var imgCount=0;
+        if(length==0) {
+            $('#upload_photo').addClass('red_bdr');
+            return false;
+        } else {
+            $('#upload_photo').removeClass('red_bdr');
+            $.each(len, function (key, input) {
+                var extension = (input.name).split('.').pop().toUpperCase();
+                if (extension != "PNG" && extension != "JPG" && extension != "GIF" && extension != "JPEG") {
+                    imgCount = +1;
+                } else {
+                    formData.append("file" + key, input);
+                }
+            });
+            if(imgCount==length) {
+                alert('Invalid File Selection');
+                return false;
+            } else if(imgCount>0) {
+                alert(imgCount+'Image Upload Failed');
+            }
+            formData.append('mode','image');
+            //formData.append('photoStatus',photoStatus);
+            //$('#photo_status').attr('readonly', true);
+            $('#image_post').hide();
+            $('#strm_loader').show();
+
+            //send formdata to server-side
+            $.ajax({
+                url: getBaseURL() + 'application/index/share', // our php file
+                type: 'post',
+                data: formData,
+                enctype: "multipart/form-data",
+                dataType: 'html', // we return html from our php file
+                async: true,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,   // tell jQuery not to set contentType
+                success : function(data) {
+                    $('#upload_area').next().prepend(data);
+                    $('#upload_photos').hide();
+                    $('#upload_photos').html('');
+                    //$('#photo_status').val('');
+                    //$('#photo_status').attr('readonly', false);
+                    $('#strm_loader').hide();
+                    $('#image_post').show();
+                    lightGallery();
+                },
+                error : function(request) {
+                }
+            });
+        }
+    }
+
+    function lightGallery() {
+        $(".lightGallery").lightGallery({
+            loop : true
+        });
+    }
+
+    function copyUnitType(unitTypeId) {
+        if(unitTypeId!="") {
+            $.ajax({
+                url: getBaseURL() + "crm/project/unit-type-generation",
+                type: "POST",
+                data: {'copyUnitTypeId': unitTypeId ,csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+                success: function (data, textStatus, jqXHR) {
+                    if (jqXHR.status == 200) {
+                        var result = JSON.parse(data);
+                        var $unitExtraItem = result[3];
+                        var unitTypeDetails = result[1];
+                        var unitTypeOtherCost = result[2];
+                        if(unitTypeDetails!=false && unitTypeDetails!=null) {
+                            if($('#CarpetArea').val()=="" || parseFloatVal($('#CarpetArea').val()) ==0) {
+                                $('#CarpetArea').val(unitTypeDetails['CarpetArea']);
+                            }
+                            if($('#Rate').val()=="" || parseFloatVal($('#Rate').val()) ==0) {
+                                $('#Rate').val(sanitizeNumber(unitTypeDetails['Rate'],2,true)).trigger('change');
+                            }
+                            if($('#GuideLineValue').val()=="" || parseFloatVal($('#GuideLineValue').val()) ==0) {
+                                $('#GuideLineValue').val(unitTypeDetails['GuideLineValue']).trigger('change');
+                            }
+                            if($('#MarketLandValue').val()=="" || parseFloatVal($('#MarketLandValue').val()) ==0) {
+                                $('#MarketLandValue').val(unitTypeDetails['MarketLandValue']).trigger('change');
+                            }
+                            if($('#AdvanceAmount').val()=="" || parseFloatVal($('#AdvanceAmount').val()) ==0) {
+                                $('#AdvanceAmount').val(sanitizeNumber(unitTypeDetails['AdvAmount'],2,true)).trigger('change');
+                            }
+                            if($('#AdvancePercent').val()=="" || parseFloatVal($('#AdvancePercent').val()) ==0) {
+                                $('#AdvancePercent').val(sanitizeNumber(unitTypeDetails['AdvPercent'],3,false)).trigger('change');
+                            }
+                            if($('#LateInterest').val()=="" || parseFloatVal($('#LateInterest').val()) ==0) {
+                                $('#LateInterest').val(sanitizeNumber(unitTypeDetails['IntPercent'],3,false)).trigger('change');
+                            }
+                            if($('#CreditDays').val()=="" || parseFloatVal($('#CreditDays').val()) !=0  || parseFloatVal($('#CreditDays').val()) ==0) {
+                                $('#CreditDays').val(unitTypeDetails['CreditDays']).trigger('change');
+                            }
+                            if($.trim($('#PaymentSchedule option:selected').val()) == "") {
+                                $("#PaymentSchedule option[value="+unitTypeDetails['PaymentScheduleId']+"]").attr("selected", true).trigger('change');
+                            }
+                        }
+                        var otherCostId = [];
+                        $.each($('#OtherCost option:selected'),function() {
+                            otherCostId.push($(this).val());
+                        });
+                        if(otherCostId.length == 0) {
+                            if (unitTypeOtherCost.length > 0) {
+                                var rare=[];
+                                $('#other-cost-details-wrapper').html('');
+                                $.each(unitTypeOtherCost, function (i, o) {
+                                    rare.push(o.OtherCostId);
+                                    var tr = $("#OtherCost option[value=" + o.OtherCostId + "]"),
+                                        selOtherCostId = o.OtherCostId,
+                                        selOtherCostName = tr.html(),
+
+                                        amt = parseFloatVal(o.Amount),
+                                        area= parseFloatVal(o.Area),
+                                        rate= parseFloatVal(o.Rate);
+
+                                    var otherCostAmtHtml = '<div class="form-group penality_int_area col-lg-12 req_flds" data-id="'+ selOtherCostId+'">'
+
+                                        + '<p style="padding-top:3px;color:#000;">'+ selOtherCostName+'</p>'
+
+                                        + '<div class="col-lg-3 col-md-3 col-sm-5 col-xs-5 padlr0">'
+                                        + '<input type="text" class="lbl_move other-cost-amt noValid"  onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostArea_'+selOtherCostId+'" name="selectedOtherCostArea_'+selOtherCostId+'" placeholder="Area" value="'+sanitizeNumber(area,2)+'" onkeypress="return isDecimal(event, this)">'
+                                        + '</div>'
+                                        + '<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4 padlr0 mar_2">'
+                                        + '<input type="text" class="lbl_move other-cost-amt noValid" onchange="calcArea('+selOtherCostId+');" id="selectedOtherCostRate_'+selOtherCostId+'" name="selectedOtherCostRate_'+selOtherCostId+'" placeholder="Rate" value="'+sanitizeNumber(rate,2,true)+'" onkeypress="return isDecimal(event, this)">'
+                                        + '</div>'
+                                        + '<div class="col-lg-5 col-md-5 col-sm-7 col-xs-7 padlr0 mar_2">'
+                                        + '<input type="text" class="lbl_move other-cost-amt other-cost-tot" onchange="calcOCAmount('+selOtherCostId+');" id="selectedOtherCostValue_'+selOtherCostId+'"  name="selectedOtherCostValue_'+selOtherCostId+'" placeholder="Amount" value="'+sanitizeNumber(amt,2,true)+'" onkeypress="return isDecimal(event, this)">'
+                                        + '<div class="error_message"><p></p></div>'
+                                        + '</div>';
+
+
+                                    $('#other-cost-details-wrapper').append(otherCostAmtHtml);
+                                    $('#other-cost-details-wrapper').removeClass('hide');
+                                    var $tarOtherCostDetail = $('#other-cost-details-wrapper').find('> div[data-id="'+selOtherCostId+'"]');
+                                    var $tarIp = $tarOtherCostDetail.find('input.lbl_move');
+
+                                    $tarIp.polymerForm();
+                                    $tarIp.each(function() {
+                                        if($(this).val() != '' && $(this).val() != null) {
+                                            $(this).closest('div').addClass('dirty');
+                                        }
+                                    });
+                                    $("#GrossAmount").trigger('change');
+                                });
+                                // $("#OtherCost").trigger('change');
+                                $("#OtherCost").select2("val", rare);
+                            }
+                        }
+
+                        var extraCostId = [];
+                        $.each($('#ExtraItem option:selected'),function() {
+                            extraCostId.push($(this).val());
+                        });
+                        if(extraCostId.length == 0) {
+                            if ($unitExtraItem.length > 0) {
+                                $.each($unitExtraItem, function (i, o) {
+                                    $("#ExtraItem option[value=" + o.ExtraItemId + "]").attr("selected", true);
+                                });
+                                $("#ExtraItem").trigger('change');
+                            }
+                        }
+
+                    } else
+                        alert(jqXHR.responseText);
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert('Failed to Process....');
+                }
+
+            });
+        }
+    }
+//    function UDSAreaCalc(salebleArea) {
+//        var uds = (parseFloatVal(salebleArea)/parseFloatVal($('#BuildUpArea').val()))*parseFloatVal($('#LandArea').val());
+//        $('#UDSLandArea').val(sanitizeNumber(uds,3,false));
+//    }
+
+//    function calcGrossAmt() {
+//        var LandAmt = parseFloatVal(isNullCheck($LandAmt.val(),'number')),
+//            ConstAmt = parseFloatVal(isNullCheck($ConstAmt.val(),'number'));
+//        var totOtherCostAmt=0;
+//        $('#other-cost-details-wrapper').find('input.other-cost-tot').each(function() {
+//            var amt = parseFloatVal($(this).val());
+//            if(!isNaN(amt)) {
+//                totOtherCostAmt += amt;
+//            }
+//        });
+//
+//        if(isNaN(LandAmt)) {
+//            LandAmt = 0;
+//        }
+//
+//        if(isNaN(ConstAmt)) {
+//            ConstAmt = 0;
+//        }
+//
+//        var GrossAmt = LandAmt + ConstAmt;
+//
+//        var totGross=totOtherCostAmt+GrossAmt;
+//        $('#GrossAmount').val(sanitizeNumber(totGross,2,true)).attr("data-gross",GrossAmt.toFixed(2)).trigger('change');
+//    }
+
+    $('#AdvanceAmount').on('change', function() {
+        var BaseAmt = parseFloatVal(isNullCheck($("#BaseAmount").val(),'number')),
+            advAmt = parseFloatVal(isNullCheck($('#AdvanceAmount').val(),'number')),
+            advPercentage = 0;
+
+        if(BaseAmt < advAmt) {
+            showErrorMsg($('#AdvanceAmount'), 'Advance Amount cannot exceed Base Amount...');
+        } else {
+            removeErrorMsg($('#AdvanceAmount'));
+            if(!isNaN(BaseAmt) && !isNaN(advAmt) && BaseAmt != 0) {
+                advPercentage = (advAmt / BaseAmt) * 100;
+            }
+        }
+
+        $('#AdvancePercent').val(sanitizeNumber(advPercentage,3,false));
+    });
+    function showErrorMsg($tarIp, msg) {
+        var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+        $tarErrorMsg.find('p').text(msg);
+        $tarErrorMsg.show();
+    }
+
+    function removeErrorMsg($tarIp) {
+        var $tarErrorMsg = $tarIp.closest('.form-group').find('.error_message');
+        $tarErrorMsg.find('p').text('Please Enter ' + $tarIp.attr('label') + '...');
+        $tarErrorMsg.hide();
+    }
+    function calcArea(x) {
+        var oCostId=x;
+        var Area=parseFloatVal($('#selectedOtherCostArea_'+ x).val());
+        var Rate=parseFloatVal($('#selectedOtherCostRate_' + x).val());
+        var Amount=parseFloatVal($('#selectedOtherCostArea_' + x).val())*parseFloatVal($('#selectedOtherCostRate_' + x).val());
+        if(Amount>0) {
+            $('#selectedOtherCostValue_'+x).val(sanitizeNumber(Amount,2,true)).trigger('change');
+        }
+        else
+        {
+            $('#selectedOtherCostValue_'+x).val('');
+        }
+    }
+    cnstamt=0;
+
+    function calcOCAmount(x)
+    {   // $("#constructionReg").val(0);
+
+        var oCostId=x;
+
+        var includereg=$('#include').val();
+
+        if(includereg==1) {
+            var $dt =   <?php echo json_encode($resultconstruct); ?>;
+          $.each($dt, function (i,v) {
+                var otherCostId= v.OtherCostId;
+          if(otherCostId==oCostId){
+
+              $('#selectedOtherCostValue_' + x).addClass('otherextra');
+        }
+
+
+    });
+    }
+
+//    cregamt =((constructionAmount+cnstamt) * (creg/100));
+//
+//     $("#constructionReg").val(cregamt);
+//    net=lregamt+cregamt+BaseAmt+Amount;
+//
+//    $("#NetAmt").val(sanitizeNumber(net,2,true));
+//        console.log($("#NetAmt").val());
+    }
+
+
+</script>

@@ -1,0 +1,222 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="formWrapper" method="post">
+                <input type="hidden" id="csrf" name="csrf" value="<?php echo isset($csrf) ? $csrf : ''; ?>">
+                <div class="col-lg-12">
+                    <h1 class="text-center" data-bsfhead="Plan Based Discount">Plan Based Discount</h1>
+                </div>
+                <div class="col-lg-12">
+                    <div
+                        class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2  prt-next">
+                        <div id="level-1"
+                             class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-next">
+                            <div class="form-horizontal">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="plan_name" data-bsfshare="Plan Name" id="plan_name"
+                                                   class="form-control lbl_move" label="Plan Name" value="<?php echo (isset($result)) ? $result['PlanName'] : ""; ?>" />
+                                            <input type="hidden" name="plan_id" id="plan_id" value="<?php echo (isset($planId)) ? $planId : 0; ?>" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-lg-12">
+                                            <select name="discount_type" id="discount_type"  data-bsfshare="Discount Type" class="form-control single_dropdown lbl_move" label="Discount Type" onchange="changeDiscountType($(this).val());" style="width:100%;">
+                                                <option value=""></option>
+                                                <option <?php if(isset($result)) { if($result['DiscountType']=="R") { echo "selected"; } } ?> value="R">Rate/Sq.ft</option>
+                                                <option <?php if(isset($result)) { if($result['DiscountType']=="L") { echo "selected"; }  }?> value="L">Lump sum</option>
+                                                <option <?php if(isset($result)) { if($result['DiscountType']=="P") { echo "selected"; }  }?> value="P">Percentage</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="display_lump_type" <?php if(isset($result['DiscountType'])) { if($result['DiscountType']=="L") { echo "style='display:block;'"; } else {  echo "style='display:none;'"; }  } else { echo "style='display:none;'"; } ?> class="form-group">
+                                        <div class="col-lg-12">
+                                            <div class="col-lg-10 col-lg-offset-1">
+                                                <div class="radio_check">
+                                                    <p>
+                                                        <input type="radio" id="over_all" name="lump_type" value="O" <?php if(isset($result)) { if($result['LumpsumType']=="R") { echo ""; } else { echo "checked"; } } else { echo "checked"; } ?> />
+                                                        <label for="over_all" class="ripple">Over All</label>
+                                                    </p>
+                                                    <p>
+                                                        <input type="radio" id="receipt_wise" name="lump_type" value="R" <?php if(isset($result)) { if($result['LumpsumType']=="R") { echo "checked"; } } ?> />
+                                                        <label for="receipt_wise" class="No">Receipt Wise</label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="display_receipt" class="form-group" <?php if(isset($result)) { if($result['LumpsumType']=="R") { echo "style='display:block;'"; } else { echo "style='display:none;'"; } } else { echo "style='display:none;'"; } ?>>
+                                        <div class="col-lg-12">
+                                            <select name="receipt_type" data-bsfshare="Receipt Type" id="receipt_type" class="form-control single_dropdown lbl_move" label="Select Receipt Type" onchange="changeReceiptType($(this).val());" style="width:100%;">
+                                                <option value=""></option>
+                                                <?php if(isset($arrResults)) { foreach($arrResults as $arr) { ?>
+                                                <option <?php if(isset($result)) { if($result['ReceiptType']==$arr['ReceiptTypeId']) { echo "selected"; } } ?> data-type="<?php echo $arr['Type']; ?>" value="<?php echo $arr['ReceiptTypeId']; ?>"><?php echo $arr['ReceiptTypeName']; ?></option>
+
+                                                <?php }} ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="display_discount" <?php if(isset($result)) { if($result['DiscountType']=="R") { echo "style='display:block;'"; } else if($result['LumpsumType']=="O") { echo "style='display:block;'"; } else if($result['ReceiptType']!=""){ echo "style='display:block;'"; } else { echo "style='display:none;'"; } } else { echo "style='display:none;'"; } ?> class="form-group">
+                                        <div class="col-lg-12">
+                                            <input type="text" name="discount_value" data-bsfshare="Discount Value" id="discount_value"
+                                                   class="form-control lbl_move" label="Discount" value="<?php echo (isset($result)) ? $result['Discount'] : 0; ?>"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="next-bt"><a href="#" id="show-next-level" class="pull-right">Submit <i class="fa fa-chevron-circle-right"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        $('input[type=radio][name=lump_type]').on('change',function() {
+           if($(this).val()=="O") {
+               $("#display_discount").show();
+               $('#receipt_type').val(null).trigger('change');
+               $('#display_receipt').hide();
+           } else {
+               $('#display_receipt').show();
+               $("#display_discount").hide();
+               $("#discount_value").val(0.00);
+           }
+        });
+        $('.next-bt').on("click",function() {
+            if($('#plan_name').val()=="") {
+                showError($('#plan_name'),'Plan Name is Empty');
+                return false;
+            }
+            removeError($('#plan_name'));
+            if($("#plan_name").val() != ""){
+                var valid = 0;
+                $.ajax({
+                    url: getBaseURL() + 'crm/project/plan-based-discount',
+                    type: 'POST',
+                    data: {"Type": 'check',"PlanName": $('#plan_name').val(),"PlanId": $('#plan_id').val(),"csrf":$('#csrf').val()},
+                    async: false,
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status != 200) {
+                            showError($('#plan_name'),'Plan Name already Exists');
+                            valid=1;
+                        } else {
+                            removeError($('#plan_name'));
+                            valid=0;
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert(textStatus+"-----"+errorThrown);
+                        valid =1;
+                    }
+                });
+                if(valid==0) {
+                    if ($('#discount_type').val() == "" || $('#discount_type').val() == null) {
+                        showError($('#discount_type'), 'Select a Discount Type');
+                        return false;
+                    }
+                    removeError($('#discount_type'));
+                    if ($('input[type=radio][name=lump_type]:checked').val() == "R") {
+                        if ($('#receipt_type').val() == "" || $('#receipt_type').val() == null) {
+                            showError($('#receipt_type'), 'Select a Receipt Type');
+                            return false;
+                        } else {
+                            removeError($('#receipt_type'));
+                        }
+                    }
+                    if($('#discount_type').val() == "P" && parseFloat($('#discount_value').val()) >100) {
+                        showError($('#discount_value'), 'Discount must be less than 100%');
+                        return false;
+                    } else {
+                        removeError($('#discount_value'));
+                    }
+                    if ($('#discount_value').val() == "") {
+                        $('#discount_value').val(0.00);
+                    }
+
+                    $('#formWrapper').submit();
+                }
+            }
+
+        });
+    });
+    function changeDiscountType(val) {
+
+        if (val != "" && val != null) {
+            if ($.trim(val) == "L") {
+                $("#display_lump_type").show();
+                if ($('input[type=radio][name=lump_type]').val() == "O") {
+                    $("#display_discount").show();
+                    $('#receipt_type').val(null).trigger('change');
+                    $('#display_receipt').hide();
+                } else {
+                    $('#display_receipt').show();
+                    $("#display_discount").hide();
+                    $("#discount_value").val(0.00);
+                }
+
+            } else if ($.trim(val) == "R") {
+                $("#discount_value").val(0.00);
+                $('#receipt_type').val(null).trigger('change');
+                $('#display_receipt').hide();
+                $("#over_all").attr('checked', true);
+                $("#display_lump_type").hide();
+                $("#display_discount").show();
+
+            } else if($.trim(val) == "P") {
+                $("#display_lump_type").show();
+                if ($('input[type=radio][name=lump_type]').val() == "O") {
+                    $("#display_discount").show();
+                    $('#receipt_type').val(null).trigger('change');
+                    $('#display_receipt').hide();
+                } else {
+                    $('#display_receipt').show();
+                    $("#display_discount").hide();
+                    $("#discount_value").val(0.00);
+                }
+            }
+
+        }
+    }
+    function changeReceiptType(rVal) {
+        if(rVal!="" && rVal!=null) {
+            $("#display_discount").show();
+        }
+    }
+//    function bindBlocksAutoComplete() {
+//
+//        var ProjectId = $ProjectId.val();
+//
+//        if (/^\d+$/.test(ProjectId) === false) {
+//            return;
+//        }
+//
+//        $.ajax({
+//            url: getBaseURL() + 'crm/project/blocks',
+//            data: {csrf: "<?php //echo isset($csrf)?$csrf:''; ?>//", ProjectId: ProjectId},
+//            type: 'POST',
+//            success: function (data, status, xhr) {
+//                bindAutoComplete(data.blocks);
+//            },
+//            error: function (xhr, status, error) {
+//                alert(xhr.responseText);
+//            }
+//        });
+//
+//    }
+</script>

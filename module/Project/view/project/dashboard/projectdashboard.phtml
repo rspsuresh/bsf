@@ -1,0 +1,1103 @@
+<!--STYLE-->
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/jqx.bases.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/amcharts.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/pie.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/funnel.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/serial.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/light.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/amcharts/themes/dark.js"></script>
+<style>
+    td { padding: 3px; left;border: 1px solid ;}
+    .tdhead {background:#0000CD!important; margin-top:10px !important;font-size:10px;padding:5px;color:#FFFFFF;font-weight:bold;}
+</style>
+<div class="content_wrapper padlr0">
+<div class="container-fluid padlr0">
+<div class="col-lg-12">
+    <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Dashboard</h1>
+    <!--Short by-->
+    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="margin-bottom:10px; padding-right:0px !important;">
+        <label class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0 control-label text-right">Select by</label>
+        <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0" style="padding-right:0px !important;">
+            <select name="projectId" id="projectId" class="form-control selectpicker show-tick" onchange="return ChangeProject()" data-size="6" title="Select Project...">
+                <option value="0">All</option>
+                <?php if(isset($projectlists)):?>
+                    <?php foreach ( $projectlists as $project ):?>
+                        <option value="<?php echo $project['ProjectId'];?>"<?php echo ($project['ProjectId'] == $projectId) ? 'selected' : '';?>><?php echo $project[ 'ProjectName' ];?></option>
+                    <?php endforeach; ?>
+                <?php  endif; ?>
+            </select>
+        </div>
+        <!--Short by end-->
+    </div>
+
+    <!--three feild start-->
+    <div class="col-md-3 col-sm-6">
+        <div class="panel panel1 panel-primary1">
+            <div class="panel-heading pnl-overflow ">
+                <div class="row">
+                    <div class="col-xs-3"><i style="color:#337ab7" class="fa fa-comments fa-5x"></i></div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge"><?php echo (isset($projectDetails)) ? $this->commonHelper()->sanitizeNumber($projectDetails['ProjectCost'],true,true) : '0';?></div>
+                        <div>Budget Cost</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel panel1 panel-green">
+            <div class="panel-heading pnl-overflow ">
+                <div class="row">
+                    <div class="col-xs-3"> <i style="color:#5cb85c" class="fa fa-tasks fa-5x"></i> </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge"><?php echo (isset($projectDetails) && $projectDetails['Duration'] != '') ? $projectDetails['Duration'] : '0';?></div>
+                        <div>Project Duration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel panel1 panel-yellow">
+            <div class="panel-heading  pnl-overflow ">
+                <div class="row">
+                    <div class="col-xs-3"> <i style="color:#f0ad4e" class="fa fa-shopping-cart fa-5x"></i> </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge"><?php echo (isset($projectDetails)) ? $this->commonHelper()->sanitizeNumber($projectDetails['ProjectCompleted'],true,true) : '0';?></div>
+                        <div>Works Completed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel panel1 panel-red">
+            <div class="panel-heading pnl-overflow ">
+                <div class="row">
+                    <div class="col-xs-3"> <i style="color:#d9534f" class="fa fa-support fa-5x"></i> </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge"><?php echo (isset($projectDetails)) ? $this->commonHelper()->sanitizeNumber( ($projectDetails['ProjectCost'] - $projectDetails['ProjectCompleted']) ,true,true) : '0';?></div>
+                        <div>Works on Hand</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="clear clearfix"></div>
+<div class="col-lg-12">
+    <div class="col-lg-8 col-sm-8">
+        <header class="panel-heading col-lg-12 col-xs-12 col-sm-12"">
+        <div class="col-lg-10 col-xs-12 col-sm-10">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Project Progress
+        </div>
+        <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0" style="padding-right:0px !important;">
+            <select name="syear" id="syear" class="form-control selectpicker show-tick" data-size="6" onchange="changeSYear()" title="Select Year">
+                <?php foreach ($yearlists as $ytrans):?>
+                    <option value="<?php echo $ytrans['Year'];?>"><?php echo $ytrans['Year'];?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        </header>
+        <div id="chartdiv" class="top_ct1"></div>
+    </div>
+    <div class="col-lg-4 col-sm-4">
+        <header class="panel-heading">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Project Details</header>
+        <table>
+            <tr>
+                <td class="tdhead" width="3%">Budget Cost</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['BudgetCost'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['BudgetCost'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Start Date</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && !is_null($projectInfo['SDate'])) ? date("d-m-Y", strtotime($projectInfo['SDate'])) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Completion Date</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && !is_null($projectInfo['EDate'])) ? date("d-m-Y", strtotime($projectInfo['EDate'])) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Duration</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && $projectInfo['Duration'] !=0) ? $projectInfo['Duration'].' Days' : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">% of Completion</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && $projectInfo['CompletionPer'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['CompletionPer'],2).' %' : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Work Done Value</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['WorkDone'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['WorkDone'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Cost to Complete</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['CTC'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['CTC'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Total Completion Cost</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['TCTC'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['TCTC'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Remaining Days</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && $projectInfo['RDays'] !=0) ? $projectInfo['RDays'].' Days' : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Current Progress/Day</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['DayProgress'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['DayProgress'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Required Progress/Day</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['RProgress'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['RProgress'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Bill Received</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['Received'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['Received'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Receivable</td>
+                <td width="10%" align="right"><?php echo (!empty($projectInfo) && $projectInfo['Receivable'] !=0) ? $this->commonHelper()->sanitizeNumber($projectInfo['Receivable'],2,true) : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Address</td>
+                <td width="10%"><?php echo (!empty($projectInfo)) ? $projectInfo['Address'] : '';?></td>
+            </tr>
+            <tr>
+                <td class="tdhead" width="3%">Contact No</td>
+                <td width="10%"><?php echo (!empty($projectInfo) && $projectInfo['Phone'] !=0) ? $projectInfo['Phone'] : '';?></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!--chart1 complete-->
+<div class="col-lg-12  commargin_ttop_20">
+    <div class="col-lg-4 col-sm-4">
+        <header class="panel-heading">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Resource Type</header>
+        <div id="chartdiv1" class="top_ct1"></div>
+    </div>
+
+    <div class="col-lg-4 col-sm-4">
+        <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Resource Group</header>
+        <div id="chartdiv5" class="top_ct1"></div>
+    </div>
+
+    <div class="col-lg-4 col-sm-4">
+        <header class="panel-heading">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Key Resources</header>
+        <div id="chartdiv3" class="top_ct1"></div>
+    </div>
+</div>
+<div class="clear"></div>
+<div class="col-lg-12  commargin_ttop_20">
+    <div class="col-lg-8 col-sm-8">
+        <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+            <div class="col-lg-10 col-xs-12 col-sm-10">
+                <svg
+                    class="chart-icon"
+                    version="1.1"
+                    baseProfile="full"
+                    viewBox="0 0 100 100"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                </svg>
+                &nbsp;&nbsp;Schedule Vs Completion</div>
+            <div class="col-lg-2 col-lg-offset-0 col-md-2 col-md-offset-0 col-sm-2 col-sm-offset-0" style="padding-right:0px !important;">
+                <select name="year" id="year" class="form-control selectpicker show-tick" data-size="6" onchange="changeYear()" title="Select Year">
+                    <?php foreach ($yearlists as $ytrans):?>
+                        <option value="<?php echo $ytrans['Year'];?>"><?php echo $ytrans['Year'];?></option>
+                    <?php endforeach; ?>
+
+                </select>
+            </div>
+        </header>
+        <div id="chartdiv4" class="top_ct1"></div>
+    </div>
+    <div class="col-lg-4 col-sm-4">
+        <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Work Group</header>
+        <div id="chartdiv9" class="top_ct1"></div>
+    </div>
+</div>
+<div class="clear"></div>
+<div class="col-lg-12  commargin_ttop_20">
+    <div class="col-lg-6 col-sm-6">
+        <header class="panel-heading col-lg-12 col-xs-12 col-sm-12">
+            <div class="col-lg-9 col-xs-12 col-sm-9">
+                <svg
+                    class="chart-icon"
+                    version="1.1"
+                    baseProfile="full"
+                    viewBox="0 0 100 100"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                    <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                </svg>
+                &nbsp;&nbsp;Today Progress</div>
+            <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0" style="padding-right:0px !important;">
+                <input type="text" name="refdate" id="refdate" class="form-control date_picker" readonly onchange="changeDate()" value="<?php  echo date("d-m-Y"); ?>"/>
+            </div>
+        </header>
+        <div id="chartdiv6" class="top_ct1"></div>
+        <div id="chartdiv7" class="top_ct1"></div>
+        <div id="chartdiv8" class="top_ct1"></div>
+    </div>
+    <div class="col-lg-6 col-sm-6">
+        <header class="panel-heading">
+            <svg
+                class="chart-icon"
+                version="1.1"
+                baseProfile="full"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg">
+                <line stroke="#088208" x1="22.5" y1="91" x2="22.5" y2="62" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#f57b04" x1="42.5" y1="91" x2="42.5" y2="37" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#0600ff" x1="62.5" y1="91" x2="62.5" y2="46" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+                <line stroke="#ff0000" x1="82.5" y1="91" x2="82.5" y2="23" stroke-width="10" stroke-linecap="butt" class="chart-line" />
+            </svg>
+            &nbsp;&nbsp;Photo View</header>
+        <div class="top_ct1-1">
+            <div id="myCarousel" class="carousel slide" data-ride="carousel" style="height: 100%;">
+                <div class="carousel-inner" role="listbox" style="height: 100%;">
+                    <?php $i=1; if($photos):
+                        foreach($photos as $key => $photo):?>
+                            <div class="item <?php echo ($i == 1) ? 'active' : '';?>"> <img src="<?php echo $this->basePath(). $photo['URL']; ?>"/> </div>
+                            <?php $i++;
+                        endforeach;
+                    endif;?>
+                </div>
+                <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev"> <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span> <span class="sr-only">Previous</span> </a> <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next"> <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> <span class="sr-only">Next</span> </a> </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<script>
+var arrSchedule= [];
+var arrProgress= [];
+var arrDayWorkDone = [];
+var arrDayMaterial = [];
+var arrDayLabour = [];
+$(function () {
+    changeSYear();
+    populateChart2();
+    populateChart3();
+    changeYear();
+    populateChart4();
+    changeDate();
+    populateChart9();
+});
+function changeSYear() {
+    var iYear = $('#syear').val();
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    arrProgress= [];
+    $.ajax({
+        url: getBaseURL() + "project/dashboard/projectdashboard",
+        type: 'post',
+        async: false,
+        data: {'Type': 'getprogress','Year': iYear,'ProjectId':iProjectId},
+        success: function (data,status, xhr) {
+            if(xhr.status == 200) {
+                arrProgress = JSON.parse(data);
+            }
+        }
+    });
+    populateChart1();
+}
+
+function changeYear() {
+    var iYear = $('#year').val();
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    arrSchedule= [];
+    $.ajax({
+        url: getBaseURL() + "project/dashboard/projectdashboard",
+        type: 'post',
+        async: false,
+        data: {'Type': 'getyeardata','Year': iYear,'ProjectId':iProjectId},
+        success: function (data,status, xhr) {
+            if(xhr.status == 200) {
+                arrSchedule = JSON.parse(data);
+            }
+        }
+    });
+    populateChart5();
+}
+function ChangeProject() {
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    window.location.href = getBaseURL() + "project/dashboard/projectdashboard/" + iProjectId;
+}
+function populateChart1() {
+    var chart = AmCharts.makeChart("chartdiv", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": arrProgress,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Budget Cost: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Schedule",
+            "type": "column",
+            "valueField": "SchAmt"
+        }, {
+            "id": "g4",
+            "valueAxis": "v1",
+            "balloonText": "Project Completed : <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "lineColor": "#228B22",
+            "fillColors": "#228B22",
+            "title": "Work Done",
+            "type": "column",
+            "clustered":false,
+            "columnWidth":0.5,
+            "valueField": "WorkDone"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v1",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#4B0082",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Receivable",
+                "useLineColorForBulletBorder": true,
+                "valueField": "BillAmount",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Receivable :<b>"+val+"</b>";
+                }
+            },
+            {
+                "id": "g2",
+                "valueAxis": "v1",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#FF0000",
+                "type": "smoothedLine",
+                "title": "Receipt",
+                "useLineColorForBulletBorder": true,
+                "valueField": "Receipt",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Receipt :<b>"+val+"</b>";
+                }
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "PDate",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function  populateChart2() {
+    var chart = AmCharts.makeChart( "chartdiv1", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": <?php echo (isset($project_resource_type)) ? json_encode($project_resource_type) : '[]';?>,
+        "valueField": "Amount",
+        "titleField": "TypeName",
+        "outlineAlpha": 0.4,
+        "radius": "30%",
+        "innerRadius": "60%",
+        "depth3D": 15,
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "angle": 15,
+        "export": {
+            "enabled": true
+        }
+    } );
+}
+
+function populateChart3() {
+    var chart = AmCharts.makeChart("chartdiv5", {
+        "type": "pie",
+        "theme": "light",
+        "dataProvider": <?php echo (isset($project_resource_group)) ? json_encode($project_resource_group) : '[]';?>,
+        "valueField": "Amount",
+        "titleField": "ResourceGroupName",
+        "radius": "30%",
+        "innerRadius": "60%",
+        "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateChart4() {
+    var chart = AmCharts.makeChart( "chartdiv3", {
+        "type": "funnel",
+        "theme": "light",
+        "dataProvider": <?php echo (isset($projects_resource_required)) ? json_encode($projects_resource_required) : '[]';?>,
+        "balloon": {
+            "fixedPosition": true
+        },
+        "valueField": "Amount",
+        "titleField": "ResourceName",
+        "marginRight": 240,
+        "marginLeft": 50,
+        "startX": -500,
+        "rotate": true,
+        "labelPosition": "right",
+        "balloonText": "[[title]]: [[value]]",
+        "export": {
+            "enabled": true
+        }
+    });
+}
+function populateChart5() {
+    var chart = AmCharts.makeChart("chartdiv4", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider": arrSchedule,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        },
+            {
+                "unit":"%",
+                "id": "v2",
+                "position": "right",
+                "autoGridCount": false,
+                "title": "% of Completion"
+            }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+            "balloonText": "Schedule: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Schedule",
+            "type": "column",
+            "valueField": "SchAmt"
+        }, {
+            "id": "g4",
+            "valueAxis": "v1",
+            "balloonText": "Work Done : <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "lineColor": "#228B22",
+            "fillColors": "#228B22",
+            "title": "Work Done Cost",
+            "type": "column",
+            "clustered":false,
+            "columnWidth":0.5,
+            "valueField": "WorkDone"
+        },
+            {
+                "id": "g1",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#4B0082",
+                "type": "smoothedLine",
+                "dashLength": 5,
+                "title": "Schedule %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "SchPer",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Schedule Completion:<br/><b>"+val+"</b>%";
+                }
+            },
+            {
+                "id": "g2",
+                "valueAxis": "v2",
+                "bullet": "round",
+                "bulletBorderAlpha": 1,
+                "bulletColor": "#FFFFFF",
+                "bulletSize": 5,
+                "hideBulletsCount": 50,
+                "lineThickness": 3,
+                "lineColor": "#FF0000",
+                "type": "smoothedLine",
+                "title": "Completion %",
+                "useLineColorForBulletBorder": true,
+                "valueField": "WorkDonePer",
+                "balloonText": "[[value]]",
+                "balloonFunction": function(graphDataItem, graph) {
+                    var val = sanitizeNumber(graphDataItem.values.value,0);
+                    return "Actual Completion:<br/><b>"+val+"</b>%";
+                }
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "PDate",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+        "legend": {
+            "useGraphSettings": true,
+            "position": "top",
+            "valueText": ""
+        },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+
+function changeDate() {
+    var dDate =  $('#refdate').val();
+    var iProjectId = isNullCheck($('#projectId').val(),'number');
+    arrDayWorkDone = [];
+    arrDayMaterial = [];
+    arrDayLabour = [];
+    $.ajax({
+        url: getBaseURL() + "project/dashboard/projectdashboard",
+        type: 'post',
+        async: false,
+        data: {'Type': 'dayprogress','sDate': dDate,'ProjectId':iProjectId},
+        success: function (data,status, xhr) {
+            if(xhr.status == 200) {
+                var obj = JSON.parse(data);
+                arrDayWorkDone = obj.Work;
+                arrDayMaterial = obj.Material;
+                arrDayLabour = obj.Work;
+            }
+        }
+    });
+    populateChart6();
+    populateChart7();
+    populateChart8();
+}
+
+function populateChart6() {
+    var chart = AmCharts.makeChart("chartdiv6", {
+        "theme": "light",
+        "type": "serial",
+        "allLabels" : [{
+            "text": "Work Progess",
+            "align": "center",
+            "bold":true,
+            "size":12
+        }],
+        "dataProvider": arrDayWorkDone,
+        "rotate": true,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Schedule: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Schedule",
+            "type": "column",
+            "valueField": "Schedule"
+        },
+            {
+                "id": "g4",
+                "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+                "lineColor": "#228B22",
+                "fillColors": "#228B22",
+
+                "balloonText": "Work Done: <b>[[value]]</b>",
+                "fillAlphas": 0.9,
+                "lineAlpha": 0.2,
+                "title": "WorkDone",
+                "type": "column",
+                "clustered":false,
+                "columnWidth":0.5,
+                "valueField": "WorkDone"
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "Title",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function populateChart7() {
+    var chart = AmCharts.makeChart("chartdiv7", {
+        "theme": "light",
+        "type": "serial",
+        "allLabels" : [{
+            "text": "Material Consumed",
+            "align": "center",
+            "bold":true,
+            "size":12
+        }],
+        "dataProvider": arrDayMaterial,
+        "rotate": true,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Theoritical: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Theoritical",
+            "type": "column",
+            "valueField": "Schedule"
+        },
+            {
+                "id": "g4",
+                "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+                "lineColor": "#228B22",
+                "fillColors": "#228B22",
+
+                "balloonText": "Actual: <b>[[value]]</b>",
+                "fillAlphas": 0.9,
+                "lineAlpha": 0.2,
+                "title": "Actual",
+                "type": "column",
+                "clustered":false,
+                "columnWidth":0.5,
+                "valueField": "Actual"
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "Title",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+
+function populateChart8() {
+    var chart = AmCharts.makeChart("chartdiv8", {
+        "theme": "light",
+        "type": "serial",
+        "allLabels" : [{
+            "text": "Labour Strength",
+            "align": "center",
+            "bold":true,
+            "size":12
+        }],
+        "dataProvider": arrDayLabour,
+        "rotate": true,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Nos"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Theoritical: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Theoritical",
+            "type": "column",
+            "valueField": "Schedule"
+        },
+            {
+                "id": "g4",
+                "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+                "lineColor": "#228B22",
+                "fillColors": "#228B22",
+
+                "balloonText": "Actual: <b>[[value]]</b>",
+                "fillAlphas": 0.9,
+                "lineAlpha": 0.2,
+                "title": "Actual",
+                "type": "column",
+                "clustered":false,
+                "columnWidth":0.5,
+                "valueField": "Actual"
+            }
+        ],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "Title",
+        "categoryAxis": {
+            "gridPosition": "start"
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+function populateChart9() {
+    var chart = AmCharts.makeChart("chartdiv9", {
+        "theme": "light",
+        "type": "serial",
+        "dataProvider":  <?php echo (isset($project_work_group)) ? json_encode($project_work_group) : '[]';?>,
+        "valueAxes": [{
+            "id": "v1",
+            "position": "left",
+            "autoGridCount": false,
+            "title": "Cost"
+        }],
+        "startDuration": 1,
+        "graphs": [{
+            "id": "g3",
+            "valueAxis": "v1",
+//                "lineColor": "#800080",
+//                "fillColors": "#800080",
+            "lineColor": "#FFA500",
+            "fillColors": "#FFA500",
+
+            "balloonText": "Amount: <b>[[value]]</b>",
+            "fillAlphas": 0.9,
+            "lineAlpha": 0.2,
+            "title": "Amount",
+            "type": "column",
+            "valueField": "Amount"
+        }],
+        "plotAreaFillAlphas": 0.1,
+        pathToImages: "//cdn.amcharts.com/lib/3/images/",
+        "categoryField": "WorkGroupName",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "labelRotation": 45
+        },
+        "export": {
+            "enabled": true
+        },
+//            "legend": {
+//                "useGraphSettings": true,
+//                "position": "top",
+//                "valueText": ""
+//            },
+        "balloon": {
+            "borderThickness": 1,
+            "shadowAlpha": 0
+        },
+        "chartScrollbar": {"enabled": true},
+        "chartCursor": {
+            "valueLineEnabled": true,
+            "valueLineBalloonEnabled": true,
+            "valueLineAlpha": 0.5,
+            "fullWidth": true,
+            "cursorAlpha": 0.05
+        }
+    });
+}
+</script>
+<!---------------Dashboard style--------------->
+<style>
+    .top_ct1                  {background:#fff;padding:5px 0;margin-bottom:20px; border:1px solid #BFDBDE;}
+    .top_ct1-1 							{background:#fff;width:100%;height:400px;margin-bottom:20px; border:1px solid #BFDBDE;}
+    #chartdiv,  #chartdiv4,#chartdiv9 {width:100%;height:400px !important;font-size:10px;background:#fff;overflow:hidden !important;}
+    #chartdiv1,#chartdiv3,#chartdiv5 {width:100%;height:200px !important;font-size:10px;background:#fff;overflow:hidden !important;}
+    #chartdiv6,#chartdiv7,#chartdiv8 {width:100%;height:120px !important;font-size:8px;background:#fff;overflow:hidden !important;}
+    .panel-primary1 					{border-bottom:2px solid #337ab7 !important;}
+    .panel1:hover::before, .panel1:focus::before, .panel1:active::before{left:0;right:0;}
+    .panel1::before 					{background:#2098d1 none repeat scroll 0 0;content: "";height:2px;left:50%;position:absolute;right:50%;top:0;transition-duration: 0.3s; transition-property: left, right;transition-timing-function: ease-out;z-index: -1;}
+    .panel1 							{backface-visibility: hidden;box-shadow: 0 0 1px rgba(0, 0, 0, 0);display:inline-block;overflow:hidden;position:relative;transform:translateZ(0px);	vertical-align: middle;}
+    .panel 								{background-color:#fff;border:1px solid #e8e8e8;border-radius:4px;box-shadow:0 1px 1px rgba(0, 0, 0, 0.05);margin:20px 0 30px 0;box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.23);width:100%;}
+    .pull-left 							{float:left !important;}
+    .pull-right 						{float:right;}
+    .panel-green 						{border-bottom:2px solid #5cb85c;}
+    .panel-red 							{border-bottom:2px solid #d9534f;}
+    .huge 								{font-size:28px;color:#000;}
+    .text-right 						{font-size:15px;color:#666;font-family:"Open Sans", sans-serif;}
+    .panel1 > .panel-heading 			{ background: none; border: none;}
+    .panel-yellow 						{border-bottom:2px solid #f0ad4e;}
+    /*.panel-body 				{border:1px solid #e7e7e7;box-shadow: 1px 1px 0 0 rgba(50, 50, 50, 0.23);}*/
+    .panel-heading 					    {color:#245221;font-weight:400;font-size:18px;padding:5px 15px;background:#FBF8E9;transition: margin 0.5s ease-out 0s; border-bottom:1px solid #337ab7; border-radius:5px 5px 0px 0px !important;}
+    .fa-5x 								{font-size:40px;margin-left:10px; -moz-transition: all 0.3s; -webkit-transition: all 0.3s;transition: all 0.3s;	overflow:hidden}
+    .fa-5x:hover 						{-moz-transform: scale(2.1);	-webkit-transform: scale(2.1);	transform: scale(2.1);}
+    .carousel-indicators li 			{background:#C03;border:1px solid #930}
+    .carousel-indicators 				{bottom:-60px;}
+    /*project info*/
+    .accordion_head_crnt, .accordion_head:hover{ background:#FBF8E9 !important;}
+    .project-img 						{padding: 0 27px 0 0;position:relative;height:400px;overflow:hidden;margin-left:0}
+    .project-info 						{background:rgba(255, 255, 255, 0.7);z-index:1;position:absolute;top:68px;height:378px; margin-left:10px; border:5px solid #dbdbdb;box-shadow: 1px 0px 0px rba(0, 0, 0, 0.2);	overflow:auto}
+    .creat-icon 						{width:40px;height:40px;border-top-right-radius:2em;border-bottom-right-radius:2em;	background: #e3edf1 none repeat scroll 0 0;	border: 2px solid #93cee5;float:left}
+    .rfc_regs ul li a 					{width:100%; font-size:12px}
+    .rfc_regs ul li a:hover				{text-transform:uppercase; transition:all 0.4s ease-in-out 0s;}
+    .rfc_regs ul li:hover::before, .rfc_regs ul li:focus::before,.rfc_regs ul li:active::before {left:0;right:0;}
+    .rfc_regs ul li::before 			{background:#2098d1;bottom:0;content: "";height:3px;left:50%;position:absolute;right:50%;transition-duration: 0.3s;transition-property: left, right;transition-timing-function: ease-out; z-index: -1;}
+    .rfc_regs ul li 					{backface-visibility: hidden;box-shadow: 0 0 1px rgba(0, 0, 0, 0);display: inline-block;border-left:2px solid #2098d1;overflow:hidden;position:relative;transform: translateZ(0px);vertical-align: middle;width:49% !important;margin:4px 2px;}
+    /*-----message list--*/
+    .message-list 						{list-style-type:none;margin:0;padding:0;}
+    .flat-blue a 						{color:#363c46;}
+    .message-list > li 					{border-bottom:1px dotted #eee;padding:10px;}
+    .message-list > li .profile-img 	{height:60px;width:60px;border:2px solid rgba(0, 112, 255, 0.4);border-radius:50%;}
+    .message-list > li .profile-img:hover{border:2px solid rgba(0, 112, 255, 0.9);}
+    .pull-left 							{float:left;}
+    .message-list > li > .message-block {min-height:60px;padding-left:70px;}
+    .message-list > li > .message-block .username {font-size:12px;font-weight:bold;	color:#333;}
+    .message-list > li > .message-block .message-datetime {color:#aaa;font-size:10px;}
+    .message-list > li > .message-block .message{font-size:12px;color:#333;}
+    .month_year 						{border:1px solid #dbdbdb !important;}
+    /*datepicker*/
+    .ui-datepicker-calendar     		{display:none;}
+    /*--icon animation css--*/
+    .chart-icon 						{width:30px;}
+    .chart-scale 						{stroke:#173753;}
+    .chart-line 						{transform-origin:bottom;}
+    .chart-icon .chart-line:first-child, .chart-icon:focus .chart-line:first-child, .chart-icon:active .chart-line:first-child {animation: 0.4s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite chartlines;}
+    .chart-icon .chart-line:nth-child(2), .chart-icon:focus .chart-line:nth-child(2), .chart-icon:active .chart-line:nth-child(2){animation: 1.22s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite reverse chartlines;}
+    .chart-icon .chart-line:nth-child(3), .chart-icon:focus .chart-line:nth-child(3), .chart-icon:active .chart-line:nth-child(3){animation: 0.94s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite reverse chartlines;}
+    .chart-icon .chart-line:nth-child(4), .chart-icon:focus .chart-line:nth-child(4), .chart-icon:active .chart-line:nth-child(4) {animation: 1.70s cubic-bezier(0.49, 0.86, 0.59, 0.95) infinite chartlines;}
+    @keyframes chartlines {
+        0% {
+            transform: scaleY(1.10);
+        }
+        32% {
+            transform: scaleY(0.85);
+        }
+        79% {
+            transform: scaleY(0.12);
+        }
+        100% {
+            transform: scaleY(0.50);
+        }
+    }
+    /*--icon animation css--*/
+    /*list news*/
+    .top_rfc1-1{ height:385px; overflow:hidden; background:#fff;}
+    @media screen and (min-width : 768px) and (max-width : 1025px)
+    {
+        .circle-icon						{height:45px;margin-top:15px;width:45px;}
+        .fa-5x								{color:#fff;font-size:28px;line-height:47px;margin-left:10px;}
+        .panel								{margin:10px 0}
+        .carousel-indicators				{bottom:-31px;}
+        .panel-heading 						{font-size:15px}
+        .carousel-inner > .item > a > img, .carousel-inner > .item > img, .img-responsive, .thumbnail a > img, .thumbnail > img{height:350px;  width: 100%;}
+        .project-info						{top:67px}
+        .rfc_regs ul li						{width:48% !important}
+    }
+    @media only screen and (min-width : 320px) and (max-width : 767px)
+    {
+        .carousel-indicators 				{bottom: -29px;}
+        .panel-heading 						{height: auto !important}
+        .carousel-inner > .item > a > img, .carousel-inner > .item > img, .img-responsive, .thumbnail a > img, .thumbnail > img{height:350px}
+        .project-info						{top:70px;width:93%}
+        .circle-icon						{height: 45px; margin-top:15px; width: 45px;}
+        .fa-5x 								{color:#fff;font-size:28px;line-height:47px;margin-left:10px;}
+        .panel								{margin:10px 0}
+        .huge								{font-size:34px}}
+</style>
+<!--content-->
+<!---------------Dashboard style END--------------->

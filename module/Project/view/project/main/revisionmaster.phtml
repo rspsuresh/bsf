@@ -1,0 +1,170 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form class="form-horizontal" method="post" role="form">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">Revision Master</h1>
+                    <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 col-sm-6 col-sm-offset-0">
+                        <div class="col-lg-9">
+                            <div class="form-group">
+                                <label class="col-sm-4 sel-type">Select Project</label>
+                                <div class="col-lg-8 form-group">
+                                    <select name="projectId" id="projectId" class="form-control single_dropdown lbl_move" data-size="6" title="Select Project..." style="width:100%;" onchange="return changeProject();">
+                                        <option value="0">None</option>
+                                        <?php if(isset($projectlists)): ?>
+                                            <?php foreach ( $projectlists as $project ): ?>
+                                                <option value="<?php echo $project['ProjectId']; ?>"><?php echo $project['ProjectName']; ?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-lg-offset-0 tmss">
+                    <div class="table-responsive clear">
+                        <div id="grid"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+
+    var $grid = $("#grid");
+    var arr_revlist = [];
+
+    function bindGrid() {
+        getrevMaster();
+        var resource = {
+            dataType: "json",
+            dataFields: [
+                { name: 'RevisionId', type: 'number' },
+                { name: 'RFCRegisterId', type: 'number' },
+                { name: 'CreateDate', type: 'date' },
+                { name: 'RevisionName', type: 'string' },
+                { name: 'Type', type: 'string' },
+                { name: 'RefNo', type: 'string' },
+                { name: 'RFCType', type: 'string' }
+            ],
+            id: 'RevisionId',
+            localdata: arr_revlist
+        };
+
+        var resdata = new $.jqx.dataAdapter(resource);var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.RFCRegisterId,datarecord.RFCType));
+        };
+
+        $grid.jqxGrid( {
+            width: "100%",
+            theme: 'bootstrap',
+            source: resdata,
+            pageable: true,
+            autoheight: true,
+            sortable: true,
+            enabletooltips: true,
+            rowdetails: true,
+            groupable:true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto; border:10px solid #ddd;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'RevisionId', datafield: 'RevisionId', hidden: true  },
+                { text: 'RFCRegisterId', datafield: 'RFCRegisterId', hidden: true  },
+                { text: 'CreateDate', datafield: 'CreateDate',width: '15%', cellsformat: 'dd-MM-yyyy'},
+                { text: 'RFCRefNo', datafield: 'RefNo',width: '15%'},
+                { text: 'RevisionName', datafield: 'RevisionName',width: '55%'},
+                { text: 'RFCType', datafield: 'RFCType',width: '15%'},
+            ],
+            groups: ['Type'],
+            groupsrenderer: function (defaultText, group, state, params) {
+                return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+            },
+            ready: function () {
+                $("#grid").jqxGrid('expandallgroups');
+            }
+        });
+
+        $grid.on('rowexpand', function (event) {
+            var prev_row = $grid.jqxGrid('selectedrowindexes');
+            if (prev_row != '') {
+                for (var i = 0; i < prev_row.length; i++) {
+                    $grid.jqxGrid('hiderowdetails', prev_row[i]);
+                }
+            };
+            var index = $grid.jqxGrid('getrowboundindex', event.args.rowindex);
+            $grid.jqxGrid({selectedrowindexes: [index]});
+        });
+
+        $grid.on('rowcollapse', function (event) {
+            $grid.jqxGrid('clearselection');
+        });
+    }
+
+    function renderRowDetail(id,type) {
+        var dataValue = '';
+        var sUrl= "";
+        switch (type) {
+            case "ProjectIOW-Add":
+                sUrl =  'project/template/getrfcprojectiow';
+                break;
+            case "ProjectIOW-Edit":
+                sUrl =  'project/template/getrfcprojectiow';
+                break;
+            case "Project-IOW-Delete":
+                sUrl =  'project/template/getrfcprojectiowdelete';
+                break;
+            case "IOWPlan-Add":
+                sUrl =  'project/template/getrfciowplan';
+                break;
+            case "OtherCost-Add":
+                sUrl =  'project/template/getrfcothercost';
+                break;
+            case "OtherCost-Edit":
+                sUrl =  'project/template/getrfcothercost';
+                break;
+        }
+
+        if (sUrl =="")  return;
+        $.ajax({
+            url: getBaseURL() + sUrl,
+            type: 'POST',
+            data: {rfcid: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+
+    function getrevMaster() {
+        arr_revlist = [];
+        var iproject_id = parseInt(isNullCheck($('#projectId').val(), 'number'));
+        $.ajax({
+            url: getBaseURL() + "project/main/getrevisionmaster",
+            async: false,
+            data: {'ProjectId': iproject_id},
+            type: 'post',
+            success: function (data, status) {
+                arr_revlist = jQuery.parseJSON(data);
+            }
+        });
+    }
+
+    function changeProject()
+    {
+        var iProjectId = isNullCheck($('#projectId').val(),'number');
+        if (iProjectId == 0) {
+            alert('Select a Project');
+            return false;
+        }
+        bindGrid();
+        $('#jqxWidget').show();
+    }
+</script>

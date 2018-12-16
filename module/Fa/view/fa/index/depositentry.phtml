@@ -1,0 +1,383 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/fa.css'; ?>" />
+<style type="text/css">
+	.top-30{padding-top:30px;}
+	.subDiv {margin-top: 0px !important;}
+</style>
+<div class="content_wrapper">
+    <div class="container-fluid">
+        <form id="chequeForm" method="post">
+            <div class="col-lg-12">
+                <h1 class="txt_center">Receipt Journal</h1><!--Deposit Entry-->
+                <div class="col-lg-3">
+                    <div class="form-group col-lg-12">
+                        <input type="hidden" name="EntryId" id="EntryId" value="<?php echo (isset($EntryId)) ? $EntryId : '0';?>" />
+                        <input type="hidden" name="bookType" id="bookType" value="" />
+                        <select type="text" name="bookName" id="bookName" style="width:100%;" class="form-control lbl_move single_dropdown" label="Book Name" onchange="loadChequeDetails()">
+                            <option value="0"></option>
+                            <?php if(isset($bookNameDet))  {
+                                foreach($bookNameDet as $books) :?>
+                                    <option value="<?php echo $books['AccountID'];?>" <?php echo (isset($bookId) && $bookId==$books['AccountID']) ? 'selected' :'';?> ><?php echo $books['AccountName'];?></option>
+                                <?php endforeach; } ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 divTable" style="display: none;">
+                <div class="table-responsive top-30">
+                    <table class="table tableView dataTable no-footer" style=" margin-bottom:0px;">
+                        <thead>
+                        <tr>
+                            <th class="red-ths">&nbsp;</th>
+                            <th class="red-ths">Voucher Date</th>
+                            <th class="red-ths">Voucher No</th>
+                            <th class="red-ths">Ref VNo</th>
+                            <th class="red-ths">Receipt Date</th>
+                            <th class="red-ths">Receipt No</th>
+                            <th class="red-ths">Ref Type</th>
+                            <th class="red-ths">SL Name</th>
+                            <th class="red-ths">Ref Info</th>
+                            <th class="red-ths">Amount</th>
+                            <th class="red-ths">PDC</th>
+                            <th class="red-ths">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody class="main seq-class" id="chequeMaster">
+
+                        </tbody>
+                        <tbody class="total" id="listTotal">
+                        <tr>
+                            <td colspan="8">&nbsp;</td>
+                            <td align="right" class="t_amt">Total</td>
+                            <td width="10%" >
+                                <input class="parent_text border-none" style="text-align:right;" type="text" name="totAmount" id="totAmount" readonly/>
+                            </td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="rowId" id="rowId" value="0"/>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area divFooter" style="display: none;">
+    <ul>
+        <?php if($allowEdit==1) { ?>
+        <li class="dropdown save_btn float_r"><a href="javascript:void(0);" id="next" onclick="submitForm()" class="ripple">Submit</a></li>
+        <?php } ?>
+        <li class="cancel_btn cancel_btn_bluecolor float_l">
+            <a href="<?php echo $this->basePath(); ?>/fa/index/depositentry" class="ripple has-ripple" style="cursor:pointer;" button type="button" id="backRid" class="ripple">Cancel<span class="ripple-wrapper"></span></a>
+        </li>
+    </ul>
+</div>
+<script type="text/template" id="template-chequeMaster">
+    <tr class="">
+        <td width="3%">
+            <input type="hidden" name="ReceiptId__" id="ReceiptId__">
+            <input type="hidden" name="EntryId__" id="EntryId__">
+            <input type="hidden" name="Type__" id="Type__">
+            <input type="hidden" name="RefAccId__" id="RefAccId__">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="tick__" name="tick__" {{Sel}} onclick="calculateAmount();">
+                    <label for="tick__"></label>
+                </p>
+            </div>
+        </td>
+        <td width="10%">
+            <div class="col-lg-12 padlr0">
+                <input type="text" name="voucherDate__" id="voucherDate__" class="tbl_input datepickerinput" readonly/>
+            </div>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" name="voucherNo__" id="voucherNo__" />
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" id="refVNo__" name="refVNo__" />
+        </td>
+        <td width="10%">
+            <div class="col-lg-12 padlr0">
+                <input type="text" name="reciptDate__" id="reciptDate__" class="tbl_input" value="" readonly/>
+            </div>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text"  name="reciptNo__"  id="reciptNo__"value="" readonly/>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" id="refType__" name="refType__" value="" readonly/>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" id="subLedger__" name="subLedger__" value="" readonly/>
+            <input type="hidden" id="subLedgerId__" name="subLedgerId__" />
+            <input type="hidden" id="subLedgerTypeId__" name="subLedgerTypeId__" />
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" id="refInfo__" name="refInfo__" value="" readonly/>
+        </td>
+        <td width="10%" align="right">
+            <input class="parent_text border-none" style="text-align:right;" type="text" id="amount__" name="amount__" value="" readonly/>
+        </td>
+        <td width="3%">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="pdc__" name="pdc__" {{PDCSel}} disabled>
+                    <label for="pdc__"></label>
+                </p>
+            </div>
+        </td>
+        <td width="3%" align="center" class="action_btns_td" style="border:none !important;">
+            <ul class="action_btns">
+                <li><a href="#" class="mainTr" id="expandTr__" style="cursor:pointer;"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a></li>
+            </ul>
+        </td>
+    </tr>
+
+    <tr class="subTr" style="display: none;">
+        <td colspan="12">
+            <div class="subDiv" style="display:none;">
+                <div class="col-lg-12 top-30">
+                    <div class="col-lg-3 form-group">
+                        Cheque No
+                        <input class="tbl_input" type="text" id="chequeNo__" name="chequeNo__" value="" placeholder="Cheque No" readonly/>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-6 form-group">
+                        Cheque Date
+                        <input class="tbl_input " type="text" id="chequeDate__" name="chequeDate__" value="" placeholder="Cheque Date" readonly/>
+                    </div>
+                    <div class="col-lg-6 form-group">
+                        Cost Centre Name
+                        <input class="tbl_input" type="text" id="costCentre__" name="costCentre__" value=""  placeholder="Cost Centre" readonly/>
+                        <input type="hidden" id="costCentreId__" name="costCentreId__"/>
+                    </div>
+                    <div class="col-lg-6 form-group">
+                        Bank Name
+                        <input class="tbl_input" type="text" id="bank__" name="bank__" value=""  placeholder="Bank" readonly/>
+                    </div>
+                    Narration
+                    <textarea class="exp-tex" name="narrition__" id="narrition__" value="" placeholder="Narrition"></textarea>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    $(".single_dropdown").select2({
+        placeholder: "",
+        allowClear: true
+    });
+    var chequeMasterEdit= <?php echo isset($chequeMasterEdit)? json_encode($chequeMasterEdit):'[]' ;?>;
+    var EntryId= <?php echo isset($EntryId)? $EntryId:'0' ;?>;
+    var oldRow='';
+    var $svNo='<?php echo isset($svNo) ? $svNo : '';?>';
+    var genType=<?php echo (isset($aVNo)) ? $aVNo['genType'] : '0';?>;
+    $svNo= $.trim($svNo);
+
+    $(function(){
+        if(EntryId !=0){
+            $("#bookName").prop('disabled',true);
+            bindChequeMaster(chequeMasterEdit);
+        }
+    });
+    function bindDatePicker(reciptDate,sno){
+        var date  = reciptDate.split('-'),
+            day = date[0],
+            month = date[1],
+            year = date[2];
+
+        $("#voucherDate_"+sno).datepicker({
+            format: "dd-mm-yyyy",
+            autoclose: true,
+            startDate:new Date(year,month-1,day)
+        });
+    }
+    function bindChequeMaster(data){
+        $("#chequeMaster").html('');
+        var template = $("#template-chequeMaster").html();
+        var sno =0;
+        var reciptDate =0;
+        var day='',month='',year='';
+        if(data.length !=0){
+            $('.divTable').fadeIn();
+            $('.divFooter').fadeIn();
+            $.each(data, function(i,o){
+                sno++;
+                var selected = '';
+                var PDCselected = '';
+                if(o.Sel == 1){
+                    selected = 'checked';
+                }
+                if(o.PDC ==1)
+                    PDCselected='checked';
+
+                $("#chequeMaster").append(template.replace(/__/g,'_'+sno)
+                    .replace(/\{\{Sel\}\}/g,selected)
+                    .replace(/\{\{PDCSel\}\}/g,PDCselected)
+                );
+                if(EntryId !=0){
+                    $("#EntryId_"+sno).val(o.EntryId);
+                    $("#tick_"+sno).prop('disabled',true);
+                }
+                $("#ReceiptId_"+sno).val(o.ReceiptId);
+                $("#Type_"+sno).val(o.Type);
+                $("#RefAccId_"+sno).val(o.RefAccId);
+                $("#voucherDate_"+sno).val(o.VoucherDate);
+                $("#voucherNo_"+sno).val(o.VoucherNo);
+                if(genType ==1){
+                    $("#voucherNo_"+sno).prop('readonly',true);
+                }
+                $("#refVNo_"+sno).val(o.RefNo);
+                $("#reciptDate_"+sno).val(o.ReceiptDate);
+                $("#reciptNo_"+sno).val(o.ReceiptNo);
+                $("#refType_"+sno).val(o.RefType);
+                $("#subLedger_"+sno).val(o.SubLedgerName);
+                $("#subLedgerId_"+sno).val(o.SubLedgerId);
+                $("#subLedgerTypeId_"+sno).val(o.SubLedgerTypeId);
+                $("#refInfo_"+sno).val(o.RefInfo);
+                $("#amount_"+sno).val(sanitizeNumber(parseFloatVal(o.ReceiptAmount,0),2,true));
+                $("#chequeNo_"+sno).val(o.ChequeNo);
+                $("#chequeDate_"+sno).val(o.ChequeDate);
+                $("#costCentre_"+sno).val(o.CostCentreName);
+                $("#costCentreId_"+sno).val(o.CostCentreId);
+                $("#bank_"+sno).val(o.BankName);
+                $("#narrition_"+sno).val(o.Remarks);
+
+                bindDatePicker(o.ReceiptDate,sno);
+            });
+            $("#rowId").val(sno);
+            bindExpandTrFn();
+            calculateAmount();
+        }else{
+            $('.divTable').fadeIn();
+            $("#chequeMaster").html('<tr><td colspan="10" style="text-align:center;">No data to display!</td></tr>');
+
+        }
+    }
+
+    function loadChequeDetails(){
+        $.ajax({
+            url: "<?php echo $this->basePath(); ?>/fa/index/depositentry",
+            type: "post",
+            async:false,
+            data: {'bookId': $('#bookName').val(),'type': 'loadChequeDetails'},
+            success: function (data, textStatus, jqXHR) {
+                var data = JSON.parse(data);
+                bindChequeMaster(data['chequeMaster']);
+                if(data['bookType'] =='BA')
+                    $('#bookType').val('B');
+                else
+                    $('#bookType').val('C');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            }
+        });
+    }
+
+    function bindExpandTrFn(){
+        // expand tr
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function(e){
+            e.preventDefault();
+
+            /*Close if the sub table is open */
+            if(oldRow != $(this) && oldRow.length != 0) {
+                $(oldRow).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(oldRow).closest("tr").next(".subTr").slideUp("slow");
+            }
+
+            oldRow=$(this);
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+            else{
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+            }
+        });
+    }
+    function pad (str, max) {
+        str = str.toString();
+        return str.length < max ? pad("0" + str, max) : str;
+    }
+    function calculateAmount(){
+        var rows = $("#rowId").val();
+        var totalAmount = 0;
+        var currentAmount = 0;
+        for(var i=1;i<=rows;i++){
+            if($("#tick_"+i).is(':checked')){
+                totalAmount = parseFloatVal($("#amount_"+i).val())+parseFloatVal(totalAmount);
+                if(EntryId == 0 && $.trim($('#voucherNo_'+i).val()) == '' && genType == 1){
+                    $('#voucherNo_'+i).val('');
+                    $('#voucherNo_'+i).val(pad($svNo,4)).prop('readonly',true);
+                    $svNo++;
+                }
+            }
+        }
+        $("#totAmount").val(sanitizeNumber(parseFloatVal(totalAmount,0),2,true));
+    }
+
+    function submitForm(){
+        var bool=true;
+        var validationResult=finalAdviceValidation();
+
+        if (validationResult == 'NoTick') {
+            alert('Please Select at least one cheque and proceed !!!');
+            bool=false;
+        }else if (validationResult == 'NoAmount') {
+            alert('Selected cheque Amount Cannot be 0 !!!');
+            bool=false;
+        } else if (validationResult == 'NoVoucher') {
+            alert('Voucher No is Required');
+            bool=false;
+        }else if (validationResult == 'NoRefVNo') {
+            alert('Ref VNo is Required');
+            bool=false;
+        }
+        if(bool === true) {
+//            alert('submitted');
+            $('input[id^=pdc_]').prop('disabled',false);
+            $('input[id^=tick_]').prop('disabled',false);
+            $('#bookName').prop('disabled',false);
+            $('#chequeForm').submit();
+        }
+    }
+
+    function finalAdviceValidation(){
+        var tickExist = 0,AmountExist= 1,VoucherExist= 1,RefVExist=1; //If not checked even one checkbox , cannot proceed
+        $.each($('input[id^=tick_]'), function () {
+            if ($('#' + $(this).attr('id')).is(':checked')) { //checked True condition;
+                var tickId = $(this).attr('id').split('_')[1];
+                tickExist = 1;
+
+                if(parseInt($('#amount_'+tickId).val()) == 0)
+                    AmountExist=0;
+
+                if($.trim($('#voucherNo_'+tickId).val()).length == 0){
+                    showError($('#voucherNo_'+tickId),'Required');
+                    VoucherExist=0;
+                }else{
+                    removeError($('#voucherNo_'+tickId));
+                }
+
+                if($.trim($('#refVNo_'+tickId).val()).length == 0){
+                    showError($('#refVNo_'+tickId),'Required');
+                    RefVExist=0;
+                }else{
+                    removeError($('#refVNo_'+tickId));
+                }
+            }
+        });
+        if(tickExist != 1)
+            return 'NoTick';
+        else if(AmountExist == 0)
+            return 'NoAmount';
+        else if(VoucherExist == 0)
+            return 'NoVoucher';
+        else if(RefVExist == 0)
+            return 'NoRefVNo';
+
+    }
+</script>

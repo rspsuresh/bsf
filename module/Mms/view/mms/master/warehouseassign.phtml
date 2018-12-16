@@ -1,0 +1,185 @@
+
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/mms.css';?>"/>
+
+<style type="text/css">
+    .mar_20{padding-top:10px; padding-bottom:10px;}
+</style>
+
+<!--content-->
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <form method="post"  id="formWrapper" action="<?php echo $this->basePath(); ?>/mms/master/warehouseassign">
+            <div class="col-lg-12">
+                <h1>Warehouse - CostCentre Setup</h1>
+            </div>
+            <div class="col-lg-12 feed-bg clear top-20">
+                <div class="table-responsive top-30">
+                    <table class="table" style=" margin-bottom:0px;" id="workorderTable">
+                        <thead>
+                        <tr>
+                            <th>Warehouse No</th>
+                            <th>Warehouse Name</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody class="main"></tbody>
+                    </table>
+                    <input type="hidden" name="rowid" id="rowid" value="0"/>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script id="iow-template"  type="text/template" class="hide">
+    <tr>
+        <td width="35%">
+            <input class="" type="text"  name="whNo__"  id="whNo__" readonly/>
+            <input class="parent_text" type="hidden"  name="whId__"  id="whId__"  value=""/>
+        </td>
+        <td width="53%">
+            <input class="" type="text"  name="whName__"  id="whName__" readonly />
+        </td>
+        <td width="15%"><label></label></td>
+
+
+        <td width="2%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a href="#" class="mainTr" id="expandTr__"> <i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="left" data-original-title="Add lines" ></i></a> </li>
+            </ul>
+        </td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="9" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="iowTable__">
+                            <thead>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>CostCenter</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main"></tbody>
+                            <tbody class="total">
+                            </tbody>
+                            <input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</script>
+
+<script id="iow-template-check"  type="text/template" class="hide">
+    <tr>
+        <td class="tbl_input_td" width="15%" id="checkselect__">
+            <div class="radio_check">
+                <p>
+                    <input type="checkbox" id="iow___whcheck_0" name="iow___whcheck_0" value="1" onclick="return selectRow(this, event);"/>
+                    <label for="iow___whcheck_0"></label>
+                </p>
+            </div>
+        </td>
+        <td width="75%">
+            <input type="hidden" name="iow___costcentreId_0" id="iow___costcentreId_0" value=""/>
+            <input type="text" id="iow___costcentreName_0" name="iow___costcentreName_0" value="0" />
+
+        </td>
+    </tr>
+</script>
+
+
+<script type="text/javascript">
+    var arr_resources = <?php echo (isset($cost)) ? json_encode($cost) : '[]';?>;
+    var arr_costcenter = <?php echo (isset($arr_costcenter)) ? json_encode($arr_costcenter) : '[]';?>;
+    var arr_warehouse = <?php echo (isset($arr_warehouse)) ? json_encode($arr_warehouse) : '[]';?>;
+
+    $(function () {
+        var $rowid = $('#rowid');
+        var template = $('#techtitle-template').html();
+        var iowtemplate = $('#iow-template').html();
+        var iowtemplatecheck = $('#iow-template-check').html();
+        var rowid = 0;
+        var $tbody = $('#workorderTable').find('> tbody.main');
+        if(arr_resources.length != 0) {
+
+            $.each(arr_resources, function(j, l) {
+
+                rowid += 1;
+                $tbody.append(iowtemplate.replace(/__/g, '_' + rowid));
+
+                $('#whNo_' + rowid).val(l.WareHouseNo);
+                $('#whId_' + rowid).val(l.WareHouseId);
+                $('#whName_' + rowid).val(l.WareHouseName);
+
+                $.each(arr_costcenter, function(k, r) {
+                    var iowrowid = parseInt($('#iow_'+rowid+'_rowid').val()) + 1;
+                    $('#iowTable_' + rowid).find('> tbody.main').append(iowtemplatecheck.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+
+                    $('#iow_'+rowid+'_rowid').val(iowrowid);
+                    $('#iow_'+ rowid +'_costcentreName_'+ iowrowid).val(r.CostCentreName);
+                    $('#iow_'+ rowid +'_costcentreId_'+ iowrowid).val(r.CostCentreId);
+
+                    $.each(arr_warehouse, function(i,o) {
+                        if(l.WareHouseId== o.WareHouseId && o.CostCentreId== r.CostCentreId){
+                            $('#iow_'+ rowid +'_whcheck_'+ iowrowid).prop("checked",true);
+                        }
+                    });
+                });
+            });
+        }
+
+
+        $('.content_wrapper').on('click','.mainTr',function(e){
+            e.preventDefault();
+            if(!$(this).closest("tr").next(".subTr").is(":visible")){
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+                $(this).find("i").addClass("tform");
+            }
+            else{
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+                $(this).find("i").removeClass("tform");
+            }
+        });
+    });
+    function selectRow(x,e){
+
+        var $x = $(x);
+        var ids = $x[0].id.split('_');
+        var rowid = ids[1];
+        var iowrowid = ids[3];
+
+        var WareHouseId = $('#whId_' + rowid).val();
+        var CostCenterId = $('#iow_' + rowid + '_costcentreId_' + iowrowid).val();
+
+        var check1= 0;
+        if($x.prop('checked')==true)
+        {
+            check1= 1;
+        }
+        var reply=false;
+        $.ajax({
+            url: getBaseURL() + 'mms/master/warehouseassign',
+            type: "post",
+            data: "CostCenterId=" + CostCenterId + "&WareHouseId=" + WareHouseId +"&check=" + check1,
+            async: false,
+            success: function (data, textStatus, jqXHR) {
+                if (jqXHR.status == 200) {
+                    reply=true;
+                }
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                reply=false;
+
+            }
+        });
+        return reply;
+    }
+
+
+</script>

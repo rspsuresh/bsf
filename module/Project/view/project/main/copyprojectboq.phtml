@@ -1,0 +1,165 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>" />
+<style type="text/css">
+.top-lic { padding-top:50px; }
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="row">
+			<form method="post" id="formWrapper">
+				<div class="col-lg-12">
+					<h1 class="text-center">Copy Project BOQ</h1>
+					<div class="col-lg-12 top_ct">
+						<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 prt-next">
+							<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2 top-lic pro_kickoff_inputs">
+								<div class="form-group divfirst">
+									<input type="text" name="fromproject" id="fromproject" class="form-control lbl_move" label="From Project" autofocus value="" />
+                                    <input type="hidden" name="fromprojectId" id="fromprojectId" value="0">
+									<div class="error_message"><p>From Project</p></div>
+								</div>
+								<div class="divfirst">
+									<input type="text" name="toproject" id="toproject" class="form-control lbl_move" label="To Project"  value=""  />
+                                    <input type="hidden" name="toprojectId" id="toprojectId" value="0">
+									<div class="error_message"><p>To Project</p></div>
+								</div>
+								<div class="form-group divfirst">
+									<div class="radio_check">
+										<p>
+										   <input type="checkbox" value="" name="checkQty"  id="checkQty" checked/>
+										   <label for="check" class="ripple">With Qty</label>
+									   </p>
+									</div>
+								</div>
+							</div>
+							<div class="clearfix"></div>
+							<div class="next-bt col-lg-12" style="margin-bottom:30px;">
+								<a id="" href="javascript:void(0);" onclick="copyBoq();" >Copy <i class="fa fa-chevron-circle-right"></i></a>
+							</div>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script>
+    var arrfromproject = <?php echo json_encode($fromprojects); ?>;
+
+
+    $(function () {
+        $('#fromproject').unbind('autocomplete');
+        $('#fromproject').autocomplete({
+            lookup: arrfromproject,
+            multiselect: true,
+            lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                if (queryLowerCase == '*') return suggestion.value;
+                else {
+                    var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                    return re.test(suggestion.value);
+                }
+            },
+            onSelect: function (suggestion) {
+                if (suggestion) {
+                    $("#fromprojectId").val(suggestion.data);
+                    bindtoProject(suggestion.data);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function (suggestion) {
+                $("#fromprojectId").val(0);
+                $("#toprojectId").val(0);
+                $('#toproject').unbind('autocomplete');
+            },
+            onSearchComplete: function (query, suggestions) {
+                if (!suggestions.length) {
+                    $(this).addClass('error');
+                    $("#fromprojectId").val(0);
+                    $("#toprojectId").val(0);
+                    $('#toproject').unbind('autocomplete');
+                } else $(this).removeClass('error');
+            }
+        });
+    });
+
+    function bindtoProject(argProjectId) {
+        $('#toproject').unbind('autocomplete');
+
+        $.ajax({
+            url: getBaseURL() + "project/main/gettoproject",
+            async: false,
+            type: 'post',
+            data: {'ProjectId': argProjectId},
+            success: function (data, status) {
+                data = JSON.parse(data);
+
+                $('#toproject').autocomplete({
+                    lookup: data,
+                    multiselect: true,
+                    lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+                        if (queryLowerCase == '*') return suggestion.value;
+                        else {
+                            var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                            return re.test(suggestion.value);
+                        }
+                    },
+                    onSelect: function (suggestion) {
+                        if (suggestion) {
+                            $("#toprojectId").val(suggestion.data);
+                            $(this).removeClass('error');
+                        }
+                    },
+                    onSearchStart: function (suggestion) {
+                        $("#toprojectId").val(0);
+                    },
+                    onSearchComplete: function (query, suggestions) {
+                        if (!suggestions.length) {
+                            $(this).addClass('error');
+                            $("#toprojectId").val(0);
+                        } else $(this).removeClass('error');
+                    }
+                });
+            }
+        });
+    }
+
+    function copyBoq() {
+        var iFromProjectId = parseInt(isNullCheck($('#fromprojectId').val(),'number'));
+        var iToProjectId =parseInt(isNullCheck($('#toprojectId').val(),'number'));
+        var sToProjectName =isNullCheck($('#toproject').val(),'string');
+
+        if (iFromProjectId ==0) {
+            showError($('#fromproject'), 'Required');
+            $('#fromproject').focus();
+            return;
+        }
+
+        if (iToProjectId ==0) {
+            showError($('#toproject'), 'Required');
+            $('#toproject').focus();
+            return;
+        }
+
+        $.ajax({
+            url: getBaseURL() + "project/main/checkprojectboqfound",
+            async: false,
+            type: 'post',
+            data: {'ProjectId': iToProjectId},
+            success: function (data, status) {
+                if (data == "BOQ") {
+                    alert("BOQ Found in " + sToProjectName + ", Does Not Allow to Copy");
+                    return;
+                } else if (data == "WBS") {
+                    alert("WBS Found in " + sToProjectName + ", Does Not Allow to Copy");
+                    return;
+                } else {
+                    formsubmit();
+                }
+            }
+        });
+    }
+
+    function formsubmit() {
+        $('#formWrapper').submit();
+    }
+
+</script>

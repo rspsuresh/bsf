@@ -1,0 +1,150 @@
+<div class="col-lg-12">
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+        <span class="date_icon"><i class="fa fa-calendar"></i></span>
+        <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" label="Reference Date" readonly  value="<?php  echo date("d-m-Y", strtotime($rfcregister['RefDate']));?>"/>
+    </div>
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+        <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo $rfcregister['RefNo'];?>"/>
+    </div>
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+        <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName'];?>"/>
+        <input type="hidden" name="project_id" id="project_id"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId'];?>"/>
+    </div>
+    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+        <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName'];?>"/>
+    </div>
+</div>
+
+<div class="col-lg-12 col-lg-offset-0" id="edit-content">
+    <div class="table-responsive topsp animated-panel zoomIn parent-scroll non-borde-td" style="animation-delay: 0.2s;">
+        <table class="fixTable table" style=" margin-bottom:0px;" id="sample12">
+            <thead>
+            <tr>
+                <th>RefNo</th>
+                <th>Specification</th>
+                <th>Unit</th>
+                <th class="text-right">Budget Qty</th>
+                <th class="text-right">Cumulative Qty</th>
+                <th class="text-right">Previous Qty</th>
+                <th class="text-right">Current Qty</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php $i=0;$iTRowId=1;
+            if (isset($rfctrans)):
+                foreach($rfctrans as $trans):
+                    $i=$i+1;
+                    ?>
+                    <tr id="IOWiRowId_<?php echo $i; ?>">
+                        <td width="5%"><input type="text" class="parent_text bor-non <?php if($trans['UnitName']=="") { echo 'fonts-blod'; } else { echo ''; }?>" name="refno_<?php echo $i; ?>" id="refno_<?php echo $i; ?>" value="<?php echo $trans['RefSerialNo'];?>" readonly></td>
+                        <td width="11%"><p class="parent_text max-min-height bor-non <?php if($trans['UnitName']=="") { echo 'fonts-blod'; } else {echo ''; }?>" id="piowname_<?php echo $i; ?>"><?php echo $trans['Specification'];?></p></td>
+                        <?php if($trans['UnitName']!="") { ?>
+                            <td width="3%"><input class="parent_text bor-non" type="text" value="<?php echo $trans['UnitName'];?>" readonly /></td>
+                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['BudgetQty'],3);?>"  id="budgetqty_<?php echo $i; ?>" readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['PrevPlanQty']+$trans['CurPlanQty'],3);?>"  id="cumplanqty_<?php echo $i; ?>"  readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['PrevPlanQty'],3);?>"  id="prevplanqty_<?php echo $i; ?>" readonly/></td>
+                            <td width="5%"><input type="text" class="parent_text text-right" name="curplanqty_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['CurPlanQty'],3);?>"  id="curplanqty_<?php echo $i; ?>" readonly onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 3)"/></td>
+                            <td width="1%">
+                                <ul class="expanded-dis">
+                                    <li>
+                                        <a href="#" class="mainTr wbsTr_<?php echo $i; ?>"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="WBS Qty" ></i></a>
+                                    </li>
+                                </ul>
+                            </td>
+                            <input type="hidden" name="piowid_<?php echo $i; ?>" value="<?php echo $trans['ProjectIOWId'];?>" id="piowid_<?php echo $i; ?>">
+                        <?php } ?>
+                    </tr>
+                    <tr style="display:none;" class="subTr wbsmainTr_<?php echo $i; ?>">
+                        <td colspan="8" style="padding:0px !important; ">
+                            <div class="col-lg-10 col-lg-offset-1" style="margin-top:10px; margin-bottom:10px;">
+                                <div class="subDiv" style="display:none;overflow-y:auto; min-height:100%; max-height:500px;">
+                                    <table class="table" style="margin-bottom:0px;" id="wbstable_<?php echo $i; ?>">
+                                        <thead>
+                                        <tr>
+                                            <th>WBS Name</th>
+                                            <th class="text-right">Budget Qty</th>
+                                            <th class="text-right">Cumulative Qty</th>
+                                            <th class="text-right">Previous Qty</th>
+                                            <th class="text-right">Current Qty</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php
+                                        $ProjectIOWId = $trans['ProjectIOWId'];
+                                        $arrwbs = array_filter($wbstrans, function($v) use($ProjectIOWId) { return $v['ProjectIOWId'] == $ProjectIOWId; });
+                                        $x=1; $dBudgetQty=0;$dCumQty=0;$dPrevQty=0;$dCurQty=0;
+                                        foreach($arrwbs as $wtrans) { ?>
+                                            <tr>
+                                                <td width="15%"><p class="parent_text max-min-height bor-non"><?php echo $wtrans['WBSName'];?></p></td>
+                                                <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['BudgetQty'],3);?>"  id="wbstable_<?php echo $i; ?>_wbsbudgetqty_<?php echo $x; ?>" readonly/></td>
+                                                <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['PrevPlanQty']+$wtrans['CurPlanQty'],3);?>"  id="wbstable_<?php echo $i; ?>_wbscumplanqty_<?php echo $x; ?>"  readonly/></td>
+                                                <td width="5%"><input type="text" class="parent_text text-right bor-non" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['PrevPlanQty'],3);?>"  id="wbstable_<?php echo $i; ?>_wbsprevplanqty_<?php echo $x; ?>" readonly/></td>
+                                                <td width="5%"><input type="text" class="parent_text text-right" name="wbscurplanqty_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($wtrans['CurPlanQty'],3);?>"  id="wbstable_<?php echo $i; ?>_wbscurplanqty_<?php echo $x; ?>" name="wbstable_<?php echo $i; ?>_wbscurplanqty_<?php echo $x; ?>" readonly  onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 3)"/></td>
+                                                <input type="hidden" name="wbstable_<?php echo $i; ?>_wbsid_<?php echo $x; ?>" id="wbstable_<?php echo $i; ?>_wbsid_<?php echo $x; ?>" value="<?php  echo $wtrans['WBSId']; ?>">
+                                            </tr>
+                                            <?php $x=$x+1; $dBudgetQty= $dBudgetQty + floatval($wtrans['BudgetQty']);$dCumQty= $dCumQty + floatval($wtrans['PrevPlanQty'])+floatval($wtrans['CurPlanQty']);$dPrevQty= $dPrevQty+ floatval($wtrans['PrevPlanQty']);$dCurQty= $dCurQty + floatval($wtrans['CurPlanQty']); } ?>
+                                        <tr>
+                                            <td class="rate_pri text-right">Total</td>
+                                            <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalbudgetqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dBudgetQty,3);?>" id="wbstable_<?php echo $i; ?>_totalbudgetqty" readonly/></td>
+                                            <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalcumqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dCumQty,3);?>" id="wbstable_<?php echo $i; ?>_totalcumqty" readonly/></td>
+                                            <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalprevqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dPrevQty,3);?>" id="wbstable_<?php echo $i; ?>_totalprevqty" readonly/></td>
+                                            <td><input class="parent_text text-right total-clr" name="wbstable_<?php echo $i; ?>_totalcurqty" value="<?php echo $this->commonHelper()->sanitizeNumber($dCurQty,3);?>" id="wbstable_<?php echo $i; ?>_totalcurqty" readonly/></td>
+                                            <input type="hidden" name="wbstable_<?php echo $i; ?>_rows" id="wbstable_<?php echo $i; ?>_rows" value="<?php echo $x; ?>">
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div></div>
+                        </td>
+                    </tr>
+                    <?php $i=$i+1; $iTRowId = $iTRowId+1;
+                endforeach;
+            endif;?>
+            </tbody>
+        </table>
+        <input type="hidden" name="rowid" id="rowid" value="<?php echo $i; ?>">
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        expandwbsTrFn();
+    });
+
+    function expandwbsTrFn(reset) {
+        var $mainTRs = $("a[class*=wbsTr_]");
+        if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+        $mainTRs.click(function(e){
+            e.preventDefault();
+            var name = $(this)[0].className,
+                key = name.split('_')[1];
+            //if (validateRow(name) == false) return false;
+            var $subTr = $(this).closest("tr").nextAll(".wbsmainTr_" + key),
+                $i = $(this).find("i");
+            if(!$subTr.is(":visible")){
+                $subTr.show();
+                $subTr.find(".subDiv").slideDown("slow");
+                $i.removeClass("fa-chevron-circle-down");
+                $i.addClass("fa-chevron-circle-up");
+//            $('rateanal_'+ key +'_restable').show();
+//            iFocusRowId = key;
+                closewbsdetails(key);
+            } else {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("fa-chevron-circle-up");
+                $i.addClass("fa-chevron-circle-down");
+            }
+            return false;
+        });
+    }
+    function closewbsdetails(key) {
+        var $mainTRs = $("a[class*=wbsTr_]");
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this),
+                $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+            if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+            if($mainTr.length != 0) $mainTr.trigger('click');
+        });
+    }
+</script>

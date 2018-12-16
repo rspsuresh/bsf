@@ -1,0 +1,1227 @@
+<?php
+if($this->currentRequest()->get('module') == 'Application' && ($this->currentRequest()->get('action') == 'dashboard' || $this->currentRequest()->get('action') == 'activity-stream')) {
+    $actHeight = 'actvt_height';
+    $actTHeight = 'tophdr_acvt';
+} else {
+    $actHeight = '';
+    $actTHeight = '';
+}
+?>
+<style type="text/css">
+    /*---------------------Social Right Side------------------*/
+    .social_profiles			{background-color:#454964;display:block;width:40px;margin-top:-100px;position:fixed;right:-40px;top:50%;z-index:1030;}
+    .social_profiles a:hover	{color:#fff;background-color:#33a72c;right:-30px;}
+    .social_profiles:hover		{right:0px;}
+    .arw_sqr{background: #3f6ac3;height: 30px;width: 26px;position: absolute;margin-top:4px;left: -24px;top: 70px;z-index: -1;cursor:pointer;}
+    .arw{color:#fff;font-size:12px !important;margin-left:6px;margin-top:10px;}
+    .blink_me {
+        -webkit-animation-name: blinker;
+        -webkit-animation-duration: 1s;
+        -webkit-animation-timing-function: linear;
+        -webkit-animation-iteration-count: infinite;
+
+        -moz-animation-name: blinker;
+        -moz-animation-duration: 1s;
+        -moz-animation-timing-function: linear;
+        -moz-animation-iteration-count: infinite;
+
+        animation-name: blinker;
+        animation-duration: 1s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @-moz-keyframes blinker {
+        0% { opacity: 1.0; }
+        50% { opacity: 0.0; }
+        100% { opacity: 1.0; }
+    }
+
+    @-webkit-keyframes blinker {
+        0% { opacity: 1.0; }
+        50% { opacity: 0.0; }
+        100% { opacity: 1.0; }
+    }
+
+    @keyframes blinker {
+        0% { opacity: 1.0; }
+        50% { opacity: 0.0; }
+        100% { opacity: 1.0; }
+    }
+/*-----------------------ios checkbox---------------------*/
+.ios_checkbox,.m_strm_pstr_pp								{display:none}
+.ios_switch													{width: 50px;height: 22px;z-index: 0;margin: 5px 7px;padding: 0;appearance: none;border: none;cursor: pointer;position: relative;}
+.ios_switch::before											{content:'';position: absolute;width: 50px;height: 22px;background-color: #e75252;z-index: 1;}
+.ios_switch::after 											{content:'';height: 18px;width: 18px;background-color: #FFFFFF;position: absolute;z-index: 2;top: 2px;left: 1px;-webkit-transition-duration: 300ms;-moz-transition-duration: 300ms;-ms-transition-duration: 300ms;-o-transition-duration: 300ms;transition-duration: 300ms;}
+.ios_checkbox:checked + div, .ios_checkbox:checked + div::before  {background:#33a72c; }
+.ios_checkbox:checked + div::after {left: 31px;}
+.ios_checkbox + div span::before							{content:'Off'; right:8px; color:#fff;font-size:11px; font-weight:600; padding-top:3px; z-index:1; position:absolute;display:inline-block;}
+.ios_checkbox:checked + div span::before					{content:'On'; left:8px; color:#fff;font-size:11px; font-weight:600; padding-top:3px; z-index:1; position:absolute;  display:inline-block;}
+
+@media only screen and (min-width : 320px) and (max-width : 767px) {
+
+ .m_help_hide,.msg_res, li:last-child	{display:none !important;}
+}
+
+</style>
+<header class="top_header <?php echo $actHeight.' '.$actTHeight; ?>">
+<div class="header_left">
+    <?php if($this->currentRequest()->get('module') != 'Application' || ($this->currentRequest()->get('module') == 'Application' && $this->currentRequest()->get('action') != 'activity-stream')) { ?>
+        <div class="left_menuicon">
+            <div class="l_menuicon_nav cross">
+				<span class="icon-container">
+					<span class="line line01"></span>
+					<span class="line line02"></span>
+					<span class="line line03"></span>
+					<span class="line line04"></span>
+				</span>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="main_logo"><a href="<?php echo $this->basePath(); ?>/application/index/index"><img src="<?php echo $this->basePath(); ?>/images/bsflogo.jpg" alt="" title="BuildSuperFast"/></a></div>
+</div>
+<div class="header_right">
+<ul class="top_toolbar dropdown cbtop-menu">
+    <?php
+    $cTeleCaller = $this->CommonHelper()->checkTeleCaller();
+    if($cTeleCaller[1]==1) {
+    ?>
+    <li style="padding-right:10px;"><a>Tele Caller</a><label><input type="checkbox" name="" id="" class="ios_checkbox" <?php if($cTeleCaller[0]==1) { echo "checked"; }?> onchange="changeCallingState(this);"/><div class="ios_switch"><span></span></div></label></li>
+    <?php
+    }
+    if($this->currentRequest()->get('module') == 'Application' && $this->currentRequest()->get('action') == 'activity-stream') { ?>
+		<li style="display:block !important;"><a href="javascript:void(0);" class="rightside_trigger ripple"><span><i class="fa fa-users"></i></span>Chat</a></li>
+    <?php }
+    if($this->currentRequest()->get('module') == 'Cb' && isset($this->Identity()->SubscriberId) && $this->currentRequest()->get('action') != 'admin-panel'){
+        $clientRequests = $this->CommonHelper()->clientRequest();
+        $countRequest = count($clientRequests);
+        if($countRequest !=0){ ?>
+            <li>
+                <a href="javascript:void(0);" data-toggle="dropdown" class="ripple">
+                    <span><i class="fa fa-user-plus"></i></span>
+                    <p  id="notify_count" class="badge badge-info up"><?php echo $countRequest; ?></p>
+                    Notification
+                </a>
+                <div class="dropdown-menu toolbar_ddown msg_ddown arrow arrowone " id="noti_integrate"  style="background-color:#ebeef4;">
+                    <ul style="height: 250px!important; min-height:50px !important;">
+                        <?php foreach($clientRequests as $clientRequest){ ?>
+                            <li id="noti_integrate_<?php echo $clientRequest['MClientId']; ?>" >
+                                <div class="noti_icon">
+                                    <img src="<?php echo $this->basePath(); ?>/images/pro_img.jpg" alt="" title="">
+                                </div>
+                                <h1 style="color: #244996;font-size: 16px; padding-top: 12px;">Allow acesss to <span style="font-weight:500;"><?php echo $clientRequest['ClientName']; ?></span></h1>
+                                <div class="cbSharer_inner" align="center" style="width: 98% !important;">
+                                    <a href="#" onclick="return allow('<?php echo $clientRequest['MClientId']; ?>');" class="cbSharer_link cb-button cb-fbk float_l" style="margin: 15px 1px ! important; font-size: 14px; color: rgb(255, 255, 255);">
+                                        <i class="cbSharer_icon fa fa-check"></i>
+                                        Allow
+                                    </a>
+                                    <a href="#" style="margin:15px !important;font-size: 14px; color: rgb(255, 255, 255);" class="cbSharer_link cb-button cb-titer float_l">
+                                        <i class="cbSharer_icon fa fa-times"></i>
+                                        Deny
+                                    </a>
+                                </div>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            </li>
+        <?php }
+    } if($this->currentRequest()->get('module') == 'Cb' && $this->currentRequest()->get('action') == 'admin-panel'){
+        $clientAdminRequests = $this->CommonHelper()->clientAdminRequests();
+        $countClientAdminRequests = count($clientAdminRequests);
+        if($countClientAdminRequests!=0){ ?>
+            <li>
+                <a href="javascript:void(0);" data-toggle="dropdown" class="ripple">
+                    <span><i class="fa fa-user-plus"></i></span>
+                    <p  id="notify_Clientcount" class="badge badge-info up"><?php echo $countClientAdminRequests; ?></p>
+                    Notification
+                </a>
+                <div class="dropdown-menu toolbar_ddown msg_ddown arrow arrowone " id="noti_integrate"  style="background-color:#ebeef4;">
+                    <ul style="height: 260px!important;">
+                        <?php foreach($clientAdminRequests as $clientAdminRequests){ ?>
+                            <li id="noti_Clientintegrate_<?php echo $clientAdminRequests['MClientId']; ?>" >
+                                <div class="noti_icon">
+                                    <img src="<?php echo $this->basePath(); ?>/images/pro_img.jpg" alt="" title="">
+                                </div>
+                                <h1 style="color: #244996;font-size: 16px; padding-top: 12px;">Allow acesss to <span style="font-weight:500;"><?php echo $clientAdminRequests['ClientName']; ?></span></h1>
+                                <div  class="cbSharer_inner"  align="center" style="width: 98% !important;">
+                                    <a href="#" onclick="return allowClient('<?php echo $clientAdminRequests['MClientId']; ?>');" class="cbSharer_link cb-button cb-fbk float_l" style="margin: 15px 1px ! important; font-size: 14px; color: rgb(255, 255, 255);">
+                                        <i class="cbSharer_icon fa fa-check"></i>
+                                        Allow
+                                    </a>
+                                    <a href="#" style="margin:15px !important;font-size: 14px; color: rgb(255, 255, 255);" class="cbSharer_link cb-button cb-titer float_l">
+                                        <i class="cbSharer_icon fa fa-times"></i>
+                                        Deny
+                                    </a>
+                                </div>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            </li>
+        <?php }
+    } ?>
+    <li class="m_help_hide"><a href="javascript:void(0);" class="ripple" onclick="return helpLoader();"><span><i class="fa fa-question"></i></span>Help</a></li>
+    <?php if($this->currentRequest()->get('module') != 'Cb') { ?>
+        <li class="msg_res"><a href="javascript:void(0);" data-toggle="dropdown" class="ripple" onclick="appNotification('');" ><span id="message_count" class="badge badge-msg badge-notify"></span><span><i class="fa fa-envelope"></i></span>Message</a>
+            <div class="dropdown-menu toolbar_ddown msg_ddown arrow">
+                <h2 class="empty_noti"><span class="animated bounce"><i class="fa fa-smile-o"></i></span><br/>
+                    no more messages....</h2>
+                <ul id="app_noti_bind">
+
+                </ul>
+                <p onclick="appNotification('clear');" class="view_msgp"><a href="javascript:void(0);">Clear All</a></p>
+            </div>
+        </li>
+    <?php } ?>
+    <li style="display:block !important;">
+        <div class="pro_img brad_50" data-toggle="dropdown">
+            <a href="javascript:void(0);" class="ripple">
+                <?php if($this->identity()->UserLogo != '') { ?>
+                    <img src="<?php echo $this->basePath().'/'.$this->identity()->UserLogo; ?>" class="brad_50" alt="" title="profile image">
+                <?php }  else { ?>
+                    <span class="pro_name_caps brad_50"><?php echo strtoupper(substr($this->identity()->EmployeeName, 0, 1));?></span>
+                <?php } ?>
+            </a>
+        </div>
+        <div class="dropdown-menu toolbar_ddown pro_ddown arrow">
+            <div class="user_image">
+                <a href="javascript:void(0);">
+                    <?php if($this->identity()->UserLogo != '') { ?>
+                        <img class="brad_50" src="<?php echo $this->basePath().'/'.$this->identity()->UserLogo; ?>" alt="">
+                    <?php }  else { ?>
+                        <span class="user_name_caps brad_50"><?php echo strtoupper(substr($this->identity()->EmployeeName, 0, 1));?></span>
+                    <?php } ?>
+                </a>
+                <!--span><a href="javascript:void(0);"><i class="fa fa-camera"></i></a></span-->
+            </div>
+            <div class="user_info">
+                <p class="user_name"><?php echo Ucfirst($this->identity()->EmployeeName); ?></p>
+                <p class="btm_bdr"><?php echo $this->identity()->Email;?></p>
+                <p>
+                    <span class="float_l"><a href="<?php echo $this->basePath(); ?>/workflow/index/userprofile">Profile</a></span>
+                    <span class="float_r"><a href="<?php echo $this->basePath(); ?>/application/index/logout">Sign Out</a></span>
+                </p>
+            </div>
+        </div>
+    </li>
+</ul>
+<div class="search_area brad_50">
+    <input type="text" name="search" placeholder="search here..." value="" />
+    <button class="ripple"><i class="fa fa-search"></i></button>
+    <?php if($this->currentRequest()->get('module') == 'Application' && ($this->currentRequest()->get('action') == 'dashboard' || $this->currentRequest()->get('action') == 'activity-stream')) { ?>
+        <ul>
+            <li class="float_l"><a href="<?php echo $this->basePath(); ?>/application/index/activity-stream" class="<?php if($this->currentRequest()->get('action') == 'activity-stream') { echo 'current'; } ?> ripple"><i class="fa fa-book"></i><span class="nav-label">Activity Stream</span></a></li>
+            <li class="float_l"><a href="<?php echo $this->basePath(); ?>/application/index/dashboard" class="<?php if($this->currentRequest()->get('action') == 'dashboard') { echo 'current'; } ?> ripple"><i class="fa fa-tachometer"></i> <span class="nav-label">Dashboard</span></a></li>
+        </ul>
+    <?php } ?>
+</div>
+<?php if($this->currentRequest()->get('module') != 'Cb') { ?>
+    <ul class="top_mainmenu brad_50">
+        <li class="rbl_border"><a href="javascript:void(0);" class="mainmdl_plus ripple"><i class="fa fa-plus"></i></a>
+            <div class="mainmdl_ddown <?php if($this->currentRequest()->get('module') == 'Application' && $this->currentRequest()->get('action') == 'activity-stream') { echo 'acvt_mamdlddown'; }?>">
+                <div class="mainmdl_m">
+                    <ul class="mainmdl_mg1">
+                        <li><a href="<?php echo $this->basePath();?>/workflow/index/company-gridlist" class="ripple">
+                                <span class="top_m_icon" ></span>
+                                <span class="top_m_name">Workflow Management</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/project/dashboard/projectmain" onclick="updateModule('Project');" class="ripple">
+                                <span class="top_m_icon" style="background-position:50px 0px;"></span>
+                                <span class="top_m_name">Projects</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/vendor/index/index" class="ripple">
+                                <span class="top_m_icon" style="background-position:200px -52px;"></span>
+                                <span class="top_m_name">Vendor Management</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/ats/index/dashboard" class="ripple">
+                            <span class="top_m_icon" style="background-position:50px -161px;"></span>
+                            <span class="top_m_name">@Site</span>
+                           </a>
+						</li>
+						<li><a href="<?php echo $this->basePath();?>/mms/master/resourceview" class="ripple">
+                                <span class="top_m_icon" style="background-position:103px -205px;"></span>
+                                <span class="top_m_name">Material Management</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/wpm/Wpmdashboard/wpmdashboard" class="ripple">
+                                <span class="top_m_icon" style="background-position:50px -53px;"></span>
+                                <span class="top_m_name">Work Progress Management</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/fa/index/accountdirectory" class="ripple">
+                                <span class="top_m_icon" style="background-position:53px -105px;"></span>
+                                <span class="top_m_name">Financial Accounting</span>
+                            </a>
+                        </li>
+                        <li><a href="<?php echo $this->basePath();?>/crm" onclick="updateModule('Crm');" class="ripple">
+                                <span class="top_m_icon" style="background-position:99px -257px;"></span>
+                                <span class="top_m_name">CRM</span>
+                            </a>
+                        </li>
+                        <li style="display:block !important;"><a href="javascript:void(0);" class="ripple">
+                                <span class="top_m_icon" style="background-position:50px -208px;"></span>
+                                <span class="top_m_name">HRM</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0);" class="more ripple">More Modules..</a>
+                    <ul class="mainmdl_mg2">
+						<li><a href="<?php echo $this->basePath();?>/clientbilling/index/dashboard">
+								<span class="top_m_icon" style="background-position:103px -105px;"></span>
+								<span class="top_m_name">Client Billing</span>
+							</a>
+						</li>
+                        <li style="display:block !important;"><a href="<?php echo $this->basePath();?>/telecaller" class="ripple">
+                                <span class="top_m_icon" style="background-position:147px -257px;"></span>
+                                <span class="top_m_name">Tele-Caller</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </li>
+        <li class=""><a href="javascript:void(0);" class="toggleFullScreen ripple"><i class="fa fa-expand"></i></a></li>
+    </ul>
+<?php } ?>
+</div>
+<?php if($this->currentRequest()->get('module') == 'Application' && ($this->currentRequest()->get('action') == 'dashboard' || $this->currentRequest()->get('action') == 'activity-stream')) { ?>
+    <div class="m_acvtmenu">
+        <ul>
+            <li class="float_l"><a href="<?php echo $this->basePath(); ?>/application/index/activity-stream" class="<?php if($this->currentRequest()->get('action') == 'activity-stream') { echo 'current'; } ?> ripple"><i class="fa fa-book"></i><span class="nav-label">Activity Stream</span></a></li>
+            <li class="float_l" style="display:block !important;"><a href="<?php echo $this->basePath(); ?>/application/index/dashboard" class="<?php if($this->currentRequest()->get('action') == 'dashboard') { echo 'current'; } ?> ripple"><i class="fa fa-tachometer"></i> <span class="nav-label">Dashboard</span></a></li>
+        </ul>
+    </div>
+<?php } ?>
+</header>
+<!--for blink add class "blink_me"-->
+<div class="social_profiles">
+    <div class="arw_sqr"><i class="fa fa-chevron-left arw"></i></div>
+    <a href="javascript:void(0);" onclick="dataAskFunc();"><span data-placement="left" data-toggle="tooltip" data-original-title="Ask"><i class="fa fa-question-circle"></i></span></a>
+    <a href="javascript:void(0);" id="respond" onclick="dataRespondFunc();"><span id="respondcount" class="badge badge-notify"></span><span data-placement="left" data-toggle="tooltip" data-original-title="Respond"><i class="fa fa-pencil-square-o"></i></span></a>
+    <a href="javascript:void(0);" id="remind" onclick="dataRemindFunc();" data-target="#social_profiles_modal"><span id="remindcount" class="badge badge-notify"></span><span data-placement="left" data-toggle="tooltip" data-original-title="Reminder"><i class="fa fa-bell-o"></i></span></a>
+    <a href="javascript:void(0);" onclick="dataShareFunc();"><span data-placement="left" data-toggle="tooltip" data-original-title="Share"><i class="fa fa-share-alt"></i></span></a>
+    <a href="javascript:void(0);" data-toggle="modal" data-target="#social_profiles_modal"><span data-placement="left" data-toggle="tooltip" data-original-title="Chat" ><i class="fa fa-comments-o"></i></span></a>
+</div>
+
+<div class="modal fade" id="social_profiles_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document" id="sharedata">
+
+    </div>
+</div>
+
+<?php if($this->currentRequest()->get('module') == 'Cb' && $this->currentRequest()->get('action') == 'admin-panel'){ ?>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button data-dismiss="modal" aria-hidden="true" class="close"><i class="fa fa-times-circle-o clpot"></i></button>
+                    <h1 style="color: #244996 !important;font-size: 2em !important;">Intergrate With BSF</h1>
+                </div>
+                <div class="modal-body">
+                    <div class="padlr0">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-lg-12 commargin_top_20">
+                                    <h2 style="text-align:center; font-size:20px !important; color:#406d92 !important;">Would you like to give access to bsf ?</h2>
+                                    <div align="center" class="col-lg-12 commargin_top_20 commargin_bottom">
+                                        <a href="#" class="hellocbbtn" data-dismiss="modal" onclick="return allow('<?php echo $this->Identity()->SubscriberId; ?>');" >Allow</a>
+                                        <a href="#" class="denycbbtn" data-dismiss="modal" >Deny</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+<?php }?>
+<!--<script type="text/javascript" src="--><?php //echo $this->basePath(); ?><!--/js/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>-->
+<script id="trig-chat-template"  type="text/template" class="hide">
+    <div class="chatbox chating__">
+        <div class="chatbox-top">
+            <div class="chatbox-avatar">
+                <a class="chat-user-link" href=""><img class="imgSet" src="/bsf_v1.1/public/images/avatar.jpg"></a>
+            </div>
+            <div class="chat-partner-name">
+                <span class="status offlinebox"></span>
+                <a class="nameSet">Avatar</a>
+            </div>
+            <div class="chatbox-icons">
+                <a href="javascript:void(0);"><i class="fa fa-minus"></i></a>
+                <a href="javascript:void(0);"><i class="fa fa-close"></i></a>
+            </div>
+        </div>
+        <div class="chat-messages chatscroll">
+
+        </div>
+        <div class="chat-input-holder">
+            <textarea class="chat-input" placeholder="Type here....."></textarea>
+            <button type="button" class="messages-submit">Send</button>
+        </div>
+        <!--<div class="attachment-panel">
+            <a href="#" class="fa fa-thumbs-up"></a>
+            <a href="#" class="fa fa-camera"></a>
+            <a href="#" class="fa fa-video-camera"></a>
+            <a href="#" class="fa fa-image"></a>
+            <a href="#" class="fa fa-paperclip"></a>
+            <a href="#" class="fa fa-link"></a>
+            <a href="#" class="fa fa-trash-o"></a>
+            <a href="#" class="fa fa-search"></a>
+        </div>-->
+    </div>
+</script>
+
+<script>
+    $(document).ready(function() {
+        var controllername='<?php echo $this->currentRequest()->get('controller');?>';
+
+        $.getScript(getBaseURL() + 'js/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js', function( data, textStatus, jqxhr ) {
+            if( jqxhr.status ==200) {
+                //chat
+                socket1 = io.connect( '<?php echo $cTeleCaller[4]; ?>' );
+                socket1.emit('setUsername', {from:'<?php echo $cTeleCaller[2]; ?>'});
+                console.log('start');
+                socket1.on('newmsg', function(data){
+                    var nwData=data;
+                    var container =$('.chating_'+nwData.sender).find('.chat-messages');
+                    if(parseInt(nwData.sender)!=0 && $('.chatbox-holder').find('.chating_'+nwData.sender).length == 0) {
+
+                        $.ajax({
+                            url: getBaseURL()+"application/index/activity-stream",
+                            type: "POST",
+                            data: {id:nwData.sender, mode:'setUser' },
+                            success: function(data) {
+                                var nsData = JSON.parse(data);
+                                var template = $('#trig-chat-template').html();
+                                template = template.replace(/__/g, '_' + nwData.sender);
+
+                                $('.chatbox-holder').append(template);
+                                $('.chating_'+nwData.sender).find('.chat-user-link').attr("href",getBaseURL()+'workflow/index/user-view/'+nwData.sender);
+
+                                var recData=nsData.rDetail;
+                                if(recData!=false) {
+                                    if($.trim(recData.UserLogo)!="") {
+                                        $('.chating_'+nwData.sender).find('.imgSet').attr("src",getBaseURL()+recData.UserLogo);
+                                    } else {
+                                        $('.chating_'+nwData.sender).find('.imgSet').attr("src",getBaseURL()+'images/avatar.jpg');
+                                    }
+                                    if($.trim(recData.EmployeeName)!="") {
+
+                                        $('.chating_'+nwData.sender).find('.nameSet').html(recData.EmployeeName);
+                                    }
+                                    if($.trim(recData.LogFlag)!="") {
+                                        $('.chating_'+nwData.sender).find('.status').removeClass('offlinebox').addClass('onlinebox');
+                                    }
+                                }
+
+                               var mes=nsData.msg;
+                                if(mes.length>0) {
+                                    var el ="";
+                                    $.each(mes,function(i,o) {
+                                        if(parseInt(o.UserId)==parseInt(nwData.sender)) {
+                                            el +='<div class="message-box-holder"><div class="message-box message-partner">'+ o.Message+'</div></div>';
+                                        } else {
+                                            el +='<div class="message-box-holder"><div class="message-box">'+ o.Message+'</div></div>';
+                                        }
+                                    });
+
+                                    el +='<div class="message-box-holder"><div class="message-box message-partner">'+nwData.message+'</div></div>';
+
+                                    $('.chating_'+nwData.sender).find('.chat-messages').html(el);
+                                }
+
+                                $('.chating_'+nwData.sender).find('.chatscroll').slimScroll({
+                                    width: '100%',
+                                    height:'400px',
+                                    alwaysVisible: false,
+                                    railVisible: true,
+                                    start: 'bottom',
+                                    railColor: '#ddd',
+                                    railOpacity: 2
+                                });
+                            }
+                        });
+                    } else {
+                        //var actual = container.html();
+                        var el ="";
+                        el +='<div class="message-box-holder"><div class="message-box message-partner">'+nwData.message+'</div></div>';
+
+                        container.append(el);
+
+                        container.slimScroll({
+                            scrollTo: container[0].scrollHeight
+                        });
+                    }
+
+                });
+                var actTele=<?php echo (isset($cTeleCaller[0])) ? $cTeleCaller[0]:0; ?>;
+                var checkUser=<?php echo (isset($cTeleCaller[1])) ? $cTeleCaller[1]:0; ?>;
+                //if(actTele==1 && checkUser==1) {
+                    //call
+                    socket = io.connect( '<?php echo $cTeleCaller[3]; ?>' );
+                    socket.emit('setUsername', {from:'<?php echo $cTeleCaller[2]; ?>'});
+                    console.log('start');
+                    socket.on('newmsg', function(data){
+                        if(data.mode=="single") {
+                            var calImg=getBaseURL()+'images/calling_icon.png';
+                            var dts="";
+                            if(data.type=="out") {
+                                console.log(data);
+                                dts = '<p id="caller_name_in"><span id="calling_number_in">'+data.To+'</span></p> ' +
+                                '<p>Ended..</p>' +
+                                '<img src="'+calImg+'" /><div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;">'+data.newStatus+'</div>';
+                                if(data.check=="cron") {
+                                    if(data.newStatus=="completed") {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px;"><a href="'+getBaseURL()+"telecaller/index/lead/0/"+data.callSid+'" class="brad_3 ripple">Create Lead</a></div>';
+                                    }
+                                } else {
+                                    //if(parseInt(data.LeadId)!=0) {
+                                    if(controllername=='lead') {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"crm/lead/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+
+                                    } else if(controllername=='buyer') {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"crm/buyer/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+                                    } else if(controllername=='index') {
+                                        if(parseInt($("#miss_call_track").val()) !=0 && data.newStatus=='completed') {
+                                            $.ajax({
+                                                type: 'POST',
+                                                url: getBaseURL() + 'telecaller/index/missed-call-list',
+                                                data: {"missedCallId" : $("#miss_call_track").val(),"CallSid" : data.callSid},
+                                                success: function(data, status, xhr) {
+                                                    $("#miss_call_track").attr("data-com",data.newStatus);
+                                                },
+                                                error: function(xhr, status, errorThrown) {
+
+                                                }
+                                            });
+                                        }
+                                        if(parseInt(data.leadFlag)==1) {
+                                            dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"crm/lead/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+
+                                        } else if(parseInt(data.leadFlag)==2) {
+                                            dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"telecaller/index/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+
+                                        } else {
+                                            if(data.newStatus=='completed') {
+                                                dts += '<div class="mkeflwup_btn_in" style="margin-top:10px;"><a href="' + getBaseURL() + "telecaller/index/lead/0/" + data.callSid + '" class="brad_3 ripple">Create Lead</a></div>';
+                                            }
+                                        }
+                                    }
+                                    //}
+                                }
+
+                                dts+='<div class="rjct_btn_in" style="margin-top:10px;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>';
+                                $('#bind_call_temp').html(dts);
+                                //$('#call_modal_in').modal('show');
+
+                            } else if(data.type=="infirst"){
+                                console.log(data);
+                                if(data.cstatus=='busy') {
+                                    $('#call_modal_in').find('.fa-times').hide();
+                                    dts = '<p id="caller_name_in">'+data.LeadName+' <span id="calling_number_in">'+data.From+'</span></p> ' +
+                                    '<p>Ringing...</p> ' +
+                                    '<img src="'+calImg+'" /> ' +
+                                    '<div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;"></div> ' +
+                                    '<div class="mkeflwup_btn_in" style="margin-top:10px; display:none;"><a href="javascript:void(0)" class="brad_3 ripple">Enter Call Details</a></div> ' +
+                                    '<div class="rjct_btn_in" style="margin-top:10px; display:none;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>';
+                                    $('#bind_call_temp').html(dts);
+                                    $('#call_modal_in').modal('show');
+                                } else {
+                                    $('#call_modal_in').find('.fa-times').show();
+                                    dts = '<p id="caller_name_in">'+data.LeadName+' <span id="calling_number_in">'+data.From+'</span></p> ' +
+                                    '<p>Ended...</p>' +
+                                    '<img src="'+calImg+'" /><div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;"></div>';
+                                    if(parseInt(data.leadFlag)==1) {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"crm/lead/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+                                    } else if(parseInt(data.leadFlag)==2) {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px; width: 197px;"><a href="'+getBaseURL()+"telecaller/index/followup/"+data.LeadId+"/0/"+data.callSid+'" class="brad_3 ripple">Enter Call Details</a></div>';
+
+                                    } else {
+                                        dts+='<div class="mkeflwup_btn_in" style="margin-top:10px;"><a href="'+getBaseURL()+"telecaller/index/lead/0/"+data.callSid+'" class="brad_3 ripple">Create Lead</a></div>';
+                                    }
+                                    dts+='<div class="rjct_btn_in" style="margin-top:10px;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>';
+                                    $('#bind_call_temp').html(dts);
+                                }
+
+                            } else {
+                                console.log(data);
+                                dts = '<p id="caller_name_in"><span id="calling_number_in">'+data.To+'</span></p> ' +
+                                '<p>Calling..</p>' +
+                                '<img src="'+calImg+'" /><div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;"></div>';
+
+                                dts+='<div class="mkeflwup_btn_in" style="margin-top:10px;display:none;"><a href="javascript:void(0)" class="brad_3 ripple">Enter Call Details</a></div>';
+                                dts+='<div class="rjct_btn_in" style="margin-top:10px;display:none;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>';
+                                $('#bind_call_temp').html(dts);
+                                $('#call_modal_in').modal('show');
+                            }
+                        }
+                    });
+               // }
+            }
+        });
+
+    });
+    function connectCall(from,to) {
+        $('.endcall_btn').hide();
+        $('#caller_name_in').html('<span id="calling_number_in">'+to+'</span>');
+        $('#call_status_in').html('calling...');
+        $('#call_modal_in').find('.fa-times').hide();
+        var data = "action=connect_call_to_agent&from=" + from + "&to=" + to;
+        $.ajax({
+            type: 'POST',
+            url: getBaseURL() + 'application/exotel/calls',
+            data: data,
+            success: function(data, status, xhr) {
+                //$('#call_modal').modal('hide');
+                xmlDoc = $.parseXML( data ),
+                    $xml = $( xmlDoc ),
+                    $Sid = $xml.find( "Sid" ).text();
+                $('#caller_sid').val($Sid);
+            },
+            error: function(xhr, status, errorThrown) {
+                $('.endcall_btn').show();
+                $('.loading_area').hide();
+                if (xhr.status == 400)
+                    alert(xhr.responseText);
+                else
+                    alert(errorThrown);
+            }
+        });
+    }
+
+    function callModal(number,ll) {
+        if(typeof ll !='undefined') {
+            $('#miss_call_track').val(ll);
+        } else {
+            $('#miss_call_track').val(0);
+        }
+
+        var calImg=getBaseURL()+'images/calling_icon.png';
+        $('#call_modal_in').modal('hide');
+        var from ='<?php echo $this->identity()->Mobile; ?>';
+        var to =number;
+        var dts='';
+        dts = '<p id="caller_name_in">Make a call <span id="calling_number_in">'+number+'</span></p> ' +
+        '<p></p>' +
+        '<img src="'+calImg+'" /><div id="call_status_in" style="color: #ffffff;font-size:18px;margin-bottom:10px;"></div>';
+
+        dts+='<div class="endcall_btn"><a href="javascript:void(0)" onclick="connectCall('+from+','+to+');" class="brad_3 ripple">Call</a></div>' +
+        '<div class="mkeflwup_btn_in" style="margin-top:10px;display:none;"><a href="javascript:void(0)" class="brad_3 ripple">Enter Call Details</a></div>';
+        dts+='<div class="rjct_btn_in" style="margin-top:10px;display:none;" onclick="closeCallModalIn();"><a href="javascript:void(0)" class="brad_3 ripple">Discard</a></div>';
+        $('#bind_call_temp').html(dts);
+        $('#call_modal_in').find('.fa-times').show();
+        $('#call_modal_in').modal('show');
+    }
+function changeCallingState(th) {
+    var checkBox = th;
+    var tele =0;
+    if(checkBox.checked) {
+        tele=1;
+    }
+    $.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data:{'mode' : 'telecall','teleVal':tele},
+        success:function(data, textStatus, jqXHR){
+            if(data == "failed"){
+                if(tele==1) {
+                    $(checkBox).attr("checked",false);
+                } else {
+                    $(checkBox).attr("checked",true);
+
+                }
+            }
+// else {
+//
+//                if(tele==1) {
+//                    $.getScript(getBaseURL() + 'js/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js', function( data, textStatus, jqxhr ) {
+//                        if( jqxhr.status ==200) {
+//                            socket = io.connect( 'http://192.168.1.8:1333' );
+//                            socket.emit('setUsername', {from:'<?php //echo $cTeleCaller[2]; ?>//'});
+//                            console.log('start');
+//                            socket.on('newmsg', function(data){
+//                                console.log(data);
+//                                if(data.mode=="single") {
+//                                    $('#call_status').html(data.status);
+//                                }
+//
+//                            });
+//                        } // 200
+//                    });
+//
+//                } else {
+//                    socket.emit('end', {from:'<?php //echo $cTeleCaller[2]; ?>//'});
+//                    console.log('end');
+//
+//                }
+//            }
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            if(tele==1) {
+                $(checkBox).attr("checked",false);
+            } else {
+                $(checkBox).attr("checked",true);
+
+            }
+        }
+    });
+}
+    $(document).ready(function() {
+        $(".single_dropdown").select2({
+            placeholder: "",
+            allowClear: true
+        });
+        $(".multiple_dropdown").select2({
+        });
+        //reminder count//
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'mode' : 'Remindcount'},
+            success:function(data, textStatus, jqXHR){
+                //var dt=JSON.parse(data);
+                if(data != 0){
+                    $('#remind').show();
+                    $('#remindcount').html(data);
+                }
+                else{
+                    $('#remind').hide();
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('#remind').hide();
+            }
+        });
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'mode' : 'Respondcount'},
+            success:function(data, textStatus, jqXHR){
+                //var dt=JSON.parse(data);
+                if(data != 0){
+                    $('#respond').show();
+                    $('#respondcount').html(data);
+                }
+                else{
+                    $('#respond').hide();
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('#respond').hide();
+            }
+        });
+
+        $.ajax({
+            url: getBaseURL() + 'application/index/activity-stream',
+            type: 'POST',
+            data:{'mode' : 'AppNotiCount'},
+            success:function(data, textStatus, jqXHR){
+                if(data==0) {
+                    $('#message_count').hide();
+                } else {
+                    $('#message_count').html(data);
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                $('#message_count').hide();
+            }
+        });
+
+    });
+
+    function dataAskFunc() {
+        var dataShare = [];
+        var url=$(location).attr('href');
+        $('*[data-bsfshare]').each(
+            function(index){
+                var input = $(this);
+                dataShare[index] = input.attr('data-bsfshare');
+            }
+        );
+
+        var dataHead = $('[data-bsfhead]').attr('data-bsfhead');
+
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'dataShare': dataShare,'url':url,'dataHead':dataHead,'mode':'Ask'},
+            success:function(data, textStatus, jqXHR){
+                $("#sharedata").html('');
+                $("#sharedata").html(data);
+                $("#social_profiles_modal").modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+
+    function dataRemindFunc() {
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'mode': 'Reminder'},
+            success:function(data, textStatus, jqXHR){
+                $("#sharedata").html(data);
+                $("#social_profiles_modal").modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+    function dataShareFunc(){
+        var dataShare = [];
+        var url=$(location).attr('href');
+        $('*[data-bsfshare]').each(
+            function(index){
+                var input = $(this);
+                dataShare[index] = input.attr('data-bsfshare');
+            }
+        );
+
+        var dataHead = $('[data-bsfhead]').attr('data-bsfhead');
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'dataShare': dataShare,'url':url,'dataHead':dataHead,'mode':'share'},
+            success:function(data, textStatus, jqXHR){
+                $("#sharedata").html('');
+                $("#sharedata").html(data);
+                $("#social_profiles_modal").modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+
+    function dataRespondFunc() {
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data:{'mode': 'Respondinfo'},
+            success:function(data, textStatus, jqXHR){
+                $("#sharedata").html(data);
+                $("#social_profiles_modal").modal('show');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+
+    function allow(id){
+        $.ajax({
+            url: getBaseURL() + 'cb/index/allow',
+            type: 'POST',
+            data: 'clientid='+id,
+            success:function(data, textStatus, jqXHR){
+                if(data=1){
+                    $('#noti_integrate_'+id).hide();
+                    count = $('#notify_count').html();
+                    if(count > 1){
+                        count = count-1;
+                        $('#notify_count').html(count);
+                    } else {
+                        $('#notify_count').html('');
+                        $('#noti_integrate').hide();
+                    }
+                }
+                else {
+                    alert("some Error occured");
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+</script>
+<?php if($this->currentRequest()->get('module') == 'Cb' && $this->currentRequest()->get('action') == 'admin-panel'){ ?>
+    <script>
+        function allowClient(id){
+            $.ajax({
+                url: getBaseURL() + 'cb/index/allowClient',
+                type: 'POST',
+                data: 'clientid='+id,
+                success:function(data, textStatus, jqXHR){
+                    if(data=1){
+                        $('#noti_Clientintegrate_'+id).hide();
+                        count = $('#notify_Clientcount').html();
+                        if(count > 1){
+                            count = count-1;
+                            $('#notify_Clientcount').html(count);
+                        } else {
+                            $('#notify_Clientcount').html('');
+                            $('#noti_Clientintegrate').hide();
+                        }
+                    }
+                    else {
+                        alert("some Error occured");
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    if (jqXHR.status == 403)
+                        alert(jqXHR.responseText);
+                    else
+                        alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        }
+    </script>
+<?php } ?>
+
+<script>
+function subdata(){
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    if($.trim($('#allsuperioruser').val()) == "" || $.trim($('#allsuperioruser').val())==null) {
+        $('#allsuperioruser').next('span').addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#allsuperioruser').next('span').focus();
+        }
+    } else {
+        $('#allsuperioruser').next('span').removeClass('red_bdr');
+    }
+    if($('#inputdata').is(":visible")){
+        if($.trim($('#inputdata').val()) == "" || $.trim($('#inputdata').val())==null) {
+            $('#inputdata').next('span').addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#inputdata').next('span').focus();
+            }
+        } else {
+            $('#inputdata').next('span').removeClass('red_bdr');
+        }}
+    if($.trim($('#ask_for').val()) == "" || $.trim($('#ask_for').val())==null) {
+        $('#ask_for').next('span').addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#ask_for').next('span').focus();
+        }
+    } else {
+        $('#ask_for').next('span').removeClass('red_bdr');
+    }
+    if($.trim($('#remarks').val()) == "" || $.trim($('#remarks').val())==null) {
+        $('#remarks').addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#remarks').focus();
+        }
+    } else {
+        $('#remarks').removeClass('red_bdr');
+    }
+    if(errorFlag == 0) {
+        $('#continue').hide();
+        $('#ask-post-loader').show();
+        var askData = $("#share").serializeArray();
+        var formData = new FormData();
+        $.each(askData,function(key,input){
+            formData.append(input.name,input.value);
+        });
+        formData.append('mode', 'askdetail');
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data: formData,
+            enctype: "multipart/form-data",
+            cache       : false,
+            contentType : false,
+            processData : false,
+            success:function(data, textStatus, jqXHR){
+                $('#ask-post-loader').hide();
+                $('#continue').show();
+                $("#social_profiles_modal").modal('hide');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+}
+
+function sharedata(){
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    if($.trim($('#allsuperioruser').val()) == "" || $.trim($('#allsuperioruser').val())==null) {
+        $('#allsuperioruser').next('span').addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#allsuperioruser').next('span').focus();
+        }
+    } else {
+        $('#allsuperioruser').next('span').removeClass('red_bdr');
+    }
+    if($('#inputdata').is(":visible")){
+        if($.trim($('#inputdata').val()) == "" || $.trim($('#inputdata').val())==null) {
+            $('#inputdata').next('span').addClass('red_bdr');
+            errorFlagCount = errorFlagCount + 1;
+            errorFlag = 1;
+            if(errorFlagCount == 1) {
+                $('#inputdata').next('span').focus();
+            }
+        } else {
+            $('#inputdata').next('span').removeClass('red_bdr');
+        }}
+
+    if($.trim($('#remarks').val()) == "" || $.trim($('#remarks').val())==null) {
+        $('#remarks').addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#remarks').focus();
+        }
+    } else {
+        $('#remarks').removeClass('red_bdr');
+    }
+    if(errorFlag == 0) {
+        $('#continue').hide();
+        $('#ask-post-loader').show();
+        var askData = $("#share").serializeArray();
+        var formData = new FormData();
+        $.each(askData,function(key,input){
+            formData.append(input.name,input.value);
+        });
+        formData.append('mode', 'sharedetail');
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data: formData,
+            enctype: "multipart/form-data",
+            cache       : false,
+            contentType : false,
+            processData : false,
+            success:function(data, textStatus, jqXHR){
+                $('#ask-post-loader').hide();
+                $('#continue').show();
+                $("#social_profiles_modal").modal('hide');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus+"-----"+errorThrown);
+            }
+        });
+    }
+}
+
+
+function showinput(){
+    var sname = $("#ask_for option:selected").val();
+    if(sname=='Approval'){
+        $('#askfori').hide();
+    }
+    else{
+        $('#askfori').show();
+    }
+}
+
+function showremarks(el){
+    $('#textremarks_'+$(el).attr('id')).toggle();
+}
+function checkRes(ask) {
+    var check = $(ask).attr('id');
+    check = check.split('-->');
+    if(check[0]=='Information') {
+        $('#textremarks_'+check[1]).toggle();
+        $('#datashare_'+check[1]).toggle();
+        $('#resremark_'+check[1]).toggle();
+    } else if(check[0]=='Complete'){
+        $('#textremarks_'+check[1]).toggle();
+        $('#resremark_'+check[1]).toggle();
+    }
+
+}
+function respondData(data){
+    var bnId = $(data).attr('id');
+    bnId = bnId.split('_');
+    var remarks = $('#remarks_'+bnId[1]).val();
+    var askId=$('#askId').val();
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    if($.trim(remarks) == "" || $.trim(remarks)==null) {
+        $('#remarks_'+bnId[1]).addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#remarks_'+bnId[1]).focus();
+        }
+    } else {
+        $('#remarks_'+bnId[1]).removeClass('red_bdr');
+    }
+    if(errorFlag == 0) {
+        $('#button_'+bnId[1]).hide();
+        $('#respond-post-loader_'+bnId[1]).show();
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data: {'remarks': remarks, 'mode': 'askresponse', 'feedId': bnId[1],askId:askId},
+            success: function (data, textStatus, jqXHR) {
+                $('#respond-post-loader_'+bnId[1]).hide();
+                $('#button_'+bnId[1]).show();
+                $('#textremarks_'+bnId[1]).hide();
+                $('#remarks_'+bnId[1]).val('');
+                $('#datashare_'+bnId[1]).hide();
+                $('#resremark_'+bnId[1]).hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus + "-----" + errorThrown);
+            }
+        });
+    }
+}
+
+$('ul #app_noti_bind, ul .view_msgp').on('click',function(event){
+    event.stopPropagation();
+});
+
+function remindData(da) {
+    var bnId = $(da).attr('id');
+    bnId = bnId.split('_');
+    var remarks = $('#remarks_'+bnId[1]).val();
+    var askId=$('#askId_'+bnId[1]).val();
+    var errorFlag = 0;
+    var errorFlagCount = 0;
+    if($.trim(remarks) == "" || $.trim(remarks)==null) {
+        $('#remarks_'+bnId[1]).addClass('red_bdr');
+        errorFlagCount = errorFlagCount + 1;
+        errorFlag = 1;
+        if(errorFlagCount == 1) {
+            $('#remarks_'+bnId[1]).focus();
+        }
+    } else {
+        $('#remarks_'+bnId[1]).removeClass('red_bdr');
+    }
+    if(errorFlag == 0) {
+        $('#button_'+bnId[1]).hide();
+        $('#remind-post-loader_'+bnId[1]).show();
+        $.ajax({
+            url: getBaseURL() + 'application/index/share',
+            type: 'POST',
+            data: {'remarks': remarks, 'mode': 'remindresponse', 'feedId': bnId[1],'askId':askId},
+            success: function (data, textStatus, jqXHR) {
+                $('#remind-post-loader_'+bnId[1]).hide();
+                $('#button_'+bnId[1]).show();
+                $('#textremarks_'+bnId[1]).hide();
+                $('#remarks_'+bnId[1]).val('');
+
+                //$("#social_profiles_modal").modal('hide');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 403)
+                    alert(jqXHR.responseText);
+                else
+                    alert(textStatus + "-----" + errorThrown);
+            }
+        });
+    }
+}
+
+function appNotification(check) {
+    $.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data: {'mode': 'appnoti','check':check},
+        success: function (data, textStatus, jqXHR) {
+            if(data=="") {
+                $('.empty_noti').show();
+                $('#app_noti_bind').hide();
+
+            } else {
+                $('#message_count').hide();
+                $('#app_noti_bind').html(data);
+                $('.empty_noti').hide();
+                $('#app_noti_bind').show();
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+        }
+    });
+}
+
+function clearMessage(nId) {
+    $.ajax({
+        url: getBaseURL() + 'application/index/activity-stream',
+        type: 'POST',
+        data: {'mode': 'appNotiDel','nId': nId },
+        success: function (data, textStatus, jqXHR) {
+            if(data=='success') {
+                $('#close_hide_' + nId).hide();
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 400)
+                alert(jqXHR.responseText);
+            else
+                alert("Request Failed");
+        }
+    });
+}
+
+function updateModule(value) {
+    $.ajax({
+        url: getBaseURL() + 'application/index/update-module',
+        type: 'POST',
+        data: {'module': value },
+        success: function (data, textStatus, jqXHR) {
+
+
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+
+        }
+    });
+}
+$('#social_profiles_modal').on('click',function(e) {
+    var target = e.target;
+    if (!$(target).is('.reminder_history') && !$(target).parents().is('.reminder_history')) {
+        $('.history_hide').hide();
+    }
+});
+function historyList(hisId) {
+    $('.history_hide').hide();
+    $('#history_list_'+hisId).show();
+    $('#textremarks_'+hisId).hide();
+    $('#resremark_'+hisId).hide();
+}
+</script>

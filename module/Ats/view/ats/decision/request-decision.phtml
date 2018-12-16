@@ -1,0 +1,1399 @@
+<style>
+.subDiv {background-color: #e7e9ec;border: 1px solid #ddd;float: left;margin-left: 2%;margin-top: 2px;position: relative;width: 98%;}
+#allResource .jqx-grid-header 	{height:75px !important;}
+#allResourceList .jqx-grid-header 	{height:75px !important;}
+.jqx-grid-column-header .jqx-checkbox-default{ display:none;}
+#sequentialView tr th{ width:auto !important;}
+.input-group-addon{ background-color:#fff !important;border:none !important;}
+.error{ border-color:red;background-color:red !important;}
+.nav-list{padding-right:15px;padding-left:15px;margin-bottom:0;}
+.nav-list-main{padding-left:0px;padding-right:0px;margin-bottom:0;}
+span.nav-toggle-icon{font-size:7px !important;top:-2px !important;color:#888 !important;}
+.sub_tbl1 {color:#424141;font-weight: 600; background:#edefe2 !important;border-bottom: 2px solid #9c793b !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+.sub_tbl2{color: #424141;font-weight: 600; background: #efe2e2 !important;border-bottom: 2px solid #5d9bb6 !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+.sub_tbl3{color: #424141;font-weight: 600; background: #ceefe5 !important;border-bottom: 2px solid #18abc4 !important;border-top: 1px solid #ddd !important;white-space: nowrap;}
+.table-responsive {box-shadow: 0 0 0 rgba(0, 0, 0, 0.12), 0 0 0 rgba(0, 0, 0, 0.24)!important;}
+
+</style>
+<div class="content_wrapper padlr0">
+	<div class="container-fluid">
+		<div class="col-lg-12 clear">
+			<form class="form-horizontal" method="post">
+                <input type="hidden" name="flag" id="flag" value="<?php echo (isset($flag)) ? $flag : '';?>">
+				<input type="hidden" name="decisionId" id="decisionId" value="<?php echo (isset($decId)) ? $decId : 0;?>">
+				<div class="row" id="firstStep">
+					<h1 class="txt_center form_main_h1 frmwrk_h1">Request Decision<?php echo ($genType) ? '-' : ''; ?><?php echo $vNo['voucherNo']; ?></h1>
+					<div class="form-group">
+						<div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+							<div class="row" style="<?php echo ($genType) ? 'display:none' : ''; ?>">
+								<div class="form-group req_flds col-lg-12">
+									<input type="text" name="voucherNo" id="voucherNo" class="form-control lbl_move" label="Enter voucherNo" value="<?php echo $svNo; ?>" >
+									<!--<input type="text" id="autocomplete-ajax-x" disabled="disabled" class="form-control" style="color: #CCC; position: static; background: transparent; z-index: 1;">-->
+									<div class="error_message"><p>Please enter VoucherNo...</p> </div> 
+								</div>
+							</div>
+							<div class="row">
+								<div class="form-group req_flds col-lg-12">
+									<select class="form-control selectpicker show-tick nextVal" name="decision_type" id="decision_type">
+										<option value="0" selected>Select Decision</option>
+										<option value="2">Material</option>
+										<option value="3">Asset</option>
+									</select>
+									<div class="error_message"><p>Please select Decision type...</p> </div> 
+								</div>
+							</div>
+							<div class="row">   
+								<div class="form-group req_flds col-lg-12">
+									<span class="date_icon"><i class="fa fa-calendar"></i></span>
+									<input type="text" name="Decision_date" id="Decision_date" readonly
+                                           value="<?php echo date("d-m-Y"); ?>" placeholder="DD-MM-YYYY" class="form-control lbl_move date_picker" label="Decision Date" />
+									<div class="error_message"><p>Please enter decision date...</p> </div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="form-group req_flds col-lg-12">
+									<select class="form-control selectpicker show-tick" name="gridtype" id="gridtype" >
+										<option value="0" selected="true">Sequential View</option>
+										<option value="1">List View</option>
+									</select>
+									<div class="error_message"><p>Please select the priority...</p></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>			
+				<div class="row" id="excludeFirst" style="display:none;">
+				   <div class="col-lg-12">
+						<?php if((((isset($DecisionNo)) ? $DecisionNo : 0) > 0 )){?>
+						<h1>Request Decision-<span id="VoucherSpan"><?php echo $DecisionNo; ?></span></h1> 
+						<?php }else{ ?>
+						<h1>Request Decision-<span id="VoucherSpan"><?php echo $vNo['voucherNo']; ?></span></h1> 
+						<?php } ?>
+						<div class="col-lg-12 clear" style="margin:10px;">
+							<div class="col-lg-6 col-md-6">
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Decision Date<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p" id="dateSpan"><?php echo date("d-m-Y"); ?></p></div> 
+								</div>
+								<div class="row">
+									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Selected Type<span class="colon_r">:</span></p></div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p" id="materialSpan">Material</p></div> 
+							   </div>
+							</div>
+							 
+						</div>
+					</div>
+				</div>				
+				<div class="row" id="secondStep" style="display:none;">
+					<input type="hidden" name="requestId" id="requestId" value="<?php echo (isset($RequestId)) ? json_encode($RequestId) : '[]'; ?>">
+					<div class="col-lg-12">
+						<nav class="navbar inrmdltab_navbar navbar-default">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle mdlnvbr_tgl collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+								</button>
+								<a class="navbar-brand inrmdl_navbrand" href="javascript:void(0);">Select Menus</a>
+							</div>
+							<div id="navbar" class="navbar-collapse padlr0 collapse">
+								<ul class="nav nav-tabs innermdl_tabs">
+									<li class="active"><a href="#allrequests" data-toggle="tab">All Request</a></li>
+								</ul>
+							</div>
+						</nav>
+						<div class="tab-content">
+							<div class="tab-pane fade in active" id="allrequests">
+								<div class="table-responsive">
+									<div id="jqxWidget">
+										<div id="allResource" style="width:100%;">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>								
+					</div>
+				</div>	
+				<div class="row" id="secondStepList" style="display:none;">
+					<input type="hidden" name="resourceId" id="resourceId">
+					<input type="hidden" name="itemId" id="itemId" value="">
+					<div class="col-lg-12">
+						<nav class="navbar inrmdltab_navbar navbar-default">
+							<div class="navbar-header">
+								<button type="button" class="navbar-toggle mdlnvbr_tgl collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+									<span class="icon-bar"></span>
+								</button>
+								<a class="navbar-brand inrmdl_navbrand" href="javascript:void(0);">Select Menus</a>
+							</div>
+							<div id="navbar" class="navbar-collapse padlr0 collapse">
+								<ul class="nav nav-tabs innermdl_tabs">
+									<li class="active"><a href="#allresources" data-toggle="tab">All Resource</a></li>
+								</ul>
+							</div>
+						</nav>
+						<div class="tab-content">
+							<div class="tab-pane fade in active" id="allresources">
+								<div class="table-responsive">
+									<div id="jqxWidget">
+										<div id="allResourceList" style="width:100%;">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>								
+					</div>
+				</div>					
+				<div class="row" id="thirdStep" style="display:none;">				
+					<div class="col-lg-12">
+						<div class="table-responsive top-30">
+							<!--Table 1-->
+							<table id="decisionTable" class="table table-bordered tableView dataTable no-footer table-striped" style=" margin-bottom:0px;">
+								<thead>
+									<tr>
+									<th tabindex="0" aria-controls="sequentialView" rowspan="1" colspan="1" style="width: 200px;" >Code</th>
+									<th tabindex="1" aria-controls="sequentialView" rowspan="1" colspan="1" style="width: 200px;" >Resource name</th>
+									<th tabindex="2" aria-controls="sequentialView" rowspan="1" colspan="1" style="width: 200px;" >Unit name</th>
+									</tr> 	
+								</thead>
+								<tbody class="main"></tbody>
+								<tbody class="total">
+								</tbody>
+							</table> 
+							<input type="hidden" name="rowid" id="rowid" value="0"/>
+						</div>
+					</div>
+                </div>
+		</form>
+	</div>
+</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+	<ul>
+		<li id="continueButton" class="dropdown save_btn float_r">
+			<a href="javascript:void(0);" class="ripple">Continue</a>
+		</li>
+		<li id="backButton" class="cancel_btn float_r" style="display:none;"><a href="javascript:void(0);" class="ripple">back</a></li>
+		<li class="cancel_btn cancel_btn_bluecolor float_l"><a id="cancelbutton" class="ripple" onclick="alert confirm();">cancel</a></li>
+	</ul>
+</div>
+<script id="resource-template"  type="text/template">
+	<tr class="count-tr">
+		<input type="hidden" name="resourceid__" id="resourceid__"/>
+		<td width="30%"  name="code__" id="code__"></td>
+		<td width="30%" name="resourcename__" id="resourcename__">
+		</td>
+		<td width="30%" name="unitname__" id="unitname__"></td>
+	</tr>
+	<tr class="subTr count-tr">
+		<td colspan="9" style="padding-inline-start:0px !important;">
+			<div class="subDiv">
+				<div class="col-lg-12">
+					<div class="tab-content">
+						<div class="table-responsive topsp">
+							<table class="table" style="margin-bottom:10px;" id="iowTable__" bgcolor="#00FF00" >
+								<thead>
+								<tr>
+									<th class="worktype-activity sub_tbl1">RequestNo</th>
+									<th class="worktype-activity sub_tbl1">RequestDate</th>
+									<th class="worktype-activity sub_tbl1">Cost Centre</th>
+									<th class="worktype-activity sub_tbl1">Bal Qty</th>
+									<th class="worktype-activity sub_tbl1">PO Qty</th>
+									<th class="worktype-activity sub_tbl1">Transfer</th>
+									<th class="worktype-activity sub_tbl1">Production</th>
+								</tr>
+								</thead>
+								<tbody class="main"></tbody>
+								<tbody class="total">
+								</tbody>
+								<input type="hidden" name="iow___rowid" id="iow___rowid" value="0"/>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</script>
+<script id="iow-template"  type="text/template" class="hide">
+	<tr class="dont-hide">
+		<td width="10%" class="worktype-activity" name="iow___RequestNo_0" id="iow___RequestNo_0"></td>
+		<td width="15%" name="iow___ReqDate_0" id="iow___ReqDate_0"></td>
+		<td width="15%" name="iow___CostCentreName_0" id="iow___CostCentreName_0"></td>
+		<td width="15%" name="iow___BalQty_0" id="iow___BalQty_0"></td>
+		<td width="15%">
+			<input class="parent_text border-none qtyVal mainTr" type="text" name="iow___IndentApproveQty_0" id="iow___IndentApproveQty_0" style="text-align:right;" onkeypress="return isNumberKey(event);" readonly />
+		</td>
+		<td width="15%">
+			<input class="parent_text border-none mainTr qtyVal" type="text" name="iow___TransferApproveQty_0" id="iow___TransferApproveQty_0" style="text-align:right;" onkeypress="return isNumberKey(event);"  readonly />
+		</td>
+		<td width="15%">
+			<input class="parent_text border-none qtyVal mainTr" type="text" name="iow___ProductionApproveQty_0" id="iow___ProductionApproveQty_0" style="text-align:right;" onkeypress="return isNumberKey(event);" readonly />
+		</td>
+		<input  type="hidden" name="iow___RequestTransId_0" id="iow___RequestTransId_0">
+		<input  type="hidden" name="iow___RequestId_0" id="iow___RequestId_0">
+		<input  type="hidden" name="iow___ResourceId_0" id="iow___ResourceId_0">
+		<input  type="hidden" name="iow___hiddenIndentApproveQty_0" id="iow___hiddenIndentApproveQty_0">
+		<input  type="hidden" name="iow___hiddenTransferApproveQty_0" id="iow___hiddenTransferApproveQty_0">
+		<input  type="hidden" name="iow___hiddenProductionApproveQty_0" id="iow___hiddenProductionApproveQty_0">
+		<input  type="hidden" name="iow___hiddenBalQty_0" id="iow___hiddenBalQty_0">
+	</tr>
+	<tr class="subTr dont-hide" style="display:none">
+		<td colspan="9" style="padding-inline-start:0px !important">
+			<div class="subDiv">
+				<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+				<div class="col-lg-12">
+					<div class="table-responsive topsp">
+						<table class="table" style="margin-bottom:10px;" id="sec___dec_0_whreqno"></table>
+						<input type="hidden" name="iow___request_0_rowid" id="iow___request_0_rowid" value="0"/>
+						<input type="hidden" name="wh___dec_0_wrowid" id="wh___dec_0_wrowid" value="0"/>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</script>
+<script id="request-template"  type="text/template" class="hide">
+	<tr class="dont-hide">
+		<td name="iow___request_0_WbsName__9" id="iow___request_0_WbsName__9"></td>
+		<input  type="hidden" name="iow___request_0_RequestAHTransId__9" id="iow___request_0_RequestAHTransId__9">
+		<td name="iow___request_0_Quantity__9" id="iow___request_0_Quantity__9"></td>
+		<td name="iow___request_0_BalQty__9" id="iow___request_0_BalQty__9"></td>
+		<td><input class="parent_text border-none closeTr quantityVal" type="text" name="iow___request_0_IndentApproveQty__9" id="iow___request_0_IndentApproveQty__9" style="text-align:right;"  onkeypress="return isDecimal(event,this);" onblur="return FormatNum(this, 3, true)" /></td>
+		<td><input class="parent_text border-none mainTr quantityVal" type="text" name="iow___request_0_TransferApproveQty__9" id="iow___request_0_TransferApproveQty__9" style="text-align:right;" onkeypress="return isNumberKey(event);" readonly /></td>
+		<td><input class="parent_text border-none closeTr quantityVal" type="text" name="iow___request_0_ProductionApproveQty__9" id="iow___request_0_ProductionApproveQty__9" style="text-align:right;" onkeypress="return isNumberKey(event);" /></td>
+		<input  type="hidden" name="iow___request_0_ReqTransId__9" id="iow___request_0_ReqTransId__9">
+		<input  type="hidden" name="iow___request_0_hiddenBalQty__9" id="iow___request_0_hiddenBalQty__9">
+	</tr>
+	<tr style="display:none" class="subTr dont-hide">
+		<td colspan="9" style="padding-inline-start:0px !important">
+			<div class="subDiv">
+				<div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"></div>
+				<div class="col-lg-12">
+					<div class="table-responsive topsp">
+						<table class="table" style="margin-bottom:10px;" id="thr___request_0_wbs__9_whreqno">
+						</table>
+						<input type="hidden" name="wh___dec_0_wbs_45_wrowid" id="wh___dec_0_wbs_45_wrowid" value="0"/>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</script>
+<script id="iow-po-warehouse"  type="text/template" class="hide">
+	<tr class="dont-hide" >
+		<td width="20%"  name="wh___dec_0_CostCentreName_4" id="wh___dec_0_CostCentreName_4"></td>
+		<td width="20%" name="wh___dec_0_ClosingStock_4" id="wh___dec_0_ClosingStock_4"></td>
+		<td width="20%">
+			<input class="parent_text border-none Val" type="text" name="wh___dec_0_Qty_4" id="wh___dec_0_Qty_4" autocomplete="off"  onkeypress="return isDecimal(event,this)"/>
+		</td>
+		<input type="hidden" name="wh___dec_0_ToCostcentreId_4" id="wh___dec_0_ToCostcentreId_4"/>
+		<input type="hidden" name="wh___dec_0_CostCentreId_4" id="wh___dec_0_CostCentreId_4"/>
+		<input type="hidden" name="wh___dec_0_ItemId_4" id="wh___dec_0_ItemId_4"/>
+		<input type="hidden" name="wh___dec_0_ResourceId_4" id="wh___dec_0_ResourceId_4"/>
+	</tr>
+</script>
+
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/paging.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/paging.js"></script>
+<script>
+$(document).ready(function(){
+	var desId = '<?php echo (isset($decId)) ? $decId : ''; ?>';
+    flag = '<?php echo (isset($flag)) ? $flag : 0; ?>';
+
+    if(flag == 1){
+        $('#firstStep').hide();
+        $('#excludeFirst').show();
+        $('#thirdStep').show();
+        loadDetailGrid();
+    }
+	if(desId!=0){
+		$("#continueButton a").text("Submit");
+		$('#firstStep').hide();
+		$('#excludeFirst').show();
+		$('#thirdStep').show();
+		editloadDetailGrid();
+    }
+
+});
+    dt=0;
+	function loadDetailGrid(){
+
+        console.log("fiusjdfusdf");
+		$("#decisionTable tbody").html("");
+        if(flag == 1){
+            reqId = '<?php echo (isset($reqId)) ? $reqId : ''; ?>';
+            resId = <?php echo (isset($resId)) ? json_encode($resId) : '[]';?>;
+            itemId = <?php echo (isset($itemId)) ? json_encode($itemId) : '[]';?>;
+            $("#requestId").val(reqId);
+            $("#decision_type").val(2);
+        }
+		$.ajax({
+			url:getBaseURL()+"ats/decision/request-decision",
+			type:"post",
+			data:"reqId="+reqId+"&resId="+resId+"&ItemId="+itemId+"&mode=secondStep",
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				$(function () {
+					var $rowid = $('#rowid');
+					var template = $('#resource-template').html();
+					var iowtemplate = $('#iow-template').html();
+					var requesttemplate = $('#request-template').html();
+					var warepotemplate = $('#iow-po-warehouse').html();
+					var rowid = 0;
+					var $tbody = $('#decisionTable').find('> tbody.main');
+					$.each(data, function(i,o){ 
+						rowid += 1;
+						$tbody.append(template.replace(/__/g, '_' + rowid));
+						$('#code_' + rowid).html(o.Code).addClass('border-none').prop('disabled', true);
+						$('#resourcename_' + rowid).html(o.ResourceName);
+						$('#resourceid_' + rowid).val(o.ResourceId);
+						$('#unitname_' + rowid).html(o.UnitName);
+						/*Request*/
+						var pocount = 0;
+						if(o.request.length > 0) { 
+							$.each(o.request, function (j, l) {
+								var iowrowid = parseInt($('#iow_' + rowid + '_rowid').val()) + 1;
+								$('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+								$('#iow_' + rowid + '_rowid').val(iowrowid);
+								pocount++;
+								$('#iow_' + rowid + '_RequestNo_' + iowrowid).html(l.RequestNo);
+								$('#iow_' + rowid + '_ReqDate_' + iowrowid).html(l.ReqDate);
+								$('#iow_' + rowid + '_CostCentreName_' + iowrowid).html(l.CostCentreName);
+								$('#iow_' + rowid + '_BalQty_' + iowrowid).html(l.BalQty);	
+								$('#iow_' + rowid + '_RequestTransId_' + iowrowid).val(l.RequestTransId);
+								$('#iow_' + rowid + '_RequestId_' + iowrowid).val(l.RequestId);
+								$('#iow_' + rowid + '_ResourceId_' + iowrowid).val(l.ResourceId); 
+								$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.IndentApproveQty,0),3,true));
+								$('#iow_' + rowid + '_TransferApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.TransferApproveQty,0),3,true));
+								$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.ProductionApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenIndentApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.IndentApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenTransferApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.TransferApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenProductionApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.ProductionApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenBalQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.BalQty,0),3,true));
+								/*WBS*/
+								requestrowid = 0;
+								if (l.wbsResults.length > 0) {
+									$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl3">WBS Name</th> <th class="worktype-activity sub_tbl3">Quantity</th> <th class="worktype-activity sub_tbl3">Bal Qty</th> <th class="worktype-activity sub_tbl3"> PO Qty</th> <th class="worktype-activity sub_tbl3">Transfer</th> <th class="worktype-activity sub_tbl3">Production</th> <th class="worktype-activity sub_tbl3"></th> </tr> </thead> <tbody class="main"></tbody> <tbody class="total"> </tbody> ');
+									$.each(l.wbsResults, function (k, r) { 
+										requestrowid = parseInt($('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val()) + 1;
+										$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').find('> tbody.main').append(requesttemplate
+											.replace(/__9/g, '_' + requestrowid)
+											.replace(/_0/g, '_' + iowrowid)
+											.replace(/__/g, '_' + rowid)
+											.replace(/_45/g, '_' + requestrowid));
+
+										$('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val(requestrowid);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_WbsName_' + requestrowid).html(r.WbsName);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_Quantity_' + requestrowid).html(r.Quantity);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_BalQty_' + requestrowid).html(r.BalQty);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_RequestAHTransId_' + requestrowid).val(r.RequestAHTransId);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_ReqTransId_' + requestrowid).val(r.ReqTransId); 
+										$('#iow_' + rowid + '_request_' + iowrowid + '_IndentApproveQty_' + requestrowid).val(sanitizeNumber(parseFloat(r.IndentApproveQty,0),3,true));
+										$('#iow_' + rowid + '_request_' + iowrowid + '_TransferApproveQty_' + requestrowid).val(sanitizeNumber(parseFloat(r.TransferApproveQty,0),3,true));
+										$('#iow_' + rowid + '_request_' + iowrowid + '_ProductionApproveQty_' + requestrowid).val(sanitizeNumber(parseFloat(r.ProductionApproveQty,0),3,true));
+										$('#iow_' + rowid + '_request_' + iowrowid + '_hiddenBalQty_' + requestrowid).val(sanitizeNumber(parseFloat(r.BalQty,0),3,true));
+										/*Decision*/
+										if (r.descision.length != 0) {
+											
+											$('#thr_' + rowid + '_request_' + iowrowid + '_wbs_' + requestrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl2">CostCentreName </th> <th class="worktype-activity sub_tbl2">ClosingStock </th> <th class="worktype-activity sub_tbl2">Qty </th> <th class="" style="display: none;">&nbsp;</th> </tr> </thead> <tbody class="main wbs"></tbody> <tbody class="total"> </tbody>');
+											$.each(r.descision, function (u, v) { 
+												var whrowid = parseInt($('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_wrowid').val()) + 1;
+												$('#thr_' + rowid + '_request_' + iowrowid + '_wbs_' + requestrowid + '_whreqno').find('> tbody.main').append(warepotemplate
+													.replace(/_4/g, '_' + whrowid)
+													.replace(/_0/g, '_' + iowrowid + '_wbs_' + requestrowid)
+													.replace(/__/g, '_' + rowid));
+
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_wrowid').val(whrowid);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_CostCentreName_' + whrowid).html(v.CostCentreName);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ClosingStock_' + whrowid).html(v.ClosingStock);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_Qty_' + whrowid).val(sanitizeNumber(parseFloat(v.Qty,0),3,true));
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ToCostcentreId_' + whrowid).val(v.ToCostcentreId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_CostCentreId_' + whrowid).val(v.CostCentreId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ItemId_' + whrowid).val(v.ItemId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ResourceId_' + whrowid).val(v.ResourceId);
+											});
+										}
+									});
+								} else { 
+									if (l.descision.length != 0) { 
+										$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl2">CostCentreName</th> <th class="worktype-activity sub_tbl2">ClosingStock </th> <th class="worktype-activity sub_tbl2">Qty </th> <th class="" style="display: none;">&nbsp;</th> </tr> </thead> <tbody class="main iow"></tbody> <tbody class="total"> </tbody>');
+										$.each(l.descision, function (u, v) {
+											var whrowid1 = parseInt($('#wh_' + rowid + '_dec_' + iowrowid + '_wrowid').val()) + 1;
+											$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').find('> tbody.main').append(warepotemplate
+												.replace(/_4/g, '_' + whrowid1)
+												.replace(/_0/g, '_' + iowrowid)
+												.replace(/__/g, '_' + rowid));
+
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_wrowid').val(whrowid1);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_CostCentreName_' + whrowid1).html(v.CostCentreName);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ClosingStock_' + whrowid1).html(v.ClosingStock);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_Qty_' + whrowid1).val(sanitizeNumber(parseFloat(v.Qty,0),3,true));
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ToCostcentreId_' + whrowid1).val(v.ToCostCentreId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_CostCentreId_' + whrowid1).val(v.CostCentreId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ItemId_' + whrowid1).val(v.ItemId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ResourceId_' + whrowid1).val(v.ResourceId);
+										});
+									}
+									
+								}
+								if (requestrowid <= 0) {
+									$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).removeClass('mainTr');
+									$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).addClass('closeTr');
+									$('#iow_' + rowid + '_TransferApproveQty_' + iowrowid).removeClass('mainTr');
+									$('#iow_' + rowid + '_TransferApproveQty_' + iowrowid).addClass('closeTr');
+									$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).removeClass('mainTr');
+									$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).addClass('closeTr');
+									$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).prop("readonly", false); 
+									$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).prop("readonly", false); 
+								}
+							});
+						}
+					});
+					$rowid.val(rowid);
+					$('[data-toggle="tooltip"]').tooltip();
+					if($('#gridtype').val() == 0) {
+						//paging
+						if(dt==0) {
+							$('#decisionTable').paging({limit: 2});
+						}else {
+							thisVal._getNavBar($('#decisionTable').find('> tbody.main >tr'));
+							$('.paging-nav').children('a[data-page=0]').trigger('click');
+						}
+						dt=1;
+					}
+				});
+				changePage();
+				calcDecisionQuantity();
+			}		
+		});		
+		
+	}
+    function calcDecisionQuantity(x,e) {
+		$(".Val").unbind();
+		$(".Val").bind('focusin', function(e){ console.log(1111);
+			//$(".Val").bind('focusin', function(e){
+				/*validation*/
+				var totWbsVal = $(this).closest("tr").find("td:nth-child(2)").text();
+				var wbsVal = 0;
+				var name = $(this).attr('name');
+				$(this).closest("tr").find("input:text").each(function(){
+					if($(this).attr('name') != name)
+						wbsVal = parseFloat(wbsVal) + parseFloat($(this).val());
+				});
+				var total = parseFloat(totWbsVal) - parseFloat(wbsVal);	
+				$(this).attr('data-original-title', 'Enter the value less than or equal to '+total);
+				$(this).tooltip('show');
+			//});
+			
+			$(".Val").bind('keyup keydown', function(e){ console.log(222);
+				var key = e.which || e.keyCode;
+				var $x = $(this);
+				var ids = $x[0].id.split('_');
+				var rowid = ids[1];
+				var iowrowid = ids[3];
+				var requestrowid = ids[5];
+				var whrowid = ids[7];
+				
+				if($(this).parent().parent().parent().hasClass("wbs")){
+					/*ClosingStock*/
+					var closingstock=parseFloatVal($('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_ClosingStock_'+whrowid).text());
+					var qty=parseFloatVal($('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_Qty_'+whrowid).val());
+					if(qty>closingstock){ 
+						alert('Quantity should not exceed ClosingStock!');
+						$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_Qty_'+whrowid).val(0);
+						$('#wh_' + rowid + '_dec_' + iowrowid +'_Qty_'+requestrowid).val(0);
+						return;
+					}else{
+						/*calc total qty*/
+						var totalQty=0;
+						$.each($('input[id^=wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_Qty_'), function (i,o) {
+							var qty = parseFloatVal($(this).val());
+							if(isNaN(qty))
+								qty = 0;
+							totalQty += qty;
+						});	
+						/*Decision*/
+						$('#iow_'+rowid+'_request_'+iowrowid+'_TransferApproveQty_'+requestrowid).val(parseFloatVal(totalQty));
+						var totalwbsqty=0;
+						$.each($('input[id^=iow_' + rowid + '_request_'+iowrowid +'_TransferApproveQty_'), function (j,k) {
+							var wbsqty = parseFloatVal($(this).val());
+							if(isNaN(wbsqty))
+								wbsqty = 0;
+							totalwbsqty += wbsqty;
+						});	
+						$('#iow_'+rowid+'_TransferApproveQty_'+iowrowid).val((totalwbsqty));
+						
+						/*Balance Quantity validation*/
+						var poQty=0;
+						var prod=0;
+						var balQty=0;
+						if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+							if(parseFloat($('#iow_' + rowid + '_request_' + iowrowid + '_hiddenBalQty_' + requestrowid).text())!=false) {
+								var balqty=parseFloatVal($('#iow_' + rowid + '_request_' + iowrowid + '_hiddenBalQty_' + requestrowid).val());
+							}
+						}
+						else{
+							if(parseFloat($('#iow_' + rowid + '_request_' + iowrowid + '_BalQty_' + requestrowid).text())!=false) {
+								var balqty=parseFloatVal($('#iow_' + rowid + '_request_' + iowrowid + '_BalQty_' + requestrowid).text());
+							}
+						}
+						if(parseFloat($('#iow_' + rowid + '_request_' + iowrowid + '_IndentApproveQty_' + requestrowid).val())!=false) {
+							poQty=parseFloatVal($('#iow_' + rowid + '_request_' + iowrowid + '_IndentApproveQty_' + requestrowid).val());
+						}
+						if(parseFloat($('#iow_' + rowid + '_request_' + iowrowid + '_ProductionApproveQty_' + requestrowid).val())!=false) {
+							prod=parseFloatVal($('#iow_' + rowid + '_request_' + iowrowid + '_ProductionApproveQty_' + requestrowid).val());
+						}
+						var totDiff = balqty-(poQty+prod);
+						if(totDiff < totalQty){ 
+							alert('Quantity should not exceed balance Quantity!');
+							$('#wh_' + rowid +'_dec_'+iowrowid+'_wbs_'+requestrowid+'_Qty_'+whrowid).val(0);
+							var totalQty=0;
+							$.each($('input[id^=wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_Qty_'), function (i,o) {
+								var qty = parseFloatVal($(this).val());
+								if(isNaN(qty))
+									qty = 0;
+								totalQty += qty;
+								
+							});	
+							$('#iow_'+rowid+'_TransferApproveQty_'+iowrowid).val((totalQty));
+							$('#iow_'+rowid+'_request_'+iowrowid+'_TransferApproveQty_'+requestrowid).val(totalQty);
+							return;
+						}
+					}
+				}else{
+					var closingstock=parseFloatVal($('#wh_' + rowid + '_dec_' + iowrowid + '_ClosingStock_' + requestrowid).text());
+					var qty=parseFloatVal($('#wh_' + rowid + '_dec_' + iowrowid + '_Qty_' + requestrowid).val());
+					if(qty>closingstock){ 
+						alert('Quantity should not exceed ClosingStock!');
+						$('#wh_' + rowid + '_dec_' + iowrowid + '_Qty_' + requestrowid).val(0);
+						return;
+					}else{
+						/*calc total qty*/
+						var totalQty=0;
+						$.each($('input[id^=wh_' + rowid + '_dec_' + iowrowid + '_Qty_'), function (i,o) {
+							var qty = parseFloatVal($(this).val());
+							if(isNaN(qty))
+								qty = 0;
+							totalQty += qty;
+						});	
+						$('#iow_'+rowid+'_TransferApproveQty_'+iowrowid).val(parseFloatVal(totalQty));
+						
+						/*Balance Quantity validation*/
+						var poQty=0;
+						var prod=0;
+						var balQty=0;
+						
+						if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+							if(parseFloat($('#iow_' + rowid + '_hiddenBalQty_' + iowrowid).text())!=false) {
+								var balqty=parseFloatVal($('#iow_' + rowid + '_hiddenBalQty_' + iowrowid).val());
+							}
+						}else{
+							if(parseFloat($('#iow_' + rowid + '_BalQty_' + iowrowid).text())!=false) {
+								var balqty=parseFloatVal($('#iow_' + rowid + '_BalQty_' + iowrowid).text());
+							}
+						}
+						
+						if(parseFloat($('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).val())!=false) {
+							poQty=parseFloatVal($('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).val());
+						}
+						if(parseFloat($('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).val())!=false) {
+							prod=parseFloatVal($('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).val());
+						}
+						var totDiff = balqty-(poQty+prod);
+						if(totDiff < totalQty){ 
+							alert('Quantity should not exceed balance Quantity!');
+							$('#wh_'+rowid+'_dec_'+iowrowid+'_Qty_'+requestrowid).val(0);
+							var totalQty=0;
+							$.each($('input[id^=wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid+'_Qty_'), function (i,o) {
+								var qty = parseFloatVal($(this).val());
+								if(isNaN(qty))
+									qty = 0;
+								totalQty += qty;
+							});	
+							$('#iow_'+rowid+'_TransferApproveQty_'+iowrowid).val(totalQty);
+							return;
+						}
+					}
+				}
+			});
+		});
+	}
+	function changePage(){
+		$(".quantityVal").unbind();
+		$(".quantityVal").bind('focusin', function(e){
+			if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+				var $x = $(this);
+				var ids = $x[0].id.split('_');
+				var rowid = ids[1];
+				var iowrowid = ids[3];
+				var requestrowid = ids[5];
+				var totWbsVal = $('#iow_'+rowid+'_request_'+iowrowid+'_hiddenBalQty_'+requestrowid).val();
+			}else{  
+				var totWbsVal = $(this).closest("tr").find("td:nth-child(4)").text();
+			}
+			var wbsVal = 0;
+			var name = $(this).attr('name');
+			$(this).closest("tr").find("input:text").each(function(){
+				if($(this).attr('name') != name){
+					if($(this).val()==''){
+						$(this).val(0)
+					}else{
+						wbsVal = parseFloat(wbsVal) + parseFloat($(this).val());
+					}
+				}
+			});
+
+			var total = parseFloat(totWbsVal) - parseFloat(wbsVal);		
+			$(this).attr('data-original-title', 'Enter the value less than or equal to '+total);
+			$(this).tooltip('show');
+		});
+	
+		$(".quantityVal").bind('keyup keydown', function(e){ 
+			var $x = $(this);
+			var ids = $x[0].id.split('_');
+			var rowid = ids[1];
+			var iowrowid = ids[3];
+			var requestrowid = ids[5];
+			var name = $(this).attr('name');
+			var key = e.which || e.keyCode;
+			if(key != 9){
+				/*Total value validation*/	
+				if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+					var $x = $(this);
+					var ids = $x[0].id.split('_');
+					var rowid = ids[1];
+					var iowrowid = ids[3];
+					var requestrowid = ids[5];
+					var totWbsVal = $('#iow_'+rowid+'_request_'+iowrowid+'_hiddenBalQty_'+requestrowid).val();
+				}else{ 
+					var totWbsVal = $(this).closest("tr").find("td:nth-child(4)").text();
+				}
+				var wbsVal = 0;
+				$(this).closest("tr").find("input:text").each(function(){
+					wbsVal = parseFloat(wbsVal) + parseFloat($(this).val());
+				});
+				if(totWbsVal < wbsVal){
+					$(this).val(orgVal);
+				} if($x[0].id == $('input[id^=iow_' + rowid + '_request_'+iowrowid +'_IndentApproveQty_'+requestrowid)[0].id){ 
+					var powbsqty=0;
+					$.each($('input[id^=iow_' + rowid + '_request_'+iowrowid +'_IndentApproveQty_'), function (j,k) {
+						var wbsqtys = parseFloatVal($(this).val());
+						if(isNaN(wbsqtys))
+							wbsqtys = 0;
+						powbsqty += wbsqtys;
+					});	
+					$('#iow_'+rowid+'_IndentApproveQty_'+iowrowid).val((powbsqty.toFixed(6)));
+				}else{
+					var prodwbsqty=0;
+					$.each($('input[id^=iow_' + rowid + '_request_'+iowrowid +'_ProductionApproveQty_'), function (j,k) {
+						var pwbsqty = parseFloatVal($(this).val());
+						if(isNaN(pwbsqty))
+							wbsqtys = 0;
+						prodwbsqty += pwbsqty;
+					});	
+					$('#iow_'+rowid+'_ProductionApproveQty_'+iowrowid).val((prodwbsqty.toFixed(6)));
+				}
+			}
+		});
+		
+		$(".qtyVal").unbind();
+		$(".qtyVal").bind('focusin', function(e){
+			
+			if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+				var $x = $(this);
+				var ids = $x[0].id.split('_');
+				var rowid = ids[1];
+				var iowrowid = ids[3];
+				var requestrowid = ids[5];
+				var totWbsVal = $('#iow_'+rowid+'_hiddenBalQty_'+iowrowid).val();
+			}else{ 
+				var totWbsVal = $(this).closest("tr").find("td:nth-child(4)").text();
+			}
+			var wbsVal = 0;
+			var name = $(this).attr('name');
+			$(this).closest("tr").find("input:text").each(function(){
+				if($(this).attr('name') != name){
+					if($(this).val()==''){
+						$(this).val(0)
+					}else{
+						wbsVal = parseFloat(wbsVal) + parseFloat($(this).val());
+					}
+				}
+			});
+			var total = parseFloat(totWbsVal) - parseFloat(wbsVal);			
+			$(this).attr('data-original-title', 'Enter the value less than or equal to '+total);
+			$(this).tooltip('show');
+		});
+		$(".qtyVal").bind('keyup keydown', function(e){ 
+			var key = e.which || e.keyCode;
+			if(key != 9){
+				var sum = 0;
+				if($(this).val().indexOf(' ') > -1){
+					$(this).val($(this).val().trim());
+				}				
+				if(isNaN($(this).val())){
+					this.value = this.value.replace(/[^0-9\.]/g,'');
+					if($(this).val().indexOf('.') > -1){
+						var index = $(this).val().indexOf( '.' );
+						this.value = this.value.substr( 0, index + 1 ) + this.value.slice( index ).replace( /\./g, '' );
+					}
+				}
+				var ex = /^\d*(\.\d{0,6})?$/;
+				if(!ex.test($(this).val())){
+					$(this).val($(this).val().substring(0,$(this).val().length-1));
+				}
+				// /*Total value validation*/	
+				if(<?php echo (isset($decId)) ? $decId : 0;?> > 0){
+					var $x = $(this);
+					var ids = $x[0].id.split('_');
+					var rowid = ids[1];
+					var iowrowid = ids[3];
+					var requestrowid = ids[5];
+					var totWbsVal = $('#iow_'+rowid+'_hiddenBalQty_'+iowrowid).val();
+				}else{ 
+					var totWbsVal = $(this).closest("tr").find("td:nth-child(4)").text();
+				}
+				var wbsVal = 0;
+				$(this).closest("tr").find("input:text").each(function(){
+					wbsVal = parseFloat(wbsVal) + parseFloat($(this).val());
+				});
+				if(totWbsVal < wbsVal){
+					 $(this).val(orgVal);
+				}
+			}
+		});
+	}
+	
+	$('.content_wrapper').on('click','.mainTr',function(e){
+        e.preventDefault();
+        if(!$(this).closest("tr").next(".subTr").is(":visible")){
+            $(this).closest("tr").next(".subTr").show();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        }
+        else{
+            $(this).closest("tr").next(".subTr").find(".subDiv").toggle("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+	$('.content_wrapper').on('click','.closeTr',function(e){
+        e.preventDefault();
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+    });
+	edit=0;
+	function editloadDetailGrid(){
+		var RequestId= <?php echo (isset($RequestId)) ? json_encode($RequestId) : '[]'; ?>;
+		var ResourceId= <?php echo (isset($ResourceId)) ? json_encode($ResourceId) : '[]'; ?>;
+		var ItemId= <?php echo (isset($ItemId)) ? json_encode($ItemId) : '[]'; ?>;
+		$("#requestId").val(RequestId);	
+		$.ajax({
+			url:getBaseURL()+"ats/decision/request-decision",
+			type:"post",
+			data:"reqId="+RequestId+"&resId="+ResourceId+"&ItemId="+ItemId+"&mode=editSecondStep&requestDecId=<?php echo $decId; ?>",
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				$(function () {
+					var $rowid = $('#rowid');
+					var template = $('#resource-template').html();
+					var iowtemplate = $('#iow-template').html();
+					var requesttemplate = $('#request-template').html();
+					var warepotemplate = $('#iow-po-warehouse').html();
+					var rowid = 0;
+					var $tbody = $('#decisionTable').find('> tbody.main');
+					$.each(data, function(i,o){ 
+						rowid += 1;
+						$tbody.append(template.replace(/__/g, '_' + rowid));
+						$('#code_' + rowid).html(o.Code).addClass('border-none').prop('disabled', true);
+						$('#resourcename_' + rowid).html(o.ResourceName);
+						$('#resourceid_' + rowid).val(o.ResourceId);
+						$('#unitname_' + rowid).html(o.UnitName);
+						/*Request*/
+						var pocount = 0;
+						if(o.request.length > 0) { 
+							$.each(o.request, function (j, l) { 
+								var iowrowid = parseInt($('#iow_' + rowid + '_rowid').val()) + 1;
+								$('#iowTable_' + rowid).find('> tbody.main').append(iowtemplate.replace(/__/g, '_' + rowid).replace(/_0/g, '_' + iowrowid));
+								$('#iow_' + rowid + '_rowid').val(iowrowid);
+								pocount++;
+								$('#iow_' + rowid + '_RequestNo_' + iowrowid).html(l.RequestNo);
+								$('#iow_' + rowid + '_ReqDate_' + iowrowid).html(l.ReqDate);
+								$('#iow_' + rowid + '_CostCentreName_' + iowrowid).html(l.CostCentreName);
+								$('#iow_' + rowid + '_BalQty_' + iowrowid).html(l.BalQty);	
+								$('#iow_' + rowid + '_RequestTransId_' + iowrowid).val(l.RequestTransId);
+								$('#iow_' + rowid + '_RequestId_' + iowrowid).val(l.RequestId);
+								$('#iow_' + rowid + '_ResourceId_' + iowrowid).val(l.ResourceId);
+								$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).val(l.IndentApproveQty);
+								$('#iow_' + rowid + '_TransferApproveQty_' + iowrowid).val(l.TransferApproveQty);
+								$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).val(l.ProductionApproveQty);
+								$('#iow_' + rowid + '_hiddenIndentApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.IndentApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenTransferApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.TransferApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenProductionApproveQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.ProductionApproveQty,0),3,true));
+								$('#iow_' + rowid + '_hiddenBalQty_' + iowrowid).val(sanitizeNumber(parseFloat(l.hiddenBalQty,0),3,true));
+								/*WBS*/
+								requestrowid = 0;
+								if (l.wbsResults.length > 0) {
+									$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl3">WBS Name</th> <th class="worktype-activity sub_tbl3">Quantity</th> <th class="worktype-activity sub_tbl3">Bal Qty</th> <th class="worktype-activity sub_tbl3"> PO Qty</th> <th class="worktype-activity sub_tbl3">Transfer</th> <th class="worktype-activity sub_tbl3">Production</th> <th class="worktype-activity sub_tbl3"></th> </tr> </thead> <tbody class="main"></tbody> <tbody class="total"> </tbody> ');
+									$.each(l.wbsResults, function (k, r) {
+										requestrowid = parseInt($('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val()) + 1;
+										$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').find('> tbody.main').append(requesttemplate
+											.replace(/__9/g, '_' + requestrowid)
+											.replace(/_0/g, '_' + iowrowid)
+											.replace(/__/g, '_' + rowid)
+											.replace(/_45/g, '_' + requestrowid));
+
+										$('#iow_' + rowid + '_request_' + iowrowid + '_rowid').val(requestrowid);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_WbsName_' + requestrowid).html(r.WbsName);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_Quantity_' + requestrowid).html(r.Quantity);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_BalQty_' + requestrowid).html(r.BalQty);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_RequestAHTransId_' + requestrowid).val(r.RequestAHTransId);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_ReqTransId_' + requestrowid).val(r.ReqTransId);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_IndentApproveQty_' + requestrowid).val(r.IndentApproveQty);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_TransferApproveQty_' + requestrowid).val(r.TransferApproveQty);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_ProductionApproveQty_' + requestrowid).val(r.ProductionApproveQty);
+										$('#iow_' + rowid + '_request_' + iowrowid + '_hiddenBalQty_' + requestrowid).val(sanitizeNumber(parseFloat(r.hiddenBalQty,0),3,true));
+										/*Decision*/
+										if (r.descision.length != 0) { 
+
+											$('#thr_' + rowid + '_request_' + iowrowid + '_wbs_' + requestrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl2">CostCentreName </th> <th class="worktype-activity sub_tbl2">ClosingStock </th> <th class="worktype-activity sub_tbl2">Qty </th> <th class="" style="display: none;">&nbsp;</th> </tr> </thead> <tbody class="main wbs"></tbody> <tbody class="total"> </tbody>');
+											$.each(r.descision, function (u, v) { 
+												var whrowid = parseInt($('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_wrowid').val()) + 1;
+												$('#thr_' + rowid + '_request_' + iowrowid + '_wbs_' + requestrowid + '_whreqno').find('> tbody.main').append(warepotemplate
+													.replace(/_4/g, '_' + whrowid)
+													.replace(/_0/g, '_' + iowrowid + '_wbs_' + requestrowid)
+													.replace(/__/g, '_' + rowid));
+
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_wrowid').val(whrowid);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_CostCentreName_' + whrowid).html(v.CostCentreName);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ClosingStock_' + whrowid).html(v.ClosingStock);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_Qty_' + whrowid).val(v.Quantity);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ToCostcentreId_' + whrowid).val(v.ToCostCentreId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_CostCentreId_' + whrowid).val(v.CostCentreId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ItemId_' + whrowid).val(v.ItemId);
+												$('#wh_' + rowid + '_dec_' + iowrowid + '_wbs_' + requestrowid + '_ResourceId_' + whrowid).val(v.ResourceId);
+											});
+										}
+									});
+								} 
+								else { 
+									if (l.descision.length != 0) {
+										$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').html('<thead> <tr> <th class="worktype-activity sub_tbl2">CostCentreName</th> <th class="worktype-activity sub_tbl2">ClosingStock </th> <th class="worktype-activity sub_tbl2">Qty </th> <th class="" style="display: none;">&nbsp;</th> </tr> </thead> <tbody class="main iow"></tbody> <tbody class="total"> </tbody>');
+										$.each(l.descision, function (u, v) {
+											var whrowid1 = parseInt($('#wh_' + rowid + '_dec_' + iowrowid + '_wrowid').val()) + 1;
+											$('#sec_' + rowid + '_dec_' + iowrowid + '_whreqno').find('> tbody.main').append(warepotemplate
+												.replace(/_4/g, '_' + whrowid1)
+												.replace(/_0/g, '_' + iowrowid)
+												.replace(/__/g, '_' + rowid));
+
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_wrowid').val(whrowid1);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_CostCentreName_' + whrowid1).html(v.CostCentreName);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ClosingStock_' + whrowid1).html(v.ClosingStock);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_Qty_' + whrowid1).val(v.Quantity);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ToCostcentreId_' + whrowid1).val(v.ToCostCentreId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_CostCentreId_' + whrowid1).val(v.CostCentreId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ItemId_' + whrowid1).val(v.ItemId);
+											$('#wh_' + rowid + '_dec_' + iowrowid + '_ResourceId_' + whrowid1).val(v.ResourceId);
+										});
+									}
+									
+								}
+								if (requestrowid <= 0) {
+									$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).removeClass('mainTr');
+									$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).removeClass('mainTr');
+									$('#iow_' + rowid + '_IndentApproveQty_' + iowrowid).prop("readonly", false); 
+									$('#iow_' + rowid + '_ProductionApproveQty_' + iowrowid).prop("readonly", false); 
+								}
+							});
+						}
+					});
+					$rowid.val(rowid);
+					$('[data-toggle="tooltip"]').tooltip();
+					if('<?php echo (isset($gridtype)) ? $gridtype : 0;?>' == 0) {
+						//paging
+						if(edit==0){
+							$('#decisionTable').paging({limit: 2});
+						}else{
+							thisVal._getNavBar($('#decisionTable').find('> tbody.main >tr'));
+							$('.paging-nav').children('a[data-page=0]').trigger('click');
+						}
+						edit=1;
+					}
+				});
+				changePage();
+				calcDecisionQuantity();
+			}		
+		});		
+	}
+	var sel_resource_count = 0;
+	var totTrans=[];
+	var request='';
+	var requestold='';
+	var resId=[];
+	var resIdOld=[];
+	var reqId=[];
+	var reqIdOld=[];
+	var reqResId = [];
+	var resRowId=[];
+	var oldFormData = [];
+	var loadRes = false;	
+	var orgVal = '0';
+	$(".error_message").hide();
+	$("#voucherNo").blur(function(){
+		$("#VoucherSpan").text($(this).val());
+	});
+	$("#decision_type").change(function(){
+		$("#materialSpan").text($("#decision_type option:selected").text());
+	});
+	function arrequal(arr1, arr2){
+		var is_equal = arr1.length==arr2.length && arr1.every(function(v,i) { 
+			return ($.inArray(v,arr2) != -1)
+		});
+		return is_equal;
+	}
+	
+	$('.date_picker').datepicker({
+		format: "dd-mm-yyyy",
+		//startDate: new Date(),
+		endDate: new Date(),
+		orientation: "top auto",
+		autoclose: true
+	}).on("changeDate", function(e){
+		$("#dateSpan").text($(this).val());
+	});
+//	$('.date_icon').click(function() {
+//		var input = $(this).parent().find('input').datepicker('show');
+//	});
+	
+		/*Resourcelist grid start*/	
+		var resSource =
+		{
+			localData: [],
+			dataType: "json",
+			dataFields:
+			[
+				{ name: 'Code', type: 'string' },
+				{ name: 'ResourceName', type: 'string' },
+				{ name: 'ItemId', type: 'string' },
+				{ name: 'ResourceId', type: 'string' }
+			]
+		};
+		var dataAdapterRes = new $.jqx.dataAdapter(resSource,{
+			autoBind: true,
+			loadComplete: function (data) {
+			},
+			loadError: function (xhr, status, error) {
+			}
+		});
+
+   
+		$("#allResourceList").jqxGrid({
+			width: '100%',
+			pageable: true,
+			selectionMode: 'singleRow',
+			pagerButtonsCount: 6,
+			autoheight:true,
+			autorowheight: true,
+			filterable: true,
+			sortable: true,
+			columnsResize: true,
+			showfilterrow: true,
+            keyboardnavigation: true,
+			ready: function(){
+				// var localizationobj = {};
+				// localizationobj.emptydatastring = "No resource to display";
+				// $("#allResourceList").jqxGrid('localizestrings', localizationobj);
+			},			
+			selectionmode: 'checkbox',						
+			source: dataAdapterRes,
+			columns: [
+				  { text: 'Code', editable: false,datafield: 'Code'},
+				  { text: 'ResourceName', editable: false,datafield: 'ResourceName'},
+				  { text: 'ItemId', editable: false,datafield: 'ItemId',hidden:true},
+				  { text: 'ResourceId', editable: false,datafield: 'ResourceId',hidden:true}
+			]
+		});
+
+		$('#allResourceList').on('rowselect', function (event){
+			// event arguments.
+			var args = event.args;
+			// row's bound index.
+			var rowBoundIndex = args.rowindex;
+			// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+			var rowData = args.row;
+		});	
+		$('#allResourceList').on('rowunselect', function (event){
+			// event arguments.
+			var args = event.args;
+			// row's bound index.
+			var rowBoundIndex = args.rowindex;
+			// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+			var rowData = args.row;
+		});	
+			
+		$('#allResourceList').on('rowclick', function (event){
+			var args = event.args;
+			// row's bound index.
+			var boundIndex = args.rowindex;
+			var index = $('#allResourceList').jqxGrid('selectedrowindexes'); 
+			//alert($.inArray(boundIndex, index))
+			if($.inArray(boundIndex, index) == -1)
+				$('#allResourceList').jqxGrid('selectrow', boundIndex);
+			else
+				$('#allResourceList').jqxGrid('unselectrow', boundIndex);
+		});
+
+/*Resourcelist grid end*/
+		
+	$("#decision_type").change(function(){
+		request = $(this).val();
+	});
+	function trimNumber(s){
+	  while (s.substr(0,1) == '0' && s.length>1) { s = s.substr(1,9999); }
+	  return s;
+	}
+	$('#cancelbutton').hide();
+	$("#continueButton").click(function(){
+		$(".error_message").hide();
+		$('#cancelbutton').show();
+		if($("#firstStep").is(":visible")){
+			if($("#voucherNo").val() == ""){
+				$("#voucherNo").closest(".req_flds").find(".error_message").show();
+				$("#voucherNo").focus();
+			}
+			else if($("#project_date").val() == ""){
+				$("#project_date").closest(".req_flds").find(".error_message").show();
+				$("#project_date").focus();
+			}
+			else if($("#decision_type").val() == '0'){
+				$("#decision_type").closest("div").find(".error_message").show();
+				$("#decision_type").focus();
+			}
+			else if($("#voucherNo").val() != '' && !<?php echo $genType; ?>){
+				$.ajax({
+					url:getBaseURL()+"ats/decision/request-decision",
+					type:"post",
+					data:"voucherno="+$('#voucherNo').val()+"&mode=voucherValid",
+					dataType:"json",
+					success:function(data, textStatus, jqXHR){
+						if(data['data'].length != 0){
+							$("#voucherNo").closest(".req_flds").find(".error_message").text("The voucher no already used").show();
+							$("#voucherNo").focus();
+						}
+						else{
+							$("#firstStep").hide();
+							$("#secondStep").show();
+							$("#backButton").show();	
+							$("#excludeFirst").show();
+							
+							var formData = $("#firstStep").find(".nextVal").serializeArray();
+							if(JSON.stringify(formData) != JSON.stringify(oldFormData)){				
+								pageNext();
+							}							
+						}
+					},
+					error:function(jqXHR, textStatus, errorThrown){
+						alert(textStatus+"-----"+errorThrown);
+					}
+				});				
+			}			
+			else{
+				$("#firstStep").hide();
+				$("#secondStep").show();
+				$("#backButton").show();	
+				$("#excludeFirst").show();
+				
+				var formData = $("#firstStep").find(".nextVal").serializeArray();
+				if(JSON.stringify(formData) != JSON.stringify(oldFormData)){				
+					pageNext();
+				}
+			}
+		}
+		else if($("#secondStep").is(":visible")){
+			var index = $('#allResource').jqxGrid('getselectedrowindex');
+			if(index==-1){
+				alert('Please select atleast one request to proceed further')
+			}
+			else{
+				reqId=[];
+				var index = $("#allResource").jqxGrid("getselectedrowindexes");
+				for(var i in index){
+
+					reqId.push($("#allResource").jqxGrid("getrowid", index[i]));
+				}
+				$("#requestId").val(reqId);
+				$("#secondStep").hide();
+				$("#secondStepList").show();
+				$("#backButton").show();
+				if(!arrequal(reqId, reqIdOld))
+					loadResource();				
+			}						
+		}
+		else if($("#secondStepList").is(":visible")){
+
+			var index = $('#allResourceList').jqxGrid('getselectedrowindex');
+			if(index==-1){
+				alert('Please select atleast one resource to proceed further')
+			}
+			else{
+
+				resId=[];
+				itemId=[];
+				var index = $("#allResourceList").jqxGrid("getselectedrowindexes");
+				for(var i in index){
+					var data =$("#allResourceList").jqxGrid("getrowdata", index[i]);
+                    console.log(data.ResourceId,data.ItemId);
+					resId.push(data.ResourceId);
+					itemId.push(data.ItemId);
+				}
+				$("#resourceId").val(resId);				
+				$("#itemId").val(itemId);				
+				$("#secondStepList").hide();
+				$("#thirdStep").show();
+				$("#continueButton a").text("Submit");	
+				loadDetailGrid();
+    }
+}
+		else if($("#thirdStep").is(":visible")){ 
+			// if(!$('#sequentialView_next').hasClass('disabled')){
+				// $('#sequentialView_next').trigger('click');
+				// if($('#sequentialView_next').hasClass('disabled'))
+					// $("#continueButton a").text("Submit");
+			// }
+			// else{
+            var row1= parseInt($('#rowid').val());
+            for(var i=1;i<=row1;i++) {
+                var iowrow = parseInt($('#iow_' + i + '_rowid').val());
+				for(var j=1;j<=iowrow;j++) {
+					if((parseFloatVal($('#iow_'+i+'_IndentApproveQty_' + j).val()) == 0 || '') && (parseFloatVal($('#iow_'+i+'_TransferApproveQty_' + j).val()) == 0 || '') && (parseFloatVal($('#iow_'+i+'_ProductionApproveQty_' + j).val()) == 0 || '') ) {
+						alert('Kindly enter the Quantity or delete the unwanted resource');
+						$('.paging-nav').children('a[data-page=' + ((i)-1) + ']').trigger('click');
+						$('#iow_'+i+'_IndentApproveQty_' + j).focus();
+						return false;
+					}
+				}
+            }
+			$("form").submit();
+			//}
+		}
+	});
+
+	$("#backButton").click(function(){
+		
+		if($("#secondStep").is(":visible")){
+			$("#secondStep").hide();
+			$("#firstStep").show();
+			$("#backButton").hide();
+			$("#excludeFirst").hide();
+			$('#cancelbutton').hide();
+		}
+		else if($("#secondStepList").is(":visible")){
+			$("#secondStep").show();
+			$("#secondStepList").hide();
+			$('#cancelbutton').show();
+		}
+		else if($("#thirdStep").is(":visible")){
+			var val = confirm("Want to go back ?");
+			if(val==true) {
+				$("#continueButton a").text("Continue");
+				$("#thirdStep").hide();
+				$("#secondStepList").show();
+				$('#cancelbutton').show();
+			}
+		}
+	});
+
+	var source = {
+		localData: [],
+		dataType: "json",
+		dataFields:
+		[
+			{ name: 'RequestDate', type: 'string', type: "date", format: 'MM/dd/yyyy' },
+			{ name: 'RequestNo', type: 'string' },
+			{ name: 'CostCentreName', type: 'string' }
+			
+		],
+		id:'RequestId'
+	};
+
+	var dataAdapter = new $.jqx.dataAdapter(source,{
+		autoBind: true,
+		loadComplete: function (data) {
+		},
+		loadError: function (xhr, status, error) {
+		}
+	});
+
+
+	$("#allResource").jqxGrid({
+		
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+        keyboardnavigation: true,
+
+            ready: function(){
+//			var localizationobj = {};
+//			localizationobj.emptydatastring = "No request to display";
+//			$("#allResource").jqxGrid('localizestrings', localizationobj);
+		},			
+		selectionmode: 'checkbox',						
+		source: dataAdapter,
+		columns: [
+				  { text: 'RequestDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy', editable: false,datafield: 'RequestDate'},
+				  { text: 'RequestNo', editable: false,datafield: 'RequestNo'},
+				  { text: 'CostCentreName', editable: false,datafield: 'CostCentreName'}
+		]
+	});
+
+	$('#allResource').on('rowselect', function(event){
+		/*event arguments.*/
+		var args = event.args;
+		/* row's bound index.*/
+		var rowBoundIndex = args.rowindex;
+		/*row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;*/
+		var rowData = args.row;
+	});	
+	$('#allResource').on('rowunselect', function(event){ 
+		/*event arguments.*/
+		var args = event.args;
+		/*row's bound index.*/
+		var rowBoundIndex = args.rowindex;
+		/*row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;*/
+		var rowData = args.row;
+	});
+    $('#allResource').jqxGrid('selectcell', 'CostCentreName','RequestNo','RequestDate');
+     $('#allResource').jqxGrid('unselectcell', 'CostCentreName','RequestNo','RequestDate');
+    $("#allResource").on('cellselect', function (event) {
+        var datafield = event.args.datafield;
+        var row = event.args.rowindex;
+        var columntext = $("#allResource").jqxGrid('getcolumn', event.args.datafield).text;
+    });
+    $("#allResource").on('cellunselect', function (event) {
+        var datafield = event.args.datafield;
+        var row = event.args.rowindex;
+        var columntext = $("#allResource").jqxGrid('getcolumn', event.args.datafield).text;
+    });
+
+	$('#allResource').on('rowclick', function (event){ 
+		var args = event.args;
+		/*row's bound index.*/
+		var boundIndex = args.rowindex;
+		var index = $('#allResource').jqxGrid('selectedrowindexes'); 
+		if($.inArray(boundIndex, index) == -1)
+			$('#allResource').jqxGrid('selectrow', boundIndex);
+		else
+			$('#allResource').jqxGrid('unselectrow', boundIndex);
+	});
+
+		
+	/*Load Resources*/
+	function loadResource(){
+		$("#allResourceList").jqxGrid("showloadelement");
+		$.ajax({
+			url:getBaseURL()+"ats/decision/request-decision",
+			type:"post",
+			data:"reqId="+reqId+"&mode=resourcePickList",
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				var index1 = $('#allResourceList').jqxGrid('selectedrowindexes'); 
+				for(var i in index1){
+					resRowId.push($('#allResourceList').jqxGrid('getrowid', index1[i]));
+				}
+				resSource.localdata = data;
+				dataAdapterRes.dataBind();
+				$('#allResourceList').jqxGrid({ source: dataAdapterRes });
+
+				if(index1.length > 0)
+					$('#allResourceList').jqxGrid('clearselection');
+//
+//				for(var id in resRowId){
+//					var ind = $('#allResourceList').jqxGrid('getrowboundindexbyid', resRowId[id]);
+//					if(ind != -1)
+//						$('#allResourceList').jqxGrid('selectrow', ind);
+//				}
+
+                $.each(data, function(i,v){
+                    var rid = v.ResourceId;
+                    if(v.Sel == 1){
+                        var mindex = $('#allResource').jqxGrid('getrowboundindexbyid', rid);
+                        if(mindex!=-1)
+                            $('#allResource').jqxGrid('selectrow', mindex);
+                    }
+                });
+			},
+			complete:function(data){
+				$("#allResourceList").jqxGrid("hideloadelement");
+				reqIdOld = reqId.slice(0);
+			},	
+			error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"-----"+errorThrown);
+			}		
+	
+		});		
+	}
+
+	function pageNext(){
+		bool=true;	
+		if($("#decision_type").val() == 0){
+			bool=false;
+			$("#decision_type").focus();
+			alert("Please Select the valid material");
+		}		
+		if(bool){
+			$("#allResource").jqxGrid("showloadelement");
+			var formData = $("#firstStep").find("input:text, select, input:hidden, input:radio").serializeArray();
+			formData.push({name:"mode", value:"firstStep"});
+			$.ajax({
+				url:getBaseURL()+"ats/decision/request-decision",
+				type:"post",
+				data:formData,
+				dataType:"json",
+				success:function(data, textStatus, jqXHR){
+					//alert(JSON.stringify(data))
+					//$("#allResource").jqxGrid("clear");
+					
+					source.localdata = data;
+					dataAdapter.dataBind();
+					$('#allResource').jqxGrid({ source: dataAdapter });
+					
+					var index1 = $('#allResource').jqxGrid('selectedrowindexes'); 
+					if(index1.length > 0)
+						$('#allResource').jqxGrid('clearselection'); 	
+
+					//oldFormData = $("#firstStep").find(".nextVal").serializeArray();					
+				
+				},
+				complete:function(data){
+					$("#allResource").jqxGrid("hideloadelement");
+				},				
+				error:function(jqXHR, textStatus, errorThrown){
+					alert(textStatus+"-----"+errorThrown);
+				}		
+		
+			});
+		}
+	}
+$("#cancelbutton").click(function(){
+    if(confirm("Would you Like to cancel")){
+        $("#cancelbutton").attr("href", "<?php echo $this->basePath();?>/ats/decision/request-decision");
+    }
+    else{
+        return false;
+    }
+	
+});
+
+</script>

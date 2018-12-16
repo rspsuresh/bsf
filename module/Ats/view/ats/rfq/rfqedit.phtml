@@ -1,0 +1,2399 @@
+<style>
+#allReqDecisionList .jqx-grid-header 	{height:75px !important;}
+#allTermList .jqx-grid-header 	{height:75px !important;}
+#allVendorList .jqx-grid-header 	{height:75px !important;}
+
+.error{
+	border: 1px solid #fa8072 !important;
+	color: red !important;
+}
+.jqx-grid-column-header .jqx-checkbox-default{
+	display:none;
+}
+</style>
+<?php 
+	echo $this->headLink(array('rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/images/favicon.ico'))
+			->appendStylesheet($this->basePath() . '/library/fileupload/css/demo.css')
+			->appendStylesheet($this->basePath() . '/library/fileupload/css/uploader.css')
+			->appendStylesheet($this->basePath() . '/css/select2.min.css');
+?>
+<div class="content_wrapper  padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+		<form class="form-horizontal" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="rfqId" id="rfqId" value="<?php echo $rfqRegId; ?>">
+			<div class="panel-group" id="accordion9" role="tablist" aria-multiselectable="true">
+			  <div class="panel panel-default" id="firstStep">
+				<div class="panel-heading accordion_head accordion_head_crnt" style="cursor:pointer" role="tab" id="heading20" data-toggle="collapse" data-parent="#accordion9" href="#collapse20" aria-expanded="true" aria-controls="collapse20">
+				  <h4>Rfq Details<?php echo ($genType) ? '-'.$rfqResult[0]['RFQNo']: ''; ?>
+					<span class="vendor_grade float_r" id="materialSpan"><?php echo $rfqResult[0]['TypeName']; ?></span>
+					<span class="vendor_grades float_r">Quotation Type :</span>
+				  </h4>
+				</div>
+				<div id="collapse20" class="panel-collapse collapse in" role="tabpanel" style="overflow: hidden;" aria-labelledby="heading20">
+				  <div class="panel-body">
+					<div class="col-lg-12">
+					  <h1 class="txt_center form_main_h1 frmwrk_h1">Request For Quotation <?php echo ($genType) ? '- '.$rfqResult[0]['RFQNo']: ''; ?></h1>
+					</div>
+					<div class="col-lg-2 col-lg-offset-10 col-md-2 col-lg-offset-10 col-sm-2 col-sm-offset-10 col-xm-offset-10 col-xm-2 ">
+					  <p style="text-align:center; color:#00aeef; font-style:italic;"><i class="fa fa-calendar"></i>&nbsp;Date :  <?php echo date("d-m-Y", strtotime($rfqResult[0]['RFQDate']));?></p>
+					</div>
+					<div class="form-group">
+					  <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+						<div class="row" style="<?php echo ($genType) ? 'display:none' : ''; ?>">
+							<div class="form-group req_flds col-lg-12">
+								<input type="text" class="form-control lbl_move modalInput" label="Voucher No" name="VoucherNo" id="VoucherNo" value="<?php echo $rfqResult[0]['RFQNo']; ?>">
+								<div class="error_message"><p>Please enter voucher no...</p> </div>
+							</div>
+						</div>						  
+						  <div class="row">
+							<div class="form-group req_flds col-lg-12">
+							  <input type="text" class="form-control lbl_move modalInput" label="Quotation Type" readonly name="autocomplete-qtnType" id="autocomplete-qtnType" value="<?php echo $rfqResult[0]['TypeName']; ?>" readonly>
+							  <input type="hidden" name="qtn_type" id="qtn_type" class="form-control nextVal" value="<?php echo $rfqResult[0]['RFQType']; ?>" >
+							  <div class="error_message"><p>Please select quotation type...</p> </div>
+							</div>
+						  </div>
+						  <!--<div class="row">
+							<div class="form-group req_flds col-lg-12">
+							  <input type="text" class="form-control nextVal" label="Select One or More Projects" name="project_name" id="project_name" >
+							  <div class="error_message"><p>Please select project name...</p> </div>
+							</div>
+						  </div>-->
+						  <div class="row">
+								<div class="form-group req_flds col-lg-12">
+									<select name="project_name[]" id="project_name" class="form-control multiple_dropdown lbl_move nextVal" multiple="multiple" label="Projects" style="width:100%;">
+										<?php
+											foreach($projects as $type){ ?>
+												<option <?php if($type){ if($type['sel'] == 1) { echo "selected"; } } ?> value="<?php echo $type['id'];?>"><?php echo $type['name'];?></option>
+										<?php } ?>
+									</select>
+									<div class="error_message"><p>Please Select project name...</p></div>
+								</div>
+							</div>
+						  <div class="row">
+							<div class="form-group col-lg-12 req_flds"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+							  <input type="text" name="biddue_date" id="biddue_date" class="form-control lbl_move datepickerinput modalInput" value="<?php echo date("d-m-Y", strtotime($rfqResult[0]['FinalBidDate']));?>" label="Bid Due Date" />
+							  <div class="error_message"><p>Please enter bid due date...</p> </div>
+							</div>
+						  </div>
+						  <div class="row col-lg-12">
+							<ul>
+							  <li class="col-lg-9">
+								<p style="color: #222222;font-size:15px;padding-top: 5px;">Need technical verification</p>
+							  </li>
+							  <li class="col-lg-2 col-lg-offset-1">
+								<span class="float_r"><label class="ripple"><input class="ios_checkbox" type="checkbox" name="verify_yes" id="verify_yes" value="1" <?php if($rfqResult){ echo ($rfqResult[0]['TechVerification'] == 1 ? 'checked':''); }?> /><div class="ios_switch"><span></span></div></label></span>
+							  </li>
+							</ul>
+						  </div>
+					  </div>
+					  <div class="col-lg-12">
+						  <ul>
+							<li class="dropdown save_btn float_r"> <a href="javascript:void(0);" class="ripple continueButton">Continue</a> </li>
+						  </ul>
+						</div>
+					</div>
+				  </div>
+				</div>
+			  </div>			
+			<div class="panel panel-default" id="techVerify" style="<?php echo (($rfqResult[0]['TechVerification'] == 1)? '':'display:none;')?>">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading33"  data-toggle="collapse" data-parent="#accordion9" href="#collapse33" aria-expanded="false" aria-controls="collapse33">
+				  <h4>Ask for required technical specification documents</h4>
+				</div>
+				<div id="collapse33" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading33">
+					<div class="panel-body">
+						<div class="col-lg-12 clear">
+						<h1 class="form_main_h1 frmwrk_h1">Required Documents name </h1>
+						<div class="col-lg-10 col-lg-offset-1 clear">
+							<div class="table-responsive clear">
+								<table class="table table-hover clear" id="documentTable">
+									<tbody>								
+										<?php 
+											$count=0;
+											foreach($rfqTechVerResult as $resuRFQTech){
+												$count=$count+1;
+										?>
+											<tr>
+												<td width="11%">
+													<input class="parent_txts newRow" placeholder="Document Name" type="text" id="Document_name_<?php echo $count;?>" name="Document_name_<?php echo $count;?>" tagname="Document_name" value="<?php echo $resuRFQTech['DocumentName'];?>" />
+												</td>
+												<td width="11%">
+													<input class="parent_txts" placeholder="Description about the docment" type="text" id="Description_doc_<?php echo $count;?>" name="Description_doc_<?php echo $count;?>" tagname="Description_doc" value="<?php echo $resuRFQTech['Description'];?>"  />
+												</td>
+												<td width="11%"><input class="parent_txts" placeholder="File format" type="text" id="File_format_doc_<?php echo $count;?>" name="File_format_doc_<?php echo $count;?>" tagname="File_format_doc" value="<?php echo $resuRFQTech['DocumentFormat'];?>" /></td>
+												<td width="4%"><a href="#" class="remove vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+											</tr>
+										<?php
+										}
+										if($count==0){
+										?>
+											<tr>
+												<td width="11%">
+													<input class="parent_txts newRow" placeholder="Document Name" type="text" id="Document_name_1" name="Document_name_1" tagname="Document_name" />
+												</td>
+												<td width="11%">
+													<input class="parent_txts" placeholder="Description about the docment" type="text" id="Description_doc_1" name="Description_doc_1" tagname="Description_doc" />
+												</td>
+												<td width="11%"><input class="parent_txts" placeholder="File format" type="text" id="File_format_doc_1" name="File_format_doc_1" tagname="File_format_doc" /></td>
+												<td width="4%"><a href="#" class="remove vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+											</tr>
+										<?php
+										}
+										else{
+											$count=$count+1;
+										?>
+											<tr>
+												<td width="11%">
+													<input class="parent_txts newRow" placeholder="Document Name" type="text" id="Document_name_<?php echo $count;?>" name="Document_name_<?php echo $count;?>" tagname="Document_name" />
+												</td>
+												<td width="11%">
+													<input class="parent_txts" placeholder="Description about the docment" type="text" id="Description_doc_<?php echo $count;?>" name="Description_doc_<?php echo $count;?>" tagname="Description_doc" />
+												</td>
+												<td width="11%"><input class="parent_txts" placeholder="File format" type="text" id="File_format_doc_<?php echo $count;?>" name="File_format_doc_<?php echo $count;?>" tagname="File_format_doc" /></td>
+												<td width="4%"><a href="#" class="remove vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+											</tr>
+										<?php
+										}
+										?>										                                         
+									</tbody>
+								</table>
+								<input type="hidden" class="parent_txts" name="RowCountdoc" id="RowCountdoc" value="1" ></input>
+							</div>
+						</div>
+						</div>
+						<div class="col-lg-12 commargin_bottom commargin_top clear">
+							<h1 class="form_main_h1 frmwrk_h1">Detailed Description</h1>
+							<div class="col-lg-6 col-lg-offset-3">
+								<div class="row">
+									<div class="form-group req_flds">
+										<textarea id="detailed_description" name="detailed_description" class="form-control lbl_move modalInput" label="Enter detail description or information about this bid.."/><?php echo $rfqResult[0]['Narration']; ?></textarea>
+										<div class="error_message"><p>Please enter description about bid...</p> </div>
+									</div>
+									<div class="radio_check">
+										<p>
+										   <input type="checkbox" id="web_finalization" name="web_finalization" <?php if($rfqResult){ echo ($rfqResult[0]['BidafterVerification'] == 1 ? 'checked':''); }?>/>
+										   <label for="web_finalization" class="ripple">Send Bid Detail after Verification</label>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-12 commargin_bottom commargin_top">
+							<ul>
+								<li class="dropdown save_btn float_r"> <a href="javascript:void(0);" class="ripple continueButton">Continue</a> </li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading21"  data-toggle="collapse" data-parent="#accordion9" href="#collapse21" aria-expanded="false" aria-controls="collapse21">
+					<h4>Select required request/decision for this rfq!
+						<span class="vendor_grade float_r" id="totaldecision">0</span>
+						<span class="vendor_grades float_r">Total : </span>
+					</h4>
+				</div>
+				<div id="collapse21" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading21">
+					<div class="panel-body">
+						<div class="col-lg-12 clear">
+							<h1 class="txt_center commargin_top commargin_bottom">List of all Request/Decision from selected projects</h1>
+							<div class="table-responsive clear">
+								<div id='jqxWidget'>
+									<div id="allReqDecisionList"> </div>
+								</div>
+							</div>
+							<input type="hidden" name="decisionId" id="decisionId">
+						</div>
+						<div class="col-lg-12 commargin_bottom commargin_top">
+							<ul>
+								<li class="col-lg-2 commargin_top">
+									<p style="background:#c2ecfd;text-align:center;">Selected<span class="vendortoc-number float_r" id="countdecision">0</span></p>
+								</li>
+								<li class="dropdown save_btn float_r"> <a href="javascript:void(0);" class="ripple continueButton">Continue</a> </li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			  <div class="panel panel-default">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading22" data-toggle="collapse" data-parent="#accordion9" href="#collapse22" aria-expanded="false" aria-controls="collapse22">
+				  <h4>Select Resources and Enter Quantity
+					<span class="vendor_grade float_r">Selected Decisions</span>
+					<span class="vendor_grades float_r"><strong id="resourceList">0</strong></span>
+					<span class="vendor_grades float_r">Resorces are listed from </span>
+				  </h4>
+				</div>
+				<div id="collapse22" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading22">
+				  <div class="panel-body">
+					<div class="col-lg-12 ">
+					  <h1 class="txt_center commargin_top commargin_bottom">All Resources from the Request/Decisions</h1>
+					  </div> 
+						 <div class="col-lg-12 clear">
+					<div class="table-responsive clear">
+						<div id="thirdStep" style="">		
+								<div class="form-group" style="margin-top:20px;">
+									<div id="sequentialViewDiv">
+										<table id="sequentialView" class="table table-bordered tableView" style="margin-top:20px;">
+											<thead>
+												<tr>
+													<th>Code</th>
+													<th>Description</th>
+													<th>Unit</th>
+													<th style="text-align:center;">Balance quantity</th>
+													<th style="text-align:center;">Quantity</th>
+												</tr>
+											</thead>
+											<tbody class="appendData">
+											<?php
+											$json = json_decode($decisionResult, true);
+											$totRes = 0;
+											foreach($json as $rs){
+											$totRes++;
+											?>
+                                            <?php
+                                            if($rfqResult[0]['TypeName'] == 'Material' || $rfqResult[0]['TypeName'] == 'Asset') {
+
+                                                ?>
+                                                <tr class="mainTr deleteTr_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>" id="<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>">
+                                                    <td width="20%"><?php echo $rs['Code']; ?></td>
+                                                    <td width="30%"><?php echo $rs['ResourceName']; ?></td>
+                                                    <td width="10%"><?php echo $rs['UnitName']; ?><input type="hidden" name="unitId_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>" id="unitId_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>" value="<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>"></td>
+                                                    <td width="20%" align="right"><?php echo $rs['Quantity']; ?></td>
+                                                    <td width="20%" align="right"><input type="text" style="text-align: right;" class="tbl_input totQuantity" value="<?php echo $rs['hidQty']; ?>" readonly name="quantity_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>" id="quantity_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>"></td>
+                                                </tr>
+                                                <?php } else { ?>
+
+												<tr class="mainTr deleteTr_<?php echo $rs['ResourceId']; ?>" id="<?php echo $rs['ResourceId']; ?>">
+													<td width="20%"><?php echo $rs['Code']; ?></td>
+													<td width="30%"><?php echo $rs['ResourceName']; ?></td>
+													<td width="10%"><?php echo $rs['UnitName']; ?><input type="hidden" name="unitId_<?php echo $rs['ResourceId']; ?>" id="unitId_<?php echo $rs['ResourceId']; ?>" value="<?php echo $rs['ResourceId']; ?>"></td>
+													<td width="20%" align="right"><?php echo $rs['Quantity']; ?></td>
+													<td width="20%" align="right"><input type="text" style="text-align: right;" class="tbl_input totQuantity" value="<?php echo $rs['hidQty']; ?>" readonly name="quantity_<?php echo $rs['ResourceId']; ?>" id="quantity_<?php echo $rs['ResourceId']; ?>"></td>
+												</tr>
+                                                <?php } ?>
+											<?php		
+											}
+											?>
+											</tbody>
+										</table>
+									</div>	
+									<div id="subtableView" style="display:none;">
+										<table id="sequentialViewSub" class="table table-bordered tableView" style="margin-top:20px;display:none;">
+											<thead>
+												<tr>
+													<th>Sample</th>
+												</tr>
+											</thead>
+											<tbody class="subTable">
+											<?php
+											$data = array();
+											$resource = array();
+                                            $items = array();
+											$trans = array();
+                                           if($rfqResult[0]['TypeName'] == 'Material' || $rfqResult[0]['TypeName'] == 'Asset') {
+                                               foreach ($json as $rs) {
+                                                   $res = array();
+                                                   array_push($resource, $rs['ResourceId'] + '_' + $rs['ItemId']);
+                                                   $res['resourceId'] = $rs['ResourceId'];
+                                                   ?>
+                                                   <tr class="subTr_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?> deleteTr_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>">
+                                                       <td colspan=5>
+                                                           <div class="subDiv">
+                                                               <table class="table table-bordered">
+                                                                   <thead>
+                                                                   <tr>
+                                                                       <th>Request/Decision No</th>
+                                                                       <th style="text-align: right;">Balance quantity
+                                                                       </th>
+                                                                       <th style="text-align: right;">Quantity</th>
+                                                                   </tr>
+                                                                   </thead>
+                                                                   <tbody>
+                                                                   <?php
+                                                                   $res["decTrans"] = array();
+                                                                   foreach ($rs['decision'] as $dec) {
+                                                                       array_push($trans, $dec['TransId']);
+                                                                       ?>
+                                                                       <tr style="background-color:#f0f2f2;"
+                                                                           id="requestTr_<?php echo $dec['TransId']; ?>">
+                                                                           <td width="50%"><?php echo $dec['RDecisionNo']; ?>
+                                                                               <input type="hidden"
+                                                                                      name="decisionId_<?php echo $dec['TransId']; ?>"
+                                                                                      id="decisionId_<?php echo $dec['TransId']; ?>"
+                                                                                      value="<?php echo $dec['DecisionId']; ?>">
+                                                                           </td>
+                                                                           <td class="tbl_input_td" width="25%"
+                                                                               align="right"><?php echo $dec['IndentQty']; ?></td>
+                                                                               <td class="tbl_input_td" width="25%"
+                                                                                   align="right"><input type="text"
+                                                                                                        style="text-align: right;"
+                                                                                                        elename="quantity_<?php echo $dec['ResourceId']; ?>_<?php echo $dec['ItemId']; ?>"
+                                                                                                        onblur="return FormatNum(this, 3, true)"
+                                                                                                        class="tbl_input quantityVal"
+                                                                                                        name="decQuantity_<?php echo $dec['TransId']; ?>"
+                                                                                                        value="<?php echo $dec['hidQty']; ?>"
+                                                                                                        hidQty="<?php echo $dec['hidQty']; ?>">
+                                                                               </td>
+                                                                       </tr>
+                                                                       <?php
+                                                                       array_push($res['decTrans'], $dec['TransId']);
+                                                                   }
+                                                                   ?>
+                                                                   </tbody>
+                                                               </table>
+                                                           </div>
+                                                       </td>
+                                                   </tr>
+                                                   <?php
+                                                   array_push($data, $res);
+                                               }
+                                           }
+                                           else {
+                                               foreach ($json as $rs) {
+                                                   $res = array();
+                                                   array_push($resource, $rs['ResourceId']);
+                                                   $res['resourceId'] = $rs['ResourceId'];
+                                                   ?>
+                                                   <tr class="subTr_<?php echo $rs['ResourceId']; ?> deleteTr_<?php echo $rs['ResourceId']; ?>">
+                                                       <td colspan=5>
+                                                           <div class="subDiv">
+                                                               <table class="table table-bordered">
+                                                                   <thead>
+                                                                   <tr>
+                                                                       <th>Request/Decision No</th>
+                                                                       <th style="text-align: right;">Balance quantity
+                                                                       </th>
+                                                                       <th style="text-align: right;">Quantity</th>
+                                                                   </tr>
+                                                                   </thead>
+                                                                   <tbody>
+                                                                   <?php
+                                                                   $res["decTrans"] = array();
+                                                                   foreach ($rs['decision'] as $dec) {
+                                                                       array_push($trans, $dec['TransId']);
+                                                                       ?>
+                                                                       <tr style="background-color:#f0f2f2;"
+                                                                           id="requestTr_<?php echo $dec['TransId']; ?>">
+                                                                           <td width="50%"><?php echo $dec['RDecisionNo']; ?>
+                                                                               <input type="hidden"
+                                                                                      name="decisionId_<?php echo $dec['TransId']; ?>"
+                                                                                      id="decisionId_<?php echo $dec['TransId']; ?>"
+                                                                                      value="<?php echo $dec['DecisionId']; ?>">
+                                                                           </td>
+                                                                           <td class="tbl_input_td" width="25%"
+                                                                               align="right"><?php echo $dec['IndentQty']; ?></td>
+
+                                                                           <td class="tbl_input_td" width="25%"
+                                                                               align="right"><input type="text"
+                                                                                                    style="text-align: right;"
+                                                                                                    elename="quantity_<?php echo $dec['ResourceId']; ?>"
+                                                                                                    onblur="return FormatNum(this, 3, true)"
+                                                                                                    class="tbl_input quantityVal"
+                                                                                                    name="decQuantity_<?php echo $dec['TransId']; ?>"
+                                                                                                    value="<?php echo $dec['hidQty']; ?>"
+                                                                                                    hidQty="<?php echo $dec['hidQty']; ?>">
+                                                                           </td>
+
+                                                                       </tr>
+                                                                       <?php
+                                                                       array_push($res['decTrans'], $dec['TransId']);
+                                                                   }
+                                                                   ?>
+                                                                   </tbody>
+                                                               </table>
+                                                           </div>
+                                                       </td>
+                                                   </tr>
+                                                   <?php
+                                                   array_push($data, $res);
+                                               }
+                                            }
+											?>	
+											</tbody>
+										</table>
+										<table id="cloneTable" class="table table-bordered tableView" style="margin-top:20px;">
+										</table>
+										<table id="resourceTable" class="table table-hover clear" style="margin-top:20px;">
+											<thead>
+												<tr>
+													<th>Code</th>
+													<th>Description</th>
+													<th>Unit</th>
+													<th style="text-align:center;">Balance Quantity</th>
+													<th style="text-align:center;">Quantity</th>
+												</tr>
+											</thead>
+											<tbody class="appendResource">
+											<?php
+											foreach($json as $rs){
+											?>
+                                            <?php
+                                            if($rfqResult[0]['TypeName'] == 'Material' || $rfqResult[0]['TypeName'] == 'Asset') {
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo $rs['Code']; ?></td>
+                                                    <td><?php echo $rs['ResourceName']; ?></td>
+                                                    <td><?php echo $rs['UnitName']; ?><input type='hidden' name='unitId_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>' id='unitId_<?php echo $rs->ResourceId; ?>_<?php echo $rs['ItemId']; ?>' value='<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>'></td>
+                                                    <td align="right"><?php echo $rs['Quantity']; ?></td>
+                                                    <td align="right"><input type='text' style='border:none;text-align: right;' class='tbl_input totQuantity' value='<?php echo $rs['hidQty']; ?>' readonly name='quantity_<?php echo $rs['ResourceId']; ?>_<?php echo $rs['ItemId']; ?>' id='quantity_<?php echo $rs->ResourceId; ?>_<?php echo $rs['ItemId']; ?>'></td>
+                                                </tr>
+
+                                                <?php } else { ?>
+												<tr>
+													<td><?php echo $rs['Code']; ?></td>
+													<td><?php echo $rs['ResourceName']; ?></td>
+													<td><?php echo $rs['UnitName']; ?><input type='hidden' name='unitId_<?php echo $rs['ResourceId']; ?>' id='unitId_<?php echo $rs->ResourceId; ?>' value='<?php echo $rs['ResourceId']; ?>'></td>
+													<td align="right"><?php echo $rs['Quantity']; ?></td>
+													<td align="right"><input type='text' style='border:none;text-align: right;' class='tbl_input totQuantity' value='<?php echo $rs['hidQty']; ?>' readonly name='quantity_<?php echo $rs['ResourceId']; ?>' id='quantity_<?php echo $rs->ResourceId; ?>'></td>
+												</tr>
+                                                <?php } ?>
+											<?php	
+											}
+											?>											
+											</tbody>
+										</table>
+									</div>
+									<input type="hidden" name="hidJson" id="hidJson" value='<?php echo json_encode($data); ?>'>
+								</div>
+							</div>
+					</div>
+				</div>
+					<div class="col-lg-12">
+					  <ul>
+						<li class="dropdown save_btn float_r"> <a href="javascript:void(0)" class="ripple continueButton">Continue</a> </li>
+					  </ul>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			<div class="panel panel-default">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading26" data-toggle="collapse" data-parent="#accordion9" href="#collapse26" aria-expanded="false" aria-controls="collapse26">
+				  <h4>Enter additional details about this Bid
+					  <span class="vendor_grade float_r" id="totalResourse">15</span>
+					  <span class="vendor_grades float_r">Total No of Resources :</span>
+				  </h4>
+				</div>
+				<div id="collapse26" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading26">
+					<div class="panel-body">
+						<div class="col-lg-12 clear">
+						
+						<div class="row demo-columns">
+							<div class="col-md-6">
+								<!-- D&D Zone-->
+								<div id="drag-and-drop-zone" class="uploader">
+									<div>Drag &amp; Drop Files Here</div>
+									<div class="or">-or-</div>
+									<div class="browser">
+										<label>
+											<span>Click to open the file Browser</span>
+											<input type="file" name="files[]"  multiple="multiple" title='Click to add Images'>
+										</label>
+									</div>
+								</div>
+								<!-- /D&D Zone -->
+							</div>
+							<!-- / Left column -->
+
+							<div class="col-md-6">
+								<div class="panel panel-default">
+									<div class="panel-heading">
+										<h3 class="panel-title">Bid documents</h3>
+									</div>
+									<?php
+										$dir = 'public/uploads/rfq/'.$rfqRegId;
+										$files = glob($dir.'/*'); // get all file names									
+									?>
+									<div class="panel-body demo-panel-files" id='demo-files' file-counter="<?php echo count($files); ?>">
+										<?php
+											function filesize_formatted($path){
+												$size = filesize($path);
+												$units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+												$power = $size > 0 ? floor(log($size, 1024)) : 0;
+												return number_format($size / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+											}										
+											if(count($files) > 0){
+												foreach($files as $file){ // iterate files
+													if(is_file($file)){
+										?>
+														<div class="file_content" style="background-color:#f5f5f5;border-color:1px solid #dcdcdc !important;padding:12px 16px 12px 16px;margin-top:10px;">
+															<a download="<?php echo basename($file); ?>" href="<?php echo $this->basePath().'/uploads/rfq/'.$rfqRegId.'/'.basename($file); ?>"><?php echo basename($file); ?></a>
+															<span class="demo-file-size">(<?php echo filesize_formatted($file); ?>)</span>
+															<div id=":197" role="button" class="vq" tabindex="-1" fname="<?php echo basename($file); ?>"></div>
+															<div class="progress progress-striped active" style="width:200px;float:right;display:none;">
+																<div class="progress-bar" role="progressbar" style="width: 0%;">
+																</div>
+															</div>
+														</div>
+										<?php	
+													}
+												}
+											}
+											else{
+												echo '<span class="demo-note">No Files have been selected/droped yet...</span>';
+											}
+										?>
+									</div>
+								</div>
+							</div>
+							<!-- / Right column -->
+						</div>							
+						
+						
+						
+						
+							<div class="col-lg-6">
+								<h1 class="vendorrequest_text commargin_bottom">Contact Information</h1>
+								 <div class="col-lg-9 col-lg-offset-1">
+									<div class="row">
+										<div class="commargin_bottom">
+										  <input type="text" class="form-control lbl_move modalInput" placeholder="Contact Name" name="contact_name" id="contact_name" value="<?php echo $rfqResult[0]['ContactName'];?>">
+										</div>
+									</div>
+									<div class="row">
+									<div class="commargin_bottom">
+										  <input type="text" class="form-control lbl_move modalInput" onkeypress="return isNumberKey(event);" placeholder="Contact Number" name="contact_number" id="contact_number" value="<?php echo $rfqResult[0]['ContactNo'];?>">
+										</div>
+									</div>
+									 <div class="row">
+										<div class="commargin_bottom">
+										  <input type="text" class="form-control lbl_move modalInput" placeholder="Designation" name="contact_designation" id="contact_designation" value="<?php echo $rfqResult[0]['Designation'];?>">
+										</div>
+									 </div>
+								 </div>     	
+							</div>  
+							<div class="col-lg-6">        
+								<h1 class="vendorrequest_text commargin_bottom">Delivery Location</h1>
+								<div class="col-lg-9 col-lg-offset-1"> 
+									<?php
+									$address = explode('|', $rfqResult[0]['ContactAddress']);
+									?>
+									<div class="row">
+										<div class="commargin_bottom">
+										  <input type="text" class="form-control lbl_move modalInput" placeholder="Address Line1" name="delivery_address1" id="delivery_address1" value="<?php echo $address[0];?>">
+										</div>
+									</div>
+									<div class="row">
+									<div class="commargin_bottom">
+										  <input type="text" class="form-control lbl_move modalInput" placeholder="Address Line2" name="delivery_address2" id="delivery_address2" value="<?php echo $address[1];?>">
+										</div>
+									</div>
+									 <div class="row">
+									  <div class="commargin_bottom">  
+										  <input type="text" class="form-control lbl_move modalInput" placeholder="Address Line3" name="delivery_address3" id="delivery_address3" value="<?php echo $address[2];?>">
+									  </div>  
+									 </div>
+								 </div>    	
+							 </div>
+							 <div class="col-lg-12 commargin_top">         	 
+								 <h1 class="vendorrequest_text commargin_bottom">Bid Information</h1>
+								  <div class="col-lg-10 col-lg-offset-1">
+										<div class="row">
+											  <textarea id="bid_description" name="bid_description" class="form-control lbl_move modalInput" placeholder="Enter detail description or information about this bid.."/><?php echo $rfqResult[0]['BidInformation'];?></textarea>
+										</div>
+								   </div>   
+								 </div>     	      		
+						</div>
+						<div class="col-lg-12">
+						  <ul>
+							<li class="dropdown save_btn float_r"> <a href="javascript:void(0);" class="ripple continueButton">Continue</a> </li>
+						  </ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			
+			<!-- Terms and condition details --->
+			<div class="panel panel-default">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading28" data-toggle="collapse" data-parent="#accordion9" href="#collapse28" aria-expanded="false" aria-controls="collapse28">
+					<h4>Enter Required details for this Bid and Terms and Condition </h4>
+				</div>
+				<div id="collapse28" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading28">
+					<div class="panel-body bgcolr">
+						<div class="col-lg-12">
+							<div class="col-lg-3" style="margin-top:10px;">
+								<select name="valuefrom" id="valuefrom" class="form-control single_dropdown sortoption" data-placeholder="Amount" style="width:100%;">
+									<option value="BaseAmount" <?php if($valuefrom == 0) echo "selected";  ?>>Base Amount</option>
+									<option value="NetAmount" <?php if($valuefrom == 1) echo "selected";  ?>>Net Amount</option>
+									<option value="GrossAmount" <?php if($valuefrom == 2) echo "selected";  ?>>Gross Amount</option>
+								</select>
+							</div>
+						</div>
+						<div class="col-lg-12">
+							<div class="top-30 bot-20">
+								<table class="table table-bordered tableView dataTable no-footer" style=" margin-bottom:0px;" id="termsTable" >
+									<thead>
+									<tr>
+										<th class="blubg">Sl.No</th>
+										<th class="blubg">Terms</th>
+										<th class="blubg">Percentage</th>
+										<th class="blubg">Value</th>
+										<th class="blubg">Period</th>
+										<th class="blubg">Date</th>
+										<th class="blubg">Description</th>
+										<th class="blubg"></th>
+									</tr>
+									</thead>
+									<tbody class="main"></tbody>
+								</table>
+								<input type="hidden" name="trowid" id="trowid" value="0"/>
+							</div>
+							<div class="col-lg-12">
+								<ul>
+									<li class="dropdown save_btn float_r"> <a href="javascript:void(0);" class="ripple continueButton">Continue</a> </li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+            <!--- stop ---->
+			
+			
+			
+			
+			
+			<div class="panel panel-default">
+				<div class="panel-heading accordion_head" style="cursor:pointer" role="tab" id="heading27" data-toggle="collapse" data-parent="#accordion9" href="#collapse27" aria-expanded="false" aria-controls="collapse27">
+					<h4>Enter Required details for this Bid and select Vendors </h4>
+				</div>
+				<div id="collapse27" class="panel-collapse collapse" role="tabpanel" style="height:485px; overflow: hidden;" aria-labelledby="heading27">
+					<div class="panel-body">
+						<div class="col-lg-12">
+						<h1 class="txt_center commargin_top commargin_bottom">Terms & Condtions</h1>
+							<div class="table-responsive" style="min-height:200px; max-height:500px;">
+								<div class="col-lg-6 col-md-6">
+									<div id='jqxWidget'>
+										<div id="allVendorList"> </div>
+									</div>
+									<input type="hidden" name="vendorListId" id="vendorListId">
+								</div>
+								<div class="col-lg-6 col-md-6">
+									<div id='jqxWidget'>
+										<div id="allTermList"> </div>
+									</div>
+									<input type="hidden" name="termListId" id="termListId">
+								</div>
+								<div class="col-lg-6 col-md-6 vendor_request_areabackground commargin_bottom commargin_top">
+									<div class="commargin_top col-lg-12">
+										<ul>
+											<li class="float_l">
+												<p style="color: #222222;font-weight: 600 !important; font-size:15px;padding-top: 5px;">Submittals</p>
+											</li>
+											<li class="float_l">
+												<span class="float_r"><label class="ripple"><input class="ios_checkbox" type="checkbox" name="submittal_yes" id="submittal_yes" <?php if($rfqResult){ echo ($rfqResult[0]['Submittal'] == 1 ? 'checked':''); }?> /><div class="ios_switch"><span></span></div></label></span>
+											</li>
+										</ul>
+									</div>
+									<div class="col-lg-12 commargin_top_20">
+										<!--<form class="form-horizontal col-lg-10">
+											<div class="row">
+												<div class="form-group req_flds">
+													<input type="text" class="form-control lbl_move" label="Enter submittal name">
+												</div>
+											</div>
+										</form>
+										<div> 
+											<a href="#" data-placement="top" data-toggle="tooltip" class="ripple has-ripple" data-original-title="AddNewsubmittal">
+												<span class="edit_symbols" style="display: block; margin-top: 8px !important;">
+													<i class="fa fa-plus"></i>
+												</span>
+											</a>
+										</div>-->
+										<div class="table-responsive clear">
+											<table class="table table-hover clear" id="submittalTable">
+												<tbody>
+													<?php 
+													$count1=0;
+													foreach($rfqSubmittalResult as $resuRFQSubmittal){
+														$count1=$count1+1;
+													?>
+														<tr>
+															<td width="11%">
+																<input class="parent_txts newRowsubmittal" placeholder="Enter submittal name" type="text" id="submittal_name_<?php echo $count1; ?>" name="submittal_name_<?php echo $count1; ?>" tagname="submittal_name" value="<?php echo $resuRFQSubmittal['SubmittalName'];?>"/>
+															</td>
+															<td width="4%"><a href="javascript:void(0);" class="removesubmittal vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+														</tr>
+													<?php
+													}
+													if($count1==0){
+													?>
+														<tr>
+															<td width="11%">
+																<input class="parent_txts newRowsubmittal" placeholder="Enter submittal name" type="text" id="submittal_name_1" name="submittal_name_1" tagname="submittal_name" />
+															</td>
+															<td width="4%"><a href="javascript:void(0);" class="removesubmittal vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+														</tr>
+													<?php
+													}
+													else{
+														$count1=$count1+1;
+													?>
+														<tr>
+															<td width="11%">
+																<input class="parent_txts newRowsubmittal" placeholder="Enter submittal name" type="text" id="submittal_name_<?php echo $count1; ?>" name="submittal_name_<?php echo $count1; ?>" tagname="submittal_name" />
+															</td>
+															<td width="4%"><a href="javascript:void(0);" class="removesubmittal vendar_styles"><span class="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></span></a></td>
+														</tr>
+													<?php
+													}
+													?>                                          
+												</tbody>
+											</table>
+											<input type="hidden" class="parent_txts" name="RowCountsubmittal" id="RowCountsubmittal" value="1" ></input>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-6 col-md-6 col-sm-6 vendor_request_areabackground commargin_top">
+									<div class="form-group">
+										<div class="col-lg-12 commargin_top_20">
+												<textarea label="Narration about the quotation" class="form-control lbl_move modalInput" id="narration_submittal" name="narration_submittal"><?php echo $rfqResult[0]['SubmittalNarration'];?></textarea>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-12">
+								<ul>
+									<li class="dropdown save_btn float_r"> <a href="javascript:void(0)" class="ripple continueButton">Continue</a> </li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="totalpage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal_vendorwidth" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1 class="modal-title" id="myModalLabel">Confirmation</h1>
+            </div>
+            <div class="modal-body">
+                <div class="content_wrapper  padlr0">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="col-lg-12">
+                                	<h1 class="vendorrequest_textclr">Request For Quotation - <span class="VoucherNo"></span></h1>
+                                </div>
+                                <div class="col-lg-12 clear">
+                                    <div class="col-lg-4 col-lg-offset-8 col-md-4 col-md-offset-8 col-sm-4 col-sm-offset-8 col-xm-offset-8 col-xm-4">
+                                    	<p style="text-align:center; color:#00aeef; font-style:italic;"><i class="fa fa-calendar"></i>&nbsp;Date : <?php echo date('d-m-Y');?></p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 clear">
+                                    <div class="col-lg-10 col-lg-offset-2 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Quotation Type<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p autocomplete-qtnType"></p></div> 
+                                        </div>
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Selected Project<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p projectList"></p></div> 
+                                        </div>
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Bit Due Date<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p biddue_date"></p></div> 
+                                        </div>
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Need technical verification<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p verify_yes"></p></div>  
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 clear" id="techVerifyMod1">
+                                	<h1 class="vendorrequest_textclr commargin_bottom">Required Documents name </h1>
+                                    <div class="col-lg-10 col-lg-offset-1 clear">
+                                        <div class="table-responsive clear">
+                                            <table class="table request_poptable table-hover clear" id="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Document Name</th>
+                                                        <th>Description about the document</th>
+                                                        <th>File format</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="document_tbody">
+                                                    
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 clear " id="techVerifyMod2">
+                                	<h1 class="vendorrequest_textclr commargin_bottom">Detailed Description</h1>
+                                    <div class="col-lg-10 col-lg-offset-1 clear">
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Entered detail description or information about this bid<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p detailed_description"></p></div> 
+                                        </div>
+                                        <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Send Bid Detail after Verification<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p web_finalization"></p></div>  
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 clear">
+                                	<h1 class="vendorrequest_textclr">List of all selected decisions</h1>
+									<div class="col-lg-10 col-lg-offset-1 clear">
+										<ul>
+											<li class="col-lg-3 commargin_bottom float_r">
+												<p style="background:#c2ecfd;text-align:center;">Selected<span class="vendortoc-number float_r decision_list">0</span></p>
+											</li>
+										</ul>
+									</div>
+                                    <div class="col-lg-10 col-lg-offset-1  table-responsive clear">
+                                        <table class="table request_poptable table-hover clear" id="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Selected Request/Decision No.</th>
+                                                    <th>Selected Request/Decision Date</th>
+                                                    <th>Description </th>
+                                                    <th>Quantity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="decision_body">
+                                              
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>								
+                                <div class="col-lg-12 clear">
+                                	<h1 class="vendorrequest_textclr commargin_bottom">Resources from the selected Decisions</h1>
+                                    <div class="col-lg-10 col-lg-offset-1 clear">
+                                        <div class="table request_poptable table-hover clear" id="decquantityTable">
+                                            
+                                        </div>
+                                    </div>
+                                </div>								
+								<div class="col-lg-12 clear">
+                                	<div class="col-lg-6">
+                                        <h1 class="vendorrequest_textclr commargin_bottom">Contact Information</h1>
+                                    </div> 
+                                    <div class="col-lg-6">
+                                        <h1 class="vendorrequest_textclr commargin_bottom">Delivery Location</h1>
+                                    </div>
+								</div>
+								<div class="col-lg-10 col-lg-offset-1 clear">         
+                                    <div class="col-lg-6">
+                                        <div class="col-lg-10">
+                                            <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Contact Name<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p contact_name"></p></div>
+                                            </div>
+                                            <div class="row">
+                                            <div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Contact Number<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p contact_number"></p></div>
+                                            </div>
+                                            <div class="row">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Designation<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><p class="space_p contact_designation"></p></div>
+                                            </div>
+                                        </div>    
+                                    </div>  
+                                    <div class="col-lg-6">
+										<div class="col-lg-10">
+                                            <div class="row">
+                                            <div class=" col-lg-3 col-md-6 col-sm-6 col-xs-6"><p class="space_p">Address<span class="colon_r">:</span></p></div>
+                                            <div class="col-lg-9 col-md-6 col-sm-6 col-xs-6"><p class="space_p delivery_addressList"></p></div>
+                                            </div>                                           
+										</div>      	      		
+                                    </div>
+								</div>
+								<div class="col-lg-12 clear">
+                                	<h1 class="vendorrequest_textclr commargin_bottom">Bid Information</h1>
+								</div>  
+								<div class="col-lg-10 col-lg-offset-1 commargin_top commargin_bottom">    
+									<div class="col-lg-12">
+										<div class="commargin_top">
+											<div class="  col-lg-4 col-md-4 col-sm-4 col-xs-4"><p class="space_p">Bid Information<span class="colon_r">:</span></p></div>
+											<div class="col-lg-7 col-md-7 col-sm-7 col-xs-7"><p class="space_p bid_description"></p></div> 
+										</div> 
+									</div>   
+								</div>
+								<div class="col-lg-12 clear">
+                                    <div class="col-lg-12">
+										<h1 class="vendorrequest_textclr commargin_bottom">Selected vendors</h1>
+                                    </div> 
+								</div>
+								<div class="col-lg-10 col-lg-offset-1">
+                                    <div class="table-responsive clear">
+										<div class="col-lg-12 col-md-6">
+                                            <table class="table request_poptable table-hover clear" id="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Selected Vendor Name</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="vendor_tbody">  
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+								<div class="col-lg-12" id="tremscondition">
+									<h1 class="vendorrequest_textclr commargin_bottom">Terms & Conditions</h1>
+								</div>
+								<div class="col-lg-10 col-lg-offset-1">
+                                    <div class="table-responsive clear">
+                                        <div class="col-lg-12 col-md-6">
+                                            <table class="table request_poptable table-hover clear" id="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="blubg">Sl.No</th>
+														<th class="blubg">Terms</th>
+														<th class="blubg">Percentage</th>
+														<th class="blubg">Value</th>
+														<th class="blubg">Period</th>
+														<th class="blubg">Date</th>
+														<th class="blubg">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="term_tbody">
+                                                   
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 padlr0 vendor_request_areabackground">
+                                            <div class="commargin_top">
+                                                <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4"><p class="space_p">Need Submittals<span class="colon_r">:</span></p></div>
+                                                <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7"><p class="space_p submittal_yes">Yes &nbsp;<span class="request_yescheck"><i class="fa fa-check"></i></span></p></div> 
+                                            </div>
+                                            <div class="commargin_top" id="submittalDet">
+                                                <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-4"><p class="space_p">Entered submittal name<span class="colon_r">:</span></p></div>
+                                                <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7"><p class="space_p submittal_value"></p></div>
+                                            </div>
+                                            <div class="commargin_top">
+                                                <div class="  col-lg-4 col-md-4 col-sm-4 col-xs-4"><p class="space_p">Narration about the quotation<span class="colon_r">:</span></p></div>
+                                                <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7"><p class="space_p narration_submittal"></p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!--table header script end-->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="color:#06C;">Edit</button>
+        		<button type="button" class="btn btn-primary" id="submitButton">Submit changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php
+	echo $this->InlineScript()
+		->appendFile($this->basePath() . '/library/fileupload/js/demo-preview.min.js')
+		->appendFile($this->basePath() . '/library/fileupload/js/dmuploader.min.js')
+		->appendFile($this->basePath() . '/js/select2.full.min.js')
+?>
+<script id="terms-template"  type="text/template" class="hide">
+    <tr class="dont-hide">
+        <td width="10%">
+            <input class="parent_text border-none" type="text" name="slno__" id="slno__" />
+        </td>
+        <td width="26%">
+            <input class="parent_text resourceSuggest" type="text" name="terms__" id="terms__"  onfocus="checkTermsUsed(this);" />
+            <input type="hidden" name="termsid__" id="termsid__"/>
+            <input type="hidden"  name="isper__" id="isper__"/>
+            <input type="hidden"  name="isvalue__" id="isvalue__"/>
+            <input type="hidden"  name="isperiod__" id="isperiod__"/>
+            <input type="hidden"  name="istdate__" id="istdate__"/>
+            <input type="hidden"  name="iststring__" id="iststring__"/>
+            <input type="hidden"  name="includegross__" id="includegross__"/>
+        </td>
+        <td width="10%">
+            <input class="parent_text border-none" type="text" name="per__" id="per__" style="text-align:right;" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="TermsCalculation(this.id);"/>
+        </td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="value__" style="text-align:right;" id="value__" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2, true)" onchange="TermsCalculation(this.id);"/></td>
+        <td width="10%"><input class="parent_text border-none" type="text" name="period__" style="text-align:right;" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 1, true)" id="period__"/></td>
+        <td width="14%">
+            <div class="col-lg-12 padlr0">
+                <input type="text" name="date__" id="date__" class="tbl_input date_picker" value="<?php echo date("d/m/Y"); ?>" onkeypress="return isNumberKey(event);" readonly/>
+                <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            </div>
+        </td>
+        <td width="15%"><input class="parent_text border-none" type="text" name="string__" id="string__"/></td>
+        <td width="15%" align="center" class="action_btns_td">
+            <ul class="action_btns">
+                <li> <a onclick="deleteRow(this, event);"  id="termsdeleteTr__" style="display:none;"><i class="fa fa-trash-o" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i> </a> </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<script>
+	var orgVal = '';
+	$('#submitButton').click(function(){
+		$('form').submit();
+	});
+	function arrequal(arr1, arr2){
+		var is_equal = arr1.length==arr2.length && arr1.every(function(v,i) { return ($.inArray(v,arr2) != -1)});
+		return is_equal;
+	}
+	$.fn.materialripple = function(options) {
+		var defaults = {
+			rippleClass: 'ripple-wrapper'
+		}
+		$.extend(defaults, options);
+		// add Ripple-Wrapper to all Elements
+		$(this).append('<span class="'+defaults.rippleClass+'"></span>');
+		$(this).addClass('has-ripple').css({'position': 'relative', 'overflow': 'hidden'});
+
+		if($(this).hasClass("slideshow_button") === true) {
+			$('.slideshow_button').css({'position': 'absolute'});
+		}
+		// Let it ripple on click
+		$(this).bind('click', function(e){
+			$(this).find('.'+defaults.rippleClass).removeClass('animated');
+			// get Mouse Position
+			var mouseX = e.clientX;
+			var mouseY = e.clientY;
+			// for each ripple element, set sizes
+			elementWidth = $(this).outerWidth();
+			elementHeight = $(this).outerHeight();
+			d = Math.max(elementWidth, elementHeight);
+			$(this).find('.'+defaults.rippleClass).css({'width': d, 'height': d});
+			var rippleX = e.clientX - $(this).offset().left - d/2;
+			var rippleY = e.clientY - $(this).offset().top - d/2;
+			// Position the Ripple Element
+			$(this).find('.'+defaults.rippleClass).css('top', rippleY+'px').css('left', rippleX+'px').addClass('animated');
+		});
+	}
+
+	$('.error_message').hide();
+	var oldFormData = [];
+	var decId = [];
+	var oldDecId = [];
+	var totResId = <?php echo json_encode($resource); ?>;
+	var totTransId = <?php echo json_encode($trans); ?>;
+	var mouseClick = true;
+	var quotation_type = ['Material', 'Asset'];
+
+	$('#totalResourse').text('<?php echo $totRes; ?>');
+	function formatNumber(num){
+		var firstChar = num.charAt(0);
+		if(firstChar == '.')
+			return parseFloat(0);
+		else
+			return parseFloatVal(num).toFixed(3);
+	}
+	
+	$('#verify_yes').change(function(){
+		if($(this).is(':checked'))
+			$('#techVerify').show();
+		else
+			$('#techVerify').hide();
+	});
+
+	$('#autocomplete-qtnType').autocomplete({
+		lookup: <?php echo json_encode($quotationType); ?>,
+		lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+			var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+			return re.test(suggestion.value);
+		},
+		onSelect: function(suggestion){
+			request = suggestion.data;
+			$("#qtn_type").val(suggestion.data);
+			$("#materialSpan").text(suggestion.value);
+		},
+		onHint: function (hint) {
+			$(this).val(hint);
+		},
+		onSearchComplete: function (query, suggestion){
+			
+		}
+	});
+	
+	
+	/*$("#project_name").tokenInput(
+		<?php echo json_encode($projects); ?>, 
+		{
+			theme: "facebook",
+			
+               prePopulate: <?php echo json_encode($projectsSelList); ?>,    
+			preventDuplicates: true,
+			excludeCurrent: true,
+			onAdd: function (item) {
+				$(this).focus();
+			},
+			onDelete: function (item) {
+				
+			}
+		}
+	);*/
+	
+	
+	
+	$('.datepickerinput').datepicker({
+		format: "dd-mm-yyyy",
+		//startDate: new Date(),
+		todayBtn: true,
+		orientation: "top auto",
+		autoclose: true
+	});
+	$('.date_icon').click(function() {
+		var input = $(this).parent().find('input').datepicker('show');
+	});
+	
+
+	/* start document submit*/
+	removetr();
+	function removetr(){
+		$('.remove').click(function(){
+			if($(this).closest('tr').index() != 0){
+				$(this).closest('tr').remove();
+				$('#documentTable tbody tr').each(function(){
+					var index=$(this).index() + 1;
+					$(this).find('select, input:text').each(function(){
+						$(this).attr('name', $(this).attr('tagname')+'_'+index);
+						$(this).attr('id', $(this).attr('tagname')+'_'+index);		
+					})
+					
+				});		
+			}
+		});
+	}
+
+	addRow();
+	function addRow(){
+		$( ".newRow" ).unbind();
+		$( ".newRow" ).bind('keyup', function() {
+		//alert($(this).closest("tr").index()+"------------"+$("#contactTable tbody tr:last").index())
+			if($(this).val().length>0 && $(this).closest("tr").index() == $("#documentTable tbody tr:last").index()){
+				$("#documentTable tbody").append("<tr>"+$("#documentTable tbody tr:first").html()+"</tr>");
+					$("#documentTable tbody tr").each(function(){
+					var index=$(this).index() + 1;
+					var lastIndex=$("#documentTable tbody tr:last").index() + 1;
+					$(this).find("select, input:text").each(function(){
+						if(index==lastIndex){
+							if($(this).prop("tagName").toLowerCase() == 'input')
+								$(this).val("");
+							else
+								$(this).val("1");
+						}
+						$(this).attr("name", $(this).attr("tagname")+'_'+index);
+						$(this).attr("id", $(this).attr("tagname")+'_'+index);		
+					})
+				});	
+				removetr();
+				addRow();
+			}
+		});
+	}
+	
+	/* start Submittal Det*/
+	removeSubmittaltr();
+	function removeSubmittaltr(){
+		$('.removesubmittal').click(function(){
+			if($(this).closest('tr').index() != 0){
+				$(this).closest('tr').remove();
+				$('#submittalTable tbody tr').each(function(){
+					var index=$(this).index() + 1;
+					$(this).find('select, input:text').each(function(){
+						$(this).attr('name', $(this).attr('tagname')+'_'+index);
+						$(this).attr('id', $(this).attr('tagname')+'_'+index);		
+					})
+					
+				});		
+			}
+		});
+	}
+
+	addsubmittalRow();
+	function addsubmittalRow(){
+		$( ".newRowsubmittal" ).unbind();
+		$( ".newRowsubmittal" ).bind('keyup', function() {
+		//alert($(this).closest("tr").index()+"------------"+$("#contactTable tbody tr:last").index())
+			if($(this).val().length>0 && $(this).closest("tr").index() == $("#submittalTable tbody tr:last").index()){
+				$("#submittalTable tbody").append("<tr>"+$("#submittalTable tbody tr:first").html()+"</tr>");
+					$("#submittalTable tbody tr").each(function(){
+					var index=$(this).index() + 1;
+					var lastIndex=$("#submittalTable tbody tr:last").index() + 1;
+					$(this).find("select, input:text").each(function(){
+						if(index==lastIndex){
+							if($(this).prop("tagName").toLowerCase() == 'input')
+								$(this).val("");
+							else
+								$(this).val("1");
+						}
+						$(this).attr("name", $(this).attr("tagname")+'_'+index);
+						$(this).attr("id", $(this).attr("tagname")+'_'+index);		
+					})
+				});	
+				removeSubmittaltr();
+				addsubmittalRow();
+			}
+		});
+	}
+	function decisionEntry(){
+		var resId = [];
+		var transId = [];
+        var rtype = $('#autocomplete-qtnType').val();
+        $.ajax({
+			url:getBaseURL()+"ats/rfq/rfqedit",
+			type:"post",
+			data:'mode=decisionEntry&decId='+decId+'&rfqId=<?php echo $rfqRegId;?>&rtype='+rtype,
+			dataType:"json",
+			success:function(data, textStatus, jqXHR){
+				oTable.fnClearTable();
+				$("#cloneTable").html($("#sequentialViewSub").html());
+				$("#sequentialViewSub tbody:first").html("");
+				$('.appendResource').html('');
+				var json=[];
+				$('#totalResourse').text(data.length);
+				$.each(data, function(i,v){
+                        if(rtype == 'Material' || rtype == 'Asset') {
+                            var resObj = {};
+                            resId.push(v.ResourceId);
+                            resObj.resourceId = v.ResourceId;
+                            resObj.itemId = v.ItemId;
+                            resObj.decTrans = [];
+                            var ai = oTable.fnAddData([v.Code + "<input type='hidden' name='resourceCode_" + v.ResourceId + "_"+ v.ItemId +"' id='resourceCode_" + v.ResourceId + "_"+ v.ItemId +"' value='" + v.Code + "'>",
+                                v.ResourceName + "<input type='hidden' name='resourceName_" + v.ResourceId + "_"+ v.ItemId +"' id='resourceName_" + v.ResourceId + "_"+ v.ItemId +"' value='" + v.ResourceName + "'>",
+                                v.UnitName + "<input type='hidden' name='unitName_" + v.ResourceId + "_"+ v.ItemId +"' id='unitName_" + v.ResourceId + "_"+ v.ItemId +"' value='" + v.UnitName + "'><input type='hidden' name='unitId_" + v.ResourceId + "_"+ v.ItemId +"' id='unitId_" + v.ResourceId + "_"+ v.ItemId +"' value='" + v.UnitId + " '>",
+                                sanitizeNumber(v.Quantity, 3, true),
+                                "<input type='text' class='tbl_input totQuantity' value='0' readonly name='quantity_" + v.ResourceId + "_"+ v.ItemId +"' id='quantity_" + v.ResourceId + "_"+ v.ItemId +"'>",
+                            ]);
+                            var n = oTable.fnSettings().aoData[ai[0]].nTr;
+                            n.setAttribute('id', v.ResourceId + "_" + v.ItemId);
+                            n.setAttribute('class', 'mainTr deleteTr_' + v.ResourceId + '_' + v.ItemId);
+                            $('.appendResource').append('<tr>' +
+                            '<td>' + v.Code + '<input type="hidden" name="resourceCode_' + v.ResourceId + '_'+ v.ItemId +' id="resourceCode_' + v.ResourceId + '_'+ v.ItemId +'" value="' + v.Code + '"></td>' +
+                            '<td>' + v.ResourceName + '<input type="hidden" name="resourceName_' + v.ResourceId + '_'+ v.ItemId +'" id="resourceName_' + v.ResourceId + '_'+ v.ItemId +'" value="' + v.UnitId + '"></td>' +
+                            '<td>' + v.UnitName + '<input type="hidden" name="unitName_' + v.ResourceId + '_'+ v.ItemId +'" id="unitName_' + v.ResourceId + '_'+ v.ItemId +'" value="' + v.UnitName + '"></td>' +
+                            '<td align="right">' + sanitizeNumber(v.Quantity, 3, true) + '</td>' +
+                            '<td align="right"><input type="text" style="border:none;text-align:right;" class="tbl_input totQuantity" value="0" readonly name="quantity_' + v.ResourceId + '_'+ v.ItemId +'" id="quantity_' + v.ResourceId + '_'+ v.ItemId +'"></td>' +
+                            '</tr>');
+
+                            $("#sequentialViewSub tbody:first").append('<tr class="subTr_' + v.ResourceId + '_'+ v.ItemId +' deleteTr_' + v.ResourceId + '_'+ v.ItemId +'">' +
+                            '<td colspan=5>' +
+                            '<div class="subDiv">' +
+                            '<table class="table table-bordered">' +
+                            '<thead>' +
+                            '<tr>' +
+                            '<th>Decision No</th>' +
+                            '<th>Balance Qty</th>' +
+                            '<th>Qty</th>' +
+                            '</tr>' +
+                            '</thead>' +
+                            '<tbody>');
+
+                            $.each(v.decision, function (deci, decv) {
+                                transId.push(decv.TransId);
+                                if ($.inArray(decv.TransId, totTransId) == -1 || $.inArray(v.ResourceId, totResId) == -1) {
+                                    console.log('new' + v.Code)
+                                    $("#sequentialViewSub .subTr_" + v.ResourceId + "_" + v.ItemId + " tbody:first").append('<tr style="background-color:#f0f2f2;" id="requestTr_' + decv.TransId + '">' +
+                                    '<td width="50%">' + decv.RDecisionNo + '<input type="hidden" name="decisionId_' + decv.TransId + '" id="decisionId_' + decv.TransId + '" value="' + decv.DecisionId + '"></td>' +
+                                    '<td align="right" width="25%">' + sanitizeNumber(decv.IndentQty, 3, true) + '</td>' +
+                                    '<td align="right" class="tbl_input_td" width="25%"><input type="text"  style="text-align: right;" elename="quantity_' + v.ResourceId + '_' + v.ItemId + '" class="tbl_input quantityVal" name="decQuantity_' + decv.TransId + '" value="' + sanitizeNumber(decv.hidQty, 3, true) + '" hidQty="' + sanitizeNumber(decv.hidQty, 3, true) + '" data-toggle="tooltip" data-title="zsdfzdf" data-placement="top" data-trigger=""></td>' +
+                                    '</tr>');
+
+                                    var val = parseFloat(oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val()) + parseFloat(sanitizeNumber(decv.hidQty, 3, true));
+                                    oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val(sanitizeNumber(val,3,true));
+                                    $("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val(sanitizeNumber(val,3,true));
+                                }
+                                else {
+                                    console.log('old' + v.Code)
+                                    $("#sequentialViewSub .subTr_" + v.ResourceId + "_" + v.ItemId + " tbody:first").append($("#cloneTable #requestTr_" + decv.TransId).clone());
+                                    var val = parseFloat(oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val()) + parseFloat($("#cloneTable #requestTr_" + decv.TransId + " .quantityVal").val());
+                                    oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val(sanitizeNumber(val,3,true));
+                                    $("input[name=quantity_" + v.ResourceId + "_" + v.ItemId + "]").val(sanitizeNumber(val,3,true));
+                                }
+                                resObj.decTrans.push(decv.TransId);
+                            });
+                            $("#sequentialViewSub .subTr_" + v.ResourceId + "_" + v.ItemId + " tbody:first").append('</tbody>' +
+                            '</table>' +
+                            '</div>' +
+                            '</td>' +
+                            '</tr>');
+                            json.push(resObj);
+                        }
+                    else if(rtype == 'Activity' || rtype == 'IOW' || rtype == 'Service') {
+                            var resObj = {};
+                            resId.push(v.ResourceId);
+                            resObj.resourceId = v.ResourceId;
+                            resObj.decTrans = [];
+                            var ai = oTable.fnAddData([v.Code + "<input type='hidden' name='resourceCode_" + v.ResourceId + "' id='resourceCode_" + v.ResourceId + "' value='" + v.Code + "'>",
+                                v.ResourceName + "<input type='hidden' name='resourceName_" + v.ResourceId + "' id='resourceName_" + v.ResourceId + "' value='" + v.ResourceName + "'>",
+                                v.UnitName + "<input type='hidden' name='unitName_" + v.ResourceId + "' id='unitName_" + v.ResourceId + "' value='" + v.UnitName + "'><input type='hidden' name='unitId_" + v.ResourceId + "' id='unitId_" + v.ResourceId + "' value='" + v.UnitId + " '>",
+                                sanitizeNumber(v.Quantity, 3, true),
+                                "<input type='text' class='tbl_input totQuantity' style='text-align:right;' value='0' disabled name='quantity_" + v.ResourceId + "' id='quantity_" + v.ResourceId + "'>",
+                            ]);
+
+                            var n = oTable.fnSettings().aoData[ai[0]].nTr;
+                            n.setAttribute('id', v.ResourceId);
+                            n.setAttribute('class', 'mainTr deleteTr_' + v.ResourceId);
+                            $('.appendResource').append('<tr>' +
+                            '<td>' + v.Code + '<input type="hidden" name="resourceCode_' + v.ResourceId + '" id="resourceCode_' + v.ResourceId + '" value="' + v.Code + '"></td>' +
+                            '<td>' + v.ResourceName + '<input type="hidden" name="resourceName_' + v.ResourceId + '" id="resourceName_' + v.ResourceId + '" value="' + v.UnitId + '"></td>' +
+                            '<td>' + v.UnitName + '<input type="hidden" name="unitName_' + v.ResourceId + '" id="unitName_' + v.ResourceId + '" value="' + v.UnitName + '"></td>' +
+                            '<td align="right">' + sanitizeNumber(v.Quantity, 3, true) + '</td>' +
+                            '<td align="right"><input type="text" style="border:none;text-align: right;" class="tbl_input totQuantity" value="0" disabled name="quantity_' + v.ResourceId + '" id="quantity_' + v.ResourceId + '"></td>' +
+                            '</tr>');
+
+                            $("#sequentialViewSub tbody:first").append('<tr class="subTr_' + v.ResourceId + ' deleteTr_' + v.ResourceId + '">' +
+                            '<td colspan=5>' +
+                            '<div class="subDiv">' +
+                            '<table class="table table-bordered">' +
+                            '<thead>' +
+                            '<tr>' +
+                            '<th>Decision No</th>' +
+                            '<th>Balance Qty</th>' +
+                            '<th>Qty</th>' +
+                            '</tr>' +
+                            '</thead>' +
+                            '<tbody>');
+
+                            $.each(v.decision, function (deci, decv) {
+                                transId.push(decv.TransId);
+                                if ($.inArray(decv.TransId, totTransId) == -1 || $.inArray(v.ResourceId, totResId) == -1) {
+                                    console.log('new' + v.Code)
+                                    $("#sequentialViewSub .subTr_" + v.ResourceId + " tbody:first").append('<tr style="background-color:#f0f2f2;" id="requestTr_' + decv.TransId + '">' +
+                                    '<td width="50%">' + decv.RDecisionNo + '<input type="hidden" name="decisionId_' + decv.TransId + '" id="decisionId_' + decv.TransId + '" value="' + decv.DecisionId + '"></td>' +
+                                    '<td align="right" width="25%">' + sanitizeNumber(decv.IndentQty, 3, true) + '</td>' +
+                                    '<td align="right" class="tbl_input_td" width="25%"><input type="text" style="text-align: right; elename="quantity_' + v.ResourceId + '" class="tbl_input quantityVal" name="decQuantity_' + decv.TransId + '" value="' + sanitizeNumber(decv.hidQty, 3, true) + '" hidQty="' + sanitizeNumber(decv.hidQty, 3, true) + '" data-toggle="tooltip" data-title="zsdfzdf" data-placement="top" data-trigger=""></td>' +
+                                    '</tr>');
+
+                                    var val = parseFloat(oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "]").val()) + parseFloat(sanitizeNumber(decv.hidQty, 3, true));
+                                    oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "]").val(sanitizeNumber(val,3,true));
+                                    $("input[name=quantity_" + v.ResourceId + "]").val(sanitizeNumber(val,3,true));
+                                }
+                                else {
+                                    console.log('old' + v.Code)
+                                    $("#sequentialViewSub .subTr_" + v.ResourceId + " tbody:first").append($("#cloneTable #requestTr_" + decv.TransId).clone());
+                                    var val = parseFloat(oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "]").val()) + parseFloat($("#cloneTable #requestTr_" + decv.TransId + " .quantityVal").val());
+                                    oTable.$("tr.mainTr").find("input[name=quantity_" + v.ResourceId + "]").val(sanitizeNumber(val,3,true));
+                                    $("input[name=quantity_" + v.ResourceId + "]").val(sanitizeNumber(val,3,true));
+                                }
+                                resObj.decTrans.push(decv.TransId);
+                            });
+                            $("#sequentialViewSub .subTr_" + v.ResourceId + " tbody:first").append('</tbody>' +
+                            '</table>' +
+                            '</div>' +
+                            '</td>' +
+                            '</tr>');
+                            json.push(resObj);
+                        }
+
+				});
+				$('#hidJson').val(JSON.stringify(json));
+			},
+			complete:function(data){
+				oldDecId = decId;
+				totResId = resId;
+				totTransId = transId;
+				trClick();
+				oTable.$("tr.mainTr").trigger("click");
+				$("#cloneTable").html('');
+				$('input[data-toggle="tooltip"]').tooltip();
+			},				
+			error:function(jqXHR, textStatus, errorThrown){
+				alert(textStatus+"-----"+errorThrown);
+			}		
+	
+		});
+	}	
+	
+	
+	$(".panel-collapse").on("shown.bs.collapse", function(e){
+		$('.panel-heading').removeClass('accordion_head_crnt');
+		$(this).prev('div').addClass('accordion_head_crnt');
+	});
+	$(".panel-collapse").on("show.bs.collapse", function(e){
+		if(mouseClick){
+			$(".error_message").hide();
+			var bool = true;
+			if($(this).attr('id') != 'collapse20'){
+				if($('.panel-collapse:visible').closest('.panel-default').index() < $(this).closest('.panel-default').index() && $('#collapse20').index() < $(this).closest('.panel-default').index()){
+					if($('#biddue_date').val().length == 0){
+						$("#biddue_date").closest(".req_flds").find(".error_message").show();
+						bool = false;
+						$('#biddue_date').focus();
+						
+						if(!$('#collapse20').is(':visible'))
+							$('#collapse20').closest('.panel-default').find('.panel-heading').trigger('click');
+						
+						return false;
+					}
+				}
+			}
+			if($(this).attr('id') != 'collapse33'){
+				if($('.panel-collapse:visible').closest('.panel-default').index() < $(this).closest('.panel-default').index() && $('#collapse33').index() < $(this).closest('.panel-default').index() && $('#collapse33').is(':visible')){
+					if($('#detailed_description').val().trim().length == 0){
+						if(!$('#collapse33').is(':visible'))
+							$('#collapse33').closest('.panel-default').find('.panel-heading').trigger('click');
+						
+						$('#detailed_description').focus();
+						$('#detailed_description').closest(".req_flds").find(".error_message").show();
+						return false;						
+					}					
+				}
+			}			
+			if($(this).attr('id') != 'collapse21'){
+				if($('.panel-collapse:visible').closest('.panel-default').index() < $(this).closest('.panel-default').index() && $('#collapse21').index() < $(this).closest('.panel-default').index()){
+					var index = $('#allReqDecisionList').jqxGrid('getselectedrowindex');
+					if(index==-1){
+						if(!$('#collapse21').is(':visible'))
+							$('#collapse21').closest('.panel-default').find('.panel-heading').trigger('click');
+						
+						alert('Atleast select one decision to proceed further');
+						return false;
+					}
+					else{
+						decId=[];
+						var index = $("#allReqDecisionList").jqxGrid("getselectedrowindexes");
+						$('#resourceList').text(index.length);
+						for(var i in index){
+							decId.push($("#allReqDecisionList").jqxGrid("getrowid", index[i]));
+						}
+						$("#decisionId").val(decId);
+						if(!arrequal(oldDecId, decId)){
+							decisionEntry();
+						}
+					}
+				}
+			}
+			if($(this).attr('id') != 'collapse22'){
+				if($('.panel-collapse:visible').closest('.panel-default').index() < $(this).closest('.panel-default').index() && $('#collapse22').index() < $(this).closest('.panel-default').index()){
+	
+				}						
+			}
+		}
+	});
+	$('.panel-heading').click(function(e){
+		if(e.which)
+			mouseClick = true;
+		else
+			mouseClick = false;
+	});
+	function showPanel(){
+		$('.error_message').hide();
+		if($('#collapse20').is(':visible')){
+			var bool = true;
+			/* if($.inArray($('#autocomplete-qtnType').val(), quotation_type) == -1){
+				$("#autocomplete-qtnType").closest(".req_flds").find(".error_message").show();
+				bool = false;
+				$('#autocomplete-qtnType').focus();
+			}
+			else if($('#project_name').val().length == 0){
+				$("#project_name").closest(".req_flds").find(".error_message").show();
+				bool = false;
+				$('#token-input-project_name').focus();
+			} */
+			if($('#project_name option:selected').length == 0){
+				$("#project_name").closest(".req_flds").find(".error_message").show();
+				bool = false;
+				$('#token-input-project_name').focus();
+			}
+			else if($('#biddue_date').val().length == 0){
+				$("#biddue_date").closest(".req_flds").find(".error_message").show();
+				bool = false;
+				$('#biddue_date').focus();
+			}			
+			if(bool){
+				$('.panel-collapse:visible').closest('.panel-default').nextAll('.panel-default:visible:first').find('.panel-heading').trigger('click');
+			}
+		}
+		else if($('#collapse33').is(':visible')){
+			var bool = true;
+			if($('#detailed_description').val().trim().length == 0){
+				bool = false;
+				$('#detailed_description').focus();
+				$('#detailed_description').closest(".req_flds").find(".error_message").show();				
+			}
+			if(bool)
+				$('.panel-collapse:visible').closest('.panel-default').next('.panel-default').find('.panel-heading').trigger('click');
+		}
+		else if($('#collapse21').is(':visible')){
+			var index = $('#allReqDecisionList').jqxGrid('getselectedrowindex');
+			if(index==-1){
+				alert('Atleast select one decision to proceed further')
+			}
+			else{
+				$('.panel-collapse:visible').closest('.panel-default').nextAll('.panel-default:visible').find('.panel-heading').trigger('click');
+				decId=[];
+				var index = $("#allReqDecisionList").jqxGrid("getselectedrowindexes");
+				$('#resourceList').text(index.length);
+				for(var i in index){
+					decId.push($("#allReqDecisionList").jqxGrid("getrowid", index[i]));
+				}
+				$("#decisionId").val(decId);
+				if(!arrequal(oldDecId, decId)){
+					decisionEntry();
+				}
+			}
+		}
+		else if($('#collapse22').is(':visible')){
+			$('.panel-collapse:visible').closest('.panel-default').nextAll('.panel-default:visible').find('.panel-heading').trigger('click');				
+		}		
+		else if($('#collapse26').is(':visible')){
+			$('.panel-collapse:visible').closest('.panel-default').nextAll('.panel-default:visible').find('.panel-heading').trigger('click');				
+		}
+		else if($('#collapse28').is(':visible')) {
+			$('.panel-collapse:visible').closest('.panel-default').nextAll('.panel-default:visible').find('.panel-heading').trigger('click');		
+		}
+		else if($('#collapse27').is(':visible')){
+			var rowCountdoc = $('#documentTable tbody tr').length;
+			$('#RowCountdoc').val(rowCountdoc);
+			
+			var rowCountsubmittal = $('#submittalTable tbody tr').length;
+			$('#RowCountsubmittal').val(rowCountsubmittal);
+					
+			var vendorsListId=[];
+			var index = $("#allVendorList").jqxGrid("getselectedrowindexes");
+			for(var i in index){
+				vendorsListId.push($("#allVendorList").jqxGrid("getrowid", index[i]));
+			}
+			$("#vendorListId").val(vendorsListId);
+			
+			// var termsListId=[];
+			// var index1 = $("#allTermList").jqxGrid("getselectedrowindexes");
+			// for(var i in index1){
+				// termsListId.push($("#allTermList").jqxGrid("getrowid", index1[i]));
+			// }
+			// $("#termListId").val(termsListId);
+			modalContent();
+			$('#totalpage').modal('show');
+			//$('form').submit();
+		}			
+	}
+	
+	function modalContent(){
+		$('.modalInput').each(function(){
+			$('.'+$(this).attr('id')).text($(this).val());
+		});
+		
+		var addr=[];
+		$('#delivery_address1').val().trim().length > 0?addr.push($('#delivery_address1').val()):'';
+		$('#delivery_address2').val().trim().length > 0?addr.push($('#delivery_address2').val()):'';
+		$('#delivery_address3').val().trim().length > 0?addr.push($('#delivery_address3').val()):'';
+		
+		$('.delivery_addressList').text(addr.join(', '));
+		
+		$('input:checkbox').each(function(){		
+			if($(this).is(':checked')){
+				$('.'+$(this).attr('id')).html('Yes &nbsp;<span class="request_yescheck"><i class="fa fa-check"></i></span>');
+				if($(this).attr('id') == 'verify_yes'){
+					$('#techVerifyMod1').show();
+					$('#techVerifyMod2').show();
+				}
+				else if($(this).attr('id') == 'submittal_yes'){
+					$('#submittalDet').show();
+				}
+			} else {
+				$('.'+$(this).attr('id')).html('No &nbsp;<span class="request_yescheckno"><i class="fa fa-times"></i></span>');
+				if($(this).attr('id') == 'verify_yes'){
+					$('#techVerifyMod1').hide();
+					$('#techVerifyMod2').hide();
+				}
+				else if($(this).attr('id') == 'submittal_yes'){
+					$('#submittalDet').hide();
+				}
+			}
+		});
+		var projList = '';
+		//$('.token-input-list-facebook li:not(:last-child)').each(function(){
+		//	projList.push($(this).find('p').text());
+		//});
+		$.each($('#project_name').find('option:selected'), function() {
+			projList += $(this).html() + ', ';
+		});
+		projList = projList.substr(0, projList.length - 2);
+		$('.projectList').text(projList);
+		$('#document_tbody').html('');
+		$('#documentTable tbody tr').each(function(){
+			if($(this).find('td:first input:text').val().trim().length != 0){
+				$('#document_tbody').append('<tr>'+
+												'<td>'+$(this).find('td:first input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(2) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(3) input:text').val()+'</td>'+
+											'</tr>');
+			}
+		});
+		
+		var selIndex = $('#allReqDecisionList').jqxGrid('getselectedrowindexes');
+        var quotType = $('#autocomplete-qtnType').val();
+		$('.decision_list').text($('#countdecision').text());
+		$('#decision_body').html('');
+		for(var i in selIndex){
+			var selectedRowData = $('#allReqDecisionList').jqxGrid('getrowdata', selIndex[i]);
+            if(quotType == 'Material') {
+                $('#decision_body').append('<tr>' +
+                '<td>' + selectedRowData.RDecisionNo + '</td>' +
+//                '<td>' + selectedRowData.DecDate + '</td>' +
+                '<td>' + $.datepicker.formatDate('dd-mm-yy', new Date(selectedRowData.DecDate)) + '</td>' +
+                '<td>' + selectedRowData.Description + '</td>' +
+                '<td>' + selectedRowData.Quantity + '</td>' +
+                '</tr>');
+            }
+            else {
+                $('#decision_body').append('<tr>' +
+                '<td>' + selectedRowData.RDecisionNo + '</td>' +
+                '<td>' + $.datepicker.formatDate('dd-mm-yy', new Date(selectedRowData.DecDate)) + '</td>' +
+                '<td>' + selectedRowData.Description + '</td>' +
+                '<td>' + selectedRowData.Quantity + '</td>' +
+                '</tr>');
+            }
+		}
+	
+		/*Decision quantity*/
+		$('#decquantityTable').html($('#resourceTable').clone())	
+		
+		var vendorIndex = $('#allVendorList').jqxGrid('getselectedrowindexes');
+		$('#vendor_tbody').html('');
+		for(var i in vendorIndex){
+			var selectedRowData = $('#allVendorList').jqxGrid('getrowdata', vendorIndex[i]);
+			$('#vendor_tbody').append('<tr>'+
+											'<td>'+selectedRowData.VendorName+'</td>'+
+										'</tr>');			
+		}
+		
+		// var termIndex = $('#allTermList').jqxGrid('getselectedrowindexes');
+		// $('#term_tbody').html('');
+		// for(var i in termIndex){
+			// var selectedRowData = $('#allTermList').jqxGrid('getrowdata', termIndex[i]);
+			// $('#term_tbody').append('<tr>'+
+										// '<td>'+selectedRowData.Title+'</td>'+
+									// '</tr>');			
+		// }
+		
+		$('#term_tbody').html('');
+		$('#termsTable tbody tr').each(function(){
+			if($(this).find('td:first input:text').val().trim().length != 0){
+				$('#term_tbody').append('<tr>'+
+												'<td>'+$(this).find('td:first input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(2) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(3) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(4) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(5) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(6) input:text').val()+'</td>'+
+												'<td>'+$(this).find('td:nth-child(7) input:text').val()+'</td>'+
+											'</tr>');
+			}
+		})
+		
+		var submittal = [];
+		$('#submittalTable tbody tr').each(function(){
+			if($(this).find('input:text').val().trim().length != 0){
+				submittal.push($(this).find('input:text').val());
+			}
+		});
+		$('.submittal_value').text(submittal.join(', '));
+	}
+	$('.continueButton').click(function(){
+		showPanel();
+	});		
+
+	var reqIdOld = [];
+	var editRequest = [];
+
+
+	
+	/*ReqDecisionlist grid start*/	
+	var resSource =
+	{
+		localData: <?php echo json_encode($decisionList); ?>,
+		dataType: "json",
+		dataFields:
+		[
+			{ name: 'RDecisionNo', type: 'string' },
+			{ name: 'DecDate', type: 'date', format: 'DD-MM-yyyy' },
+            { name: 'Description',type: 'string' },
+            { name: 'Quantity', type: 'string' },
+			{ name: 'Sel', type: 'string' },
+		],
+		id:'DecisionId'
+	};
+
+	var dataAdapterRes = new $.jqx.dataAdapter(resSource,{
+		autoBind: true,
+		loadComplete: function (data) {
+			
+		},
+		loadError: function (xhr, status, error) {
+			
+		}
+	});
+	$('#totaldecision').text(<?php echo json_encode($decisionList); ?>.length);
+
+	$("#allReqDecisionList").jqxGrid({
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready: function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No request decision to display";			
+			$("#allReqDecisionList").jqxGrid('localizestrings', localizationobj);
+		},			
+		selectionmode: 'checkbox',						
+		source: dataAdapterRes,
+		columns: [
+			  { text: 'Request/Decision No.', editable: false,datafield: 'RDecisionNo'},
+			  { text: 'Request/Decision Date', editable: false,datafield: 'DecDate', filtertype: 'date', cellsformat: 'dd-MM-yyyy'},
+              { text: 'Description', dataField: 'Description',width:'25%', editable:false},
+              { text: 'Quantity', dataField: 'Quantity',width:'25%', editable:false,align:'center',cellsalign: 'right'},
+			  { text: 'Sel', editable: false,datafield: 'Sel', hidden:true},
+		]
+	});
+	var selDec = 0;
+	$.each(<?php echo json_encode($decisionList); ?>, function(i,v){
+		var rid = v.DecisionId;
+		if(v.Sel == 1){
+			selDec++;
+			oldDecId.push(rid);
+			editRequest.push(rid);
+			var mindex = $('#allReqDecisionList').jqxGrid('getrowboundindexbyid', rid);
+			if(mindex!=-1)
+				$('#allReqDecisionList').jqxGrid('selectrow', mindex);
+		}
+	});
+	$('#countdecision').text(selDec);
+	$('#resourceList').text(selDec);
+	
+	$('#allReqDecisionList').on('rowselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;
+		
+		$('#countdecision').text($('#allReqDecisionList').jqxGrid('selectedrowindexes').length);
+		
+	});	
+	$('#allReqDecisionList').on('rowunselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;
+		$('#countdecision').text($('#allReqDecisionList').jqxGrid('selectedrowindexes').length);
+	});	
+		
+	$('#allReqDecisionList').on('rowclick', function (event){
+		var args = event.args;
+		// row's bound index.
+		var boundIndex = args.rowindex;
+		var index = $('#allReqDecisionList').jqxGrid('selectedrowindexes'); 
+		//alert($.inArray(boundIndex, index))
+		if($.inArray(boundIndex, index) == -1)
+			$('#allReqDecisionList').jqxGrid('selectrow', boundIndex);
+		else
+			$('#allReqDecisionList').jqxGrid('unselectrow', boundIndex);
+	});	
+	/*ReqDecisionlist grid end*/					
+	
+	
+	
+	/*Termlist grid start*/	
+	/*var termSource =
+	{
+		localData: <?php echo json_encode($termList); ?>,
+		dataType: "json",
+		dataFields:
+		[
+			{ name: 'Title', type: 'string' },
+			{ name: 'Sel', type: 'string' }
+		],
+		id:'TermsId'
+	};
+
+	var dataAdapterTerm = new $.jqx.dataAdapter(termSource,{
+		autoBind: true,
+		loadComplete: function (data) {
+			
+		},
+		loadError: function (xhr, status, error) {
+			
+		}
+	});
+
+
+	$("#allTermList").jqxGrid({
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready: function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No terms to display";
+			$("#allTermList").jqxGrid('localizestrings', localizationobj);
+		},			
+		selectionmode: 'checkbox',						
+		source: dataAdapterTerm,
+		columns: [
+			  { text: 'Term Description', editable: false,datafield: 'Title'},
+			  { text: 'Sel', editable: false,datafield: 'Sel', hidden:true},
+		]
+	});
+	
+	$.each(<?php echo json_encode($termList); ?>, function(i,v){
+		var rid = v.TermsId;
+		if(v.Sel == 1){
+			editRequest.push(rid);
+			var mindex = $('#allTermList').jqxGrid('getrowboundindexbyid', rid);
+			if(mindex!=-1)
+				$('#allTermList').jqxGrid('selectrow', mindex);
+		}
+	});
+	
+	$('#allTermList').on('rowselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;
+	});	
+	$('#allTermList').on('rowunselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;		
+	});	
+		
+	$('#allTermList').on('rowclick', function (event){
+		var args = event.args;
+		// row's bound index.
+		var boundIndex = args.rowindex;
+		var index = $('#allTermList').jqxGrid('selectedrowindexes'); 
+		//alert($.inArray(boundIndex, index))
+		if($.inArray(boundIndex, index) == -1)
+			$('#allTermList').jqxGrid('selectrow', boundIndex);
+		else
+			$('#allTermList').jqxGrid('unselectrow', boundIndex);
+						
+	});	*/
+
+	/*Vendorlist grid start*/	
+	var vendorSource =
+	{
+		localData: <?php echo json_encode($vendorList); ?>,
+		dataType: "json",
+		dataFields:
+		[
+			{ name: 'VendorName', type: 'string' },
+			{ name: 'Sel', type: 'string' }
+		],
+		id:'VendorId'
+	};
+
+	var dataAdapterVendor = new $.jqx.dataAdapter(vendorSource,{
+		autoBind: true,
+		loadComplete: function (data) {
+			
+		},
+		loadError: function (xhr, status, error) {
+			
+		}
+	});
+
+
+	$("#allVendorList").jqxGrid({
+		width: '100%',
+		pageable: true,
+		selectionMode: 'singleRow',
+		pagerButtonsCount: 6,
+		autoheight:true,
+		//rowsheight:60,
+		autorowheight: true,
+		filterable: true,
+		sortable: true,
+		//filtermode: 'advanced',				
+		columnsResize: true,
+		showfilterrow: true,
+		ready: function(){
+			var localizationobj = {};
+			localizationobj.emptydatastring = "No vendor to display";
+			$("#allVendorList").jqxGrid('localizestrings', localizationobj);
+		},			
+		selectionmode: 'checkbox',						
+		source: dataAdapterVendor,
+		columns: [
+			  { text: 'VendorName', editable: false,datafield: 'VendorName'},
+			  { text: 'Sel', editable: false,datafield: 'Sel', hidden:true},
+		]
+	});
+	
+	$.each(<?php echo json_encode($vendorList); ?>, function(i,v){
+		var rid = v.VendorId;
+		if(v.Sel == 1){
+			editRequest.push(rid);
+			var mindex = $('#allVendorList').jqxGrid('getrowboundindexbyid', rid);
+			if(mindex!=-1)
+				$('#allVendorList').jqxGrid('selectrow', mindex);
+		}
+	});
+	
+	$('#allVendorList').on('rowselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;
+	});	
+	$('#allVendorList').on('rowunselect', function (event){
+		// event arguments.
+		var args = event.args;
+		// row's bound index.
+		var rowBoundIndex = args.rowindex;
+		// row's data. The row's data object or null(when all rows are being selected or unselected with a single action). If you have a datafield called "firstName", to access the row's firstName, use var firstName = rowData.firstName;
+		var rowData = args.row;
+		resSelect = true;		
+	});	
+		
+	$('#allVendorList').on('rowclick', function (event){
+		var args = event.args;
+		// row's bound index.
+		var boundIndex = args.rowindex;
+		var index = $('#allVendorList').jqxGrid('selectedrowindexes'); 
+		//alert($.inArray(boundIndex, index))
+		if($.inArray(boundIndex, index) == -1)
+			$('#allVendorList').jqxGrid('selectrow', boundIndex);
+		else
+			$('#allVendorList').jqxGrid('unselectrow', boundIndex);
+						
+	});	
+	/*Vendorlist grid end*/					
+					
+				
+	
+	var oTable = $("#sequentialView").dataTable({"aLengthMenu": [[1, 5, 10], [1, 5, 10]],  "order": [],
+		"initComplete": function(settings, json) {
+			$("select[name=sequentialView_length]").addClass('show-tick').selectpicker();
+		},	
+		"drawCallback": function( settings ){
+			$(this).find("tr.mainTr").trigger('click');
+		}
+	});
+	function trimNumber(s){
+	  while (s.substr(0,1) == '0' && s.length>1) { s = s.substr(1,9999); }
+	  return s;
+	}	
+	function changePage(){
+		$(".quantityVal").unbind();
+		$(".quantityVal").bind('focusin', function(e){
+			var totDecVal = parseFloat($(this).closest("tr").find("td:nth-child(2)").text()) + parseFloat($(this).attr('hidQty'));
+			$(this).attr('data-original-title', 'Enter the value less than or equal to '+totDecVal);
+			$(this).tooltip('show');
+		});	
+		$(".quantityVal").bind('keyup keydown', function(e){
+			var name = $(this).attr("name");
+			var eleName = $(this).attr("elename");
+			var key = e.which || e.keyCode;
+			if(key != 9){
+				var sum = 0;
+				if($(this).val().indexOf(' ') > -1){
+					$(this).val($(this).val().trim());
+				}				
+				if (isNaN($(this).val())){
+					this.value = this.value.replace(/[^0-9\.]/g,'');
+					if($(this).val().indexOf('.') > -1){
+						var index = $(this).val().indexOf( '.' );
+						this.value = this.value.substr( 0, index + 1 ) + this.value.slice( index ).replace( /\./g, '' );
+					}
+				}
+				var ex = /^\d*(\.\d{0,6})?$/;
+				if(!ex.test($(this).val())){
+					$(this).val($(this).val().substring(0,$(this).val().length-1));
+				}
+				var currVal = $(this).val();
+				
+				var totDecVal = parseFloatVal($(this).closest("tr").find("td:nth-child(2)").text()) + parseFloatVal($(this).attr('hidQty'));
+
+				if(parseFloat(totDecVal) < parseFloat(currVal)){
+					$(this).val(orgVal);
+				}
+				else{
+					orgVal = $(this).val();
+					$(this).closest('table').find(".quantityVal").each(function(){
+						//add only if the value is number
+						if (!isNaN(this.value) && this.value.length != 0) {
+							sum += parseFloatVal(this.value);
+						}
+					});
+					$("input[name="+eleName+"]").val(sum.toFixed(3));
+				}
+			}
+		});
+		$(".quantityVal").bind('change', function(){
+			var name = $(this).attr("name");
+			var eleName = $(this).attr("elename");
+			
+			var sum = 0;
+			if (!isNaN($(this).val()) && $(this).val().length != 0) {
+
+			}
+			else{
+				$(this).val($(this).val().substring(0,$(this).val().length-1));
+			}
+			var ex = /^\d*(\.\d{0,6})?$/;
+			if(!ex.test($(this).val())){
+				$(this).val($(this).val().substring(0,$(this).val().length-1));
+			}
+			var currVal = $(this).val();
+			var totDecVal = parseFloat($(this).closest("tr").find("td:nth-child(2)").text()) + parseFloat($(this).attr('hidQty'));
+			if(parseFloat(totDecVal) < parseFloat(currVal)){
+				 $(this).val(orgVal);
+			}
+			else{
+				orgVal = $(this).val();
+				$(this).closest('table').find(".quantityVal").each(function(){
+					//add only if the value is number
+					if (!isNaN(this.value) && this.value.length != 0) {
+						sum += parseFloat(this.value);
+					}
+				});
+				$("input[name="+eleName+"]").val(sum.toFixed(3));
+			}
+			//$(this).val(parseInput($(this).val()));
+			var val = '0';
+			if($(this).val() == '' || $(this).val() == 0){
+				val = val+'.000000';
+			}
+			else{
+				$(this).val(trimNumber($(this).val()));
+				val1 = $(this).val();
+				var str = '000000';
+				var splitVal = val1.split('.');
+				var len = 6;
+				if(splitVal[1]){
+					len -= splitVal[1].length;
+				}
+				if(len == 6)
+					val = val1+'.000000';
+				else if(len < 0)
+					val = splitVal[0]+'.'+splitVal[1].substring(0,6);
+				else
+					val = val1+str.substring(0,len);
+				
+				if(val.substring(0,1) == '.')
+					val = '0' + val;
+			}
+			
+			$("input[name="+name+"]").attr("value", val);
+			$("input[name="+name+"]").val(sanitizeNumber(val,3,true));
+		});
+	}
+	function trClick(){
+		oTable.$("tr.mainTr").unbind();
+		oTable.$("tr.mainTr").bind('click', function(){
+			if(!($(this).next("tr").hasClass("duplicateTr"))){
+				$(this).after("<tr class='duplicateTr'>"+$(".subTr_"+$(this).attr("id")).html()+"</tr>");
+				$(this).next(".subTr_"+$(this).attr("id")).show();
+				$(this).next("tr").find('.subDiv').slideDown("slow");
+				changePage();
+			}
+		});
+	}
+	trClick();
+	oTable.$("tr.mainTr").trigger("click");
+
+	function removeFile(){
+		$('.vq').unbind('click');
+		$('.vq').bind('click', function(){
+			var ele = $(this);
+			var fname = ele.attr('fname');
+			$.ajax({
+				url:getBaseURL()+"ats/rfq/uploadfile/<?php echo $rfqRegId; ?>",
+				type:'post',
+				data:'mode=delete&fname='+fname,
+				success:function(data, textStatus, errorThrown){
+					//fileList.splice($.inArray(fname, fileList),1);
+					//console.log(fileList);
+					ele.closest('div.file_content').fadeOut(500, function(){
+						$(this).remove();
+					})
+				},
+				erorr:function(jqXHR, textStatus, errorThrown){
+					
+				}
+			});	
+		});
+	}
+	removeFile();		
+	$('#drag-and-drop-zone').dmUploader({
+		url:getBaseURL()+"ats/rfq/uploadfile/<?php echo $rfqRegId; ?>",
+		dataType: 'json',
+		//allowedTypes: 'image/*',
+		onInit: function(){
+		  
+		},
+		onBeforeUpload: function(id){
+		  
+		},
+		onNewFile: function(id, file){
+		  $.danidemo.addFile('#demo-files', id, file);
+
+		  /*** Begins Image preview loader ***/
+		  if (typeof FileReader !== "undefined"){
+			
+			var reader = new FileReader();
+
+			// Last image added
+			var img = $('#demo-files').find('.demo-image-preview').eq(0);
+
+			reader.onload = function (e) {
+			  img.attr('src', e.target.result);
+			}
+
+			reader.readAsDataURL(file);
+
+		  } else {
+			// Hide/Remove all Images if FileReader isn't supported
+			$('#demo-files').find('.demo-image-preview').remove();
+		  }
+		  /*** Ends Image preview loader ***/
+
+		},
+		onComplete: function(){
+		  $.danidemo.addLog('#demo-debug', 'default', 'All pending tranfers completed');
+			removeFile();
+		},
+		onUploadProgress: function(id, percent){
+		  var percentStr = percent + '%';
+
+		  $.danidemo.updateFileProgress(id, percentStr);
+		},
+		onUploadSuccess: function(id, data){
+			//fileList.push(data.fname);
+			//console.log(fileList);
+			$.danidemo.updateFileProgress(id, '100%');
+			$('#demo-file'+id).find('a').attr('href', '<?php echo $this->basePath(); ?>/uploads/rfq/<?php echo $rfqRegId; ?>/'+data.fname);
+			$('#demo-file'+id).find('a').attr('download', data.fname);
+			$('#demo-file'+id).find('a').text((data.fname.length > 50)?data.fname.substring(0, 50)+'...':data.fname);
+			$('#demo-file'+id).find('.vq').attr('fname', data.fname);
+		},
+		onUploadError: function(id, message){
+		  
+		},
+		onFileTypeError: function(file){
+		  
+		},
+		onFileSizeError: function(file){
+		  
+		},
+		onFallbackMode: function(message){
+		  
+		}
+	});		
+	$(document).ready(function() {
+		$(".multiple_dropdown").select2({
+		});		
+	});
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var arr_edit_terms=<?php echo (isset($arr_edit_terms)) ? json_encode($arr_edit_terms) : '[]';?>;
+$(function () {
+ //terms &condition end
+    var $trowid = $('#trowid');
+    var template = $('#terms-template').html();
+    var trowid = 0;
+    var $tbody = $('#termsTable').find('> tbody');
+	var termstemplate = $('#terms-template').html();
+	
+    if(arr_edit_terms.length != 0) {
+
+        $.each(arr_edit_terms, function(i, o) {  
+            trowid += 1;
+            $tbody.append(termstemplate.replace(/__/g, '_' + trowid));
+            $('#slno_' + trowid).val(o.SlNo).addClass('border-none').prop('disabled', true);
+            $('#termsid_' + trowid).val(o.data);
+            $('#terms_' + trowid).val(o.value);
+            $('#per_' + trowid).val(o.Per);
+            $('#value_' + trowid).val(o.Val);
+            $('#period_' + trowid).val(o.Period);
+            $('#date_' + trowid).val(o.Dte);
+            $('#string_' + trowid).val(o.Strg);
+            $('#isper_' + trowid).val(o.IsPer);
+            $('#isvalue_' + trowid).val(o.IsValue);
+            $('#isperiod_' + trowid).val(o.IsPeriod);
+            $('#istdate_' + trowid).val(o.IsTDate);
+            $('#iststring_' + trowid).val(o.IsTString);
+            $('#includegross_' + trowid).val(o.IncludeGross);
+            $('#termsdeleteTr_' + trowid).show();
+        });
+    }
+    trowid += 1;
+    $tbody.append(template.replace(/__/g, '_' + trowid));
+    $trowid.val(trowid);
+});
+function bindTermsAutocomplete() { 
+	var type = $('#qtn_type').val();
+	console.log(type);
+	if(type==2){
+		var arr_terms=<?php echo (isset($arr_terms)) ? json_encode($arr_terms) : '[]';?>;
+	}else{
+		var arr_terms=<?php echo (isset($arr_termsType)) ? json_encode($arr_termsType) : '[]';?>;
+	}
+	var tmp_arr_terms=arr_terms;
+	console.log(tmp_arr_terms);
+    // bind resource autocomplete
+    $('#termsTable .resourceSuggest').autocomplete({
+        lookup: tmp_arr_terms,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                var $this = $(this);
+                var rowid = $this[0].id.split('_')[1];
+                $this.prop('readonly', true).addClass('border-none');
+                $('#termsid_' + rowid).val(suggestion.data);
+                $('#slno_' + rowid).val(suggestion.SlNo).attr("readonly",true);
+                $('#terms_' + rowid).val(suggestion.value);
+                $('#per_' + rowid).val(sanitizeNumber(suggestion.Per,2,true));
+                $('#value_' + rowid).val(sanitizeNumber(suggestion.Val,2,true));
+                $('#period_' + rowid).val(sanitizeNumber(suggestion.Period,1,true));
+            //    $('#date_' + rowid).val(suggestion.Dte);
+                $('#string_' + rowid).val(suggestion.Strg);
+                $('#isper_' + rowid).val(suggestion.IsPer);
+                $('#isvalue_' + rowid).val(suggestion.IsValue);
+                $('#isperiod_' + rowid).val(suggestion.IsPeriod);
+                $('#istdate_' + rowid).val(suggestion.IsTDate);
+                $('#iststring_' + rowid).val(suggestion.IsTString);
+                $('#includegross_' + rowid).val(suggestion.IncludeGross);
+                $('#termsdeleteTr_' + rowid).show();
+                if(parseInt($('#isper_' + rowid).val())==0){$('#per_' + rowid).attr("readonly",true);}
+                if(parseInt($('#isvalue_' + rowid).val())==0) {$('#value_' + rowid).attr("readonly",true);}
+                if(parseInt($('#isperiod_' + rowid).val())==0) {$('#period_' + rowid).attr("readonly",true);}
+                if(parseInt($('#istdate_' + rowid).val())==0) {$('#date_' + rowid).attr("readonly",true);}
+                if(parseInt($('#iststring_' + rowid).val())==0) {$('#string_' + rowid).attr("readonly",true);}
+                addNewTermsRow($this);
+            }
+        }, onSearchStart: function (suggestion) {
+            //var rowid = $(this)[0].id.split('_')[1];
+            ////$('#terms_' + rowid).val('');
+        }, onSearchComplete: function (query, suggestions) {
+            if(!suggestions.length) {
+                // var rowid = $(this)[0].id.split('_')[1];
+                // $('#terms_' + rowid).val('');
+            }
+        }
+    });
+}
+
+
+function checkTermsUsed(x) {
+	var type = $('#qtn_type').val();
+	if(type==2){
+		var arr_terms=<?php echo (isset($arr_terms)) ? json_encode($arr_terms) : '[]';?>;
+	}else{
+		var arr_terms=<?php echo (isset($arr_termsType)) ? json_encode($arr_termsType) : '[]';?>;
+	}
+	var tmp_arr_terms=arr_terms;
+    var id = $(x)[0].id.split('_')[1];
+    var termkeyid = $('input[id*=termsid_]');
+    tmp_arr_terms = arr_terms;
+    tmp_arr_terms = $.grep(arr_terms, function (element, index) {
+        var is_selected = true;
+        $.each(termkeyid, function (i, obj) {
+            var $this = $(this),
+                name = $this[0].id;
+            var arrname = name.split('_');
+            var key1 = arrname[1];
+            if (key1 != id) {
+                if (element.data == $this.val()) {
+                    is_selected = false;
+                    return false;
+                }
+            }
+        });
+        return is_selected;
+    });
+    bindTermsAutocomplete();
+}
+function addNewTermsRow(x) {
+    var $tr = $(x).closest('tr');
+    if ($tr.next('tr:not(.subTr)').length != 0)
+        return;
+
+    var $trowid = $('#trowid'),
+        trowid = parseInt($trowid.val()),
+        $tbody = $('#termsTable').find('> tbody.main');
+
+    $('#deleteTr_' + trowid).show();
+    var count = trowid + 1,
+        template = $('#terms-template').html();
+
+    template = template.replace(/__/g, '_' + count);
+    $tbody.append(template);
+
+    $trowid.val(count);
+    var tCount =  $('#termsTable tbody tr').length;
+    if(tCount > 1){
+        $('#valuefrom').attr("disabled", true);
+    }
+    else {
+        $('#valuefrom').attr("disabled", false);
+    }
+    bindTermsAutocomplete();
+}	
+
+function deleteRow(x,e) { 
+    e.preventDefault();
+    var $x = $(x),
+        key = $x[0].className.split('_')[1];
+
+    if (!confirm('Do you want to Delete'))
+        return false;
+
+    var $tr = $x.closest('tr');
+    $tr.next('.subTr').remove();
+    $tr.next('.subTr').remove();
+    $tr.remove();
+    var rId = $('#rowid').val();
+    rId--;
+    if(rId == 1){
+        document.getElementById("vendor").disabled = false;
+    }
+    $('#rowid').val(rId);
+    calcTotal();
+    bindTermsAutocomplete();
+    TermsAutoRefresh();
+    return false;
+}
+</script>

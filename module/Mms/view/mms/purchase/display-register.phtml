@@ -1,0 +1,220 @@
+<style type="text/css">
+    .jqx-grid-header {height:75px !important;}
+	.reg-icon-file{color:hsl(208, 41%, 58%) !important;margin-top:10px; }
+</style>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+		 <div class="row">
+			<div class="col-lg-5 col-md-5 col-sm-4">
+				<h1>Purchase Order Register
+					<div class="stgedit_btn req_addbtn brad_50">
+						<a href="<?php echo $this->basePath();?>/mms/purchase/order" class="ripple" data-toggle="tooltip" data-placement="right" title="Add New PO"><i class="fa fa-plus"></i></a>
+					</div>
+				</h1>
+			</div>
+			<div class="col-lg-12">
+				<div id="subGrid">
+				</div>	
+			</div>
+		</div>
+		<div class="row" style="">
+			<div class="col-lg-12">
+				<div id="jqxgrid">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="col-lg-12 savebtn_area">
+	<ul>
+		<li class="dropdown save_btn float_r">
+			<a href="<?php echo $this->basePath();?>/mms/master/resourceview" class="ripple">Close</a>
+		</li>
+	 </ul>
+</div>	
+
+<script type="text/javascript">
+
+$(document).ready(function (){
+	$.ajax({    
+		url:getBaseURL()+"mms/purchase/display-register",
+		type:"post",
+		data:"mode=first",
+		dataType:"json",
+		success:function(data, textStatus, jqXHR){
+			//alert(JSON.stringify(data))
+			var $treeGrid = $("#subGrid");
+			var source =
+			{
+				dataFields: [
+					{ name: 'PoRegisterId', type: 'string'},
+                    { name: 'PoDate', type: 'date', format: 'MM-dd-yyyy'},
+					{ name: 'PoNo', type: 'string' },
+                    { name: 'CostCentreName', type: 'string' },
+                    { name: 'CostCentreId', type: 'string' },
+                    { name: 'VendorName', type: 'string' },
+					{ name: 'NetAmount', type: 'string' },
+					{ name: 'Approve', type: 'string' }
+					
+				],
+				localdata:data,
+				id: 'PoRegisterId',
+				datatype: "json",
+				async: false
+				
+			};
+            var cellsrenderer1 = function (row, column, value) {
+                return '<div style="text-align: center; margin-top: 5px;">' + value + '</div>';
+            };
+
+			var employeesAdapter = new $.jqx.dataAdapter(source);
+
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+                var $tabsdiv = $($(parentElement).children()[0]);
+                $tabsdiv.append(renderRowDetail(datarecord.PoRegisterId,datarecord.CostCentreId));
+            };
+			
+			// creage jqxgrid
+			$("#subGrid").jqxGrid(
+                {
+				    width: '100%',
+				    autoheight:true,
+				    source: employeesAdapter,
+				    sortable: true,
+				    filterable: true,
+				    pageable: true,
+				    showfilterrow: true,
+                    pagerMode: 'advanced',
+                    pagerHeight: 40,
+                    rowsheight:40,
+                    columnsresize: true,
+                    altrows: true,
+                    enabletooltips: true,
+                    groupable: true,
+                    showstatusbar: true,
+                    statusbarheight: 35,
+                    showaggregates: true,
+                    autorowheight: true,
+                    groupsexpandedbydefault: true,
+                    rowdetails:true,
+                    initrowdetails: initrowdetails,
+                    rowdetailstemplate: {
+
+                    rowdetails: "<div id='detailsDiv' style='height:100%;overflow:visible; border:4px solid #5bc0de;'></div>", rowdetailsheight:400 },
+
+				columns: [
+				
+					{ text: 'PoRegisterId', datafield: 'PoRegisterId',  hidden: true, filterable: false},
+					{ text: 'CostCentreId', datafield: 'CostCentreId',  hidden: true, filterable: false},
+                    { text: 'PO Date', dataField: 'PoDate',width:'10%' ,filtertype: 'date',cellsformat: 'dd-MM-yyyy'},
+					{ text: 'PO No', dataField: 'PoNo',width:'10%',align:'center',cellsrenderer: cellsrenderer1 },
+                    { text: 'CostCentre', dataField: 'CostCentreName',width:'25%',align:'center',cellsrenderer: cellsrenderer1},
+                    { text: 'Vendor', dataField: 'VendorName',width:'25%',align:'center',cellsrenderer: cellsrenderer1 },
+					{ text: 'Amount', dataField: 'NetAmount',width:'10%' },
+					{ text: 'Approve', dataField: 'Approve',cellsalign: 'center',align: 'center',width:'10%'},
+					{ text: 'Action', sortable: false, filterable: false, cellsalign: 'center',width:'10%',
+						cellsrenderer: function (row) {
+                            var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+                            var PoRegisterId = $treeGrid.jqxGrid('getCellValue', row, 'PoRegisterId');
+                            var Approve = $treeGrid.jqxGrid('getCellValue', row, 'Approve');
+                            if(Approve == "Yes" || Approve == "Partial") {
+                                var editLink ='<a title="Detailed"   href="' + getBaseURL() + 'mms/purchase/detailed/' + PoRegisterId + '"  style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/purchase/report/' + PoRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                            }
+                            else {
+                                var editLink = '<a href="' + getBaseURL() + 'mms/purchase/order-entry/0/' + PoRegisterId + '" "javascript:void(0);" title="Delete" onclick="poedit(' + PoRegisterId + ',' + row + ');return false;""> <i class="fa fa-pencil-square-o reg-icon"></i></a>' +  //<a title="Edit" href="'+ getBaseURL() + 'mms/purchase/order-entry/'+PoRegisterId+'" "javascript:void(0);" onclick="podelete(' + PoRegisterId + ','+ row +');return false; style="padding-left: 15px; margin-top:8px;">
+                                    "&nbsp;&nbsp;" + '<a href="' + getBaseURL() + 'mms/purchase/deletePO/' + PoRegisterId + '" "javascript:void(0);" title="Delete" onclick="podelete(' + PoRegisterId + ',' + row + ');return false;""><i class="fa fa-trash-o reg-icon"></i></a>' + //<a title="Delete" href="'+ getBaseURL() + 'mms/purchase/deletePO/'+PoRegisterId+'"  style="padding-left: 15px; margin-top:8px;" >
+                                    '<a title="Detailed"   href="' + getBaseURL() + 'mms/purchase/detailed/' + PoRegisterId + '"  style="margin-left: 12px; margin-top:8px;"><i class="fa fa-paper-plane reg-icon"></i></a>';
+                                return editLink + "&nbsp;&nbsp;" + '<a title="Report" href="' + getBaseURL() + 'mms/purchase/report/' + PoRegisterId + '" style="margin-left: 8px;"><i class="fa fa-file-text-o reg-icon-file"></i></a>';
+                            }
+						}
+					}
+				  ]
+			});
+            $("#subGrid").jqxGrid('showgroupsheader', false);
+            $("#subGrid").bind('rowselect', function (event) {
+                var row = event.args.rowindex;
+                var datarow = $("#subGrid").jqxGrid('getrowdata', row);
+            });
+
+//            $('#subGrid').on('rowclick', function (event) {
+//                // event.args.rowindex is a bound index.
+//                //alert("Row with bound index: " + event.args.rowindex +" has been clicked.");
+//
+//            });
+        },
+		error:function(jqXHR, textStatus, errorThrown){
+			alert(textStatus+"-----"+errorThrown);
+		}
+	});
+});
+
+function podelete(poregid,row) {
+    //get selected row
+    var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+    var retVal = true;
+
+    if(rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial")
+    {
+        alert("Can't Delete Already Approved");
+        return;
+    }
+    $.ajax({
+        url: getBaseURL() + 'mms/purchase/orderentry',
+        type: "post",
+        data: "PORegisterId=" + poregid + "&Type=validPODelete",
+        async: false,
+        success: function (data, textStatus, jqXHR) {
+            if (jqXHR.status == 200) {
+                data = JSON.parse(data);
+                if (data.arr1.length>0 || data.arr2.length>0 || data.arr3.length>0) {
+                    alert("Already Used. Do Not Delete");
+                    retVal = false;
+                }
+            }
+            $('.loading_area').hide();
+        }, error: function (jqXHR, textStatus, errorThrown) {
+            $('.loading_area').hide();
+        }
+    });
+    if(retVal == true) {
+        var val = confirm("Do you want to delete this purchase order ?");
+        if (val == true) {
+            location.replace('deletePO/'+poregid);
+        }
+    }
+}
+function poedit(poregid,row) {
+    //get selected row
+    var rowData = $("#subGrid").jqxGrid('getrowdata', row);
+
+    if (rowData['Approve'] == "Yes" || rowData['Approve'] == "Partial") {
+        alert("Can't Edit Already Approved");
+        return;
+    }
+    location.replace('order-entry/0/'+poregid);
+}
+
+    function renderRowDetail(id,ccid){
+        var dataValue = '';
+        $.ajax({
+            url: getBaseURL() + 'mms/purchase/po-details',
+            type: 'POST',
+            data:"poregId="+id+"&costcentreid="+ccid,
+            async: false,
+            virtualmode: true,
+
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+
+    }
+
+</script>

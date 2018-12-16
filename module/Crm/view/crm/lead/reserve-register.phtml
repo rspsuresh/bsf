@@ -1,0 +1,176 @@
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.grouping.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqxgrid.aggregates.js"></script>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/library/jqwidgets/jqx-all.js"></script>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style type="text/css">
+    #treeGrid .jqx-grid-header 	{
+        height:75px !important;
+    }
+</style>
+
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <div class="col-lg-12 padlr0">
+                <h1>Unit Reserve<div class="stgedit_btn req_addbtn brad_50">
+                        <a href="<?php echo $this->basePath(); ?>/crm/lead/reserve" class="ripple" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Lead"><i class="fa fa-plus"></i></a>
+                    </div></h1>
+                <div class="fixed-action-btn padtop0">
+                    <a class="btn-floating btn-large"><i class="fa fa-paperclip"></i></a>
+                    <ul>
+                        <li>
+                            <a class="btn-floating hide-input-file" data-toggle="tooltip" data-placement="bottom" data-original-title="Import From Excel">
+                                <i class="fa fa-file-excel-o"></i>
+                                <input type="file" name="myfile" id="myfile" class="input-large" accept=".xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" onchange="getExcelField();">
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn-floating" href="javascript:void(0);" id="excelExport" download data-toggle="tooltip" data-placement="bottom" data-original-title="Download Sample">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 padlr0 tmss commargin_top clear">
+                <div class="table-responsive clear">
+                    <div id="treeGrid"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="mdlDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Please provide a reason for deleting data</h1>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks"/></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r">
+                            <a href="javascript:void(0);" id="btnDelete" class="ripple">Delete</a>
+                        </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function() {
+        var $treeGrid = $('#treeGrid');
+        var source = {
+            localdata:<?php echo (isset($jsonReserve))?$jsonReserve:'[]'; ?>,
+            dataType: "json",
+            dataFields: [
+                { name: 'ReserveId', type: 'number' },
+                { name: 'ReserveDate', type: "date", format: 'dd/MM/yyyy' },
+                { name: 'UnitNo', type: 'string' },
+                { name: 'UnitId', type: 'string' },
+                { name: 'ReservedBy', type: 'string' },
+               { name: 'ProjectName', type: 'string' }
+
+
+            ],
+            id: 'ReserveId'
+        };
+
+        var dataAdapter = new $.jqx.dataAdapter(source);
+
+        $treeGrid.jqxGrid({
+            width: '100%',
+            pageable: true,
+            selectionMode: 'singleRow',
+            pagerButtonsCount: 6,
+            autoheight:true,
+            //rowsheight:60,
+            autorowheight: true,
+            filterable: true,
+            sortable: true,
+            //filtermode: 'advanced',
+            columnsResize: true,
+            showfilterrow: true,
+            ready:function(){
+                var localizationobj = {};
+                localizationobj.emptydatastring = "No Unit Transfers found!";
+                $treeGrid.jqxGrid('localizestrings', localizationobj);
+            },
+            source:dataAdapter,
+            columns: [
+                { text: 'ReserveId', dataField: 'ReserveId',hidden: true, filterable: false},
+                { text: 'ReserveDate', filtertype: 'date', dataField: 'ReserveDate',cellsformat: 'dd/MM/yyyy',width:'20%' },
+                { text: 'ReservedBy', dataField: 'ReservedBy',width:'20%'},
+                { text: 'UnitName', dataField: 'UnitNo',width:'30%'},
+                { text: 'UnitId', dataField: 'UnitId',width:'10%',hidden: true},
+                { text: 'Project Name', dataField: 'ProjectName',width:'20%'},
+
+                { text: 'Action', sortable: false, filterable: false,width:'10%',align: 'left',
+                    cellsrenderer: function (row) {
+                        var ReserveId = $treeGrid.jqxGrid('getCellValue', row, 'ReserveId');
+
+                        // booking = $treeGrid.jqxGrid('getCellValue', row, 'BookingDate');
+                        var btn_str = '<a title="Edit" href="'+ getBaseURL() + 'crm/lead/reserve/'+ReserveId+'" style="padding-left: 15px; margin-top:8px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>';
+                        btn_str += '<a title="Delete" onclick="payRowDelete(' + row + ');return false;"><i class="fa fa-times reg-icon"></i></a>';
+                        return btn_str;
+
+                    }
+                }
+            ]
+        });
+    });
+
+    $('#btnDelete').on('click', function () {
+        //alert("1");
+        var remarks = $("#remarks").val();
+        if(remarks.length == 0) {
+            showError($("#remarks"), 'Required!');
+            return;
+        } else{
+            removeError($("#remarks"));
+
+            $('#mdlDelete').modal('hide');}
+        var rowData =$('#treeGrid').jqxGrid('getrowdata', $('#mdlDelete').data('row'));
+        $.ajax({
+            url: getBaseURL() + 'crm/lead/preBookDelete',
+            type: 'POST',
+            async: false,
+            data: {"RegisterId": rowData.ReserveId, "Remarks": remarks,"UnitId": rowData.UnitId,mode:'reserve'},
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status == 200)
+                    $('#treeGrid').jqxGrid("deleterow", rowData.ReserveId);
+                else
+                    alert('Failed to delete!');
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Failed to delete!');
+            }
+        });
+        $("#remarks").val('');
+    });
+    function payRowDelete(row) {
+        var rowData =$('#treeGrid').jqxGrid('getrowdata', row);
+        $('#mdlDelete').data('row', row).modal('show');
+        $("#remarks").val('');
+    }
+    $("#excelExport").click(function () {
+        $("#treeGrid").jqxGrid('exportdata', 'xls', 'jqxGrid');
+    });
+
+</script>

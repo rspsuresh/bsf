@@ -1,0 +1,75 @@
+<?php if(isset($allowAddUser) && !$allowAddUser):?>
+    <div class="signup_wrapper">
+        <div class="signup_header">
+            <img src="<?php echo $this->basePath(); ?>/images/rabills_logo.png" class="login_logo" alt="" title="Ra-Bills" />
+        </div>
+        <div class="signup_content">
+            <h2 class="txt_center m_tb40">
+                <img class="m_btm20" src="<?php echo $this->basePath(); ?>/images/mail_icon.png"/><br />
+                Sorry, You are allowed to add only <?php echo $NoOfUserCount;?> user(s) in this plan!<br><br>
+                <a href="<?php echo $this->basePath(); ?>/cb/plan/upgrade">Upgrade your plan!</a>
+            </h2>
+        </div>
+    </div>
+<?php else: ?>
+<div class="signup_wrapper">
+	<div class="signup_header">
+		<img src="<?php echo $this->basePath(); ?>/images/rabills_logo.png" class="login_logo" alt="" title="Ra-Bills" />
+	</div>
+	<div class="signup_content">
+		<div class="signupcnt_left float_l">
+			<h1>Add User</h1>
+			<form id="addUserForm" method="post" autocomplete="off">
+				<ul class="login_form cb_login_form">
+					<li class="login_input">
+						<p class="label_p"><label for="email">Email</label></p>
+						<input type="text" id="email" name="email" autocomplete="off" />
+						<div class="error_message"></div>
+					</li>
+					<li>
+						<div class="login_load brad_2"><p><img src="<?php echo $this->basePath(); ?>/images/loading.gif" alt="" />Loading &nbsp;&nbsp;&nbsp;Please Wait!</p></div>
+						<button type="submit" name="addUser" class="signup_btn brad_2 ripple" onclick="return addUserValidate();">Submit</button>
+					</li>
+				</ul>
+			</form>
+		</div>
+		<div class="signup_footer clear">
+			<p class="txt_center">Copyright © <?php echo date('Y'); ?> RA-Bills.com. All Rights Reserved <img class="float_r" src="<?php echo $this->basePath(); ?>/images/bsf_flogo.jpg" alt="" /></p>
+		</div>
+	</div>
+</div>
+<script>
+function addUserValidate()
+{
+	$('.error_message').hide();
+	var sFlag = 0;
+	if($('#email').val() == '') {
+		$('#email').closest('.login_input').find(".error_message").show();
+		$('#email').closest('.login_input').find(".error_message").html('<p>Required</p>');
+		$('#email').focus();
+		sFlag = 1;
+		return false;
+	} else if($('#email').val() != '' && validateEmail($('#email').val())==false) {
+		$('#email').closest('.login_input').find(".error_message").show();
+		$('#email').closest('.login_input').find(".error_message").html('<p>Please enter valid email id</p>');
+		$('#email').focus();
+		sFlag = 1;
+		return false;
+	}
+	if(sFlag == 0) {
+		$.post(getBaseURL()+'cb/index/check-email', { eMail: $('#email').val() },
+		function(data) {
+			var chkusr = JSON.parse(data);
+			if(chkusr.Count != 0) {
+				$('#email').closest('.login_input').find(".error_message").show();
+				$('#email').closest('.login_input').find(".error_message").html('<p>Email already exists!</p>');
+				$('#email').focus();
+			} else {
+				$("#addUserForm").submit();
+			}
+		});
+	}
+	return false;
+}
+</script>
+<?php endif;?>

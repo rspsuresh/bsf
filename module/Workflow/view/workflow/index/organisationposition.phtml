@@ -1,0 +1,407 @@
+<style>
+    .search-container label {right: 10px;position: absolute;top: 30px;z-index:999;color:#ccc;}
+    .sr-only {border: 0 none;clip: rect(0px, 0px, 0px, 0px);height: 1px; margin: -1px;overflow: hidden;padding: 0;position: absolute;      width: 1px;}
+    .search-container {font-size: 18px;margin: -20px auto 0;padding-top: 20px;position: relative}
+    .card {margin: 15px 0;padding: 11px;}
+    .panel {margin-bottom:5px}
+    .form-group1{margin-bottom:8px}
+    .panel-body{background:#F7F7F7;font-family: 'roboto', sans-serif;}
+    .adddprtmnt_box{background:#E9ECF2;margin-bottom:5px}
+    .lbl_move{height:40px !important}
+</style>
+<script id="posDetails"  type="text/template" class="hide">
+    <tr id="index__">
+        <td id="sno__"></td>
+        <td id="posName__"></td>
+        <!--        <td id="posTypeName__"></td>-->
+        <td class="action_btns_td">
+            <ul class="action_btns">
+                <li>
+                    <a id="bindPosIdDelete__" href="javascript:void(0);" data-toggle="tooltip" data-placement="left"
+                       data-original-title="Delete">
+                        <span><i class="fa fa-trash-o"></i></span>
+                    </a>
+                </li>
+                <li>
+                    <a id="bindPosIdEdit__" href="javascript:void(0);" data-toggle="tooltip" class="mainTr"
+                       rel="rt" data-placement="left" data-original-title="Edit">
+                        <span><i class="fa fa-edit"></i></span>
+                    </a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+</script>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid padlr0">
+        <div class="col-lg-12">
+            <h1 class="col-lg-6 col-md-6 col-sm-5 padlr0" data-bsfhead="Position">Position
+                <div class="stgedit_btn req_addbtn brad_50">
+                    <a href="javascript:void(0);" class="ripple mainTr" data-expandid="0" rel="oc" data-toggle="tooltip" data-placement="right" title="Add&nbsp;New&nbsp;Position" onclick="getPosId(this);"><i class="fa fa-plus"></i></a>
+                </div>
+            </h1>
+            <div class="col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 padlr0">
+                <div class="input-group col-md-12">
+                    <input name="search_all" id="search_all" type="text" onkeyup="positionSearch($(this).val());" class="form-control grid_search_input"/>
+                        <span class="input-group-btn">
+                            <button class="btn grid_search_btn" type="button">
+                                <span><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </button>
+                        </span>
+                </div>
+            </div>
+        </div>
+        <div id="add_data">
+
+        </div>
+        <div class="col-lg-12 clear">
+            <div class="table-responsive" style="min-height:200px;">
+                <table class="table table-hover tbltop_bdr0">
+                    <thead>
+                    <tr>
+                        <th width="5%">S.No</th>
+                        <th width="80%">Position</th>
+                        <!--                        <th width="40%">Position Type</th>-->
+                        <th width="15%">&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php $k=0; if(isset($resultPosReg)) {
+                        foreach ($resultPosReg as $resultPosRegs):
+                            $k += 1;?>
+                            <tr id="index_<?php echo $k; ?>">
+                                <td><?php echo $k; ?></td>
+                                <td><?php echo $resultPosRegs['PositionName']; ?></td>
+                                <!--                                <td>--><?php //echo $resultPosRegs['PositionTypeName']; ?><!--</td>-->
+                                <td class="action_btns_td">
+                                    <ul class="action_btns">
+                                        <li>
+                                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left"
+                                               data-original-title="Delete"
+                                               onclick="positionDelete(this, '<?php echo $resultPosRegs['PositionId']; ?>', '<?php echo $resultPosRegs['PositionName']; ?>', '<?php echo $k; ?>')">
+                                                <span><i class="fa fa-trash-o"></i></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" data-toggle="tooltip" class="mainTr"
+                                               data-expandid="<?php echo $resultPosRegs['PositionId']; ?>"
+                                               onclick="getPosId(this);editPosition('<?php echo $resultPosRegs['PositionId']; ?>',$(this));"
+                                               rel="rt" data-placement="left" data-original-title="Edit">
+                                                <span><i class="fa fa-edit"></i></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        <?php endforeach;
+                    } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delete Confirmation Modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h1>Why do you want to delete <span id="delPosName" class="bld-txt"></span>?</h1>
+                <input type="hidden" name="deletePosId" id="deletePosId" value="" />
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                    <form class="form-horizontal">
+                        <div class="row m_tb40">
+                            <div class="col-lg-12 form-group req_flds">
+                                <textarea id="remarks" maxlength="250" class="form-control lbl_move" label="Enter the remarks">
+                                </textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer clear">
+                <div class="col-lg-12 savebtn_area no_border">
+                    <ul>
+                        <li class="save_btn float_r"> <a href="javascript:void(0);" id="btnDeleteYes" class="ripple">Delete</a> </li>
+                        <li class="cancel_btn float_r"><a href="javascript:void(0);" aria-hidden="true" data-dismiss="modal" class="ripple">Cancel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(".error_message").hide();
+var $deleteModal = $('#DeleteModal'),
+    $remarks = $('#remarks');
+$(document).on('click','.mainTr',function() {
+    var relDiv = $(this);
+    if(relDiv.attr('rel')=='oc') {
+        $('.close_tr').remove();
+        $('#add_data').html('');
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/orgpositionupdate',
+            type: 'POST',
+            data: {"mode":'add'},
+            success:function(data, textStatus, jqXHR) {
+                $('#add_data').html(data);
+                $('.card-body').slimScroll({
+                    height : '100%',
+                    alwaysVisible: false,
+                    railVisible: true,
+                    railColor: '#cececd',
+                    railOpacity: 1
+                });
+                var addPlatForm = $('#ocDivDept_1');
+                addPlatForm.find(".lbl_move").polymerForm();
+                addPlatForm.find(".lbl_move").each(function() {
+                    if($(this).val() != '' && $(this).val() != null) {
+                        $(this).closest('div').addClass('dirty');
+                    }
+                });
+                $(".single_dropdown").select2({
+                    placeholder: "",
+                    allowClear: true
+                });
+                addPlatForm.show("slow");
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                alert('Request Failed');
+            }
+        });
+    }
+});
+$(document).on('click','.panel-heading',function() {
+    $('.panel-heading').removeClass('accordion_head_crnt');
+    if($(this).next('div.in'))
+        $(this).addClass('accordion_head_crnt');
+    else
+        $(this).removeClass('accordion_head_crnt');
+});
+$(document).on('change','.sampleUI input:checkbox',function (){
+    var current = $(this).closest('li'),
+        $checkbox = current.find("input:checkbox"),
+        key = $checkbox.data('id');
+    if($checkbox.is(':checked')){
+        var prependToDiv = $('#checkedUl_' + key);
+        current.animate({
+            top: -30,
+            left: prependToDiv.offset().left
+        }, 200, function() {
+            current.prependTo(prependToDiv).css({
+                top: 'auto',
+                left: 'auto'
+            });
+        });
+    }
+    else{
+        var prependToDiv = $('#unCheckedUl_' + key);
+        current.animate({
+            top: -30,
+            left: -prependToDiv.offset().left
+
+        }, 200, function() {
+            current.prependTo(prependToDiv).css({
+                top: 'auto',
+                left: 'auto'
+            });
+        });
+    }
+});
+globalTimeout = null;
+
+function positionSearch(positionDetails) {
+    if (globalTimeout != null) {
+        clearTimeout(globalTimeout);
+    }
+    globalTimeout = setTimeout(function() {
+
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/organisationposition',
+            type: 'POST',
+            data: {'uMode': 'searchpos','searchVal' : $.trim(positionDetails)},
+            async:true,
+            success: function (data, textStatus, jqXHR) {
+                var posDetail = JSON.parse(data);
+                $('.table tbody').html('');
+                if(posDetail.length>0) {
+                    $.each(posDetail,function(i,o) {
+                        var posTemplate = $('#posDetails').html();
+                        $('.table tbody').append(posTemplate.replace(/__/g, '_' + (i+1)));
+//                        $('#posTypeName_'+(i+1)).html(o.PositionTypeName);
+                        $('#posName_'+(i+1)).html(o.PositionName);
+                        $('#sno_'+(i+1)).html(i+1);
+                        $('#bindPosIdDelete_'+(i+1)).attr('onclick','positionDelete(this,'+ o.PositionId +','+ o.PositionName+','+(i+1)+')');
+                        $('#bindPosIdEdit_'+(i+1)).attr('data-expandid',o.PositionId);
+                        $('#bindPosIdEdit_'+(i+1)).attr('onclick','getPosId(this);editPosition('+ o.PositionId +',$(this));');
+                    });
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status == 400)
+                    alert(jqXHR.responseText);
+                else
+                    alert("Request Failed");
+
+            }
+        });
+        globalTimeout=null;
+    }, 500);
+}
+$(document).on('click','#submitData',function(){
+    $(".error_message").hide();
+    if($("#positionName_0").val() == ""){
+        $("#positionName_0").closest(".req_flds").find(".error_message").show();
+        $("#positionName_0").focus();
+        return;
+    }
+//    if($("#positionTypeId_0").val() == 0){
+//        $("#positionTypeId_0").closest(".req_flds").find(".error_message").show();
+//        $("#positionTypeId_0").focus();
+//        return;
+//    }
+    if($("#positionName_0").val() != ""){
+        $valid=1;
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/deleteorgposition',
+            type: 'POST',
+            data: {"PosId": 0, "Remarks": "", "Type": 'check',"positionName": $('#positionName_0').val() },
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status != 200) {
+                    $valid=0;
+                    alert('Already Exists Position Name!');
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                //alert('Failed to delete the Department!');
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+        if($valid==0){
+            $("#positionName_0").closest(".req_flds").find(".error_message").show();
+            $("#positionName_0").focus();
+            return;
+        }
+    }
+    $("#addForm").submit();
+});
+$(document).on('click','.editSubmitBtn',function(){
+    $(".error_message").hide();
+    var key=$(this).data('editid');
+    if($("#positionName_" + key).val() == ""){
+        $("#positionName_" + key).closest(".req_flds").find(".error_message").show();
+        $("#positionName_" + key).focus();
+        return;
+    }
+//    if($("#positionTypeId_" + key).val() == 0){
+//        $("#positionTypeId_" + key).closest(".req_flds").find(".error_message").show();
+//        $("#positionTypeId_" + key).focus();
+//        return;
+//    }
+    if($("#positionName_" + key).val() != ""){
+        $valid=1;
+        $posLName=$("#positionName_" + key).val();
+        $posLId=$("#PosId_" + key).val();
+        $.ajax({
+            url: getBaseURL() + 'workflow/index/deleteorgposition',
+            type: 'POST',
+            data: {"PosId": $posLId, "Remarks": "", "Type": 'check',"positionName": $posLName },
+            async: false,
+            success:function(data, textStatus, jqXHR){
+                if (jqXHR.status != 200) {
+                    $valid=0;
+                    alert('Already Exists Position Name!');
+                }
+            },
+            error:function(jqXHR, textStatus, errorThrown){
+                //alert('Failed to delete the Department!');
+                alert(textStatus+"-----"+errorThrown);
+            }
+        });
+        if($valid==0){
+            $("#positionName_" + key).closest(".req_flds").find(".error_message").show();
+            $("#positionName_" + key).focus();
+            return;
+        }
+    }
+    $("#editform_" + key).submit();
+});
+$('#btnDeleteYes').on('click', function () {
+    var remarks = $remarks.val();
+    if(remarks.length == 0) {
+        showError($remarks, 'Required!');
+        return;
+    } else {
+        removeError($remarks);
+    }
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/deleteorgposition',
+        type: 'POST',
+        data: {"PosId": $('#deletePosId').val(), "Remarks": remarks, "Type": 'update'},
+        async: false,
+        success:function(data, textStatus, jqXHR){
+            if (jqXHR.status == 200) {
+                $('#index_'+$deleteModal.attr('data-rowid')).remove();
+                $('#rtDivDept_'+$deleteModal.attr('data-rowid')).remove();
+            } else
+                alert('Cannot delete this Position, it is already in use!');
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            alert('Failed to delete the Position!');
+        }
+    });
+    $deleteModal.modal('hide');
+    $remarks.val('');
+});
+function positionDelete(x, id, name, indexrowId) {
+    $deleteModal.attr('data-rowid', indexrowId).modal('show');
+    $("#remarks").val('');
+    $("#deletePosId").val(id);
+    $('#delPosName').html(name);
+}
+function getPosId(data) {
+    curPosId = $(data).attr('data-expandid');
+}
+function editPosition(posId,_this) {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+    $.ajax({
+        url: getBaseURL() + 'workflow/index/orgpositionupdate',
+        type: 'POST',
+        data: {"posId": posId,"mode":'edit'},
+        success:function(data, textStatus, jqXHR){
+            $(data).insertAfter(_this.closest('tr'));
+            $('.card-body').slimScroll({
+                height : '100%',
+                alwaysVisible: false,
+                railVisible: true,
+                railColor: '#cececd',
+                railOpacity: 1
+            });
+            var editPlatForm = $('#rtDivDept_'+posId);
+            editPlatForm.find(".lbl_move").polymerForm();
+            editPlatForm.find(".lbl_move").each(function() {
+                if($(this).val() != '' && $(this).val() != null) {
+                    $(this).closest('div').addClass('dirty');
+                }
+            });
+            $(".single_dropdown5").select2({
+                placeholder: "",
+                allowClear: true
+            });
+            _this.closest('tr').next('tr').show("slow");
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+
+        }
+    });
+}
+$(document).on('click','.close',function() {
+    $('.close_tr').remove();
+    $('#add_data').html('');
+});
+</script>

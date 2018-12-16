@@ -1,0 +1,388 @@
+<div class="col-lg-12" >
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+            <input type="text" class="form-control date_picker lbl_move" label="Reference Date" readonly name="refdate" value = "<?php echo date("d-m-Y", strtotime($rfcregister['RefDate'])); ?>"  readonly id="refdate"/>
+        </div>
+    </div>
+    <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+        <div class="col-lg-12">
+            <input type="text" class="form-control lbl_move" label="Reference No" name="refno" value = "<?php echo $rfcregister['RefNo'];?>" readonly id="refno"/>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+<table class="table" style=" margin-bottom:0px; id="sample12">
+<thead>
+<tr class="popuptable-topfix">
+    <th <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?> width="3%">Code</th>
+    <th width="11%">Resource Name</th>
+    <th width="11%">Resource Group</th>
+    <th width="5%">Type Name</th>
+    <th width="5%">Unit</th>
+    <th width="5%">Rate</th>
+    <th width="4%">&nbsp;</th>
+</tr>
+</thead>
+<tbody class="demo" style="width:100%; height: 300px">
+<?php $i=0;
+if (isset($rfctrans)):
+    foreach($rfctrans as $trans):
+        $rfctransid = $trans['RFCTransId'];
+        $i=$i+1; ?>
+        <tr id="ResourceiRowId_<?php echo $i; ?>">
+            <td width="3%" <?php echo ($codegenType == 1) ? 'style="display:none;"': ''; ?>><input class="parent_text" name="code_<?php echo $i ?>" value = "<?php echo $trans['Code'];?>" readonly id="code_<?php echo $i ?>"/></td>
+            <td width="11%" align="center"><textarea class="parent_texts" name="resname_<?php echo $i ?>" id="resname_<?php echo $i ?>" autocomplete="off" readonly><?php echo $trans['ResourceName'];?></textarea></td>
+            <td width="11%"><input type="text" class="parent_text" name="resgroupname_<?php echo $i ?>" id ="resgroupname_<?php echo $i ?>" value = "<?php echo $trans['ResourceGroupName'];?>" readonly></td>
+            <td width="5%"><input class="parent_text" type="text" name="typename_<?php echo $i ?>" value = "<?php echo $trans['TypeName'];?>" id="typename_<?php echo $i ?>" readonly/></td>
+            <td width="5%"><input type="text" class="parent_text" name="unitname_<?php echo $i; ?>" id="unitname_<?php echo $i; ?>" value = "<?php echo $trans['UnitName'];?>" readonly></td>
+            <td width="5%"><input class="parent_text text-right" maxlength="15" type="text" name="rate_<?php echo $i ?>" value = "<?php echo $this->commonHelper()->sanitizeNumber($trans['Rate'],2,true);?>" id="rate_<?php echo $i ?>" align="right" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onfocus="return clickExpandTr(this.id)" readonly/></td>
+            <input type="hidden" name="typeid_<?php echo $i ?>" value = "<?php echo $trans['TypeId'];?>" id="typeid_<?php echo $i ?>">
+            <input type="hidden" name="unitid_<?php echo $i ?>" id ="unitid_<?php echo $i ?>" value="<?php echo $trans['UnitId'];?>">
+            <input type="hidden" name="resgroupid_<?php echo $i ?>" id ="resgroupid_<?php echo $i ?>" value="<?php echo $trans['ResourceGroupId'];?>">
+            <input type="hidden" name="resourceid_<?php echo $i ?>" id ="resourceid_<?php echo $i ?>" value="<?php echo $trans['ResourceId'];?>">
+            <td width="4%">
+                <ul class="action_btns">
+                    <?php if($trans['TypeId'] != '1'): ?>
+                        <li>
+                            <a href="#" class="mainTr_<?php echo $i; ?>"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Expand" ></i></a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </td>
+        </tr>
+        <!--expand table-->
+        <tr style="display:none;" class="subTr_<?php echo $i ?> paintTr">
+        <td colspan="12"><div class="subDiv" style="display:none;" >
+        <?php if($trans['TypeId'] == '4'): ?>
+            <!-- Activity SubDiv -->
+            <div class="darkmenu">
+                <ul>
+                    <li class="active" id="manual_tab_<?php echo $i ?>"><a href="javascript:showmix('manual', '#manual_tab_<?php echo $i ?>')"><i class="fa fa-magic"></i> Manual</a></li>
+                    <li id="machinery_tab_<?php echo $i ?>"><a href="javascript:showmix('machinery', '#machinery_tab_<?php echo $i ?>')"><i class="fa fa-cogs"></i> Machinery</a></li>
+                </ul>
+                <div class="lstate manual_mac">
+                    <ul>
+                        <li>
+                            <label>LS Rate</label>
+                            <input type="text" class="text-right" maxlength="15" name="analrateLS_<?php echo $i ?>" id="analrateLS_<?php echo $i ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['LRate'],2,true);?>" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" readonly/>
+                        </li>
+                        <li>
+                            <label>Manual Rate</label>
+                            <input type="text" class="text-right" maxlength="15" name="analrateM_<?php echo $i ?>" id="analrateM_<?php echo $i ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['MRate'],2,true);?>" onkeypress="return isDecimal(event,this)" readonly/>
+                        </li>
+                        <li>
+                            <label>Machinery Rate</label>
+                            <input type="text" class="text-right" maxlength="15" name="analrateA_<?php echo $i ?>" id="analrateA_<?php echo $i ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['ARate'],2,true);?>" onkeypress="return isDecimal(event,this)" readonly/>
+                        </li>
+                        <li>
+                            <label>Rate Type</label>
+                            <div class="select-style select-inline">
+                                <select name="analrate_<?php echo $i ?>" id ="analrate_<?php echo $i ?>" onchange="return MainRateUpdate()">
+                                    <option value="L" <?php echo ($trans['RateType'] == 'L') ? 'selected' : '';?>>LS </option>
+                                    <option value="M" <?php echo ($trans['RateType'] == 'M') ? 'selected' : '';?>>Manual </option>
+                                    <option value="A" <?php echo ($trans['RateType'] == 'A') ? 'selected' : '';?>>Machinery </option>
+                                </select>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-12 clear">
+                <div id="activityWQty_<?php echo $i ?>">
+                    <label class="lbl_style">Working Qty</label>
+                    <input type="text" class="parent_texters work_qt text-right" maxlength="15" name="activity_<?php echo $i ?>_AnalQty" id="activity_<?php echo $i ?>_AnalQty" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['AnalysisMQty'],3);?>" onkeypress="return isDecimal(event,this)" readonly>
+                </div>
+                <div id="activityWQtyR_<?php echo $i ?>" style="display: none;">
+                    <label class="lbl_style">Working Qty</label>
+                    <input type="text" class="parent_texters work_qt text-right" maxlength="15" name="activityR_<?php echo $i ?>_AnalQty" id="activityR_<?php echo $i ?>_AnalQty" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['AnalysisAQty'],3);?>" onkeypress="return isDecimal(event,this)" readonly>
+                </div>
+                <div class="table-responsive topsp animated-panel zoomIn" style="overflow: visible;animation-delay: 0.2s;">
+                    <!-- Manual tabs -->
+                    <table class="table" style="margin-bottom:0px; margin-top:8px;" id="activity_<?php echo $i ?>_restable">
+                        <thead>
+                        <tr class="popuptable-topfixs">
+                            <th class="bg_clo_subTr" width="21%">Resource name</th>
+                            <th class="bg_clo_subTr" width="5%">Unit</th>
+                            <th class="bg_clo_subTr" width="5%">Qty</th>
+                            <th class="bg_clo_subTr" width="5%">Rate</th>
+                            <th class="bg_clo_subTr" width="8%">Amount</th>
+                            <th class="bg_clo_subTr text-center" width="4%">&nbsp;</th>
+                        </tr>
+                        </thead>
+
+                        <tbody class="sorting fix-tabletops">
+                        <?php $j=0; $total=0;
+                        if(isset($rfcactivity)):
+                            foreach($rfcactivity as $curanal):
+                                $rfcrestransid = $curanal['RFCTransId'];
+                                if($curanal['ActivityType'] != 'M' || $rfctransid != $rfcrestransid)
+                                    continue;
+                                $j = $j+1; ?>
+                                <tr id="activity_<?php echo $i ?>_RowId_<?php echo $j ?>" >
+                                    <td width="21%"><input class="parent_text" type="text" data-toggle="popover" name="activity_<?php echo $i ?>_resname_<?php echo $j ?>" id ="activity_<?php echo $i ?>_resname_<?php echo $j ?>" value="<?php echo $curanal['Code'].' '.$curanal['ResourceName'];?>" readonly autocomplete="off"></td>
+                                    <td width="5%"><label for="activity_<?php echo $i ?>_resunit_<?php echo $j ?>"><?php echo $curanal['UnitName'];?></label></td>
+                                    <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="activity_<?php echo $i ?>_resqty_<?php echo $j ?>" id="activity_<?php echo $i ?>_resqty_<?php echo $j ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Qty'],3);?>" onfocus="return showformula(this.id)" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onkeydown="return showF(this.id,event)" readonly></td>
+                                    <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="activity_<?php echo $i ?>_resrate_<?php echo $j ?>" id="activity_<?php echo $i ?>_resrate_<?php echo $j ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Rate'],2,true);?>" onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2,true)" readonly></td>
+                                    <td width="8%"><input type="text" class="parent_text text-right" maxlength="15" name="activity_<?php echo $i ?>_resamt_<?php echo $j ?>" id="activity_<?php echo $i ?>_resamt_<?php echo $j ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($curanal['Amount'],2,true);?>" readonly onkeypress="return isDecimal(event,this)"></td>
+                                    <td width="4%">
+                                    </td>
+                                    <input type="hidden" name="activity_<?php echo $i ?>_newresname_<?php echo $j ?>" id ="activity_<?php echo $i ?>_newresname_<?php echo $j ?>" value="<?php echo $curanal['ResourceName'];?>">
+                                    <input type="hidden" name="activity_<?php echo $i ?>_formula_<?php echo $j ?>" id="activity_<?php echo $i ?>_formula_<?php echo $j ?>">
+                                    <input type="hidden" name="activity_<?php echo $i ?>_resid_<?php echo $j ?>" id ="activity_<?php echo $i ?>_resid_<?php echo $j ?>" value="<?php echo $curanal['ResourceId'];?>">
+                                    <input type="hidden" name="activity_<?php echo $i ?>_resunitid_<?php echo $j ?>" id ="activity_<?php echo $i ?>_resunitid_<?php echo $j ?>" value="<?php echo $curanal['UnitId'];?>">
+                                    <input type="hidden" name="activity_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="activity_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                                </tr>
+                                <?php $total += $curanal['Amount'];
+                            endforeach; endif;  $j = $j+1; ?>
+                        </tbody>
+                        <tbody class="total">
+                        <tr style="border-bottom:none;">
+                            <td colspan="3" style="border-right:none;border-top:none;">&nbsp;</td>
+                            <td style="border-right:none;vertical-align: middle;" class="rate_pri" align="right"><label id="activity_<?php echo $i ?>_ltotrate">Total</label></td>
+                            <td style="border-right:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="activity_<?php echo $i ?>_totrate" id="activity_<?php echo $i ?>_totrate" value="<?php echo $this->commonHelper()->sanitizeNumber($total,2,true);?>"  readonly></td>
+                            <td style="border-right:none;">&nbsp;</td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+
+                            <td colspan="3" style="border-right:none;border-top:none;">&nbsp;</td>
+                            <td style="border-right:none;border-top:none; vertical-align: middle;" class="rate_pri" align="right"><label id="activity_<?php echo $i ?>_lperrate">Rate Per Unit</label></td>
+                            <td style="border-right:none;border-top:none;"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="activity_<?php echo $i ?>_perrate" id="activity_<?php echo $i ?>_perrate" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['MRate'],2,true);?>"  readonly></td>
+                            <td style="border-right:none;border-top:none;">&nbsp;</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="rowinfoid_<?php echo $i ?>" id="rowinfoid_<?php echo $i ?>" value="<?php echo $j; ?>">
+                    <!-- Machinery tabs -->
+                    <table class="table" style="display: none;margin-bottom:0px; margin-top:8px;" id="activityR_<?php echo $i ?>_restable">
+                        <thead>
+                        <tr class="popuptable-topfixs">
+                            <th class="bg_clo_subTr" width="21%">Resource name</th>
+                            <th class="bg_clo_subTr" width="5%">Unit</th>
+                            <th class="bg_clo_subTr" width="5%">Qty</th>
+                            <th class="bg_clo_subTr" width="5%">Rate</th>
+                            <th class="bg_clo_subTr" width="8%">Amount</th>
+                            <th class="bg_clo_subTr text-center" width="4%">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody class="sorting fix-tabletops">
+                        <?php $j=0; $total=0;
+                        if(isset($rfcactivity)):
+                            foreach($rfcactivity as $curanal):
+                                $rfcrestransid = $curanal['RFCTransId'];
+                                if($curanal['ActivityType'] != 'A' || $rfctransid != $rfcrestransid)
+                                    continue;
+                                $j = $j+1; ?>
+                                <tr id="activityR_<?php echo $i ?>_RowId_<?php echo $j ?>">
+                                    <td width="21%"><input class="parent_text" type="text" data-toggle="popover" name="activityR_<?php echo $i ?>_resname_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resname_<?php echo $j ?>" value="<?php echo $curanal['Code'].' '.$curanal['ResourceName'];?>" readonly autocomplete="off"></td>
+                                    <td width="5%"><label for="activityR_<?php echo $i ?>_resunit_<?php echo $j ?>"><?php echo $curanal['UnitName'];?></label></td>
+                                    <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="activityR_<?php echo $i ?>_resqty_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resqty_<?php echo $j ?>" value="<?php echo $curanal['Qty'];?>" align="right" onblur="return FormatNum(this, 3)" onkeypress="return isDecimal(event,this)" onfocus="return showformulaR(this.id)" onkeydown="return showF(this.id,event)" readonly></td>
+                                    <td width="5%"><input type="text" class="parent_text text-right" maxlength="15" name="activityR_<?php echo $i ?>_resrate_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resrate_<?php echo $j ?>" value="<?php echo $curanal['Rate'];?>" align="right" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" onchange="return ValueChangeR(this.id)" readonly></td>
+                                    <td width="8%"><input type="text" class="parent_text text-right" maxlength="15" name="activityR_<?php echo $i ?>_resamt_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resamt_<?php echo $j ?>" value="<?php echo $curanal['Amount'];?>" align="right" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                                    <td width="4%">
+                                    </td>
+                                    <input type="hidden" name="activityR_<?php echo $i ?>_newresname_<?php echo $j ?>" id ="activityR_<?php echo $i ?>_newresname_<?php echo $j ?>" value="<?php echo $curanal['ResourceName'];?>">
+                                    <input type="hidden" name="activityR_<?php echo $i ?>_formula_<?php echo $j ?>" id="activityR_<?php echo $i ?>_formula_<?php echo $j ?>">
+                                    <input type="hidden" name="activityR_<?php echo $i ?>_resid_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resid_<?php echo $j ?>" value="<?php echo $curanal['ResourceId'];?>">
+                                    <input type="hidden" name="activityR_<?php echo $i ?>_resunitid_<?php echo $j ?>" id="activityR_<?php echo $i ?>_resunitid_<?php echo $j ?>" value="<?php echo $curanal['UnitId'];?>">
+                                    <input type="hidden" name="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>" value = "<?php echo $j; ?>" id="activityR_<?php echo $i; ?>_rowrefid_<?php echo $j; ?>">
+                                </tr>
+                                <?php $total += $curanal['Amount'];
+                            endforeach; endif; $j = $j+1;?>
+                        </tbody>
+                        <tbody class="total fix-tabletops">
+                        <tr style="border-bottom:none;">
+                            <td style="border-right:none;" width="21%"></td>
+                            <td style="border-right:none;" width="5%"></td>
+                            <td style="border-right:none;" width="5%"></td>
+                            <td style="border-right:none;  color:#1d99d4; vertical-align: middle; " align="right" width="5%"><label id="activityR_<?php echo $i ?>_ltotrate">Total</label></td>
+                            <td style="border-right:none;" width="8%"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="activityR_<?php echo $i ?>_totrate" id="activityR_<?php echo $i ?>_totrate"  value="<?php echo $this->commonHelper()->sanitizeNumber($total,2,true);?>" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                            <td style="border-right:none;" width="4%">&nbsp;</td>
+                        </tr>
+                        <tr style="border-bottom:none;">
+                            <td style="border-right:none;border-top:none;" width="21%"></td>
+                            <td style="border-right:none;border-top:none;" width="5%"></td>
+                            <td style="border-right:none;border-top:none;" width="5%"></td>
+                            <td style="border-right:none;border-top:none; color:#1d99d4; vertical-align: middle; " align="right" width="5%"><label id="activityR_<?php echo $i ?>_lperrate">Rate Per Unit</label></td>
+                            <td style="border-right:none;border-top:none;" width="8%"><input class="parent_text text-right total-clr" type="text" placeholder="00.0" name="activityR_<?php echo $i ?>_perrate" id="activityR_<?php echo $i ?>_perrate" value="<?php echo $this->commonHelper()->sanitizeNumber($trans['ARate'],2,true);?>" onkeypress="return isDecimal(event,this)" readonly=""></td>
+                            <td style="border-right:none;border-top:none;" width="4%">&nbsp;</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="rowinfoidR_<?php echo $i ?>" id="rowinfoidR_<?php echo $i ?>" value="<?php echo $j; ?>">
+                </div>
+            </div>
+        <?php elseif($trans['TypeId'] == '3'): ?>
+            <!-- Asset SubDiv -->
+            <div id="generalinfo_<?php echo $i ?>">
+                <div class="rfc_met">
+                    <ul>
+                        <li>
+                            <label>Working Unit</label>
+                            <input type="text" id="generalinfo_<?php echo $i ?>_wunitname" value="<?php echo $trans['WorkUnitName'];?>" readonly>
+                            <input type="hidden" name="generalinfo_<?php echo $i ?>_wunit" id="generalinfo_<?php echo $i ?>_wunit" value="<?php echo $trans['WorkUnitId'];?>"/>
+                        </li>
+                        <li>
+                            <label>Lead Time (in Days)</label>
+                            <input type="text" name="generalinfo_<?php echo $i ?>_lead" maxlength="3" id="generalinfo_<?php echo $i ?>_lead" onkeypress="return isDecimal(event,this)" value="<?php echo $trans['LeadDays'];?>" readonly>
+                        </li>
+                        <li>
+                            <label>Working Rate</label>
+                            <input type="text" class="text-right" maxlength="15" name="generalinfo_<?php echo $i ?>_wrate" id="generalinfo_<?php echo $i ?>_wrate" onblur="return FormatNum(this, 2,true)" onkeypress="return isDecimal(event,this)" readonly value="<?php echo $trans['WorkRate'];?>">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        <?php elseif($trans['TypeId'] == '2'): ?>
+            <!-- Material SubDiv -->
+            <div id="navbar" class="darkmenu" style="margin-top:10px; margin-bottom:8px;">
+                <ul role="tablist">
+                    <li class="active"><a href="#general_<?php echo $i ?>" role="tab" data-toggle="tab" class="ripple has-ripple" style="position: relative; overflow: hidden;"><i class="fa fa-angle-double-right"></i> General info<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a></li>
+                    <li id="steel_link_<?php echo $i ?>" style="display: <?php echo ($trans['MaterialType'] == "S") ? 'block' : 'none';?>;"><a href="#steel_<?php echo $i ?>" role="tab" data-toggle="tab" class="ripple has-ripple" style="position: relative; overflow: hidden;"><i class="fa fa-angle-double-right"></i> Steel directory<span class="ripple-wrapper"></span><span class="ripple-wrapper"></span></a></li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade active in" id="general_<?php echo $i ?>">
+                    <div class="rfc_met">
+                        <ul>
+                            <li>
+                                <label>Material Type</label>
+                                <div class="select-style rfc_meoption">
+                                    <select name="generalinfo_<?php echo $i ?>_mtype" id ="generalinfo_<?php echo $i ?>_mtype" readonly>
+                                        <option value="G" <?php echo ($trans['MaterialType'] == "G" || $trans['MaterialType'] == "") ? 'selected' : '';?>>General</option>
+                                        <option value="F" <?php echo ($trans['MaterialType'] == "F") ? 'selected' : '';?>>Fuel</option>
+                                        <option value="S" <?php echo ($trans['MaterialType'] == "S") ? 'selected' : '';?>>Steel</option>
+                                        <option value="P" <?php echo ($trans['MaterialType'] == "P") ? 'selected' : '';?>>Production</option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li>
+                                <label>Lead Time (in Days)</label>
+                                <input type="text" maxlength="3" name="generalinfo_<?php echo $i ?>_lead" id="generalinfo<?php echo $i ?>_lead" onkeypress="return isDecimal(event,this)" readonly value="<?php echo $trans['LeadDays'];?>">
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-pane fade table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;overflow: visible;" id="steel_<?php echo $i ?>">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th class="bg_clo">Steel Description</th>
+                            <th class="bg_clo">Diameter</th>
+                            <th class="bg_clo">Factor/Unit</th>
+                            <th class="bg_clo">Wastage %</th>
+                            <th class="bg_clo text-center">&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php $j=0;
+                        foreach($rfcsteel as $steel):
+                            if($rfctransid != $steel['RFCTransId'])
+                                continue;
+                            $j = $j+1;?>
+                            <tr id="steel_<?php echo $i ?>_RowId_<?php echo $j ?>">
+                                <td width="11%"><input type="text" class="parent_text" name="steel_<?php echo $i ?>_des_<?php echo $j ?>" id="steel_<?php echo $i ?>_steeldes_<?php echo $j ?>" value="<?php echo $steel['SteelDescription'];?>" onblur="checkSteelDescription(this.id)" readonly></td>
+                                <td width="5%"><input type="text" maxlength="15" class="parent_text text-right" name="steel_<?php echo $i ?>_dia_<?php echo $j ?>" id="steel_<?php echo $i ?>_dia_<?php echo $j ?>" value="<?php echo $steel['SteelDia'];?>" onkeypress="return isDecimal(event, this)" readonly ></td>
+                                <td width="5%"><input type="text" maxlength="15" class="parent_text text-right" name="steel_<?php echo $i ?>_factor_<?php echo $j ?>" id="steel_<?php echo $i ?>_factor_<?php echo $j ?>" value="<?php echo $steel['Factor'];?>" onkeypress="return isDecimal(event, this)" readonly></td>
+                                <td width="5%"><input type="text" maxlength="15" class="parent_text text-right" name="steel_<?php echo $i ?>_waste_<?php echo $j ?>" id="steel_<?php echo $i ?>_waste_<?php echo $j ?>" value="<?php echo $steel['Wastage'];?>" onkeypress="return isDecimal(event, this)" readonly></td>
+                                <!--                                <td width="2%"><a href="javascript:DeleteSteelRow('steel_--><?php //echo $i ?><!--_RowId_--><?php //echo $j ?><!--')" style="display: none;"><i class="fa fa-trash-o ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete"></i></a></td>-->
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="rowinfoidS_<?php echo $i ?>" id="rowinfoidS_<?php echo $i ?>" value="1">
+                </div>
+            </div>
+        <?php endif; ?>
+        </div></td>
+        </tr>
+    <?php endforeach; $i=$i+1;
+endif; ?>
+<tr class="remarks">
+    <td colspan="7"><textarea placeholder="Enter Remarks" class="remrk element" name="narration" id="narration" title="Remarks" onfocus="inputFocus(this)" onblur="inputBlur(this)"><?php if(isset($rfcregister['Narration'])) echo $rfcregister['Narration'];?></textarea></td>
+</tr>
+
+</tbody>
+</table>
+<input type="hidden" name="rowid" id="rowid" value="<?php echo (isset($rfctrans)) ? count($rfctrans) : $i; ?>">
+</div>
+
+<script>
+    $(function () {
+        expandTrFn();
+    });
+    function expandTrFn(reset) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        if (typeof reset !== 'undefined' && reset === true) $mainTRs.unbind('click');
+        $mainTRs.click(function(e){
+            e.preventDefault();
+            var name = $(this)[0].className,
+                key = name.split('_')[1];
+//            if (validateAndAddTabs(name) == false) return false;
+            var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                $i = $(this).find("i");
+            if(!$subTr.is(":visible")){
+                $subTr.show();
+                $subTr.find(".subDiv").slideDown("slow");
+                $i.addClass("tform");
+                $('activity_'+ key +'_restable').show();
+                iFocusRowId = key;
+                closedetails(name);
+            } else {
+                $subTr.find(".subDiv").slideUp("slow");
+                $subTr.slideUp("slow");
+                $i.removeClass("tform");
+            }
+            // set LS Rate if available for activity
+            var $rateLS = $('#mainanalrateLS_' + key);
+            if ($rateLS.length == 1) {
+                $('#analrateLS_' + key).val(sanitizeNumber(isNullCheck($rateLS.val(),'number'),2,true));
+                $('#analrate_' + key).find('option[value="'+ $('#mainanalrate_' + key).val() +'"]').attr('selected', 'selected');
+            }
+            return false;
+        });
+    }
+
+    function showmix(x, tab) {
+        $(tab).addClass('active').siblings('li').removeClass('active');
+        if (x=="machinery") {
+            $('#activity_'+iFocusRowId+'_restable').hide();
+            $('#activityWQty_' + iFocusRowId).hide();
+            $('#activityR_'+iFocusRowId+'_restable').show();
+            $('#activityWQtyR_' + iFocusRowId).show();
+            return;
+        }
+        $('#activity_'+iFocusRowId+'_restable').show();
+        $('#activityWQty_' + iFocusRowId).show();
+        $('#activityR_'+iFocusRowId+'_restable').hide();
+        $('#activityWQtyR_' + iFocusRowId).hide();
+    }
+    function closedetails(name) {
+        var $mainTRs = $("a[class*=mainTr_]");
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this);
+            if (name != $this[0].className) {
+                key = $this[0].className.split('_')[1];
+                var $subTr = $(this).closest("tr").nextAll(".subTr_" + key),
+                    $i = $(this).find("i");
+                if ($subTr.is(":visible")) {
+                    $subTr.find(".subDiv").slideUp("slow");
+                    $subTr.slideUp("slow");
+                    $i.removeClass("fa-chevron-circle-up");
+                    $i.addClass("fa-chevron-circle-down");
+                }
+            }
+        });
+    }
+
+
+    //    function closedetails(key) {
+//        var $mainTRs = $("a[class*=mainTr_]");
+//        $.each($mainTRs, function (i, obj) {
+//            var $this = $(this),
+//                $mainTr = $this.find('> i.fa-chevron-circle-down.tform');
+//            if (typeof key != 'undefined' && $this[0].className.indexOf(key) != -1) return;
+//            if($mainTr.length != 0) $mainTr.trigger('click');
+//        });
+//    }
+</script>

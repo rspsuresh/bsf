@@ -1,0 +1,399 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<style>
+    body{ background:#F1F4F9;}
+    .jqx-widget-content{background:#fff;border:1px solid #c2c2c2; color:#333 !important;}
+    .jqx-widget-content ul{ width:250px !important; }
+    .jqx-widget-content ul li.jqx-tree-item-li{border:1px solid rgba(128, 123, 23, 0.59)!important; width:252px!important; margin-bottom:5px;}
+    .jqx-widget{  margin-bottom:10px !important; }
+    .jqx-tree-item{ border:none !important; overflow:unset !important; width:220px !important; padding:5px;}
+    .jqx-tree-item-arrow-expand jqx-icon-arrow-down{ background:#06F !important;}
+    .jqx-tree-item-hover{ background:none !important;}
+    .jqx-tree-dropdown-root{ margin-top:20px !important;}
+    .jqx-rc-all{ border:none !important; border-radius:none !important;}
+    .jqx-tree-item-arrow-expand{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important; margin-right:3px;}
+    .jqx-icon-arrow-right{ border:1px solid #999 !important; margin-left:3px !important; margin-top:3px !important;margin-right:3px; }
+    .jqx-fill-state-pressed{ background:rgba(226, 241, 171, 0.41) !important; padding-left:3px !important;border-radius:0px !important; padding:5px !important;}
+    .jqx-tree-item:hover{ color:#999;}
+    .jqx-popup{ background:#F3F9DC !important;   border: 1px solid hsla(57, 70%, 30%, 0.59) !important;}
+    .jqx-menu-item-top{ float:left; margin:0px; padding:5px;}
+    .jqx-fill-state-hover{ background:none !important; color:#999; }
+    .jqx-menu-iteam-top-hover{ background:none !important;border-bottom:1px thick #066;}
+    #treeWrapper {width: 100%;}
+    #treeWrapper, #treeWrapper > div {float: left;}
+</style>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form id="form"  action="" onsubmit="return entryValidate()"  method="post">
+                <input type="hidden" name="rfcUId" id="rfcUId" value="<?php echo $rfcid;?>">
+                <input type="hidden" name="rfcmode" id="rfcmode" value="<?php echo $mode;?>">
+                <input type="hidden" name="editid" id="editid" value="<?php echo $editid;?>">
+                <div class="col-lg-12 page_tittle">
+                    <h1>Request for Creation - WBS Plan Add</h1>
+                </div>
+                <div class="col-lg-12 top_ct" >
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" name="refdate" id="refdate" class="form-control date_picker lbl_move" readonly label="Reference Date"  value="<?php  if ($rfcid !=0) { echo date("d-m-Y", strtotime($rfcregister['RefDate'])) ;} else { echo date("d-m-Y");  }?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="refno" id="refno" class="form-control lbl_move" label="Reference No" value="<?php echo ($rfcid !=0 ) ? $rfcregister['RefNo'] : $svNo; ?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_name" id="project_name" class="form-control lbl_move" label="Project Name"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectName']; else if(isset($rfcregister['ProjectName'])) echo $rfcregister['ProjectName'];?>"/>
+                            <input type="hidden" name="project_id" id="project_id"  value="<?php if(isset($projectinfo)) echo $projectinfo['ProjectId']; else if(isset($rfcregister['ProjectId'])) echo $rfcregister['ProjectId'];?>"/>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-3 col-sm-offset-0">
+                        <div class="form-group">
+                            <input type="text" name="project_typename" id="project_typename" class="form-control lbl_move" label="Type" value="<?php if(isset($projecttypename)) echo $projecttypename; else if(isset($rfcregister['ProjectTypeName'])) echo $rfcregister['ProjectTypeName'];?>"/>
+                            <input type="hidden" name="project_type" id="project_type" value="<?php if(isset($projecttype)) echo $projecttype; else if(isset($rfcregister['ProjectType'])) echo $rfcregister['ProjectType'];?>"/>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!--table Jq Grid start-->
+                <div class="col-lg-12 col-lg-offset-0" id="plan-list">
+                    <!-- Tree Structure -->
+                    <div id="treeWrapper" style="display: none;">
+                        <div class="bread_crumb first_step" id="tree-structure"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="table-responsive clear" style="overflow: visible;" id="grid-wrapper">
+                        <div id='jqxWidget'>
+                            <div id='jqxTree'></div>
+                            <div id='jqxMenu'>
+                                <ul>
+                                    <li id="menu-addplan">Add Plan</li>
+                                    <li id="menu-showplan">Show Plan</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- wbs plan Table Start-->
+                <div class="col-lg-12 col-lg-offset-0">
+                    <div class="table-responsive topsp" id="plan-content" style="display: none;"></div>
+                    <input type="hidden" name="newPlanRowId" id="newPlanRowId" value="0"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 savebtn_area">
+    <ul>
+  <li><div id="back-btn" class="back-bts" style="display:none;"><a href="javascript:showTreeGrid();" data-toggle="tooltip" data-placement="right" title="Go Back"> <i class="fa fa-chevron-circle-left"></i> Back</a></div></li>
+        <li class="dropdown save_btn float_r" id="submit-btn"><a href="javascript:submitForm();" data-toggle="tooltip" class="ripple" title="Submit!">Submit</a>
+        <li class="cancel_btn float_r" id="cancel-btn"><a href="<?php echo $this->basePath() . '/project/rfc/rfcwbs';?>" data-toggle="tooltip" class="ripple" title="Cancel">Cancel</a></li>
+    </ul>
+</div>
+<div id="dummytableheader" style="display: none">
+    <table class="table newPlans" style=" margin-bottom:0px; display: none;" id="newplan__1">
+        <thead>
+            <tr>
+                <input type="hidden" name="newplan__1_rowid" id="newplan__1_rowid" value="1">
+                <th>WBS</th>
+                <th>Unit</th>
+                <th>Budget Qty</th>
+                <th>Cumulative Plan Qty</th>
+                <th>Previous Plan Qty</th>
+                <th>Current Plan Qty</th>
+                <th class="text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<div id="plan" style="display: none">
+    <table id="dummytable">
+        <tbody>
+        <tr id="newplan__0_PlaniRowId__1">
+            <td width="11%"><input type="text" class="parent_text" name="newplan__0_parentname__1" id="newplan__0_parentname__1" onblur="return CheckParentValid(this.id)" /></td>
+            <td width="5%"><label for="newplan__0_unitid__1"></label></td>
+            <td width="5%"><input type="text" class="parent_text" value="0" id="newplan__0_budgetqty__1" align="right" onchange="return rateUpdate(this.id)" readonly/></td>
+            <td width="5%"><input type="text" class="parent_text" value="0" id="newplan__0_cumplanqty__1" align="right" onchange="return rateUpdate(this.id)" readonly/></td>
+            <td width="5%"><input type="text" class="parent_text" value="0" id="newplan__0_prevplanqty__1" align="right" onchange="return rateUpdate(this.id)" readonly/></td>
+            <td width="5%"><input type="text" class="parent_text" name="newplan__0_curplanqty__1" id="newplan__0_curplanqty__1" align="right" onchange="return rateUpdate(this.id)"  onkeypress="return isDecimal(event,this)" onblur="return FormatNum(this, 2)"/></td>
+            <input type="hidden" name="newplan__0_unitid__1" id="newplan__0_unitid__1">
+            <input type="hidden" name="newplan__0_parentid__1" id="newplan__0_parentid__1">
+            <td width="1%" align="center"><a href="javascript: DeleteTRFn('#newplan__0_mainTrDelete__1');" id="newplan__0_mainTrDelete__1" style="margin-right: 10px;"><i class="fa fa-trash ctlss" data-toggle="tooltip" data-placement="top" data-original-title="Delete" ></i></a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+// jqxTree script
+var $jqxTree = $('#jqxTree'),
+    $planContent = $('#plan-content'),
+    $newPlanRowId = $('#newPlanRowId'),
+    dummyTableHeadHTML = $('#dummytableheader').html(),
+    dummyTableHTML = $('#dummytable > tbody').html(),
+    dummyid = 0,
+    treePostData = [],
+    arrPlanData = [];
+$(function () {
+    var $jqxMenu = $('#jqxMenu'),
+        url1 = getBaseURL() + 'project/rfc/getrfcwbslist/1',
+        source =
+        {
+            async: false,
+            datatype: "json",
+            editable:true,
+            datafields: [
+                { name: 'id' },
+                { name: 'parentid' },
+                { name: 'text' }
+            ],
+            id: 'id',
+            url: url1
+        };
+    var dataAdapter = new $.jqx.dataAdapter(source);
+    dataAdapter.dataBind();
+    var records = dataAdapter.getRecordsHierarchy('id', 'parentid', 'items', [{ name: 'text', map: 'label'}]);
+    $jqxTree.jqxTree({ source: records, height: 400, width: '100%', allowDrag: false, keyboardNavigation: true});
+    $jqxTree.css('visibility', 'visible');
+    var contextMenu = $jqxMenu.jqxMenu({ width: '150px',  height: '20px', autoOpenPopup: false, mode: 'popup' }),
+        clickedItem = null,
+        attachContextMenu = function () {
+            // open the context menu when the user presses the mouse right button.
+            $("#jqxTree li").on('mousedown', function (event) {
+                var target = $(event.target).parents('li:first')[0],
+                    rightClick = isRightClick(event),
+                    $menu_showplan = $('#menu-showplan'),
+                    $menu_addplan = $('#menu-addplan');
+                if (rightClick && target != null) {
+                    $jqxTree.jqxTree('selectItem', target);
+                    var selItem = $jqxTree.jqxTree('selectedItem'),
+                        $window = $(window);
+                    // check if has added Plan and remove new wbs option
+                    if (arrPlanData.indexOf(selItem.id) >= 0) {
+                        $menu_showplan.show();
+                        $menu_addplan.hide();
+                    } else {
+                        $menu_showplan.hide();
+                        $menu_addplan.show();
+                    }
+                    contextMenu.jqxMenu('open', parseInt(event.clientX) + 5 + $window.scrollLeft(), parseInt(event.clientY) + 5 + $window.scrollTop());
+                    return false;
+                }
+            });
+        };
+    attachContextMenu();
+    $jqxMenu.on('itemclick', function (event) {
+        var item = $.trim($(event.args).text()),
+            selectedItem = $jqxTree.jqxTree('selectedItem');
+        if (selectedItem == null) return;
+        switch (item) {
+            case "Add Plan":
+                addNewPlan(selectedItem);
+                break;
+            case "Show Plan":
+                showAddedPlan(selectedItem);
+                break;
+        }
+    });
+    $(document).on('contextmenu', function (e) {
+        if ($(e.target).parents('.jqx-tree').length > 0) return false;
+        return true;
+    });
+    $jqxTree.jqxTree('expandAll');
+});
+// jqxgrid functions start
+function showTreeGrid() {
+    $('#treeWrapper').hide();
+    $('#plan-content').hide();
+    $('#back-btn').hide();
+    $jqxTree.jqxTree('selectItem', null);
+    $('#grid-wrapper').show();
+    $('#submit-btn').show();
+    $('#cancel-btn').show();
+}
+function addNewPlan(item) {
+    var id = item.element.id;
+    bindTreeStructure(item);
+    // show plan table
+    $planContent.append(dummyTableHeadHTML.replace(/__1/g, '_' + id));
+    $('#newplan_' + id + ' > tbody').html(dummyTableHTML.replace(/__0/g,'_' + id).replace(/__1/g, '_1').replace(/__9/g,'_1'));
+    $('.newPlans').hide();
+    $planContent.show();
+    $('#newplan_' + id).show();
+    $newPlanRowId.val(parseInt($newPlanRowId.val()) + 1);
+    arrPlanData.push(id);
+    bindAutoComplete(true);
+}
+function showAddedPlan(item) {
+    bindTreeStructure(item);
+    $planContent.hide();
+    $('.newPlans').hide();
+    if(arrPlanData.indexOf(item.id)  == -1) return;
+    $planContent.show();
+    $('#newplan_' + item.id).show();
+}
+var arryparentList = <?php echo (isset($parentiow)) ? json_encode($parentiow) : 'null'; ?>;
+function bindAutoComplete() {
+    var $parent_ids = $('input[id*=_parentname_]');
+    // unbind previous autocomplete functionality
+    $parent_ids.unbind('autocomplete');
+    $.each($parent_ids, function (i, obj) {
+        var $this = $(this),
+            name = $this[0].id;
+        if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+        var keys =  name.split('_'),
+            iowId = keys[1],
+            key1 = keys[3];
+        $this.autocomplete({
+            lookup: arryparentList,
+            showNoSuggestionNotice:true,
+            noSuggestionNotice: 'Do you want to Create New <input type="button" font-weight:bold" class="btn btn-link" value="Plan" onclick="return AddNewPlan('+name+')" >',
+            lookupFilter: function(suggestion, originalQuery, queryLowerCase) {
+                var re = new RegExp('\\b' + $.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            },
+            onSelect: function(suggestion) {
+                if(suggestion) {
+                    console.log(suggestion);
+                    $("#newplan_" + iowId +"_parentid_"+ key1).val(suggestion.data);
+                    $("#newplan_" + iowId +"_unitid_"+ key1).val(suggestion.UnitId);
+                    $('label[for=newplan_' + iowId +'_unitid_' + key1 + ']').html(suggestion.UnitName);
+                    $(this).removeClass('error');
+                }
+            },
+            onSearchStart: function(suggestion) {
+                $("#newplan_" + iowId +"_parentid_"+ key1).val(0);
+                $("#newplan_" + iowId +"_unitid_"+ key1).val(0);
+                $('label[for=newplan_' + iowId +'_unitid_' + key1 + ']').html('');
+            },
+            onSearchComplete: function (query, suggestions) {
+                if(!suggestions.length){
+                    $("#newplan_" + iowId +"_parentid_"+ key1).val(0);
+                    $("#newplan_" + iowId +"_unitid_"+ key1).val(0);
+                    $('label[for=newplan_' + iowId +'_unitid_' + key1 + ']').html('');
+                    $(this).addClass('error');
+                } else $(this).removeClass('error');
+            }
+        });
+    });
+}
+function DeleteTRFn(id) {
+    var keys =  id.split('_'),
+        iowId= keys[1],
+        $elem = $(id);
+    if (confirm('Do you want to Delete')) {
+        var tr_length = $('#newplan_'+ iowId +' > tbody tr[id*=newplan_'+ iowId +'_PlaniRowId_]').length;
+        if(tr_length == 1) {
+            $('#newplan_'+ iowId +'_rowid').val(0);
+            AddNewRowA(id, false);
+        }
+        $elem.closest('tr').remove();
+    }
+}
+function rateUpdate(x){
+    var keys = x.split("_"),
+        iowId = keys[1],
+        rowId = keys[3],
+        budgetQty = parseFloat($('#newplan_'+iowId+'_budgetqty_' + rowId).val()),
+        $curQty = $('#newplan_'+iowId+'_curplanqty_' + rowId),
+        totQty = parseFloat($('#newplan_'+iowId+'_prevplanqty_' + rowId).val()) +  parseFloat($curQty.val()),
+        $cumQty = $('#newplan_'+iowId+'_cumplanqty_' + rowId);
+    if (totQty > budgetQty || totQty < 0) $curQty.addClass('error');
+    else $curQty.removeClass('error');
+    $cumQty.val(totQty);
+    AddNewRowA(x);
+}
+function CheckParentValid(x) {
+    var keys = x.split("_"),
+        iowId = keys[1],
+        iARowid = keys[3];
+    if ($('#newplan_'+iowId+'_parentid_' + iARowid).val() == '0' || $('#newplan_'+iowId+'_parentid_' + iARowid).val().length==0) {
+        if ($('#newplan_'+iowId+'_parentname_' + iARowid).val().length >0) $('#newplan_'+iowId+'_parentname_' + iARowid).addClass('error');
+        else {$('#newplan_'+iowId+'_parentname_' + iARowid).removeClass('error');}
+    } else $('#newplan_'+iowId+'_parentname_' + iARowid).removeClass('error');
+}
+function AddNewRowA(x,is_validate) {
+    var keys = x.split("_"),
+        iowId = keys[1],
+        iARowid = keys[3],
+        iRowId = $('#newplan_'+ iowId +'_rowid').val();
+    if($('#PlaniRowId_' + iARowid).nextAll('tr[id*=PlaniRowId_]').length == 1) return;
+    if (typeof is_validate == 'undefined' && is_validate != false) {
+        if ($('#newplan_'+iowId+'_parentid_' + iARowid).val().length == 0)
+            return;
+
+        if ($('#newplan_'+iowId+'_curplanqty_' + iARowid).val().length == 0)
+            return;
+    }
+
+    var ioRowId =  iRowId;
+    iRowId = +iRowId + 1;
+    var snid = 'PlaniRowId_'+iRowId,
+        sStr = $('#dummytable tbody').html();
+
+    sStr = sStr.replace(/__0/g,'_'+ iowId);
+    sStr = sStr.replace(/__1/g,'_'+ iRowId);
+    sStr = sStr.replace(/__9/g,'_1');
+
+    if (ioRowId != 1) {ioRowId = (ioRowId*2)-1 ;}
+
+    $('#newplan_'+ iowId  +' > tbody > tr:last-child').after(sStr);
+    $('#newplan_'+ iowId +'_rowid').val(iRowId);
+
+    bindAutoComplete();
+}
+
+function bindTreeStructure(item) {
+    // get element parents
+    var parentId = null,
+        $element = $jqxTree.jqxTree('getItem', item.parentElement),
+        treeli = '';
+
+    while(parentId != 0) {
+        if ($element == null)
+            break;
+
+        treeli = '<a data-id="'+$element.id+'">'+$element.label+'</a>' + treeli;
+        parentId = $element.parentId;
+        $element = $jqxTree.jqxTree('getItem', $element.parentElement);
+    }
+    treeli += '<a class="active" data-id="'+item.id+'">'+item.label+'</a>';
+
+    // hide treeGrid and show Plan Table
+    $('#tree-structure').html(treeli);
+
+    $('#treeWrapper').show();
+    $('#back-btn').show();
+
+    $('#grid-wrapper').hide();
+    $('#submit-btn').hide();
+    $('#cancel-btn').hide();
+}
+
+function getObjectKeyIndex(obj, value) {
+    var index = null;
+    $.each(obj, function(i, o) {
+        if (o.id == value) {
+            index = i;
+            return false;
+        }
+    });
+    return index;
+}
+
+function isRightClick(event) {
+    var rightclick;
+    if (!event) var event = window.event;
+    if (event.which) rightclick = (event.which == 3);
+    else if (event.button) rightclick = (event.button == 2);
+    return rightclick;
+}
+// jqxgrid functions end
+
+// plan functions start
+function submitForm() {
+    $('form').submit();
+}
+</script>

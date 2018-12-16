@@ -1,0 +1,1933 @@
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/workorder.css';?>"/>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<style>
+    .table-responsive table.table tr.padi05 td{padding:5px !important}
+    .form-control {
+        box-shadow:none !important
+    }
+    .panel {
+        border-radius:0px !important;
+    }
+    .panel-info {
+        border:none;
+        border-top:none;
+    }
+    #mainWrapper {
+        display: none;
+    }
+    .opt-listed ul li p {
+        height:30px !important;
+        padding-top:0px !important;
+    }
+    .rdochck_subscrbcrm p > input[type="checkbox"] + label {
+        background-position: 0 -80px !important;
+    }
+    .rdochck_subscrbcrm p > input[type="checkbox"]:checked + label {
+        background-position: 0 -260px !important;
+    }
+    .sub_print_btn {width:134px; margin-left:45px;}
+    @media only screen and (min-width:981px) and (max-width:1024px)
+    {
+        .sub_print_btn {margin-left:35px !important;}
+    }
+    @media only screen and (min-width : 769px) and (max-width : 980px)
+    {
+        .sub_print_btn {margin-left:35px !important;}
+    }
+    @media screen and (width:320px;)
+    {
+        .sub_print_btn {margin-left: 5px !important; width: 100% !important;}
+    }
+</style>
+<?php
+$viewmode = true;
+//if(isset($mode) && $mode != 'edit' && isset($receiptid) && $receiptid == 0)
+//    $viewmode = true;
+//
+//if (isset($receiptregister)) {
+//    if ($receiptregister['ReceiptAgainst'] != "B") $viewmode = true;
+//}
+?>
+<div class="content_wrapper padlr0">
+    <div class="container-fluid">
+        <div class="row">
+            <form  id="formWrapper"  method="post">
+                <input type="hidden" name="print" id="print" value="false"/>
+                <input type="hidden" name="csrf" value="<?php echo isset($csrf)?$csrf:''; ?>">
+                <input type="hidden" name="receiptid" id="receiptid" value="<?php echo (isset($receiptid)) ? $receiptid  : 0; ?>"/>
+                <input type="hidden" name="mode" id="mode" value="<?php echo (isset($mode)) ? $mode  : 'add'; ?>"/>
+                <?php if($viewmode):?>
+                    <div id="indexWrapper">
+                        <div class="col-lg-12">
+                            <h1 class="text-center" data-bsfhead="Receipt">Receipt</h1>
+                        </div>
+                        <!--form start-->
+                        <div class="col-lg-12">
+                            <div class="col-lg-4 col-lg-offset-1">
+                                <div class="countdown-box">
+                                    <div class="countdown" id="lReceiptno" style="color:#45a2c9;" onclick="showReceiptNoText()">
+                                        <label id="lcno">Receipt No : <span style="font-size:15px;"><?php  if ($receiptid!=0) { echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : ''; } else {echo $svNo;}?></span></label>
+                                    </div>
+                                    <div id="tReceiptno" style="display: none" >
+                                        <input type="text" name="ReceiptNo" data-bsfshare="ReceiptNo" id="ReceiptNo" class="form-control lbl_move" label="Receipt No." value="<?php if ($receiptid!=0) { echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : '';} else {echo $svNo; }?>" <?php if ($genType==true) { ?> readonly <?php } ?> maxlength="50" onblur="showReceiptNoLabel()"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-lg-offset-4">
+                                <div class="countdown-box">
+                                    <div class="countdown" id="lReceiptdate" style="color:#45a2c9 ;" onclick="showReceiptDateText()">
+                                        <label id="lcdate">Receipt Date : <span style="font-size:15px;"><?php echo (isset($receiptregister['ReceiptDate'])) ? $receiptregister['ReceiptDate'] : date('d-m-Y'); ?></span> </label>
+                                    </div>
+                                    <div id="tReceiptdate" style="display: none" >
+                                        <input type="text" name="ReceiptDate" data-bsfshare="ReceiptDate" id="ReceiptDate" class="form-control date_picker lbl_move" readonly="readonly" label="Receipt Date" onchange="validateDate(this)"  value="<?php echo (isset($receiptregister['ReceiptDate'])) ? $receiptregister['ReceiptDate'] : date('d-m-Y');?>"  onblur="showReceiptDateLabel()"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" >
+                            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1  prt-next">
+                                <div class="col-sm-8 col-sm-offset-2 top-next">
+                                    <div class="form-horizontal">
+                                        <div class="row">
+                                            <div class="form-group nextClass">
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="unitname" data-bsfshare="Unit Name" id="unitname" class="form-control lbl_move" label="Project/Unit/Buyer" value="<?php if($mode=="final") { echo (isset($receiptName)) ? $receiptName['value'] : ''; } else if($mode=="save"){echo (isset($unitstype)) ? $unitstype['value'] : '';} else { echo (isset($receiptregister)) ? $receiptregister['UnitName'] : ''; } ?>" <?php if($mode=="final") { echo 'disabled'; } ?>  />
+                                                    <input type="hidden" name="unitid" id="unitid" value="<?php if($mode=="final") { echo (isset($receiptName)) ? $receiptName['data'] : ''; } else if($mode=="save"){echo (isset($unitstype)) ? $unitstype['data'] : '';} else{ echo (isset($receiptregister)) ? $receiptregister['UnitId'] : ''; } ?>"/>
+                                                    <input type="hidden" name="leadid" id="leadid" value="<?php if($mode=="final") { echo (isset($receiptName)) ? $receiptName['LeadId'] : ''; } else if($mode=="save"){echo (isset($unitstype)) ? $unitstype['LeadId'] : '';} else { echo (isset($receiptregister)) ? $receiptregister['LeadId'] : ''; } ?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass">
+                                                <div class="col-lg-12">
+                                                    <select name="ReceiptAgainst" data-bsfshare="ReceiptAgainst" id="ReceiptAgainst" class="single_dropdown2 lbl_move" style="width:100%;" label="Receipt Against" >
+                                                        <option></option>
+                                                        <option <?php if($mode=="final") { echo 'selected'; } ?> value="A" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'A') ? 'selected' : '';?>>Advance</option>
+                                                        <option value="B" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'B') ? 'selected' : '';?>>Bill/Schedule</option>
+                                                        <option value="P" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'P') ? 'selected' : '';?>>Pre-Booking</option>
+                                                        <option value="R" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? 'selected' : '';?>>Rent</option>
+                                                        <option value="L" <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'L') ? 'selected' : '';?>>Late-Interest</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group rentClass <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? '' : 'hide';?>">
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="rentBillNo" data-bsfshare="Rent Bill No" id="rentBillNo" class="form-control lbl_move" label="Rent Bill No" value="<?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? $receiptregister['RentBillNo'] : '';?>" readonly />
+                                                    <input type="hidden" name="rentRegId" id="rentRegId" value="<?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? $receiptregister['RentRegisterId'] : '';?>" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group rentClass <?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? '' : 'hide';?>">
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="rentBillAmt" data-bsfshare="Rent Bill Amount" id="rentBillAmt" class="form-control lbl_move" label="Rent Bill Amount" value="<?php echo (isset($receiptregister) && $receiptregister['ReceiptAgainst'] == 'R') ? $receiptregister['RentBillAmount'] : '';?>" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass" id="PaymentModeHide">
+                                                <div class="col-lg-12">
+                                                    <select name="PaymentMode" data-bsfshare="PaymentMode" id="PaymentMode" class="single_dropdown2 lbl_move" style="width:100%;" label="Payment Mode" onchange="PaymentModeCheck()" >
+                                                        <option></option>
+                                                        <option value="Cash" <?php if($mode=="final") { echo "selected";  } else { echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'Cash') ? 'selected' : ''; }?>>Cash</option>
+                                                        <option value="Cheque" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'Cheque') ? 'selected' : '';?>>Cheque</option>
+                                                        <option value="Demand Draft" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'Demand Draft') ? 'selected' : '';?>>Demand Draft</option>
+                                                        <option value="NEFT" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'NEFT') ? 'selected' : '';?>>NEFT</option>
+                                                        <option value="RTGS" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'RTGS') ? 'selected' : '';?>>RTGS</option>
+                                                        <option value="Credit Card" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'Credit Card') ? 'selected' : '';?>>Credit Card</option>
+                                                        <option value="Fund Transfer" <?php echo (isset($receiptregister) && $receiptregister['ReceiptMode'] == 'Fund Transfer') ? 'selected' : '';?>>Fund Transfer</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass" style="display:none"  id="TNoD" >
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="TNo" data-bsfshare="TNo" id="TNo" class="form-control lbl_move" label="Trasaction No" maxlength="50" value="<?php echo (isset($receiptregister)) ? $receiptregister['TransNo'] : '';?>" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass" style="display:none" id="TDateD">
+                                                <div class="col-lg-12"> <span class="date_icon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" name="TDate" data-bsfshare="TDate" id="TDate" class="form-control date_picker lbl_move" label="Trasaction Date"  value="<?php echo (isset($receiptregister)) ? $receiptregister['TransDate'] : date('d-m-Y');?>" readonly onchange="validateDate(this)"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass" style="display:none" id="BankNameD">
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="BankName" data-bsfshare="BankName" id="BankName" class="form-control lbl_move" label="Bank Name" maxlength="100" value="<?php echo (isset($receiptregister)) ? $receiptregister['BankName'] : '';?>"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass" id="AmountD" >
+                                                <div class="col-lg-12">
+                                                    <input type="text" name="Amount" data-bsfshare="Amount" id="Amount" class="form-control lbl_move text-left special seperate" label="Amount" onblur="return FormatNum(this, 3, true)" value="<?php if($mode=="final") { echo (isset($aAmount)) ? $aAmount : 0; } else { echo (isset($receiptregister)) ? $receiptregister['Amount'] : ''; }?>" maxlength="15"/>
+                                                    <input type="hidden" name="advAmount" id="advAmount"/>
+                                                    <input type="hidden" name="latefee" id="latefee"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group nextClass">
+                                                <div class="col-lg-12">
+                                                    <textarea class="form-control lbl_move" label="Remarks" name="Remarks" data-bsfshare="Remarks" maxlength="255" id="Remarks"><?php echo (isset($receiptregister)) ? $receiptregister['Remarks'] : '';?></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="next-bt" id="nextbt" ><a href="#" onclick="validateIndex(); return false;">Next <i class="fa fa-chevron-circle-right"></i></a></div>
+                                    <div class="save_btn sub_print_btn float_l" style="display:none" id="savebt"><a href="#" id="submitId" onclick="submitReceipt(); return false;" class="ripple">Submit</a><div id="submit-loader" class="post_loader ask_post_loader brad_50">
+                                            <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+                                        </div></div>
+                                    <div class="save_btn sub_print_btn float_l" style="display:none" id="saveandprintbt"><a href="#" id="submitPId" onclick="submitReceipt(true); return false;" class="ripple">Submit & Print</a><div id="submit-loader1" class="post_loader ask_post_loader brad_50">
+                                            <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+                                        </div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+
+                    <input type="hidden" name="Amount" class="special" id="Amount" value="<?php echo (isset($receiptregister)) ? $receiptregister['Amount'] : '';?>" />
+                <?php endif; ?>
+                <div id="mainWrapper" <?php echo (!$viewmode) ? 'style="display:block;"' : ''; ?>
+                <div class="content_wrapper padlr0">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h1>Receipt</h1>
+                            </div>
+                            <div class="col-lg-12 commargin_ttop_20" >
+                                <div class="tagcrd">
+                                    <ul>
+                                        <li class="mnimumwidthres90">
+                                            <div class="tagcardhdng pnl-overflow crmbrdrclr1">
+                                                <h2 class="comtex crmbrdrclrhed1 comnelips" style="font-weight:600 !important;">Receipt Date</h2>
+                                                <input type="text" name="Receipt_Date" data-bsfshare="Receipt Date" id="Receipt_Date" class="form-control tetmuted tet-clr11 comnelips" value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptDate'] : date("d-m-Y");?>" style="width:100%;cursor:pointer;"  />
+                                            </div>
+                                        </li>
+                                        <li class="mnimumwidthres90">
+                                            <div class="tagcardhdng pnl-overflow crmbrdrclr2">
+                                                <h2 class="comtex crmbrdrclrhed2 comnelips" style="font-weight:600 !important;">Receipt No.</h2>
+                                                <input type="text" name="Receipt_No" data-bsfshare="Receipt No" id="Receipt_No" class="form-control tetmuted tet-clr11 comnelips" style="width:100%;cursor:pointer;" value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : $svNo;?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                                            </div>
+                                        </li>
+                                        <li class="mnimumwidthres90">
+                                            <div class="tagcardhdng pnl-overflow crmbrdrclr3">
+                                                <div class="icon-bg"><i class="fa fa-suitcase i-text-111"></i></div>
+                                                <h2 class="comtex crmbrdrclrhed3 commargin_bottom_5 comnelips" style="font-weight:600 !important;">Project/Unit/Buyer</h2>
+                                                <h5 class="tetmuted tet-clr11 comnelips" id="MW_unitname"><?php echo (isset($receiptregister)) ? $receiptregister['UnitName'] : '';?></h5>
+                                            </div>
+                                        </li>
+                                        <li class="mnimumwidthres90">
+                                            <div class="tagcardhdng pnl-overflow crmbrdrclr4">
+                                                <div class="icon-bg"><i class="fa fa-tasks i-text-111"></i></div>
+                                                <h2 class="comtex crmbrdrclrhed4 commargin_bottom_5 comnelips" style="font-weight:600 !important;">Transaction</h2>
+                                                <h5 class="tetmuted tet-clr11 comnelips" id="MW_Trans"></h5>
+                                            </div>
+                                        </li>
+                                        <li class="mnimumwidthres90">
+                                            <div class="tagcardhdng pnl-overflow crmbrdrclr5">
+                                                <div class="icon-bg"><i class="fa fa-ban  i-text-111"></i></div>
+                                                <h2 class="comtex crmbrdrclrhed5 commargin_bottom_5 comnelips" style="font-weight:600 !important;">Amount</h2>
+                                                <h5 class="tetmuted tet-clr11 comnelips" id="MW_Amount"><?php echo (isset($receiptregister)) ? $receiptregister['Amount'] : '';?></h5>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!--  <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                    <div class="col-lg-12">
+                      <input type="text" name="Receipt_Date" id="Receipt_Date" class="form-control lbl_move" label="Receipt Date"  value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptDate'] : date("d-m-Y");?>"/>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 col-lg-offset-0 col-md-4 col-md-offset-0 col-sm-4 col-sm-offset-0">
+                    <div class="col-lg-12">
+                      <input type="text" name="Receipt_No" id="Receipt_No" class="form-control lbl_move" label="Receipt No." value="<?php echo (isset($receiptregister)) ? $receiptregister['ReceiptNo'] : $svNo;?>" <?php echo ($genType==true) ? 'readonly' : ''; ?>/>
+                    </div>
+                  </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row mb-b">
+                  <div class="col-lg-12 col-lg-offset-0">
+                    <div class="opt-listed">
+                      <ul>
+                        <li>
+                          <label>Project/Unit/Buyer</label>
+                          <p id="MW_unitname"><?php //echo (isset($receiptregister)) ? $receiptregister['UnitName'] : '';?></p>
+                        </li>
+                        <li>
+                          <label>Transaction</label>
+                          <p id="MW_Trans"></p>
+                        </li>
+                        <li>
+                          <label>Amount</label>
+                          <p id="MW_Amount"><?php //echo (isset($receiptregister)) ? $receiptregister['Amount'] : '';?></p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>-->
+                                <div class="clearfix"></div>
+                                <!--table start-->
+                                <div class="col-lg-12 col-lg-offset-0">
+                                    <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                        <table class="table" style="margin-bottom:0px;" id="EntryTable">
+                                            <thead>
+                                            <tr>
+                                                <th width="16%" rowspan="2">Bill Date&nbsp;&nbsp;&nbsp;</th>
+                                                <th width="3%" rowspan="2">Bill No</th>
+                                                <th width="52%" rowspan="2">Stage Name</th>
+                                                <th width="6%" style="text-align:right" rowspan="2">Base Amount</th>
+                                                <th width="6%" style="text-align:right" rowspan="2">Received Amt</th>
+                                                <th width="8%" style="text-align:right" rowspan="2">Receivable Amt</th>
+                                                <th width="4%" colspan="3" style="text-align:center">Current Paying</th>
+                                                <th width="3%">&nbsp;</th>
+                                            </tr>
+                                            <tr>
+                                                <th width="6%" style="text-align:right">Base Amount</th>
+                                                <th width="6%" style="text-align:right">Tax Amount</th>
+                                                <th width="6%" style="text-align:right">Net Amount</th>
+                                                <th width="2%">&nbsp;</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody class="main">
+                                            <?php if(isset($billformats)):
+                                                $i=0;
+                                                foreach($billformats as $trans):
+                                                    $i=$i+1;
+
+                                                    $baseAmt = 0;
+                                                    $curAmt = $trans['CurrentAmount'];
+                                                    $adjAmt = $trans['PaidAmount'];
+                                                    $qualAmt = $trans['QualAmount'];
+                                                    $netAmt = $trans['NetAmount'];
+                                                    if($adjAmt<0)
+                                                    {
+                                                        $adjAmt=$adjAmt*(-1);
+                                                    }
+                                                    $baseAmt = $trans['BillAmount'];
+                                                    $balAmt = $baseAmt - $adjAmt;
+                                                    ?>
+                                                    <tr class="padi05">
+                                                        <td><input class="parent_text red-non mainTrInput" type="text" id="BDate_<?php echo $i; ?>" value="<?php if(date( 'd-m-Y', strtotime($trans['BillDate']) )!='01-01-1970'){echo $trans['BillDate'];}else{ echo '' ; }?>" readonly/></td>
+                                                        <td><input class="parent_text red-non mainTrInput" type="text" id="BNo_<?php echo $i; ?>" value="<?php echo $trans['PBNo'];?>" readonly/></td>
+                                                        <td><div class="parent_text red-non mainTrInput" id="StageNames_<?php echo $i; ?>" > <?php echo $trans['StageName'];?></div></td>
+                                                        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="BaseAmt_<?php echo $i; ?>"  value="<?php echo $this->commonHelper()->sanitizeNumber($baseAmt,2,true);?>" readonly/></td>
+                                                        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="AdjAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($adjAmt,2,true);?>" readonly/></td>
+                                                        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="BalAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($balAmt,2,true);?>" readonly/></td>
+                                                        <input type="hidden" name="BillId_<?php echo $i; ?>" id="BillId_<?php echo $i; ?>" value="<?php echo $trans['ProgressBillTransId'];?>"/>
+                                                        <input type="hidden" name="StageId_<?php echo $i; ?>" id="StageId_<?php echo $i; ?>" value="<?php echo $trans['StageId'];?>"/>
+                                                        <input type="hidden" name="StageType_<?php echo $i; ?>" id="StageType_<?php echo $i; ?>" value="<?php echo $trans['StageType'];?>"/>
+                                                        <input type="hidden" name="ExtraBillId_<?php echo $i; ?>" id="ExtraBillId_<?php echo $i; ?>" value="<?php echo $trans['ExtraBillRegisterId'];?>"/>
+                                                        <input type="hidden" name="StageName_<?php echo $i; ?>" id="StageName_<?php echo $i; ?>" value="<?php echo $trans['StageName'];?>"/>
+                                                        <td><input class="parent_text text-right mainTrInput" type="text" name="CurAmt_<?php echo $i; ?>" id="CurAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($curAmt,2,true);?>"  onblur="return numFormat(this))" onkeypress="return isDecimal(event,this)" maxlength="15" onchange="calcTotal()" readonly/></td>
+                                                        <td><input type="text"  class="parent_padi05 text-right mainTrInput" name="TaxAmt_<?php echo $i; ?>" id="TaxAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($qualAmt,2,true);?>" readonly/></td>
+                                                        <td width="7%"><input type="text"  class="parent_padi05 text-right mainTrInput" name="NetAmt_<?php echo $i; ?>" id="NetAmt_<?php echo $i; ?>" value="<?php echo $this->commonHelper()->sanitizeNumber($netAmt,2,true);?>" readonly/></td>
+                                                        <td align="center" class="action_btns_td"><ul class="action_btns">
+                                                                <li> <a href="#" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a> </li>
+                                                            </ul></td>
+                                                    </tr>
+                                                    <tr style="display:none;" class="subTr">
+                                                        <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+                                                                <div class="col-lg-12">
+                                                                    <div class="table-responsive topsp">
+                                                                        <table class="table" style="margin-bottom:0px;" id="absTable_<?php echo $i;?>">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th width="12%" rowspan="2">Description</th>
+                                                                                <th width="6%" style="text-align:right" rowspan="2">Bill Amount</th>
+                                                                                <th width="6%" style="text-align:right" rowspan="2">Received</th>
+                                                                                <th width="6%" style="text-align:right" rowspan="2">Receivable</th>
+                                                                                <th width="6%" colspan="3" style="text-align:center">Current Paying</th>
+                                                                                <th width="6%">&nbsp;</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th style="text-align:right">Base Amount</th>
+                                                                                <th style="text-align:right">Tax Amount</th>
+                                                                                <th style="text-align:right">Net Amount</th>
+                                                                                <th>&nbsp;</th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody class="main">
+                                                                            <?php
+                                                                            $j=0;
+                                                                            foreach($trans['BillAbs'] as $billAbs):
+                                                                                $j=$j+1;
+                                                                                ?>
+                                                                                <!-- Start -->
+                                                                                <tr class="padi05">
+                                                                                    <td><input class="parent_text red-non rqualmainTrInput" type="text" id="BillAbs_<?php echo $i;?>_Desc_<?php echo $j;?>" value="<?php echo $billAbs['ReceiptTypeName'];?>" readonly/></td>
+                                                                                    <td><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs_<?php echo $i;?>_BaseAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['BillAmount'],2,true);?>" readonly/></td>
+                                                                                    <td><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs_<?php echo $i;?>_AdjAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['PaidAmount'],2,true);?>" readonly/></td>
+                                                                                    <td><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs_<?php echo $i;?>_BalAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['BillAmount'] - $billAbs['PaidAmount'],2,true);?>" readonly/></td>
+                                                                                    <td><input class="parent_text text-right rqualmainTrInput" type="text" id="BillAbs_<?php echo $i;?>_CurAmt_<?php echo $j;?>" name="BillAbs_<?php echo $i;?>_CurAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['CurrentAmount'],2,true);?>" onblur="return numFormat(this)" onkeypress="return isDecimal(event,this)" maxlength="15" onchange="calcAbsTotal(this)" readonly/></td>
+                                                                                    <input type="hidden" name="BillAbs_<?php echo $i;?>_ReceiptTypeId_<?php echo $j;?>" id="BillAbs_<?php echo $i;?>_ReceiptTypeId_<?php echo $j;?>" value="<?php echo $billAbs['ReceiptTypeId'];?>" readonly/>
+                                                                                    <input type="hidden" name="BillAbs_<?php echo $i;?>_ReceiptType_<?php echo $j;?>" id="BillAbs_<?php echo $i;?>_ReceiptType_<?php echo $j;?>" value="<?php echo $billAbs['ReceiptType'];?>" readonly/>
+                                                                                    <td><input type="text"  class="parent_padi05 text-right rqualmainTrInput" id="BillAbs_<?php echo $i;?>_TaxAmt_<?php echo $j;?>" name="BillAbs_<?php echo $i;?>_TaxAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['QualAmount'],2,true);?>" readonly/></td>
+                                                                                    <td><input type="text"  class="parent_padi05 text-right rqualmainTrInput" id="BillAbs_<?php echo $i;?>_NetAmt_<?php echo $j;?>" name="BillAbs_<?php echo $i;?>_NetAmt_<?php echo $j;?>" value="<?php echo $this->commonHelper()->sanitizeNumber($billAbs['NetAmount'],2,true);?>" readonly/></td>
+                                                                                    <td align="center" class="action_btns_td"><ul class="action_btns">
+                                                                                            <li> <a href="#" class="rqualmainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a> </li>
+                                                                                        </ul></td>
+                                                                                    <input type="hidden" class="qualRefId" name="BillAbs_<?php echo $i;?>_QualRefId_<?php echo $j;?>" id="BillAbs_<?php echo $i;?>_QualRefId_<?php echo $j;?>" value="0"/>
+                                                                                </tr>
+                                                                                <tr style="display:none;" class="qualmainTr">
+                                                                                    <td colspan="8" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+                                                                                            <?php echo $billAbs['HtmlTag'];?>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <!-- End -->
+                                                                            <?php endforeach;?>
+                                                                            </tbody>
+                                                                            <tbody class="total">
+                                                                            <tr class="padi05">
+                                                                                <td></td>
+                                                                                <td colspan="2"></td>
+                                                                                <td align="right" class="rate_pri">Total</td>
+                                                                                <td width="7%"><input class="parent_padi05 text-right" type="text" id="TotalCurAmt_<?php echo $i;?>" readonly/></td>
+                                                                                <td width="7%"><input type="text" class="parent_padi05 text-right" id="TotalTaxAmt_<?php echo $i;?>" readonly/></td>
+                                                                                <td width="7%"><input type="text" class="parent_padi05 text-right" id="TotalNetAmt_<?php echo $i;?>" readonly/></td>
+                                                                                <td>&nbsp;</td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <input type="hidden" name="billabsrowid_<?php echo $i;?>" id="billabsrowid_<?php echo $i;?>" value="<?php echo $j;?>"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div></td>
+                                                    </tr>
+                                                <?php endforeach; endif;?>
+                                            </tbody>
+                                            <tbody class="total">
+                                            <tr class="padi05">
+                                                <td align="right" class="rate_pri"><label style="display: none" id="BillExcessAmtlbl">Excess Amount</label></td>
+                                                <td width="20%"><input style="display: none" class="parent_text text-right" type="text" name="BillExcessAmt" id="BillExcessAmt" readonly/></td>
+                                                <td colspan="3">&nbsp;</td>
+                                                <td align="right" class="rate_pri">Total</td>
+                                                <td width="7%" ><input class="parent_padi05 text-right" type="text" name="BillCurTotal" id="BillCurTotal" readonly/></td>
+                                                <td width="7%" ><input class="parent_padi05 text-right" type="text" name="BillTaxTotal" id="BillTaxTotal" onfocus="showTotalTax()"  readonly/></td>
+                                                <td width="7%" ><input class="parent_padi05 text-right" type="text" name="BillNetTotal" id="BillNetTotal" readonly/></td>
+                                                <td>&nbsp; </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="6">&nbsp;</td>
+                                                <td colspan="2">
+                                                    <div class="col-lg-12 col-lg-offset-0" id="taxabsdiv" style="display: none">
+                                                        <div class="table-responsive topsp animated-panel zoomIn" style="animation-delay: 0.2s;">
+                                                            <table id="totaltaxTable" class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th class="red-ths">Description</th>
+                                                                    <th class="red-ths">Amount</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                </tbody>
+                                                                <input type="hidden" name="billqualrowid" id="billqualrowid" value="0"/>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>&nbsp;</td>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <input type="hidden" name="billrowid" id="billrowid" value="<?php echo $i;?>"/>
+                                        <input type="hidden" name="QualTotalRowId" id="QualTotalRowId" value="0"/>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 savebtn_area">
+                        <ul>
+                            <li class="cancel_btn float_l"><a href="javascript:backfn();" data-toggle="tooltip" class="ripple" title="Go back!">Back</a></li>
+                            <li class="dropdown save_btn float_r"><a href="#" onclick="submitForm(); return false;" id="submitFId" data-toggle="tooltip" class="ripple" title="Submit">Submit</a><div id="submit-loaderF" class="post_loader ask_post_loader brad_50">
+                                    <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+                                </div>
+                            <li class="dropdown save_btn float_r"><a href="#" onclick="submitForm(true);  return false;" id="submitpFId" data-toggle="tooltip" class="ripple" title="Submit">Submit & Print</a>
+                                <div id="submit-loader2" class="post_loader ask_post_loader brad_50">
+                                    <img title="" alt="" src="/bsf_v1.1/public/images/post-loader.gif">
+                                </div>
+                            <li class="cb-cancel float_r"><a href="#" data-toggle="tooltip" class="ripple"  onclick="CloseForm()" title="Cancel">Cancel</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<table id="dummy-bill" style="display: none;">
+    <tbody>
+    <tr class="padi05">
+        <td><input class="parent_text red-non mainTrInput" type="text" id="BDate__1" readonly/></td>
+        <td><input class="parent_text red-non mainTrInput" type="text" id="BNo__1" readonly/></td>
+        <td><div class="parent_text red-non mainTrInput" id="StageNames__1"></div></td>
+        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="BaseAmt__1" readonly/></td>
+        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="AdjAmt__1" readonly/></td>
+        <td><input class="parent_padi05 text-right mainTrInput" type="text" id="BalAmt__1" readonly/></td>
+        <input type="hidden" name="BillId__1" id="BillId__1"/>
+        <input type="hidden" name="StageId__1" id="StageId__1"/>
+        <input type="hidden" name="StageName__1" id="StageName__1"/>
+        <input type="hidden" name="StageType__1" id="StageType__1"/>
+        <input type="hidden" name="ExtraBillId__1" id="ExtraBillId__1"/>
+        <td><input class="parent_text text-right mainTrInput" type="text" name="CurAmt__1" id="CurAmt__1" onblur="return numFormat(this)" onkeypress="return isDecimal(event,this)" maxlength="15" onchange="calcTotal()" readonly/></td>
+        <td><input class="parent_padi05 text-right mainTrInput" type="text" name="TaxAmt__1" id="TaxAmt__1" readonly/></td>
+        <td><input class="parent_padi05 text-right mainTrInput" type="text" name="NetAmt__1" id="NetAmt__1" readonly/></td>
+        <td align="center" class="action_btns_td"><ul class="action_btns">
+                <li> <a href="#" class="mainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a> </li>
+            </ul></td>
+    </tr>
+    <tr style="display:none;" class="subTr">
+        <td colspan="10" style="padding:0px !important; "><div class="subDiv" style="display:none;">
+                <div class="col-lg-12 col-lg-offset-0 rdbt" style="margin-top:5px;"> </div>
+                <div class="col-lg-12">
+                    <div class="table-responsive topsp">
+                        <table class="table" style="margin-bottom:0px;" id="absTable__1">
+                            <thead>
+                            <tr>
+                                <th rowspan="2">Description</th>
+                                <th style="text-align:right" rowspan="2">Bill Amount</th>
+                                <th style="text-align:right" rowspan="2">Received</th>
+                                <th style="text-align:right" rowspan="2">Receivable</th>
+                                <th colspan="3" style="text-align:center">Current Paying</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            <tr>
+                                <th style="text-align:right">Base Amount</th>
+                                <th style="text-align:right">Tax Amount</th>
+                                <th style="text-align:right">Net Amount</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody class="main">
+                            </tbody>
+                            <tbody class="total">
+                            <tr class="padi05">
+                                <td colspan="3"></td>
+                                <td align="right" class="rate_pri">Total</td>
+                                <td width="7%"><input class="parent_padi05 text-right" type="text" id="TotalCurAmt__1" readonly/></td>
+                                <td width="7%"><input class="parent_padi05 text-right" type="text" id="TotalTaxAmt__1" readonly/></td>
+                                <td width="7%"><input class="parent_padi05 text-right" type="text" id="TotalNetAmt__1" readonly/></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <input type="hidden" name="billabsrowid__1" id="billabsrowid__1" value="1"/>
+                    </div>
+                </div>
+            </div></td>
+    </tr>
+    </tbody>
+</table>
+<table id="dummy-bill-abs" style="display: none;">
+    <tbody>
+    <tr class="padi05">
+        <td width="15%"><input class="parent_text red-non rqualmainTrInput" type="text" id="BillAbs__1_Desc__9" readonly/></td>
+        <td width="7%"><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs__1_BaseAmt__9" readonly/></td>
+        <td width="7%"><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs__1_AdjAmt__9" readonly/></td>
+        <td width="7%"><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs__1_BalAmt__9" readonly/></td>
+        <input type="hidden" name="BillAbs__1_ReceiptTypeId__9" id="BillAbs__1_ReceiptTypeId__9" readonly/>
+        <input type="hidden" name="BillAbs__1_ReceiptType__9" id="BillAbs__1_ReceiptType__9" readonly/>
+        <td width="7%"><input class="parent_text text-right rqualmainTrInput" type="text" id="BillAbs__1_CurAmt__9" name="BillAbs__1_CurAmt__9" onblur="return numFormat(this)" onkeypress="return isDecimal(event,this)" maxlength="15" onchange="calcAbsTotal(this)"/></td>
+        <td width="7%"><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs__1_TaxAmt__9" name="BillAbs__1_TaxAmt__9" readonly/></td>
+        <td width="7%"><input class="parent_padi05 text-right rqualmainTrInput" type="text" id="BillAbs__1_NetAmt__9" name="BillAbs__1_NetAmt__9" readonly/></td>
+        <td width="4%" align="center" class="action_btns_td"><ul class="action_btns">
+                <li> <a href="#" class="rqualmainTr"><i class="fa fa-chevron-circle-down" data-toggle="tooltip" data-placement="top" data-original-title="Add lines" ></i></a> </li>
+            </ul></td>
+        <input type="hidden" name="BillAbs__1_QualRefId__9" id="BillAbs__1_QualRefId__9" value="0"/>
+    </tr>
+    </tbody>
+</table>
+<table style="display: none" id="dummy-totaltaxTable">
+    <tbody>
+    <tr class="padi05">
+        <td width="7%"><input class="parent_text red-non" type="text" name="QualName__1" value="" id="QualName__1" readonly/></td>
+        <td width="7%"><input class="parent_padi05 text-right" type="text" name="QualAmt__1" value="0" id="QualAmt__1" readonly/></td>
+        <input type="hidden" name="QualifierId__1" id="QualifierId__1" value="0"/>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    var arr_Units = <?php echo (isset($unitList)) ? json_encode($unitList) : '[]';?>;
+    var arr_banks = <?php echo (isset($banks)) ? json_encode($banks) : '[]';?>;
+    var mode = <?php echo (isset($mode)) ? json_encode($mode) : '[]';?>;
+    var $ProjectName = $('#ProjectName'),
+        $OrderNo = $('#OrderNo'),
+        $ReceiptAgainst = $('#ReceiptAgainst'),
+        $PaymentMode = $('#PaymentMode'),
+        $TNo = $('#TNo'),
+        $TDate = $('#TDate'),
+        $Amount = $('#Amount'),
+        $advAmount = $('#advAmount'),
+        $WorkOrderId = $('#PWorkOrderId'),
+        $WODate = $('#WODate'),
+        $ReceiptNo = $('#ReceiptNo'),
+        $ReceiptDate = $('#ReceiptDate'),
+        $UnitName = $('#unitname'),
+        $BankName = $('#BankName'),
+        $UnitId = $('#unitid'),
+        $LeadId = $('#leadid'),
+        tmpSelProjectId = null;
+    var $MW_UnitName= $('#MW_unitname'),
+        $MW_WorkOrderNo = $('#MW_WorkOrderNo'),
+        $MW_PaymentMode = $('#MW_PaymentMode'),
+        $MW_TDate = $('#MW_TDate'),
+        $MW_TNo = $('#MW_TNo'),
+        $MW_Amount = $('#MW_Amount');
+    var bReady=false;
+
+    $(function () {
+        // select2 initialize
+        $(".single_dropdown2").select2({
+            placeholder: ""
+            // minimumResultsForSearch: -1
+        });
+        $(".special").keydown(function (e) {
+            var key = e.which || e.keyCode;
+            if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+                    // numbers
+                key >= 48 && key <= 57 ||
+                    // Numeric keypad
+                key >= 96 && key <= 105 ||
+                    // Backspace and Tab and Enter
+                key == 8 || key == 9 || key == 13 ||
+                    // Home and End
+                key == 35 || key == 36 ||
+                    // left and right arrows
+                key == 37 || key == 39 || (key == 190 &&  this.value.split('.').length === 1) ||
+                    // Del and Ins
+                key == 46 || key == 45){
+                return true;
+            }
+            else{
+                return false;
+            }
+
+        });
+        if ($PaymentMode.val() =="" || $PaymentMode.val() =="Cash") {
+            $('#TNoD').hide();
+            $('#TDateD').hide();
+            $('#BankNameD').hide();
+        } else {
+            $('#TNoD').show();
+            $('#TDateD').show();
+            $('#BankNameD').show();
+        }
+        if ($('#ReceiptAgainst').val() != "B") {
+            $('#nextbt').hide();
+            $('#savebt').show();
+            $('#saveandprintbt').show();
+        } else {
+            $('#savebt').hide();
+            $('#saveandprintbt').hide();
+            $('#nextbt').show();
+        }
+
+        var sTrans ="";
+        if ($PaymentMode.val() == "Cash") {
+            sTrans="Cash";
+        }else {
+            sTrans = " No." + $TNo.val() + " dt." + $TDate.val();
+            if ($('#BankName').val() != "") { sTrans =  sTrans + ' - ' +$('#BankName').val();}
+        }
+        $('#MW_Trans').html(sTrans);
+
+        if ($('#mode').val() == "edit") {
+            if ($('#ReceiptAgainst').val() == "B") {
+                $('#indexWrapper').hide();
+                $('#mainWrapper').fadeIn();
+            }
+        }
+        entryShow();
+//  bindExpandTrFn();
+
+        $(document).keydown(function(e) {
+            if (e.keyCode==9) {
+                entryShow();
+            }
+        });
+
+        rowSelect();
+        bindExpandMainTr();
+        bindExpandMainTrInput();
+
+        bindRQualExpandTr();
+        bindRQualExpandTrInput();
+
+        bindQualExpandTr();
+        bindQualExpandTrInput();
+        showQualExpandButton();
+        bindTaxCalculation();
+
+        fillRowRefEditMode();
+        calcTotal();
+        qualTotal();
+    });
+
+
+    //$(document).ready(function() {
+    //    showTax();
+    //});
+
+    //$(window).load(function() {
+    //    showTax();
+    //});
+
+
+    $UnitName.autocomplete({
+        lookup: arr_Units,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }, onSelect: function (suggestion) {
+            if (suggestion) {
+                $UnitId.val(suggestion.data);
+                $LeadId.val(suggestion.LeadId);
+                $ReceiptAgainst.val('').trigger('change');
+
+                $(this).removeClass('error');
+            }
+        }, onSearchStart: function (suggestion) {
+            $UnitId.val(0);
+        }, onSearchComplete: function (query, suggestions) {
+            if (!suggestions.length) {
+                $UnitId.val(0);
+                $(this).addClass('error');
+            } else $(this).removeClass('error');
+        }
+    });
+
+    $BankName.autocomplete({
+        lookup: arr_banks,
+        showNoSuggestionNotice: false,
+        lookupFilter: function (suggestion, originalQuery, queryLowerCase) {
+            if (queryLowerCase == '*') {
+                return suggestion.value;
+            } else {
+                var re = new RegExp($.Autocomplete.utils.escapeRegExChars(queryLowerCase), 'gi');
+                return re.test(suggestion.value);
+            }
+        }
+    });
+
+    /*$('input, select, textarea').on('focus', function() {;
+     var that = $(this);
+     $('html, body').animate({
+     scrollTop: that.offset().top + that.height() / 2 - $(window).height() / 2
+     }, 2000);
+     });*/
+
+    $('input, select, textarea').on('change', function() {
+        if($('#ReceiptAgainst').val()!="R") {
+            entryShow();
+            $('.rentClass').addClass('hide');
+            $('.rentClass').val('');
+        } else {
+            if($('#PaymentModeHide').is(':visible')) {
+                entryShow();
+            }
+        }
+    });
+
+    $("#quantity").focus(function(e){
+        e.preventDefault();
+        if(!$(this).closest("tr").next(".TAXsubTr").is(":visible")){
+            $(this).closest("tr").next(".TAXsubTr").show();
+            $(this).closest("tr").next(".TAXsubTr").find(".subDiv").slideDown("slow");
+            $(this).find("i").addClass("tform");
+        }
+        else{
+            $(this).closest("tr").next(".TAXsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".TAXsubTr").slideUp("slow");
+            $(this).find("i").removeClass("tform");
+        }
+    });
+
+    function showReceiptDateText() {
+        $('#lReceiptdate').hide();
+        $('#tReceiptdate').show();
+    }
+
+    function showReceiptDateLabel() {
+        $('#lcdate').html('Receipt Date :' + $('#ReceiptDate').val());
+        $('#tReceiptdate').hide();
+        $('#lReceiptdate').show();
+    }
+
+
+    function showReceiptNoText() {
+        $('#lReceiptno').hide();
+        $('#tReceiptno').show();
+    }
+
+    function showReceiptNoLabel() {
+        $('#lcno').html('Receipt No :' + $('#ReceiptNo').val());
+        $('#tReceiptno').hide();
+        $('#lReceiptno').show();
+    }
+
+    function entryShow() {
+        $('#nextbt').hide();
+        $('#savebt').hide();
+        $('#saveandprintbt').hide();
+        var $mainTRs = $("[class*=nextClass]");
+        var bShow=true;
+        $.each($mainTRs, function (i, obj) {
+            var $this = $(this);
+            if (bShow==true) { $this.show();  $this.focus();}
+            else $this.hide();
+            $this.find("input:text").each(function () {
+                name = $(this)[0].id;
+                if (name !=  'TNo' && name != 'TDate' && name !='BankName') {
+                    if ($('#' + name).val().length == 0) bShow = false;
+                }
+            });
+            $this.find("textarea").each(function () {
+                name = $(this)[0].id;
+                if ($('#'+name).val().length ==0) bShow=false;
+            });
+            $this.find("select").each(function () {
+                name = $(this)[0].id;
+                if ($('#'+name).val().length ==0) bShow=false;
+            });
+        });
+
+        if ($('#PaymentMode').val() == "") {
+            $('#TNoD').hide();
+            $('#TDateD').hide();
+            $('#BankNameD').hide();
+            $('#AmountD').hide();
+        } else if ($('#PaymentMode').val() == "Cash") {
+            $('#TNoD').hide();
+            $('#TDateD').hide();
+            $('#BankNameD').hide();
+            $('#AmountD').show();
+        }
+
+        if (bShow==true) {
+            if ($('#ReceiptAgainst').val() != "B") {
+                $('#nextbt').hide();
+                $('#savebt').show();
+                $('#saveandprintbt').show();
+            } else {
+                $('#savebt').hide();
+                $('#saveandprintbt').hide();
+                $('#nextbt').show();
+            }
+        }
+    }
+
+    function CloseForm(){
+        if ($('#mode').val() == "edit") { window.location.href =  getBaseURL() + 'crm/bill/receipt-register';}
+        else {window.location.href =  getBaseURL() + 'crm/bill/receipt';}
+    }
+
+    function validateIndex() {
+        var unitName = $UnitName.val(),
+            ReceiptOrderNo = $ReceiptNo.val(),
+            ReceiptOrderDate = $ReceiptDate.val();
+
+
+        if(ReceiptOrderNo.length == 0) {
+            alert('Receipt No. is required!');
+            $ReceiptNo.focus();
+            return false;
+        }
+
+        if($ReceiptNo.hasClass('error')) {
+            alert('Receipt No. already exists!');
+            $ReceiptNo.focus();
+            return false;
+        }
+
+        if(ReceiptOrderDate.length == 0) {
+            alert('Receipt Date is required!');
+            $ReceiptDate.focus();
+            return false;
+        }
+
+        if($ReceiptDate.val().length == 0) {
+            alert('Receipt Date is required!');
+            $ReceiptDate.focus();
+            return false;
+        }
+
+        if($UnitName.val().length == 0) {
+            alert('Unit Name is required!');
+            $UnitName.focus();
+            return false;
+        }
+
+        if($UnitId.val().length == 0 || $UnitId.val() == 0 || $UnitName.length == 0 || $UnitName.hasClass('error')) {
+            alert('Unit Name is required!');
+            $UnitName.focus();
+            return false;
+        }
+        if($ReceiptAgainst.val().length == 0){
+            alert('Receipt Against is required!');
+            $ReceiptAgainst.focus();
+            return false;
+        }
+
+        if($PaymentMode.val().length == 0){
+            alert('Payment Mode is required!');
+            $PaymentMode.focus();
+            return false;
+        }
+
+        if ($PaymentMode.val() != "Cash") {
+            if ($TNo.val().length == 0) {
+                alert('Trasaction No. is required!');
+                $TNo.focus();
+                return false;
+            }
+            if ($TDate.val().length == 0 || $TDate.hasClass('error')) {
+                alert('Trasaction Date is required!');
+                $TDate.focus();
+                return false;
+            }
+        }
+
+        if($Amount.val().length == 0  ){
+            alert('Amount is required!');
+            $Amount.focus();
+            return false;
+        }
+        var sTrans ="";
+        if ($PaymentMode.val() == "Cash") {
+            sTrans="Cash";
+        }else {
+            sTrans = " No." + $TNo.val() + " dt." + $TDate.val()
+            if ($('#BankName').val() != "") { sTrans =  sTrans + ' - ' +$('#BankName').val();}
+        }
+        $('#MW_Trans').html(sTrans);
+
+        // Set Header Titles
+        $MW_UnitName.html(unitName);
+        $MW_Amount.html($Amount.val());
+        $('#Receipt_No').val($ReceiptNo.val());
+        $('#Receipt_Date').val($ReceiptDate.val());
+
+        /*if (parseFloat(isNullCheck($('#BillNetTotal').val(),'number')) >0 ) {
+         $('#indexWrapper').hide();
+         $('#mainWrapper').fadeIn();
+         return;
+         }*/
+
+        if (mode != 'edit') bindBills();
+        $('#indexWrapper').hide();
+        $('#mainWrapper').fadeIn();
+    }
+
+    function CheckReceiptNo(x, value) {
+        var $el = $(x);
+        $el.removeClass('error');
+        $.ajax({
+            url: getBaseURL() + "crm/bill/receipt",
+            data: {'rtype':'receiptno', 'data':value, csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status) {
+                if (data == "Y") {
+                    $el.addClass('error');
+                    //alert('Receipt No. already exists!');
+                }
+            }
+        });
+    }
+
+    function bindBills() {
+        var $tbody = $('#EntryTable tbody.main'),
+            $billrowid = $('#billrowid');
+        $tbody.html('');
+        $.ajax({
+            url: getBaseURL() + "crm/bill/receipt",
+            data: {rtype:'Bill', data: $UnitId.val(), csrf: "<?php echo isset($csrf)?$csrf:''; ?>"},
+            async: false,
+            type: 'post',
+            success: function(data,status, xhr) {
+                var detail = JSON.parse(data);
+
+                var template = $('#dummy-bill tbody').html(),
+                    absTemplate = $('#dummy-bill-abs tbody').html(),
+                    count = 0,
+                    billAmt = parseFloatVal(isNullCheck($Amount.val(),'number'));
+
+                $.each(detail, function(i, obj) {
+                    count++;
+                    $tbody.append(template.replace(/__1/g, '_' + count));
+                    bdate= obj.BillDate;
+                    if(obj.BillDate=='01-01-1970'){
+                        bdate='';
+                    }
+                    $('#BDate_' + count).val(bdate);
+                    $('#BillId_' + count).val(obj.ProgressBillTransId);
+                    $('#StageId_' + count).val(obj.StageId);
+                    $('#StageType_' + count).val(obj.StageType);
+                    $('#ExtraBillId_' + count).val(obj.ExtraBillRegisterId);
+
+                    $('#BNo_' + count).val(obj.PBNo);
+                    $('#StageNames_' + count).text(isNullCheck(obj.StageName,'string'));
+                    $('#StageName_' + count).val(isNullCheck(obj.StageName,'string'));
+                    var adjAmt = parseFloat(obj.PaidAmount),
+                        sAmt = parseFloat(obj.Amount),
+                        cAmt=0;
+                    baseAmt = 0;
+                    if(isNaN(sAmt))
+                        sAmt = 0;
+//                if(isNaN((cAmt)))
+//                    cAmt = 0;
+                    if(isNaN((adjAmt)))
+                        adjAmt = 0;
+
+                    if(cAmt > 0){
+                        baseAmt = cAmt;}
+
+                    else if (sAmt > 0){
+                        baseAmt = sAmt;}
+
+
+
+                    var balAmt = baseAmt - adjAmt,
+                        $curAmt = $('#CurAmt_' + count);
+
+                    if (balAmt > billAmt) {
+                        $curAmt.val(sanitizeNumber(billAmt,2,true));
+                        billAmt = 0;
+                    }
+                    else{
+                        $curAmt.val(sanitizeNumber(balAmt,2,true));
+                        billAmt = billAmt - balAmt;
+                    }
+
+                    $('#BaseAmt_' + count).val(sanitizeNumber(baseAmt,2,true));
+                    $('#AdjAmt_' + count).val(sanitizeNumber(adjAmt,2,true));
+                    $('#BalAmt_' + count).val(sanitizeNumber(balAmt,2,true));
+
+                    // Bill Abstract
+                    var absCount = 0,
+                        billAbsAmt = parseFloatVal($curAmt.val());
+
+
+                    $.each(obj.BillAbs, function (i,o) {
+                        absCount++;
+
+
+                        var nAmt = parseFloatVal(o.Amount),
+                            aAmt = parseFloatVal(o.PaidAmount),
+                            bAmt = (nAmt - aAmt);
+                        $('#absTable_' +count+ ' tbody.main').append(absTemplate.replace(/__1/g, '_' + count).replace(/__9/g, '_' + absCount));
+                        $('#BillAbs_'+count+'_Desc_'+absCount).val(o.ReceiptTypeName);
+                        $('#BillAbs_'+count+'_ReceiptTypeId_'+absCount).val(o.ReceiptTypeId);
+                        $('#BillAbs_'+count+'_ReceiptType_'+absCount).val(o.ReceiptType);
+                        $('#BillAbs_'+count+'_BaseAmt_'+absCount).val(sanitizeNumber(nAmt,2,true));
+                        $('#BillAbs_'+count+'_AdjAmt_'+absCount).val(sanitizeNumber(aAmt,2,true));
+                        $('#BillAbs_'+count+'_BalAmt_'+absCount).val(sanitizeNumber(bAmt,2,true));
+                        var $cAmt = $('#BillAbs_'+count+'_CurAmt_'+absCount);
+                        //  console.log(bAmt);
+                        // console.log(billAbsAmt);
+
+                        if (bAmt >= billAbsAmt) {
+                            $cAmt.val(sanitizeNumber(billAbsAmt,2,true));
+                            billAbsAmt = 0;
+                        } else {
+                            $cAmt.val(sanitizeNumber(bAmt,2,true));
+                            billAbsAmt = billAbsAmt - bAmt;
+                        }
+
+
+                        var sHtml = o.HtmlTag;
+                        bReady=false;
+                        if (sHtml !="") {
+                            sname = 'BillAbs_' + count + '_CurAmt_' + absCount;
+                            var $x = $('#' + sname);
+                            var $tr = $x.closest('tr');
+
+                            var trows = isNullCheck($('#QualTotalRowId').val(), 'number');
+                            trows = +trows + 1;
+
+                            sHtml = sHtml.replace(/__1/g, '_' + trows);
+
+                            $tr.after('<tr style="display:none;" class="qualmainTr"><td colspan="8" style="padding:0px !important; "><div class="subDiv" style="display:none;">' + sHtml + '</td></tr>');
+                            $('#BillAbs_' + count + '_QualRefId_' + absCount).val(trows);
+                            $('#QualRowRef_' + trows).val(sname);
+                            $('#QualTotalRowId').val(trows);
+
+                            calcAbsTotal($x);
+                        }
+                        bReady=true;
+                    });
+
+                    $('#billabsrowid_' + count).val(absCount);
+                    calcAbsTotal($('#billabsrowid_' + count));
+                });
+                bindDatePicker();
+                calcTotal();
+                $billrowid.val(count);
+            }
+        });
+
+        bReady=false;
+        //showTax();
+        bReady=true;
+        rowSelect();
+
+        bindExpandMainTr();
+        bindExpandMainTrInput();
+
+        bindRQualExpandTr();
+        bindRQualExpandTrInput();
+
+        bindQualExpandTr();
+        bindQualExpandTrInput();
+        showQualExpandButton();
+        bindTaxCalculation();
+        checkTaxAdjustment();
+    }
+
+    function checkTaxAdjustment() {
+        var billAmt = parseFloatVal($Amount.val());
+        var dbalAmt=billAmt;
+        $netAmt = $('input[id*=NetAmt_]');
+        $.each($netAmt, function () {
+            var $x = $(this),
+                name = $x[0].id,
+                key = $x[0].id.split('_')[1];
+
+            if (name.indexOf('__') != -1 || name.indexOf('TotalNetAmt_') != -1 || name.indexOf('_NetAmt_') != -1 || name.indexOf('excel') != -1) return;
+
+            var dAmt = parseFloat(isNullCheck($x.val(),'number'));
+            if (dbalAmt < dAmt) {
+                $curAmt = $('input[id*=BillAbs_'+key+'_CurAmt_]');
+                $.each($curAmt, function () {
+                    var $y = $(this),
+                        sname = $x[0].id,
+                        key1 = $y[0].id.split('_')[1],
+                        key2 = $y[0].id.split('_')[3];
+
+                    if (sname.indexOf('__') != -1) return;
+
+                    var $net = $('#BillAbs_' + key1 + '_NetAmt_' + key2);
+
+                    var dRAmt = parseFloat(isNullCheck($net.val(),'number'));
+                    if (dbalAmt < dRAmt) {
+                        var dbaseAmt = parseFloat(isNullCheck($y.val(),'number'));
+                        var $tax = $('#BillAbs_' + key1 + '_TaxAmt_' + key2);
+                        var dtaxAmt = parseFloat(isNullCheck($tax.val(),'number'));
+
+                        if (dtaxAmt !=0) {
+                            var dnTax = 1+ (dtaxAmt/dbaseAmt);
+                            var dnbaseAmt = dbalAmt/dnTax;
+
+                            $y.val(sanitizeNumber(dnbaseAmt,2,true));
+                            dbalAmt=0;
+                        } else {
+                            $y.val(sanitizeNumber(dbalAmt,2,true));
+                            dbalAmt=0;
+                        }
+                        calcAbsTotal($y);
+                    } else {
+                        dbalAmt = dbalAmt - dRAmt;
+                    }
+                });
+            } else {
+                dbalAmt = dbalAmt - dAmt;
+            }
+        });
+        if (dbalAmt >0) {
+            $('#BillExcessAmt').val(sanitizeNumber(dbalAmt,2,true));
+            $('#BillExcessAmtlbl').show();
+            $('#BillExcessAmt').show();
+        } else {
+            $('#BillExcessAmt').val(sanitizeNumber(0,2,true));
+            $('#BillExcessAmtlbl').hide();
+            $('#BillExcessAmt').hide();
+        }
+    }
+
+
+
+
+    function bindDatePicker() {
+        $('.date_picker').datepicker({
+            'format': 'dd-mm-yyyy'
+        }).on('changeDate', function() {
+            $('.datepicker').hide();
+        }).data('datepicker');
+    }
+
+    function showTotalTax() {
+        $('#taxabsdiv').show();
+    }
+
+    function submitForm(isPrint) {
+
+        //alert("1");
+        if(typeof isPrint != 'undefined' && isPrint == true) {
+            $('#submitpFId').hide();
+            $('#submit-loader2').show();
+        }else {
+            $('#submitFId').hide();
+            $('#submit-loaderF').show();
+        }
+        var $error = $('.error');
+        if($error.length != 0) {
+            alert('Kindly notice the error notifications!');
+
+            $error.parents('.collapse:not(.in)').siblings('.panel-heading').trigger('click');
+            return false;
+            $('#submitFId').show();
+            $('#submitpFId').show();
+        }
+        $('#unitname').removeAttr('disabled');
+
+        $('#print').val('false');
+        if(typeof isPrint != 'undefined' && isPrint == true) {
+            $('#print').val('true');
+        }
+
+        $('#formWrapper').submit();
+    }
+    var modef=$("#mode").val();
+    if( modef == 'edit'){
+$("#Amount").change(function(){
+
+    var receiptagainst=$("#ReceiptAgainst").val();
+    var unitId=$("#unitid").val();
+    var receiptId=$("#receiptid").val();
+
+    var amt=parseFloatVal($("#Amount").val());
+
+     $.ajax({
+            url:getBaseURL()+"crm/bill/receipt",
+            type:"post",
+            data:{'mode':'submit',id:unitId,receiptId:receiptId},
+            success:function(data,textStatus,jqXHR){
+               if(parseFloatVal(amt) > parseFloatVal(data)){
+                    alert('amount exceeds advance amount');
+                   $("#Amount").val(0);
+                    $("#Amount").focus();
+                    return false;
+
+                }
+                else{
+                    return true;
+
+                }
+            }
+        });
+
+    });
+    }
+
+    function submitReceipt(isPrint) {
+
+        var modef=$("#mode").val();
+        var receiptagainst=$("#ReceiptAgainst").val();
+
+        var amt=parseFloatVal($("#Amount").val());
+        var avamt=parseFloatVal($("#advAmount").val());
+
+        if($("#Amount").val() == 0 ){
+            alert('Amount should not be 0');
+            $("#Amount").focus();
+            return false;
+
+        }
+  if( modef != 'edit'){
+         if( modef != 'final' && receiptagainst=='A'){ if( amt > avamt  ){
+            alert('amount should not exceed advance amount');
+            $("#Amount").focus();
+            return false;
+        }}}
+
+        if(typeof isPrint != 'undefined' && isPrint == true) {
+            //$('#submitPId').hide();
+           // $('#submit-loader1').show();
+        }else {
+            $('#submitId').hide();
+            $('#submit-loader').show();
+        }
+        var $error = $('.error');
+        if($error.length != 0) {
+            alert('Kindly notice the error notifications!');
+
+            $error.parents('.collapse:not(.in)').siblings('.panel-heading').trigger('click');
+            return false;
+            $('#submitPId').show();
+            $('#submitId').show();
+            $('#submit-loader').hide();
+        }
+
+        $('#print').val('false');
+        if(typeof isPrint != 'undefined' && isPrint == true) {
+
+            $('#print').val('true');
+        }
+
+        $('#formWrapper').submit();
+    }
+
+
+
+
+    function backfn() {
+        $('#mainWrapper').hide();
+        $('#indexWrapper').fadeIn();
+        var dNAmt = parseFloat(isNullCheck($('#BillNetTotal').val(),'number'));
+        $('#Amount').val(sanitizeNumber(dNAmt,2,true));
+    }
+
+    function PaymentModeCheck() {
+        if ($('#PaymentMode').val() =="" || $('#PaymentMode').val() =="Cash") {
+            $('#TNoD').hide();
+            $('#TDateD').hide();
+            $('#BankNameD').hide();
+            $('#Amount').show();
+            $('#Amount').focus();
+        } else {
+            $('#TNoD').show();
+            $('#TDateD').show();
+            $('#BankNameD').show();
+            $('#TNoD').focus();
+        }
+    }
+
+    //Expanse/Collapse
+    function bindExpandMainTr() {
+        var $mainTr = $(".mainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                closeMainTr();
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".subTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindExpandMainTrInput() {
+        var $mainTr = $(".mainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".subTr").is(":visible")) {
+                closeMainTr();
+                $(this).closest("tr").next(".subTr").show();
+                $(this).closest("tr").next(".subTr").find(".subDiv").slideDown("slow");
+            }
+//        $(this).closest("tr").find(".mainTr").trigger('click');
+        });
+    }
+
+    function closeMainTr() {
+        var $mainTr = $(".mainTr");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".subTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".subTr").slideUp("slow");
+        });
+    }
+
+    function bindRQualExpandTr() {
+        var $mainTr = $(".rqualmainTr");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                closeRQualTr();
+                $(this).closest("tr").next(".qualmainTr").show();
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindRQualExpandTrInput() {
+        var $mainTr = $(".rqualmainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".qualmainTr").is(":visible")) {
+                closeRQualTr();
+                $(this).closest("tr").next(".qualmainTr").show();
+                $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideDown("slow");
+            }
+        });
+    }
+
+    function closeRQualTr() {
+        var $mainTr = $(".rqualmainTr");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualmainTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualmainTr").slideUp("slow");
+        });
+    }
+
+
+    function bindQualExpandTr() {
+        var $mainTr = $(".qualmainExp");
+        $mainTr.unbind('click');
+        $mainTr.click(function (e) {
+            e.preventDefault();
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr();
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+            else {
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+                $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+            }
+        });
+    }
+
+    function bindQualExpandTrInput() {
+        var $mainTr = $(".qualmainTrInput");
+        $mainTr.focus(function (e) {
+            if (!$(this).closest("tr").next(".qualsubTr").is(":visible")) {
+                closeQualTr();
+                $(this).closest("tr").next(".qualsubTr").show();
+                $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideDown("slow");
+            }
+        });
+    }
+
+    function closeQualTr() {
+        var $mainTr = $(".qualmainExp");
+        $.each($mainTr, function () {
+            $(this).closest("tr").next(".qualsubTr").find(".subDiv").slideUp("slow");
+            $(this).closest("tr").next(".qualsubTr").slideUp("slow");
+        });
+    }
+    function bindTaxCalculation() {
+        var $mainTr = $(".qualChange");
+        $mainTr.change(function (e) {
+            CalculateTax($(this)[0].id);
+        });
+    }
+    //Calculation
+    function calcTotal() {
+        var $curAmt = $('input[id^=CurAmt_]'),
+            gcurTotal = 0,
+            gtaxTotal= 0,
+            gnetTotal= 0;
+        $.each($curAmt, function () {
+            var acurTotal = 0,
+                ataxTotal= 0,
+                anetTotal= 0;
+
+            var $this = $(this),
+                name = $this[0].id,
+                key = name.split('_')[1];
+            if (name.indexOf('__') != -1 || name.indexOf('_CurAmt_') != -1 || name.indexOf('excel') != -1) return;
+
+
+            $acurAmt = $('input[id*=BillAbs_'+key+'_CurAmt_]'),
+                $.each($acurAmt, function () {
+                    var $x = $(this),
+                        name = $x[0].id,
+                        key1 = name.split('_')[1],
+                        key2 = name.split('_')[3];
+
+                    if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+
+                    var curAmt = parseFloat(isNullCheck($x.val(),'number')),
+                        taxAmt = parseFloat(isNullCheck($('#BillAbs_' + key1 + '_TaxAmt_' + key2).val(),'number'));
+
+                    var netAmt = curAmt+taxAmt;
+
+                    $('#BillAbs_' + key1 + '_NetAmt_' + key2).val(sanitizeNumber(netAmt,2,true));
+
+                    acurTotal = acurTotal+ curAmt;
+                    ataxTotal = ataxTotal+ taxAmt;
+                    anetTotal = acurTotal+ netAmt;
+                });
+
+            acurTotal = parseFloat(isNullCheck($this.val(),'number'));
+            var balAmt = parseFloat(isNullCheck($('#BalAmt_' + key).val(),'number'));
+            $('#TaxAmt_' + key).val(sanitizeNumber(ataxTotal,2,true));
+            anetTotal = acurTotal+ ataxTotal;
+            $('#NetAmt_' + key).val(sanitizeNumber(anetTotal,2,true));
+
+            if(acurTotal > balAmt)
+                showError($this, 'Amount should be less or equal to Balance Amount!');
+            else
+                removeError($this);
+
+            gcurTotal = gcurTotal+ acurTotal;
+            gtaxTotal = gtaxTotal+ ataxTotal;
+            gnetTotal = gnetTotal+ anetTotal;
+
+        });
+
+        $('#BillCurTotal').val(sanitizeNumber(gcurTotal,2,true));
+        $('#BillTaxTotal').val(sanitizeNumber(gtaxTotal,2,true));
+        $('#BillNetTotal').val(sanitizeNumber(gnetTotal,2,true));
+        $MW_Amount.html(sanitizeNumber(gnetTotal,2,true));
+        //$('#Amount').val(sanitizeNumber(gnetTotal,2,true));
+    }
+
+    function calcAbsTotal(x) {
+        var key1 = $(x)[0].id.split('_')[1],
+            $curAmt = $('input[id*=BillAbs_'+key1+'_CurAmt_]'),
+            cTotal = 0,
+            taxTotal = 0,
+            nTotal=0;
+
+        $.each($curAmt, function () {
+            var $this = $(this),
+                name = $this[0].id,
+                keys = name.split('_'),
+                rowid = keys[1],
+                key = keys[3];
+
+
+            if (name.indexOf('__') != -1 || name.indexOf('excel') != -1) return;
+
+            var iRefId = $('#BillAbs_' + rowid + '_QualRefId_' + key).val();
+
+            var sname = $('#QualRowRef_' + iRefId).val();
+            var dbaseAmt= parseFloat(isNullCheck($('#' + sname).val(),'number'));
+
+            CalculateQualifier(dbaseAmt,iRefId);
+
+            var dTaxAmt = parseFloat(isNullCheck($('#QualTotalAmt_' + iRefId).val(),'number'));
+            $('#BillAbs_' + rowid + '_TaxAmt_' + key).val(sanitizeNumber(dTaxAmt,2,true));
+            $('#BillAbs_' + rowid + '_NetAmt_' + key).val(sanitizeNumber(dTaxAmt+dbaseAmt,2,true));
+
+            //calcTotal();
+            //CalculateTax(name);
+
+            var total = parseFloatVal($this.val()),
+                balAmt = parseFloatVal($('#BillAbs_'+rowid+'_BalAmt_' + key).val()),
+                baseAmt = parseFloatVal($('#BillAbs_'+rowid+'_BaseAmt_' + key).val()),
+                adjAmt = parseFloatVal($('#BillAbs_'+rowid+'_AdjAmt_' + key).val()),
+                txtAmt = parseFloatVal($('#BillAbs_'+rowid+'_TaxAmt_' + key).val());
+
+            if(total > balAmt)
+                showError($this, 'Amount should be less or equal to Balance Amount!');
+            else
+                removeError($this);
+
+            cTotal += total;
+            taxTotal += txtAmt;
+            nTotal = cTotal+taxTotal;
+            var nAmt = total+txtAmt;
+
+            ($('#BillAbs_'+rowid+'_NetAmt_' + key).val(sanitizeNumber(nAmt,2,true))),
+                $('#TotalCurAmt_' + rowid).val(sanitizeNumber(cTotal,2,true));
+            $('#TotalTaxAmt_' + rowid).val(sanitizeNumber(taxTotal,2,true));
+            $('#TotalNetAmt_' + rowid).val(sanitizeNumber(cTotal+taxTotal,2,true));
+
+            // update to bill curAmt
+        });
+
+        var $billCurAmt = $('#CurAmt_' + key1);
+        $billCurAmt.val(sanitizeNumber(cTotal,2,true));
+
+        $('#TaxAmt_' + key1).val(sanitizeNumber(taxTotal,2,true));
+        $('#NetAmt_' + key1).val(sanitizeNumber(nTotal,2,true));
+
+        $billCurAmt.trigger('change');
+    }
+
+    function CalculateTax(id) {
+        if (bReady==false) return;
+        var key1 = id.split('_')[1],
+            key2 = id.split('_')[3];
+
+        var sname = $('#QualRowRef_' + key1).val();
+        var dbaseAmt= parseFloat($('#' + sname).val());
+
+        CalculateQualifier(dbaseAmt,key1);
+        var dTaxAmt = parseFloat(isNullCheck($('#QualTotalAmt_' + key1).val(),'number'));
+
+        var k1 = sname.split('_')[1],
+            k2 = sname.split('_')[3];
+
+        $('#BillAbs_' + k1 + '_TaxAmt_' + k2).val(dTaxAmt);
+        $('#BillAbs_' + k1 + '_NetAmt_' + k2).val(dTaxAmt+dbaseAmt);
+
+        calcTotal();
+    }
+
+    function CalculateQualifier(baseValue, key1) {
+
+        var rows = $('#QualRowId_' + key1).val();
+        var sformula="";
+        var sname = $('#QualRowRef_' + key1).val();
+        var dbaseAmt= parseFloatVal(isNullCheck($('#' + sname).val(),'number'));
+        var dTotalQualAmt=0;
+
+        for (i = 1; i <= rows; i++) {
+            var sRef = $('#Qual_' + key1 + '_Ref_' + i).val().trim();
+            var sFormula = $('#Qual_' + key1 + '_Exp_'+ i).val();
+
+            var dPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_ExpPer_'+ i).val(),'number'));
+            var sbaseRef = 'R0';
+            if (parseFloatVal(dPer) ==0) dPer=100;
+            sFormula = sFormula.replace(new RegExp(sbaseRef, 'g'), dbaseAmt);
+
+            for (j = 1; j <= rows; j++) {
+                var sFRef = $('#Qual_' + key1 + '_Ref_' + j).val().trim();
+                var dFamt = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_Amount_'+ j).val(),'number'));
+                sFormula = sFormula.replace(new RegExp(sFRef, 'g'), dFamt);
+            }
+
+            var fvaule = computeEval(sFormula);
+            $('#Qual_' + key1 + '_ExpValue_' + i).val(sanitizeNumber(fvaule,2,true));
+
+            var iQualTypeid = $('#Qual_' + key1 + '_TypeId_' + i).val();
+            if (iQualTypeid==1) {
+                var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(),'number'));
+                var dCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_CessPer_' + i).val(),'number'));
+                var dEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_EduCessPer_' + i).val(),'number'));
+                var dHEDCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_HEduCessPer_' + i).val(),'number'));
+                var dNetPer = dTaxPer + (dTaxPer * (dCess +  dEDCess + dHEDCess))/100;
+                $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+
+                $('#Qual_' + key1 + '_NetPer_' + i).val(sanitizeNumber(dNetPer,2,true));
+                $('#Qual_' + key1 + '_ExpPer_'+ i).val(sanitizeNumber(dNetPer,2,true));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dCessAmt =  dTaxAmt* (dCess/100);
+                var dEDAmt =  dTaxAmt* (dEDCess/100);
+                var dHEDAmt =  dTaxAmt* (dHEDCess/100);
+                var dNetAmt = dTaxAmt+dCessAmt+dEDAmt+dHEDAmt;
+
+                $('#Qual_' + key1 + '_TaxableAmt_'+ i).val(sanitizeNumber(dTaxableAmt,2,true));
+                $('#Qual_' + key1 + '_TaxPerAmt_'+ i).val(sanitizeNumber(dTaxAmt,2,true));
+                $('#Qual_' + key1 + '_CessAmt_'+ i).val(sanitizeNumber(dCessAmt,2,true));
+                $('#Qual_' + key1 + '_EduCessAmt_'+ i).val(sanitizeNumber(dEDAmt,2,true));
+                $('#Qual_' + key1 + '_HEduCessAmt_'+ i).val(sanitizeNumber(dHEDAmt,2,true));
+                $('#Qual_' + key1 + '_NetAmt_'+ i).val(sanitizeNumber(dNetAmt,2,true));
+
+                dAmt = dNetAmt;
+            } else if (iQualTypeid==2) {
+
+                var dTaxablePer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxablePer_' + i).val(),'number'));
+                var dTaxPer = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_TaxPer_' + i).val(),'number'));
+                var dKKCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_KKCessPer_' + i).val(),'number'));
+                var dSBCess = parseFloatVal(isNullCheck($('#Qual_' + key1 + '_SBCessPer_' + i).val(),'number'));
+
+                var dNetPer = dTaxPer + dKKCess + dSBCess;
+
+                $('#Qual_' + key1 + '_NetPer_' + i).val(dNetPer);
+                $('#Qual_' + key1 + '_NetPer_' + i).val(sanitizeNumber(dNetPer,2,true));
+                $('#Qual_' + key1 + '_ExpPer_'+ i).val(sanitizeNumber(dNetPer,2,true));
+
+                var dTaxableAmt =  fvaule* (dTaxablePer/100);
+                var dTaxAmt =  dTaxableAmt* (dTaxPer/100);
+                var dTaxAmt = dTaxableAmt * (dTaxPer / 100);
+                var dKKCessAmt = dTaxableAmt * (dKKCess / 100);
+                var dSBCessAmt = dTaxableAmt * (dSBCess / 100);
+
+                var dNetAmt = dTaxAmt + dKKCessAmt + dSBCessAmt;
+
+                $('#Qual_' + key1 + '_TaxableAmt_'+ i).val(sanitizeNumber(dTaxableAmt,2,true));
+                $('#Qual_' + key1 + '_TaxPerAmt_'+ i).val(sanitizeNumber(dTaxAmt,2,true));
+                $('#Qual_' + key1 + '_KKCessAmt_' + i).val(sanitizeNumber(dKKCessAmt, 2, true));
+                $('#Qual_' + key1 + '_SBCessAmt_' + i).val(sanitizeNumber(dSBCessAmt, 2, true));
+                $('#Qual_' + key1 + '_NetAmt_'+ i).val(sanitizeNumber(dNetAmt,2,true));
+
+                dAmt = dNetAmt;
+
+            } else {
+                var dAmt = parseFloatVal(fvaule) * (parseFloatVal(dPer) / 100);
+            }
+            $('#Qual_' + key1 + '_Amount_' + i).val(sanitizeNumber(dAmt,2,true));
+            if ($('#Qual_' + key1 + '_YesNo_' + i).is(':checked') == true) dTotalQualAmt = dTotalQualAmt+ parseFloatVal(dAmt);
+        }
+        $('#QualTotalAmt_' + key1).val(sanitizeNumber(dTotalQualAmt,2,true));
+        qualTotal();
+    }
+    function computeEval(formula) {
+        with (document.forms){
+            with (Math) {
+                A = eval((formula));
+            }
+        } return A;
+    }
+
+    function signChange(x) {
+        var $this = $(x);
+        if ($this.hasClass( "fa-plus" )) {
+            $this.removeClass('fa-plus clr-gre');
+            $this.addClass('fa-minus clr-red');
+            var key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#Qual_' + key1 + '_Sign_' + key2).val('-');
+        } else {
+            $this.removeClass('fa-minus clr-red');
+            $this.addClass('fa-plus clr-gre');
+            var key1 = $this[0].id.split('_')[1],
+                key2 = $this[0].id.split('_')[3];
+            $('#Qual_' + key1 + '_Sign_' + key2).val('+');
+        }
+    }
+
+    function rowSelect() {
+        var $rBody = $('table[id*=EntryTable] tbody.main');
+        $.each($rBody, function(i, obj){
+            if ($(this).parent('table')[0].id.indexOf('__') != -1) {
+                $rBody.splice(i, 1);
+            }
+        });
+        var $sRTable = $rBody.find('tr');
+        if (typeof reset !== 'undefined' && reset === true) {
+            $sRTable.unbind('click', 'dblclick', 'select', 'sortable');
+            $rBody.unbind('sortable');
+        }
+        $sRTable.on( 'dblclick', function () {
+            var $this = $(this);
+            if ($this.hasClass('selected') == true) $this.toggleClass('selected', false);
+            else $this.toggleClass('selected', true);
+        });
+        $sRTable.on( 'click', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+        $sRTable.on( 'select', function () {
+            var $this = $(this);
+            $this.closest("tr").siblings().removeClass("highlighted");
+            $this.toggleClass('highlighted',true);
+        });
+    }
+
+    function numFormat(x) {
+        $('#' + x.id).val(sanitizeNumber(isNullCheck($('#' + x.id).val(),'number'),2,true));
+    }
+
+    function qualTotal() {
+        var iRows = $('#QualTotalRowId').val();
+        var arrQual =[];
+        for (i = 1; i <= iRows; i++) {
+            $qualrows = $('input[id*=Qual_'+i+'_Ref_]'),
+                $.each($qualrows, function () {
+                    var $this = $(this),
+                        name = $this[0].id,
+                        keys = name.split('_'),
+                        key1 = keys[1],
+                        key2 = keys[3];
+
+                    var sQualName = $('#Qual_' + key1 + '_Desc_' + key2).val();
+                    var iQualifierId = $('#Qual_' + key1 + '_Id_' + key2).val();
+                    var dAmt =  parseFloat(isNullCheck($('#Qual_' + key1 + '_Amount_' + key2).val(),'number'));
+                    var sSign = $('#Qual_' + key1 + '_Sign_' + key2).val();
+                    if (sSign =="") sSign ="+";
+
+                    if (sSign =="-") { dAmt = dAmt*(-1); }
+
+                    if (dAmt !=0) {
+                        arrQual.push({QualifierId:iQualifierId, QualName: sQualName, Amount: dAmt});
+                    }
+                });
+        }
+
+        var result = [];
+        arrQual.reduce(function (res, value) {
+            if (!res[value.QualifierId]) {
+                res[value.QualifierId] = {
+                    Amount: 0,
+                    QualName: value.QualName,
+                    QualifierId: value.QualifierId
+                };
+                result.push(res[value.QualifierId])
+            }
+            res[value.QualifierId].Amount += value.Amount
+            return res;
+        }, {});
+
+        var iCount=0;
+
+        $("#totaltaxTable tbody").empty();
+        $('#billqualrowid').val(iCount);
+        $.each(result,function(index,element){
+            iCount = +iCount+1;
+            var $tbody = $('#totaltaxTable tbody');
+            var template = $('#dummy-totaltaxTable tbody').html();
+            $tbody.append(template.replace(/__1/g, '_' + iCount));
+
+            $('#QualName_' + iCount).val(element.QualName);
+            $('#QualAmt_' + iCount).val(sanitizeNumber(element.Amount,2,true));
+            $('#QualifierId_' + iCount).val(element.QualifierId);
+
+            $('#billqualrowid').val(iCount);
+        });
+    }
+
+    function showQualExpandButton() {
+        var $mainTr = $(".qualExpandbut");
+        $.each($mainTr, function () {
+            if ($(this).closest("tr").find(".qualTypeId").val() == 1 || $(this).closest("tr").find(".qualTypeId").val() ==2) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    function fillRowRefEditMode() {
+        var $mainTr = $(".qualmainTr"),
+            iTotalCount= 0,
+            ikey =0;
+        $.each($mainTr, function () {
+            var $x =$(this),
+                $y = $x.prev(),
+                akey1 = 0,
+                akey2 = 0;
+            $y.find(".qualRefId").each(function () {
+                var $z =$(this);
+                akey1 = parseInt($z[0].id.split('_')[1]);
+                akey2 = parseInt($z[0].id.split('_')[3]);
+            });
+            $x.find(".qualTypeId").each(function () {
+                var $n =$(this),
+                    key1 = parseInt($n[0].id.split('_')[1]);
+                if (iTotalCount < key1) iTotalCount = key1;
+                if (ikey != key1) {
+                    ikey = key1;
+                    var sname = 'BillAbs_' + akey1 + '_CurAmt_' + akey2;
+                    $('#QualRowRef_' + key1).val(sname);
+                    $('#BillAbs_' + akey1 + '_QualRefId_' + akey2).val(key1);
+                }
+            });
+        });
+        $('#QualTotalRowId').val(iTotalCount);
+    }
+    $('#BillTaxTotal').blur(function(e){
+        $('#taxabsdiv').hide();
+    });
+
+
+    //get Amount from unitdetails//
+    $('#ReceiptAgainst').on('change',function(){
+        var unitId=$("#unitid").val();
+        var receiptagainst=$("#ReceiptAgainst").val();
+        var modef=$("#mode").val();
+
+        if(receiptagainst=='A' && modef != 'final'){
+            $.ajax({
+                url:getBaseURL()+"crm/bill/receipt",
+                type:"post",
+                data:{'mode':'amount',id:unitId},
+                success:function(data,textStatus,jqXHR){
+                    if(data==0){
+                        alert("no advance amount to pay");
+                        $("#PaymentModeHide").hide();
+
+                    }
+                    else {
+                        $("#Amount").val(data);
+                        $("#advAmount").val(data);
+                        $("#Remarks").show();
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        } else if(receiptagainst=='R') {
+            $("#PaymentMode").val(null).trigger('change');
+            $("#PaymentModeHide").hide();
+            var unitId= parseInt($.trim($("#unitid").val()));
+            if(unitId!=0 && unitId!="") {
+                $.ajax({
+                    url:getBaseURL()+'crm/bill/receipt',
+                    type:'POST',
+                    data:{"UnitId":unitId,'mode':'rent'},
+                    success:function(data, textStatus, jqXHR){
+                        if (jqXHR.status != 200) {
+                            alert('Failed to get the Bill Details.. try again..');
+                            return false;
+                        }
+                        else
+                        {
+                            var rentVal = JSON.parse(data);
+
+                            if(rentVal.beAmt!=false) {
+                                var tAmt=0;
+                                if(rentVal.reAmt!=false && rentVal.reAmt['tAmount']!=null) {
+                                    tAmt =parseFloat(rentVal.reAmt['tAmount'])
+                                }
+                                var totAmt = parseFloat(rentVal.beAmt['TotalAmountPayable'])-tAmt;
+                                if(totAmt>0) {
+                                    $("#rentBillNo").val(rentVal.beAmt['PVNo']).trigger('change');
+                                    $("#rentBillAmt").val(totAmt).trigger('change');
+                                    $("#rentRegId").val(rentVal.beAmt['RegisterId']);
+                                    $(".rentClass").removeClass('hide');
+                                    $("#PaymentModeHide").show();
+                                } else {
+                                    $("#rentBillNo").val(rentVal.beAmt['PVNo']).trigger('change');
+                                    $("#rentBillAmt").val(0).trigger('change');
+                                    $("#rentRegId").val(rentVal.beAmt['RegisterId']);
+                                    $(".rentClass").removeClass('hide');
+                                    $("#PaymentModeHide").show();
+                                }
+                            } else {
+                                alert('No Bill Available');
+                            }
+
+                        }
+                    },
+                    error:function(jqXHR, textStatus, errorThrown){
+                        alert('Failed to get the Bill Details.. try again..');
+                    }
+                });
+            } else {
+                alert('Please select Project/Unit/Buyer');
+            }
+
+            $("#Amount").val(0);
+            $("#advAmount").val(0);
+
+        }  else if(receiptagainst=='L'){
+            $.ajax({
+                url:getBaseURL()+"crm/bill/receipt",
+                type:"post",
+                data:{'mode':'LateInt',id:unitId},
+                success:function(data,textStatus,jqXHR){
+                    if(data==0){
+                        alert("no Late Fee to pay");
+                        $("#PaymentModeHide").hide();
+
+                    }
+                    else if(data > 0) {
+                        $("#Amount").val(data);
+                        $("#latefee").val(data);
+                        $("#Remarks").show();
+                    }
+                    else{
+                        $("#Amount").val(0);
+                        $("#PaymentModeHide").hide();
+                    }
+                },
+                error:function(jqXHR, textStatus, errorThrown){
+                    alert(textStatus+"-----"+errorThrown);
+                }
+            });
+        }
+        else{
+            $("#Amount").val(0);
+            $("#advAmount").val(0);
+        }
+
+    });
+
+
+    $('.seperate').on('keyup', function () {
+
+        var x = $('#Amount').val();
+        $('.seperate').val(addCommas(x));
+    });
+
+    function addCommas(x) {
+//        console.log(x);
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+</script>

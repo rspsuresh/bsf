@@ -1,0 +1,259 @@
+<?php $bsf = new \BuildsuperfastClass(); ?>
+<script type="text/javascript" src="<?php echo $this->basePath(); ?>/js/select2.full.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo $this->basePath(); ?>/css/select2.min.css" />
+<form action="" method="post" id="form" onSubmit="return formValidation();">
+	<div class="content_wrapper padlr0">
+		<div class="container-fluid padlr0">
+			<div class="col-lg-12">
+				<h1 class="float_l">Project Info of
+                    <div class="btn-group proname_btn">
+                        <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"><?php echo ucfirst($projectDetail['ProjectName']);?> <span class="edit_symbols" data-placement="right" data-toggle="tooltip" data-original-title="Choose&nbsp;your&nbsp;project"><i class="fa fa-caret-down "></i></span></a> 							
+                        <div class="dropdown-menu toolbar_ddown proname_ddown arrow" role="menu">
+                            <ul>
+                                <?php foreach($projects as $project){?>
+                                    <li><a href="<?php echo $this->basePath(); ?>/crm/project/<?php echo $this->currentRequest()->get('action'); ?>/<?php echo $bsf->encode($project['ProjectId']); ?>"><?php echo ucfirst($project['ProjectName']);?></a></li>
+                                <?php }	?>
+                            </ul>
+                        </div>
+                    </div>
+				</h1>
+                <div class="promote_social float_r">
+					<ul>
+						<span>Promote Project</span>
+						<li><a href="#" class="fb_c ripple"><i class="fa fa-facebook-square"></i></a></li>
+						<li><a href="#" class="twt_c ripple"><i class="fa fa-twitter-square"></i></a></li>
+						<li><a href="#" class="g_c ripple"><i class="fa fa-google-plus-square"></i></a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-lg-12 clear">
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="step_by_liner animated slideInDown"></div>
+                            <ul class="step_by stepby_mb60">
+                                <li>
+                                    <div class="step_by_sep animated_0_4s slideInRight"><p>1</p></div>
+                                    <p class="stepli_p1">General</p>
+                                </li>
+                                <li>
+                                    <div class="step_by_sep stepsep_active animated slideInRight"><p>2</p></div>
+                                    <p class="stepli_p2">Area Details</p>
+                                </li>
+                                <li class="opacity_08">
+                                    <div class="step_by_sep animated_1_5s slideInRight"><p>3</p></div>
+                                    <p class="stepli_p3">Land Cost Calculation</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+					<div class="row"> 
+						<div class="form-group col-lg-12">
+							<select id="areaunit" name="areaunit" class="form-control single_dropdown lbl_move" label="Area Unit" onchange="setUnit()">
+							 <?php $Unit=''; if($area){
+							foreach($area as $userDetail){ ?>
+							<option value="<?php echo $userDetail['UnitId'];?>" <?php if($userDetail['UnitId']==$resultDetail['AreaUnit']){$Unit=$userDetail['UnitName']; echo "selected";}?>><?php echo $userDetail['UnitName']; ?></option>
+							<?php }
+						} ?>
+							</select>
+						</div>
+					</div>
+                    <div class="row">   
+                        <div class="form-group col-lg-12 req_flds">
+                            <input type="text" class="form-control lbl_move calculation special" value="<?php echo $resultDetail['LandArea']; ?>" label="Total Land Area" name="landArea" id="landArea"  onblur="return FormatNum(this, 3)" >
+                            <div class="error_message"><p>Land Area should not be 0 or empty...</p></div>
+                        </div>
+                    </div>
+                    <?php if($resultsinfo['BusinessTypeId']!=3){ ?>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <label class="txt_left radio_label" for="guide">FSI Calculation</label>
+                            <div class="radio_check">
+                                <p class="col-lg-6">
+                                    <input type="radio" name="fsicalc" id="calc_auto" value="1" <?php if($resultDetail['FSICalc'] == '1') { echo 'checked'; } ?> onchange="fsiCalc()">
+                                    <label for="calc_auto">Auto</label>
+                                </p>
+                                <p class="col-lg-6">
+                                    <input type="radio" name="fsicalc" id="calc_manual" value="0" <?php if($resultDetail['FSICalc'] == '0') { echo 'checked'; } ?> onchange="fsiCalc()">
+                                    <label for="calc_manual">Manual</label>
+                                </p>
+                                <div class="error_message"><p>Required</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row clear">
+                        <div class="form-group padtop20 col-lg-12 <?php echo ($resultDetail['FSICalc'] == '1') ? 'req_flds' : '';?>">
+                            <input type="text" class="form-control lbl_move calculation special" value="<?php echo $resultDetail['FSI']; ?>" label="FSI" name="fsi" id="fsi" onblur="return FormatNum(this, 3)" <?php echo ($resultDetail['FSICalc'] == '0') ? 'readonly' : '';?>>
+                            <div class="error_message"><p>FSI should not be 0 or empty...</p></div>
+                        </div>
+                    </div>	
+					<div class="row">   
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move calculation special" value="<?php echo $resultDetail['PremiumFSI']; ?>" label="Premium FSI" name="premiumFsi" id="premiumFsi" onblur="return FormatNum(this, 3)" <?php echo ($resultDetail['FSICalc'] == '0') ? 'readonly' : '';?>>
+                            <div class="error_message"><p>Please fill Premium FSI...</p></div>
+                        </div>
+                    </div>
+					<div class="row">   
+                        <div class="form-group col-lg-12">
+                            <input type="text" class="form-control lbl_move calculation special" value="<?php echo $resultDetail['ExpandedFSIPercent']; ?>" label="Expandable FSI in %" name="expandedFsi" id="expandedFsi" onblur="return FormatNum(this, 3)" <?php echo ($resultDetail['FSICalc'] == '0') ? 'readonly' : '';?>>
+                            <div class="error_message"><p>Please fill Expandable FSI % ...</p></div>
+                        </div>
+                    </div>
+					<div class="row">   
+                        <div class="form-group col-lg-12  <?php echo ($resultDetail['FSICalc'] == '0') ? 'req_flds' : '';?>">
+                        	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 padlr0">
+                            	<input type="text" class="form-control lbl_move special" value="<?php echo $resultDetail['BuildupArea']; ?>" label="Buildup Area" name="buildupArea" id="buildupArea" onblur="return FormatNum(this, 3)" <?php echo ($resultDetail['FSICalc'] == '1') ? 'readonly' : '';?>>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4">
+                            	<p class="pad10_5"><span class="changeUnit"><?php echo $Unit; ?></span></p>
+                            </div>
+                            <div class="clear"></div>
+                            <div class="error_message"><p>Please fill Buildup Area...</p></div>
+                        </div>
+					    
+                    </div><?php } ?>
+                    <div class="row clear">   
+                        <div class="form-group col-lg-12">
+                        	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 padlr0">
+                            	<input type="text" class="form-control lbl_move special" value="<?php echo $this->commonHelper()->sanitizeNumber($projectDetail['Amount'],3,false); ?>" label="Saleable Area" name="saleArea" id="saleArea" readonly>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4">
+                            	<p class="pad10_5"><span class="changeUnit"><?php echo $Unit; ?></span></p>
+                            </div>
+                            <div class="error_message"><p>Please fill Sale Area...</p></div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+		</div>
+	</div>
+    <div class="col-lg-12 savebtn_area">
+        <ul>
+        	<li class="save_btn m_right10 float_r"><input type="submit" name="saveExit" class="ripple continue" value="Save &amp; Exit"/></li>
+            <li class="save_btn m_right10 float_r"><input type="submit" name="saveNext" class="ripple continue" value="Save &amp; Next"/></li>
+			<li class="goto">
+                <label for="go_to" class="float_l">Go to</label> 
+                <select id="projectSteps" name="go_to" class="float_l goto_select">
+					<option value="general" <?php if($this->currentRequest()->get('action') == 'general') { echo 'selected'; } ?>>General</option>
+					<option value="land-area" <?php if($this->currentRequest()->get('action') == 'land-area') { echo 'selected'; } ?>>Area Details</option>
+					<option value="land-cost" <?php if($this->currentRequest()->get('action') == 'land-cost') { echo 'selected'; } ?>>Land Cost Calculation</option>
+					<option value="other-cost" <?php if($this->currentRequest()->get('action') == 'other-cost') { echo 'selected'; } ?>>Other Cost Details</option>
+					<option value="payment" <?php if($this->currentRequest()->get('action') == 'payment-schedule' || $this->currentRequest()->get('action') == 'payment-schedule-edit' || $this->currentRequest()->get('action') == 'payment-schedule-register' || $this->currentRequest()->get('action') == 'payment') { echo 'selected'; } ?>>Payment Schedule</option>
+                    <option value="unit-type-register" <?php if($this->currentRequest()->get('action') == 'unit-type-register' || $this->currentRequest()->get('action') == 'unit-type') { echo 'selected'; } ?>>Unit Type</option>
+                    <option value="facility" <?php if($this->currentRequest()->get('action') == 'facility' || $this->currentRequest()->get('action') == 'car-park' || $this->currentRequest()->get('action') == 'other-facility') { echo 'selected'; } ?>>Facility Management</option>
+					<option value="checklist" <?php if($this->currentRequest()->get('action') == 'checklist') { echo 'selected'; } ?>>Check List Management</option>
+					<option value="penality-interestrate" <?php if($this->currentRequest()->get('action') == 'penality-interestrate') { echo 'selected'; } ?>>Penality & Interest Rate</option>
+					<option value="incentive-register" <?php if($this->currentRequest()->get('action') == 'incentive-register') { echo 'selected'; } ?>>Incentive Management</option>
+				    <option value="property-management" <?php if($this->currentRequest()->get('action') == 'property-management') { echo 'selected'; } ?>>Property Management</option>
+				</select>
+                <p class="donecngs_p">Done With Your Changes ?</p>
+            </li>
+        </ul>
+    </div>
+</form>
+<!--Page Scripts-->
+<script>
+$("#projectSteps").change(function(){
+	window.location.href= getBaseURL() + "crm/project/"+this.value+"/<?php echo $bsf->encode($projectId); ?>";
+});
+function setUnit() {
+    var areaunit = $('#areaunit option:selected').text();
+    $('.changeUnit').text(areaunit);
+}
+//Area Calculation//
+$(document).on('change','.calculation',function() {
+	if($(this).val().trim().length != 0) {
+		var landArea = parseFloat($("#landArea").val());
+		var fsi = parseFloat($("#fsi").val());
+        var premiumFsi = parseFloat($("#premiumFsi").val());
+		var expandedFsi = parseFloat($("#expandedFsi").val());
+		var finalFSi = 0.000;
+
+		if(fsi != 0 && fsi != 0.000 && fsi != .000 && (!isNaN(fsi))) {
+			finalFSi = fsi;
+			
+		}
+		if(premiumFsi != 0 && premiumFsi != 0.000 && premiumFsi != .000 && (!isNaN(premiumFsi))) {
+			finalFSi = finalFSi + premiumFsi;
+			
+		}
+		if(expandedFsi != 0 && expandedFsi != 0.000 && expandedFsi != .000 && (!isNaN(expandedFsi))) {
+			finalFSi = (expandedFsi*finalFSi)/100 + finalFSi ;
+			
+		}
+		$("#buildupArea").val(parseFloat(finalFSi*landArea).toFixed(3));
+	}
+});
+
+function fsiCalc() {
+    var fsicalc = $('input[name=fsicalc]:checked').val();
+    if(fsicalc == '1') {
+        $('#fsi').val('').prop('readonly', false).closest('.form-group').addClass('req_flds');
+        $('#fsi').focus();
+        $('#premiumFsi').val('').prop('readonly', false);
+        $('#expandedFsi').val('').prop('readonly', false);
+        $('#buildupArea').val('').prop('readonly', true).closest('.form-group').removeClass('req_flds');
+    } else {
+        $('#fsi').val('').prop('readonly', true).closest('.form-group').removeClass('req_flds');
+        $('#premiumFsi').val('').prop('readonly', true);
+        $('#expandedFsi').val('').prop('readonly', true);
+        $('#buildupArea').val('').prop('readonly', false).closest('.form-group').addClass('req_flds');
+        $('#buildupArea').focus();
+    }
+}
+
+function formValidation() {
+    var fsicalc = $('input[name=fsicalc]:checked').val();
+    $(".error_message").hide();
+
+    if($("#landArea").val() == '' || $("#landArea").val() == null || $("#landArea").val() == 0) {
+        $("#landArea").closest('.form-group').find(".error_message").show();
+        return false;
+    }
+    var buildtype=$("#buidType").val().trim();
+    if(buildtype !=3) {
+        var fsival = isNullCheck($("#fsi").val(), 'number');
+        if (fsicalc == 1 && fsival == 0) {
+            $("#fsi").closest('.form-group').find(".error_message").show();
+            return false;
+        }
+
+        var buildupval = isNullCheck($("#buildupArea").val(), 'number');
+        if (fsicalc == 0 && buildupval == 0) {
+            $("#buildupArea").closest('.form-group').find(".error_message").show();
+            return false;
+        }
+    }
+
+    if($("#saleArea").val() == '' || $("#saleArea").val() == null || $("#saleArea").val() == 0) {
+        $("#saleArea").closest('.form-group').find(".error_message").show();
+        return false;
+    }
+
+    return true;
+}
+
+$(".special").keydown(function (e) {
+        var key = e.which || e.keyCode;
+            if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+                     // numbers   
+                         key >= 48 && key <= 57 ||
+                     // Numeric keypad
+                         key >= 96 && key <= 105 ||
+                     // Backspace and Tab and Enter
+                        key == 8 || key == 9 || key == 13 ||
+                     // Home and End
+                        key == 35 || key == 36 ||
+                     // left and right arrows
+                        key == 37 || key == 39 || (key == 190 &&  this.value.split('.').length === 1) ||
+                     // Del and Ins
+                        key == 46 || key == 45){
+						return true;}
+			else{
+                       return false;}
+						
+                 });
+</script>
+<!--Page Scripts-->

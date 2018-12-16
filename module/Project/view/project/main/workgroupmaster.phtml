@@ -1,0 +1,165 @@
+<style>
+.jqx-grid-content {
+	z-index:11!important;
+}
+.jqx-grid-header {
+    height:75px !important;
+}
+
+</style>
+<link rel="stylesheet" href="<?php echo $this->basePath() . '/css/project.css';?>"/>
+<div class="content_wrapper padlr0">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1>Work Group Library</h1>
+          <div class="col-md-5"></div>
+         
+              <div class="dropdown nav-list"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print print-icon-img" aria-hidden="true"></i></a>
+                  <ul class="dropdown-menu drp-list arrow-right">
+                      <li><a href="<?php echo $this->basePath(); ?>/project/report/workgrouplist">WorkGroup List</a></li>
+                  </ul>
+              </div>
+        
+      </div>
+      <div class="col-lg-12 edit_del">
+          <ul>
+              <li>
+              <a href="<?php echo $this->basePath(); ?>/project/rfc/rfcworkgroup" class="edit-btn edit_al"><i class="fa fa-plus"></i> Add Work Group</a> </li>
+              <li>
+<!--              <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfcworkgroup/0/edit/0" class="edit_tl"><i class="fa fa-pencil"></i> Edit Work Group</a>-->
+<!--              </li>-->
+<!--              <li>-->
+<!--              <a href="--><?php //echo $this->basePath(); ?><!--/project/rfc/rfcworkgroupdelete" class="edit_dl"><i class="fa fa-trash"></i> Delete Work Group</a>-->
+<!--              </li>-->
+          </ul>
+          <div class="clearfix"></div>
+      </div>
+      <div class="col-lg-12 col-lg-offset-0 tmss">
+        <div class="table-responsive clear">
+          <div id="grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+    var $grid = $("#grid");
+    $(function () {
+        var url1 = getBaseURL() + "project/main/getworkgroupmaster";
+        var resource = {
+            dataType: "json",
+            dataFields: [
+                { name: 'WorkGroupId', type: 'number' },
+                { name: 'SerialNo', type: 'string' },
+                { name: 'WorkGroupName', type: 'string' },
+                { name: 'WorkType', type: 'string' }
+            ],
+            id: 'WorkGroupId',
+            url: url1
+        };
+
+        var resdata = new $.jqx.dataAdapter(resource);var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+            var $tabsdiv = $($(parentElement).children()[0]);
+            $tabsdiv.append(renderRowDetail(datarecord.WorkGroupId));
+        };
+        $grid.jqxGrid( {
+            width: "100%",
+            theme: 'bootstrap',
+            source: resdata,
+            pageable: true,
+            autoheight: true,
+            sortable: true,
+            enabletooltips: true,
+            rowdetails: true,
+            filterable:true,
+            showfilterrow: true,
+            groupable:true,
+            initrowdetails: initrowdetails,
+            rowdetailstemplate: { rowdetails: "<div style='height:100%;overflow:auto;'></div>", rowdetailsheight:400},
+            columns: [
+                { text: 'WorkGroupId', datafield: 'WorkGroupId', hidden: true  },
+                { text: 'SerialNo', datafield: 'SerialNo'},
+                { text: 'WorkGroupName', datafield: 'WorkGroupName'},
+                { text: 'WorkType', datafield: 'WorkType'},
+//                { text: 'WorkType', datafield: 'WorkType',},
+                { text: 'Action', sortable: false, filterable: false, align: 'center',
+                    cellsrenderer: function (row) {
+                        var WorkGroupId = $grid.jqxGrid('getCellValue', row, 'WorkGroupId'),
+                            editLink = '<a href="'+ getBaseURL() + 'project/rfc/rfcworkgroup/0/edit/'+WorkGroupId+'" style="padding-left:0px;"><i class="fa fa-pencil-square-o reg-icon"></i></a>',
+                            deleteLink = '<a href="javascript: checkRFCDelete('+row+')"><i class="fa fa-trash-o reg-icon"></i></a>';
+
+                        return '<div class="text-center" style="vertical-align: middle;">' + editLink + "&nbsp;&nbsp;" + deleteLink + "</div>";
+                    }
+                }
+            ]
+//            groups: ['WorkType'],
+//            groupsrenderer: function (defaultText, group, state, params) {
+//                return "<div style='margin: 5px;font-weight: bold;'>" + group +  "</div>";
+//            },
+//            ready: function () {
+//                $("#grid").jqxGrid('expandallgroups');
+//            }
+        });
+
+        $grid.on('rowexpand', function (event) {
+            var prev_row = $grid.jqxGrid('selectedrowindexes');
+            if (prev_row != '') {
+                for (var i = 0; i < prev_row.length; i++) {
+                    $grid.jqxGrid('hiderowdetails', prev_row[i]);
+                }
+            };
+            var index = $grid.jqxGrid('getrowboundindex', event.args.rowindex);
+            $grid.jqxGrid({selectedrowindexes: [index]});
+        });
+
+        $grid.on('rowcollapse', function (event) {
+            $grid.jqxGrid('clearselection');
+        });
+
+    });
+
+    function checkRFCDelete(row) {
+        var id = $grid.jqxGrid('getCellValue', row, 'WorkGroupId');
+        $.ajax({
+            url: getBaseURL() + 'project/rfc/checkWorkGroupUsed',
+            type: 'POST',
+            async: false,
+            data: {'id': id},
+            success: function (data) {
+                if (data=='Y') {
+                    alert('This Work Group is already Used, Do Not Delete');
+                    return;
+                } else if (data=='U') {
+                    alert('Request to delete this Work Group is already pending');
+                    return;
+                }
+                window.location = getBaseURL() + 'project/rfc/rfcworkgroupdelete/0/' + id;
+            },
+            error: function(xhr,status, error) {
+            }
+        });
+    }
+
+    function renderRowDetail(id) {
+        var dataValue = '';
+        $.ajax({
+            url: getBaseURL() + 'project/main/getworkgroupdetails',
+            type: 'POST',
+            data: {resId: id},
+            async: false,
+            success: function(data,status, xhr) {
+                if(xhr.status == 200)
+                    dataValue = data;
+            }, error: function(xhr, status, errorThrown) {
+            }
+        });
+        return dataValue;
+    }
+</script>
+<!--hover open list--> 
+<script>$('.nav-list').hover(function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500);
+}, function() {
+  $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500);
+});</script>
